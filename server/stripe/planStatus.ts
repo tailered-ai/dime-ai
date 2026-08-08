@@ -20,8 +20,14 @@ export type PlanStatusState =
 
 export interface PlanStatus {
   state: PlanStatusState;
-  /** null only when state === "none" */
-  planId: PlanId | null;
+  /**
+   * The plan the user is actually on. A legacy static PlanId
+   * (monthly/annual/pro/sharp/operator) or an owner-created DB plan slug
+   * (dime-pro/dime-sharp/dime-max/…). null only when state === "none".
+   * Never coerced — reporting the wrong plan to its own owner is worse than
+   * reporting one the caller does not recognise.
+   */
+  planId: string | null;
   /** null only when state === "none" */
   planLabel: string | null;
   /**
@@ -60,7 +66,13 @@ export type PlanStatusUser = Pick<
  */
 export function derivePlanStatus(
   user: PlanStatusUser,
-  now: number = Date.now()
+  now: number = Date.now(),
+  /**
+   * Display name for an owner-created DB plan, resolved by the caller (this
+   * module is deliberately I/O-free). Ignored for legacy static plans, which
+   * carry their own name in PLANS. Omit it and a DB plan falls back to its slug.
+   */
+  catalogLabel?: string | null
 ): PlanStatus {
   // ── [STEP 1] No Stripe customer or no plan on file → nothing to report ──────
   if (!user.stripeCustomerId || !user.stripePlanId) {
@@ -75,8 +87,23 @@ export function derivePlanStatus(
     };
   }
 
-  const planId = normalizePlanId(user.stripePlanId);
-  const planLabel = PLANS[planId].name;
+  // Legacy static plans (monthly/annual/pro/sharp/operator) keep their exact
+  // previous behaviour. Owner-created DB plans do NOT: normalizePlanId coerces
+  // every unknown slug to "monthly", so a dime-sharp subscriber was reported as
+  // planId "monthly" and labelled "AI Sports Betting — Monthly" — a retired
+  // $99.99 plan they are not on. That coercion is correct for its original job
+  // (mapping a raw webhook value onto a legacy PlanId) and wrong here, where
+  // the answer is shown to the customer on their own billing tab.
+  const raw = user.stripePlanId;
+  const isLegacyPlan = Object.prototype.hasOwnProperty.call(PLANS, raw);
+  const planId = isLegacyPlan ? normalizePlanId(raw) : raw;
+  // `catalogLabel` is the DB plan's display name, looked up by the caller (this
+  // module stays I/O-free by design). Falling back to the slug is deliberate:
+  // an unresolved label shows "dime-sharp", which is honest and debuggable,
+  // where the old behaviour showed a different plan's name and looked correct.
+  const planLabel = isLegacyPlan
+    ? PLANS[planId as PlanId].name
+    : (catalogLabel ?? raw);
   const governingDate = user.expiryDate ?? null;
 
   // ── [STEP 2] Past expiry — strictly greater than, matching appUserProcedure ─
