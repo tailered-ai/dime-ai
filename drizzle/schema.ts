@@ -916,10 +916,31 @@ export const games = mysqlTable("games", {
   modelF5HomeScore: decimal("modelF5HomeScore", { precision: 5, scale: 2 }),
   /** Model projected F5 total (combined runs through 5 innings) */
   modelF5Total: decimal("modelF5Total", { precision: 5, scale: 1 }),
-  /** Model F5 over probability (0-100) */
-  modelF5OverRate: decimal("modelF5OverRate", { precision: 5, scale: 2 }),
-  /** Model F5 under probability (0-100) */
-  modelF5UnderRate: decimal("modelF5UnderRate", { precision: 5, scale: 2 }),
+  /**
+   * Model F5 over probability — **0-1 UNIT SCALE, not 0-100**.
+   * Producer: mlbModelRunner.ts `p_f5_over.toFixed(4)` — no *100 anywhere.
+   *
+   * The "(0-100)" this comment used to claim is what caused audit M-203:
+   * brierScore() believed it and divided by 100, scoring a genuine 0.52 as
+   * 0.0052 and making brierF5Total garbage for the whole 2026 season.
+   *
+   * Widened 5,2 -> 7,4 (2026-08-08): the producer writes 4 decimals but the
+   * column only held 2, so every stored value was truncated (0.5234 -> 0.52).
+   *
+   * Why 7,4 and not the 6,4 its sibling 0-1 probabilities (modelF5PushPct,
+   * modelF5PushRaw) use: those were CREATED at 6,4, whereas this is an ALTER
+   * over existing production rows. decimal(5,2) admits values up to 999.99
+   * while decimal(6,4) caps at 99.9999, so 6,4 NARROWS the integer range —
+   * and since this column's own doc wrongly claimed "0-100" for a season, a
+   * percent-scaled value in any historical row would put the ALTER out of
+   * range. 7,4 (max 999.9999) is strictly wider than the column it replaces,
+   * so the migration cannot fail on data the column already holds, while
+   * still fixing the truncation. Constraining the domain to [0,1] is a
+   * separate concern that does not belong in a migration which can abort.
+   */
+  modelF5OverRate: decimal("modelF5OverRate", { precision: 7, scale: 4 }),
+  /** Model F5 under probability — 0-1 UNIT SCALE. See modelF5OverRate. */
+  modelF5UnderRate: decimal("modelF5UnderRate", { precision: 7, scale: 4 }),
   /** Model F5 away win probability (0-100) */
   modelF5AwayWinPct: decimal("modelF5AwayWinPct", { precision: 5, scale: 2 }),
   /** Model F5 home win probability (0-100) */
@@ -968,8 +989,14 @@ export const games = mysqlTable("games", {
   nrfiOverOdds: varchar("nrfiOverOdds", { length: 16 }),
   /** YRFI under (yes run) odds from FanDuel NJ, e.g. "+110" */
   yrfiUnderOdds: varchar("yrfiUnderOdds", { length: 16 }),
-  /** Model P(NRFI) — probability no run scores in inning 1 (0-100) */
-  modelPNrfi: decimal("modelPNrfi", { precision: 5, scale: 2 }),
+  /**
+   * Model P(NRFI) — probability no run scores in inning 1.
+   * **0-1 UNIT SCALE, not 0-100.** Producer: mlbModelRunner.ts
+   * `p_nrfi.toFixed(4)`. Same M-203 history and same 5,2 -> 6,4 widening as
+   * modelF5OverRate; see that column for the full note, including why the
+   * target is 7,4 rather than the 6,4 its siblings use.
+   */
+  modelPNrfi: decimal("modelPNrfi", { precision: 7, scale: 4 }),
   /** Model fair value odds for NRFI, e.g. "-143" */
   modelNrfiOdds: varchar("modelNrfiOdds", { length: 16 }),
   /** Model fair value odds for YRFI, e.g. "+121" */
