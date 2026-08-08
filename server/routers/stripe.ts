@@ -35,6 +35,7 @@ import { recordCheckoutCreated } from "../stripe/checkoutLedger";
 import { recordSubscriptionEvent, subscriptionPeriodEndMs } from "../stripe/subscriptionLedger";
 import { PLANS, NEW_PLAN_IDS, getPlanByPriceId, computeExpiryMs, type PlanId } from "../stripe/products";
 import { getPlanBySlug, defaultPriceForMode, isSoldOut, type StoredPlan, type StoredPrice } from "../stripe/planStore";
+import { logSafe } from "../_core/logSafe";
 import { derivePlanStatus } from "../stripe/planStatus";
 import type { BillingInvoice, BillingPaymentMethod, BillingInfo } from "../stripe/billingTypes";
 import { getDb, getAppUserById, invalidateAppUserByIdCache, updateAppUser } from "../db";
@@ -1306,9 +1307,24 @@ export const stripeRouter = router({
     const user = ctx.appUser;
     console.log(`${TAGS} [INPUT] userId=${user.id} stripeCustomerId=${user.stripeCustomerId ?? '(none)'} stripePlanId=${user.stripePlanId ?? '(none)'}`);
 
-    const status = derivePlanStatus(user, Date.now());
+    // Owner-created DB plans carry their display name in the catalog, not in
+    // the legacy PLANS const. Resolve it here — derivePlanStatus is I/O-free by
+    // design — so a dime-sharp subscriber sees "Dime Sharp" and not the retired
+    // legacy plan normalizePlanId used to coerce them onto. Legacy slugs skip
+    // the lookup entirely and behave exactly as before. A failed lookup is not
+    // fatal: the status still renders, falling back to the slug.
+    let catalogLabel: string | null = null;
+    const rawPlan = user.stripePlanId;
+    if (rawPlan && !Object.prototype.hasOwnProperty.call(PLANS, rawPlan)) {
+      try {
+        catalogLabel = (await getPlanBySlug(rawPlan))?.name ?? null;
+      } catch (err) {
+        console.warn(`${TAGS} catalog label lookup failed for plan="${logSafe(rawPlan)}": ${(err as Error).message}`);
+      }
+    }
+    const status = derivePlanStatus(user, Date.now(), catalogLabel);
 
-    console.log(`${TAGS} [OUTPUT] userId=${user.id} state=${status.state} planId=${status.planId ?? '(none)'} governingDate=${status.governingDate ?? '(none)'}`);
+    console.log(`${TAGS} [OUTPUT] userId=${user.id} state=${status.state} planId=${status.planId ?? '(none)'} planLabel=${status.planLabel ?? '(none)'} governingDate=${status.governingDate ?? '(none)'}`);
     console.log(`${TAGS} [VERIFY] PASS`);
     return status;
   }),

@@ -127,13 +127,87 @@ describe("derivePlanStatus", () => {
     });
   });
 
-  it("normalizes an unrecognized legacy stripePlanId instead of throwing", () => {
+  // Was: "normalizes an unrecognized legacy stripePlanId instead of throwing",
+  // asserting planId === "monthly". The intent — do not throw, still render —
+  // is preserved; the assertion is not. Coercing an unknown slug to "monthly"
+  // told a subscriber they were on a retired $99.99 plan they had never bought,
+  // and it read as correct because the label came from a real plan. Reporting
+  // the slug is honest and debuggable; reporting a different plan is not.
+  it("reports an unrecognized stripePlanId as itself, without throwing and without coercing", () => {
     const result = derivePlanStatus(
       user({ stripePlanId: "legacy-plan-xyz" }),
       NOW
     );
     expect(result.state).toBe("active");
-    expect(result.planId).toBe("monthly"); // normalizePlanId's documented fallback
+    expect(result.planId).toBe("legacy-plan-xyz");
+    expect(result.planLabel).toBe("legacy-plan-xyz");
+    expect(result.planLabel).not.toBe(PLANS.monthly.name);
+  });
+
+  describe("owner-created DB catalog plans", () => {
+    // The live defect this fixes: all 95 subscribers hold stripePlanId
+    // "dime-sharp" (admin counts subscribers by that column against the plan
+    // slug), and normalizePlanId coerced it to "monthly", so every paying
+    // customer's billing tab read "AI Sports Betting — Monthly".
+    it("labels a DB plan with its catalog name, not a legacy plan's", () => {
+      const result = derivePlanStatus(
+        user({ stripePlanId: "dime-sharp" }),
+        NOW,
+        "Dime Sharp"
+      );
+      expect(result.planId).toBe("dime-sharp");
+      expect(result.planLabel).toBe("Dime Sharp");
+      expect(result.planLabel).not.toBe(PLANS.monthly.name);
+    });
+
+    it("falls back to the slug when no catalog label is supplied", () => {
+      const result = derivePlanStatus(user({ stripePlanId: "dime-max" }), NOW);
+      expect(result.planId).toBe("dime-max");
+      expect(result.planLabel).toBe("dime-max");
+    });
+
+    it("ignores catalogLabel for legacy plans — their name comes from PLANS", () => {
+      const result = derivePlanStatus(
+        user({ stripePlanId: "pro" }),
+        NOW,
+        "Some Other Name"
+      );
+      expect(result.planId).toBe("pro");
+      expect(result.planLabel).toBe(PLANS.pro.name);
+    });
+
+    it("carries the real slug through every non-none state", () => {
+      const base = { stripePlanId: "dime-sharp" };
+      expect(
+        derivePlanStatus(
+          user({ ...base, expiryDate: NOW - 1 }),
+          NOW,
+          "Dime Sharp"
+        )
+      ).toMatchObject({
+        state: "expired",
+        planId: "dime-sharp",
+        planLabel: "Dime Sharp",
+      });
+      expect(
+        derivePlanStatus(user({ ...base, hasAccess: false }), NOW, "Dime Sharp")
+      ).toMatchObject({
+        state: "expired",
+        planId: "dime-sharp",
+        planLabel: "Dime Sharp",
+      });
+      expect(
+        derivePlanStatus(
+          user({ ...base, cancelAtPeriodEnd: true }),
+          NOW,
+          "Dime Sharp"
+        )
+      ).toMatchObject({
+        state: "cancel_scheduled",
+        planId: "dime-sharp",
+        planLabel: "Dime Sharp",
+      });
+    });
   });
 
   it("defaults `now` to Date.now() when not supplied", () => {
