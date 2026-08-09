@@ -58,6 +58,7 @@ VENUES = os.path.join(ROOT, "scripts/data/nfl-2026/venues.json")
 if LIB not in sys.path:
     sys.path.insert(0, LIB)
 
+import build_inputs                    # noqa: E402  the canonical build-input contract
 import corrections                     # noqa: E402  data corrections, each asserting its prior
 import depth_charts as depth_lib       # noqa: E402  B3
 import player_dimension                # noqa: E402  B5
@@ -528,19 +529,22 @@ def build(conn, rows, teams, venues):
     # Same defect as #427's EXTRACT-NOTES.md, same fix: a negation cannot
     # re-include a file inside an excluded DIRECTORY, so it moved one level up to
     # scripts/data/nfl-db/espn-identities.json where nothing excludes it.
-    # The old path is still honoured so existing checkouts keep working.
-    identities_path = os.path.join(HERE, "espn-identities.json")
-    legacy_path = os.path.join(HERE, "cache/b3/espn_identities.json")
-    if not os.path.exists(identities_path) and os.path.exists(legacy_path):
-        identities_path = legacy_path
+    #
+    # ONE path authority: build_inputs.BUILD_INPUTS["espn_identities"]. The
+    # gitignored cache/ copy is deliberately NOT a fallback. Letting untracked
+    # developer residue stand in for a missing tracked input is precisely the
+    # defect this contract exists to prevent, and it would let two clones of the
+    # same revision build different databases. Its presence is REPORTED to help
+    # the operator diagnose an incomplete checkout; it is never consumed.
+    identities_path = build_inputs.path("espn_identities", root=ROOT)
     if not os.path.exists(identities_path):
-        # Loud, not silent: skipping T4 changes the database it produces.
-        raise RuntimeError(
-            f"T4 identity file missing at {identities_path!r} (and no legacy copy "
-            f"at {legacy_path!r}). Without it the ESPN->gsis crosswalk loses its "
-            f"T4 tier and 316 audited depth_chart rows silently lose their "
-            f"gsis_id. This file is tracked in git -- a missing copy means the "
-            f"checkout is incomplete, not that T4 is optional.")
+        spec = build_inputs.BUILD_INPUTS["espn_identities"]
+        legacy = os.path.join(HERE, "cache/b3/espn_identities.json")
+        extra = ("\n  NOTE           : an untracked copy exists at " + legacy +
+                 " -- it is NOT used. cache/ is gitignored, so that copy is "
+                 "machine-local residue, not a build input.") \
+            if os.path.exists(legacy) else ""
+        raise RuntimeError("\n" + build_inputs.format_failure(spec, identities_path) + extra)
     identities = {r["espn_id"]: {"fullName": r.get("espn_full"),
                                  "college": r.get("college")}
                   for r in load_json(identities_path)}
@@ -1307,6 +1311,19 @@ def preflight_raw():
     that is exactly how this database silently carried zero 2012 snap counts.
     A short extract is a corruption risk, so it stops the build.
     """
+    # PRESENCE of every declared mandatory input -- upstream extracts AND the
+    # repository-owned semantic inputs -- comes from the canonical contract, so a
+    # second static list can never drift from it. An audit-hook trace of a real
+    # build opens 12 data files; the old list here named 5.
+    ok, failures = build_inputs.preflight(root=ROOT, raw_dir=RAW)
+    if not ok:
+        print("\n" + "=" * 68, file=sys.stderr)
+        for spec, resolved in failures:
+            print(build_inputs.format_failure(spec, resolved), file=sys.stderr)
+            print("", file=sys.stderr)
+        print("=" * 68, file=sys.stderr)
+        sys.exit(1)
+
     missing, short = [], []
     for name, floor in REQUIRED_RAW:
         path = os.path.join(RAW, name)
