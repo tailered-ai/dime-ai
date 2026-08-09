@@ -43,6 +43,28 @@
  *   Historical rows do NOT self-heal: outcomeIngestedAt gates re-ingestion,
  *   so correcting stored values needs a force re-ingest by the owner.
  *
+ * EXECUTION MODES (OutcomeIngestOptions) — for the M-203 correction run:
+ *   dryRun     Runs every selection, matching and scoring path exactly as a
+ *              live run would, then reports `would_write` instead of issuing
+ *              the UPDATE. Zero database mutations. Each row carries
+ *              previousBrier + brierChanged so the scope of a correction can
+ *              be measured BEFORE deciding to write.
+ *   historical Suppresses checkF5ShareDrift() — which takes no date, always
+ *              evaluates the CURRENT rolling window, and can TRIGGER
+ *              RECALIBRATION — and suppresses the owner notification. Without
+ *              it, replaying a season would re-evaluate today's window once
+ *              per replayed date and send one notification per date.
+ *   dryRun implies historical's suppressions; a dry run has no side effects.
+ *
+ * NULL SEMANTICS (why the Brier fields are written as explicit null):
+ *   Drizzle OMITS `undefined` columns from the SET clause. The Brier fields
+ *   used to be written as undefined when null, so a FORCE re-ingest could not
+ *   CLEAR a stale value that should now be null (push, tie, unparseable
+ *   probability) — it could only overwrite non-null with non-null. They are
+ *   now written as explicit null. The actual* fields intentionally remain
+ *   `undefined`: they feed the drift detector's rolling window, and clearing
+ *   them on a transient API gap would silently shrink it.
+ *
  * BRIER SCORE FORMULA:
  *   BS = (p - o)^2
  *   where p = model probability [0,1], o = binary outcome (0 or 1)
@@ -138,6 +160,15 @@ export interface GameOutcome {
   isFinal: boolean;
 }
 
+/** The five Brier fields, as stored before this run (for dry-run diffing). */
+export interface BrierSnapshot {
+  brierFgTotal: number | null;
+  brierF5Total: number | null;
+  brierNrfi: number | null;
+  brierFgMl: number | null;
+  brierF5Ml: number | null;
+}
+
 /** Per-game ingestion result */
 export interface OutcomeIngestResult {
   gameId: number;
@@ -145,6 +176,7 @@ export interface OutcomeIngestResult {
   gameDate: string;
   status:
     | "written"
+    | "would_write"
     | "skipped_already_ingested"
     | "skipped_not_final"
     | "skipped_no_mlbgamepk"
@@ -158,6 +190,14 @@ export interface OutcomeIngestResult {
   brierNrfi: number | null;
   brierFgMl: number | null;
   brierF5Ml: number | null;
+  /**
+   * Brier values as they stood BEFORE this run. Populated for written and
+   * would_write rows so a dry run can be diffed field-by-field without a
+   * second query. Null for skipped/error rows.
+   */
+  previousBrier?: BrierSnapshot | null;
+  /** True when at least one Brier field differs from previousBrier. */
+  brierChanged?: boolean;
   error?: string;
 }
 
@@ -166,6 +206,10 @@ export interface OutcomeIngestSummary {
   date: string;
   totalGames: number;
   written: number;
+  /** Rows a dry run WOULD have written. Always 0 on a live run. */
+  wouldWrite: number;
+  /** Of the written/would_write rows, how many change at least one Brier field. */
+  brierChanged: number;
   skippedAlreadyIngested: number;
   skippedNotFinal: number;
   skippedNoGamePk: number;
@@ -173,6 +217,34 @@ export interface OutcomeIngestSummary {
   errors: number;
   results: OutcomeIngestResult[];
   runAt: number;
+  /** Echo of the options this run executed under. */
+  dryRun: boolean;
+  historical: boolean;
+}
+
+/**
+ * Execution modes for ingestMlbOutcomes.
+ *
+ * Both flags exist to make the M-203 historical Brier correction measurable
+ * and inert with respect to the live model. Neither changes how any score is
+ * computed — only whether the result is persisted and what runs afterwards.
+ */
+export interface OutcomeIngestOptions {
+  /**
+   * Compute and report, mutate NOTHING. Every selection, matching and scoring
+   * path runs exactly as it would live; the UPDATE and its verification read
+   * are skipped and rows are reported as `would_write`.
+   */
+  dryRun?: boolean;
+  /**
+   * Historical replay. Suppresses the post-ingest drift detector (which can
+   * TRIGGER RECALIBRATION of the live model) and the owner notification.
+   * checkF5ShareDrift() evaluates the CURRENT rolling window regardless of the
+   * date being ingested, so replaying a season of past dates would otherwise
+   * re-evaluate — and potentially recalibrate against — today's window once per
+   * date, and send one notification per date.
+   */
+  historical?: boolean;
 }
 
 // ─── Brier Score Computation ──────────────────────────────────────────────────
@@ -318,6 +390,91 @@ export function computeBrierScores(
   return { brierFgTotal, brierF5Total, brierNrfi, brierFgMl, brierF5Ml };
 }
 
+// ─── Brier diffing + write verification ───────────────────────────────────────
+
+/** The five Brier columns, in a fixed order, for diffing and verification. */
+export const BRIER_FIELDS = [
+  "brierFgTotal",
+  "brierF5Total",
+  "brierNrfi",
+  "brierFgMl",
+  "brierF5Ml",
+] as const;
+
+/**
+ * Brier columns are decimal(7,6) and brierScore() rounds to 6dp, so equality
+ * must be compared at that resolution rather than exactly — a round-trip
+ * through MySQL returns a string that need not re-parse bit-identically.
+ */
+const BRIER_EPSILON = 5e-7;
+
+/** True when any of the five Brier fields differs between two snapshots. */
+export function brierSnapshotDiffers(
+  before: BrierSnapshot,
+  after: BrierSnapshot
+): boolean {
+  return BRIER_FIELDS.some(f => {
+    const x = before[f];
+    const y = after[f];
+    if (x === null || y === null) return x !== y;
+    return Math.abs(x - y) > BRIER_EPSILON;
+  });
+}
+
+/** Compact one-line rendering of a Brier snapshot for logs. */
+export function formatBrierSnapshot(s: BrierSnapshot): string {
+  return BRIER_FIELDS.map(f => `${f.slice(5)}=${s[f] ?? "null"}`).join(" ");
+}
+
+/**
+ * Compares what we intended to write against what the row actually holds,
+ * returning one message per mismatched field (empty array = verified).
+ *
+ * Only fields the write actually CLAIMED are checked. actualFgTotal is written
+ * as `undefined` (column omitted) when null, so in that case nothing was
+ * claimed and asserting the stored value is null would be a false failure. The
+ * five Brier fields are always written explicitly — including as null — so they
+ * are always verified.
+ */
+export function verifyWrittenFields(
+  intended: { actualFgTotal: number | null } & BrierSnapshot,
+  stored: {
+    actualFgTotal: string | number | null;
+    brierFgTotal: string | number | null;
+    brierF5Total: string | number | null;
+    brierNrfi: string | number | null;
+    brierFgMl: string | number | null;
+    brierF5Ml: string | number | null;
+  }
+): string[] {
+  const mismatches: string[] = [];
+
+  if (intended.actualFgTotal !== null) {
+    const got = parseNumOrNull(stored.actualFgTotal);
+    if (got === null || Math.abs(got - intended.actualFgTotal) >= 0.01) {
+      mismatches.push(
+        `actualFgTotal expected=${intended.actualFgTotal} got=${stored.actualFgTotal ?? "null"}`
+      );
+    }
+  }
+
+  for (const f of BRIER_FIELDS) {
+    const want = intended[f];
+    const got = parseNumOrNull(stored[f]);
+    const ok =
+      want === null
+        ? got === null
+        : got !== null && Math.abs(got - want) <= BRIER_EPSILON;
+    if (!ok) {
+      mismatches.push(
+        `${f} expected=${want ?? "null"} got=${stored[f] ?? "null"}`
+      );
+    }
+  }
+
+  return mismatches;
+}
+
 // ─── MLB Stats API Fetch ──────────────────────────────────────────────────────
 
 /**
@@ -441,13 +598,32 @@ async function fetchMlbOutcomes(
  */
 export async function ingestMlbOutcomes(
   dateStr: string,
-  force = false
+  force = false,
+  options: OutcomeIngestOptions = {}
 ): Promise<OutcomeIngestSummary> {
+  const dryRun = options.dryRun === true;
+  const historical = options.historical === true;
+  // A dry run must have no side effects at all, so it implies the historical
+  // suppressions on top of skipping the write.
+  const suppressSideEffects = dryRun || historical;
+
   const startMs = Date.now();
   console.log(
     `\n${TAG} ══════════════════════════════════════════════════════`
   );
-  console.log(`${TAG} [INPUT] date=${dateStr} force=${force}`);
+  console.log(
+    `${TAG} [INPUT] date=${dateStr} force=${force} dryRun=${dryRun} historical=${historical}`
+  );
+  if (dryRun) {
+    console.log(
+      `${TAG} [INPUT] DRY RUN — no database mutation will be performed`
+    );
+  }
+  if (suppressSideEffects) {
+    console.log(
+      `${TAG} [INPUT] side effects SUPPRESSED — drift detector, recalibration and owner notification will not run`
+    );
+  }
 
   const db = await getDb();
 
@@ -476,6 +652,13 @@ export async function ingestMlbOutcomes(
       actualHomeScore: games.actualHomeScore,
       actualF5AwayScore: games.actualF5AwayScore,
       actualF5HomeScore: games.actualF5HomeScore,
+      // Previously-stored Brier values, so a dry run can report before/after
+      // without a second query. Read-only — never fed to computeBrierScores.
+      prevBrierFgTotal: games.brierFgTotal,
+      prevBrierF5Total: games.brierF5Total,
+      prevBrierNrfi: games.brierNrfi,
+      prevBrierFgMl: games.brierFgMl,
+      prevBrierF5Ml: games.brierF5Ml,
     })
     .from(games)
     .where(
@@ -492,6 +675,8 @@ export async function ingestMlbOutcomes(
 
   const results: OutcomeIngestResult[] = [];
   let written = 0;
+  let wouldWrite = 0;
+  let brierChangedCount = 0;
   let skippedAlreadyIngested = 0;
   let skippedNotFinal = 0;
   let skippedNoGamePk = 0;
@@ -504,6 +689,8 @@ export async function ingestMlbOutcomes(
       date: dateStr,
       totalGames: 0,
       written: 0,
+      wouldWrite: 0,
+      brierChanged: 0,
       skippedAlreadyIngested: 0,
       skippedNotFinal: 0,
       skippedNoGamePk: 0,
@@ -511,6 +698,8 @@ export async function ingestMlbOutcomes(
       errors: 0,
       results: [],
       runAt: Date.now(),
+      dryRun,
+      historical,
     };
   }
 
@@ -545,6 +734,8 @@ export async function ingestMlbOutcomes(
       date: dateStr,
       totalGames: dbGames.length,
       written: 0,
+      wouldWrite: 0,
+      brierChanged: 0,
       skippedAlreadyIngested: 0,
       skippedNotFinal: 0,
       skippedNoGamePk: 0,
@@ -552,6 +743,8 @@ export async function ingestMlbOutcomes(
       errors,
       results,
       runAt: Date.now(),
+      dryRun,
+      historical,
     };
   }
 
@@ -708,31 +901,79 @@ export async function ingestMlbOutcomes(
         ` F5ML=${briers.brierF5Ml ?? "null"}`
     );
 
+    // ── Diff against what is already stored ───────────────────────────────
+    const previousBrier: BrierSnapshot = {
+      brierFgTotal: parseNumOrNull(game.prevBrierFgTotal),
+      brierF5Total: parseNumOrNull(game.prevBrierF5Total),
+      brierNrfi: parseNumOrNull(game.prevBrierNrfi),
+      brierFgMl: parseNumOrNull(game.prevBrierFgMl),
+      brierF5Ml: parseNumOrNull(game.prevBrierF5Ml),
+    };
+    const brierChanged = brierSnapshotDiffers(previousBrier, briers);
+    if (brierChanged) brierChangedCount++;
+
+    console.log(
+      `${TAG} [STATE] id=${game.id} ${matchup} | brierChanged=${brierChanged}` +
+        ` | before=${formatBrierSnapshot(previousBrier)}` +
+        ` | after=${formatBrierSnapshot(briers)}`
+    );
+
+    // ── Dry run: report what WOULD happen, mutate nothing ─────────────────
+    if (dryRun) {
+      console.log(
+        `${TAG} [OUTPUT] id=${game.id} ${matchup} — WOULD WRITE (dry run, no mutation)`
+      );
+      results.push({
+        gameId: game.id,
+        matchup,
+        gameDate: game.gameDate ?? dateStr,
+        status: "would_write",
+        actualFgTotal,
+        actualF5Total,
+        actualNrfiBinary,
+        brierFgTotal: briers.brierFgTotal,
+        brierF5Total: briers.brierF5Total,
+        brierNrfi: briers.brierNrfi,
+        brierFgMl: briers.brierFgMl,
+        brierF5Ml: briers.brierF5Ml,
+        previousBrier,
+        brierChanged,
+      });
+      wouldWrite++;
+      continue;
+    }
+
     // ── Write to DB ───────────────────────────────────────────────────────
     try {
       const now = Date.now();
       await db
         .update(games)
         .set({
+          // actual* stay `undefined` (= column omitted) deliberately: they are
+          // the drift detector's rolling-window inputs, and clearing them on a
+          // transient API gap would silently shrink that window. The Brier
+          // fields below MUST be explicit null — see the note on that block.
           actualFgTotal:
             actualFgTotal !== null ? String(actualFgTotal) : undefined,
           actualF5Total:
             actualF5Total !== null ? String(actualF5Total) : undefined,
           actualNrfiBinary: actualNrfiBinary,
+          // EXPLICIT null, never undefined. Drizzle OMITS undefined columns
+          // from the SET clause, so passing undefined made a force re-ingest
+          // unable to CLEAR a stale Brier value that should now be null (a
+          // push, a tie, or a probability that no longer parses). Writing null
+          // is a no-op on a first ingest — the column is already null — and is
+          // the whole point of a correction run.
           brierFgTotal:
-            briers.brierFgTotal !== null
-              ? String(briers.brierFgTotal)
-              : undefined,
+            briers.brierFgTotal !== null ? String(briers.brierFgTotal) : null,
           brierF5Total:
-            briers.brierF5Total !== null
-              ? String(briers.brierF5Total)
-              : undefined,
+            briers.brierF5Total !== null ? String(briers.brierF5Total) : null,
           brierNrfi:
-            briers.brierNrfi !== null ? String(briers.brierNrfi) : undefined,
+            briers.brierNrfi !== null ? String(briers.brierNrfi) : null,
           brierFgMl:
-            briers.brierFgMl !== null ? String(briers.brierFgMl) : undefined,
+            briers.brierFgMl !== null ? String(briers.brierFgMl) : null,
           brierF5Ml:
-            briers.brierF5Ml !== null ? String(briers.brierF5Ml) : undefined,
+            briers.brierF5Ml !== null ? String(briers.brierF5Ml) : null,
           outcomeIngestedAt: now,
         })
         .where(eq(games.id, game.id));
@@ -740,31 +981,37 @@ export async function ingestMlbOutcomes(
       console.log(`${TAG} [OUTPUT] id=${game.id} ${matchup} — written OK`);
 
       // ── Post-write verification ────────────────────────────────────────
+      // Reads back and checks actualFgTotal AND all five Brier fields. The
+      // Brier fields are the entire point of an M-203 correction run, so a
+      // verification that ignored them could pass while every corrected score
+      // silently failed to land.
       const [verify] = await db
         .select({
           actualFgTotal: games.actualFgTotal,
           actualF5Total: games.actualF5Total,
           actualNrfiBinary: games.actualNrfiBinary,
           brierFgTotal: games.brierFgTotal,
+          brierF5Total: games.brierF5Total,
+          brierNrfi: games.brierNrfi,
+          brierFgMl: games.brierFgMl,
+          brierF5Ml: games.brierF5Ml,
           outcomeIngestedAt: games.outcomeIngestedAt,
         })
         .from(games)
         .where(eq(games.id, game.id));
 
-      const fgMatch =
-        verify.actualFgTotal !== null && actualFgTotal !== null
-          ? Math.abs(parseFloat(String(verify.actualFgTotal)) - actualFgTotal) <
-            0.01
-          : verify.actualFgTotal === null && actualFgTotal === null;
+      const mismatches = verifyWrittenFields(
+        { actualFgTotal, ...briers },
+        verify
+      );
 
-      if (!fgMatch) {
+      if (mismatches.length > 0) {
         console.error(
-          `${TAG} [VERIFY] FAIL — id=${game.id} ${matchup}` +
-            ` | expected actualFgTotal=${actualFgTotal} got=${verify.actualFgTotal}`
+          `${TAG} [VERIFY] FAIL — id=${game.id} ${matchup} | ${mismatches.join(" | ")}`
         );
       } else {
         console.log(
-          `${TAG} [VERIFY] PASS — id=${game.id} ${matchup} | actualFgTotal=${verify.actualFgTotal} | outcomeIngestedAt=${verify.outcomeIngestedAt}`
+          `${TAG} [VERIFY] PASS — id=${game.id} ${matchup} | actualFgTotal=${verify.actualFgTotal} | brier=${formatBrierSnapshot(briers)} | outcomeIngestedAt=${verify.outcomeIngestedAt}`
         );
       }
 
@@ -781,6 +1028,8 @@ export async function ingestMlbOutcomes(
         brierNrfi: briers.brierNrfi,
         brierFgMl: briers.brierFgMl,
         brierF5Ml: briers.brierF5Ml,
+        previousBrier,
+        brierChanged,
       });
       written++;
     } catch (err) {
@@ -814,7 +1063,10 @@ export async function ingestMlbOutcomes(
   );
   console.log(`${TAG} [SUMMARY] date=${dateStr}`);
   console.log(
-    `${TAG} [SUMMARY] total=${dbGames.length} | written=${written} | skipped_ingested=${skippedAlreadyIngested} | skipped_not_final=${skippedNotFinal} | skipped_no_pk=${skippedNoGamePk} | skipped_no_match=${skippedNoApiMatch} | errors=${errors}`
+    `${TAG} [SUMMARY] mode=${dryRun ? "DRY-RUN" : "LIVE"}${historical ? "+historical" : ""}`
+  );
+  console.log(
+    `${TAG} [SUMMARY] total=${dbGames.length} | written=${written} | would_write=${wouldWrite} | brier_changed=${brierChangedCount} | skipped_ingested=${skippedAlreadyIngested} | skipped_not_final=${skippedNotFinal} | skipped_no_pk=${skippedNoGamePk} | skipped_no_match=${skippedNoApiMatch} | errors=${errors}`
   );
   console.log(`${TAG} [SUMMARY] elapsed=${elapsed}s`);
   console.log(
@@ -822,36 +1074,48 @@ export async function ingestMlbOutcomes(
   );
 
   // ── Drift detector: run rolling f5_share check (before notifyOwner so result is included) ─────────
+  //
+  // SUPPRESSED for dry runs and historical replays. checkF5ShareDrift() takes
+  // no date — it always evaluates the CURRENT rolling window and can set
+  // recalibrationTriggered. Replaying past dates would therefore re-evaluate,
+  // and potentially recalibrate, the live model once per replayed date.
   let driftSummaryLine = "Drift check: skipped (insufficient data)";
-  try {
+  if (suppressSideEffects) {
+    driftSummaryLine = "Drift check: SUPPRESSED (dry-run / historical replay)";
     console.log(
-      `${TAG} [STEP] Running drift detector (rolling f5_share check)...`
+      `${TAG} [STEP] Drift detector SUPPRESSED — replay must not evaluate or recalibrate the live rolling window`
     );
-    const driftResult = await checkF5ShareDrift();
-    console.log(
-      `${TAG} [OUTPUT] driftDetected=${driftResult.driftDetected} | delta=${driftResult.delta?.toFixed(4) ?? "N/A"} | rollingF5Share=${driftResult.rollingF5Share?.toFixed(4) ?? "N/A"} | windowSize=${driftResult.windowSize}`
-    );
-    console.log(`${TAG} [OUTPUT] drift message: ${driftResult.message}`);
-    if (driftResult.driftDetected) {
-      console.warn(
-        `${TAG} [VERIFY] DRIFT DETECTED — delta=${driftResult.delta?.toFixed(4)} exceeds threshold. recalibrationTriggered=${driftResult.recalibrationTriggered}`
-      );
-      driftSummaryLine = `⚠️ DRIFT DETECTED — delta=${driftResult.delta?.toFixed(4)} | rolling=${driftResult.rollingF5Share?.toFixed(4)} | baseline=${driftResult.baselineF5Share.toFixed(4)} | recalibrated=${driftResult.recalibrationTriggered}`;
-    } else if (driftResult.rollingF5Share !== null) {
+  } else {
+    try {
       console.log(
-        `${TAG} [VERIFY] PASS — no drift detected (delta=${driftResult.delta?.toFixed(4) ?? "N/A"})`
+        `${TAG} [STEP] Running drift detector (rolling f5_share check)...`
       );
-      driftSummaryLine = `✅ No drift — delta=${driftResult.delta?.toFixed(4)} | rolling=${driftResult.rollingF5Share?.toFixed(4)} | baseline=${driftResult.baselineF5Share.toFixed(4)} | window=${driftResult.windowSize}`;
-    } else {
-      driftSummaryLine = `Drift check: insufficient data (${driftResult.windowSize} games, need 20+)`;
+      const driftResult = await checkF5ShareDrift();
+      console.log(
+        `${TAG} [OUTPUT] driftDetected=${driftResult.driftDetected} | delta=${driftResult.delta?.toFixed(4) ?? "N/A"} | rollingF5Share=${driftResult.rollingF5Share?.toFixed(4) ?? "N/A"} | windowSize=${driftResult.windowSize}`
+      );
+      console.log(`${TAG} [OUTPUT] drift message: ${driftResult.message}`);
+      if (driftResult.driftDetected) {
+        console.warn(
+          `${TAG} [VERIFY] DRIFT DETECTED — delta=${driftResult.delta?.toFixed(4)} exceeds threshold. recalibrationTriggered=${driftResult.recalibrationTriggered}`
+        );
+        driftSummaryLine = `⚠️ DRIFT DETECTED — delta=${driftResult.delta?.toFixed(4)} | rolling=${driftResult.rollingF5Share?.toFixed(4)} | baseline=${driftResult.baselineF5Share.toFixed(4)} | recalibrated=${driftResult.recalibrationTriggered}`;
+      } else if (driftResult.rollingF5Share !== null) {
+        console.log(
+          `${TAG} [VERIFY] PASS — no drift detected (delta=${driftResult.delta?.toFixed(4) ?? "N/A"})`
+        );
+        driftSummaryLine = `✅ No drift — delta=${driftResult.delta?.toFixed(4)} | rolling=${driftResult.rollingF5Share?.toFixed(4)} | baseline=${driftResult.baselineF5Share.toFixed(4)} | window=${driftResult.windowSize}`;
+      } else {
+        driftSummaryLine = `Drift check: insufficient data (${driftResult.windowSize} games, need 20+)`;
+      }
+    } catch (driftErr) {
+      const driftMsg =
+        driftErr instanceof Error ? driftErr.message : String(driftErr);
+      console.error(
+        `${TAG} [ERROR] drift detector failed (non-fatal): ${driftMsg}`
+      );
+      driftSummaryLine = `Drift check: error — ${driftMsg.slice(0, 80)}`;
     }
-  } catch (driftErr) {
-    const driftMsg =
-      driftErr instanceof Error ? driftErr.message : String(driftErr);
-    console.error(
-      `${TAG} [ERROR] drift detector failed (non-fatal): ${driftMsg}`
-    );
-    driftSummaryLine = `Drift check: error — ${driftMsg.slice(0, 80)}`;
   }
 
   // ── F5 ML coverage audit: count games with model but no book F5 ML odds ──────────────────
@@ -876,7 +1140,14 @@ export async function ingestMlbOutcomes(
   }
 
   // ── notifyOwner: push Brier calibration summary + drift result to owner ──────────────────
-  if (written > 0) {
+  //
+  // SUPPRESSED for dry runs and historical replays: a season-long backfill
+  // would otherwise send one owner notification per replayed date.
+  if (suppressSideEffects) {
+    console.log(
+      `${TAG} [STEP] Owner notification SUPPRESSED (dry-run / historical replay)`
+    );
+  } else if (written > 0) {
     try {
       const ingestedResults = results.filter(r => r.status === "written");
       const brierAvg = (field: keyof OutcomeIngestResult): string => {
@@ -936,6 +1207,8 @@ export async function ingestMlbOutcomes(
     date: dateStr,
     totalGames: dbGames.length,
     written,
+    wouldWrite,
+    brierChanged: brierChangedCount,
     skippedAlreadyIngested,
     skippedNotFinal,
     skippedNoGamePk,
@@ -943,6 +1216,8 @@ export async function ingestMlbOutcomes(
     errors,
     results,
     runAt: Date.now(),
+    dryRun,
+    historical,
   };
 }
 
@@ -957,20 +1232,21 @@ export async function ingestMlbOutcomes(
 async function ingestMlbOutcomesRange(
   startDate: string,
   endDate: string,
-  force = false
+  force = false,
+  options: OutcomeIngestOptions = {}
 ): Promise<OutcomeIngestSummary[]> {
   const summaries: OutcomeIngestSummary[] = [];
   const start = new Date(startDate + "T00:00:00Z");
   const end = new Date(endDate + "T00:00:00Z");
 
   console.log(
-    `${TAG} [INPUT] Range backfill: ${startDate} → ${endDate} force=${force}`
+    `${TAG} [INPUT] Range backfill: ${startDate} → ${endDate} force=${force} dryRun=${options.dryRun === true} historical=${options.historical === true}`
   );
 
   const current = new Date(start);
   while (current <= end) {
     const dateStr = current.toISOString().slice(0, 10);
-    const summary = await ingestMlbOutcomes(dateStr, force);
+    const summary = await ingestMlbOutcomes(dateStr, force, options);
     summaries.push(summary);
     current.setUTCDate(current.getUTCDate() + 1);
   }
