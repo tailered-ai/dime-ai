@@ -22,25 +22,11 @@ sys.path.insert(0, os.path.join(HERE, "lib"))
 import sqlite3  # noqa: E402
 import season_pins as sp  # noqa: E402
 
-WINDOWS = {
-    "depth_chart": (
-        f"(source_shape='A' OR snapshot_ts <= '{sp.DEPTH_CHART_EXTRACT_CUTOFF}')",
-        ["source_shape", "snapshot_ts", "season", "franchise_id", "gsis_id",
-         "depth_position", "depth_order", "pos_slot", "source_ordinal"],
-    ),
-    "player_game_stats": (
-        f"season <= {sp.FROZEN_THROUGH}",
-        ["gsis_id", "season", "week", "season_type"],
-    ),
-    "snap_count": (
-        f"season <= {sp.FROZEN_THROUGH}",
-        ["gsis_id", "season", "week", "season_type", "game_id", "pfr_player_id"],
-    ),
-    "roster_season": (
-        f"season <= {sp.FROZEN_THROUGH}",
-        ["gsis_id", "season", "week", "franchise_id", "source_ordinal"],
-    ),
-}
+# The frozen populations come from season_pins.FROZEN_WINDOWS. This file used to
+# carry its own copy of every predicate and column list, so the regenerator could
+# silently protect a different population than the gate it feeds. Same authority,
+# same rows, or the digest means nothing.
+WINDOWS = {t: sp.window(t).predicate for t in sp.governed_tables()}
 
 
 def main() -> int:
@@ -52,9 +38,9 @@ def main() -> int:
     print(f"# from {db}")
     print("CONTENT_DIGESTS = {")
     bad = 0
-    for table, (where, key) in WINDOWS.items():
+    for table, where in WINDOWS.items():
         try:
-            d, n, keep = sp.content_digest(conn, table, where, key)
+            d, n, keep = sp.content_digest(conn, table, where)
         except sqlite3.OperationalError as exc:
             print(f"    # {table}: SKIPPED -- {exc}")
             bad += 1

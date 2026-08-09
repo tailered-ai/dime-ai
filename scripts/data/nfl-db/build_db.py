@@ -978,10 +978,9 @@ def pass_reconciliation(conn, rows, hist, new, counts):
     # fails claiming closed history moved. season_pins.frozen_verdict() now
     # refuses this table outright to keep the mistake from being made twice.
     cutoff = season_pins.DEPTH_CHART_EXTRACT_CUTOFF
-    dc_frozen = q("""SELECT COUNT(*) FROM depth_chart
-                     WHERE source_shape='A' OR snapshot_ts <= ?""", cutoff)[0]
-    dc_live = q("""SELECT COUNT(*) FROM depth_chart
-                   WHERE source_shape='B' AND snapshot_ts > ?""", cutoff)[0]
+    _dcw = season_pins.window("depth_chart")
+    dc_frozen = q(f"SELECT COUNT(*) FROM depth_chart WHERE {_dcw.predicate}")[0]
+    dc_live = q(f"SELECT COUNT(*) FROM depth_chart WHERE {_dcw.live_predicate}")[0]
     frozen_ok, frozen_detail = season_pins.frozen_counts_verdict(
         "depth_chart", dc_frozen, dc_live, basis=f"snapshot <= {cutoff}")
     check(2, "depth_chart: the audited extract is present and unchanged",
@@ -989,8 +988,8 @@ def pass_reconciliation(conn, rows, hist, new, counts):
     # Shape A closed when nflverse retired that release format; it can never grow
     # again. Shape B spans the audited window and everything published since, so
     # only the audited part is pinned.
-    b_frozen = q("""SELECT COUNT(*) FROM depth_chart
-                    WHERE source_shape='B' AND snapshot_ts <= ?""", cutoff)[0]
+    b_frozen = q(f"SELECT COUNT(*) FROM depth_chart "
+                 f"WHERE source_shape='B' AND {_dcw.predicate}")[0]
     shape_ok, shape_detail = season_pins.frozen_shape_verdict(
         counts["depth_shape_a"], b_frozen)
     check(2, "depth_chart shape split across the audited window matches B3",
@@ -1013,20 +1012,16 @@ def pass_reconciliation(conn, rows, hist, new, counts):
     # different content -- 316 of them silently missing a gsis_id -- while every
     # count matched and all 154 checks passed. These digests close that gap.
     # Excluded columns are documented per table in season_pins.CONTENT_DIGEST_EXCLUDE.
-    for tbl, (cw, key) in (
-        ("depth_chart", (f"(source_shape='A' OR snapshot_ts <= '{cutoff}')",
-                         ["source_shape", "snapshot_ts", "season", "franchise_id",
-                          "gsis_id", "depth_position", "depth_order", "pos_slot",
-                          "source_ordinal"])),
-        ("player_game_stats", (f"season <= {season_pins.FROZEN_THROUGH}",
-                               ["gsis_id", "season", "week", "season_type"])),
-        ("snap_count", (f"season <= {season_pins.FROZEN_THROUGH}",
-                        ["gsis_id", "season", "week", "season_type", "game_id",
-                         "pfr_player_id"])),
-        ("roster_season", (f"season <= {season_pins.FROZEN_THROUGH}",
-                           ["gsis_id", "season", "week", "franchise_id", "source_ordinal"])),
-    ):
-        dg, nrows, _ = season_pins.content_digest(conn, tbl, cw, key)
+    #
+    # The frozen population comes from season_pins.FROZEN_WINDOWS -- the ONE
+    # authority. It used to be written out here AND again in content_digest.py,
+    # so the enforcer and the generator each carried their own WHERE clause and
+    # column list for the same contract. Two independent definitions of one
+    # contract eventually disagree, and a correct hash over the wrong population
+    # is still wrong.
+    for tbl in season_pins.governed_tables():
+        spec = season_pins.window(tbl)
+        dg, nrows, _ = season_pins.content_digest(conn, tbl, spec.predicate)
         ok, detail = season_pins.content_verdict(tbl, dg)
         if ok is None:
             report(f"{tbl}: frozen-window content digest", f"{detail}, {nrows:,} rows")

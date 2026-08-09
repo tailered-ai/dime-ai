@@ -84,6 +84,168 @@ FROZEN_SHAPE_A = 552_514   # 2010-2024, 15-col schema
 FROZEN_SHAPE_B = 554_215   # 2025 only, 12-col schema
 
 
+# ===========================================================================
+# THE CANONICAL FROZEN-WINDOW REGISTRY
+# ===========================================================================
+# WHY. The constants above were already central, but the PREDICATES were not:
+# build_db.py and content_digest.py each wrote their own WHERE clause and their
+# own column list for the same four contracts. A correct hash over the wrong
+# population is still wrong, and two independently-maintained definitions of one
+# contract will eventually disagree -- silently, because both look right in
+# isolation. This registry is the single authority both paths consume.
+#
+# AXES ARE NOT INTERCHANGEABLE. player_game_stats / snap_count / roster_season
+# read `season` from a literal CSV column that stops changing when the season
+# ends. depth_chart does not: its shape-B rows carry no season, so it is derived
+# from the snapshot instant against the game calendar, and a season-keyed freeze
+# there keeps absorbing rows for ~3.5 months after a season ends. That was the
+# #433 defect. The registry therefore models the axis explicitly rather than
+# assuming one column name fits every table.
+
+AXIS_SEASON = "season"        # literal CSV season column; settles at season end
+AXIS_SNAPSHOT = "snapshot"    # audited snapshot instant; immune to the calendar rule
+
+#: Lifecycle of an integrity surface, so a planned mechanism is never mistaken
+#: for an enforced one.
+ACTIVE = "active"                 # enforced by the build today
+TRANSITIONAL = "transitional"     # enforced today, known to need replacement
+PLANNED = "planned"               # specified, deliberately NOT yet enforced
+OBSERVATIONAL = "observational"   # measured and reported, never blocking
+
+
+class FrozenWindow:
+    """One governed frozen population. The only place its predicate exists."""
+
+    #: NOTE ON PROJECTION. A `key_cols` field lived here briefly and was dead
+    #: metadata: content_digest() orders by the FULL hashed projection (see its
+    #: docstring), so an ordering key affects nothing. Dead metadata inside a
+    #: registry that claims to be the single authority is a trap -- someone will
+    #: edit it believing it matters. The real projection authority is
+    #: CONTENT_DIGEST_EXCLUDE: projection = all columns minus that table's
+    #: exclusions, computed in one place. A mutation test proves it.
+    __slots__ = ("table", "axis", "predicate", "expected_count",
+                 "why_axis", "live_predicate")
+
+    def __init__(self, table, axis, predicate, expected_count, why_axis,
+                 live_predicate=None):
+        self.table = table
+        self.axis = axis
+        self.predicate = predicate
+        self.expected_count = expected_count
+        self.why_axis = why_axis
+        self.live_predicate = live_predicate
+
+    def __repr__(self):
+        return f"FrozenWindow({self.table}, axis={self.axis})"
+
+
+FROZEN_WINDOWS = {
+    "depth_chart": FrozenWindow(
+        table="depth_chart",
+        axis=AXIS_SNAPSHOT,
+        predicate=f"(source_shape='A' OR snapshot_ts <= '{DEPTH_CHART_EXTRACT_CUTOFF}')",
+        live_predicate=f"(source_shape='B' AND snapshot_ts > '{DEPTH_CHART_EXTRACT_CUTOFF}')",
+        expected_count=1_106_729,
+        why_axis="shape-B rows carry no season column; it is derived from `dt` "
+                 "against the game calendar's dead-zone rule, so a season-keyed "
+                 "window stays open ~3.5 months past the Super Bowl. The snapshot "
+                 "instant is exactly 'was in the audited extract'."),
+
+    "player_game_stats": FrozenWindow(
+        table="player_game_stats", axis=AXIS_SEASON,
+        predicate=f"season <= {FROZEN_THROUGH}",
+        live_predicate=f"season > {FROZEN_THROUGH}",
+        expected_count=286_843,
+        why_axis="`season` is a literal column in the upstream extract and stops "
+                 "changing when the season ends."),
+
+    "snap_count": FrozenWindow(
+        table="snap_count", axis=AXIS_SEASON,
+        predicate=f"season <= {FROZEN_THROUGH}",
+        live_predicate=f"season > {FROZEN_THROUGH}",
+        expected_count=324_611,
+        why_axis="literal season column, as above."),
+
+    "roster_season": FrozenWindow(
+        table="roster_season", axis=AXIS_SEASON,
+        predicate=f"season <= {FROZEN_THROUGH}",
+        live_predicate=f"season > {FROZEN_THROUGH}",
+        expected_count=43_856,
+        why_axis="literal season column, as above."),
+}
+
+
+#: The integrity SURFACES over those populations, with honest lifecycle state.
+#: depth_chart's provenance-aware replacement is specified here so later phases
+#: can finish the migration WITHOUT inventing a second population definition --
+#: which is the failure this registry exists to prevent.
+#:
+#: Measured populations backing the depth_chart layers (two clean-clone builds):
+#:     frozen window            1,106,729
+#:       shape A, feed-supplied   552,514   multiset identical between builds
+#:       shape B, feed-supplied   548,638   0 gsis_id changes
+#:       shape B, crosswalk-derived 5,229
+#:       shape B, unresolved          348
+#:     Layer B total            1,101,152  (99.50%)   Layer C  5,577 -> 204 mappings
+INTEGRITY_SURFACES = {
+    "depth_chart": {
+        "legacy_content_digest": {
+            "status": TRANSITIONAL,
+            "note": "hashes crosswalk-DERIVED gsis_id as if it were immutable "
+                    "source history. Measured non-stationary: 15 identities were "
+                    "legitimately gained between two correct builds. Known to be "
+                    "the wrong final mechanism; replaced by layers A/B/C. MUST "
+                    "NOT ship as the Session 2 design.",
+        },
+        "layer_a_raw_facts": {
+            "status": PLANNED,
+            "population": "the full frozen window",
+            "note": "blocking digest over columns whose semantics are stationary.",
+        },
+        "layer_b_source_identity": {
+            "status": PLANNED,
+            "population": "frozen window AND gsis_source='feed'  (1,101,152 rows)",
+            "note": "source-owned identity, proven stationary across two builds. "
+                    "The predicate selects on the PROVENANCE LABEL, so its safety "
+                    "rests on a measured fact, not a definition: no row was "
+                    "observed crossing the feed<->derived boundary. If a crossing "
+                    "is ever observed, this surface must be re-derived, not "
+                    "patched.",
+        },
+        "layer_c_derived_identity": {
+            "status": PLANNED,
+            "population": "204 canonical espn_id mappings, not 5,577 row copies",
+            "note": "accepted-baseline state machine; artifacts exist but are "
+                    "deliberately uncommitted until their own phase.",
+        },
+        "provenance": {
+            "status": OBSERVATIONAL,
+            "field": "gsis_source",
+            "note": "describes the CURRENT derivation path, not history. 1,059 "
+                    "legitimate transitions measured between two correct builds.",
+        },
+    },
+}
+
+
+def projection(conn, table):
+    """The pinned column list for a table: every column minus its documented
+    exclusions. ONE authority, so enforcement and generation cannot hash
+    different fields."""
+    cols = [r[1] for r in conn.execute(f"PRAGMA table_info({table})")]
+    return [c for c in cols if c not in CONTENT_DIGEST_EXCLUDE.get(table, set())]
+
+
+def window(table):
+    """The one authority. KeyError for an unregistered table is deliberate:
+    a governed contract with no registry entry must be a loud error."""
+    return FROZEN_WINDOWS[table]
+
+
+def governed_tables():
+    return tuple(FROZEN_WINDOWS)
+
+
 def split(counts_by_season, frozen_through=FROZEN_THROUGH):
     """Partition {season: rows} into (frozen_rows, live_rows).
 
@@ -171,9 +333,21 @@ def live_verdict(table, db_live_rows, source_live_rows):
 CONTENT_DIGEST_EXCLUDE = {
     "depth_chart": {
         # Which crosswalk TIER resolved an identity, not the identity itself.
-        # Legitimately moves as upstream player data improves (T3->T0 for 1,375
-        # rows on 2026-08-07). gsis_id IS pinned, so a lost or changed identity
-        # still fails -- which is exactly the 316-row regression this catches.
+        #
+        # EVIDENCE CORRECTION (2026-08-08). An earlier comment here claimed
+        # "T3->T0 for 1,375 rows". That figure was measured against the BROKEN
+        # no-T4 build, so roughly 316 rows of the apparent movement were
+        # contamination from the missing-T4 defect itself, and it named the wrong
+        # dominant transition. Re-measured full-population between two correct
+        # builds:
+        #
+        #     total provenance transitions   1,059
+        #       T1 -> T0                       881    <- the dominant movement
+        #       T3 -> T0                       163
+        #       NULL -> T0                      15
+        #
+        # gsis_id is NOT excluded here, so a lost or changed identity still fails
+        # -- which is exactly the 316-row regression this distinction protects.
         "gsis_source",
         "depth_chart_id",   # surrogate, assignment order
     },
@@ -211,7 +385,7 @@ CONTENT_DIGESTS = {
 }
 
 
-def content_digest(conn, table, where, _key_cols=None):
+def content_digest(conn, table, where):
     """Stable content hash of a frozen window's pinned columns.
 
     ORDER BY is the FULL hashed column list, deliberately. SQL leaves the order
@@ -226,16 +400,15 @@ def content_digest(conn, table, where, _key_cols=None):
     being hashed, so their relative order cannot change the result. No unique key
     is needed, and none has to be maintained as the schema evolves.
 
-    `_key_cols` is accepted and ignored so existing call sites stay valid.
+    The projection comes from projection() -- the single field authority.
     """
     import hashlib
-    cols = [r[1] for r in conn.execute(f"PRAGMA table_info({table})")]
-    keep = [c for c in cols if c not in CONTENT_DIGEST_EXCLUDE.get(table, set())]
-    projection = ", ".join(keep)
+    keep = globals()["projection"](conn, table)
+    proj_sql = ", ".join(keep)
     h = hashlib.sha256()
     n = 0
     for row in conn.execute(
-            f"SELECT {projection} FROM {table} WHERE {where} ORDER BY {projection}"):
+            f"SELECT {proj_sql} FROM {table} WHERE {where} ORDER BY {proj_sql}"):
         h.update(repr(row).encode())
         n += 1
     return h.hexdigest()[:20], n, keep
