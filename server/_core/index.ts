@@ -70,7 +70,7 @@ import { ensureDebugLogsTable } from "./debugLogger";
 import { registerAnalyticsIngestRoute } from "../analytics/ingestRoute";
 import { registerAnalyticsReadRoute } from "../analytics/readRoute";
 import { registerStripeWebhookRoute, getWebhookLatencyStats } from "../stripeWebhook";
-import { assertSchemaCurrent } from "./schemaGuard";
+import { runSchemaGuardPreflight } from "./schemaGuard";
 import { registerWc2026Heartbeats } from "../wc2026/wc2026Heartbeat";
 import { registerCronRoutes } from "../cron/cronRoutes";
 import { registerDimeChatRoute } from "../dime-chat.route";
@@ -1487,15 +1487,11 @@ async function startServer() {
       `[SERVER_STARTUP] ✓ Server listening — bound=${JSON.stringify(addr)} url=http://localhost:${port}/`
     );
     console.log(`Server running on http://localhost:${port}/`);
-    // Does the live schema actually satisfy what this build's queries assume?
-    // Drizzle enumerates every declared column, so code deployed ahead of its
-    // migration breaks every query against the affected table — which on
-    // 2026-07-31 took platform-wide login down while the deploy looked green.
-    // Warn-only by default (SCHEMA_GUARD_FATAL=1 to fail closed) so a check
-    // failure can never crash-loop the service it is meant to protect.
-    assertSchemaCurrent().catch((err: unknown) =>
-      console.warn(`[SchemaGuard] check failed to run: ${err instanceof Error ? err.message : String(err)}`)
-    );
+    // SchemaGuard no longer runs here. It ran fire-and-forget from this handler
+    // until the 2026-08-09 closeout, which meant that with SCHEMA_GUARD_FATAL=1 a
+    // confirmed-stale deployment started accepting requests and then exited
+    // underneath them. The authoritative verdict now resolves in
+    // runSchemaGuardPreflight() BEFORE server.listen — see startServer below.
     // Say at boot whether billing alerts can actually reach a human, rather
     // than discovering it the first time something goes wrong.
     reportBillingAlertTransport();
@@ -1889,6 +1885,20 @@ async function startServer() {
     await runBootSchemaProbe();
     startSchemaProbeInterval();
   }
+
+  // The authoritative nine-table guard, awaited BEFORE listen.
+  //
+  // Two controls, deliberately different and deliberately both:
+  //   runBootSchemaProbe  — narrow (app_users columns only), decides /health
+  //                         503 so Railway keeps the previous deploy; periodic.
+  //   runSchemaGuardPreflight — broad (every guarded product/billing/ledger
+  //                         table), and the only one that can refuse to serve.
+  //
+  // It self-scopes: on the analytics store it returns not_applicable without
+  // touching the product tables, so the call is unconditional. A confirmed FAIL
+  // with SCHEMA_GUARD_FATAL=1 exits from inside, before this returns and before
+  // any request is accepted. An unavailable verdict is fail-open by design.
+  await runSchemaGuardPreflight();
 
   console.log(
     `[SERVER_STARTUP] Calling server.listen(${port}) — host omitted for dual-stack bind with IPv4 fallback ...`

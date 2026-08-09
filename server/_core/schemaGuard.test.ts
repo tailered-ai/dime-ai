@@ -7,8 +7,7 @@ import { describe, it, expect } from "vitest";
 import {
   formatDrift,
   REQUIRED_COLUMNS,
-  isInconclusiveRead,
-  INCONCLUSIVE_MIN_TABLES,
+  normalizeSchemaRows,
   type SchemaDrift,
 } from "./schemaGuard";
 import { isSchemaError } from "../db";
@@ -136,68 +135,50 @@ describe("formatDrift", () => {
 });
 
 /**
- * The inconclusive rule reasons from coincidence: nine tables do not vanish at
- * once from a skipped migration, so all-nine-missing must be a failed read.
- * That reasoning weakens as the guarded list shrinks and collapses at one, where
- * "everything is missing" and "the one table I guard is missing" are the same
- * event — a total, genuine drift waved through as merely unknown.
- *
- * Demonstrated 2026-08-08 against the then-shipped code: with REQUIRED_COLUMNS
- * cut to a single table, an absent app_users returned inconclusive:true and did
- * NOT exit, even with SCHEMA_GUARD_FATAL=1 — which is now armed in production.
+ * The envelope reader. This is where a guess used to live: the old code did
+ * `Array.isArray(rows[0]) ? rows[0] : rows` and coerced anything else to `[]`,
+ * so an unrecognized shape carrying a perfectly good schema became "zero rows"
+ * — which reads as total drift. Coercing the other way would have been just as
+ * wrong. An envelope we do not recognize is not data.
  */
-const missing = (...tables: string[]): SchemaDrift[] =>
-  tables.map(t => ({ table: t, missingColumns: ["id"], tableMissing: true }));
+describe("normalizeSchemaRows", () => {
+  const rows = [
+    { t: "app_users", c: "id" },
+    { t: "app_users", c: "email" },
+  ];
 
-describe("isInconclusiveRead — the floor under the coincidence argument", () => {
-  it("[IR-1] at the shipped list size, all-missing reads as inconclusive", () => {
-    const n = Object.keys(REQUIRED_COLUMNS).length;
-    expect(
-      isInconclusiveRead(missing(...Object.keys(REQUIRED_COLUMNS)), n)
-    ).toBe(true);
+  it("[NR-1] accepts a flat row array (drizzle)", () => {
+    expect(normalizeSchemaRows(rows)).toEqual({ ok: true, rows });
   });
 
-  it("[IR-2] below the floor it is NEVER inconclusive — real drift stays fatal", () => {
-    // The bug this closes. One guarded table, that table absent: identical
-    // shape to "everything missing", but it is unambiguously real drift.
-    expect(isInconclusiveRead(missing("app_users"), 1)).toBe(false);
-    expect(isInconclusiveRead(missing("app_users", "plan_prices"), 2)).toBe(
-      false
-    );
+  it("[NR-2] accepts the [rows, fields] envelope (mysql2)", () => {
+    expect(normalizeSchemaRows([rows, []])).toEqual({ ok: true, rows });
   });
 
-  it("[IR-3] the floor is inclusive — exactly INCONCLUSIVE_MIN_TABLES qualifies", () => {
-    const n = INCONCLUSIVE_MIN_TABLES;
-    const tables = Array.from({ length: n }, (_, i) => `t${i}`);
-    expect(isInconclusiveRead(missing(...tables), n)).toBe(true);
-    // One below must not.
-    expect(isInconclusiveRead(missing(...tables.slice(1)), n - 1)).toBe(false);
+  it("[NR-3] a recognized EMPTY result is valid data, not an error", () => {
+    // "The query ran and matched nothing" is a real answer — it means the
+    // tables are absent. Hiding it here is how the wrong-database case escaped.
+    expect(normalizeSchemaRows([])).toEqual({ ok: true, rows: [] });
+    expect(normalizeSchemaRows([[], []])).toEqual({ ok: true, rows: [] });
   });
 
-  it("[IR-4] partial drift is never inconclusive, however long the list", () => {
-    // 8 of 9 missing is a migration problem, not a failed read.
-    expect(
-      isInconclusiveRead(missing("a", "b", "c", "d", "e", "f", "g", "h"), 9)
-    ).toBe(false);
+  it("[NR-4] rejects an unrecognized envelope instead of coercing it", () => {
+    expect(normalizeSchemaRows({ rows }).ok).toBe(false);
+    expect(normalizeSchemaRows(null).ok).toBe(false);
+    expect(normalizeSchemaRows(undefined).ok).toBe(false);
+    expect(normalizeSchemaRows("rows").ok).toBe(false);
   });
 
-  it("[IR-5] missing COLUMNS never read as inconclusive, only missing TABLES", () => {
-    const columnDrift: SchemaDrift[] = Array.from({ length: 9 }, (_, i) => ({
-      table: `t${i}`,
-      missingColumns: ["planPriceId"],
-      tableMissing: false,
-    }));
-    expect(isInconclusiveRead(columnDrift, 9)).toBe(false);
+  it("[NR-5] rejects rows missing the expected keys", () => {
+    expect(normalizeSchemaRows([{ TABLE_NAME: "app_users" }]).ok).toBe(false);
+    expect(normalizeSchemaRows([{ t: "app_users" }]).ok).toBe(false);
+    expect(normalizeSchemaRows([{ t: null, c: null }]).ok).toBe(false);
   });
 
-  it("[IR-6] INVARIANT: REQUIRED_COLUMNS must stay above the floor", () => {
-    // This is the assertion that actually protects production. The floor inside
-    // isInconclusiveRead is defence in depth; what keeps the guard honest is
-    // that the guarded list stays long enough for the coincidence argument to
-    // hold. If a future change shrinks it, this fails here rather than silently
-    // downgrading a real outage to "inconclusive" on a live, FATAL-armed box.
-    expect(Object.keys(REQUIRED_COLUMNS).length).toBeGreaterThanOrEqual(
-      INCONCLUSIVE_MIN_TABLES
-    );
+  it("[NR-6] stringifies non-string scalars rather than rejecting them", () => {
+    expect(normalizeSchemaRows([{ t: 1, c: 2 }])).toEqual({
+      ok: true,
+      rows: [{ t: "1", c: "2" }],
+    });
   });
 });

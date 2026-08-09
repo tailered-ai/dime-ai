@@ -140,10 +140,27 @@ results and measured before/after all live in this file and in the four artifact
 it. What is genuinely missing is the *structured* form of two of them — specifically the
 MASTER.md checklist walked item-by-item, which nothing else here substitutes for.
 
-**Separately, a contract-vs-practice divergence worth the owner's attention:**
-`screenshots/` is listed as required, and **no bundle in the repo has one — 0 of 7.**
-Every bundle substitutes a text `rendered-proof-*.txt` capture instead. Either the
-contract should name that substitution as acceptable, or seven bundles are
-non-compliant; right now the contract asserts something practice has never once met,
-which makes it unusable as a gate. Not resolved here — it is a design-federation
-contract decision, not a fix to this bundle.
+~~**Separately, a contract-vs-practice divergence worth the owner's attention:**
+`screenshots/` is listed as required, and no bundle in the repo has one — 0 of 7.~~
+
+**RETRACTED 2026-08-09 — that finding was wrong, and the error was mine.** There is no
+divergence. `docs/audits/*-evidence/screenshots/` is **gitignored on purpose**
+(`.gitignore:221`, "screenshots live on disk / in the PR body, never in git"), and the
+contract says so itself two paragraphs above the contents table, under **PNG law**:
+screenshots stay untracked and are attached to the PR body, while the markdown summary
+and JSON sidecars are tracked. Confirmed with `git check-ignore`, which ignores
+`docs/audits/<any>-evidence/screenshots/*.png`.
+
+So "0 of 7 in git" is the policy working exactly as designed, not seven bundles failing a
+gate. I read the contents table and missed the rule directly above it, then reported the
+absence as systemic non-compliance without first asking whether it was intentional —
+which is the one failure mode an evidence bundle is least allowed to have. Left visible
+rather than deleted, because a retraction that erases itself teaches nothing.
+
+**One wording correction in the same pass.** The table above compares *federated UI*
+bundles. Two other post-federation bundles also lack `brief.yaml`/`checklist.md` —
+`2026-08-06-kprops-sentinel-evidence` and `2026-07-26-nflverse-evidence` — and both are
+correctly out of scope: the contract opens "A federated **UI** change is unfinished until
+this bundle exists," and those two are an engineering data-integrity fix and a data audit
+respectively, with no design Lead or surface. The claim holds for the set the contract
+governs; "post-federation bundle" was the imprecise way to say "federated UI bundle".
