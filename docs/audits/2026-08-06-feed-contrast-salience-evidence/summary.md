@@ -106,3 +106,44 @@ fails to see what it is checking) produced a vacuous pass in the #413 harness.
 None outstanding on this surface. The three items carried since #409 are now all
 closed: slate tier and mint rationing (#413), the stale `mlbScoreRefresh`
 comments (#416), and these two (#416).
+
+## Bundle completeness — noted 2026-08-08
+
+Recorded rather than quietly fixed, because the honest move for a missing evidence
+artifact is to say it is missing. Back-dating a `brief.yaml` and a `checklist.md` to
+2026-08-06 would manufacture a record of process that did not happen — the exact
+failure an evidence bundle exists to prevent.
+
+**Two files the contract requires are absent here:** `brief.yaml` (the filled mission
+this was built against) and `checklist.md` (MASTER.md Pre-Delivery Checklist,
+item-by-item). See
+[`evidence-bundle.md`](../../../.claude/skills/design-federation/references/evidence-bundle.md).
+
+This bundle is the **only** post-federation one missing them. Surveyed on `main`
+2026-08-08:
+
+| Bundle | `brief.yaml` | `checklist.md` |
+| --- | --- | --- |
+| 2026-08-05-feed-card-status-evidence | ✅ | ✅ |
+| 2026-08-05-feed-desktop-evidence | ✅ | ✅ |
+| 2026-08-05-feed-mobile-evidence | ✅ | ✅ |
+| 2026-08-05-splits-desktop-evidence | ✅ | ✅ |
+| 2026-08-05-splits-mobile-evidence | ✅ | ✅ |
+| 2026-08-06-feed-unplayable-evidence | ✅ | ✅ |
+| **2026-08-06-feed-contrast-salience-evidence** | **❌** | **❌** |
+
+(`2026-08-04-parlay-leg-cells` and `2026-07-11-dime-shell` predate the federation and
+carry no `summary.md` either, so they are not comparable.)
+
+**What is not lost.** The Lead, surface, PR, owner authorization, scope fence, gate
+results and measured before/after all live in this file and in the four artifacts beside
+it. What is genuinely missing is the *structured* form of two of them — specifically the
+MASTER.md checklist walked item-by-item, which nothing else here substitutes for.
+
+**Separately, a contract-vs-practice divergence worth the owner's attention:**
+`screenshots/` is listed as required, and **no bundle in the repo has one — 0 of 7.**
+Every bundle substitutes a text `rendered-proof-*.txt` capture instead. Either the
+contract should name that substitution as acceptable, or seven bundles are
+non-compliant; right now the contract asserts something practice has never once met,
+which makes it unusable as a gate. Not resolved here — it is a design-federation
+contract decision, not a fix to this bundle.
