@@ -20,6 +20,7 @@ import {
   buildDbCopy,
   buildLegalLine,
   cadencePhrase,
+  LOADING_COPY,
   type DbCheckoutPlan,
 } from "./checkoutCopy";
 
@@ -242,5 +243,30 @@ describe("legacy static plan copy is unaffected", () => {
     expect(legal).toBe(
       "Charged today, then annually until you cancel. Secure processing by Stripe — card details never touch our servers."
     );
+  });
+});
+
+describe("loading state makes no cadence promise", () => {
+  // Found by PR B's own adversarial self-review: `copy` falls back to
+  // LOADING_COPY while publicGetCheckoutPlan is in flight and the legal line
+  // renders unconditionally, so the old `chargeCadence: "monthly"` placeholder
+  // told a weekly buyer "then monthly until you cancel" before any price had
+  // been selected.
+  it("omits the renewal clause entirely while no price is resolved", () => {
+    const legal = buildLegalLine(LOADING_COPY);
+    expect(legal).not.toContain("until you cancel");
+    expect(legal).not.toContain("monthly");
+    expect(legal).not.toContain("Charged today");
+  });
+
+  it("still shows the Stripe assurance", () => {
+    expect(buildLegalLine(LOADING_COPY)).toContain(
+      "Secure processing by Stripe"
+    );
+  });
+
+  it("resumes a full cadence sentence once a price arrives", () => {
+    const legal = legalFor({ interval: "week", amountCents: 7499 });
+    expect(legal).toContain("Charged today, then weekly until you cancel");
   });
 });

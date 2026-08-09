@@ -137,7 +137,19 @@ export function buildDbCopy(d: DbCheckoutPlan): PlanCopy {
   };
 }
 
-/** Placeholder shown in the rail while the DB plan's display info loads. */
+/** The trailing half of every legal line — never varies with the price. */
+const STRIPE_ASSURANCE =
+  "Secure processing by Stripe — card details never touch our servers.";
+
+/**
+ * Placeholder shown in the rail while the DB plan's display info loads.
+ *
+ * `chargeCadence` is deliberately EMPTY, not "monthly". No price has been
+ * selected yet at this point, so any cadence here would be an unfounded claim —
+ * and the previous "monthly" placeholder made a weekly plan's page read
+ * "then monthly until you cancel" for as long as the lookup was in flight.
+ * `buildLegalLine` renders the no-cadence form while this is the active copy.
+ */
 export const LOADING_COPY: PlanCopy = {
   name: "Loading…",
   heading: "Activate your plan",
@@ -145,14 +157,16 @@ export const LOADING_COPY: PlanCopy = {
   period: "",
   payLabel: "Continue to payment",
   renewal: "",
-  chargeCadence: "monthly",
+  chargeCadence: "",
   recurring: true,
 };
 
 /** Renewal/authorization legal line under the pay button — recurring vs one-time. */
 export function buildLegalLine(copy: PlanCopy): string {
   if (copy.recurring === false) {
-    return "Charged once today — lifetime access, no renewals. Secure processing by Stripe — card details never touch our servers.";
+    return `Charged once today — lifetime access, no renewals. ${STRIPE_ASSURANCE}`;
   }
-  return `Charged today, then ${copy.chargeCadence} until you cancel. Secure processing by Stripe — card details never touch our servers.`;
+  // No cadence resolved yet (loading) → promise nothing about renewal timing.
+  if (!copy.chargeCadence) return STRIPE_ASSURANCE;
+  return `Charged today, then ${copy.chargeCadence} until you cancel. ${STRIPE_ASSURANCE}`;
 }
