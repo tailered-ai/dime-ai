@@ -60,6 +60,7 @@ if LIB not in sys.path:
 
 import build_inputs                    # noqa: E402  the canonical build-input contract
 import corrections                     # noqa: E402  data corrections, each asserting its prior
+import espn_identities                 # noqa: E402  the ONE T4 loader/validator
 import depth_charts as depth_lib       # noqa: E402  B3
 import player_dimension                # noqa: E402  B5
 import rowloss                         # noqa: E402  B4
@@ -536,19 +537,14 @@ def build(conn, rows, teams, venues):
     # defect this contract exists to prevent, and it would let two clones of the
     # same revision build different databases. Its presence is REPORTED to help
     # the operator diagnose an incomplete checkout; it is never consumed.
-    identities_path = build_inputs.path("espn_identities", root=ROOT)
-    if not os.path.exists(identities_path):
-        spec = build_inputs.BUILD_INPUTS["espn_identities"]
-        legacy = os.path.join(HERE, "cache/b3/espn_identities.json")
-        extra = ("\n  NOTE           : an untracked copy exists at " + legacy +
-                 " -- it is NOT used. cache/ is gitignored, so that copy is "
-                 "machine-local residue, not a build input.") \
-            if os.path.exists(legacy) else ""
-        raise RuntimeError("\n" + build_inputs.format_failure(spec, identities_path) + extra)
-    identities = {r["espn_id"]: {"fullName": r.get("espn_full"),
-                                 "college": r.get("college")}
-                  for r in load_json(identities_path)}
-    counts["espn_identities"] = len(identities)
+    # ONE authority: lib/espn_identities validates and canonicalises T4. No
+    # parsing happens here, so build and self-check cannot interpret a record
+    # differently. Preflight has already run this; loading again is cheap and
+    # keeps the call site honest about where the data comes from.
+    t4 = espn_identities.load(root=ROOT)
+    identities = t4.as_crosswalk_map()
+    counts["espn_identities"] = len(t4)
+    counts["espn_identities_capable"] = len(t4.t4_capable)
     espn_gsis = depth_lib.build_espn_gsis_crosswalk(RAW, espn_identities=identities)
     dc_rows = []
     dc_ordinal = Counter()
@@ -1316,6 +1312,10 @@ def preflight_raw():
     # second static list can never drift from it. An audit-hook trace of a real
     # build opens 12 data files; the old list here named 5.
     ok, failures = build_inputs.preflight(root=ROOT, raw_dir=RAW)
+    if ok:
+        # Presence is not validity. Malformed T4 is knowable at startup, so it must
+        # not surface minutes later after the database has been built.
+        espn_identities.load(root=ROOT)
     if not ok:
         print("\n" + "=" * 68, file=sys.stderr)
         for spec, resolved in failures:
