@@ -14,6 +14,7 @@
  */
 import {
   assertSchemaCurrent,
+  runSchemaGuardPreflight,
   REQUIRED_COLUMNS,
   type inspectSchema,
 } from "../schemaGuard";
@@ -46,6 +47,17 @@ const scenarios: Record<string, Inspector> = {
   }),
   // Valid read of an empty/wrong database — confirmed, so fatal.
   empty: async () => ({ status: "ok", database: DB_NAME, rows: [] }),
+  // Confirmed drift that arrives AFTER the preflight timeout. Used with
+  // SCHEMA_GUARD_MODE=preflight to prove the loser of the race cannot kill the
+  // process — the defect found reviewing 0a0c43621.
+  "slow-drift": async () => {
+    await new Promise(r => setTimeout(r, 400));
+    return {
+      status: "ok",
+      database: DB_NAME,
+      rows: allRows().filter(r => r.t !== "payment_events"),
+    };
+  },
 };
 
 async function main(): Promise<void> {
@@ -56,7 +68,21 @@ async function main(): Promise<void> {
     process.exit(64);
   }
 
-  const result = await assertSchemaCurrent(inspector);
+  // `preflight` exercises the bounded boot path; anything else the unbounded one.
+  const result =
+    process.env.SCHEMA_GUARD_MODE === "preflight"
+      ? await runSchemaGuardPreflight(
+          Number(process.env.SCHEMA_GUARD_TEST_TIMEOUT_MS ?? 50),
+          inspector
+        )
+      : await assertSchemaCurrent(inspector);
+
+  // Stay alive past the losing inspection so a delayed exit would be observed
+  // rather than raced against process teardown.
+  if (process.env.SCHEMA_GUARD_MODE === "preflight") {
+    await new Promise(r => setTimeout(r, 600));
+    console.log("CHILD_SURVIVED_PAST_LOSER=1");
+  }
 
   // Only reached when the guard did NOT exit. Printing the status lets the test
   // distinguish "continued because unavailable" from "continued because pass".

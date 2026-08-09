@@ -28,7 +28,8 @@ type Run = { code: number; out: string };
 
 async function spawnChild(
   scenario: string,
-  fatal: "1" | undefined
+  fatal: "1" | undefined,
+  extraEnv: Record<string, string> = {}
 ): Promise<Run> {
   try {
     const { stdout, stderr } = await run("npx", ["tsx", CHILD], {
@@ -38,6 +39,7 @@ async function spawnChild(
         SCHEMA_GUARD_TEST_SCENARIO: scenario,
         ...(fatal ? { SCHEMA_GUARD_FATAL: fatal } : {}),
         ANALYTICS_ROLE: scenario === "store" ? "store" : "",
+        ...extraEnv,
       },
       timeout: 120_000,
     });
@@ -93,6 +95,29 @@ describe("SCHEMA_GUARD_FATAL — real process termination", () => {
     expect(r.out).toContain("CHILD_RESULT_STATUS=unavailable");
     expect(r.out).not.toContain("[VERIFY] PASS");
     expect(r.out).not.toContain("refusing to serve");
+  }, 180_000);
+
+  it("[FX-6] confirmed drift that LOSES the preflight timeout never kills the process", async () => {
+    // The OS-level half of [SO-6]. Armed, bounded at 50ms, with an inspection
+    // that returns real drift at 400ms — then the child deliberately stays alive
+    // another 600ms. If the losing promise could still reach process.exit, this
+    // child would die with code 1 and never print the survival marker.
+    //
+    // Together with [FX-1] this pins BOTH halves of the contract:
+    //   fast confirmed drift  -> fail closed (exit 1)
+    //   timed-out inspection  -> fail open, and STAY open
+    const r = await spawnChild("slow-drift", "1", {
+      SCHEMA_GUARD_MODE: "preflight",
+      SCHEMA_GUARD_TEST_TIMEOUT_MS: "50",
+    });
+
+    expect(r.code).toBe(0);
+    expect(r.out).toContain("[VERIFY] UNAVAILABLE");
+    expect(r.out).toContain("inspection-timeout");
+    expect(r.out).toContain("CHILD_RESULT_STATUS=unavailable");
+    expect(r.out).toContain("CHILD_SURVIVED_PAST_LOSER=1");
+    expect(r.out).not.toContain("refusing to serve");
+    expect(r.out).not.toContain("[VERIFY] FAIL");
   }, 180_000);
 
   it("[FX-5] confirmed drift WITHOUT the flag keeps serving", async () => {

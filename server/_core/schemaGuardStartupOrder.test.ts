@@ -83,8 +83,58 @@ describe("runSchemaGuardPreflight — behaviour", () => {
     const r = await runSchemaGuardPreflight(30);
 
     expect(r.status).toBe("unavailable");
-    expect(r.status === "unavailable" && r.reason).toBe("inspection-failed");
+    expect(r.status === "unavailable" && r.reason).toBe("inspection-timeout");
     expect(r.status === "unavailable" && r.detail).toContain("exceeded 30ms");
+  });
+
+  it("[SO-6] a slow inspection that LOSES the race can never kill the process", async () => {
+    // THE MERGE-BLOCKER REGRESSION (found in review of 0a0c43621, reproduced
+    // before the fix). The preflight used to race assertSchemaCurrent(), and
+    // Promise.race does not cancel the loser. A confirmed-drift inspection that
+    // finished after the timeout therefore reached process.exit AFTER
+    // server.listen had already been called:
+    //
+    //   at-listen status=unavailable exitCalls=0
+    //   +250ms    exitCalls=1  refusalLogged=true
+    //
+    // Exactly the post-listen death the preflight exists to prevent, caused by
+    // the preflight. Only the side-effect-free inspector is raced now.
+    //
+    // A never-resolving stub CANNOT prove this: the losing promise has to
+    // actually settle, with drift, while the flag is armed.
+    process.env.SCHEMA_GUARD_FATAL = "1";
+    const exitSpy = vi
+      .spyOn(process, "exit")
+      .mockImplementation((() => {}) as never);
+    const errs: string[] = [];
+    vi.spyOn(console, "error").mockImplementation(
+      (...a: unknown[]) => void errs.push(String(a[0]))
+    );
+
+    let call = 0;
+    dbStub = {
+      execute: async () => {
+        call += 1;
+        if (call === 1)
+          return [[{ databaseName: "dime_product" }], []] as unknown;
+        await new Promise(r => setTimeout(r, 120));
+        return allRows().filter(r => r.t !== "payment_events"); // confirmed drift
+      },
+    };
+
+    const r = await runSchemaGuardPreflight(20);
+
+    // The instant server.listen would be called.
+    expect(r.status).toBe("unavailable");
+    expect(r.status === "unavailable" && r.reason).toBe("inspection-timeout");
+    expect(exitSpy).not.toHaveBeenCalled();
+
+    // Wait past the losing inspection settling — this is the whole point.
+    await new Promise(r => setTimeout(r, 250));
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(errs.join("\n")).not.toContain("refusing to serve");
+    expect(errs.join("\n")).not.toContain("[VERIFY] FAIL");
   });
 
   it("[SO-2b] the analytics store resolves without touching the database", async () => {

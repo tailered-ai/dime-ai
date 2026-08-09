@@ -145,6 +145,7 @@ export type SchemaGuardUnavailableReason =
   | "no-database-handle"
   | "no-database-context"
   | "inspection-failed"
+  | "inspection-timeout"
   | "unrecognized-driver-result";
 
 /**
@@ -218,8 +219,15 @@ export function normalizeSchemaRows(
   return { ok: false };
 }
 
-/** First scalar value of the first row, for single-value probes. */
-function firstScalar(raw: unknown): string | null {
+/**
+ * Read the `databaseName` column of a single-row probe, by NAME.
+ *
+ * Deliberately not "the first scalar of the first row": that is a proxy, and
+ * this file spent its whole redesign removing proxies. If the envelope is not
+ * one we recognize, or the named column is absent, the caller reports
+ * unrecognized-driver-result rather than inventing a value.
+ */
+function readDatabaseName(raw: unknown): string | null {
   const rows = Array.isArray(raw)
     ? Array.isArray(raw[0])
       ? (raw[0] as unknown[])
@@ -227,7 +235,8 @@ function firstScalar(raw: unknown): string | null {
     : null;
   const row = rows?.[0];
   if (typeof row !== "object" || row === null) return null;
-  const v = Object.values(row as Record<string, unknown>)[0];
+  if (!("databaseName" in row)) return null;
+  const v = (row as { databaseName: unknown }).databaseName;
   return v == null ? null : String(v);
 }
 
@@ -267,7 +276,7 @@ export async function inspectSchema(
 
   let database: string | null;
   try {
-    database = firstScalar(
+    database = readDatabaseName(
       await db.execute(sql`SELECT DATABASE() AS databaseName`)
     );
   } catch (err) {
@@ -375,45 +384,48 @@ export function formatDrift(drift: readonly SchemaDrift[]): string {
     .join("\n");
 }
 
-/**
- * Run once at boot. Never throws on its own failure — an unreachable database at
- * startup is the circuit breaker's problem, not this check's.
- */
-export async function assertSchemaCurrent(
-  /**
-   * Injectable for tests, exactly as `runSchemaProbe(probe = probeAppUsersSchema)`
-   * is in schemaHealthGate. It exists so the child-process fatal test can drive a
-   * REAL `process.exit` without a real database — a spy can prove the call was
-   * made, but only a spawned process can prove the process actually died.
-   */
-  inspect: typeof inspectSchema = inspectSchema
-): Promise<SchemaGuardResult> {
+/** The analytics-store gate, shared by both entry points. */
+function reportNotApplicable(): SchemaGuardResult {
   // Both Railway services run the SAME build, but only one owns these tables.
   // The analytics store (ai-sports-betting-backend, ANALYTICS_ROLE=store) points
-  // its DATABASE_URL at a different database that by design holds analytics_events
-  // and none of the product/billing tables declared above. So every one of them
-  // reads as "MISSING entirely" on every boot: ten tables, plus a "login, checkout,
-  // fulfilment will break" warning, none of it true there.
-  //
-  // That is worse than noise. This guard exists to make ONE failure impossible to
-  // miss — code deployed ahead of its migration, which took platform-wide login
-  // down on 2026-07-31 — and a guard that screams on every single boot of one
-  // service is precisely how the real alarm gets scrolled past.
+  // its DATABASE_URL at a different database that by design holds
+  // analytics_events and none of the product/billing tables declared above, so
+  // every one of them used to read as "MISSING entirely" on every boot.
   //
   // Scoped by ROLE, deliberately, not by drift shape. Treating "table missing
   // entirely" as benign would have been the smaller diff and the wrong fix: that
   // case IS the ledger miss described in REQUIRED_COLUMNS above, and it has to
   // stay loud on the service that actually owns the tables.
-  if (isAnalyticsStore()) {
-    console.log(
-      `${TAG} [VERIFY] N/A — ANALYTICS_ROLE=store. This instance's DATABASE_URL is the ` +
-        `analytics store, which owns none of the product tables this guard checks, so drift ` +
-        `here would be meaningless. The product service reports the real verdict.`
-    );
-    return { status: "not_applicable", drift: [], reason: "analytics-store" };
-  }
+  console.log(
+    `${TAG} [VERIFY] N/A — ANALYTICS_ROLE=store. This instance's DATABASE_URL is the ` +
+      `analytics store, which owns none of the product tables this guard checks, so drift ` +
+      `here would be meaningless. The product service reports the real verdict.`
+  );
+  return { status: "not_applicable", drift: [], reason: "analytics-store" };
+}
 
-  const inspection = await inspect();
+/**
+ * Turn a finished inspection into a verdict, and enforce it.
+ *
+ * THIS is the only function that may call process.exit, and it is deliberately
+ * synchronous with respect to its input: it receives an inspection that has
+ * ALREADY resolved. Nothing it touches can still be in flight.
+ *
+ * That separation is not stylistic. Until 2026-08-09 the preflight did
+ * `Promise.race([assertSchemaCurrent(), timeout])`, and Promise.race does not
+ * cancel the loser — so a slow inspection that lost the race kept running,
+ * reached this exit, and killed the process AFTER server.listen. Reproduced
+ * before the fix: at-listen status=unavailable exitCalls=0; 250ms later
+ * exitCalls=1 with the refusal logged. That is precisely the post-listen death
+ * this guard exists to prevent, caused by the guard itself.
+ *
+ * The invariant now: anything that may still be executing after a timeout is
+ * incapable of terminating the process, because only inspection races and
+ * inspection has no side effects.
+ */
+export function applySchemaGuardPolicy(
+  inspection: Awaited<ReturnType<typeof inspectSchema>>
+): SchemaGuardResult {
   if (inspection.status === "unavailable") {
     // No verdict. Explicitly NOT a pass, and explicitly not fatal: freezing
     // deploys on a cold or blipping database would be a self-inflicted outage,
@@ -446,8 +458,8 @@ export async function assertSchemaCurrent(
   // Reached only when the inspection itself succeeded, so this is CONFIRMED.
   // That now includes "every table absent", which the retired heuristic used to
   // wave through: with the schema context proven non-null, zero required tables
-  // means the product service is pointed at an empty or wrong database, and it
-  // must not serve.
+  // means the selected database does not carry the guarded schema at all, and
+  // this service must not serve from it.
   const detail = formatDrift(drift);
   console.error(
     `${TAG} [VERIFY] FAIL — the running code expects schema objects that do not exist ` +
@@ -467,6 +479,25 @@ export async function assertSchemaCurrent(
 }
 
 /**
+ * Inspect and enforce, unbounded. Used where there is no boot deadline.
+ *
+ * Never throws on its own failure — an unreachable database at startup is the
+ * circuit breaker's problem, not this check's.
+ */
+export async function assertSchemaCurrent(
+  /**
+   * Injectable for tests, exactly as `runSchemaProbe(probe = probeAppUsersSchema)`
+   * is in schemaHealthGate. It exists so the child-process fatal test can drive a
+   * REAL `process.exit` without a real database — a spy can prove the call was
+   * made, but only a spawned process can prove the process actually died.
+   */
+  inspect: typeof inspectSchema = inspectSchema
+): Promise<SchemaGuardResult> {
+  if (isAnalyticsStore()) return reportNotApplicable();
+  return applySchemaGuardPolicy(await inspect());
+}
+
+/**
  * Boot preflight: resolve the authoritative verdict BEFORE the server accepts
  * traffic, bounded so a cold database cannot wedge startup.
  *
@@ -476,32 +507,37 @@ export async function assertSchemaCurrent(
  * app_users probe (schemaHealthGate) already ran pre-listen; this gives the
  * nine-table guard the same standing.
  *
+ * ONLY THE INSPECTION IS RACED. Enforcement happens after the race resolves, so
+ * a slow inspection that loses can do nothing worse than finish and be ignored —
+ * it cannot reach process.exit. See applySchemaGuardPolicy for the incident this
+ * encodes.
+ *
  * The timeout mirrors runBootSchemaProbe's reasoning: the budget must exceed the
  * pool's 15s connectTimeout, because at boot this may open the very first
  * connection. A timeout yields no verdict, which is `unavailable`, which is
  * fail-open — never a pass, never fatal.
  */
 export async function runSchemaGuardPreflight(
-  timeoutMs = 20_000
+  timeoutMs = 20_000,
+  inspect: typeof inspectSchema = inspectSchema
 ): Promise<SchemaGuardResult> {
-  const timedOut: SchemaGuardResult = {
-    status: "unavailable",
-    drift: [],
-    reason: "inspection-failed",
-    detail: `preflight exceeded ${timeoutMs}ms`,
-  };
-  const result = await Promise.race([
-    assertSchemaCurrent(),
-    new Promise<SchemaGuardResult>(resolve => {
-      const t = setTimeout(() => resolve(timedOut), timeoutMs);
+  if (isAnalyticsStore()) return reportNotApplicable();
+
+  const inspection = await Promise.race([
+    inspect(),
+    new Promise<Awaited<ReturnType<typeof inspectSchema>>>(resolve => {
+      const t = setTimeout(
+        () =>
+          resolve({
+            status: "unavailable",
+            reason: "inspection-timeout",
+            detail: `preflight exceeded ${timeoutMs}ms`,
+          }),
+        timeoutMs
+      );
       if (typeof t.unref === "function") t.unref();
     }),
   ]);
-  if (result === timedOut) {
-    console.error(
-      `${TAG} [VERIFY] UNAVAILABLE — preflight exceeded ${timeoutMs}ms; ` +
-        `continuing to listen without a verdict (not a pass).`
-    );
-  }
-  return result;
+
+  return applySchemaGuardPolicy(inspection);
 }
