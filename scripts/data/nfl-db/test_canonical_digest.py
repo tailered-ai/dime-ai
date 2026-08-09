@@ -193,6 +193,30 @@ class Injectivity(unittest.TestCase):
         finally:
             c.close()
 
+    @unittest.skipUnless(DB and os.path.exists(DB), "needs NFLDB_TEST_DB")
+    def test_multi_row_framing_on_real_rows(self):
+        """The per-row test above re-frames each row on its own, so it proves
+        value fidelity but not that a CONCATENATED stream stays unambiguous.
+        Buffering all 1.76M rows would cost gigabytes, so this decodes a bounded
+        window of consecutive real rows per table as one blob -- enough to
+        exercise row-to-row boundaries on production data."""
+        c = sqlite3.connect(f"file:{DB}?mode=ro", uri=True)
+        try:
+            for t in sp.governed_tables():
+                w = sp.window(t)
+                keep = sp.projection(c, t)
+                proj = ", ".join(keep)
+                rows = [tuple(r) for r in c.execute(
+                    f"SELECT {proj} FROM {t} WHERE {w.predicate} "
+                    f"ORDER BY {proj} LIMIT 10000")]
+                self.assertGreater(len(rows), 0, t)
+                _, _, _, cols, back = sp.decode_canonical(
+                    stream_of(t, w.predicate, keep, rows))
+                self.assertEqual(cols, keep, t)
+                self.assertEqual(back, rows, f"{t}: multi-row framing lost data")
+        finally:
+            c.close()
+
 
 # --------------------------------------------------------------------------
 # Section 23/24 -- the migration claim stays falsifiable

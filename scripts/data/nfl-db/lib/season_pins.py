@@ -400,6 +400,12 @@ CONTENT_DIGESTS = {
 #:
 #: The Phase-3 pins were the first 20 chars of exactly these values; that
 #: prefix relationship was verified before any constant was rewritten.
+#:
+#: RE-PINNING: when a content change is established as correct and CONTENT_DIGESTS
+#: is regenerated, this map MUST be regenerated in the same commit --
+#: legacy_content_digest() for each table -- or the migration test fails with a
+#: stale-legacy mismatch that reads like corruption. Both maps describe the same
+#: rows; they are only allowed to disagree about encoding.
 LEGACY_CONTENT_DIGESTS = {
     "depth_chart":
         "d165550d624c6ccaf397142b679b03a9acfd4641071fc8efbb2d67efa0bf47be",
