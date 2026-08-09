@@ -516,13 +516,35 @@ def build(conn, rows, teams, venues):
     calendar = depth_lib.GameCalendar(conn.execute(
         "SELECT season, season_type, week, playoff_round, kickoff_utc FROM game"))
     team_map = depth_lib.load_team_map(TEAMS)
-    # Same shaping B3's own self-check does (lib/depth_charts.py:810-814).
-    identities_path = os.path.join(HERE, "cache/b3/espn_identities.json")
-    identities = {}
-    if os.path.exists(identities_path):
-        identities = {r["espn_id"]: {"fullName": r.get("espn_full"),
-                                     "college": r.get("college")}
-                      for r in load_json(identities_path)}
+    # T4's input. This file used to live at cache/b3/espn_identities.json, and
+    # `scripts/data/nfl-db/cache/` is gitignored -- so it existed on exactly one
+    # machine and NO clone ever had it. The loader skipped T4 silently when it was
+    # missing (`if os.path.exists(...)` with no else), so a clean clone built
+    # green while 316 audited depth-chart rows quietly lost their resolved
+    # gsis_id. Verified by holding the extract constant and varying only this
+    # file: 3,814 espn ids resolve with it, 3,809 without -- the 5 T4-only ids
+    # 3043133, 4240033, 4244814, 4339830, 4362191 cover exactly those 316 rows.
+    #
+    # Same defect as #427's EXTRACT-NOTES.md, same fix: a negation cannot
+    # re-include a file inside an excluded DIRECTORY, so it moved one level up to
+    # scripts/data/nfl-db/espn-identities.json where nothing excludes it.
+    # The old path is still honoured so existing checkouts keep working.
+    identities_path = os.path.join(HERE, "espn-identities.json")
+    legacy_path = os.path.join(HERE, "cache/b3/espn_identities.json")
+    if not os.path.exists(identities_path) and os.path.exists(legacy_path):
+        identities_path = legacy_path
+    if not os.path.exists(identities_path):
+        # Loud, not silent: skipping T4 changes the database it produces.
+        raise RuntimeError(
+            f"T4 identity file missing at {identities_path!r} (and no legacy copy "
+            f"at {legacy_path!r}). Without it the ESPN->gsis crosswalk loses its "
+            f"T4 tier and 316 audited depth_chart rows silently lose their "
+            f"gsis_id. This file is tracked in git -- a missing copy means the "
+            f"checkout is incomplete, not that T4 is optional.")
+    identities = {r["espn_id"]: {"fullName": r.get("espn_full"),
+                                 "college": r.get("college")}
+                  for r in load_json(identities_path)}
+    counts["espn_identities"] = len(identities)
     espn_gsis = depth_lib.build_espn_gsis_crosswalk(RAW, espn_identities=identities)
     dc_rows = []
     dc_ordinal = Counter()
@@ -984,6 +1006,33 @@ def pass_reconciliation(conn, rows, hist, new, counts):
                    f"{live:,} rows, not pinned")
     if dc_live:
         report(f"depth_chart: snapshots after {cutoff}", f"{dc_live:,} rows, not pinned")
+
+    # CONTENT, not just count. Every frozen check above compares row COUNTS, and a
+    # count cannot see a value change: on 2026-08-07 a clean-clone rebuild had
+    # 5,655 settled player_game_stats rows and 331 audited depth_chart rows with
+    # different content -- 316 of them silently missing a gsis_id -- while every
+    # count matched and all 154 checks passed. These digests close that gap.
+    # Excluded columns are documented per table in season_pins.CONTENT_DIGEST_EXCLUDE.
+    for tbl, (cw, key) in (
+        ("depth_chart", (f"(source_shape='A' OR snapshot_ts <= '{cutoff}')",
+                         ["source_shape", "snapshot_ts", "season", "franchise_id",
+                          "gsis_id", "depth_position", "depth_order", "pos_slot",
+                          "source_ordinal"])),
+        ("player_game_stats", (f"season <= {season_pins.FROZEN_THROUGH}",
+                               ["gsis_id", "season", "week", "season_type"])),
+        ("snap_count", (f"season <= {season_pins.FROZEN_THROUGH}",
+                        ["gsis_id", "season", "week", "season_type", "game_id",
+                         "pfr_player_id"])),
+        ("roster_season", (f"season <= {season_pins.FROZEN_THROUGH}",
+                           ["gsis_id", "season", "week", "franchise_id", "source_ordinal"])),
+    ):
+        dg, nrows, _ = season_pins.content_digest(conn, tbl, cw, key)
+        ok, detail = season_pins.content_verdict(tbl, dg)
+        if ok is None:
+            report(f"{tbl}: frozen-window content digest", f"{detail}, {nrows:,} rows")
+        else:
+            check(2, f"{tbl}: frozen-window CONTENT is unchanged, not just its count",
+                  ok, detail)
     check(2, "depth_chart holds only rows that carry a real season",
           q("SELECT COUNT(*) FROM depth_chart WHERE season IS NULL")[0] == 0)
     bad = q("SELECT COUNT(*) FROM depth_chart WHERE week IS NOT NULL AND week > 18")[0]

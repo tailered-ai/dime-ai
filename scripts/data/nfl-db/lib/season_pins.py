@@ -153,6 +153,102 @@ def live_verdict(table, db_live_rows, source_live_rows):
     return ok, detail
 
 
+#: Columns excluded from the frozen-window CONTENT digest, per table, with the
+#: reason each is allowed to move. Everything NOT listed here is pinned by
+#: content, not merely by row count.
+#:
+#: WHY THIS EXISTS. The frozen checks were count-only, and a count cannot see a
+#: value change. Measured 2026-08-07 against a clean-clone rebuild: 5,655 rows of
+#: settled player_game_stats and 331 rows of the audited depth_chart window had
+#: DIFFERENT CONTENT while every count matched and all 154 checks passed. 316 of
+#: those depth_chart rows had silently lost their gsis_id. A count-only gate
+#: cannot distinguish that from a perfect reproduction.
+#:
+#: The exclusions are not a loophole -- they are the line between what upstream
+#: OWNS and what it merely REPORTS. nflverse recomputes EPA and usage shares
+#: whenever its play-by-play models change; those are derived estimates and they
+#: legitimately move. Identities, teams, games and raw counting stats do not.
+CONTENT_DIGEST_EXCLUDE = {
+    "depth_chart": {
+        # Which crosswalk TIER resolved an identity, not the identity itself.
+        # Legitimately moves as upstream player data improves (T3->T0 for 1,375
+        # rows on 2026-08-07). gsis_id IS pinned, so a lost or changed identity
+        # still fails -- which is exactly the 316-row regression this catches.
+        "gsis_source",
+        "depth_chart_id",   # surrogate, assignment order
+    },
+    "player_game_stats": {
+        # nflverse-computed advanced metrics. Recomputed upstream on model
+        # revision: 2,059 / 1,706 / 1,043 / 702 / 275 / 10 / 10 rows moved
+        # between the 2026-07-27 extract and 2026-08-07 with ZERO change to any
+        # raw counting stat and ZERO change to row identity.
+        "passing_epa", "rushing_epa", "receiving_epa",
+        "target_share", "air_yards_share",
+        "fantasy_points", "fantasy_points_ppr",
+    },
+    # Surrogate row ids: assignment artefacts, not content. Verified against
+    # PRAGMA table_info rather than guessed -- snap_count has none (its PK is
+    # the natural pair pfr_player_id+pfr_game_id).
+    "snap_count": set(),
+    "roster_season": {"roster_row_id"},
+}
+
+#: sha256 (first 20 hex chars) of the frozen window's pinned columns, ordered by
+#: the table's natural key. Computed from a clean-clone build against live
+#: nflverse. Regenerate with: python3 scripts/data/nfl-db/content_digest.py
+#:
+#: A digest mismatch means settled history CHANGED, not merely that a count
+#: moved. Treat it the way you would treat a failed count pin: investigate what
+#: moved before touching this constant.
+CONTENT_DIGESTS = {
+    # From a clean-clone build against live nflverse, 2026-08-08, with the T4
+    # identity file present (see build_db.py's T4 block -- without it these are
+    # NOT reproducible, which is the whole reason that file is tracked now).
+    "depth_chart": "d165550d624c6ccaf397",        # 1,106,729 rows, 23 pinned cols
+    "player_game_stats": "c30625670748f488ff35",  #   286,843 rows, 22 pinned cols
+    "snap_count": "ea44a47fecfeb0af8683",         #   324,611 rows, 19 pinned cols
+    "roster_season": "4c610696494640288603",      #    43,856 rows, 15 pinned cols
+}
+
+
+def content_digest(conn, table, where, _key_cols=None):
+    """Stable content hash of a frozen window's pinned columns.
+
+    ORDER BY is the FULL hashed column list, deliberately. SQL leaves the order
+    among ties unspecified, so ordering by a partial key would make the digest
+    vary run-to-run on identical data -- a flaky gate is worse than no gate. A
+    first attempt ordered depth_chart by its natural key and 545,225 of the
+    1,106,729 audited rows landed in 51,280 tied groups (shape A repeats a
+    player at a slot every week), which would have pinned a coin flip.
+
+    Ordering by every hashed column removes the problem instead of working
+    around it: two rows that tie are by definition IDENTICAL in the projection
+    being hashed, so their relative order cannot change the result. No unique key
+    is needed, and none has to be maintained as the schema evolves.
+
+    `_key_cols` is accepted and ignored so existing call sites stay valid.
+    """
+    import hashlib
+    cols = [r[1] for r in conn.execute(f"PRAGMA table_info({table})")]
+    keep = [c for c in cols if c not in CONTENT_DIGEST_EXCLUDE.get(table, set())]
+    projection = ", ".join(keep)
+    h = hashlib.sha256()
+    n = 0
+    for row in conn.execute(
+            f"SELECT {projection} FROM {table} WHERE {where} ORDER BY {projection}"):
+        h.update(repr(row).encode())
+        n += 1
+    return h.hexdigest()[:20], n, keep
+
+
+def content_verdict(table, digest):
+    """(ok, detail) for a frozen-window content digest. Unpinned tables report."""
+    want = CONTENT_DIGESTS.get(table)
+    if want is None:
+        return None, f"{digest} (not yet pinned)"
+    return digest == want, f"{digest} vs {want} pinned"
+
+
 def frozen_shape_verdict(shape_a, shape_b):
     """depth_chart shape split across FROZEN seasons only. Returns (ok, detail).
 

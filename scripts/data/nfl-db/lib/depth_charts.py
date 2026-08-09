@@ -799,7 +799,11 @@ def _self_check(raw_dir=None, db_path=None, teams_json=None, identities=None):
     raw_dir = raw_dir or os.path.join(_NFLDB, "raw")
     db_path = db_path or os.path.join(_NFLDB, "nfl.db")
     teams_json = teams_json or os.path.join(_ROOT, "scripts/data/nfl-2026/teams.json")
-    identities = identities or os.path.join(_NFLDB, "cache/b3/espn_identities.json")
+    # Tracked location first; cache/ is gitignored so no clone ever had that copy.
+    if identities is None:
+        identities = os.path.join(_NFLDB, "espn-identities.json")
+        if not os.path.exists(identities):
+            identities = os.path.join(_NFLDB, "cache/b3/espn_identities.json")
 
     fail = []
 
@@ -816,11 +820,15 @@ def _self_check(raw_dir=None, db_path=None, teams_json=None, identities=None):
     cal = GameCalendar.from_db_path(db_path)
     team_map = load_team_map(teams_json) if os.path.exists(teams_json) else None
 
-    ident = {}
-    if os.path.exists(identities):
-        raw = json.load(open(identities))
-        ident = {r["espn_id"]: {"fullName": r.get("espn_full"), "college": r.get("college")}
-                 for r in raw}
+    # Loud, not silent: without this file T4 does not fire and 316 audited rows
+    # lose their gsis_id, which used to look like upstream drift.
+    if not os.path.exists(identities):
+        print("    [FAIL] T4 identity file missing at %s -- the crosswalk would "
+              "silently lose its T4 tier" % identities)
+        return 1
+    raw = json.load(open(identities))
+    ident = {r["espn_id"]: {"fullName": r.get("espn_full"), "college": r.get("college")}
+             for r in raw}
     xwalk = build_espn_gsis_crosswalk(raw_dir, season=2025, espn_identities=ident)
 
     shapes, buckets, weeks = Counter(), Counter(), Counter()
