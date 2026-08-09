@@ -367,9 +367,9 @@ CONTENT_DIGEST_EXCLUDE = {
     "roster_season": {"roster_row_id"},
 }
 
-#: sha256 (first 20 hex chars) of the frozen window's pinned columns, ordered by
-#: the table's natural key. Computed from a clean-clone build against live
-#: nflverse. Regenerate with: python3 scripts/data/nfl-db/content_digest.py
+#: Full SHA-256 (all 64 hex chars) over the DIGEST_ALGORITHM serialization of a
+#: frozen window's pinned columns, ordered by the full hashed projection.
+#: Regenerate with: python3 scripts/data/nfl-db/content_digest.py
 #:
 #: A digest mismatch means settled history CHANGED, not merely that a count
 #: moved. Treat it the way you would treat a failed count pin: investigate what
@@ -378,15 +378,193 @@ CONTENT_DIGESTS = {
     # From a clean-clone build against live nflverse, 2026-08-08, with the T4
     # identity file present (see build_db.py's T4 block -- without it these are
     # NOT reproducible, which is the whole reason that file is tracked now).
-    "depth_chart": "d165550d624c6ccaf397",        # 1,106,729 rows, 23 pinned cols
-    "player_game_stats": "c30625670748f488ff35",  #   286,843 rows, 22 pinned cols
-    "snap_count": "ea44a47fecfeb0af8683",         #   324,611 rows, 19 pinned cols
-    "roster_season": "4c610696494640288603",      #    43,856 rows, 15 pinned cols
+    "depth_chart":
+        "cf0e5b7749e2c07858f51f6670840017650713cfe4b01177f94f02ba5fc311b1",
+    "player_game_stats":
+        "86f772898f7afc159e38ef729ab9714150100bacd3fd226e9304949f13a0bfbc",
+    "snap_count":
+        "117acf47dd3a875ed177139aba27dc5663947d7627a8a455ceb2a3b27fbd386a",
+    "roster_season":
+        "8e87bc733dc0820464b7d35dd829c2864600185dcadbf8c4f7284faf0fef7c2a",
+}
+
+#: The pre-Phase-4 repr() digests over the SAME accepted content, at full width.
+#:
+#: These are not a fallback. They are the migration's evidence: Phase 4 replaced
+#: the serializer, and the only way to show that swap did not quietly change
+#: WHAT is protected is to keep proving the old function still reproduces its
+#: own accepted answer over today's rows. test_canonical_digest recomputes both
+#: hashes from a single cursor -- if content ever drifts, the legacy hash moves
+#: too, and "the digest changed because we changed the hashing code" stops being
+#: available as an excuse.
+#:
+#: The Phase-3 pins were the first 20 chars of exactly these values; that
+#: prefix relationship was verified before any constant was rewritten.
+LEGACY_CONTENT_DIGESTS = {
+    "depth_chart":
+        "d165550d624c6ccaf397142b679b03a9acfd4641071fc8efbb2d67efa0bf47be",
+    "player_game_stats":
+        "c30625670748f488ff35dbb4a838c820effb957cb7a34171ef582e885df75140",
+    "snap_count":
+        "ea44a47fecfeb0af86832837a1c9d985e9f0021fb1c36d1244fa6458ffdb583e",
+    "roster_season":
+        "4c610696494640288603e7f7c486e6402bd06b7e6029af34e4619d0af225e1dc",
 }
 
 
+# --------------------------------------------------------------------------
+# Canonical digest serialization  (Phase 4)
+# --------------------------------------------------------------------------
+# Digests through Phase 3 hashed `repr(row)` and stored 20 of 64 hex chars.
+# That was never shown to collide -- an attempt to construct one failed, and
+# repr appears injective over fixed-arity SQLite value tuples. It was replaced
+# because its correctness rested on properties nothing enforced:
+#
+#   D2  no schema binding.  The stream carried VALUES ONLY. Two rows [1,'a'] are
+#       hashed identically whether the columns are (id, name) or (week, team),
+#       so renaming or repurposing a column was invisible to the pin.  <- the
+#       decisive defect; demonstrated, not argued.
+#   D3  unframed row stream.  Rows were concatenated with no separator and no
+#       count, so "the stream cannot be reparsed two ways" was an argument about
+#       balanced parentheses rather than a property of the encoding.
+#   D4  80-bit commitment.  hexdigest()[:20] discarded 176 of 256 bits.
+#   D5  repr() is a debugging function with no cross-interpreter stability
+#       contract, and it collapses every NaN payload to the token 'nan'.
+#   D6  unversioned.  A legacy pin and a canonical pin were indistinguishable
+#       strings, so an algorithm swap could not be detected by inspection.
+#
+# The replacement is a prefix-free TLV encoding: every element carries a type
+# tag and an explicit length, so the byte stream is DECODABLE. Injectivity is
+# then a property of the format -- proven by exhibiting decode_canonical() and
+# round-tripping the real corpus -- rather than a property we hope repr has.
+DIGEST_ALGORITHM = "nfldb-canon-1"
+
+_TAG_NULL = b"N"
+_TAG_INT = b"I"
+_TAG_REAL = b"F"
+_TAG_TEXT = b"S"
+_TAG_BLOB = b"B"
+_TAG_ROW = b"R"
+_TAG_HEADER = b"H"
+_TAG_FOOTER = b"Z"
+
+
+def _frame(payload: bytes) -> bytes:
+    """Length-prefixed field. 8-byte big-endian length makes the stream self-
+    delimiting, which is what buys decodability (and therefore injectivity)."""
+    return len(payload).to_bytes(8, "big") + payload
+
+
+def encode_value(v) -> bytes:
+    """One SQLite value -> canonical bytes. Type tag is part of the stream, so
+    1, 1.0 and '1' can never share an encoding regardless of the hash."""
+    import struct
+    if v is None:
+        return _TAG_NULL + _frame(b"")
+    if isinstance(v, bool):                       # sqlite3 never yields bool;
+        raise TypeError("bool is not a SQLite storage class")   # fail loud
+    if isinstance(v, int):
+        # Fixed 8-byte two's complement: minimal-length encoding would admit
+        # sign-extended variants of the same integer, i.e. non-canonical forms.
+        try:
+            return _TAG_INT + _frame(v.to_bytes(8, "big", signed=True))
+        except OverflowError as exc:
+            raise ValueError(f"integer outside SQLite INTEGER range: {v}") from exc
+    if isinstance(v, float):
+        # IEEE-754 big-endian: interpreter-independent, unlike repr() (D5).
+        return _TAG_REAL + _frame(struct.pack(">d", v))
+    if isinstance(v, str):
+        return _TAG_TEXT + _frame(v.encode("utf-8"))   # raises on lone surrogates
+    if isinstance(v, (bytes, bytearray)):
+        return _TAG_BLOB + _frame(bytes(v))
+    raise TypeError(f"unencodable storage class {type(v).__name__}")
+
+
+def canonical_header(table: str, where: str, cols) -> bytes:
+    """Binds algorithm, table, population predicate and the ORDERED column NAMES
+    into the hash. This is the fix for D2: the digest now commits to which
+    columns produced the values, not merely to the values."""
+    out = _TAG_HEADER + _frame(DIGEST_ALGORITHM.encode("utf-8"))
+    out += _frame(table.encode("utf-8")) + _frame(where.encode("utf-8"))
+    out += len(cols).to_bytes(4, "big")
+    for c in cols:
+        out += _frame(c.encode("utf-8"))
+    return out
+
+
+def canonical_row(row) -> bytes:
+    """One row: tag, field count, then each length-framed field."""
+    out = _TAG_ROW + len(row).to_bytes(4, "big")
+    for v in row:
+        out += encode_value(v)
+    return out
+
+
+def canonical_footer(n: int) -> bytes:
+    """Binds the population SIZE, so a digest over N rows can never equal one
+    over a prefix of those rows (D3)."""
+    return _TAG_FOOTER + n.to_bytes(8, "big")
+
+
+def decode_canonical(blob: bytes):
+    """Inverse of the encoder -> (algorithm, table, where, cols, rows).
+
+    This exists to be RUN, not to be read: a stream that decodes back to exactly
+    the input is by definition an injective encoding of it. test_canonical_digest
+    round-trips the full governed corpus through it.
+    """
+    import struct
+    p = 0
+
+    def take(n):
+        nonlocal p
+        if p + n > len(blob):
+            raise ValueError(f"truncated stream at byte {p}")
+        p += n
+        return blob[p - n:p]
+
+    def framed():
+        return take(int.from_bytes(take(8), "big"))
+
+    if take(1) != _TAG_HEADER:
+        raise ValueError("missing canonical header")
+    algo = framed().decode("utf-8")
+    table = framed().decode("utf-8")
+    where = framed().decode("utf-8")
+    cols = [framed().decode("utf-8") for _ in range(int.from_bytes(take(4), "big"))]
+    rows = []
+    while True:
+        tag = take(1)
+        if tag == _TAG_FOOTER:
+            n = int.from_bytes(take(8), "big")
+            if n != len(rows):
+                raise ValueError(f"footer claims {n} rows, decoded {len(rows)}")
+            if p != len(blob):
+                raise ValueError("trailing bytes after footer")
+            return algo, table, where, cols, rows
+        if tag != _TAG_ROW:
+            raise ValueError(f"unexpected tag {tag!r} at byte {p - 1}")
+        vals = []
+        for _ in range(int.from_bytes(take(4), "big")):
+            t = take(1)
+            payload = framed()
+            if t == _TAG_NULL:
+                vals.append(None)
+            elif t == _TAG_INT:
+                vals.append(int.from_bytes(payload, "big", signed=True))
+            elif t == _TAG_REAL:
+                vals.append(struct.unpack(">d", payload)[0])
+            elif t == _TAG_TEXT:
+                vals.append(payload.decode("utf-8"))
+            elif t == _TAG_BLOB:
+                vals.append(payload)
+            else:
+                raise ValueError(f"unknown value tag {t!r}")
+        rows.append(tuple(vals))
+
+
 def content_digest(conn, table, where):
-    """Stable content hash of a frozen window's pinned columns.
+    """Canonical content hash of a frozen window's pinned columns. Full SHA-256.
 
     ORDER BY is the FULL hashed column list, deliberately. SQL leaves the order
     among ties unspecified, so ordering by a partial key would make the digest
@@ -406,12 +584,34 @@ def content_digest(conn, table, where):
     keep = globals()["projection"](conn, table)
     proj_sql = ", ".join(keep)
     h = hashlib.sha256()
+    h.update(canonical_header(table, where, keep))
+    n = 0
+    for row in conn.execute(
+            f"SELECT {proj_sql} FROM {table} WHERE {where} ORDER BY {proj_sql}"):
+        h.update(canonical_row(row))
+        n += 1
+    h.update(canonical_footer(n))
+    return h.hexdigest(), n, keep
+
+
+def legacy_content_digest(conn, table, where):
+    """The pre-Phase-4 repr() digest, retained ONLY as migration evidence.
+
+    Not a fallback and not a second authority: nothing in the build calls it.
+    test_canonical_digest uses it to keep proving that the content protected by
+    the canonical pins is the same content the legacy pins accepted -- the claim
+    Phase 4 rests on. Deleting it would make that claim unfalsifiable.
+    """
+    import hashlib
+    keep = globals()["projection"](conn, table)
+    proj_sql = ", ".join(keep)
+    h = hashlib.sha256()
     n = 0
     for row in conn.execute(
             f"SELECT {proj_sql} FROM {table} WHERE {where} ORDER BY {proj_sql}"):
         h.update(repr(row).encode())
         n += 1
-    return h.hexdigest()[:20], n, keep
+    return h.hexdigest(), n, keep
 
 
 def content_verdict(table, digest):
@@ -419,6 +619,12 @@ def content_verdict(table, digest):
     want = CONTENT_DIGESTS.get(table)
     if want is None:
         return None, f"{digest} (not yet pinned)"
+    # D6: a truncated legacy-width digest must not be silently compared against
+    # a canonical pin -- it can only ever mismatch, which would read as data
+    # corruption instead of "you are running the old algorithm".
+    if len(digest) != 64:
+        return False, (f"{digest} is {len(digest)} hex chars; {DIGEST_ALGORITHM} "
+                       f"pins are full 64-char SHA-256 (legacy digest?)")
     return digest == want, f"{digest} vs {want} pinned"
 
 

@@ -241,9 +241,18 @@ class TestContentPins(unittest.TestCase):
         self.assertIn("not yet pinned", detail)
         ok, _ = sp.content_verdict("depth_chart", sp.CONTENT_DIGESTS["depth_chart"])
         self.assertTrue(ok)
-        ok, detail = sp.content_verdict("depth_chart", "0000000000000000dead")
+        # A CONTENT fault: right algorithm, wrong bytes. The detail must name
+        # the pin the operator is supposed to investigate against.
+        ok, detail = sp.content_verdict("depth_chart", "0" * 60 + "dead")
         self.assertFalse(ok)
         self.assertIn(sp.CONTENT_DIGESTS["depth_chart"], detail)
+        # An ALGORITHM fault: a legacy-width digest. This is deliberately NOT
+        # reported as a content mismatch -- quoting the expected pin here would
+        # send an operator hunting for data corruption that has not happened.
+        ok, detail = sp.content_verdict("depth_chart", "0000000000000000dead")
+        self.assertFalse(ok)
+        self.assertIn("legacy digest?", detail)
+        self.assertNotIn(sp.CONTENT_DIGESTS["depth_chart"], detail)
 
 
 class TestAgainstRealUpstream(unittest.TestCase):
