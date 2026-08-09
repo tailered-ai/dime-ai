@@ -47,47 +47,16 @@ import type {
 import { trpc } from "@/lib/trpc";
 import "./landing/landing-v2.css";
 import { MintCheck, Wordmark } from "./landing/components/shared";
+// Display/disclosure copy lives in a pure module so the cadence contract is
+// unit-testable without mounting Stripe Elements — see checkoutCopy.test.ts.
+import {
+  buildDbCopy,
+  buildLegalLine,
+  LOADING_COPY,
+  type PlanCopy,
+} from "./checkoutCopy";
 
 type PlanId = "pro" | "sharp" | "operator" | "monthly" | "annual";
-
-interface PlanCopy {
-  /** Rail tier name + success-panel subject. */
-  name: string;
-  /** Form card heading. */
-  heading: string;
-  price: string;
-  period: string;
-  /** "Works out to" per-day line — omitted (empty) for owner-created DB plans. */
-  perDay?: string;
-  /** v2 ladder rail rows — legacy plans keep their existing compact rail.
-   *  Withheld while the tiered Analyst models are not live: no plan sets it, so
-   *  the "Model access" row does not render. Kept for the day the tiers ship. */
-  modelAccess?: string;
-  /** Withheld until the credit ledger grants and meters credits (PROD-001). */
-  credits?: string;
-  features?: string[];
-  payLabel: string;
-  renewal: string;
-  chargeCadence: "monthly" | "annually";
-  /** false → a one-time ("Lifetime") purchase — no renewal, no cancellation row.
-   *  undefined/true → recurring (all legacy plans). */
-  recurring?: boolean;
-}
-
-/** Public display shape returned by stripe.publicGetCheckoutPlan (DB plans). */
-interface DbCheckoutPlan {
-  slug: string;
-  name: string;
-  description: string | null;
-  amountCents: number;
-  currency: string;
-  interval: "day" | "week" | "month" | "year" | null;
-  intervalCount: number | null;
-  recurring: boolean;
-  trialPeriodDays: number | null;
-  label: string | null;
-  soldOut: boolean;
-}
 
 const PLAN_COPY: Record<PlanId, PlanCopy> = {
   pro: {
@@ -189,84 +158,6 @@ function parsePriceId(search: string): number | undefined {
   if (!raw) return undefined;
   const n = parseInt(raw, 10);
   return Number.isInteger(n) && n > 0 ? n : undefined;
-}
-
-function formatMoney(cents: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency.toUpperCase(),
-    }).format(cents / 100);
-  } catch {
-    return `$${(cents / 100).toFixed(2)}`;
-  }
-}
-
-/** Human cadence phrase for a recurring DB interval (e.g. "monthly", "every 2 weeks"). */
-function cadencePhrase(
-  interval: DbCheckoutPlan["interval"],
-  count: number | null
-): string {
-  const n = count && count > 1 ? count : 1;
-  if (n === 1) {
-    if (interval === "day") return "daily";
-    if (interval === "week") return "weekly";
-    if (interval === "month") return "monthly";
-    if (interval === "year") return "annually";
-  }
-  return `every ${n} ${interval}${n > 1 ? "s" : ""}`;
-}
-
-/** Build the checkout display copy for an owner-created DB plan/interval. */
-function buildDbCopy(d: DbCheckoutPlan): PlanCopy {
-  const priceStr = formatMoney(d.amountCents, d.currency);
-  if (!d.recurring) {
-    return {
-      name: d.name,
-      heading: `Activate ${d.name}`,
-      price: priceStr,
-      period: "one-time",
-      payLabel: `Get lifetime access — ${priceStr}`,
-      renewal: "One-time payment — lifetime access. No renewals.",
-      chargeCadence: "monthly",
-      recurring: false,
-    };
-  }
-  const n = d.intervalCount && d.intervalCount > 1 ? `${d.intervalCount} ` : "";
-  const unit = d.interval ?? "month";
-  const period = `/ ${n}${unit}${d.intervalCount && d.intervalCount > 1 ? "s" : ""}`;
-  const phrase = cadencePhrase(d.interval, d.intervalCount);
-  return {
-    name: d.name,
-    heading: `Activate ${d.name}`,
-    price: priceStr,
-    period,
-    payLabel: `Subscribe — ${priceStr}`,
-    renewal: `Auto-renews ${phrase} at ${priceStr} until cancelled. Cancel anytime before renewal.`,
-    chargeCadence: d.interval === "year" ? "annually" : "monthly",
-    recurring: true,
-  };
-}
-
-/** Placeholder shown in the rail while the DB plan's display info loads. */
-const LOADING_COPY: PlanCopy = {
-  name: "Loading…",
-  heading: "Activate your plan",
-  price: "—",
-  period: "",
-  payLabel: "Continue to payment",
-  renewal: "",
-  chargeCadence: "monthly",
-  recurring: true,
-};
-
-/** Renewal/authorization legal line under the pay button — recurring vs one-time. */
-function buildLegalLine(copy: PlanCopy): string {
-  if (copy.recurring === false) {
-    return "Charged once today — lifetime access, no renewals. Secure processing by Stripe — card details never touch our servers.";
-  }
-  const cadence = copy.chargeCadence === "annually" ? "annually" : "monthly";
-  return `Charged today, then ${cadence} until you cancel. Secure processing by Stripe — card details never touch our servers.`;
 }
 
 // ─── Stripe Appearance API — Dime token mapping (design spec §B, verbatim) ────
