@@ -1,23 +1,19 @@
 /**
  * SCHEMA_GUARD_FATAL — the branch that decides whether a bad deploy serves.
  *
- * WHY THIS EXISTS. SchemaGuard is warn-only by default. Turning on
- * SCHEMA_GUARD_FATAL=1 converts a degraded boot into a refused one, which is the
- * whole point — it would have turned the 2026-08-05 deploy-order incident (#370,
- * 40 minutes of auth down) into a failed deploy that never took traffic. But
- * `process.exit(1)` fires from `onListening`, AFTER the server is already
- * accepting requests, and until now no test drove it at all. A switch nobody has
- * ever tested is not a switch you flip on production.
+ * Armed on the product service since 2026-08-08. A confirmed-stale schema now
+ * exits the process, so the Railway healthcheck fails and the previous healthy
+ * deployment keeps serving — which is what #370 (40 minutes of auth down) cost
+ * when nothing did this.
  *
- * THE HAZARD IT GUARDS. Probed 2026-08-07 before any of this was written: a db
- * stub returning `[]` makes compareSchema report all 9 required tables as
- * `tableMissing`, `ok: false`. Under FATAL that is `process.exit(1)` — so one
- * transient empty read (wrong DATABASE() context, driver row-shape change, lost
- * information_schema access) crash-loops a service whose schema was fine. That
- * is a self-inflicted outage in the name of preventing one.
+ * These are unit-level assertions on the DECISION. The terminal proof that the
+ * operating-system process actually dies with a nonzero code lives in
+ * `schemaGuardFatalExit.test.ts`, which spawns a real child process. A spy can
+ * only ever prove the function was called; it cannot prove the process ended.
  *
- * A migration adds or alters; it does not drop the entire product schema. So
- * all-tables-missing is treated as a failed READ, reported loudly, never fatal.
+ * TRAP, recorded so it is not rediscovered: `process.exit` is called INSIDE
+ * assertSchemaCurrent, and the surrounding code path returns a value afterwards.
+ * A stub that THROWS is therefore not a faithful model — assert on the spy.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
@@ -28,13 +24,21 @@ vi.mock("../db", () => ({ getDb: () => getDb() }));
 
 import { assertSchemaCurrent, REQUIRED_COLUMNS } from "./schemaGuard";
 
+const DB_NAME = "dime_product";
 const allRows = () =>
   Object.entries(REQUIRED_COLUMNS).flatMap(([t, cols]) =>
     cols.map(c => ({ t, c }))
   );
-const dbReturning = (rows: Array<{ t: string; c: string }>): DbStub => ({
-  execute: async () => rows,
-});
+const db = (schemaRows: unknown, database: string | null = DB_NAME): DbStub => {
+  let call = 0;
+  return {
+    execute: async () => {
+      call += 1;
+      if (call === 1) return [[{ databaseName: database }], []] as unknown;
+      return schemaRows;
+    },
+  };
+};
 
 let savedFatal: string | undefined;
 let exitSpy: ReturnType<typeof vi.spyOn>;
@@ -50,13 +54,7 @@ beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(
     (...a: unknown[]) => void errors.push(String(a[0]))
   );
-  // Record instead of exiting. A throwing stub would model reality better —
-  // process.exit never returns — but it cannot be used here: the exit call sits
-  // INSIDE assertSchemaCurrent's try, whose catch swallows everything and
-  // returns { ok: true, drift: [] }. A thrown stub is therefore caught and the
-  // test sees a clean pass, which is the opposite of what happened. (Harmless in
-  // production, where process.exit genuinely does not return — but a trap for
-  // anyone testing this branch, so: assert on the spy, not on a rejection.)
+  vi.spyOn(console, "log").mockImplementation(() => {});
   exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
 });
 afterEach(() => {
@@ -66,10 +64,9 @@ afterEach(() => {
 });
 
 describe("SCHEMA_GUARD_FATAL", () => {
-  it("[SG-10] with FATAL=1 and REAL drift, it refuses to serve", async () => {
+  it("[SG-10] FATAL=1 + confirmed drift refuses to serve", async () => {
     process.env.SCHEMA_GUARD_FATAL = "1";
-    // One table gone — the shape a skipped migration actually produces.
-    dbStub = dbReturning(allRows().filter(r => r.t !== "payment_events"));
+    dbStub = db(allRows().filter(r => r.t !== "payment_events"));
 
     await assertSchemaCurrent();
 
@@ -80,55 +77,69 @@ describe("SCHEMA_GUARD_FATAL", () => {
   });
 
   it("[SG-11] without FATAL, the same drift reports and keeps serving", async () => {
-    dbStub = dbReturning(allRows().filter(r => r.t !== "payment_events"));
+    dbStub = db(allRows().filter(r => r.t !== "payment_events"));
 
-    const result = await assertSchemaCurrent();
+    const r = await assertSchemaCurrent();
 
-    expect(result.ok).toBe(false);
+    expect(r.status).toBe("fail");
     expect(exitSpy).not.toHaveBeenCalled();
     expect(errors.join("\n")).toContain("[VERIFY] FAIL");
   });
 
-  it("[SG-12] an EMPTY read is never fatal, even with FATAL=1", async () => {
-    // The crash-loop guard. Without it this is 9/9 tableMissing -> exit(1).
+  it("[SG-12] an UNAVAILABLE verdict is never fatal, even with FATAL=1", async () => {
+    // Fail-open. An unverifiable check must not decide that a healthy
+    // deployment cannot serve — that would be a self-inflicted outage.
     process.env.SCHEMA_GUARD_FATAL = "1";
-    dbStub = dbReturning([]);
+    dbStub = null;
 
-    const result = await assertSchemaCurrent();
+    const r = await assertSchemaCurrent();
 
     expect(exitSpy).not.toHaveBeenCalled();
-    expect(result.inconclusive).toBe(true);
-    expect(result.ok).toBe(false);
-    expect(errors.join("\n")).toContain("[VERIFY] INCONCLUSIVE");
-    // It must not be silent either — "we don't know" is worth saying.
-    expect(errors.join("\n")).toContain("schema READ failed");
+    expect(r.status).toBe("unavailable");
+    expect(errors.join("\n")).toContain("[VERIFY] UNAVAILABLE");
+    expect(errors.join("\n")).toContain("NOT a pass");
   });
 
-  it("[SG-13] all-missing is judged on ALL tables, not a lucky count", async () => {
-    // Every table present but stripped to zero columns: 9 drift entries, none
-    // tableMissing. That is real column drift and must stay fatal — the
-    // inconclusive branch must key on tableMissing, not on drift.length alone.
+  it("[SG-13] a valid read of an empty database IS fatal under FATAL=1", async () => {
+    // Changed by the closeout. This used to be INCONCLUSIVE and non-fatal, so a
+    // product service pointed at the wrong database served happily.
     process.env.SCHEMA_GUARD_FATAL = "1";
-    dbStub = dbReturning(
-      Object.keys(REQUIRED_COLUMNS).map(t => ({ t, c: "id" }))
-    );
+    dbStub = db([]);
 
     await assertSchemaCurrent();
 
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
 
-  it("[SG-14] the analytics store never exits, whatever FATAL says", async () => {
-    // The store legitimately has none of these tables. If the role skip ever
-    // regressed, FATAL would crash-loop the back office on every boot.
+  it("[SG-22] a malformed driver result is never fatal", async () => {
     process.env.SCHEMA_GUARD_FATAL = "1";
-    process.env.ANALYTICS_ROLE = "store";
-    dbStub = dbReturning([]);
+    dbStub = db({ rows: allRows() });
 
-    const result = await assertSchemaCurrent();
+    const r = await assertSchemaCurrent();
 
     expect(exitSpy).not.toHaveBeenCalled();
-    expect(result.skipped).toBe("analytics-store");
+    expect(r.status).toBe("unavailable");
+  });
+
+  it("[SG-14] the analytics store never exits, whatever FATAL says", async () => {
+    process.env.SCHEMA_GUARD_FATAL = "1";
+    process.env.ANALYTICS_ROLE = "store";
+    dbStub = db([]);
+
+    const r = await assertSchemaCurrent();
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(r.status).toBe("not_applicable");
     expect(getDb).not.toHaveBeenCalled();
+  });
+
+  it("[SG-23] a complete schema never exits", async () => {
+    process.env.SCHEMA_GUARD_FATAL = "1";
+    dbStub = db(allRows());
+
+    const r = await assertSchemaCurrent();
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(r.status).toBe("pass");
   });
 });

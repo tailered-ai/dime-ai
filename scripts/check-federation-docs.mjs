@@ -56,6 +56,59 @@ export const GOVERNED_DOCS = [
   ".claude/commands/ui-loop.md",
 ];
 
+/**
+ * Additional ACTIVE surfaces checked for dangling references only.
+ *
+ * These get rule 1 (no dangling paths) and nothing else — the ordinal, record-
+ * fidelity and routing rules are federation-specific and would be nonsense here.
+ *
+ * Why these three and not "all of os/ and docs/", measured on 23aafc55a:
+ *
+ *   os/*.md            (2 files)   0 dangling   -> governed
+ *   docs/*.md          (2 files)   0 dangling   -> governed
+ *   docs/audits/*-evidence/summary.md (8)  0 dangling -> governed
+ *   os/decisions/*.md  (17 files)  130 dangling -> NOT governed, see below
+ *   os/** (all md)     (80 files)  220 dangling -> NOT governed
+ *
+ * DECISION RECORDS ARE DELIBERATELY EXCLUDED. A decision record argues about
+ * work that may never be built: DR-006 alone cites 16 paths that do not exist,
+ * DR-010 cites 11, and DR-010 was subsequently CUT — those citations are
+ * correct for the genre and always will be. Governing them would need a ~130
+ * entry permanent allowlist, which is the "make the scan pass" anti-pattern this
+ * gate exists to avoid. The cost is real and is stated in the closeout PR: a
+ * stale path citation inside a DR (the `observe-crons.mjs` drift found by hand
+ * on 2026-08-08) is still not mechanically caught.
+ *
+ * Evidence summaries ARE governed. They describe work that shipped, so their
+ * references are claims about the current repository, and they are exactly where
+ * the 2026-08-09 hand-verified links lived.
+ */
+const ACTIVE_DOC_GLOBS = [
+  { dir: "os", depth: 1, match: /\.md$/ },
+  { dir: "docs", depth: 1, match: /\.md$/ },
+  { dir: "docs/audits", depth: 2, match: /^summary\.md$/ },
+];
+
+/** Resolve ACTIVE_DOC_GLOBS to repo-relative file paths, sorted and deduped. */
+export function listActiveDocs(root = ROOT) {
+  const out = new Set();
+  /** `depth` is how many directory levels remain; files count only at depth 1. */
+  const walk = (rel, depth, match) => {
+    const abs = path.join(root, rel);
+    if (!existsSync(abs)) return;
+    for (const entry of readdirSync(abs, { withFileTypes: true })) {
+      const childRel = `${rel}/${entry.name}`;
+      if (entry.isDirectory()) {
+        if (depth > 1) walk(childRel, depth - 1, match);
+      } else if (depth === 1 && match.test(entry.name)) {
+        out.add(childRel);
+      }
+    }
+  };
+  for (const g of ACTIVE_DOC_GLOBS) walk(g.dir, g.depth, g.match);
+  return [...out].sort();
+}
+
 const RECORD_TEMPLATE = `${ENG}/references/record-template.yaml`;
 const VENDORED_STANDARD = `${ENG}/references/production-grade-engineering-architecture.md`;
 const SMOKE_SCRIPT = "scripts/smoke-deploy.mjs";
@@ -262,6 +315,14 @@ export function runChecks(root = ROOT) {
       );
       continue;
     }
+    for (const p of findDanglingPaths(read(doc), doc, root)) {
+      fail(doc, `cites a path that does not exist: ${p}`);
+    }
+  }
+
+  // 1a. Same rule over the ACTIVE os/ and docs/ surfaces. Dangling references
+  // only — see ACTIVE_DOC_GLOBS for why decision records are excluded.
+  for (const doc of listActiveDocs(root)) {
     for (const p of findDanglingPaths(read(doc), doc, root)) {
       fail(doc, `cites a path that does not exist: ${p}`);
     }

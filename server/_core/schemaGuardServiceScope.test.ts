@@ -1,51 +1,35 @@
 /**
- * SchemaGuard is scoped to the service that actually owns the tables.
+ * SchemaGuard result states — the full matrix, driven through assertSchemaCurrent.
  *
- * THE BUG THIS LOCKS DOWN (observed live 2026-08-07, at the #440 deploy 13:19:08
- * and again at #446 13:40:35): both Railway services run the same build, but
- * ai-sports-betting-backend points DATABASE_URL at the analytics store, which by
- * design holds analytics_events and NONE of the product/billing tables. So on
- * every single boot it logged
+ * WHY THE MODEL CHANGED (closeout, 2026-08-09). Reproduced against baseline
+ * 23aafc55a before any edit, three distinct conditions collapsed onto the same
+ * `{ ok: true, drift: [] }`, and one of them printed the PASS banner:
  *
- *   [SchemaGuard] [VERIFY] FAIL — the running code expects schema objects that do not exist:
- *     table "app_users" is MISSING entirely (18 expected columns)
- *     ... nine more ...
- *   [SchemaGuard] This means code deployed AHEAD of its migration ... login, checkout,
- *   fulfilment will break.
+ *   getDb() -> null      => { ok:true, drift:[] }   and logged "[VERIFY] PASS"
+ *   execute() throws     => { ok:true, drift:[] }   (warn only)
+ *   malformed row shape  => { ok:true, drift:[] }   (warn only)
+ *   valid read, 0 tables => INCONCLUSIVE, non-fatal even with FATAL=1
  *
- * None of which was true there. The product service was healthy throughout
- * (/health schema:"ok", Stripe webhook [VERIFY] PASS).
+ * So a boot that never reached a database announced a verified schema, and a
+ * product service pointed at an empty or WRONG database was waved through as
+ * merely unknown. The result is now a discriminated union — pass / fail /
+ * unavailable / not_applicable — and no empty array carries hidden meaning.
  *
- * Why that matters enough to test: this guard exists so that ONE failure — code
- * deployed ahead of its migration, which took platform-wide login down on
- * 2026-07-31 — cannot be missed in the logs. A guard that cries wolf on every
- * boot of one service is how the real alarm gets scrolled past.
- *
- * The fix is scoped by ROLE, not by drift shape, and [SG-6]/[SG-7] are the
- * reason: "table missing entirely" must STAY fatal on the service that owns the
- * tables, because that exact shape is the ledger miss REQUIRED_COLUMNS was
- * extended to catch. Relaxing the shape would have been the smaller diff and the
- * wrong fix.
- *
- * [SG-7]..[SG-9] exist because an adversarial review of this PR found that
- * [SG-6] alone did not back that claim. SG-6 pins compareSchema, a pure function
- * this change does not touch — so the wrong fix, written one layer up as
- *   const drift = (await detectSchemaDrift()).filter(d => !d.tableMissing)
- * passed all 27 tests AND tsc. assertSchemaCurrent's entire drift-REPORTING
- * branch had no coverage anywhere in the repo; every test reached it with getDb
- * mocked to null, so drift was always empty and the FAIL path never ran.
- * SG-7 kills that mutation. A claim in a comment is not a test.
+ * SERVICE SCOPING (the original reason this file exists) is preserved below.
+ * Both Railway services run the same build; the analytics store points
+ * DATABASE_URL at a database that owns none of these tables, and used to log
+ * "[VERIFY] FAIL ... login, checkout, fulfilment will break" on every boot. That
+ * scoping is by ROLE, never by drift shape — see [SG-6].
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-// A configurable stub, not a constant null. Tests that only care about role
-// resolution leave it null (detectSchemaDrift short-circuits, and asserting on
-// whether getDb was REACHED is the only honest way to tell "skipped" from "ran
-// and found nothing"). Tests that need the drift-reporting branch install a
-// stub that returns real information_schema rows.
 type DbStub = { execute: (q: unknown) => Promise<unknown> } | null;
 let dbStub: DbStub = null;
-const getDb = vi.fn(async () => dbStub);
+let getDbThrows: Error | null = null;
+const getDb = vi.fn(async () => {
+  if (getDbThrows) throw getDbThrows;
+  return dbStub;
+});
 vi.mock("../db", () => ({ getDb: () => getDb() }));
 
 import {
@@ -54,96 +38,122 @@ import {
   REQUIRED_COLUMNS,
 } from "./schemaGuard";
 
-/** Every required column of every required table, minus the tables named. */
-const schemaRowsOmitting = (omitTables: string[]) =>
+const DB_NAME = "dime_product";
+const allRows = () =>
   Object.entries(REQUIRED_COLUMNS).flatMap(([t, cols]) =>
-    omitTables.includes(t) ? [] : cols.map(c => ({ t, c }))
+    cols.map(c => ({ t, c }))
   );
 
-const dbReturning = (rows: Array<{ t: string; c: string }>): DbStub => ({
-  execute: async () => rows,
+/**
+ * Answers the two probes inspectSchema makes, in order: SELECT DATABASE(), then
+ * information_schema. `database: null` models a connection with no schema
+ * selected; `schemaRows` may be any shape, including a malformed one.
+ */
+const db = (opts: {
+  database?: string | null;
+  schemaRows?: unknown;
+}): DbStub => {
+  // `"database" in opts` rather than `??` — an EXPLICIT null is the case under
+  // test (a connection with no schema selected), and `null ?? DB_NAME` would
+  // quietly hand back the default and make [SG-18] vacuous.
+  const database = "database" in opts ? opts.database : DB_NAME;
+  let call = 0;
+  return {
+    execute: async () => {
+      call += 1;
+      if (call === 1) return [[{ databaseName: database }], []] as unknown;
+      return "schemaRows" in opts ? opts.schemaRows : [];
+    },
+  };
+};
+const throwingDb = (msg: string): DbStub => ({
+  execute: async () => {
+    throw new Error(msg);
+  },
 });
 
-const ROLE_KEYS = [
+const ENV_KEYS = [
   "ANALYTICS_ROLE",
   "USER_ACTIVITY_BACKEND_URL",
   "SCHEMA_GUARD_FATAL",
 ] as const;
 let saved: Record<string, string | undefined> = {};
+let logs: string[];
+let errs: string[];
 
 beforeEach(() => {
-  saved = Object.fromEntries(ROLE_KEYS.map(k => [k, process.env[k]]));
-  for (const k of ROLE_KEYS) delete process.env[k];
-  getDb.mockClear();
+  saved = Object.fromEntries(ENV_KEYS.map(k => [k, process.env[k]]));
+  for (const k of ENV_KEYS) delete process.env[k];
   dbStub = null;
+  getDbThrows = null;
+  getDb.mockClear();
+  logs = [];
+  errs = [];
+  vi.spyOn(console, "log").mockImplementation(
+    (...a: unknown[]) => void logs.push(String(a[0]))
+  );
+  vi.spyOn(console, "error").mockImplementation(
+    (...a: unknown[]) => void errs.push(String(a[0]))
+  );
 });
 afterEach(() => {
-  for (const k of ROLE_KEYS) {
+  vi.restoreAllMocks();
+  for (const k of ENV_KEYS) {
     if (saved[k] === undefined) delete process.env[k];
     else process.env[k] = saved[k]!;
   }
 });
 
-describe("SchemaGuard service scoping", () => {
-  it("[SG-1] on the analytics store it reports N/A and never touches the database", async () => {
+const allOutput = () => [...logs, ...errs].join("\n");
+
+describe("SchemaGuard — NOT_APPLICABLE (service scoping)", () => {
+  it("[SG-1] the analytics store reports not_applicable and never touches the database", async () => {
     process.env.ANALYTICS_ROLE = "store";
 
-    const result = await assertSchemaCurrent();
+    const r = await assertSchemaCurrent();
 
-    expect(result.skipped).toBe("analytics-store");
-    expect(result.drift).toEqual([]);
-    // Reaching the DB at all would mean the early return did not happen.
+    expect(r.status).toBe("not_applicable");
+    expect(r.drift).toEqual([]);
     expect(getDb).not.toHaveBeenCalled();
-  });
-
-  it("[SG-2] ok:true carries a skipped reason, so 'not checked' can never be read as 'verified clean'", async () => {
-    process.env.ANALYTICS_ROLE = "store";
-    const skippedRun = await assertSchemaCurrent();
-
-    delete process.env.ANALYTICS_ROLE;
-    const realRun = await assertSchemaCurrent();
-
-    // Both are ok:true and they mean completely different things. `skipped` is
-    // the only thing that separates "we did not look" from "we looked, it's fine".
-    expect(skippedRun.ok).toBe(true);
-    expect(skippedRun.skipped).toBe("analytics-store");
-    expect(realRun.ok).toBe(true);
-    expect(realRun.skipped).toBeUndefined();
+    expect(allOutput()).toContain("[VERIFY] N/A");
+    expect(allOutput()).not.toContain("[VERIFY] PASS");
   });
 
   it("[SG-3] the FORWARDER — the real production app — is still fully guarded", async () => {
     process.env.USER_ACTIVITY_BACKEND_URL =
       "http://backend.railway.internal:8080";
+    dbStub = db({ schemaRows: allRows() });
 
-    const result = await assertSchemaCurrent();
+    const r = await assertSchemaCurrent();
 
-    expect(result.skipped).toBeUndefined();
+    expect(r.status).toBe("pass");
     expect(getDb).toHaveBeenCalled();
   });
 
   it("[SG-4] the 'disabled' default is still guarded — only an EXPLICIT store opts out", async () => {
-    // No ANALYTICS_ROLE, no backend URL: role resolves to "disabled". A service
-    // that has not declared itself is not a licence to stop checking.
-    const result = await assertSchemaCurrent();
+    dbStub = db({ schemaRows: allRows() });
 
-    expect(result.skipped).toBeUndefined();
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("pass");
     expect(getDb).toHaveBeenCalled();
   });
 
   it("[SG-5] a lookalike role value does NOT open the escape hatch", async () => {
     process.env.ANALYTICS_ROLE = "storefront";
+    dbStub = db({ schemaRows: allRows() });
 
-    const result = await assertSchemaCurrent();
+    const r = await assertSchemaCurrent();
 
-    expect(result.skipped).toBeUndefined();
+    expect(r.status).toBe("pass");
     expect(getDb).toHaveBeenCalled();
   });
 
   it("[SG-6] REGRESSION GUARD: a missing TABLE is still drift — the ledger miss stays loud", () => {
-    // The tempting smaller fix was "treat tableMissing as benign everywhere".
-    // That would have silently re-opened the ledger gap: checkout_sessions and
-    // payment_events were MISSING ENTIRELY when their migrations were skipped,
-    // and swallow their own errors, so nothing else would have said a word.
+    // The tempting smaller fix was always "treat tableMissing as benign".
+    // checkout_sessions and payment_events were MISSING ENTIRELY when their
+    // migrations were skipped, and they swallow their own errors, so nothing
+    // else would have said a word.
     const drift = compareSchema([], {
       checkout_sessions: ["id", "fulfillment"],
     });
@@ -156,48 +166,133 @@ describe("SchemaGuard service scoping", () => {
   });
 });
 
-/**
- * The branch that actually fires the alarm. Before these, nothing in the repo
- * ever called assertSchemaCurrent with non-empty drift, so the [VERIFY] FAIL
- * log, the SCHEMA_GUARD_FATAL exit, and `ok: false` were all unexecuted code.
- */
-describe("SchemaGuard drift reporting — the alarm itself", () => {
-  it("[SG-7] a missing ledger table makes the guard FAIL, not pass", async () => {
-    // This is the mutation killer. Filtering tableMissing out of the drift
-    // inside assertSchemaCurrent — the "smaller diff and wrong fix" this change
-    // explicitly disclaims — used to pass every test in the repo.
-    const errors: string[] = [];
-    const spy = vi
-      .spyOn(console, "error")
-      .mockImplementation((...a: unknown[]) => void errors.push(String(a[0])));
-    dbStub = dbReturning(schemaRowsOmitting(["payment_events"]));
+describe("SchemaGuard — UNAVAILABLE (no trustworthy verdict)", () => {
+  it("[SG-15] no database handle is UNAVAILABLE, never PASS", async () => {
+    // The baseline defect in one line: this used to print the PASS banner.
+    dbStub = null;
 
-    const result = await assertSchemaCurrent();
-    spy.mockRestore();
+    const r = await assertSchemaCurrent();
 
-    expect(result.ok).toBe(false);
-    expect(result.skipped).toBeUndefined();
-    expect(result.drift).toContainEqual(
-      expect.objectContaining({ table: "payment_events", tableMissing: true })
-    );
-    // And it has to SAY so — a silent false is not an alarm.
-    expect(errors.join("\n")).toContain("[VERIFY] FAIL");
-    expect(errors.join("\n")).toContain("payment_events");
+    expect(r.status).toBe("unavailable");
+    expect(r.status === "unavailable" && r.reason).toBe("no-database-handle");
+    expect(allOutput()).toContain("[VERIFY] UNAVAILABLE");
+    expect(allOutput()).not.toContain("[VERIFY] PASS");
   });
 
-  it("[SG-8] a missing COLUMN also fails — the 2026-07-31 outage shape", async () => {
-    // app_users.planPriceId existed in code but not in the database, and every
-    // query against app_users died with ER_BAD_FIELD_ERROR.
-    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
-    dbStub = dbReturning(
-      schemaRowsOmitting([]).filter(r => r.c !== "planPriceId")
+  it("[SG-16] getDb() throwing is UNAVAILABLE, never PASS", async () => {
+    getDbThrows = new Error("pool exhausted");
+
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("unavailable");
+    expect(r.status === "unavailable" && r.reason).toBe("no-database-handle");
+    expect(allOutput()).not.toContain("[VERIFY] PASS");
+  });
+
+  it("[SG-17] a failed inspection query is UNAVAILABLE, never PASS", async () => {
+    dbStub = throwingDb("ECONNRESET");
+
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("unavailable");
+    expect(r.status === "unavailable" && r.reason).toBe("inspection-failed");
+    expect(allOutput()).toContain("[VERIFY] UNAVAILABLE");
+    expect(allOutput()).not.toContain("[VERIFY] PASS");
+  });
+
+  it("[SG-17b] a failure of the information_schema query specifically is UNAVAILABLE", async () => {
+    // Distinct from [SG-17], and it exists because mutation M2 SURVIVED the
+    // first draft of this suite. `throwingDb` throws on the FIRST probe
+    // (SELECT DATABASE()), so the second catch — the one guarding the
+    // information_schema read — had no coverage at all, and could have been
+    // replaced with a fake complete schema without a single test noticing.
+    let call = 0;
+    dbStub = {
+      execute: async () => {
+        call += 1;
+        if (call === 1) return [[{ databaseName: DB_NAME }], []] as unknown;
+        throw new Error("information_schema denied");
+      },
+    };
+
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("unavailable");
+    expect(r.status === "unavailable" && r.reason).toBe("inspection-failed");
+    expect(r.status === "unavailable" && r.detail).toContain(
+      "information_schema denied"
     );
+    expect(allOutput()).not.toContain("[VERIFY] PASS");
+  });
 
-    const result = await assertSchemaCurrent();
-    spy.mockRestore();
+  it("[SG-19b] an array of UNRECOGNIZED row objects is UNAVAILABLE, not zero rows", async () => {
+    // The other coercion path. [SG-19] sends a non-array envelope, which is
+    // rejected by the first shape guard; this sends a well-formed array whose
+    // ROWS are unrecognized (raw information_schema casing), which reaches the
+    // final guard. Coercing it to [] would read as total drift and, with the
+    // flag armed, refuse to serve over nothing.
+    dbStub = db({
+      schemaRows: [{ TABLE_NAME: "app_users", COLUMN_NAME: "id" }],
+    });
 
-    expect(result.ok).toBe(false);
-    expect(result.drift).toContainEqual(
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("unavailable");
+    expect(r.status === "unavailable" && r.reason).toBe(
+      "unrecognized-driver-result"
+    );
+    expect(allOutput()).not.toContain("[VERIFY] FAIL");
+  });
+
+  it("[SG-18] no selected schema context is UNAVAILABLE — this is what 'wrong place' looks like", async () => {
+    dbStub = db({ database: null, schemaRows: [] });
+
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("unavailable");
+    expect(r.status === "unavailable" && r.reason).toBe("no-database-context");
+    expect(allOutput()).not.toContain("[VERIFY] PASS");
+  });
+
+  it("[SG-19] an unrecognized driver envelope is UNAVAILABLE, not silently zero rows", async () => {
+    // A COMPLETE, CORRECT schema in an envelope we do not recognize. The old
+    // code coerced this to [] and would have called it total drift; coercing the
+    // other way would call it PASS. Both are guesses. Refuse instead.
+    dbStub = db({ schemaRows: { rows: allRows() } });
+
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("unavailable");
+    expect(r.status === "unavailable" && r.reason).toBe(
+      "unrecognized-driver-result"
+    );
+    expect(allOutput()).not.toContain("[VERIFY] PASS");
+  });
+});
+
+describe("SchemaGuard — FAIL (inspection succeeded, drift confirmed)", () => {
+  it("[SG-7] a missing ledger table FAILS and names it", async () => {
+    dbStub = db({
+      schemaRows: allRows().filter(r => r.t !== "payment_events"),
+    });
+
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("fail");
+    expect(r.drift).toContainEqual(
+      expect.objectContaining({ table: "payment_events", tableMissing: true })
+    );
+    expect(allOutput()).toContain("[VERIFY] FAIL");
+    expect(allOutput()).toContain("payment_events");
+  });
+
+  it("[SG-8] a missing COLUMN fails — the 2026-07-31 outage shape", async () => {
+    dbStub = db({ schemaRows: allRows().filter(r => r.c !== "planPriceId") });
+
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("fail");
+    expect(r.drift).toContainEqual(
       expect.objectContaining({
         table: "app_users",
         tableMissing: false,
@@ -206,21 +301,42 @@ describe("SchemaGuard drift reporting — the alarm itself", () => {
     );
   });
 
-  it("[SG-9] a complete schema passes, and says PASS rather than N/A", async () => {
-    const logs: string[] = [];
-    const spy = vi
-      .spyOn(console, "log")
-      .mockImplementation((...a: unknown[]) => void logs.push(String(a[0])));
-    dbStub = dbReturning(schemaRowsOmitting([]));
+  it("[SG-20] a VALID read of an empty/wrong database is FAIL, not inconclusive", async () => {
+    // The retired heuristic's blind spot. The schema context is proven non-null,
+    // the query succeeded, and nothing is there: the product service is pointed
+    // somewhere it must not serve from.
+    dbStub = db({ schemaRows: [] });
 
-    const result = await assertSchemaCurrent();
-    spy.mockRestore();
+    const r = await assertSchemaCurrent();
 
-    expect(result.ok).toBe(true);
-    expect(result.drift).toEqual([]);
-    expect(result.skipped).toBeUndefined();
-    // "we looked and it is fine" must not be worded like "we did not look".
-    expect(logs.join("\n")).toContain("[VERIFY] PASS");
-    expect(logs.join("\n")).not.toContain("N/A");
+    expect(r.status).toBe("fail");
+    expect(r.drift).toHaveLength(Object.keys(REQUIRED_COLUMNS).length);
+    expect(allOutput()).toContain("[VERIFY] FAIL");
+    expect(allOutput()).not.toContain("INCONCLUSIVE");
+  });
+});
+
+describe("SchemaGuard — PASS (and only for a real pass)", () => {
+  it("[SG-9] a complete schema passes, names the database, and is not N/A", async () => {
+    dbStub = db({ schemaRows: allRows() });
+
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("pass");
+    expect(r.drift).toEqual([]);
+    expect(r.status === "pass" && r.database).toBe(DB_NAME);
+    expect(allOutput()).toContain("[VERIFY] PASS");
+    expect(allOutput()).not.toContain("N/A");
+    expect(allOutput()).not.toContain("UNAVAILABLE");
+  });
+
+  it("[SG-21] extra columns beyond the required set do not break PASS", async () => {
+    dbStub = db({
+      schemaRows: [...allRows(), { t: "app_users", c: "someNewColumn" }],
+    });
+
+    const r = await assertSchemaCurrent();
+
+    expect(r.status).toBe("pass");
   });
 });
