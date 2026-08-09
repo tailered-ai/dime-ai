@@ -117,7 +117,13 @@ export function buildDbCopy(d: DbCheckoutPlan): PlanCopy {
       period: "one-time",
       payLabel: `Get lifetime access — ${priceStr}`,
       renewal: "One-time payment — lifetime access. No renewals.",
-      chargeCadence: "monthly",
+      // Empty for the same reason as LOADING_COPY: a one-time purchase has no
+      // recurring cadence, so stamping "monthly" here would be a claim the
+      // price does not support. Dead today (buildLegalLine branches on
+      // `recurring` first) — but the field's contract is "the cadence of THIS
+      // price", and a placeholder that contradicts it is how the original
+      // defect started.
+      chargeCadence: "",
       recurring: false,
     };
   }

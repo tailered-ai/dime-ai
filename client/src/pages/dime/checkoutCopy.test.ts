@@ -72,7 +72,9 @@ describe("cadencePhrase — the single cadence authority", () => {
     // recurring implies interval != null upstream; a malformed row must still
     // not print "every 1 null" to a paying customer.
     expect(cadencePhrase(null, 1)).toBe("monthly");
-    expect(cadencePhrase(null, 1)).not.toContain("null");
+    // count > 1 is the path that actually reaches the template literal, where
+    // a missing `unit` fallback would interpolate the word "null".
+    expect(cadencePhrase(null, 2)).toBe("every 2 months");
   });
 });
 
@@ -142,6 +144,9 @@ describe("D5 — one-time price", () => {
     );
     expect(copy.recurring).toBe(false);
     expect(copy.renewal).not.toContain("Auto-renews");
+    // A one-time price carries no cadence at all — pinning this stops the
+    // "monthly" placeholder from creeping back onto a lifetime purchase.
+    expect(copy.chargeCadence).toBe("");
   });
 });
 
@@ -252,11 +257,15 @@ describe("loading state makes no cadence promise", () => {
   // renders unconditionally, so the old `chargeCadence: "monthly"` placeholder
   // told a weekly buyer "then monthly until you cancel" before any price had
   // been selected.
-  it("omits the renewal clause entirely while no price is resolved", () => {
-    const legal = buildLegalLine(LOADING_COPY);
-    expect(legal).not.toContain("until you cancel");
-    expect(legal).not.toContain("monthly");
-    expect(legal).not.toContain("Charged today");
+  // Pinned with toBe, not a list of absences. Independent review caught that
+  // three `not.toContain` assertions all pass if LOADING_COPY.recurring flips
+  // to false — which makes the pre-price line read "Charged once today —
+  // lifetime access, no renewals.", an equally false promise in the other
+  // direction. Only an exact-string assertion rules out every wrong sentence.
+  it("says exactly the assurance and nothing else while no price is resolved", () => {
+    expect(buildLegalLine(LOADING_COPY)).toBe(
+      "Secure processing by Stripe — card details never touch our servers."
+    );
   });
 
   it("still shows the Stripe assurance", () => {
