@@ -137,43 +137,180 @@ export interface SchemaDrift {
   tableMissing: boolean;
 }
 
-export interface SchemaGuardResult {
-  ok: boolean;
-  drift: SchemaDrift[];
-  /**
-   * Set when the guard did not run because it does not apply to this instance.
-   * `ok: true` with a `skipped` reason means "not checked", NOT "verified clean" —
-   * callers that report schema health must not conflate the two.
-   */
-  skipped?: "analytics-store";
-  /**
-   * Set when EVERY required table read as absent, which says the schema READ
-   * failed rather than that a migration was missed. Reported, never fatal —
-   * see the reasoning at the check site in assertSchemaCurrent.
-   */
-  inconclusive?: true;
+/**
+ * Why a verdict could not be produced. Every one of these means "we do not
+ * know", and none of them may ever be rendered as PASS.
+ */
+export type SchemaGuardUnavailableReason =
+  | "no-database-handle"
+  | "no-database-context"
+  | "inspection-failed"
+  | "inspection-timeout"
+  | "unrecognized-driver-result";
+
+/**
+ * A discriminated verdict, replacing the old `{ ok, drift }` shape.
+ *
+ * The old shape collapsed THREE distinct conditions onto `{ ok: true, drift: [] }`
+ * — verified clean, no database handle, and inspection threw — and the no-handle
+ * case additionally logged `[VERIFY] PASS`. Reproduced on the 23aafc55a baseline
+ * before this change; see the closeout PR. An empty array must never carry hidden
+ * epistemic meaning, so the state is now explicit and non-optional:
+ *
+ *   pass            — the database was reached, the schema context was
+ *                     established, the inspection returned a recognized result,
+ *                     and every required table AND column was observed.
+ *   fail            — inspection SUCCEEDED and confirmed drift. Fatal under
+ *                     SCHEMA_GUARD_FATAL=1.
+ *   unavailable     — no trustworthy verdict. Never fatal (fail-open), never PASS.
+ *   not_applicable  — this service does not own the guarded tables.
+ */
+export type SchemaGuardResult =
+  | { status: "pass"; drift: readonly []; database: string }
+  | { status: "fail"; drift: SchemaDrift[]; database: string }
+  | {
+      status: "unavailable";
+      drift: readonly [];
+      reason: SchemaGuardUnavailableReason;
+      detail?: string;
+    }
+  | { status: "not_applicable"; drift: readonly []; reason: "analytics-store" };
+
+type SchemaRow = { t: string; c: string };
+
+/**
+ * Recognize the driver's result envelope, or refuse to guess.
+ *
+ * The previous code did `Array.isArray(rows[0]) ? rows[0] : rows` and coerced
+ * anything else to `[]` — so an unrecognized shape carrying a PERFECTLY GOOD
+ * schema became "zero rows", which reads as total drift. Silent coercion in
+ * either direction is the bug; an envelope we do not recognize is `unavailable`.
+ *
+ * A recognized-but-EMPTY result is deliberately NOT an error here. "The query ran
+ * and matched nothing" is a real, meaningful answer — it means the tables are not
+ * there — and it is the caller's job to treat that as drift, not this function's
+ * job to hide it.
+ */
+export function normalizeSchemaRows(
+  raw: unknown
+): { ok: true; rows: SchemaRow[] } | { ok: false } {
+  const isRow = (v: unknown): v is SchemaRow =>
+    typeof v === "object" &&
+    v !== null &&
+    "t" in v &&
+    "c" in v &&
+    (v as { t: unknown }).t != null &&
+    (v as { c: unknown }).c != null;
+
+  const asRows = (v: unknown): SchemaRow[] | null => {
+    if (!Array.isArray(v)) return null;
+    return v.every(isRow)
+      ? v.map(r => ({ t: String(r.t), c: String(r.c) }))
+      : null;
+  };
+
+  if (!Array.isArray(raw)) return { ok: false };
+  // Flat row array (drizzle) — also covers the empty case.
+  const flat = asRows(raw);
+  if (flat) return { ok: true, rows: flat };
+  // mysql2 [rows, fields] envelope.
+  const nested = asRows(raw[0]);
+  if (nested) return { ok: true, rows: nested };
+  return { ok: false };
 }
 
-/** Compare declared expectations against information_schema. Read-only. */
-export async function detectSchemaDrift(
-  required: Readonly<Record<string, readonly string[]>> = REQUIRED_COLUMNS
-): Promise<SchemaDrift[]> {
-  const db = await getDb();
-  if (!db) return [];
-  const tables = Object.keys(required);
-  const rows = (await db.execute(
-    sql`SELECT TABLE_NAME AS t, COLUMN_NAME AS c FROM information_schema.COLUMNS
-        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN (${sql.join(
-          tables.map(t => sql`${t}`),
-          sql`, `
-        )})`
-  )) as unknown as Array<Array<{ t: string; c: string }>>;
-  const flat =
-    (Array.isArray(rows[0])
-      ? rows[0]
-      : (rows as unknown as Array<{ t: string; c: string }>)) ?? [];
+/**
+ * Read the `databaseName` column of a single-row probe, by NAME.
+ *
+ * Deliberately not "the first scalar of the first row": that is a proxy, and
+ * this file spent its whole redesign removing proxies. If the envelope is not
+ * one we recognize, or the named column is absent, the caller reports
+ * unrecognized-driver-result rather than inventing a value.
+ */
+function readDatabaseName(raw: unknown): string | null {
+  const rows = Array.isArray(raw)
+    ? Array.isArray(raw[0])
+      ? (raw[0] as unknown[])
+      : (raw as unknown[])
+    : null;
+  const row = rows?.[0];
+  if (typeof row !== "object" || row === null) return null;
+  if (!("databaseName" in row)) return null;
+  const v = (row as { databaseName: unknown }).databaseName;
+  return v == null ? null : String(v);
+}
 
-  return compareSchema(flat, required);
+/**
+ * Establish that the inspection itself is trustworthy BEFORE comparing anything.
+ *
+ * Order matters. Each step can only fail one way, and every failure is an
+ * explicit `unavailable` reason rather than an empty array:
+ *   1. a database handle exists
+ *   2. a schema context is selected (`SELECT DATABASE()` is non-null) — this is
+ *      what separates "queried the right place and found nothing" from "queried
+ *      nowhere", which the drift-shape heuristic used to guess at
+ *   3. the information_schema query succeeds
+ *   4. the result envelope is one we recognize
+ */
+export async function inspectSchema(
+  required: Readonly<Record<string, readonly string[]>> = REQUIRED_COLUMNS
+): Promise<
+  | { status: "ok"; database: string; rows: SchemaRow[] }
+  | {
+      status: "unavailable";
+      reason: SchemaGuardUnavailableReason;
+      detail?: string;
+    }
+> {
+  let db: Awaited<ReturnType<typeof getDb>>;
+  try {
+    db = await getDb();
+  } catch (err) {
+    return {
+      status: "unavailable",
+      reason: "no-database-handle",
+      detail: err instanceof Error ? err.message : String(err),
+    };
+  }
+  if (!db) return { status: "unavailable", reason: "no-database-handle" };
+
+  let database: string | null;
+  try {
+    database = readDatabaseName(
+      await db.execute(sql`SELECT DATABASE() AS databaseName`)
+    );
+  } catch (err) {
+    return {
+      status: "unavailable",
+      reason: "inspection-failed",
+      detail: err instanceof Error ? err.message : String(err),
+    };
+  }
+  if (!database)
+    return { status: "unavailable", reason: "no-database-context" };
+
+  const tables = Object.keys(required);
+  let raw: unknown;
+  try {
+    raw = await db.execute(
+      sql`SELECT TABLE_NAME AS t, COLUMN_NAME AS c FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN (${sql.join(
+            tables.map(t => sql`${t}`),
+            sql`, `
+          )})`
+    );
+  } catch (err) {
+    return {
+      status: "unavailable",
+      reason: "inspection-failed",
+      detail: err instanceof Error ? err.message : String(err),
+    };
+  }
+
+  const normalized = normalizeSchemaRows(raw);
+  if (!normalized.ok)
+    return { status: "unavailable", reason: "unrecognized-driver-result" };
+  return { status: "ok", database, rows: normalized.rows };
 }
 
 /**
@@ -212,40 +349,29 @@ export function compareSchema(
 }
 
 /**
- * Below this many required tables, "every table is missing" stops being
- * implausible-as-drift and starts being an ordinary, real failure.
+ * RETIRED: the drift-shape heuristic (`INCONCLUSIVE_MIN_TABLES` /
+ * `isInconclusiveRead`).
  *
- * The inconclusive rule reasons from coincidence: nine tables do not vanish at
- * once from a skipped migration, so all-nine-missing must be a failed read. That
- * reasoning gets weaker as the list shrinks and collapses entirely at one, where
- * "all missing" and "the single guarded table is missing" are the same event —
- * so a genuine, total drift would be waved through as merely unknown.
+ * It inferred "the read failed" from all-required-tables-missing, because a
+ * migration does not drop the whole product schema. That inference existed only
+ * because the read state was not observable — and it was wrong in one direction
+ * that matters: a product service genuinely pointed at an empty or WRONG database
+ * was waved through as merely unknown, and stayed non-fatal with the guard armed.
  *
- * Demonstrated 2026-08-08 against the shipped code: with REQUIRED_COLUMNS cut to
- * a single table, an absent app_users returned `inconclusive: true` and did NOT
- * exit, even with SCHEMA_GUARD_FATAL=1. Live-safe today at nine, and the list has
- * only ever grown — but that is an accident of history, not a guarantee, and the
- * guard should not silently depend on one.
+ * `inspectSchema` now observes the read state directly, so every case the
+ * heuristic covered has an explicit home and nothing is inferred from shape:
+ *
+ *   no database handle        -> unavailable / no-database-handle
+ *   connect or query throws   -> unavailable / inspection-failed
+ *   DATABASE() null           -> unavailable / no-database-context
+ *   unrecognized driver shape -> unavailable / unrecognized-driver-result
+ *   context OK, zero tables   -> FAIL  (confirmed: right place, nothing there)
+ *   context OK, partial drift -> FAIL
+ *   context OK, complete      -> PASS
+ *
+ * Two systems solving the same ambiguity is worse than one, so the heuristic is
+ * gone rather than layered. Explicit state beats a statistical argument.
  */
-export const INCONCLUSIVE_MIN_TABLES = 3;
-
-/**
- * Split out from assertSchemaCurrent so the decision can be tested at every list
- * size, including the sizes REQUIRED_COLUMNS does not currently have.
- *
- * Deliberately takes the count as an argument rather than reading
- * REQUIRED_COLUMNS: a predicate that closes over global state can only ever be
- * tested in the one configuration that happens to ship.
- */
-export function isInconclusiveRead(
-  drift: readonly SchemaDrift[],
-  requiredTableCount: number
-): boolean {
-  if (requiredTableCount < INCONCLUSIVE_MIN_TABLES) return false;
-  return (
-    drift.length === requiredTableCount && drift.every(d => d.tableMissing)
-  );
-}
 
 /** Human-readable, actionable — names the exact objects and the fix. */
 export function formatDrift(drift: readonly SchemaDrift[]): string {
@@ -258,87 +384,160 @@ export function formatDrift(drift: readonly SchemaDrift[]): string {
     .join("\n");
 }
 
-/**
- * Run once at boot. Never throws on its own failure — an unreachable database at
- * startup is the circuit breaker's problem, not this check's.
- */
-export async function assertSchemaCurrent(): Promise<SchemaGuardResult> {
+/** The analytics-store gate, shared by both entry points. */
+function reportNotApplicable(): SchemaGuardResult {
   // Both Railway services run the SAME build, but only one owns these tables.
   // The analytics store (ai-sports-betting-backend, ANALYTICS_ROLE=store) points
-  // its DATABASE_URL at a different database that by design holds analytics_events
-  // and none of the product/billing tables declared above. So every one of them
-  // reads as "MISSING entirely" on every boot: ten tables, plus a "login, checkout,
-  // fulfilment will break" warning, none of it true there.
-  //
-  // That is worse than noise. This guard exists to make ONE failure impossible to
-  // miss — code deployed ahead of its migration, which took platform-wide login
-  // down on 2026-07-31 — and a guard that screams on every single boot of one
-  // service is precisely how the real alarm gets scrolled past.
+  // its DATABASE_URL at a different database that by design holds
+  // analytics_events and none of the product/billing tables declared above, so
+  // every one of them used to read as "MISSING entirely" on every boot.
   //
   // Scoped by ROLE, deliberately, not by drift shape. Treating "table missing
   // entirely" as benign would have been the smaller diff and the wrong fix: that
   // case IS the ledger miss described in REQUIRED_COLUMNS above, and it has to
   // stay loud on the service that actually owns the tables.
-  if (isAnalyticsStore()) {
-    console.log(
-      `${TAG} [VERIFY] N/A — ANALYTICS_ROLE=store. This instance's DATABASE_URL is the ` +
-        `analytics store, which owns none of the product tables this guard checks, so drift ` +
-        `here would be meaningless. The product service reports the real verdict.`
-    );
-    return { ok: true, drift: [], skipped: "analytics-store" };
-  }
-  try {
-    const drift = await detectSchemaDrift();
-    if (drift.length === 0) {
-      console.log(
-        `${TAG} [VERIFY] PASS — live schema satisfies every required column`
-      );
-      return { ok: true, drift: [] };
-    }
-    // All-or-nothing is a failed READ, not a missed migration.
-    //
-    // A migration adds or alters; it does not drop the entire product schema.
-    // So when EVERY required table reads as absent, the thing that failed is the
-    // read: an empty result set, the wrong DATABASE() context, a driver row-shape
-    // change, or lost information_schema access. Verified 2026-08-07 — a stub
-    // returning [] produces exactly this shape, 9/9 tableMissing with ok:false.
-    //
-    // This is inert today and decisive the moment SCHEMA_GUARD_FATAL=1 is set:
-    // without it, one transient empty read turns a healthy service into a crash
-    // loop, which is a self-inflicted outage in the name of preventing one. Still
-    // reported at error level — the only thing established here is that we do not
-    // know, and that is worth saying out loud rather than exiting on.
-    const requiredTableCount = Object.keys(REQUIRED_COLUMNS).length;
-    if (isInconclusiveRead(drift, requiredTableCount)) {
-      console.error(
-        `${TAG} [VERIFY] INCONCLUSIVE — all ${requiredTableCount} required tables read as ` +
-          `absent. That pattern means the schema READ failed (empty result set, wrong ` +
-          `DATABASE(), driver shape change, or lost information_schema access), not that a ` +
-          `migration was missed. Not treated as drift, and NOT fatal even under ` +
-          `SCHEMA_GUARD_FATAL=1. If the database really is unmigrated, the first query will ` +
-          `say so far more precisely than this check can.`
-      );
-      return { ok: false, drift, inconclusive: true };
-    }
-    const detail = formatDrift(drift);
+  console.log(
+    `${TAG} [VERIFY] N/A — ANALYTICS_ROLE=store. This instance's DATABASE_URL is the ` +
+      `analytics store, which owns none of the product tables this guard checks, so drift ` +
+      `here would be meaningless. The product service reports the real verdict.`
+  );
+  return { status: "not_applicable", drift: [], reason: "analytics-store" };
+}
+
+/**
+ * Turn a finished inspection into a verdict, and enforce it.
+ *
+ * THIS is the only function that may call process.exit, and it is deliberately
+ * synchronous with respect to its input: it receives an inspection that has
+ * ALREADY resolved. Nothing it touches can still be in flight.
+ *
+ * That separation is not stylistic. Until 2026-08-09 the preflight did
+ * `Promise.race([assertSchemaCurrent(), timeout])`, and Promise.race does not
+ * cancel the loser — so a slow inspection that lost the race kept running,
+ * reached this exit, and killed the process AFTER server.listen. Reproduced
+ * before the fix: at-listen status=unavailable exitCalls=0; 250ms later
+ * exitCalls=1 with the refusal logged. That is precisely the post-listen death
+ * this guard exists to prevent, caused by the guard itself.
+ *
+ * The invariant now: anything that may still be executing after a timeout is
+ * incapable of terminating the process, because only inspection races and
+ * inspection has no side effects.
+ */
+export function applySchemaGuardPolicy(
+  inspection: Awaited<ReturnType<typeof inspectSchema>>
+): SchemaGuardResult {
+  if (inspection.status === "unavailable") {
+    // No verdict. Explicitly NOT a pass, and explicitly not fatal: freezing
+    // deploys on a cold or blipping database would be a self-inflicted outage,
+    // and the DB circuit breaker plus the app_users health gate already own
+    // database availability. Same fail-open asymmetry as schemaHealthGate.
     console.error(
-      `${TAG} [VERIFY] FAIL — the running code expects schema objects that do not exist:\n${detail}\n` +
-        `${TAG} This means code deployed AHEAD of its migration. Drizzle enumerates every declared ` +
-        `column, so queries against these tables will fail with ER_BAD_FIELD_ERROR and user-facing ` +
-        `flows (login, checkout, fulfilment) will break.\n` +
-        `${TAG} FIX: run the pending migration workflow, then redeploy.`
+      `${TAG} [VERIFY] UNAVAILABLE — no schema verdict could be produced ` +
+        `(${inspection.reason}${inspection.detail ? `: ${inspection.detail}` : ""}). ` +
+        `This is NOT a pass: the guarded schema was not verified on this boot. ` +
+        `Not fatal even under SCHEMA_GUARD_FATAL=1, because an unverifiable check ` +
+        `must not decide that a healthy deployment cannot serve.`
     );
-    if (process.env.SCHEMA_GUARD_FATAL === "1") {
-      console.error(
-        `${TAG} SCHEMA_GUARD_FATAL=1 — refusing to serve with a stale schema.`
-      );
-      process.exit(1);
-    }
-    return { ok: false, drift };
-  } catch (err) {
-    console.warn(
-      `${TAG} check skipped — ${err instanceof Error ? err.message : String(err)}`
-    );
-    return { ok: true, drift: [] };
+    return {
+      status: "unavailable",
+      drift: [],
+      reason: inspection.reason,
+      ...(inspection.detail ? { detail: inspection.detail } : {}),
+    };
   }
+
+  const drift = compareSchema(inspection.rows);
+  if (drift.length === 0) {
+    console.log(
+      `${TAG} [VERIFY] PASS — live schema satisfies every required column ` +
+        `(database "${inspection.database}", ${Object.keys(REQUIRED_COLUMNS).length} tables inspected)`
+    );
+    return { status: "pass", drift: [], database: inspection.database };
+  }
+
+  // Reached only when the inspection itself succeeded, so this is CONFIRMED.
+  // That now includes "every table absent", which the retired heuristic used to
+  // wave through: with the schema context proven non-null, zero required tables
+  // means the selected database does not carry the guarded schema at all, and
+  // this service must not serve from it.
+  const detail = formatDrift(drift);
+  console.error(
+    `${TAG} [VERIFY] FAIL — the running code expects schema objects that do not exist ` +
+      `in database "${inspection.database}":\n${detail}\n` +
+      `${TAG} This means code deployed AHEAD of its migration. Drizzle enumerates every declared ` +
+      `column, so queries against these tables will fail with ER_BAD_FIELD_ERROR and user-facing ` +
+      `flows (login, checkout, fulfilment) will break.\n` +
+      `${TAG} FIX: run the pending migration workflow, then redeploy.`
+  );
+  if (process.env.SCHEMA_GUARD_FATAL === "1") {
+    console.error(
+      `${TAG} SCHEMA_GUARD_FATAL=1 — refusing to serve with a stale schema.`
+    );
+    process.exit(1);
+  }
+  return { status: "fail", drift, database: inspection.database };
+}
+
+/**
+ * Inspect and enforce, unbounded. Used where there is no boot deadline.
+ *
+ * Never throws on its own failure — an unreachable database at startup is the
+ * circuit breaker's problem, not this check's.
+ */
+export async function assertSchemaCurrent(
+  /**
+   * Injectable for tests, exactly as `runSchemaProbe(probe = probeAppUsersSchema)`
+   * is in schemaHealthGate. It exists so the child-process fatal test can drive a
+   * REAL `process.exit` without a real database — a spy can prove the call was
+   * made, but only a spawned process can prove the process actually died.
+   */
+  inspect: typeof inspectSchema = inspectSchema
+): Promise<SchemaGuardResult> {
+  if (isAnalyticsStore()) return reportNotApplicable();
+  return applySchemaGuardPolicy(await inspect());
+}
+
+/**
+ * Boot preflight: resolve the authoritative verdict BEFORE the server accepts
+ * traffic, bounded so a cold database cannot wedge startup.
+ *
+ * Sequencing is the point. Until this existed the full guard ran fire-and-forget
+ * from the `listening` handler, so with SCHEMA_GUARD_FATAL=1 a confirmed-stale
+ * deployment began accepting requests and exited underneath them. The narrow
+ * app_users probe (schemaHealthGate) already ran pre-listen; this gives the
+ * nine-table guard the same standing.
+ *
+ * ONLY THE INSPECTION IS RACED. Enforcement happens after the race resolves, so
+ * a slow inspection that loses can do nothing worse than finish and be ignored —
+ * it cannot reach process.exit. See applySchemaGuardPolicy for the incident this
+ * encodes.
+ *
+ * The timeout mirrors runBootSchemaProbe's reasoning: the budget must exceed the
+ * pool's 15s connectTimeout, because at boot this may open the very first
+ * connection. A timeout yields no verdict, which is `unavailable`, which is
+ * fail-open — never a pass, never fatal.
+ */
+export async function runSchemaGuardPreflight(
+  timeoutMs = 20_000,
+  inspect: typeof inspectSchema = inspectSchema
+): Promise<SchemaGuardResult> {
+  if (isAnalyticsStore()) return reportNotApplicable();
+
+  const inspection = await Promise.race([
+    inspect(),
+    new Promise<Awaited<ReturnType<typeof inspectSchema>>>(resolve => {
+      const t = setTimeout(
+        () =>
+          resolve({
+            status: "unavailable",
+            reason: "inspection-timeout",
+            detail: `preflight exceeded ${timeoutMs}ms`,
+          }),
+        timeoutMs
+      );
+      if (typeof t.unref === "function") t.unref();
+    }),
+  ]);
+
+  return applySchemaGuardPolicy(inspection);
 }
