@@ -330,42 +330,259 @@ def live_verdict(table, db_live_rows, source_live_rows):
 #: OWNS and what it merely REPORTS. nflverse recomputes EPA and usage shares
 #: whenever its play-by-play models change; those are derived estimates and they
 #: legitimately move. Identities, teams, games and raw counting stats do not.
-CONTENT_DIGEST_EXCLUDE = {
+# --------------------------------------------------------------------------
+# Field semantics  (Phase 5)
+# --------------------------------------------------------------------------
+# Phase 4 proved the digest represents its content contract exactly. That makes
+# the remaining question the semantic one: is the CONTRACT right -- does every
+# blocking field deserve immutability, and does every non-blocking field deserve
+# to move? A cryptographically perfect digest over the wrong fields is still a
+# wrong integrity system.
+#
+# This registry answers that per column, mechanically. It is THE authority:
+# CONTENT_DIGEST_EXCLUDE is derived from it below, so a field cannot be dropped
+# from the digest without also declaring what it is and what governs it instead.
+
+#: Semantic classes. Each maps to exactly one integrity mechanism.
+RAW_SOURCE_FACT = "RAW_SOURCE_FACT"                    # -> blocking digest
+SOURCE_OWNED_IDENTITY = "SOURCE_OWNED_IDENTITY"        # -> blocking identity
+DERIVED_PROVIDER_METRIC = "DERIVED_PROVIDER_METRIC"    # -> observational (Phase 6)
+DERIVED_INTERNAL_IDENTITY = "DERIVED_INTERNAL_IDENTITY"  # -> Layer C state machine
+PROVENANCE_LABEL = "PROVENANCE_LABEL"                  # -> observational
+SURROGATE_OR_TECHNICAL = "SURROGATE_OR_TECHNICAL"      # -> none, if proven inert
+
+#: Reason codes: why a field sits outside the blocking digest. A consumer must be
+#: able to answer that programmatically, without parsing prose.
+REASON_PROVIDER_DERIVED_METRIC = "provider_derived_metric"
+REASON_PROVENANCE_LABEL = "provenance_label"
+REASON_SURROGATE_KEY = "surrogate_key"
+
+#: Governance: what controls a field that the blocking digest does not.
+GOV_BLOCKING_DIGEST = "blocking_content_digest"
+GOV_OBSERVATIONAL_DIGEST = "phase6_observational_digest"
+GOV_IDENTITY_STATE_MACHINE = "layer_c_identity_state_machine"
+GOV_NONE_INERT = "none_proven_semantically_inert"
+
+#: Evidence strength. Never upgrade one of these without new measurement.
+PROVEN = "PROVEN"
+STRONGLY_SUPPORTED = "STRONGLY_SUPPORTED"
+UNRESOLVED = "UNRESOLVED"
+
+
+class FieldSpec:
+    """One column's semantics. `reason` is required exactly when not blocking."""
+
+    def __init__(self, semantic_class, blocking, producer, governance,
+                 evidence=PROVEN, reason=None, note="", also=()):
+        if blocking and reason is not None:
+            raise ValueError("a blocking field has no exclusion reason code")
+        if not blocking and reason is None:
+            raise ValueError("a non-blocking field must carry a reason code")
+        self.semantic_class = semantic_class
+        self.blocking = blocking
+        self.producer = producer
+        self.governance = governance
+        self.evidence = evidence
+        self.reason = reason
+        self.note = note
+        self.also = tuple(also)          # secondary mechanisms (§28)
+
+
+def _raw(*columns, producer="nflverse extract, verbatim"):
+    """Bulk-declare raw source facts. Enumerated, never inferred by rule: a rule
+    would let a NEW column default into governance silently, which is the exact
+    failure test_field_classification guards against."""
+    return {c: FieldSpec(RAW_SOURCE_FACT, True, producer, GOV_BLOCKING_DIGEST)
+            for c in columns}
+
+
+FIELD_CLASSES = {
     "depth_chart": {
-        # Which crosswalk TIER resolved an identity, not the identity itself.
-        #
-        # EVIDENCE CORRECTION (2026-08-08). An earlier comment here claimed
-        # "T3->T0 for 1,375 rows". That figure was measured against the BROKEN
-        # no-T4 build, so roughly 316 rows of the apparent movement were
-        # contamination from the missing-T4 defect itself, and it named the wrong
-        # dominant transition. Re-measured full-population between two correct
-        # builds:
-        #
-        #     total provenance transitions   1,059
-        #       T1 -> T0                       881    <- the dominant movement
-        #       T3 -> T0                       163
-        #       NULL -> T0                      15
-        #
-        # gsis_id is NOT excluded here, so a lost or changed identity still fails
-        # -- which is exactly the 316-row regression this distinction protects.
-        "gsis_source",
-        "depth_chart_id",   # surrogate, assignment order
+        **_raw("source_shape", "snapshot_ts", "source_ordinal", "season",
+               "season_type", "week", "playoff_round", "bucket",
+               "source_game_type", "source_week", "franchise_id", "espn_id",
+               "full_name", "jersey_number", "position", "depth_position",
+               "depth_position_canonical", "depth_order", "unit", "scheme",
+               "pos_slot", "elias_id"),
+        "gsis_id": FieldSpec(
+            SOURCE_OWNED_IDENTITY, True,
+            "feed for 1,101,152 frozen rows; build_espn_gsis_crosswalk for 5,229",
+            GOV_BLOCKING_DIGEST,
+            also=(GOV_IDENTITY_STATE_MACHINE,),
+            note="ONE column carrying TWO provenances, deliberately not flattened "
+                 "into included/excluded. Frozen split measured 2026-08-09: "
+                 "feed-owned 1,101,152 (Layer B, blocking), crosswalk-derived "
+                 "5,229 (Layer C), unresolved 348 -- totalling 1,106,729. The "
+                 "derived part is non-stationary because an unresolved row can "
+                 "legitimately become resolved, which is why Layer C governs it "
+                 "rather than the raw-fact digest. It stays blocking meanwhile: "
+                 "the 316-row T4 regression is exactly what that catches."),
+        "gsis_source": FieldSpec(
+            PROVENANCE_LABEL, False, "crosswalk tier that resolved the identity",
+            GOV_OBSERVATIONAL_DIGEST, reason=REASON_PROVENANCE_LABEL,
+            note="Which crosswalk TIER reached an identity, not the identity. "
+                 "EVIDENCE CORRECTION (2026-08-08): an earlier comment claimed "
+                 "'T3->T0 for 1,375 rows'. That was measured against the BROKEN "
+                 "no-T4 build, so 316 rows of the apparent movement were "
+                 "contamination from the missing-T4 defect, and it named the "
+                 "wrong dominant transition. Re-measured full-population between "
+                 "two correct builds: 1,059 total = T1->T0 881 (dominant), "
+                 "T3->T0 163, NULL->T0 15. Phase 5 re-derived this and proved "
+                 "the specificity that matters: across the 1,044 purely "
+                 "provenance-only rows (T1->T0 + T3->T0), gsis_source moved and "
+                 "NOTHING else did -- same espn_id, same gsis_id, same raw "
+                 "facts. The 15 NULL->T0 rows are held out as identity "
+                 "IMPROVEMENT, and the 316 T4->NULL as identity REGRESSION; "
+                 "conflating those three classes is what produced the wrong "
+                 "1,375. gsis_id is NOT excluded, so a provenance relabel can "
+                 "never launder an identity reassignment."),
+        "depth_chart_id": FieldSpec(
+            SURROGATE_OR_TECHNICAL, False, "SQLite rowid, assignment order",
+            GOV_NONE_INERT, reason=REASON_SURROGATE_KEY,
+            note="Proven inert 2026-08-09: the 23-column blocking projection is "
+                 "already unique across all 1,106,729 frozen rows, so this "
+                 "distinguishes nothing. Contrast source_ordinal, which is also "
+                 "load-order-derived but IS blocking -- dropping it collapses "
+                 "1,718 depth_chart rows, so it separates genuinely distinct "
+                 "semantic rows. That measured difference is the whole "
+                 "justification for treating two load-order fields differently."),
     },
+
     "player_game_stats": {
-        # nflverse-computed advanced metrics. Recomputed upstream on model
-        # revision: 2,059 / 1,706 / 1,043 / 702 / 275 / 10 / 10 rows moved
-        # between the 2026-07-27 extract and 2026-08-07 with ZERO change to any
-        # raw counting stat and ZERO change to row identity.
-        "passing_epa", "rushing_epa", "receiving_epa",
-        "target_share", "air_yards_share",
-        "fantasy_points", "fantasy_points_ppr",
+        **_raw("season", "week", "season_type", "game_id", "franchise_id",
+               "opponent_id", "position", "position_group", "completions",
+               "attempts", "passing_yards", "passing_tds", "interceptions",
+               "sacks_suffered", "carries", "rushing_yards", "rushing_tds",
+               "receptions", "targets", "receiving_yards", "receiving_tds"),
+        "gsis_id": FieldSpec(
+            SOURCE_OWNED_IDENTITY, True,
+            "player_stats.csv player_id, verbatim (build_db.py:344)",
+            GOV_BLOCKING_DIGEST,
+            note="Taken straight from the extract -- no crosswalk, no inference."),
+        # All seven are nflverse model outputs copied verbatim -- as_real(pick(...))
+        # at build_db.py:365-378, one INSERT, no second writer, and corrections.py
+        # never patches them. nfl-db could not compute them if it wanted to: the
+        # build-input contract declares no play-by-play source, and EPA is a
+        # play-by-play derivative. So they are provider-OWNED estimates, which is
+        # the semantic reason they sit outside a frozen-HISTORY guarantee.
+        #
+        # MEASURED CAUSE OF THE OBSERVED MOVEMENT (2026-08-09, and it is not the
+        # cause an earlier comment here asserted). That comment read "Recomputed
+        # upstream on model revision". Full-population comparison of the two
+        # controlled builds reproduces its row counts exactly -- 2,059 / 1,706 /
+        # 1,043 / 702 / 275 / 10 / 10, 5,655 distinct rows -- but every single
+        # difference is at most 1.03e-13 absolute and 1e-14 relative. That is the
+        # last representable bit of a double, not a model revision, which would
+        # move EPA by 1e-2 or more.
+        #
+        # The mechanism is PROVEN from the extract itself: upstream R serialises
+        # at 15 significant digits while a double needs 17 to round-trip, so the
+        # same logical value renders as "0.06" in one regeneration and
+        # "0.0599999999999999" in another when accumulation order shifts the last
+        # bit. Both parse exactly; the stored doubles then differ.
+        #
+        # Consequence for governance, and the reason this is written down rather
+        # than filed as trivia: a TOLERANCE-free digest over these columns would
+        # be permanently flaky, but plain exclusion means a genuine model revision
+        # is INVISIBLE. Phase 6 must therefore measure them with a tolerance, not
+        # merely hash them. Whether upstream has ever substantively revised these
+        # values is UNRESOLVED -- the controlled pair spans about an hour and can
+        # only witness build-to-build nondeterminism, never a months-long refit.
+        **{c: FieldSpec(
+            DERIVED_PROVIDER_METRIC, False, producer, GOV_OBSERVATIONAL_DIGEST,
+            reason=REASON_PROVIDER_DERIVED_METRIC, note=note)
+           for c, producer, note in (
+            ("passing_epa", "nflverse EPA model (build_db.py:365, verbatim)",
+             "275 frozen rows moved; max |delta| 1.03e-13."),
+            ("rushing_epa", "nflverse EPA model (build_db.py:369, verbatim)",
+             "1,043 frozen rows moved; max |delta| 1.01e-13."),
+            ("receiving_epa", "nflverse EPA model (build_db.py:374, verbatim)",
+             "2,059 frozen rows moved; max |delta| 1.01e-13."),
+            ("target_share", "nflverse usage denominator (build_db.py:375, verbatim)",
+             "702 frozen rows moved; max |delta| 9.99e-16."),
+            ("air_yards_share", "nflverse usage denominator (build_db.py:376, verbatim)",
+             "1,706 frozen rows moved; max |delta| 1.06e-15."),
+            ("fantasy_points", "nflverse scoring formula (build_db.py:377, verbatim)",
+             "10 frozen rows moved; max |delta| 9.99e-16."),
+            ("fantasy_points_ppr", "nflverse scoring formula (build_db.py:378, verbatim)",
+             "10 frozen rows moved; max |delta| 9.99e-16."))},
     },
-    # Surrogate row ids: assignment artefacts, not content. Verified against
-    # PRAGMA table_info rather than guessed -- snap_count has none (its PK is
-    # the natural pair pfr_player_id+pfr_game_id).
-    "snap_count": set(),
-    "roster_season": {"roster_row_id"},
+
+    "snap_count": {
+        **_raw("pfr_player_id", "game_id", "pfr_game_id", "season", "season_type",
+               "week", "playoff_round", "source_game_type", "source_week",
+               "franchise_id", "franchise_id_upstream", "position",
+               "offense_snaps", "offense_pct", "defense_snaps", "defense_pct",
+               "st_snaps", "st_pct"),
+        "gsis_id": FieldSpec(
+            DERIVED_INTERNAL_IDENTITY, True,
+            "snap_crosswalk.build_pfr_to_gsis via pfr_player_id (build_db.py:445)",
+            GOV_BLOCKING_DIGEST,
+            note="Derived like depth_chart's crosswalk identity, yet correctly "
+                 "BLOCKING rather than Layer C. The discriminator is not the "
+                 "derivation, it is whether an improvable unresolved population "
+                 "exists: build_db.py:470 RAISES if any pfr_player_id fails to "
+                 "resolve, so every stored row has an asserted identity and "
+                 "there is no unresolved set that could legitimately become "
+                 "resolved later. Measured stationary across the controlled "
+                 "pair. If that fail-closed guard is ever relaxed, this "
+                 "classification must move to Layer C."),
+    },
+
+    "roster_season": {
+        **_raw("season", "franchise_id", "season_type", "week", "playoff_round",
+               "source_game_type", "source_week", "position",
+               "depth_chart_position", "jersey_number", "status", "full_name",
+               "years_exp", "source_ordinal"),
+        "gsis_id": FieldSpec(
+            SOURCE_OWNED_IDENTITY, True,
+            "rosters.csv gsis_id/player_id, verbatim (build_db.py:496)",
+            GOV_BLOCKING_DIGEST),
+        "roster_row_id": FieldSpec(
+            SURROGATE_OR_TECHNICAL, False, "SQLite rowid, assignment order",
+            GOV_NONE_INERT, reason=REASON_SURROGATE_KEY,
+            note="Proven inert 2026-08-09: the 15-column blocking projection is "
+                 "unique across all 43,856 frozen rows without it. "
+                 "source_ordinal is kept blocking because dropping it collapses "
+                 "4 rows -- same player, season, team and week, genuinely "
+                 "distinct roster entries."),
+    },
 }
+
+#: DERIVED, not declared. Keeping a second hand-maintained exclusion set beside
+#: FIELD_CLASSES would recreate exactly the two-authorities defect Phase 3
+#: removed for frozen predicates: the two would eventually disagree, and the
+#: digest would protect a different field set than the registry documents.
+CONTENT_DIGEST_EXCLUDE = {
+    table: {col for col, spec in fields.items() if not spec.blocking}
+    for table, fields in FIELD_CLASSES.items()
+}
+
+
+def field(table, column):
+    """One column's semantics. KeyError is deliberate -- an unclassified column
+    in a governed table must be loud, never a silent default."""
+    return FIELD_CLASSES[table][column]
+
+
+def classified_columns(table):
+    return set(FIELD_CLASSES[table])
+
+
+def blocking_columns(table):
+    return {c for c, s in FIELD_CLASSES[table].items() if s.blocking}
+
+
+def unclassified_columns(conn, table):
+    """Physical columns with no classification -- the new-column silence guard."""
+    physical = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+    return physical - classified_columns(table)
+
+
+def stale_classifications(conn, table):
+    """Classified columns that no longer exist physically."""
+    physical = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+    return classified_columns(table) - physical
 
 #: Full SHA-256 (all 64 hex chars) over the DIGEST_ALGORITHM serialization of a
 #: frozen window's pinned columns, ordered by the full hashed projection.
