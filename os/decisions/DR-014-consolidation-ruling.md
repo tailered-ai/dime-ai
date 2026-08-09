@@ -287,3 +287,63 @@ See `os/audits/2026-08-05-builder-resolution.md`.
 - ~~The real cost of the RAILPACK finding~~ — **RESOLVED 2026-08-05.** The builder is the Dockerfile;
   the Python runners are present and functional. What remains open is narrower and belongs to
   ISSUE-012: how many drift adjustments the ephemeral filesystem has silently discarded.
+
+---
+
+## Premise check — 2026-08-08 (read-only, no ruling made)
+
+This record still reads **AWAITING RULING** with `observe_by: 2026-08-12`. Three days of
+decisions have landed since it was written, and two of its premises have moved. Recorded here
+so the ruling is made against current facts rather than 2026-08-05 ones. **Nothing below
+decides anything** — the four requested rulings remain the DRI's.
+
+### Ruling 1 is already satisfied — the ask is now narrower
+
+All four cuts were ruled on 2026-08-07 (PR #447), and each record carries it:
+
+| Record | Status on `main` |
+| --- | --- |
+| DR-007 context-layer | `RULED — cut upheld 2026-08-07` |
+| DR-010 factory-thresholds | `RULED — cut upheld 2026-08-07` |
+| DR-011 founder-dashboard | `RULED — cut upheld 2026-08-07` |
+| DR-013 loop-rollout-order | `RULED — cut upheld 2026-08-07` |
+
+So "Requested ruling" item (1), including the optional DR-007, is **closed**. Item (2) is
+**partially** closed — the 2026-08-07 partial ruling above settled evidence-record location.
+What actually remains outstanding is: the rest of (2), plus (3) and (4).
+
+### Two cited premises have drifted
+
+- **`observe-crons.mjs` does not exist.** The script on `main` is
+  [`scripts/os/observe-crons.mts`](../../scripts/os/observe-crons.mts), with
+  `scripts/os/observe-crons.test.ts` beside it and `.github/workflows/os-observe-crons.yml`
+  driving it. Any ruling that names the `.mjs` path would name a file that was never there.
+- **An `os-ledger` branch already exists** on the remote. Text here that treats the ledger as
+  purely prospective is describing work that has at least started.
+
+### One premise holds
+
+- **"Four GitHub-issue writers, zero issues ever opened"** — still exactly true. `gh issue
+  list --state all` returns **0** for `tailered-ai/dime-ai` as of 2026-08-08. The argument in
+  Ruling 3 stands on its original footing.
+
+### Both "Open unknowns" are now resolved, read-only
+
+- **`Security Audit` vs gitleaks — they are DISTINCT, and gitleaks IS required.** Branch
+  protection lists five required contexts: `Security Audit`, `TypeScript Check`, `Vitest`,
+  `Secret Scan (gitleaks)`, and `08-contract-and-data-integrity` (that last one added
+  2026-08-07). On commit `e68d4055b` the two ran as separate jobs in separate workflow runs
+  (`31232252819` and `31232252776`). **SEC-006 is not regressed.** The Stage 2 review that
+  reported "three contexts and no `Secret Scan`" was reading an incomplete list.
+- **`DISABLE_BACKGROUND_JOBS` is set on the backend.** Settled from runtime rather than by
+  reading a variable: `ai-sports-betting-backend` logs
+  `[SCHEDULERS] DISABLE_BACKGROUND_JOBS set — web-only mode: recurring background jobs skipped`
+  on every boot (most recently 2026-08-08T01:17:16Z). The long-pending single-writer question
+  is answered — the backend runs no schedulers. See `railway-two-service-topology` context in
+  `references/`.
+
+### One thing this check does not touch
+
+The `observe_by: 2026-08-12` clock. It is still running, and this note is not an extension of
+it — recording that the premises moved is not the same as ruling, and DR-008's whole point is
+that a record cannot quietly age out by being commented on.
