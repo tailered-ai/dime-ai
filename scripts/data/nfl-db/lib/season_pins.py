@@ -559,6 +559,122 @@ CONTENT_DIGEST_EXCLUDE = {
 }
 
 
+# --------------------------------------------------------------------------
+# Observability specification  (Phase 6)
+# --------------------------------------------------------------------------
+# Phase 5 proved these fields are ALLOWED to move. Allowed to move is not
+# allowed to move invisibly -- so each non-blocking semantic field declares how
+# it is observed. This is the ONE owner of tolerance: the comparator, the
+# baseline writer and the tests all read it from here, so they cannot drift
+# apart the way an enforcer and a generator did before Phase 3.
+
+OBSERVE_TOLERANCE_NUMERIC = "tolerance_numeric"      # provider-derived floats
+OBSERVE_EXACT_CATEGORICAL = "exact_categorical"      # provenance tiers
+OBSERVE_NONE = "none"                                # proven-inert technical
+
+#: Derived from measurement, not chosen for roundness. Full-population
+#: comparison of the two controlled builds (2,007,901 numeric cells) put the
+#: regeneration noise ceiling at 9.97e-15 RELATIVE and 1.03e-13 ABSOLUTE, with
+#: a maximum ULP distance of 73 and zero structural differences.
+#:
+#: 1e-12 is the smallest power of ten that covers both ceilings -- 1e-13 does
+#: NOT, because passing_epa's absolute noise reaches 1.03e-13. It leaves ~100x
+#: margin over measured noise while every plausible substantive revision stays
+#: >= 1.7e8x above the resulting blind zone (worst case 5.95e-11, on
+#: fantasy_points_ppr whose values reach 59.5).
+#:
+#: One common policy is used because all seven metrics sit inside one order of
+#: magnitude of each other in RELATIVE terms (4.4e-15 .. 1.0e-14) despite their
+#: absolute scales differing ~60x. Per-field values remain expressible; they are
+#: simply equal today, and a future metric with a different noise profile gets
+#: its own entry rather than widening everyone else's.
+NOISE_CEILING_RELATIVE = 9.97e-15
+NOISE_CEILING_ABSOLUTE = 1.03e-13
+DEFAULT_ABS_TOLERANCE = 1e-12
+DEFAULT_REL_TOLERANCE = 1e-12
+
+
+class ObservationSpec:
+    """How one non-blocking field is watched.
+
+    abs/rel tolerance are combined with OR: a cell is noise when it is within
+    EITHER. The absolute term exists for values near zero, where a relative
+    term is meaningless -- target_share legitimately holds exact 0.0. The
+    relative term carries everything else, because the underlying defect is a
+    15-significant-digit serialisation, which is a relative error.
+    """
+
+    def __init__(self, mode, abs_tolerance=None, rel_tolerance=None,
+                 review_policy="review_required", note=""):
+        if mode == OBSERVE_TOLERANCE_NUMERIC and (abs_tolerance is None
+                                                  or rel_tolerance is None):
+            raise ValueError("a tolerance-numeric field must declare both tolerances")
+        if mode != OBSERVE_TOLERANCE_NUMERIC and (abs_tolerance is not None
+                                                  or rel_tolerance is not None):
+            raise ValueError(f"{mode} must not carry a numeric tolerance")
+        self.mode = mode
+        self.abs_tolerance = abs_tolerance
+        self.rel_tolerance = rel_tolerance
+        self.review_policy = review_policy
+        self.note = note
+
+
+def _numeric_spec(note):
+    return ObservationSpec(OBSERVE_TOLERANCE_NUMERIC,
+                           abs_tolerance=DEFAULT_ABS_TOLERANCE,
+                           rel_tolerance=DEFAULT_REL_TOLERANCE, note=note)
+
+
+OBSERVATION_SPECS = {
+    "player_game_stats": {
+        m: _numeric_spec(
+            "nflverse model output; movement in the controlled pair was "
+            "serialisation noise only, never a revision")
+        for m in ("passing_epa", "rushing_epa", "receiving_epa", "target_share",
+                  "air_yards_share", "fantasy_points", "fantasy_points_ppr")
+    },
+    "depth_chart": {
+        "gsis_source": ObservationSpec(
+            OBSERVE_EXACT_CATEGORICAL,
+            note="Categorical provenance. Tolerance is meaningless here and a "
+                 "numeric comparator would be a category error, so transitions "
+                 "are compared exactly and reported as a matrix. Observation "
+                 "never decides identity -- the Phase 0R state machine does."),
+        "depth_chart_id": ObservationSpec(
+            OBSERVE_NONE, review_policy="none",
+            note="Proven inert in Phase 5; observing it would manufacture noise "
+                 "with no semantic content."),
+    },
+    "roster_season": {
+        "roster_row_id": ObservationSpec(
+            OBSERVE_NONE, review_policy="none",
+            note="Proven inert in Phase 5."),
+    },
+    "snap_count": {},
+}
+
+#: The exact set of provenance tiers. A value outside this is a schema-contract
+#: violation, not an observation: a new tier must be classified deliberately
+#: before it can appear in governed data.
+KNOWN_GSIS_SOURCES = ("feed", "T0", "T1", "T2", "T3", "T4", None)
+
+
+def observation(table, column):
+    """The one authority for how a field is observed. KeyError is deliberate."""
+    return OBSERVATION_SPECS[table][column]
+
+
+def observed_fields(table):
+    """Non-blocking fields of `table` that carry real observation, in order."""
+    return tuple(sorted(
+        c for c, s in OBSERVATION_SPECS.get(table, {}).items()
+        if s.mode != OBSERVE_NONE))
+
+
+def observed_tables():
+    return tuple(t for t in governed_tables() if observed_fields(t))
+
+
 def field(table, column):
     """One column's semantics. KeyError is deliberate -- an unclassified column
     in a governed table must be loud, never a silent default."""
