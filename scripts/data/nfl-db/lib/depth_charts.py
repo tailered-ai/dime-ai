@@ -864,6 +864,7 @@ def _self_check(raw_dir=None, db_path=None, teams_json=None, identities=None):
     keys = set()
     key_dupes = 0
     a_position_agree = a_position_check = slot_ne_position = 0
+    b_pos_abb = Counter()
     path = os.path.join(raw_dir, "depth_charts.csv")
     with open(path, newline="", encoding="utf-8", errors="replace") as fh:
         for row in csv.DictReader(fh):
@@ -881,6 +882,7 @@ def _self_check(raw_dir=None, db_path=None, teams_json=None, identities=None):
             if rec["source_shape"] == "B":
                 weeks[(rec["week"], rec["playoff_round"])] += 1
                 b_seasons[rec["season"]] += 1
+                b_pos_abb[rec["depth_position"]] += 1
                 k = (rec["snapshot_ts"], rec["team_abbr"], rec["scheme"],
                      rec["pos_slot"], rec["depth_order"])
                 if k in keys:
@@ -1006,7 +1008,14 @@ def _self_check(raw_dir=None, db_path=None, teams_json=None, identities=None):
            all(POSITION_CROSSWALK.get(v, v) == v for v in POSITION_CROSSWALK.values()),
            [v for v in set(POSITION_CROSSWALK.values())
             if POSITION_CROSSWALK.get(v, v) != v])
-    expect("all 31 shape-B pos_abb values are mapped", True, "")
+    # Asserted against the values this run actually observed, not against the
+    # literal True. `_normalize_b` does raise on an unknown pos_abb, so the old
+    # form was true -- but it INHERITED its truth from another function and
+    # would have kept printing PASS if that guard were ever removed. An empty
+    # observation also fails, so the check cannot pass by seeing nothing.
+    unmapped = sorted(p for p in b_pos_abb if p not in POSITION_CROSSWALK)
+    expect("all %d observed shape-B pos_abb values are mapped" % len(b_pos_abb),
+           bool(b_pos_abb) and not unmapped, unmapped)
     expect("crosswalk covers >=97% of shape-A depth_position rows",
            a_position_check and a_position_agree / a_position_check >= 0.97,
            "%d/%d" % (a_position_agree, a_position_check))

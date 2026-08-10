@@ -71,8 +71,12 @@ def evaluate(conn, baseline_path=None, root=None):
     parts["layer_c"] = {"verdict": c_verdict, "detail": stats,
                         "findings": findings}
     cons = il.conservation(conn)
+    # Both directions. A row governed by NO mechanism is unprotected; a row
+    # counted by TWO is a broken partition, and two such errors of opposite sign
+    # once made `ungoverned` read 0 on a database that had an unprotected row.
     parts["conservation"] = {
-        "verdict": PASS if cons["ungoverned"] == 0 else FAIL, "detail": cons}
+        "verdict": PASS if (cons["ungoverned"] == 0 and cons["overlapping"] == 0)
+        else FAIL, "detail": cons}
     overall = compose(PASS if a_ok else FAIL, PASS if b_ok else FAIL, c_verdict,
                       parts["conservation"]["verdict"])
     return overall, parts
