@@ -242,7 +242,31 @@ def window(table):
     return FROZEN_WINDOWS[table]
 
 
+#: depth_chart's monolithic digest was RETIRED in Phase 8 and replaced by
+#: Layers A + B + C (lib/identity_layers.py, lib/identity_baseline.py).
+#:
+#: It was verified healthy immediately before retirement -- it reproduced its
+#: pinned value exactly -- so this is a migration, not the abandonment of a
+#: broken mechanism. The reason it had to go: it hashed source-owned identity
+#: (immutable) and crosswalk-derived identity (a legitimately improvable join
+#: result) into one number, so a legitimate new resolution was simultaneously
+#: Layer C REVIEW_REQUIRED and digest corruption. Two controls contradicted each
+#: other about the same event.
+#:
+#: The pin remains in CONTENT_DIGESTS as historical evidence and is still
+#: reproducible, but no gate consults it: governed_tables() no longer yields
+#: depth_chart, so content_digest()'s blocking loop skips it.
+RETIRED_MONOLITHIC_TABLES = ("depth_chart",)
+
+
 def governed_tables():
+    """Tables whose monolithic content digest is an ACTIVE blocking gate."""
+    return tuple(t for t in FROZEN_WINDOWS if t not in RETIRED_MONOLITHIC_TABLES)
+
+
+def all_frozen_tables():
+    """Every registered frozen window, including retired-digest tables. Use this
+    for population/count contracts, which are unaffected by the retirement."""
     return tuple(FROZEN_WINDOWS)
 
 

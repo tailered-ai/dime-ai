@@ -22,8 +22,12 @@ would be inventing schema.
     rather than rejected.
 
     5 records actually produce a T4 resolution (489 rows, 316 of them inside the
-    audited frozen window). The other 34 are evidence for ids in
-    UNRESOLVED_ESPN_IDS -- exact overlap, 5 + 34 = 39.
+    audited frozen window). The other 34 are evidence for ids that were
+    unresolved when this was itemised -- see depth_charts.UNRESOLVED_NOTES,
+    exact overlap, 5 + 34 = 39. Note that the CURRENT accepted-unresolved set is
+    33, not 34: Phase 0R reviewed and accepted 4431597 (Roc Taylor) as resolved.
+    The authority is depth_charts.unresolved_baseline_ids(), derived from
+    accepted-identities.json; the 34 here is frozen historical evidence.
 
 WHY THIS MODULE EXISTS. Before it there were two independent parsers: build_db.py
 and depth_charts._self_check, each resolving its own path and building its own dict

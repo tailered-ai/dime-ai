@@ -513,7 +513,7 @@ class AcceptanceWorkflow(unittest.TestCase):
 
     def test_blocking_integrity_is_a_prerequisite(self):
         conn = sqlite3.connect(":memory:")
-        for t in sp.governed_tables():
+        for t in sp.all_frozen_tables():
             conn.execute(f"CREATE TABLE {t} ({', '.join(sp.FIELD_CLASSES[t])})")
         try:
             ok, _ = self.cli.blocking_integrity(conn)
@@ -549,7 +549,10 @@ class AcceptanceWorkflow(unittest.TestCase):
         target = sorted(e for e, g in accepted.items() if not g)[0]
         db = os.path.join(tmp, "pending.db")
         c = sqlite3.connect(db)
-        for t in sp.governed_tables():
+        # all_frozen_tables(), not governed_tables(): Phase 8 retired depth_chart's
+        # monolithic digest, so it is no longer an ACTIVE blocking gate -- but this
+        # fixture still needs the table, because Layer C reads depth_chart rows.
+        for t in sp.all_frozen_tables():
             c.execute(f"CREATE TABLE {t} ({', '.join(sp.FIELD_CLASSES[t])})")
         cols = list(sp.FIELD_CLASSES["depth_chart"])
         for e, g in list(accepted.items()):
