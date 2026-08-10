@@ -200,18 +200,61 @@ export function buildRepairManifest(
 }
 
 /**
- * A row is inside the M-203 defect window when it was SCORED before the fix
- * deployed — not when the game was played.
+ * The production interval during which rows were scored by the defective
+ * unit-conversion. Both bounds are PRODUCTION timestamps, not commit dates.
+ *
+ * defectStartMs — when the defective scorer became active in production.
+ * fixDeployedAtMs — when the corrected scorer became active in production.
+ *
+ * The evidence record must carry the real deployment timestamp for
+ * fixDeployedAtMs. A commit date is NOT a substitute: code lands and deploys at
+ * different moments, and using the earlier of the two would silently exclude
+ * rows scored in the gap between merge and deploy.
+ */
+export interface DefectWindow {
+  defectStartMs: number;
+  fixDeployedAtMs: number;
+}
+
+/**
+ * A row is inside the M-203 defect window when it was SCORED inside that
+ * interval — not when the game was played.
  *
  * This distinction is load-bearing. An April game re-ingested in July carries
  * correct scores and must not be repaired; a July game scored before the fix
  * must be. Selecting on game date would get both wrong.
+ *
+ * Boundary contract, stated explicitly rather than left to be inferred:
+ *
+ *   defectStartMs   INCLUSIVE  (a row scored at the instant the defect went
+ *                              live carries the defect)
+ *   fixDeployedAtMs EXCLUSIVE  (a row scored at the instant the fix went live
+ *                              was scored by the corrected code)
+ *
+ * Fails closed: a null, undefined, NaN or non-finite timestamp is NOT treated
+ * as in-window, because a row whose scoring time is unknown cannot be proven
+ * defective and must be classified for investigation instead of silently
+ * repaired.
  */
 export function isInDefectWindow(
   outcomeIngestedAt: number | null | undefined,
-  fixDeployedAtMs: number
+  window: DefectWindow | number
 ): boolean {
-  if (outcomeIngestedAt === null || outcomeIngestedAt === undefined)
+  if (outcomeIngestedAt === null || outcomeIngestedAt === undefined) {
     return false;
-  return outcomeIngestedAt < fixDeployedAtMs;
+  }
+  if (
+    typeof outcomeIngestedAt !== "number" ||
+    !Number.isFinite(outcomeIngestedAt)
+  ) {
+    return false;
+  }
+  const w: DefectWindow =
+    typeof window === "number"
+      ? { defectStartMs: Number.NEGATIVE_INFINITY, fixDeployedAtMs: window }
+      : window;
+  return (
+    outcomeIngestedAt >= w.defectStartMs &&
+    outcomeIngestedAt < w.fixDeployedAtMs
+  );
 }
