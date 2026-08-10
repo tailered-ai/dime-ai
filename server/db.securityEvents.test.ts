@@ -121,6 +121,58 @@ describe("getSecurityEvents — silent truncation (defect 1)", () => {
   });
 });
 
+describe("getSecurityEvents — existence probes do not cry truncation", () => {
+  // PRODUCTION SYMPTOM this pins (deployment ff472662, 2026-08-09T13:00:43Z):
+  //   [DB][getSecurityEvents] Fetched 1 rows | limit=1 type=DIGEST_MARKER_DAILY
+  //   ERROR Result hit the limit (1) — older events ... TRUNCATED ... LOWER BOUND
+  // Nothing was truncated. The caller asked whether one marker exists and got
+  // its answer. Fired twice per digest run, at ERROR severity, in the security
+  // stream — the lying-observability class, inside the fix meant to remove it.
+
+  it("a full existence probe stays silent (the production false positive)", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    rowsToReturn = [{ id: 1, eventType: DIGEST_MARKER_DAILY_EVENT_TYPE }];
+    await getSecurityEvents({
+      eventType: DIGEST_MARKER_DAILY_EVENT_TYPE,
+      limit: 1,
+      existenceProbe: true,
+    });
+    const said = warn.mock.calls.flat().join(" ");
+    console.log(
+      `[STATE] truncation warning on a satisfied probe: ${/TRUNCATED/.test(said)}`
+    );
+    expect(said).not.toMatch(/TRUNCATED/);
+  });
+
+  it("STILL warns for a genuine window survey that hits its ceiling", async () => {
+    // The exemption must be narrow: a real survey losing rows must still shout.
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    rowsToReturn = Array.from({ length: 10 }, (_, i) => ({ id: i }));
+    await getSecurityEvents({ limit: 10, sinceMs: 1 });
+    const said = warn.mock.calls.flat().join(" ");
+    expect(said).toMatch(/TRUNCATED/);
+  });
+
+  it("an UNFLAGGED single-row read still warns — the flag is opt-in, not inferred from limit", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    rowsToReturn = [{ id: 1 }];
+    await getSecurityEvents({ limit: 1 });
+    const said = warn.mock.calls.flat().join(" ");
+    expect(said).toMatch(/TRUNCATED/);
+  });
+
+  it("a probe that comes back EMPTY is silent too (nothing to report either way)", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    rowsToReturn = [];
+    await getSecurityEvents({
+      eventType: DIGEST_MARKER_DAILY_EVENT_TYPE,
+      limit: 1,
+      existenceProbe: true,
+    });
+    expect(warn.mock.calls.flat().join(" ")).not.toMatch(/TRUNCATED/);
+  });
+});
+
 describe("getSecurityEvents — digest markers in the console (defect 2)", () => {
   it("builds a WHERE clause even with no filters, so markers can be excluded", async () => {
     // Pre-fix, {} produced zero conditions and the call was `.where(undefined)`,
