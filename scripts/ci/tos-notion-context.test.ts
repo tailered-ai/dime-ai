@@ -133,6 +133,16 @@ describe("TOS-006 contract on scoped PRs (fixture-driven)", () => {
       /Deployment consequence: none/,
     ],
     ["unfilled-template.txt", /"Project" is missing/, /add "- Project:/],
+    [
+      "commented-section.txt",
+      /no "## Notion context" section/,
+      /add the section below/,
+    ],
+    [
+      "lying-project.txt",
+      /carries 2 different Notion ids/,
+      /keep exactly one URL\/id/,
+    ],
   ];
 
   for (const [name, whatPattern, fixPattern] of REJECTIONS) {
@@ -146,6 +156,24 @@ describe("TOS-006 contract on scoped PRs (fixture-driven)", () => {
       assert.match(report, /config\/tailered-os-control-plane\.v1\.json/);
     });
   }
+
+  it("a whitespace-stuffed body cannot burn the job (ReDoS fix, gstack-cso 504-1)", () => {
+    const bomb = `## Notion context\n${(" ".repeat(120) + "\n").repeat(500)}- Project: junk\n`;
+    const startedAt = process.hrtime.bigint();
+    const result = evaluate(bomb, SCOPED, manifest);
+    const elapsedMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
+    assert.ok(result.errors.length > 0, "must reject");
+    assert.ok(elapsedMs < 1000, `must be linear-time (took ${elapsedMs}ms)`);
+  });
+
+  it("a lookalike heading is not accepted as the section (exact match)", () => {
+    const body = `## Notion contextual notes\n\n- Project: https://app.notion.com/p/${PROJECT_ID}\n`;
+    const result = evaluate(body, SCOPED, manifest);
+    assert.match(
+      formatReport(result, manifest),
+      /no "## Notion context" section/
+    );
+  });
 
   it("a body failing several fields reports ALL of them at once", () => {
     const result = evaluate(fixture("many-failures.txt"), SCOPED, manifest);

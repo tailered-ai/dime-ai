@@ -52,16 +52,32 @@ export function isTosScoped(changedFiles) {
 // www.notion.so/<workspace>/<Slug>-<id>, dashed UUIDs, and bare ids. Matching is
 // by the dash-normalized 32-hex id — never by exact URL-template comparison.
 export function extractNotionId(text) {
-  const match = text.match(
+  const match = String(text ?? "").match(
     /\b(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\b/
   );
   return match ? match[0].replace(/-/g, "").toLowerCase() : null;
 }
 
+// ALL page ids in a value, deduplicated. A field must not carry two different
+// ids — "- Project: <canonical-hex> [open](…/<other-id>)" is a lying line, not
+// a valid one (gstack-review finding).
+export function extractAllNotionIds(text) {
+  const matches =
+    String(text ?? "").match(
+      /\b(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\b/g
+    ) ?? [];
+  return [...new Set(matches.map(m => m.replace(/-/g, "").toLowerCase()))];
+}
+
 function sectionOf(body, heading) {
-  const lines = body.split(/\r?\n/);
-  const start = lines.findIndex(line =>
-    line.trim().toLowerCase().startsWith(`## ${heading}`.toLowerCase())
+  // Strip HTML comments from the WHOLE body first: a fully commented-out
+  // template block never renders and must not satisfy the contract
+  // (gstack-review finding). Unterminated comments swallow to end-of-body,
+  // matching what GitHub renders.
+  const rendered = body.replace(/<!--[\s\S]*?(-->|$)/g, "");
+  const lines = rendered.split(/\r?\n/);
+  const start = lines.findIndex(
+    line => line.trim().toLowerCase() === `## ${heading}`.toLowerCase()
   );
   if (start === -1) return null;
   const rest = lines.slice(start + 1);
@@ -70,13 +86,22 @@ function sectionOf(body, heading) {
 }
 
 function fieldOf(section, label) {
-  const match = section.match(
-    new RegExp(`^\\s*[-*]?\\s*${label}\\s*:\\s*(.*)$`, "im")
+  // Per-line matching with intra-line whitespace only ([^\S\n], never \s across
+  // newlines): the previous section-wide `im` regex backtracked catastrophically
+  // on whitespace-stuffed bodies — 13s at 13KB, unbounded at GitHub's body cap
+  // (gstack-cso finding, ReDoS). Line-based matching is linear.
+  const pattern = new RegExp(
+    `^[^\\S\\n]*[-*]?[^\\S\\n]*${label}[^\\S\\n]*:[^\\S\\n]*(.*)$`,
+    "i"
   );
-  if (!match) return null;
-  // Strip HTML comments (unfilled template placeholders read as empty).
-  const value = match[1].replace(/<!--[\s\S]*?(-->|$)/g, "").trim();
-  return value.length > 0 ? value : null;
+  for (const line of section.split("\n")) {
+    const match = line.match(pattern);
+    if (match) {
+      const value = match[1].replace(/<!--[\s\S]*?(-->|$)/g, "").trim();
+      return value.length > 0 ? value : null;
+    }
+  }
+  return null;
 }
 
 function compliantBlock(manifest) {
@@ -124,11 +149,18 @@ export function evaluate(body, changedFiles, manifest) {
       `add "- Project: ${manifest.notion.pageUrlTemplate.replace("{id}", canonicalProjectId)}" (canonical id from config/tailered-os-control-plane.v1.json).`
     );
   } else {
-    const projectId = extractNotionId(projectValue);
-    if (projectId !== canonicalProjectId) {
+    const projectIds = extractAllNotionIds(projectValue);
+    if (projectIds.length > 1) {
       fail(
         "Project",
-        `the Project URL resolves to id "${projectId ?? "none"}", which is not the canonical Tailered OS project.`,
+        `the Project line carries ${projectIds.length} different Notion ids — a line whose visible id and link target disagree is a lying line.`,
+        "one field, one id: mixed ids are how a PR points reviewers at the canonical project while linking somewhere else.",
+        "keep exactly one URL/id on the Project line."
+      );
+    } else if (projectIds[0] !== canonicalProjectId) {
+      fail(
+        "Project",
+        `the Project URL resolves to id "${projectIds[0] ?? "none"}", which is not the canonical Tailered OS project.`,
         "a wrong project id silently detaches the PR from the control plane.",
         `use the canonical project (id ${canonicalProjectId}, pinned in config/tailered-os-control-plane.v1.json).`
       );
@@ -136,7 +168,16 @@ export function evaluate(body, changedFiles, manifest) {
   }
 
   const taskValue = fieldOf(section, "Task");
-  const taskId = taskValue ? extractNotionId(taskValue) : null;
+  const taskIds = taskValue ? extractAllNotionIds(taskValue) : [];
+  if (taskIds.length > 1) {
+    fail(
+      "Task",
+      `the Task line carries ${taskIds.length} different Notion ids.`,
+      "one field, one id: a mixed-id line hides which task actually governs the change.",
+      "keep exactly one Task URL on the line."
+    );
+  }
+  const taskId = taskIds.length === 1 ? taskIds[0] : null;
   if (!taskValue || !taskId) {
     fail(
       "Task",

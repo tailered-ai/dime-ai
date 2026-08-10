@@ -49,7 +49,10 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          git diff --name-only "$(git merge-base "$BASE_SHA" "$HEAD_SHA")" "$HEAD_SHA" > changed-files.txt
+          # --no-renames: a rename prints only its destination, so a pure
+          # `git mv` out of the TOS tree would otherwise dodge the scope
+          # predicate entirely (gstack-review finding).
+          git diff --name-only --no-renames "$(git merge-base "$BASE_SHA" "$HEAD_SHA")" "$HEAD_SHA" > changed-files.txt
           echo "changed files: $(wc -l < changed-files.txt)"
 
       - name: "[STEP] Notion-context contract (body via env only; scope decided in-job)"
