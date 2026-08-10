@@ -47,12 +47,12 @@ jobs:
           fetch-depth: 0
 
       - name: "[STEP] Setup Node.js 22"
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: 22
 
       - name: "[STEP] Install pnpm"
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v4
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v4
 
       - name: "[STEP] Install dependencies"
         run: pnpm install --frozen-lockfile

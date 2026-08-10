@@ -53,6 +53,13 @@ c63bb85031c2a3404ae2a4a049dfb02e39777c2d:ml/dime-1.0/evidence/benchmarks/base-mo
 9ace77d832bed675f7c06444c477b164f18e80d7:ml/dime-1.0/configs/runpod_gate_1_authorization_v1.json:generic-api-key:30
 9ace77d832bed675f7c06444c477b164f18e80d7:ml/dime-1.0/configs/runpod_gate_1_authorization_v1.json:generic-api-key:36
 
+# TOS-001 (PR #500): the control-plane validator's negative test originally
+# carried a literal secret-shaped Stripe fixture; commit 92a6afcf rebuilt it at
+# runtime so the working tree is clean, but the introducing commit's diff is
+# immutable history. Same class as the SEC-006 entries above: a constructed
+# fixture ABOUT credential detection, not a credential. Exact fingerprint only.
+1904f3ab0ed286712744176ccd66641ff0a93c79:scripts/tailered-os-control-plane.test.ts:stripe-access-token:99
+
 # PR #496 Tailered OS pin gate. The cloudflare-api-key detector matched the
 # EXPECTED_CLOUDFLARE_OS_PIN env value in the Tailered OS CI workflow — a 40-hex
 # string adjacent to the word "cloudflare". It is the public cloudflare/cloudflare-os

@@ -45,6 +45,7 @@ and the embedded runtimes. Auth law: LLM.md "Auth model: subscription-first".
 | Deployment                               | plugin `railway@railway-skills`                                                                                   | railwayapp/railway-skills — `use-railway` skill + hosted MCP server for services, environments, deployments, logs, and troubleshooting. Pair with `references/railway-deploy.md` (deploy law below)                                                                                                                                                                                                                                                                                                               |
 | Secondary harness                        | `.pi/` + global `@earendil-works/pi-coding-agent`; embedded runtime `server/_core/piAgent.ts`                     | pi coding agent wired to this repo: loads `AGENTS.md` + all skill trees + `.claude/commands/` as templates via `.pi/settings.json`; dime-guard extension, dime theme, model policy. pi-agent-core embeds the same stack in-process (createPiAgent/runPiChat/runPiAgent, gateway-routed). Runbook: `references/pi-harness.md`                                                                                                                                                                                      |
 | Multiplayer orchestration                | `~/src/qm` reference clone (yc-software/qm)                                                                       | QM — Slack + web org workspaces driving Pi/Claude Code; this repo feeds it as a skill pack and sandbox checkout; deployment owner-gated (docker/fly/aws). Runbook: `references/qm-harness.md`                                                                                                                                                                                                                                                                                                                     |
+| Browser + shipping (gstack)              | `~/.claude/skills/gstack` (user scope, tracks upstream `main`); bootstrap `.claude/scripts/bootstrap-gstack.sh`   | garrytan/gstack — 53 skills, all installed **`gstack-` prefixed**. `/gstack-browse` is THE browsing path (never `mcp__claude-in-chrome__*`); plus `/gstack-qa`, `/gstack-review`, `/gstack-investigate`, `/gstack-canary`, `/gstack-land-and-deploy`, the `/gstack-plan-*-review` panel, and `/gstack-careful`+`-freeze`+`-guard`. The prefix is what keeps `/ship` and `/retro` Dime's — full list, the collision law, and the bootstrap contract are in the **gstack** section below                                                                                                                                                            |
 
 Plugin config lives in `.claude/settings.json` (`extraKnownMarketplaces` + `enabledPlugins`, 61
 plugins across 6 marketplaces). `skills-lock.json` pins the npx-installed sources.
@@ -173,6 +174,121 @@ For multi-skill or aesthetic-direction UI work, `/ui-loop` wraps the `/ui-build`
 
 Useful CLI: `python3 .claude/skills/ui-ux-pro-max/scripts/search.py "<query>" [--domain ...] [--stack ...] [--design-system --variance N --motion N --density N]`
 
+## gstack
+
+[garrytan/gstack](https://github.com/garrytan/gstack) lives at `~/.claude/skills/gstack` — **user
+scope, not project scope**: `./setup` symlinks each sub-skill into `~/.claude/skills/`, so nothing
+in this repo can carry it. A third `SessionStart` hook
+(`.claude/scripts/bootstrap-gstack.sh`, `startup|resume|clear`, timeout 300s) closes that gap: a
+warm machine early-exits in ~0s, a cold one clones and builds once (~40s) and never again.
+**`bun` is a prerequisite** (`brew install bun`) — without it the hook warns and exits 0 rather
+than wedging the session. Opt out with `DIME_SKIP_GSTACK=1`.
+
+The hook pins `--prefix` (every gstack skill installs as `/gstack-<name>` — see **Name collisions**
+below) and `--no-plan-tune-hooks` (never writes hooks into a teammate's `~/.claude/settings.json`),
+and sets `GSTACK_SKIP_COREUTILS=1` so an unattended session never `brew install`s on someone's
+machine — re-run `./setup` by hand if you want `/gstack-codex` hang protection. It deliberately does
+**not** `git pull` an existing checkout; gstack tracks upstream `main` and advancing it is a
+deliberate act: `/gstack-upgrade`, or `cd ~/.claude/skills/gstack && git pull && ./setup`.
+
+**Browsing law (IMPORTANT).** Use the **`/gstack-browse`** skill for **all** web browsing —
+page loads, screenshots, scraping, form interaction, console/network inspection, rendered proof.
+**Never use the `mcp__claude-in-chrome__*` tools.** The binary is
+`~/.claude/skills/gstack/browse/dist/browse` (76 commands: `goto`, `screenshot`, `snapshot`,
+`click`, `fill`, `eval`, `console`, `network`, `scrape`, `ux-audit`, …). There is no `bin/browse` —
+`bin/` holds the 76 `gstack-*` helper executables, not the browser.
+
+Running `browse` from a repo creates a per-project `.gstack/` daemon-state dir there and appends
+`.gstack/` to that repo's `.gitignore` (idempotent, `browse/src/config.ts`). This repo ignores
+per-project `.gstack/` browser state, so an unexplained `.gitignore` diff after your first
+`/gstack-browse` is this, not a mistake. Note that headless `browse` against **production** is a
+bot to the edge and gets 403'd by design; verify prod from Railway logs instead
+(`references/railway-deploy.md`).
+
+Available gstack skills — **all 53 carry the `gstack-` prefix**:
+
+- **Plan** — `/gstack-office-hours`, `/gstack-autoplan`, `/gstack-plan-ceo-review`,
+  `/gstack-plan-eng-review`, `/gstack-plan-design-review`, `/gstack-plan-devex-review`,
+  `/gstack-plan-tune`, `/gstack-spec`
+- **Design** — `/gstack-design-consultation`, `/gstack-design-shotgun`, `/gstack-design-html`,
+  `/gstack-design-review`, `/gstack-diagram`
+- **Review** — `/gstack-review`, `/gstack-devex-review`, `/gstack-cso`, `/gstack-investigate`,
+  `/gstack-retro`, `/gstack-health`
+- **Ship** — `/gstack-ship`, `/gstack-land-and-deploy`, `/gstack-canary`, `/gstack-benchmark`
+- **Browser** — `/gstack-browse`, `/gstack-connect-chrome`, `/gstack-qa`, `/gstack-qa-only`,
+  `/gstack-setup-browser-cookies`, `/gstack-scrape`, `/gstack-skillify`, `/gstack-pair-agent`
+- **Docs** — `/gstack-document-release`, `/gstack-document-generate`, `/gstack-learn`,
+  `/gstack-make-pdf`
+- **Safety** — `/gstack-careful`, `/gstack-freeze`, `/gstack-guard`, `/gstack-unfreeze`
+- **iOS** — `/gstack-ios-qa`, `/gstack-ios-fix`, `/gstack-ios-design-review`, `/gstack-ios-sync`,
+  `/gstack-ios-clean`
+- **Setup/state** — `/gstack-setup-deploy`, `/gstack-setup-gbrain`, `/gstack-sync-gbrain`,
+  `/gstack-upgrade`, `/gstack-codex`, `/gstack-context-save`, `/gstack-context-restore`,
+  `/gstack-landing-report`, `/gstack-benchmark-models`
+
+`/gstack-upgrade` is named that way upstream and is not double-prefixed. The root `/gstack` router
+is never prefixed.
+
+That is 53 distinct skills across 54 `gstack-*` skill directories: upstream ships `connect-chrome`
+as a **symlink** to `open-gstack-browser`, so both directories carry the same `SKILL.md` (one inode,
+one declared `name:`) and the pair surfaces as the single skill **`/gstack-connect-chrome`** —
+`/gstack-open-gstack-browser` does not resolve as a separate entry.
+
+### Name collisions (IMPORTANT — do not "simplify" this)
+
+This repo owns two names gstack also ships: **`ship`** (`.claude/commands/ship.md`, the Railway
+release pipeline) and **`retro`** (`.claude/skills/retro/`, the phuryn PM retro).
+
+**Claude Code does not resolve these by scope.** There is no project-beats-user rule — verified
+2026-08-10 in a fresh session, where `retro` resolved to gstack's skill, not this repo's. Same-named
+skills collapse to one winner, and `skillOverrides` is keyed by bare skill name with no scope
+qualifier, so it cannot disable the user-scope copy without disabling the project's too.
+
+The fix is upstream-supported and lives in the naming mode, not in precedence:
+
+| Name | Resolves to | Notes |
+| --- | --- | --- |
+| `/ship` | **Dime** — `.claude/commands/ship.md` | Railway release pipeline. The only `ship`. |
+| `/retro` | **Dime** — `.claude/skills/retro/SKILL.md` | phuryn PM retro. The only `retro`. |
+| `/gstack-ship` | gstack | branch/test/VERSION/CHANGELOG/PR workflow |
+| `/gstack-retro` | gstack | weekly engineering retrospective |
+
+`./setup --prefix` renames **every** gstack skill (gstack applies the prefix uniformly — there is
+no per-skill allowlist), which is what frees `ship` and `retro`. setup persists the choice via
+`gstack-config set skill_prefix true` in `~/.gstack/config.yaml`, so a later bare `./setup` and
+`/gstack-upgrade` (which stashes, `git reset --hard`s, then re-runs setup) both stay prefixed.
+The bootstrap hook judges health on the **observable surface**, not on the config: the checkout is
+a real git checkout, `VERSION` is non-empty, `browse/dist/browse` is executable,
+`~/.claude/skills/gstack-browse/SKILL.md` exists and is the checkout's own `browse/SKILL.md`
+(compared by inode, so path spelling cannot fool it), and `skill_prefix=true`. Anything less is not
+healthy, so a flat-mode machine is reconciled by one `./setup --prefix`.
+
+**Bounded self-repair.** setup persists `skill_prefix=true` at `setup:180` but does not create the
+skill links until `setup:994`, and it deletes the old flat links at `setup:987` — so an interrupted
+setup can leave a machine claiming prefixed mode with _no gstack skills at all_. Trusting the config
+would call that healthy; refusing to act on it would leave it broken forever. The hook instead makes
+**one** `./setup --prefix` attempt per cooldown window:
+
+- Success → `gstack repaired (…)`, state cleared.
+- Failure → prints `gstack DEGRADED:` with the exact cause and the manual recovery command, **exits
+  0** so startup is never blocked, and records `~/.gstack/.dime-gstack-repair` (epoch + gstack
+  version@sha, atomic write-then-rename).
+- While that state is fresh, later sessions skip setup entirely and just repeat the warning — no
+  setup storm. Retry re-opens after 6h (`DIME_GSTACK_REPAIR_COOLDOWN`) **or** as soon as gstack's
+  own version/sha changes, whichever comes first. Deleting the state file forces an immediate retry.
+- Concurrent sessions are serialised by an atomic `mkdir` lock at
+  `~/.gstack/.dime-gstack-repair.lock`; the loser reports and exits rather than waiting, and a lock
+  orphaned by a killed session is reclaimed after 30m (`DIME_GSTACK_LOCK_STALE`).
+
+Both state files follow gstack's own `~/.gstack` dot-file convention (cf. `.last-setup-version`,
+`setup:1227`). Neither lives in the repo.
+
+Deliberate consequence: a developer who runs `./setup --no-prefix` by hand gets the collision back,
+and the next SessionStart will reconcile them to prefixed. `DIME_SKIP_GSTACK=1` is the opt-out.
+
+Repo law still governs gstack output: UI obeys `design-system/dime-ai/MASTER.md`, schema changes
+ride `db-push.yml` first, and merging to `main` IS a production deploy.
+
 ## Precedence rules (IMPORTANT)
 
 1. **Dime brand law beats skill suggestions.** For any UI work, `design-system/dime-ai/MASTER.md`
@@ -211,13 +327,16 @@ Useful CLI: `python3 .claude/skills/ui-ux-pro-max/scripts/search.py "<query>" [-
   the ML lane is DORMANT — PR #289 closed (branch `agent/dime-v1-release-candidate-v1` preserves
   the checksummed dataset candidate), the RunPod endpoint decommissioned, its production env vars
   removed, and `dime-llm-validation.yml` triggers slimmed to the `ml/` tree only.
-- `references/notion-control-plane.md` — Notion is the organizational control plane (workspace
-  "Tailered Sports", root page "Dime AI — Operations HQ"): goals, projects, decisions, releases,
-  and AI governance metadata live there; GitHub stays authoritative for code, CI, and commit
-  evidence. Production releases get a Release record with exact evidence links; owner decisions
-  get a Decision record; PRs paste their Notion context URL into the PR template's "Notion
-  context" section (enables Notion's GitHub auto-relations). Never mirror GitHub issues into
-  Notion by hand, and never put secrets in Notion.
+- `references/notion-control-plane.md` — Notion is the organizational control plane (root page
+  "Tailered Team Home"): goals, projects, decisions, releases, and AI governance metadata live
+  there; GitHub stays authoritative for code, CI, and commit evidence. Machine-readable
+  authority map: `config/tailered-os-control-plane.v1.json` (canonical Tailered OS Project,
+  Command Center, Tasks/Projects databases, AI Systems Registry — enforced by
+  `scripts/tailered-os-control-plane.mjs`). Production releases get a Release record with exact
+  evidence links; owner decisions get a Decision record; PRs paste their Notion context URL into
+  the PR template's "Notion context" section (the archived GitHub Sync integration no longer
+  auto-relates them). Never mirror GitHub issues into Notion by hand, and never put secrets in
+  Notion.
 
 ## Deploy law (IMPORTANT)
 
