@@ -1079,6 +1079,43 @@ function main(argv) {
     return console.log(`[ledger] ${decisionId} = ${value}`);
   }
 
+  if (command === "supersede-evidence") {
+    // APPEND-ONLY evidence supersession (DEF-028). A closed unit's status is
+    // terminal and is NOT touched here; only its evidence pointer moves, and
+    // the superseded paths AND their original hashes are retained forever so
+    // the original record stays auditable. Same shape as the append-only
+    // GEN-000 correction AMD-001 introduced for DEF-005.
+    //
+    // This exists because a RUN ARTIFACT was recorded as immutable unit
+    // evidence and a later authorized run legitimately regenerated it. It is
+    // deliberately expensive to use: reason, defect, and replacement evidence
+    // are all mandatory, and every use is visible in the rendered ledger.
+    const ledger = loadLedger();
+    const [unitId] = rest;
+    const unit = ledger.units[unitId];
+    if (!unit) throw new Error(`UNKNOWN_UNIT_ID: ${unitId}`);
+    if (!flags.reason) throw new Error("SUPERSESSION_REASON_REQUIRED");
+    if (!flags.defect) throw new Error("SUPERSESSION_DEFECT_REQUIRED");
+    if (!flags.evidence.length) {
+      throw new Error("SUPERSESSION_EVIDENCE_REQUIRED");
+    }
+    unit.superseded_evidence ??= [];
+    unit.superseded_evidence.push({
+      at: new Date().toISOString(),
+      reason: flags.reason,
+      defect: flags.defect,
+      previous: unit.evidence.map(item => ({
+        path: item.path,
+        sha256: item.sha256,
+      })),
+    });
+    unit.evidence = collectEvidence(flags.evidence);
+    persist(ledger);
+    return console.log(
+      `[ledger] ${unit.id} evidence superseded (${unit.superseded_evidence.length} supersession(s) on record; status unchanged: ${unit.status})`
+    );
+  }
+
   if (command === "defect") {
     const ledger = loadLedger();
     const [action, defectId] = rest;

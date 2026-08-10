@@ -1,0 +1,9 @@
+diff --git a/drizzle/meta/p05-poison-stray.json b/drizzle/meta/p05-poison-stray.json
+new file mode 100644
+index 000000000..ddc9c04f3
+--- /dev/null
++++ b/drizzle/meta/p05-poison-stray.json
+@@ -0,0 +1,3 @@
++{
++  "note": "P05 ASSURANCE poison — a non-drizzle file in drizzle/meta/ makes drizzle-kit generate abort with exit code 0 and silently disarm db:push. Inert patch bytes only."
++}

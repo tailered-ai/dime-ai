@@ -10,8 +10,8 @@
     "workflows": [
       {
         "path": ".github/workflows/01-pr-proof-contract.yml",
-        "raw_sha256": "76cdc4b5534f53756dff77cd58b92efa956fcee72121edb09e238d0d12d71f50",
-        "canonical_sha256": "7f5fa8b6bee01fed01ab57b1b4456e25dbcf448cac7be0779cf6e2d43c151fcb"
+        "raw_sha256": "2778ae9068c3f74f7a1c05f7cc8591891f076dc55b4f6b65da931cfb6aa0507f",
+        "canonical_sha256": "f52a1b9f159e8bc2842b54da4c02acd866616985965ac914586d09cc01358b5d"
       },
       {
         "path": ".github/workflows/02-codeql.yml",
@@ -35,13 +35,13 @@
       },
       {
         "path": ".github/workflows/07-coverage-patch.yml",
-        "raw_sha256": "24afae21812686c5469ca155a28e36f83db938898955df7efaf851fa8fd58f45",
-        "canonical_sha256": "f113a26ac11a6dd365b4a84b0cfc650b82a14ff206766fcab0e5bb25db88b8f9"
+        "raw_sha256": "38203a2e85e47a5f1aeb195567b2ea77e794348a26d83f28b603d1647f80cb41",
+        "canonical_sha256": "ff4c83a51bcbc920538cd1f29c67fa4411de20eacd79053f9dac157bebf0f266"
       },
       {
         "path": ".github/workflows/08-contract-and-data-integrity.yml",
-        "raw_sha256": "459978cb3b7a7e3801faa9cb7a1966ce9bfa2580ed931c408a586dcb628f7824",
-        "canonical_sha256": "bc6b76db5b2a53a9234a5437c48488ca1705b5549d704ba844bc205aa41951af"
+        "raw_sha256": "4ab20522d6289e9b90a95985e1e885308617de078ca9c88e74bc11d93546cb42",
+        "canonical_sha256": "7ab2853128dce3abcebf2f4c4ca3545851a01eb0ed468c722c25d7e4d27b3099"
       },
       {
         "path": ".github/workflows/09-artifact-build-and-smoke.yml",
@@ -50,8 +50,8 @@
       },
       {
         "path": ".github/workflows/10-ai-eval-critical.yml",
-        "raw_sha256": "83ed21dd5185b1193c0172b5b6c517e6c5a8e196550413d487616441775ba6cb",
-        "canonical_sha256": "21f867df5ae0effbca3e209c376e4d7dcd46f0e62a961affd8ef4cc195a8a694"
+        "raw_sha256": "fc3c61ec5295d39cfc19d76fdd5f580cdc08af3745858f49a04ad04500bfdd00",
+        "canonical_sha256": "1962c88decd245b24551b6155855247e5cfb73a620b7f8483bac3c129b22c21c"
       },
       {
         "path": ".github/workflows/11-artifact-attestation.yml",
@@ -60,8 +60,8 @@
       },
       {
         "path": ".github/workflows/12-nightly-verification.yml",
-        "raw_sha256": "a77a3a33a807ba0ef74ae2cefab017c6f6774dac12c31310c8812ee05de6235e",
-        "canonical_sha256": "ddc282b454cfde43abeeb1e18ebd8fe9e74f5e44a5124502d027ea40a371ccee"
+        "raw_sha256": "d391710ff1fda1ce48b35fbcb9c48133baa9a1f8ac34c49507beed18f63dee62",
+        "canonical_sha256": "6cda3ccc1b90711b6792a50f702896ab96597efce0aa6e81e825b72a2cf063f4"
       },
       {
         "path": ".github/workflows/auto-merge-dependabot.yml",
@@ -70,8 +70,8 @@
       },
       {
         "path": ".github/workflows/ci.yml",
-        "raw_sha256": "feb30dc96f5ff704ae6655355801774cfdcc6eb7821c1505905e72a71f66fa04",
-        "canonical_sha256": "027d67e57b47f8d2a2a52699bce5313116de62239ea54e134944fc69c3d4873a"
+        "raw_sha256": "ed6801cad8426de380840c323eaf036b3e0a158c08642940a356c20d9f0677b7",
+        "canonical_sha256": "4052cae10731c3c0a4da622dc2df634f8826fdac9ed4df23b5e9b96b6fbe6110"
       },
       {
         "path": ".github/workflows/cron-bet-grade.yml",
@@ -80,8 +80,8 @@
       },
       {
         "path": ".github/workflows/cron-mlb-canonical-refresh.yml",
-        "raw_sha256": "2cada7ec4243c9d71526dd63fbe65c84fe579926cbb1b717ef58f0c14836f91b",
-        "canonical_sha256": "d588d1f3bc4ed03010369f4b83c3cce57e5c9db545a6f86e63ceb267d5940995"
+        "raw_sha256": "066a43bd7b8608d1023c4a7c5a417ba29ad57ad2d6eea35c877dcc6063f36b16",
+        "canonical_sha256": "f840129cea3d367f4daa2a2c676784023e9efaf9e8d1049d4f14594857bf4b3b"
       },
       {
         "path": ".github/workflows/cron-mlb-cycle.yml",
@@ -110,8 +110,8 @@
       },
       {
         "path": ".github/workflows/db-push.yml",
-        "raw_sha256": "14d3c7147929c8e41d8b53bf786ab47a67ff758a2e3a6ce40639a936a7efad18",
-        "canonical_sha256": "c7ee244fc825d5720d0424e83bfbd124fd83a014440ff88e4a7e0670c685ceef"
+        "raw_sha256": "450e055d71eaff36f3d74eca8cc1d8f3970b069591dc1b9d145176c0bcaa741f",
+        "canonical_sha256": "0d731311bcbec2c53b2fc7e92f8261c3c0ccaa0398bd4348c95548dd52e86897"
       },
       {
         "path": ".github/workflows/db-query.yml",
@@ -120,8 +120,8 @@
       },
       {
         "path": ".github/workflows/db-reconcile-migrations.yml",
-        "raw_sha256": "5fc912cf0c015fdc27d294d39e43ab62d23f0f2aa5b4b91a0d3897f2a3cd4845",
-        "canonical_sha256": "cd6ff4ffaf01cd6b19850a4f14b671d371ccdd200dbbd0256456680964f41967"
+        "raw_sha256": "a98cbac115450c665393d324ce32fbaefa80482cc4372be99ec6dbcd72c13001",
+        "canonical_sha256": "9c7b8d96ac738bdb6271eb43e4a6f3c4378cddf3a7a7d407c0f5322e6cab2130"
       },
       {
         "path": ".github/workflows/deploy-smoke.yml",
@@ -135,13 +135,13 @@
       },
       {
         "path": ".github/workflows/edge-arming-gate.yml",
-        "raw_sha256": "b31e79bd33c15920d0c733b126c1a597356c3579b846cf7f7557f688865088e3",
-        "canonical_sha256": "e120c2666b2630997cc4323e359d47190bc353f4ef7fc8139faf82f50e973d51"
+        "raw_sha256": "bbd57e1f0b9fd0e31808ff81a352a72b01e1f660a2c71dc5b942f06829c326a1",
+        "canonical_sha256": "a78eeeed3d4cf3af044f3aead6439c6c38a9f35b8d989acb1d170ae08af34417"
       },
       {
         "path": ".github/workflows/feed-responsive-cross-browser.yml",
-        "raw_sha256": "32b1efdb6337c0edd581a7b6cf4e7e9e063fcad3189ad43686f2095874020c67",
-        "canonical_sha256": "779690b249abd812387d382f9fa9415774bdb1bb97969ccbefebbb10c82d37cc"
+        "raw_sha256": "e0ba16432cc32fb12063111bde3abd800c43b737944009fca7ddf575768edc05",
+        "canonical_sha256": "d3796532c8361c66e58e6e334cbb6030ad445e86f32d8c0dde492a5b03e9c97c"
       },
       {
         "path": ".github/workflows/gitleaks.yml",
@@ -155,8 +155,8 @@
       },
       {
         "path": ".github/workflows/os-observe-crons.yml",
-        "raw_sha256": "27185963587b61ebb0e2d699e5eb780f99d4c3e5cc8ed2958476220cab40fb3d",
-        "canonical_sha256": "e3af47275ce21fe8aa94ca37369b1a387d3d3d1594c67bbd96806c05981c1286"
+        "raw_sha256": "0458ee9c67b161e2b6930a20d929f6e4d9e442e2fcc064fab514b2db5456c5b3",
+        "canonical_sha256": "eabb14b4523287fbf2246cc5897142026b140cb1ebe840b236cf4eb329e8aa96"
       },
       {
         "path": ".github/workflows/p0-db-verify.yml",
@@ -170,13 +170,13 @@
       },
       {
         "path": ".github/workflows/perf-harness.yml",
-        "raw_sha256": "5440b716eb96ab36542e904fa6f136f01e73c84e8c7af4664a9852acf0e17093",
-        "canonical_sha256": "329feb72c4174ca2c426a31c8c1b1d3409213d22b93713d35949b30af4bd91ef"
+        "raw_sha256": "de950ad17ed4714b62e10258db39ef10ad994f3d0720c1f1822830de2e607369",
+        "canonical_sha256": "aec3b9e1329e74a764e529c30746e82a53f0d71e08fb3b259d94f8633b7cfce1"
       },
       {
         "path": ".github/workflows/pi-review.yml",
-        "raw_sha256": "7594180b93acd86d21fc5325a7e7c711c3a38c09a744eb2477e8c8b0857c179c",
-        "canonical_sha256": "acf6df90645c74f436be6f53e2adb37086cd58d1cb893dc8cc7e688246967117"
+        "raw_sha256": "39e99c0d6cd1be615ff9cb4afa8cc26bf5042322f03e632ab7d3bfe51390ee80",
+        "canonical_sha256": "ebec175f06fdff80b99f92cb130333f0417b7fb74ae0b6f7ff2aae02edd3c3d9"
       },
       {
         "path": ".github/workflows/railway-p0-control.yml",
@@ -190,23 +190,23 @@
       },
       {
         "path": ".github/workflows/security-audit-weekly.yml",
-        "raw_sha256": "713b9bb5c6d5c302a5523738536aa15cdcdd0008067cfb96fc8c93572e492933",
-        "canonical_sha256": "77e832b77e23d3027bf3c89efd1d4913578e6f050d009dfae9b7b013e9af6e3c"
+        "raw_sha256": "3f2a793eba0f58cfd25146162277ef207adad93df6b3a591bad7981c6b470d17",
+        "canonical_sha256": "5a35f09f95f6d490fba4e3aa805f4ff691bda5e29a865999e388a45133611f54"
       },
       {
         "path": ".github/workflows/seed-cfb.yml",
-        "raw_sha256": "edcf431d2a73b3859ff462f254d8c4ee1962b3209ba29d798dce0a3a0d54ea0b",
-        "canonical_sha256": "0c8b0c75f46067324102e22101c0cdae9cd4b77ad1595fa237288033f8532f08"
+        "raw_sha256": "1c6f483040e38a4f71ad7c20c7ecccfa5f71602b029bb3a482749309c922f209",
+        "canonical_sha256": "2fe565087f61de08281a0627a048b64121aa90b6aea902b77deeb1abebd548ca"
       },
       {
         "path": ".github/workflows/seed-nfl.yml",
-        "raw_sha256": "0eb40abf225c52e7afb129381c8ce6bae7099b465aef10b2ca004a33895e6e35",
-        "canonical_sha256": "46c7271b1ca615e5ebc0acf8e96f36d85b192b8b62b67c2c3c794a1da572ef63"
+        "raw_sha256": "5b83e674f3dd58aa33fdcb4749d04a956ae4725f06c06c45612be67bf79d0879",
+        "canonical_sha256": "6055a41734fa57c84a85eb9d0202ea2b339271ec9c8515f8b5c253c3af41bd7f"
       },
       {
         "path": ".github/workflows/stripe-e2e.yml",
-        "raw_sha256": "85e31c1553d14ef5a9a5b07825f2a0208746eb3c61495aa9ff67733ad545434f",
-        "canonical_sha256": "79821c1d0877c50b1bb3f678cccae1aabe3f509ab8b87644ff90a96332df4dc4"
+        "raw_sha256": "2ec7075dc813d39f383f1963fc9d3901f636b3e02f5e31dfc0d327ffb58df881",
+        "canonical_sha256": "5583eb720f05b8fffc0ff73b5d7b98fb75a2d98644d76806f4d984e4af590304"
       }
     ]
   },
@@ -531,7 +531,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -627,7 +627,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -1154,7 +1154,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -1259,7 +1259,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -1590,7 +1590,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -1827,7 +1827,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -2030,7 +2030,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -2281,7 +2281,7 @@
           "index": 1,
           "name": "[STEP] Setup pnpm",
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -2405,7 +2405,7 @@
           "index": 1,
           "name": "[STEP] Setup pnpm",
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -2625,7 +2625,7 @@
           "index": 1,
           "name": "[STEP] Setup pnpm",
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -2737,7 +2737,7 @@
           "index": 1,
           "name": "[STEP] Setup pnpm",
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -2937,7 +2937,7 @@
           "index": 2,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -3321,7 +3321,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -3501,7 +3501,7 @@
           "index": 2,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -3876,7 +3876,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -3998,7 +3998,7 @@
           "index": 2,
           "name": "[STEP] Setup pnpm",
           "id": null,
-          "uses": "pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -4262,7 +4262,7 @@
           "index": 2,
           "name": "[STEP] Install pnpm",
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -4481,7 +4481,7 @@
           "index": 2,
           "name": "[STEP] Setup pnpm",
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -4626,7 +4626,7 @@
           "index": 1,
           "name": "[STEP] Setup pnpm",
           "id": null,
-          "uses": "pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -4843,7 +4843,7 @@
           "index": 1,
           "name": "[STEP] Setup pnpm",
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -4955,7 +4955,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -5045,7 +5045,7 @@
           "index": 1,
           "name": null,
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,
@@ -5153,7 +5153,7 @@
           "index": 2,
           "name": "[STEP] Setup pnpm",
           "id": null,
-          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
           "run": null,
           "with": null,
           "env": null,

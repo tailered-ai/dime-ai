@@ -101,6 +101,101 @@
       "superseded_blueprint_sha256": "423ccd3169000118bb876e1f0cfe99d5756fbf53c957d325ab6268e9cb45866d",
       "superseded_ledger_impl_sha256": "5a5be7ad815e4b06709d7108d60f7df76df9556237ab5fa21044233f2367e93a",
       "superseded_source": "AMD-004"
+    },
+    {
+      "at": "2026-08-10T11:27:36.779Z",
+      "defect": "P05.NEG05,P05.NEG06,P05.NEG07,P05.TEST04,P05.AUD02",
+      "evidence": [
+        {
+          "bytes": 1368,
+          "path": "docs/verification/evidence/p05/AMD-006-rationale.md",
+          "sha256": "8d6febf1b86c5c6c91952a098336e254449e570fbc213c03daf3f21cce2655be"
+        }
+      ],
+      "genesis_corrections": [],
+      "id": "AMD-006",
+      "new_blueprint_sha256": "a1b9cbdaf682a5277519ad3489da4a4fd0a5f34b409eee2db4b0b58b471bd77e",
+      "new_ledger_impl_sha256": "5a5be7ad815e4b06709d7108d60f7df76df9556237ab5fa21044233f2367e93a",
+      "reason": "P05 authorization scope: declare NEG05 (WRONG_REASON), NEG06 (false-assurance suite), NEG07 (interrupt/poison-escape), TEST04 (determinism), AUD02 (architectural isolation) — additive per AMD-005 precedent",
+      "superseded_blueprint_sha256": "fb18bfad5908a497c830af462f3726ed8298d8ead9b852819ea6b11b91ef4bb5",
+      "superseded_ledger_impl_sha256": "5a5be7ad815e4b06709d7108d60f7df76df9556237ab5fa21044233f2367e93a",
+      "superseded_source": "AMD-005"
+    },
+    {
+      "at": "2026-08-10T12:53:22.021Z",
+      "defect": "DEF-023,P05.CP02",
+      "evidence": [
+        {
+          "bytes": 649,
+          "path": "docs/verification/evidence/p05/remediation/AMD-007-rationale.md",
+          "sha256": "204cb972a8fd320b0f800442aac367e8e575cd8ae8f0df24463c5b887d0354f0"
+        }
+      ],
+      "genesis_corrections": [],
+      "id": "AMD-007",
+      "new_blueprint_sha256": "8200d81f2645d7f26a870889581a02175c4cfec5d0b53f8720a7e921db55caed",
+      "new_ledger_impl_sha256": "5a5be7ad815e4b06709d7108d60f7df76df9556237ab5fa21044233f2367e93a",
+      "reason": "DEF-023 remediation: declare P05.CP02, the append-only re-checkpoint that supersedes CP01 for progression while CP01 is preserved byte-for-byte",
+      "superseded_blueprint_sha256": "a1b9cbdaf682a5277519ad3489da4a4fd0a5f34b409eee2db4b0b58b471bd77e",
+      "superseded_ledger_impl_sha256": "5a5be7ad815e4b06709d7108d60f7df76df9556237ab5fa21044233f2367e93a",
+      "superseded_source": "AMD-006"
+    },
+    {
+      "at": "2026-08-10T13:03:42.430Z",
+      "defect": "DEF-027",
+      "evidence": [
+        {
+          "bytes": 3257,
+          "path": "docs/verification/evidence/p05/remediation/AMD-008-rationale.md",
+          "sha256": "bc57b41ebf1343902eec36af76afb4f48083b3ace69d44ab0bbd16eed62306cb"
+        }
+      ],
+      "genesis_corrections": [],
+      "id": "AMD-008",
+      "new_blueprint_sha256": "8200d81f2645d7f26a870889581a02175c4cfec5d0b53f8720a7e921db55caed",
+      "new_ledger_impl_sha256": "5a5be7ad815e4b06709d7108d60f7df76df9556237ab5fa21044233f2367e93a",
+      "reason": "AMD-008: authorized removal of the redundant spoofable github.actor clause from the Dependabot identity guard, preserving the authoritative pull_request.user.login check; resolves the clean-tree HIGH bot-conditions finding at source (DEF-027)",
+      "superseded_blueprint_sha256": "8200d81f2645d7f26a870889581a02175c4cfec5d0b53f8720a7e921db55caed",
+      "superseded_ledger_impl_sha256": "5a5be7ad815e4b06709d7108d60f7df76df9556237ab5fa21044233f2367e93a",
+      "superseded_source": "AMD-007"
+    },
+    {
+      "at": "2026-08-10T13:10:25.313Z",
+      "defect": "DEF-028",
+      "evidence": [
+        {
+          "bytes": 2212,
+          "path": "docs/verification/evidence/p05/remediation/AMD-009-rationale.md",
+          "sha256": "101a2f2c6fe9578d2202ca3f7e2e5ec34ce4fdb023561d5c9737e38a0b1febee"
+        }
+      ],
+      "genesis_corrections": [],
+      "id": "AMD-009",
+      "new_blueprint_sha256": "8200d81f2645d7f26a870889581a02175c4cfec5d0b53f8720a7e921db55caed",
+      "new_ledger_impl_sha256": "bfc19fe6d0ab8bd669367e9c292e1ddc753f4239b2bad677f934bbb149f98e49",
+      "reason": "AMD-009: append-only evidence supersession in the sole ledger writer (DEF-028) — status untouched, superseded paths and original hashes retained forever, reason+defect+replacement all mandatory",
+      "superseded_blueprint_sha256": "8200d81f2645d7f26a870889581a02175c4cfec5d0b53f8720a7e921db55caed",
+      "superseded_ledger_impl_sha256": "5a5be7ad815e4b06709d7108d60f7df76df9556237ab5fa21044233f2367e93a",
+      "superseded_source": "AMD-008"
+    },
+    {
+      "at": "2026-08-10T14:02:15.804Z",
+      "defect": "P05.CP05",
+      "evidence": [
+        {
+          "bytes": 687,
+          "path": "docs/verification/evidence/p05/remediation/AMD-010-rationale.md",
+          "sha256": "b18fc8948903300631575d52456686399022e976696190173c1b37bf3e01c325"
+        }
+      ],
+      "genesis_corrections": [],
+      "id": "AMD-010",
+      "new_blueprint_sha256": "deb2d0635810f381f12d97c3e208f1e814e8c852f40d63573b1826834cb32c61",
+      "new_ledger_impl_sha256": "bfc19fe6d0ab8bd669367e9c292e1ddc753f4239b2bad677f934bbb149f98e49",
+      "reason": "AMD-010: declare P05.CP05, the append-only re-checkpoint after integrating exact main 7fa4b3fe; CP01-CP04 preserved byte-unchanged",
+      "superseded_blueprint_sha256": "8200d81f2645d7f26a870889581a02175c4cfec5d0b53f8720a7e921db55caed",
+      "superseded_ledger_impl_sha256": "bfc19fe6d0ab8bd669367e9c292e1ddc753f4239b2bad677f934bbb149f98e49",
+      "superseded_source": "AMD-009"
     }
   ],
   "blueprint_version": "1.0.0",
@@ -198,6 +293,111 @@
       ],
       "phase": "P04",
       "recorded_at": "2026-08-10T11:11:17.814Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — Blocking IDs: DEF-023",
+      "evidence": [
+        {
+          "bytes": 9781,
+          "path": "docs/verification/evidence/p05/CP01-checkpoint.md",
+          "sha256": "1a5009ba0682234ba3386fe382c2b14c8590ffe8d8402c610b3f5087dda2ac10"
+        },
+        {
+          "bytes": 3672,
+          "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+          "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+        },
+        {
+          "bytes": 3688,
+          "path": "docs/verification/evidence/p05/DEF-023-finding.md",
+          "sha256": "c47c1ae2f501fd716c7c8de7a8353387b4b849590bd5b3b1878ca08df54bf463"
+        }
+      ],
+      "phase": "P05",
+      "recorded_at": "2026-08-10T12:34:32.750Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — Blocking IDs: DEF-023, DEF-027",
+      "evidence": [
+        {
+          "bytes": 7777,
+          "path": "docs/verification/evidence/p05/remediation/CP02-checkpoint.md",
+          "sha256": "bf3692d404df3b6c855cb3132e4adbcff4968c3157efafac119f97a4a741c3c5"
+        },
+        {
+          "bytes": 3605,
+          "path": "docs/verification/evidence/p05/remediation/DEF-027.md",
+          "sha256": "a7e7af54c903c8a42adface72c87a3217ce9ffb1d687bc88df528a73147bcff4"
+        },
+        {
+          "bytes": 972,
+          "path": "docs/verification/evidence/p05/remediation/POSTFIX-zizmor-cycle.txt",
+          "sha256": "0e420ebcdb5bd05767e7d685977b68728a8fe6c98b6cf0c44ac73a6af0171573"
+        }
+      ],
+      "phase": "P05",
+      "recorded_at": "2026-08-10T12:55:08.983Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — Blocking IDs: DEF-029",
+      "evidence": [
+        {
+          "bytes": 6920,
+          "path": "docs/verification/evidence/p05/remediation/CP03-checkpoint.md",
+          "sha256": "3272fd4ce86f6910358f2b71b0307e540ba95b96fd6435d91f42a545002102ab"
+        },
+        {
+          "bytes": 3319,
+          "path": "docs/verification/evidence/p05/remediation/DEF-029.md",
+          "sha256": "c94494e91c9a728884f962ea656a1442a00dc4d0ff4af04c725632b18cbd5ef8"
+        },
+        {
+          "bytes": 1649,
+          "path": "docs/verification/evidence/p05/remediation/BLOCKER-main-advanced.txt",
+          "sha256": "8f98269979b884598d33dbc8f1075f24e16df25119680da1425f1de6b0ab34d3"
+        }
+      ],
+      "phase": "P05",
+      "recorded_at": "2026-08-10T13:15:11.937Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — Blocking IDs: DEF-029, DEF-030",
+      "evidence": [
+        {
+          "bytes": 6486,
+          "path": "docs/verification/evidence/p05/remediation/CP04-checkpoint.md",
+          "sha256": "84975bcad1462b06f429fbf2c99689ccea84581f0c3bb15317fd6b6487d82e57"
+        },
+        {
+          "bytes": 23555,
+          "path": "docs/verification/evidence/p05/remediation/INTEGRATION-inventory.json",
+          "sha256": "b15f0425e1ceeb9b9bc1bf87c052f29468a075033e0539c7f250fc41f543d84a"
+        }
+      ],
+      "phase": "P05",
+      "recorded_at": "2026-08-10T13:44:51.683Z"
+    },
+    {
+      "decision": "PROCEED TO P06/P07",
+      "evidence": [
+        {
+          "bytes": 7289,
+          "path": "docs/verification/evidence/p05/remediation/CP05-checkpoint.md",
+          "sha256": "ab45fd7b558b3e07a73fea748232d50d460446e63411f60f8cf419075a3087f7"
+        },
+        {
+          "bytes": 31648,
+          "path": "docs/verification/evidence/p05/remediation/cp05/assurance.json",
+          "sha256": "abf4c803c5151ad795b9d749c8bef823c08c3e22f2931a7e7ff74ab804eca78c"
+        },
+        {
+          "bytes": 3915,
+          "path": "docs/verification/evidence/p05/remediation/PRESERVATION-manifest.json",
+          "sha256": "27c38bf1eaa0bd757029fee9f3795040dddabb4294703d1ef7ce5bbf0bf161a9"
+        }
+      ],
+      "phase": "P05",
+      "recorded_at": "2026-08-10T14:03:07.890Z"
     }
   ],
   "decisions": [
@@ -1346,6 +1546,539 @@
       "severity": "HIGH",
       "status": "CLOSED",
       "title": "Interrupted executor run can still write a complete manifest: the async signal-teardown races the main flow, which keeps settling child exits and reaches the manifest write before process.exit(130)"
+    },
+    {
+      "affected_gate": "P05 session mechanics",
+      "blast_radius": "zero canonical corruption: stray writes confined to the disposable worktree ledger copy, disposed with the worktree; canonical amend refused before any write",
+      "closed_at": "2026-08-10T11:28:45.107Z",
+      "corrective_action": "cwd reset + absolute-path invocation discipline; AMD-006/sync/phase replayed canonically; worktree removed via git worktree remove --force + prune; assurance runner passes worktrees only as explicit cwd, never via process chdir",
+      "detected_by": "P05.T03",
+      "evidence": [
+        {
+          "bytes": 2725,
+          "path": "docs/verification/evidence/p05/DEF-022.md",
+          "sha256": "735ed276e86b8ac3d3d43d3d45967cefae128b852e3213c6a5324a65f1f08df0"
+        }
+      ],
+      "history": [
+        {
+          "action": "classify",
+          "at": "2026-08-10T11:28:45.026Z",
+          "flags": {
+            "blast_radius": "zero canonical corruption: stray writes confined to the disposable worktree ledger copy, disposed with the worktree; canonical amend refused before any write",
+            "corrective_action": "cwd reset + absolute-path invocation discipline; AMD-006/sync/phase replayed canonically; worktree removed via git worktree remove --force + prune; assurance runner passes worktrees only as explicit cwd, never via process chdir",
+            "evidence": [],
+            "regression_test_id": "P05.AUD02",
+            "retest_result": "canonical verify exit 0; P05 25 units seeded once; phase history clean",
+            "root_cause": "session shell cwd persisted inside a kept spike worktree; module-relative ledger resolution (correct frozen behavior) then targeted the worktree copy"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T11:28:45.106Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p05/DEF-022.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-022",
+      "opened_at": "2026-08-10T11:27:55.210Z",
+      "regression_test_id": "P05.AUD02",
+      "retest_result": "canonical verify exit 0; P05 25 units seeded once; phase history clean",
+      "root_cause": "session shell cwd persisted inside a kept spike worktree; module-relative ledger resolution (correct frozen behavior) then targeted the worktree copy",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "Wrong-cwd ledger invocation: persistent shell cwd inside a kept spike worktree routed two phase-transition writes into the worktree's disposable ledger copy; the canonical amend was refused by EVIDENCE_MISSING before any write"
+    },
+    {
+      "affected_gate": "P06.T05",
+      "blast_radius": "a REQUIRED status check is green regardless of High-severity workflow-security findings; it fails only if the scanner crashes. Live in production CI today",
+      "closed_at": "2026-08-10T13:07:53.676Z",
+      "corrective_action": "fail-closed plain-format enforcement using the scanner's own exit semantics (Option A), plus DEF-027 fixed at source so the control state is legitimately green, plus canonical P02 contract regeneration",
+      "detected_by": "P05.T03",
+      "evidence": [
+        {
+          "bytes": 4898,
+          "path": "docs/verification/evidence/p05/remediation/DEF-023-closure.md",
+          "sha256": "16bc17b125381256d3bdda00518b3602b8392ecfedf9f607ac4179cd6af76b5c"
+        },
+        {
+          "bytes": 703,
+          "path": "docs/verification/evidence/p05/remediation/POSTFIX-zizmor-PROVEN.txt",
+          "sha256": "4978058d48e5eaa878412ce6c27c80157515521a188f8fa583df0745a2935b36"
+        },
+        {
+          "bytes": 31648,
+          "path": "docs/verification/evidence/p05/assurance.json",
+          "sha256": "0986a75a9cd25547bbe20106d3c55de2414cc626533d868d94b2ad4f7d1ac2a6"
+        }
+      ],
+      "history": [
+        {
+          "action": "classify",
+          "at": "2026-08-10T12:26:52.400Z",
+          "flags": {
+            "blast_radius": "a REQUIRED status check is green regardless of High-severity workflow-security findings; it fails only if the scanner crashes. Live in production CI today",
+            "corrective_action": "OUT OF P05 SCOPE — the fix edits a production workflow (owner-gated; amending it would also be amending a gate to make a fixture pass). P05 recorded the proof, preserved the fixture as a permanent finding, and armed the coverage law so P06 cannot graduate this gate while it cannot reject",
+            "evidence": [
+              "docs/verification/evidence/p05/DEF-023-finding.md"
+            ],
+            "regression_test_id": "P05.NEG03",
+            "retest_result": "FINDING_CONFIRMED: poison leg PASS exit 0 with zizmor/template-injection present in the SARIF; coverage marks the gate cannot_reject + UNPROVEN",
+            "root_cause": "zizmor 1.29.0 exits 0 in --format sarif mode even when findings exist (plain mode exits 14); the workflow step relies on the exit code and its inline comment asserts fail-closed behaviour that mode does not provide"
+          }
+        },
+        {
+          "action": "classify",
+          "at": "2026-08-10T12:54:02.808Z",
+          "flags": {
+            "corrective_action": "IMPLEMENTED AND PROVEN: 05-workflow-security.yml now runs zizmor twice - SARIF for reporting/upload, plain-format as the fail-closed verdict (Option A, native scanner exit semantics; see DEC-mechanism-selection.md). Poison leg proves rejection for the intended detector. CLOSURE BLOCKED by DEF-027: the control leg cannot pass while a pre-existing HIGH finding exists in an unrelated workflow",
+            "evidence": [
+              "docs/verification/evidence/p05/remediation/POSTFIX-zizmor-cycle.txt",
+              "docs/verification/evidence/p05/remediation/DEC-mechanism-selection.md",
+              "docs/verification/evidence/p05/DEF-023-finding.md"
+            ],
+            "retest_result": "poison FAIL exit 14, reason signatures matched; control FAIL exit 14 (DEF-027) => BROKEN_GATE(CONTROL_RED); closure criterion 'passes its restored control' unsatisfiable"
+          }
+        },
+        {
+          "action": "classify",
+          "at": "2026-08-10T13:07:53.615Z",
+          "flags": {
+            "corrective_action": "fail-closed plain-format enforcement using the scanner's own exit semantics (Option A), plus DEF-027 fixed at source so the control state is legitimately green, plus canonical P02 contract regeneration",
+            "evidence": [],
+            "regression_test_id": "P05.TEST-workflow-template-injection",
+            "retest_result": "PROVEN: clean tree exit 0; poison FAIL exit 14 with error[template-injection] and the poison path both matched; restoration byte-identical; control PASS exit 0; zero residue",
+            "root_cause": "zizmor detected the issue correctly and wrote it to SARIF; the GATE ENFORCEMENT LOGIC was defective — the workflow treated scanner process success as security success, and SARIF mode exits 0 regardless of findings, so actionable HIGH findings could coexist with a green required status"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T13:07:53.673Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p05/remediation/DEF-023-closure.md",
+              "docs/verification/evidence/p05/remediation/POSTFIX-zizmor-PROVEN.txt",
+              "docs/verification/evidence/p05/assurance.json"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-023",
+      "opened_at": "2026-08-10T11:43:57.243Z",
+      "regression_test_id": "P05.TEST-workflow-template-injection",
+      "retest_result": "PROVEN: clean tree exit 0; poison FAIL exit 14 with error[template-injection] and the poison path both matched; restoration byte-identical; control PASS exit 0; zero residue",
+      "root_cause": "zizmor detected the issue correctly and wrote it to SARIF; the GATE ENFORCEMENT LOGIC was defective — the workflow treated scanner process success as security success, and SARIF mode exits 0 regardless of findings, so actionable HIGH findings could coexist with a green required status",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "REQUIRED production check 05-workflow-security#zizmor cannot reject: 'zizmor --min-severity high --format sarif' exits 0 even with a High finding (plain format exits 14), so the gate is green regardless of workflow-security findings; its own inline comment asserts the opposite"
+    },
+    {
+      "affected_gate": "P05.AUD01",
+      "blast_radius": "22 false violations made AUD01 unusable and would have masked a real violation in noise; contained to P05 development, caught on first execution before any unit closed",
+      "closed_at": "2026-08-10T11:55:29.819Z",
+      "corrective_action": "replaced the blunt root rule with the marker rule (p05-poison in a live scannable file anywhere) plus the initiative rule (gate-scanned file this initiative touched); everything else CLASSIFIED with a written reason; scan scope now tracked-union-initiative with --untracked-files=all",
+      "detected_by": "P05.AUD01",
+      "evidence": [
+        {
+          "bytes": 2820,
+          "path": "docs/verification/evidence/p05/DEF-024.md",
+          "sha256": "a543ab8077fed001036282d7f2294f7cd209941ce811b89a32a26523864234dc"
+        }
+      ],
+      "history": [
+        {
+          "action": "classify",
+          "at": "2026-08-10T11:55:29.761Z",
+          "flags": {
+            "blast_radius": "22 false violations made AUD01 unusable and would have masked a real violation in noise; contained to P05 development, caught on first execution before any unit closed",
+            "corrective_action": "replaced the blunt root rule with the marker rule (p05-poison in a live scannable file anywhere) plus the initiative rule (gate-scanned file this initiative touched); everything else CLASSIFIED with a written reason; scan scope now tracked-union-initiative with --untracked-files=all",
+            "evidence": [],
+            "regression_test_id": "P05.AUD01,P05.NEG04",
+            "retest_result": "0 violations, 45 classified (8 INERT_FIXTURE, 1 TEST_CANARY, 4 DOCUMENTED_FINDING, 30 LEGITIMATE_EXISTING_SOURCE) over 4289 files; AUD01 PASS",
+            "root_cause": "audit asked 'does the repo contain poison strings' instead of 'did P05 introduce live poison'; scan scope also omitted untracked initiative files and collapsed new directories"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T11:55:29.811Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p05/DEF-024.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-024",
+      "opened_at": "2026-08-10T11:52:54.957Z",
+      "regression_test_id": "P05.AUD01,P05.NEG04",
+      "retest_result": "0 violations, 45 classified (8 INERT_FIXTURE, 1 TEST_CANARY, 4 DOCUMENTED_FINDING, 30 LEGITIMATE_EXISTING_SOURCE) over 4289 files; AUD01 PASS",
+      "root_cause": "audit asked 'does the repo contain poison strings' instead of 'did P05 introduce live poison'; scan scope also omitted untracked initiative files and collapsed new directories",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "P05.AUD01 false positives: treated any poison signature under a sensitive root as a violation, flagging 22 legitimate pre-existing files (secrets.X in real workflows, DROP TABLE in historical migrations); the audit must ask whether P05 introduced live poison, not whether the repo contains those strings"
+    },
+    {
+      "affected_gate": "P05.AUD02",
+      "blast_radius": "one genuine control-plane duplication plus a blind spot in the audit meant to prevent it; caught by P01's provenance audit during the first full regression, before any P05 unit closed",
+      "closed_at": "2026-08-10T12:15:34.521Z",
+      "corrective_action": "removed the ref resolution (working-tree scope only); narrowed the AUD02 exemption from per-file to per-row via isRuleDefinitionRow; added documented allowlist entries to the P01/P02/P03 audits using the mechanism each already ships, weakening no pattern",
+      "detected_by": "P05.AUD02",
+      "evidence": [
+        {
+          "bytes": 3837,
+          "path": "docs/verification/evidence/p05/DEF-025.md",
+          "sha256": "5eb33700ff0f270b906dc25a3164d6ef32dda499605c38353152e609a41350bb"
+        }
+      ],
+      "history": [
+        {
+          "action": "classify",
+          "at": "2026-08-10T12:15:34.455Z",
+          "flags": {
+            "blast_radius": "one genuine control-plane duplication plus a blind spot in the audit meant to prevent it; caught by P01's provenance audit during the first full regression, before any P05 unit closed",
+            "corrective_action": "removed the ref resolution (working-tree scope only); narrowed the AUD02 exemption from per-file to per-row via isRuleDefinitionRow; added documented allowlist entries to the P01/P02/P03 audits using the mechanism each already ships, weakening no pattern",
+            "evidence": [],
+            "regression_test_id": "P01.NEG04,P05.AUD02",
+            "retest_result": "scripts/ regression 630/630 exit 0; provenance PASS; P02 yaml-audit PASS; P03 AUD01/AUD02 PASS; P05 AUD01/AUD02 PASS",
+            "root_cause": "initiativeFiles() resolved origin/main...HEAD, duplicating P01-owned base resolution; P05.AUD02 exempted the whole audit file rather than only its declaration rows, so the module carrying the isolation law was exempt from it"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T12:15:34.517Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p05/DEF-025.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-025",
+      "opened_at": "2026-08-10T12:09:26.334Z",
+      "regression_test_id": "P01.NEG04,P05.AUD02",
+      "retest_result": "scripts/ regression 630/630 exit 0; provenance PASS; P02 yaml-audit PASS; P03 AUD01/AUD02 PASS; P05 AUD01/AUD02 PASS",
+      "root_cause": "initiativeFiles() resolved origin/main...HEAD, duplicating P01-owned base resolution; P05.AUD02 exempted the whole audit file rather than only its declaration rows, so the module carrying the isolation law was exempt from it",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "P05 tripped three prior-phase audits: p05-audit.mjs genuinely duplicated P01-owned ref resolution (git diff origin/main...HEAD), and P05.AUD02 missed it because it exempted the whole audit file instead of only its declaration rows; the remaining four flags are declaration-table false positives"
+    },
+    {
+      "affected_gate": "P05.T03",
+      "blast_radius": "gitignored scratch directories containing no poison and no worktree registration; no developer-tree mutation and no false proof, but the zero-residue requirement was violated and a green test hid it",
+      "closed_at": "2026-08-10T12:26:16.625Z",
+      "corrective_action": "sweepStaleRunDirs with double ownership proof (realpath containment + not-a-registered-worktree), run at the START of every assurance run so orphans cannot accumulate; NEG07 now asserts zero orphans and that every skip was for the registered-worktree reason",
+      "detected_by": "P05.NEG07",
+      "evidence": [
+        {
+          "bytes": 3538,
+          "path": "docs/verification/evidence/p05/DEF-026.md",
+          "sha256": "5bc8b0526d6c88a3b3f1f7ed465d3a951dfadd879c8df8b3285925a8c4491538"
+        }
+      ],
+      "history": [
+        {
+          "action": "classify",
+          "at": "2026-08-10T12:26:16.557Z",
+          "flags": {
+            "blast_radius": "gitignored scratch directories containing no poison and no worktree registration; no developer-tree mutation and no false proof, but the zero-residue requirement was violated and a green test hid it",
+            "corrective_action": "sweepStaleRunDirs with double ownership proof (realpath containment + not-a-registered-worktree), run at the START of every assurance run so orphans cannot accumulate; NEG07 now asserts zero orphans and that every skip was for the registered-worktree reason",
+            "evidence": [],
+            "regression_test_id": "P05.NEG07",
+            "retest_result": "sweep removed 4 orphans and refused both pre-existing registered worktrees; post-run .ci-verify/runs contains only those 2; P05 suite 43/43",
+            "root_cause": "P01 and P04 each wire a SIGINT handler; P04's process.exit can preempt P01's candidate removal, leaving the run dir on disk with its worktree already unregistered. P05 inherited P04's best-effort teardown boundary without inheriting its recovery mechanism, and NEG07 never asserted candidate residue"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T12:26:16.623Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p05/DEF-026.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-026",
+      "opened_at": "2026-08-10T12:17:53.357Z",
+      "regression_test_id": "P05.NEG07",
+      "retest_result": "sweep removed 4 orphans and refused both pre-existing registered worktrees; post-run .ci-verify/runs contains only those 2; P05 suite 43/43",
+      "root_cause": "P01 and P04 each wire a SIGINT handler; P04's process.exit can preempt P01's candidate removal, leaving the run dir on disk with its worktree already unregistered. P05 inherited P04's best-effort teardown boundary without inheriting its recovery mechanism, and NEG07 never asserted candidate residue",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "An interrupted poison cycle leaves an orphaned run directory: P01 and P04 both wire SIGINT handlers and whichever exits first preempts the other's removal, stranding <run>/worktree/node_modules (gitignored, no poison, no worktree registration); P05.NEG07 asserted no poison and no artifact but never asserted zero run-dir residue"
+    },
+    {
+      "affected_gate": "P06.T05",
+      "blast_radius": "the corrected 05-workflow-security gate fails on a CLEAN tree, so its control leg cannot pass and it cannot be PROVEN; landing the DEF-023 fix without resolving this would turn a required check red on every PR and block all merges",
+      "closed_at": "2026-08-10T13:03:42.565Z",
+      "corrective_action": "removed the redundant spoofable clause, kept github.event.pull_request.user.login == dependabot[bot]; nothing suppressed, ignored, allowlisted, or severity-downgraded",
+      "detected_by": "P05.T03",
+      "evidence": [
+        {
+          "bytes": 3909,
+          "path": "docs/verification/evidence/p05/remediation/DEF-027-closure.md",
+          "sha256": "3bcadff174bea94f5289193853480b5968e144cfa4a2b1c4e37f4b23a09922d1"
+        },
+        {
+          "bytes": 61,
+          "path": "docs/verification/evidence/p05/remediation/POSTFIX-DEF027-clean-plain.txt",
+          "sha256": "0182e4395ba9cb8d8617fee627e998dbf3095b38a95f49d464493b3597ee726e"
+        },
+        {
+          "bytes": 229,
+          "path": "docs/verification/evidence/p05/remediation/DEF027-guard-tests.txt",
+          "sha256": "6e4a14d2d07c4398210a371d905f511c0c36044a0a84feb978feffde502c23f3"
+        }
+      ],
+      "history": [
+        {
+          "action": "classify",
+          "at": "2026-08-10T12:54:02.711Z",
+          "flags": {
+            "blast_radius": "the corrected 05-workflow-security gate fails on a CLEAN tree, so its control leg cannot pass and it cannot be PROVEN; landing the DEF-023 fix without resolving this would turn a required check red on every PR and block all merges",
+            "corrective_action": "OUT OF SCOPE for this authorization (do not alter unrelated workflow jobs). Recommended: drop the redundant spoofable github.actor clause, keeping the non-spoofable pull_request.user.login check the condition already has. Suppression was rejected as a cover-up",
+            "evidence": [
+              "docs/verification/evidence/p05/remediation/DEF-027.md"
+            ],
+            "regression_test_id": "P05.TEST-zizmor-cycle",
+            "retest_result": "BROKEN_GATE(CONTROL_RED): poison leg FAIL exit 14 with both detector signatures matched; control leg FAIL exit 14 on this finding",
+            "root_cause": "a pre-existing spoofable github.actor check in an unrelated workflow produces the repository's single HIGH zizmor finding; it was invisible while 05-workflow-security ran only the SARIF form (DEF-023), and becomes gate-failing the moment that gate is made honest"
+          }
+        },
+        {
+          "action": "classify",
+          "at": "2026-08-10T13:03:42.515Z",
+          "flags": {
+            "corrective_action": "removed the redundant spoofable clause, kept github.event.pull_request.user.login == dependabot[bot]; nothing suppressed, ignored, allowlisted, or severity-downgraded",
+            "evidence": [],
+            "regression_test_id": "scripts/ci/selftest/dependabot-guard.test.ts",
+            "retest_result": "clean-tree plain enforcement exit 0, zero blocking findings, bot-conditions absent, no new HIGH; guard regression 9/9; actions-security PASS",
+            "root_cause": "the workflow condition itself: github.actor is attacker-influenceable on re-runs and was redundant against the authoritative PR-author clause it was ANDed with. zizmor detected it correctly; the finding stayed invisible only because 05-workflow-security ran the SARIF form (DEF-023)"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T13:03:42.563Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p05/remediation/DEF-027-closure.md",
+              "docs/verification/evidence/p05/remediation/POSTFIX-DEF027-clean-plain.txt",
+              "docs/verification/evidence/p05/remediation/DEF027-guard-tests.txt"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-027",
+      "opened_at": "2026-08-10T12:45:26.873Z",
+      "regression_test_id": "scripts/ci/selftest/dependabot-guard.test.ts",
+      "retest_result": "clean-tree plain enforcement exit 0, zero blocking findings, bot-conditions absent, no new HIGH; guard regression 9/9; actions-security PASS",
+      "root_cause": "the workflow condition itself: github.actor is attacker-influenceable on re-runs and was redundant against the authoritative PR-author clause it was ANDed with. zizmor detected it correctly; the finding stayed invisible only because 05-workflow-security ran the SARIF form (DEF-023)",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "Pre-existing HIGH workflow-security finding blocks DEF-023 closure: zizmor/bot-conditions in .github/workflows/auto-merge-dependabot.yml:27 (spoofable github.actor check) means the now-fail-closed 05-workflow-security gate fails on a CLEAN tree, so its control leg cannot pass and the gate cannot be PROVEN"
+    },
+    {
+      "affected_gate": "P05.EV01",
+      "blast_radius": "ledger verify blocked; no data lost or corrupted; the guard caught it immediately",
+      "closed_at": "2026-08-10T13:11:33.883Z",
+      "corrective_action": "AMD-009 supersede-evidence: append-only, status-preserving, retains superseded paths and original hashes, requires reason+defect+replacement",
+      "detected_by": "P05.EV01",
+      "evidence": [
+        {
+          "bytes": 2857,
+          "path": "docs/verification/evidence/p05/remediation/DEF-028.md",
+          "sha256": "08d84856ae20dc3fa5aebdb0c73ae150714003f87227755ebb37da528389838a"
+        },
+        {
+          "bytes": 2212,
+          "path": "docs/verification/evidence/p05/remediation/AMD-009-rationale.md",
+          "sha256": "101a2f2c6fe9578d2202ca3f7e2e5ec34ce4fdb023561d5c9737e38a0b1febee"
+        }
+      ],
+      "history": [
+        {
+          "action": "classify",
+          "at": "2026-08-10T13:11:33.806Z",
+          "flags": {
+            "blast_radius": "ledger verify blocked; no data lost or corrupted; the guard caught it immediately",
+            "corrective_action": "AMD-009 supersede-evidence: append-only, status-preserving, retains superseded paths and original hashes, requires reason+defect+replacement",
+            "evidence": [],
+            "regression_test_id": "DEF-028 supersession guard tests",
+            "retest_result": "verify exit 0; three units PASS with one supersession record each; four CLI refusals proven pre-write",
+            "root_cause": "a per-run artifact at a mutable path was recorded as immutable unit evidence; an authorized re-run legitimately regenerated it, invalidating three closed units whose PASS status is terminal"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T13:11:33.881Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p05/remediation/DEF-028.md",
+              "docs/verification/evidence/p05/remediation/AMD-009-rationale.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-028",
+      "opened_at": "2026-08-10T13:09:54.645Z",
+      "regression_test_id": "DEF-028 supersession guard tests",
+      "retest_result": "verify exit 0; three units PASS with one supersession record each; four CLI refusals proven pre-write",
+      "root_cause": "a per-run artifact at a mutable path was recorded as immutable unit evidence; an authorized re-run legitimately regenerated it, invalidating three closed units whose PASS status is terminal",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "Regenerating assurance.json in place invalidated evidence under three already-closed units (P05.EV01/EV02/GATE01); PASS is terminal by design so they cannot be re-pointed, and the run artifact was never a stable path to record as immutable unit evidence"
+    },
+    {
+      "affected_gate": "P05.GATE01",
+      "blast_radius": "no candidate can be built, so every P05 proof is unrunnable and the existing proofs certify a merge GitHub will no longer evaluate; the frozen contract no longer describes the prospective merge",
+      "closed_at": "2026-08-10T14:01:59.202Z",
+      "corrective_action": "integrated the exact pinned BASE_SHA 7fa4b3fe via a real history-preserving merge (parents d07a1c38 + 7fa4b3fe); resolved .gitignore as the proven 121-rule semantic union with exactly one .gstack/; re-derived the frozen contract and PARITY registry from the integrated candidate; re-executed all four real-gate proofs bound to the new candidate",
+      "detected_by": "P05.T03",
+      "evidence": [
+        {
+          "bytes": 2017,
+          "path": "docs/verification/evidence/p05/remediation/EV-P05-CP05-snapshot.json",
+          "sha256": "a14b440bfc7f21c7fe2c66747a9cac548136fd4cf1dd0ac4f24fca627a205385"
+        },
+        {
+          "bytes": 31648,
+          "path": "docs/verification/evidence/p05/remediation/cp05/assurance.json",
+          "sha256": "abf4c803c5151ad795b9d749c8bef823c08c3e22f2931a7e7ff74ab804eca78c"
+        },
+        {
+          "bytes": 2583,
+          "path": "docs/verification/evidence/p05/remediation/DRIFT-post-integration.txt",
+          "sha256": "fc75d11525711ad2a7333c0ce7b4dc3f6e304d5607a53b61ace5dd69998c9333"
+        }
+      ],
+      "history": [
+        {
+          "action": "classify",
+          "at": "2026-08-10T13:14:22.291Z",
+          "flags": {
+            "blast_radius": "no candidate can be built, so every P05 proof is unrunnable and the existing proofs certify a merge GitHub will no longer evaluate; the frozen contract no longer describes the prospective merge",
+            "corrective_action": "OUT OF SCOPE: integrating origin/main imports 18 unreviewed workflow changes plus a CI action bump. Requires owner authorization, then contract re-derivation and a full P05 re-proof",
+            "evidence": [
+              "docs/verification/evidence/p05/remediation/DEF-029.md",
+              "docs/verification/evidence/p05/remediation/BLOCKER-main-advanced.txt"
+            ],
+            "root_cause": "external: origin/main advanced by 5 commits touching 18 workflow files; both main and this branch independently added .gstack/ to .gitignore, producing a textual conflict so the prospective merge cannot be constructed"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T14:01:59.136Z",
+          "flags": {
+            "corrective_action": "integrated the exact pinned BASE_SHA 7fa4b3fe via a real history-preserving merge (parents d07a1c38 + 7fa4b3fe); resolved .gitignore as the proven 121-rule semantic union with exactly one .gstack/; re-derived the frozen contract and PARITY registry from the integrated candidate; re-executed all four real-gate proofs bound to the new candidate",
+            "evidence": [],
+            "regression_test_id": "P05.TEST01-04 re-executed",
+            "retest_result": "P01 constructs the candidate successfully (head 942aa0b1 / base 7fa4b3fe / tree cdf1eb75 / digest 0260ab79) - BLOCKED(MERGE_CONFLICT) eliminated; 4/4 PROVEN ASSURANCE_GREEN bound to that candidate; no active proof references the superseded base; fresh-base check at acceptance time confirms origin/main is still 7fa4b3fe"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T14:01:59.199Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p05/remediation/EV-P05-CP05-snapshot.json",
+              "docs/verification/evidence/p05/remediation/cp05/assurance.json",
+              "docs/verification/evidence/p05/remediation/DRIFT-post-integration.txt"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-029",
+      "opened_at": "2026-08-10T13:13:55.517Z",
+      "regression_test_id": "P05.TEST01-04 re-executed",
+      "retest_result": "P01 constructs the candidate successfully (head 942aa0b1 / base 7fa4b3fe / tree cdf1eb75 / digest 0260ab79) - BLOCKED(MERGE_CONFLICT) eliminated; 4/4 PROVEN ASSURANCE_GREEN bound to that candidate; no active proof references the superseded base; fresh-base check at acceptance time confirms origin/main is still 7fa4b3fe",
+      "root_cause": "external: origin/main advanced by 5 commits touching 18 workflow files; both main and this branch independently added .gstack/ to .gitignore, producing a textual conflict so the prospective merge cannot be constructed",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "origin/main advanced mid-session (4d644cf4 -> 1c17c555, 5 commits touching 19 workflow files) and now conflicts with this branch in .gitignore; P01 reports BLOCKED(MERGE_CONFLICT) so no candidate can be constructed, and the existing proofs certify a merge GitHub will no longer evaluate"
+    },
+    {
+      "affected_gate": "P05.GATE01",
+      "blast_radius": "the authorized integration is fully validated in isolation but cannot be placed on feat/ci-verify-control-plane; P05 cannot rebind its proofs, so acceptance stays blocked. No developer content is at risk - three files are byte-identical to main and the fourth equals the proven merge resolution",
+      "closed_at": "2026-08-10T13:55:04.783Z",
+      "corrective_action": "built a verified preservation bundle (bytes + hashes + mode + tracked state + HEAD/BASE comparisons) OUTSIDE the working tree, re-proved byte-equality against the exact pinned BASE_SHA, cleared the four blockers path-by-path (checkout for the three tracked, relocation into the bundle for the untracked one) with no stash/reset/clean/broad-restore, then merged the exact BASE_SHA",
+      "detected_by": "P05.T03",
+      "evidence": [
+        {
+          "bytes": 3915,
+          "path": "docs/verification/evidence/p05/remediation/PRESERVATION-manifest.json",
+          "sha256": "27c38bf1eaa0bd757029fee9f3795040dddabb4294703d1ef7ce5bbf0bf161a9"
+        },
+        {
+          "bytes": 6486,
+          "path": "docs/verification/evidence/p05/remediation/CP04-checkpoint.md",
+          "sha256": "84975bcad1462b06f429fbf2c99689ccea84581f0c3bb15317fd6b6487d82e57"
+        }
+      ],
+      "history": [
+        {
+          "action": "classify",
+          "at": "2026-08-10T13:43:52.913Z",
+          "flags": {
+            "blast_radius": "the authorized integration is fully validated in isolation but cannot be placed on feat/ci-verify-control-plane; P05 cannot rebind its proofs, so acceptance stays blocked. No developer content is at risk - three files are byte-identical to main and the fourth equals the proven merge resolution",
+            "corrective_action": "OUT OF SCOPE: requires the developer to commit or discard four now-redundant local paths. The merge itself is proven: validated merge preserved at refs/heads/integration/main-7fa4b3fe (parents d07a1c38 + 7fa4b3fe)",
+            "evidence": [
+              "docs/verification/evidence/p05/remediation/INTEGRATION-inventory.json"
+            ],
+            "root_cause": "PR #495 (gstack bootstrap) merged upstream while the developer still holds the same work uncommitted locally; git's dirty-file guard blocks the merge because those four paths would be updated by it"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T13:44:51.630Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p05/remediation/CP04-checkpoint.md",
+              "docs/verification/evidence/p05/remediation/INTEGRATION-inventory.json"
+            ]
+          }
+        },
+        {
+          "action": "reopen",
+          "at": "2026-08-10T13:45:14.270Z",
+          "flags": {
+            "closed_at": "null",
+            "evidence": [],
+            "retest_result": "NOT RESOLVED: the merge still cannot be placed on the branch; an erroneous close was issued and is corrected here. The prior close action remains in this defect's history rather than being erased.",
+            "status": "OPEN"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T13:55:04.708Z",
+          "flags": {
+            "corrective_action": "built a verified preservation bundle (bytes + hashes + mode + tracked state + HEAD/BASE comparisons) OUTSIDE the working tree, re-proved byte-equality against the exact pinned BASE_SHA, cleared the four blockers path-by-path (checkout for the three tracked, relocation into the bundle for the untracked one) with no stash/reset/clean/broad-restore, then merged the exact BASE_SHA",
+            "evidence": [],
+            "retest_result": "merge landed; merged-tree bytes IDENTICAL to preserved bytes for all four paths; information lost = 0; other 25 unrelated paths byte-unchanged; authoritative merge tree cdf1eb75 identical to the independently validated helper merge",
+            "root_cause": "PR #495 landed upstream while the developer still held the same work uncommitted; git's dirty-file guard blocked the merge on four overlapping paths"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T13:55:04.781Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p05/remediation/PRESERVATION-manifest.json",
+              "docs/verification/evidence/p05/remediation/CP04-checkpoint.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-030",
+      "opened_at": "2026-08-10T13:43:52.851Z",
+      "regression_test_id": null,
+      "retest_result": "merge landed; merged-tree bytes IDENTICAL to preserved bytes for all four paths; information lost = 0; other 25 unrelated paths byte-unchanged; authoritative merge tree cdf1eb75 identical to the independently validated helper merge",
+      "root_cause": "PR #495 landed upstream while the developer still held the same work uncommitted; git's dirty-file guard blocked the merge on four overlapping paths",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "Authorized main integration cannot land on the branch: four unrelated UNCOMMITTED developer paths (.gitignore, .claude/settings.json, CLAUDE.md, .claude/scripts/bootstrap-gstack.sh) collide with the incoming merge, and git refuses; resolving requires committing, stashing, or removing developer work, which section 1 forbids"
     }
   ],
   "gate_results": [],
@@ -1712,8 +2445,54 @@
         "P05.CP01 recorded"
       ],
       "id": "P05",
-      "state": "NOT_STARTED",
-      "state_history": [],
+      "state": "ACCEPTED",
+      "state_history": [
+        {
+          "at": "2026-08-10T11:27:36.899Z",
+          "from": "NOT_STARTED",
+          "to": "PRECONDITIONS"
+        },
+        {
+          "at": "2026-08-10T11:27:36.950Z",
+          "from": "PRECONDITIONS",
+          "to": "IN_PROGRESS"
+        },
+        {
+          "at": "2026-08-10T12:33:13.504Z",
+          "from": "IN_PROGRESS",
+          "to": "IMPLEMENTED"
+        },
+        {
+          "at": "2026-08-10T12:33:13.609Z",
+          "from": "IMPLEMENTED",
+          "to": "TESTING"
+        },
+        {
+          "at": "2026-08-10T12:33:13.670Z",
+          "from": "TESTING",
+          "to": "AUDITING"
+        },
+        {
+          "at": "2026-08-10T12:33:13.722Z",
+          "from": "AUDITING",
+          "to": "CHECKPOINT_REVIEW"
+        },
+        {
+          "at": "2026-08-10T12:34:32.967Z",
+          "from": "CHECKPOINT_REVIEW",
+          "to": "BLOCKED"
+        },
+        {
+          "at": "2026-08-10T12:34:48.631Z",
+          "from": "BLOCKED",
+          "to": "OWNER_DECISION_REQUIRED"
+        },
+        {
+          "at": "2026-08-10T14:03:25.748Z",
+          "from": "OWNER_DECISION_REQUIRED",
+          "to": "ACCEPTED"
+        }
+      ],
       "title": "ASSURANCE — the self-test framework"
     },
     {
@@ -5602,13 +6381,24 @@
       "validation": null
     },
     "P05.AUD01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:01.746Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 6484,
+          "path": "docs/verification/evidence/p05/AUD01-AUD02-audits.txt",
+          "sha256": "f1d5a48129165708bd860e75851d29eec0e9116bb037f02d7a9d986925a4a524"
+        },
+        {
+          "bytes": 2820,
+          "path": "docs/verification/evidence/p05/DEF-024.md",
+          "sha256": "a543ab8077fed001036282d7f2294f7cd209941ce811b89a32a26523864234dc"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.AUD01",
@@ -5618,22 +6408,64 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:01.687Z",
+      "status": "PASS",
       "title": "Audit: zero poison artifacts exist in the tracked tree",
       "validation": null
     },
-    "P05.CP01": {
-      "attempts": 0,
+    "P05.AUD02": {
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:01.859Z",
+      "defects": [],
+      "depends_on": [
+        "P05.T03"
+      ],
+      "evidence": [
+        {
+          "bytes": 6484,
+          "path": "docs/verification/evidence/p05/AUD01-AUD02-audits.txt",
+          "sha256": "f1d5a48129165708bd860e75851d29eec0e9116bb037f02d7a9d986925a4a524"
+        },
+        {
+          "bytes": 3837,
+          "path": "docs/verification/evidence/p05/DEF-025.md",
+          "sha256": "5eb33700ff0f270b906dc25a3164d6ef32dda499605c38353152e609a41350bb"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": null,
+      "flaky": false,
+      "id": "P05.AUD02",
+      "inputs": [],
+      "kind": "AUDIT",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P05",
+      "remediation": null,
+      "started_at": "2026-08-10T12:33:01.801Z",
+      "status": "PASS",
+      "title": "Audit: P05 duplicates no P01-P04 control-plane mechanism (snapshots, YAML, contract, registry, results, execution, cleanup, ledger, acceptance)",
+      "validation": null
+    },
+    "P05.CP01": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T12:34:32.909Z",
       "defects": [],
       "depends_on": [
         "P05.GATE01",
         "P05.GATE02"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 9781,
+          "path": "docs/verification/evidence/p05/CP01-checkpoint.md",
+          "sha256": "1a5009ba0682234ba3386fe382c2b14c8590ffe8d8402c610b3f5087dda2ac10"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.CP01",
@@ -5643,19 +6475,92 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:34:32.851Z",
+      "status": "PASS",
       "title": "P05 checkpoint recorded",
       "validation": null
     },
-    "P05.EV01": {
-      "attempts": 0,
+    "P05.CP02": {
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:55:09.133Z",
+      "defects": [],
+      "depends_on": [
+        "P05.CP01"
+      ],
+      "evidence": [
+        {
+          "bytes": 7777,
+          "path": "docs/verification/evidence/p05/remediation/CP02-checkpoint.md",
+          "sha256": "bf3692d404df3b6c855cb3132e4adbcff4968c3157efafac119f97a4a741c3c5"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": null,
+      "flaky": false,
+      "id": "P05.CP02",
+      "inputs": [],
+      "kind": "CHECKPOINT",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P05",
+      "remediation": null,
+      "started_at": "2026-08-10T12:55:09.083Z",
+      "status": "PASS",
+      "title": "P05 re-checkpoint after DEF-023 remediation; supersedes CP01 for progression while CP01 is preserved byte-for-byte",
+      "validation": null
+    },
+    "P05.CP05": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T14:03:08.003Z",
+      "defects": [],
+      "depends_on": [
+        "P05.CP02"
+      ],
+      "evidence": [
+        {
+          "bytes": 7289,
+          "path": "docs/verification/evidence/p05/remediation/CP05-checkpoint.md",
+          "sha256": "ab45fd7b558b3e07a73fea748232d50d460446e63411f60f8cf419075a3087f7"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": null,
+      "flaky": false,
+      "id": "P05.CP05",
+      "inputs": [],
+      "kind": "CHECKPOINT",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P05",
+      "remediation": null,
+      "started_at": "2026-08-10T14:03:07.947Z",
+      "status": "PASS",
+      "title": "P05 re-checkpoint after integrating the exact current main; supersedes CP01-CP04 for progression while all remain byte-unchanged",
+      "validation": null
+    },
+    "P05.EV01": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T12:33:01.964Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 31648,
+          "path": "docs/verification/evidence/p05/remediation/cp05/assurance.json",
+          "sha256": "abf4c803c5151ad795b9d749c8bef823c08c3e22f2931a7e7ff74ab804eca78c"
+        },
+        {
+          "bytes": 477,
+          "path": "docs/verification/evidence/p05/remediation/cp05/assurance-run.txt",
+          "sha256": "d58ddd47aed8210bde2c9270ca63236f42cf44f70a42a3d2ceda55d33003abf8"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.EV01",
@@ -5665,19 +6570,57 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:01.906Z",
+      "status": "PASS",
+      "superseded_evidence": [
+        {
+          "at": "2026-08-10T13:10:37.407Z",
+          "defect": "DEF-028",
+          "previous": [
+            {
+              "path": "docs/verification/evidence/p05/assurance.json",
+              "sha256": "00862593cb7de99e7a5e6c6a79313fd9af0827d3fefc4a69a81a2c9606801b6f"
+            },
+            {
+              "path": "docs/verification/evidence/p05/raw/assurance-run.txt",
+              "sha256": "86e14fa16cac85c399e3acf367d6bc3931a20895f0954a710bde457142a43055"
+            }
+          ],
+          "reason": "DEF-023/DEF-027 remediation regenerated the assurance run artifact (3 PROVEN + 1 FINDING_CONFIRMED -> 4/4 PROVEN, ASSURANCE_GREEN); superseded bytes are unreconstructable and PASS is terminal"
+        },
+        {
+          "at": "2026-08-10T13:58:44.298Z",
+          "defect": "DEF-029",
+          "previous": [
+            {
+              "path": "docs/verification/evidence/p05/assurance.json",
+              "sha256": "0986a75a9cd25547bbe20106d3c55de2414cc626533d868d94b2ad4f7d1ac2a6"
+            },
+            {
+              "path": "docs/verification/evidence/p05/raw/assurance-run.txt",
+              "sha256": "4ba7b944831f9d47d3b4bbdf83864389acd3b72be13c588b667e425f5f583b13"
+            }
+          ],
+          "reason": "DEF-029 integration: all four proofs re-executed against the new candidate (head 942aa0b1 / base 7fa4b3fe); the prior artifact binds to the superseded base 4d644cf4 and is retained as historical evidence"
+        }
+      ],
       "title": "Evidence: assurance.json",
       "validation": null
     },
     "P05.EV02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:02.073Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 81,
+          "path": "docs/verification/evidence/p05/remediation/cp05/assurance.json.sha256",
+          "sha256": "1ad955853895c792c5ada41b1dfe52706f197f81c97388216bfd8ea1479a0229"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.EV02",
@@ -5687,23 +6630,63 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:02.022Z",
+      "status": "PASS",
+      "superseded_evidence": [
+        {
+          "at": "2026-08-10T13:10:37.500Z",
+          "defect": "DEF-028",
+          "previous": [
+            {
+              "path": "docs/verification/evidence/p05/assurance.json.sha256",
+              "sha256": "88022388705774db3093cfa5e67544a64b77adde3b99aef331b09d4a749f8fb4"
+            }
+          ],
+          "reason": "DEF-023/DEF-027 remediation regenerated the assurance run artifact (3 PROVEN + 1 FINDING_CONFIRMED -> 4/4 PROVEN, ASSURANCE_GREEN); superseded bytes are unreconstructable and PASS is terminal"
+        },
+        {
+          "at": "2026-08-10T13:58:44.482Z",
+          "defect": "DEF-029",
+          "previous": [
+            {
+              "path": "docs/verification/evidence/p05/assurance.json.sha256",
+              "sha256": "09bc60dfef2b15c86fbaeb5f89769f5bc38ffc1d2d8fa1766de2f34cc6d482ff"
+            }
+          ],
+          "reason": "DEF-029 integration: all four proofs re-executed against the new candidate (head 942aa0b1 / base 7fa4b3fe); the prior artifact binds to the superseded base 4d644cf4 and is retained as historical evidence"
+        }
+      ],
       "title": "Evidence: assurance.json sha256",
       "validation": null
     },
     "P05.GATE01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:02.211Z",
       "defects": [],
       "depends_on": [
         "P05.TEST01",
         "P05.TEST02",
         "P05.TEST03"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 31648,
+          "path": "docs/verification/evidence/p05/remediation/cp05/assurance.json",
+          "sha256": "abf4c803c5151ad795b9d749c8bef823c08c3e22f2931a7e7ff74ab804eca78c"
+        },
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 7060,
+          "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+          "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.GATE01",
@@ -5713,21 +6696,72 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:02.137Z",
+      "status": "PASS",
+      "superseded_evidence": [
+        {
+          "at": "2026-08-10T13:10:37.570Z",
+          "defect": "DEF-028",
+          "previous": [
+            {
+              "path": "docs/verification/evidence/p05/assurance.json",
+              "sha256": "00862593cb7de99e7a5e6c6a79313fd9af0827d3fefc4a69a81a2c9606801b6f"
+            },
+            {
+              "path": "docs/verification/evidence/p05/P05-suite.txt",
+              "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+            },
+            {
+              "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+              "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+            }
+          ],
+          "reason": "DEF-023/DEF-027 remediation regenerated the assurance run artifact (3 PROVEN + 1 FINDING_CONFIRMED -> 4/4 PROVEN, ASSURANCE_GREEN); superseded bytes are unreconstructable and PASS is terminal"
+        },
+        {
+          "at": "2026-08-10T13:58:44.576Z",
+          "defect": "DEF-029",
+          "previous": [
+            {
+              "path": "docs/verification/evidence/p05/assurance.json",
+              "sha256": "0986a75a9cd25547bbe20106d3c55de2414cc626533d868d94b2ad4f7d1ac2a6"
+            },
+            {
+              "path": "docs/verification/evidence/p05/P05-suite.txt",
+              "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+            },
+            {
+              "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+              "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+            }
+          ],
+          "reason": "DEF-029 integration: all four proofs re-executed against the new candidate (head 942aa0b1 / base 7fa4b3fe); the prior artifact binds to the superseded base 4d644cf4 and is retained as historical evidence"
+        }
+      ],
       "title": "At least three real gates proven",
       "validation": null
     },
     "P05.GATE02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:02.345Z",
       "defects": [],
       "depends_on": [
         "P05.T06"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 6513,
+          "path": "docs/verification/evidence/p05/EV02-coverage-map.tsv",
+          "sha256": "e800975dcbe7129f2c522c2624de7a04589a2957e5a3a999ff7aa20c9a1a3371"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.GATE02",
@@ -5737,19 +6771,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:02.268Z",
+      "status": "PASS",
       "title": "Coverage assertion armed",
       "validation": null
     },
     "P05.NEG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.887Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 3672,
+          "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+          "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.NEG01",
@@ -5759,19 +6804,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:00.836Z",
+      "status": "PASS",
       "title": "Fixture reddening the wrong gate yields BROKEN-GATE(WRONG_TARGET)",
       "validation": null
     },
     "P05.NEG02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.985Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 3672,
+          "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+          "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.NEG02",
@@ -5781,19 +6837,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:00.933Z",
+      "status": "PASS",
       "title": "Fixture whose control run stays red yields BROKEN-GATE(NON_RESTORING)",
       "validation": null
     },
     "P05.NEG03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:01.099Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 3672,
+          "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+          "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.NEG03",
@@ -5803,19 +6870,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:01.039Z",
+      "status": "PASS",
       "title": "Mandatory gate without a fixture yields BROKEN-GATE(UNPROVEN)",
       "validation": null
     },
     "P05.NEG04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:01.506Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 6484,
+          "path": "docs/verification/evidence/p05/AUD01-AUD02-audits.txt",
+          "sha256": "f1d5a48129165708bd860e75851d29eec0e9116bb037f02d7a9d986925a4a524"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.NEG04",
@@ -5825,19 +6903,139 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:01.446Z",
+      "status": "PASS",
       "title": "A live poison fixture inside a scanned path causes the build to refuse",
       "validation": null
     },
-    "P05.T01": {
-      "attempts": 0,
+    "P05.NEG05": {
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:01.266Z",
+      "defects": [],
+      "depends_on": [
+        "P05.T05"
+      ],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 3672,
+          "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+          "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": null,
+      "flaky": false,
+      "id": "P05.NEG05",
+      "inputs": [],
+      "kind": "NEGATIVE_VALIDATION",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P05",
+      "remediation": null,
+      "started_at": "2026-08-10T12:33:01.181Z",
+      "status": "PASS",
+      "title": "Target gate failing for a reason other than the intended detector yields BROKEN-GATE(WRONG_REASON)",
+      "validation": null
+    },
+    "P05.NEG06": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T12:33:01.400Z",
+      "defects": [],
+      "depends_on": [
+        "P05.T03"
+      ],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 3672,
+          "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+          "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": null,
+      "flaky": false,
+      "id": "P05.NEG06",
+      "inputs": [],
+      "kind": "NEGATIVE_VALIDATION",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P05",
+      "remediation": null,
+      "started_at": "2026-08-10T12:33:01.345Z",
+      "status": "PASS",
+      "title": "False-assurance adversarial suite: no-op/partial/wrong-file poison, non-detector statuses, missing or tampered evidence, duplicate or malformed fixtures, and path escapes all fail closed",
+      "validation": null
+    },
+    "P05.NEG07": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T12:33:01.633Z",
+      "defects": [],
+      "depends_on": [
+        "P05.T03",
+        "P04.T07"
+      ],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 3538,
+          "path": "docs/verification/evidence/p05/DEF-026.md",
+          "sha256": "5bc8b0526d6c88a3b3f1f7ed465d3a951dfadd879c8df8b3285925a8c4491538"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": null,
+      "flaky": false,
+      "id": "P05.NEG07",
+      "inputs": [],
+      "kind": "NEGATIVE_VALIDATION",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P05",
+      "remediation": null,
+      "started_at": "2026-08-10T12:33:01.574Z",
+      "status": "PASS",
+      "title": "Interruption during a poison cycle discards the candidate, leaves zero poison and zero residue, and can never emit a proof",
+      "validation": null
+    },
+    "P05.T01": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T12:32:59.946Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 7060,
+          "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+          "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+        },
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.T01",
@@ -5847,21 +7045,32 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:28:45.274Z",
+      "status": "PASS",
       "title": "Fixture format {poison.patch, expect.json}",
       "validation": null
     },
     "P05.T02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.031Z",
       "defects": [],
       "depends_on": [
         "P00.T05"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 7060,
+          "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+          "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+        },
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.T02",
@@ -5871,19 +7080,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:28:45.337Z",
+      "status": "PASS",
       "title": "Placement policy enforcement — fixtures are patches, never live files in scanned trees",
       "validation": null
     },
     "P05.T03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.125Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 7060,
+          "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+          "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+        },
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.T03",
@@ -5893,19 +7113,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:28:45.386Z",
+      "status": "PASS",
       "title": "Runner: worktree, apply, run target gate, assert, revert, control re-run",
       "validation": null
     },
     "P05.T04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.191Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 7060,
+          "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+          "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+        },
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.T04",
@@ -5915,19 +7146,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:28:45.441Z",
+      "status": "PASS",
       "title": "expected_gate enforcement",
       "validation": null
     },
     "P05.T05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.260Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 7060,
+          "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+          "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+        },
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.T05",
@@ -5937,19 +7179,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:28:45.493Z",
+      "status": "PASS",
       "title": "expected_reason signature matching",
       "validation": null
     },
     "P05.T06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.309Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 7060,
+          "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+          "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+        },
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.T06",
@@ -5959,19 +7212,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:28:45.568Z",
+      "status": "PASS",
       "title": "Coverage assertion — every mandatory gate has a fixture",
       "validation": null
     },
     "P05.T07": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.358Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 7060,
+          "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+          "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+        },
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.T07",
@@ -5981,19 +7245,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:28:45.669Z",
+      "status": "PASS",
       "title": "Emit assurance.json plus its sha256",
       "validation": null
     },
     "P05.TEST01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.456Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 3672,
+          "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+          "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.TEST01",
@@ -6003,19 +7278,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:00.408Z",
+      "status": "PASS",
       "title": "Real gate 1 reddens for its own declared reason; control returns green",
       "validation": null
     },
     "P05.TEST02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.569Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 3672,
+          "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+          "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.TEST02",
@@ -6025,19 +7311,30 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:00.512Z",
+      "status": "PASS",
       "title": "Real gate 2 reddens for its own declared reason; control returns green",
       "validation": null
     },
     "P05.TEST03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T12:33:00.685Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 3672,
+          "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+          "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P05.TEST03",
@@ -6047,9 +7344,45 @@
       "notes": [],
       "phase": "P05",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T12:33:00.626Z",
+      "status": "PASS",
       "title": "Real gate 3 reddens for its own declared reason; control returns green",
+      "validation": null
+    },
+    "P05.TEST04": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T12:33:00.788Z",
+      "defects": [],
+      "depends_on": [
+        "P05.T03"
+      ],
+      "evidence": [
+        {
+          "bytes": 240,
+          "path": "docs/verification/evidence/p05/P05-suite.txt",
+          "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+        },
+        {
+          "bytes": 3672,
+          "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+          "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": null,
+      "flaky": false,
+      "id": "P05.TEST04",
+      "inputs": [],
+      "kind": "POSITIVE_VALIDATION",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P05",
+      "remediation": null,
+      "started_at": "2026-08-10T12:33:00.737Z",
+      "status": "PASS",
+      "title": "Repeated poison/control cycles produce identical logical proof semantics; a flaky fixture can never be PROVEN",
       "validation": null
     },
     "P06.AUD01": {

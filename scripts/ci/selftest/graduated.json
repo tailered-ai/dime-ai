@@ -1,0 +1,5 @@
+{
+  "schema_version": "1.0.0",
+  "note": "Gates P06/P07 have graduated into actual local execution. A gate listed here that is locally executable and mandatory MUST carry a valid ASSURANCE proof or the coverage assertion emits BROKEN_GATE(UNPROVEN) -> VERIFIER_BROKEN. P05 ships this empty by design: no gate has graduated yet. P06/P07 append entries as they implement gates; they can never remove the law.",
+  "graduated": []
+}

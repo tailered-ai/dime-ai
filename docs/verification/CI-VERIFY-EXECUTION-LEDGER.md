@@ -29,7 +29,7 @@
 | `P02` | Contract extraction, freeze, conformance | `ACCEPTED` | 23 / 23 | 0 | 0 |
 | `P03` | Registries, taxonomy, reporter, ledger integration | `ACCEPTED` | 24 / 24 | 0 | 0 |
 | `P04` | Executor core | `ACCEPTED` | 30 / 30 | 0 | 0 |
-| `P05` | ASSURANCE — the self-test framework | `NOT_STARTED` | 0 / 20 | 0 | 0 |
+| `P05` | ASSURANCE — the self-test framework | `ACCEPTED` | 27 / 27 | 0 | 0 |
 | `P06` | PARITY — static, security, supply chain | `NOT_STARTED` | 0 / 29 | 0 | 0 |
 | `P07` | PARITY — test and data | `NOT_STARTED` | 0 / 24 | 0 | 0 |
 | `P08` | CLEANROOM — image identity, container build, dual runtime proof | `NOT_STARTED` | 0 / 23 | 0 | 0 |
@@ -334,13 +334,13 @@
 
 ## P05 — ASSURANCE — the self-test framework
 
-**State:** `NOT_STARTED`
+**State:** `ACCEPTED`
 
 **Assurance property:** Every mandatory gate is proven capable of rejection, for its own declared reason, and proven to return to green after restoration.
 
 **Depends on:** `P04`
 
-**Progress (MANDATORY):** 0 / 20
+**Progress (MANDATORY):** 27 / 27
 
 **Entry checklist**
 
@@ -362,26 +362,33 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P05.T01` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Fixture format {poison.patch, expect.json} |
-| `P05.T02` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Placement policy enforcement — fixtures are patches, never live files in scanned trees |
-| `P05.T03` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Runner: worktree, apply, run target gate, assert, revert, control re-run |
-| `P05.T04` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | expected_gate enforcement |
-| `P05.T05` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | expected_reason signature matching |
-| `P05.T06` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Coverage assertion — every mandatory gate has a fixture |
-| `P05.T07` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Emit assurance.json plus its sha256 |
-| `P05.TEST01` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Real gate 1 reddens for its own declared reason; control returns green |
-| `P05.TEST02` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Real gate 2 reddens for its own declared reason; control returns green |
-| `P05.TEST03` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Real gate 3 reddens for its own declared reason; control returns green |
-| `P05.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Fixture reddening the wrong gate yields BROKEN-GATE(WRONG_TARGET) |
-| `P05.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Fixture whose control run stays red yields BROKEN-GATE(NON_RESTORING) |
-| `P05.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Mandatory gate without a fixture yields BROKEN-GATE(UNPROVEN) |
-| `P05.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | A live poison fixture inside a scanned path causes the build to refuse |
-| `P05.AUD01` | AUDIT | MANDATORY | `NOT_STARTED` | 0 | — | Audit: zero poison artifacts exist in the tracked tree |
-| `P05.EV01` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: assurance.json |
-| `P05.EV02` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: assurance.json sha256 |
-| `P05.GATE01` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | At least three real gates proven |
-| `P05.GATE02` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | Coverage assertion armed |
-| `P05.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P05 checkpoint recorded |
+| `P05.T01` | TASK | MANDATORY | `PASS` | 1 | `4edb99e86f20` `919769ab9a5a` | Fixture format {poison.patch, expect.json} |
+| `P05.T02` | TASK | MANDATORY | `PASS` | 1 | `4edb99e86f20` `919769ab9a5a` | Placement policy enforcement — fixtures are patches, never live files in scanned trees |
+| `P05.T03` | TASK | MANDATORY | `PASS` | 1 | `4edb99e86f20` `919769ab9a5a` | Runner: worktree, apply, run target gate, assert, revert, control re-run |
+| `P05.T04` | TASK | MANDATORY | `PASS` | 1 | `4edb99e86f20` `919769ab9a5a` | expected_gate enforcement |
+| `P05.T05` | TASK | MANDATORY | `PASS` | 1 | `4edb99e86f20` `919769ab9a5a` | expected_reason signature matching |
+| `P05.T06` | TASK | MANDATORY | `PASS` | 1 | `4edb99e86f20` `919769ab9a5a` | Coverage assertion — every mandatory gate has a fixture |
+| `P05.T07` | TASK | MANDATORY | `PASS` | 1 | `4edb99e86f20` `919769ab9a5a` | Emit assurance.json plus its sha256 |
+| `P05.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `72cf4564a506` | Real gate 1 reddens for its own declared reason; control returns green |
+| `P05.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `72cf4564a506` | Real gate 2 reddens for its own declared reason; control returns green |
+| `P05.TEST03` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `72cf4564a506` | Real gate 3 reddens for its own declared reason; control returns green |
+| `P05.TEST04` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `72cf4564a506` | Repeated poison/control cycles produce identical logical proof semantics; a flaky fixture can never be PROVEN |
+| `P05.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `72cf4564a506` | Fixture reddening the wrong gate yields BROKEN-GATE(WRONG_TARGET) |
+| `P05.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `72cf4564a506` | Fixture whose control run stays red yields BROKEN-GATE(NON_RESTORING) |
+| `P05.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `72cf4564a506` | Mandatory gate without a fixture yields BROKEN-GATE(UNPROVEN) |
+| `P05.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `f1d5a4812916` | A live poison fixture inside a scanned path causes the build to refuse |
+| `P05.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `72cf4564a506` | Target gate failing for a reason other than the intended detector yields BROKEN-GATE(WRONG_REASON) |
+| `P05.NEG06` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `72cf4564a506` | False-assurance adversarial suite: no-op/partial/wrong-file poison, non-detector statuses, missing or tampered evidence, duplicate or malformed fixtures, and path escapes all fail closed |
+| `P05.NEG07` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `919769ab9a5a` `5bc8b0526d6c` | Interruption during a poison cycle discards the candidate, leaves zero poison and zero residue, and can never emit a proof |
+| `P05.AUD01` | AUDIT | MANDATORY | `PASS` | 1 | `f1d5a4812916` `a543ab8077fe` | Audit: zero poison artifacts exist in the tracked tree |
+| `P05.AUD02` | AUDIT | MANDATORY | `PASS` | 1 | `f1d5a4812916` `5eb33700ff0f` | Audit: P05 duplicates no P01-P04 control-plane mechanism (snapshots, YAML, contract, registry, results, execution, cleanup, ledger, acceptance) |
+| `P05.EV01` | EVIDENCE | MANDATORY | `PASS` | 1 | `abf4c803c515` `d58ddd47aed8` | Evidence: assurance.json |
+| `P05.EV02` | EVIDENCE | MANDATORY | `PASS` | 1 | `1ad955853895` | Evidence: assurance.json sha256 |
+| `P05.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `abf4c803c515` `919769ab9a5a` `4edb99e86f20` | At least three real gates proven |
+| `P05.GATE02` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `919769ab9a5a` `e800975dcbe7` | Coverage assertion armed |
+| `P05.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `1a5009ba0682` | P05 checkpoint recorded |
+| `P05.CP02` | CHECKPOINT | MANDATORY | `PASS` | 1 | `bf3692d404df` | P05 re-checkpoint after DEF-023 remediation; supersedes CP01 for progression while CP01 is preserved byte-for-byte |
+| `P05.CP05` | CHECKPOINT | MANDATORY | `PASS` | 1 | `ab45fd7b558b` | P05 re-checkpoint after integrating the exact current main; supersedes CP01-CP04 for progression while all remain byte-unchanged |
 
 ## P06 — PARITY — static, security, supply chain
 
@@ -689,6 +696,15 @@
 | `DEF-019` | `P02.GATE01` | HIGH | `CLOSED` | AMD-002 recorded a reason that never took effect (blueprint edit failed; batch continued and wrote a vacuous amendment) |
 | `DEF-020` | `P03.CP01` | MEDIUM | `CLOSED` | P03.CP01 evidence lost three backticked terms to unquoted-heredoc command substitution |
 | `DEF-021` | `P04.NEG03` | HIGH | `CLOSED` | Interrupted executor run can still write a complete manifest: the async signal-teardown races the main flow, which keeps settling child exits and reaches the manifest write before process.exit(130) |
+| `DEF-022` | `P05.T03` | LOW | `CLOSED` | Wrong-cwd ledger invocation: persistent shell cwd inside a kept spike worktree routed two phase-transition writes into the worktree's disposable ledger copy; the canonical amend was refused by EVIDENCE_MISSING before any write |
+| `DEF-023` | `P05.T03` | HIGH | `CLOSED` | REQUIRED production check 05-workflow-security#zizmor cannot reject: 'zizmor --min-severity high --format sarif' exits 0 even with a High finding (plain format exits 14), so the gate is green regardless of workflow-security findings; its own inline comment asserts the opposite |
+| `DEF-024` | `P05.AUD01` | MEDIUM | `CLOSED` | P05.AUD01 false positives: treated any poison signature under a sensitive root as a violation, flagging 22 legitimate pre-existing files (secrets.X in real workflows, DROP TABLE in historical migrations); the audit must ask whether P05 introduced live poison, not whether the repo contains those strings |
+| `DEF-025` | `P05.AUD02` | MEDIUM | `CLOSED` | P05 tripped three prior-phase audits: p05-audit.mjs genuinely duplicated P01-owned ref resolution (git diff origin/main...HEAD), and P05.AUD02 missed it because it exempted the whole audit file instead of only its declaration rows; the remaining four flags are declaration-table false positives |
+| `DEF-026` | `P05.NEG07` | LOW | `CLOSED` | An interrupted poison cycle leaves an orphaned run directory: P01 and P04 both wire SIGINT handlers and whichever exits first preempts the other's removal, stranding <run>/worktree/node_modules (gitignored, no poison, no worktree registration); P05.NEG07 asserted no poison and no artifact but never asserted zero run-dir residue |
+| `DEF-027` | `P05.T03` | HIGH | `CLOSED` | Pre-existing HIGH workflow-security finding blocks DEF-023 closure: zizmor/bot-conditions in .github/workflows/auto-merge-dependabot.yml:27 (spoofable github.actor check) means the now-fail-closed 05-workflow-security gate fails on a CLEAN tree, so its control leg cannot pass and the gate cannot be PROVEN |
+| `DEF-028` | `P05.EV01` | MEDIUM | `CLOSED` | Regenerating assurance.json in place invalidated evidence under three already-closed units (P05.EV01/EV02/GATE01); PASS is terminal by design so they cannot be re-pointed, and the run artifact was never a stable path to record as immutable unit evidence |
+| `DEF-029` | `P05.T03` | HIGH | `CLOSED` | origin/main advanced mid-session (4d644cf4 -> 1c17c555, 5 commits touching 19 workflow files) and now conflicts with this branch in .gitignore; P01 reports BLOCKED(MERGE_CONFLICT) so no candidate can be constructed, and the existing proofs certify a merge GitHub will no longer evaluate |
+| `DEF-030` | `P05.T03` | HIGH | `CLOSED` | Authorized main integration cannot land on the branch: four unrelated UNCOMMITTED developer paths (.gitignore, .claude/settings.json, CLAUDE.md, .claude/scripts/bootstrap-gstack.sh) collide with the incoming merge, and git refuses; resolving requires committing, stashing, or removing developer work, which section 1 forbids |
 
 ## Checkpoints
 
@@ -701,3 +717,8 @@
 | `P02` | **PROCEED TO P03** | 2026-08-10T09:51:10.828Z | `1a36ea25a1e4` |
 | `P03` | **PROCEED TO P04** | 2026-08-10T10:22:27.089Z | `1ccb5c006c3a` |
 | `P04` | **PROCEED TO P05** | 2026-08-10T11:11:17.814Z | `d710f47496b9` `258a5a137e3b` `0dd066e93e4c` |
+| `P05` | **DO NOT PROCEED — Blocking IDs: DEF-023** | 2026-08-10T12:34:32.750Z | `1a5009ba0682` `72cf4564a506` `c47c1ae2f501` |
+| `P05` | **DO NOT PROCEED — Blocking IDs: DEF-023, DEF-027** | 2026-08-10T12:55:08.983Z | `bf3692d404df` `a7e7af54c903` `0e420ebcdb5b` |
+| `P05` | **DO NOT PROCEED — Blocking IDs: DEF-029** | 2026-08-10T13:15:11.937Z | `3272fd4ce86f` `c94494e91c9a` `8f98269979b8` |
+| `P05` | **DO NOT PROCEED — Blocking IDs: DEF-029, DEF-030** | 2026-08-10T13:44:51.683Z | `84975bcad146` `b15f0425e1ce` |
+| `P05` | **PROCEED TO P06/P07** | 2026-08-10T14:03:07.890Z | `ab45fd7b558b` `abf4c803c515` `27c38bf1eaa0` |

@@ -1,0 +1,48 @@
+gate_id	runnability	required	graduated	proof_state	fixture	reason
+.github/workflows/01-pr-proof-contract.yml#format-check	LOCAL	n	n	PROVEN	format-check-violation	
+.github/workflows/01-pr-proof-contract.yml#proof	LOCAL+TOOL	Y	n	NOT_LOCALLY_EXECUTABLE	-	required tool(s) unavailable on this host: playwright-browsers
+.github/workflows/02-codeql.yml#analyze	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/03-semgrep.yml#advisory	LOCAL+TOOL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/03-semgrep.yml#blocking	LOCAL+TOOL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/05-workflow-security.yml#zizmor	LOCAL+TOOL	Y	n	UNPROVEN	workflow-template-injection	gate is empirically PROVEN UNABLE TO REJECT (finding fixture(s): workf
+.github/workflows/06-dependency-review.yml#dependency-review	CI-ONLY	Y	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/07-coverage-patch.yml#coverage	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/08-contract-and-data-integrity.yml#contracts	LOCAL	Y	n	PROVEN	drizzle-meta-stray	
+.github/workflows/09-artifact-build-and-smoke.yml#artifact	LOCAL+TOOL	n	n	NOT_LOCALLY_EXECUTABLE	-	required tool(s) unavailable on this host: trivy
+.github/workflows/10-ai-eval-critical.yml#deterministic	LOCAL	Y	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/11-artifact-attestation.yml#attest	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/12-nightly-verification.yml#dependency-release-age	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/12-nightly-verification.yml#full-container-scan	LOCAL+TOOL	n	n	NOT_LOCALLY_EXECUTABLE	-	required tool(s) unavailable on this host: trivy
+.github/workflows/12-nightly-verification.yml#full-osv	LOCAL+TOOL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/12-nightly-verification.yml#mutation-diff	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/12-nightly-verification.yml#scorecard	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/auto-merge-dependabot.yml#auto-merge	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/ci.yml#build	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/ci.yml#db-tests	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/ci.yml#security-audit	LOCAL+TOOL	Y	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/ci.yml#test	LOCAL+TOOL	Y	n	NOT_LOCALLY_EXECUTABLE	-	required tool(s) unavailable on this host: playwright-browsers
+.github/workflows/ci.yml#typecheck	LOCAL	Y	n	PROVEN	typecheck-ts2322	
+.github/workflows/cron-bet-grade.yml#fire	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/cron-mlb-canonical-refresh.yml#refresh	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/cron-mlb-cycle.yml#fire	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/cron-scores.yml#fire	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/cron-stripe-reconcile.yml#fire	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/cron-vsin-odds.yml#fire	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/db-push.yml#db-push	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/db-reconcile-migrations.yml#reconcile	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/deploy-smoke.yml#smoke	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/dime-llm-validation.yml#validate	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/edge-arming-gate.yml#enforce	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/edge-arming-gate.yml#validate	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/gitleaks.yml#gitleaks	LOCAL+TOOL	Y	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/os-ledger-append.yml#append	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/os-observe-crons.yml#observe	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/p0-db-verify.yml#query	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/p0-feed-verify.yml#verify	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/perf-harness.yml#measure	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/pi-review.yml#pi-review	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/railway-p0-control.yml#health	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/refresh-cf-cidrs.yml#check	LOCAL	n	n	NOT_YET_MANDATORY	-	no P06/P07 implementation has graduated this gate yet; proof will be r
+.github/workflows/seed-cfb.yml#seed-cfb	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/seed-nfl.yml#seed-nfl	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required
+.github/workflows/stripe-e2e.yml#stripe-e2e	CI-ONLY	n	n	CI_ONLY	-	not meaningfully executable locally; no local proof required

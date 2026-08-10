@@ -1,0 +1,62 @@
+[p05-audit] AUD01 scanned 4303 tracked file(s): violations=0 classified=49
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE: 30
+[p05-audit]   DOCUMENTED_FINDING: 9
+[p05-audit]   INERT_FIXTURE: 8
+[p05-audit]   TEST_CANARY: 2
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/01-pr-proof-contract.yml [template-injection]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/07-coverage-patch.yml [template-injection]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/08-contract-and-data-integrity.yml [template-injection]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/11-artifact-attestation.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/auto-merge-dependabot.yml [template-injection,secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/cron-bet-grade.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/cron-mlb-canonical-refresh.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/cron-mlb-cycle.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/cron-mlb-learning-loop.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/cron-scores.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/cron-stripe-reconcile.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/cron-vsin-odds.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/db-push.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/db-query.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/db-reconcile-migrations.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/deploy-smoke.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/gitleaks.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/p0-db-verify.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/perf-harness.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/pi-review.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/seed-cfb.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/seed-nfl.yml [secret-reference]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE .github/workflows/stripe-e2e.yml [secret-reference]
+[p05-audit]   DOCUMENTED_FINDING docs/superpowers/plans/2026-07-25-cfb-2026-database.md [secret-reference] — evidence/documentation — never executed or scanned by a gate
+[p05-audit]   DOCUMENTED_FINDING docs/verification/CI-VERIFY-EXECUTION-LEDGER.md [destructive-sql] — evidence/documentation — never executed or scanned by a gate
+[p05-audit]   DOCUMENTED_FINDING docs/verification/ci-verify-ledger.json [p05-marker,destructive-sql] — evidence/documentation — never executed or scanned by a gate
+[p05-audit]   DOCUMENTED_FINDING docs/verification/evidence/p03/EV01-parity-registry.json [template-injection,secret-reference] — evidence/documentation — never executed or scanned by a gate
+[p05-audit]   DOCUMENTED_FINDING docs/verification/evidence/p05/DEF-024.md [p05-marker,destructive-sql] — evidence/documentation — never executed or scanned by a gate
+[p05-audit]   DOCUMENTED_FINDING docs/verification/evidence/p05/T01-T07-implementation.md [p05-marker] — evidence/documentation — never executed or scanned by a gate
+[p05-audit]   DOCUMENTED_FINDING docs/verification/evidence/p05/assurance.json [p05-marker] — evidence/documentation — never executed or scanned by a gate
+[p05-audit]   DOCUMENTED_FINDING docs/verification/evidence/p05/raw/DEF-023-zizmor-plain.txt [p05-marker,template-injection] — evidence/documentation — never executed or scanned by a gate
+[p05-audit]   DOCUMENTED_FINDING docs/verification/evidence/p05/raw/DEF-023-zizmor-sarif.json [p05-marker,template-injection] — evidence/documentation — never executed or scanned by a gate
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE drizzle/0014_organic_spacker_dave.sql [destructive-sql]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE drizzle/0107_majestic_kinsey_walden.sql [destructive-sql]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE drizzle/0115_condemned_warhawk.sql [destructive-sql]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE drizzle/0120_fresh_gargoyle.sql [destructive-sql]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE scripts/bench-bet-stats.mts [destructive-sql]
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE scripts/ci/contract.frozen.json [template-injection,secret-reference]
+[p05-audit]   INERT_FIXTURE scripts/ci/selftest/fixtures/drizzle-meta-stray/expect.json [p05-marker]
+[p05-audit]   INERT_FIXTURE scripts/ci/selftest/fixtures/drizzle-meta-stray/poison.patch [p05-marker]
+[p05-audit]   INERT_FIXTURE scripts/ci/selftest/fixtures/format-check-violation/expect.json [p05-marker]
+[p05-audit]   INERT_FIXTURE scripts/ci/selftest/fixtures/format-check-violation/poison.patch [p05-marker]
+[p05-audit]   INERT_FIXTURE scripts/ci/selftest/fixtures/typecheck-ts2322/expect.json [p05-marker]
+[p05-audit]   INERT_FIXTURE scripts/ci/selftest/fixtures/typecheck-ts2322/poison.patch [p05-marker]
+[p05-audit]   INERT_FIXTURE scripts/ci/selftest/fixtures/workflow-template-injection/expect.json [p05-marker]
+[p05-audit]   INERT_FIXTURE scripts/ci/selftest/fixtures/workflow-template-injection/poison.patch [p05-marker,template-injection]
+[p05-audit]   TEST_CANARY scripts/ci/selftest/p05-audit.mjs [p05-marker] — imports and reports the signature table; contains no live poison
+[p05-audit]   TEST_CANARY scripts/ci/selftest/p05.test.ts [p05-marker,template-injection] — drives the negatives; every poison string it holds is a controlled in-memory double or lives under a temp root, never a live repo file
+[p05-audit]   LEGITIMATE_EXISTING_SOURCE scripts/data/nfl-db/test_field_classification.py [destructive-sql]
+[p05-audit] AUD01 PASS — zero live poison in the tracked tree; all fixture poison is inert patch bytes
+[p05-audit] AUD02 modules=5 findings=0
+[p05-audit]   integration present: P01 snapshot
+[p05-audit]   integration present: P02/P03 contract+registry
+[p05-audit]   integration present: P03 result taxonomy
+[p05-audit]   integration present: P04 executor
+[p05-audit]   integration present: P04 teardown
+[p05-audit] AUD02 PASS — P05 orchestrates P01-P04 and duplicates none of them

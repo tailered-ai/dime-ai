@@ -121,46 +121,46 @@ implicit ignored class: an unclassified construct aborts generation with
 
 | Workflow | raw sha256 | canonical sha256 |
 | --- | --- | --- |
-| `01-pr-proof-contract.yml` | `76cdc4b5534f5375` | `7f5fa8b6bee01fed` |
+| `01-pr-proof-contract.yml` | `2778ae9068c3f74f` | `f52a1b9f159e8bc2` |
 | `02-codeql.yml` | `8368b0ac4e37f06a` | `63f6b6d713029f66` |
 | `03-semgrep.yml` | `e8f9690f3317c1a3` | `3d24f628dd383fea` |
 | `05-workflow-security.yml` | `7bf7f454f7fa9bb1` | `8a039dc619a6ea94` |
 | `06-dependency-review.yml` | `d4c5e5deefeb7b7c` | `89f79e1dbb9b4467` |
-| `07-coverage-patch.yml` | `24afae21812686c5` | `f113a26ac11a6dd3` |
-| `08-contract-and-data-integrity.yml` | `459978cb3b7a7e38` | `bc6b76db5b2a53a9` |
+| `07-coverage-patch.yml` | `38203a2e85e47a5f` | `ff4c83a51bcbc920` |
+| `08-contract-and-data-integrity.yml` | `4ab20522d6289e9b` | `7ab2853128dce3ab` |
 | `09-artifact-build-and-smoke.yml` | `bc732356b3611ddf` | `b792c10a527cb82e` |
-| `10-ai-eval-critical.yml` | `83ed21dd5185b119` | `21f867df5ae0effb` |
+| `10-ai-eval-critical.yml` | `fc3c61ec5295d39c` | `1962c88decd245b2` |
 | `11-artifact-attestation.yml` | `4b30e6067e3915df` | `e0d4bfe2bf8ff99a` |
-| `12-nightly-verification.yml` | `a77a3a33a807ba0e` | `ddc282b454cfde43` |
+| `12-nightly-verification.yml` | `d391710ff1fda1ce` | `6cda3ccc1b90711b` |
 | `auto-merge-dependabot.yml` | `cc1fdaa050d8091e` | `55e151f35d3fa254` |
-| `ci.yml` | `feb30dc96f5ff704` | `027d67e57b47f8d2` |
+| `ci.yml` | `ed6801cad8426de3` | `4052cae10731c3c0` |
 | `cron-bet-grade.yml` | `9eeddca74c8c5c96` | `df0cd7873a40af34` |
-| `cron-mlb-canonical-refresh.yml` | `2cada7ec4243c9d7` | `d588d1f3bc4ed030` |
+| `cron-mlb-canonical-refresh.yml` | `066a43bd7b8608d1` | `f840129cea3d367f` |
 | `cron-mlb-cycle.yml` | `0c6eb0f142de1488` | `c9487082b6ec9834` |
 | `cron-mlb-learning-loop.yml` | `d92325a4dd78b0b9` | `49057a1ba96d71e7` |
 | `cron-scores.yml` | `f7e4db9c0b2504b1` | `a6f00571e6ca5c57` |
 | `cron-stripe-reconcile.yml` | `f3853159e4a178a2` | `8797451b71919384` |
 | `cron-vsin-odds.yml` | `28ff39a9bb2a01cd` | `ec21de9d54796eb6` |
-| `db-push.yml` | `14d3c7147929c8e4` | `c7ee244fc825d572` |
+| `db-push.yml` | `450e055d71eaff36` | `0d731311bcbec2c5` |
 | `db-query.yml` | `35bde1399b158250` | `f74b90ad09c2a084` |
-| `db-reconcile-migrations.yml` | `5fc912cf0c015fdc` | `cd6ff4ffaf01cd6b` |
+| `db-reconcile-migrations.yml` | `a98cbac115450c66` | `9c7b8d96ac738bdb` |
 | `deploy-smoke.yml` | `cfef81db859b7bfe` | `33372e428098ccb3` |
 | `dime-llm-validation.yml` | `8d36ae80ee9d1393` | `ce640ec49b5f7d6d` |
-| `edge-arming-gate.yml` | `b31e79bd33c15920` | `e120c2666b263099` |
-| `feed-responsive-cross-browser.yml` | `32b1efdb6337c0ed` | `779690b249abd812` |
+| `edge-arming-gate.yml` | `bbd57e1f0b9fd0e3` | `a78eeeed3d4cf3af` |
+| `feed-responsive-cross-browser.yml` | `e0ba16432cc32fb1` | `d3796532c8361c66` |
 | `gitleaks.yml` | `b8e8571ffbd69107` | `f21f3cbed277f83d` |
 | `os-ledger-append.yml` | `2c327ce38b741615` | `b0efa324a0ec4c57` |
-| `os-observe-crons.yml` | `27185963587b61eb` | `e3af47275ce21fe8` |
+| `os-observe-crons.yml` | `0458ee9c67b161e2` | `eabb14b4523287fb` |
 | `p0-db-verify.yml` | `fb15133f713a4df2` | `16bd85a4969a07f6` |
 | `p0-feed-verify.yml` | `391d7845c7cefd21` | `cff13e8b6d3a8a67` |
-| `perf-harness.yml` | `5440b716eb96ab36` | `329feb72c4174ca2` |
-| `pi-review.yml` | `7594180b93acd86d` | `acf6df90645c74f4` |
+| `perf-harness.yml` | `de950ad17ed4714b` | `aec3b9e1329e74a7` |
+| `pi-review.yml` | `39e99c0d6cd1be61` | `ebec175f06fdff80` |
 | `railway-p0-control.yml` | `22eae8e44fac7bb5` | `64f96ea0be26cbdf` |
 | `refresh-cf-cidrs.yml` | `178fb7eb3ad26eea` | `16dff8928ae011ef` |
-| `security-audit-weekly.yml` | `713b9bb5c6d5c302` | `77e832b77e23d302` |
-| `seed-cfb.yml` | `edcf431d2a73b385` | `0c8b0c75f4606732` |
-| `seed-nfl.yml` | `0eb40abf225c52e7` | `46c7271b1ca615e5` |
-| `stripe-e2e.yml` | `85e31c1553d14ef5` | `79821c1d0877c50b` |
+| `security-audit-weekly.yml` | `3f2a793eba0f58cf` | `5a35f09f95f6d490` |
+| `seed-cfb.yml` | `1c6f483040e38a4f` | `2fe565087f61de08` |
+| `seed-nfl.yml` | `5b83e674f3dd58aa` | `6055a41734fa57c8` |
+| `stripe-e2e.yml` | `2ec7075dc813d39f` | `5583eb720f05b8ff` |
 
 ## Regeneration and failure semantics
 

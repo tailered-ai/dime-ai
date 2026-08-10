@@ -1,0 +1,232 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "invocations": [
+        {
+          "executionSuccessful": true
+        }
+      ],
+      "results": [
+        {
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "importance": "important",
+                      "location": {
+                        "logicalLocations": [
+                          {
+                            "properties": {
+                              "symbolic": {
+                                "annotation": "this job",
+                                "feature_kind": "Normal",
+                                "key": {
+                                  "Local": {
+                                    "verbatim_path": ".github/workflows/auto-merge-dependabot.yml"
+                                  }
+                                },
+                                "kind": "Related",
+                                "route": {
+                                  "route": [
+                                    {
+                                      "Key": "jobs"
+                                    },
+                                    {
+                                      "Key": "auto-merge"
+                                    },
+                                    {
+                                      "Key": "name"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "message": {
+                          "text": "this job"
+                        },
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": ".github/workflows/auto-merge-dependabot.yml"
+                          },
+                          "region": {
+                            "endColumn": 42,
+                            "endLine": 22,
+                            "snippet": {
+                              "text": "    name: Auto-merge Dependabot patch PRs"
+                            },
+                            "sourceLanguage": "yaml",
+                            "startColumn": 5,
+                            "startLine": 22
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "importance": "essential",
+                      "location": {
+                        "logicalLocations": [
+                          {
+                            "properties": {
+                              "symbolic": {
+                                "annotation": "actor context may be spoofable",
+                                "feature_kind": {
+                                  "Subfeature": {
+                                    "after": 0,
+                                    "fragment": {
+                                      "Regex": "github\\.actor\\s+==\\s+'dependabot\\[bot\\]'"
+                                    }
+                                  }
+                                },
+                                "key": {
+                                  "Local": {
+                                    "verbatim_path": ".github/workflows/auto-merge-dependabot.yml"
+                                  }
+                                },
+                                "kind": "Primary",
+                                "route": {
+                                  "route": [
+                                    {
+                                      "Key": "jobs"
+                                    },
+                                    {
+                                      "Key": "auto-merge"
+                                    },
+                                    {
+                                      "Key": "if"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        ],
+                        "message": {
+                          "text": "actor context may be spoofable"
+                        },
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": ".github/workflows/auto-merge-dependabot.yml"
+                          },
+                          "region": {
+                            "endColumn": 42,
+                            "endLine": 27,
+                            "snippet": {
+                              "text": "github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'"
+                            },
+                            "sourceLanguage": "yaml",
+                            "startColumn": 9,
+                            "startLine": 27
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "kind": "fail",
+          "level": "error",
+          "locations": [
+            {
+              "logicalLocations": [
+                {
+                  "properties": {
+                    "symbolic": {
+                      "annotation": "actor context may be spoofable",
+                      "feature_kind": {
+                        "Subfeature": {
+                          "after": 0,
+                          "fragment": {
+                            "Regex": "github\\.actor\\s+==\\s+'dependabot\\[bot\\]'"
+                          }
+                        }
+                      },
+                      "key": {
+                        "Local": {
+                          "verbatim_path": ".github/workflows/auto-merge-dependabot.yml"
+                        }
+                      },
+                      "kind": "Primary",
+                      "route": {
+                        "route": [
+                          {
+                            "Key": "jobs"
+                          },
+                          {
+                            "Key": "auto-merge"
+                          },
+                          {
+                            "Key": "if"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              ],
+              "message": {
+                "text": "actor context may be spoofable"
+              },
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".github/workflows/auto-merge-dependabot.yml"
+                },
+                "region": {
+                  "endColumn": 42,
+                  "endLine": 27,
+                  "snippet": {
+                    "text": "github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'"
+                  },
+                  "sourceLanguage": "yaml",
+                  "startColumn": 9,
+                  "startLine": 27
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "spoofable bot actor check: actor context may be spoofable"
+          },
+          "properties": {
+            "zizmor/confidence": "Medium",
+            "zizmor/persona": "Regular",
+            "zizmor/severity": "High"
+          },
+          "ruleId": "zizmor/bot-conditions"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "downloadUri": "https://github.com/zizmorcore/zizmor",
+          "informationUri": "https://docs.zizmor.sh",
+          "name": "zizmor",
+          "rules": [
+            {
+              "help": {
+                "markdown": "`bot-conditions`: spoofable bot actor check\n\nDocs: <https://docs.zizmor.sh/audits/#bot-conditions>",
+                "text": "spoofable bot actor check"
+              },
+              "helpUri": "https://docs.zizmor.sh/audits/#bot-conditions",
+              "id": "zizmor/bot-conditions",
+              "name": "bot-conditions",
+              "properties": {
+                "tags": [
+                  "security"
+                ]
+              }
+            }
+          ],
+          "semanticVersion": "1.29.0",
+          "version": "1.29.0"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

@@ -54,6 +54,15 @@ export const ALLOWLIST = [
       "The audit must name the patterns it forbids in order to detect them. " +
       "It performs no SHA resolution of its own.",
   },
+  {
+    file: "scripts/ci/selftest/p05-audit.mjs",
+    reason:
+      "P05.AUD02's isolation table must NAME the provenance patterns it " +
+      "forbids P05 from using. Its own git calls are `ls-files` and " +
+      "`status` only — neither resolves a SHA or a ref. Added after DEF-025, " +
+      "where this module's genuine `origin/main...HEAD` call was caught here " +
+      "and removed; the allowlist covers the declaration table, not that bug.",
+  },
 ];
 
 /**

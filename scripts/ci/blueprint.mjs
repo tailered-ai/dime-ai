@@ -982,9 +982,39 @@ export const PHASES = [
         "A live poison fixture inside a scanned path causes the build to refuse"
       ),
       u(
+        "P05.NEG05",
+        M,
+        "Target gate failing for a reason other than the intended detector yields BROKEN-GATE(WRONG_REASON)",
+        { depends_on: ["P05.T05"] }
+      ),
+      u(
+        "P05.NEG06",
+        M,
+        "False-assurance adversarial suite: no-op/partial/wrong-file poison, non-detector statuses, missing or tampered evidence, duplicate or malformed fixtures, and path escapes all fail closed",
+        { depends_on: ["P05.T03"] }
+      ),
+      u(
+        "P05.NEG07",
+        M,
+        "Interruption during a poison cycle discards the candidate, leaves zero poison and zero residue, and can never emit a proof",
+        { depends_on: ["P05.T03", "P04.T07"] }
+      ),
+      u(
+        "P05.TEST04",
+        M,
+        "Repeated poison/control cycles produce identical logical proof semantics; a flaky fixture can never be PROVEN",
+        { depends_on: ["P05.T03"] }
+      ),
+      u(
         "P05.AUD01",
         M,
         "Audit: zero poison artifacts exist in the tracked tree"
+      ),
+      u(
+        "P05.AUD02",
+        M,
+        "Audit: P05 duplicates no P01-P04 control-plane mechanism (snapshots, YAML, contract, registry, results, execution, cleanup, ledger, acceptance)",
+        { depends_on: ["P05.T03"] }
       ),
       u("P05.EV01", M, "Evidence: assurance.json"),
       u("P05.EV02", M, "Evidence: assurance.json sha256"),
@@ -997,6 +1027,18 @@ export const PHASES = [
       u("P05.CP01", M, "P05 checkpoint recorded", {
         depends_on: ["P05.GATE01", "P05.GATE02"],
       }),
+      u(
+        "P05.CP02",
+        M,
+        "P05 re-checkpoint after DEF-023 remediation; supersedes CP01 for progression while CP01 is preserved byte-for-byte",
+        { depends_on: ["P05.CP01"] }
+      ),
+      u(
+        "P05.CP05",
+        M,
+        "P05 re-checkpoint after integrating the exact current main; supersedes CP01-CP04 for progression while all remain byte-unchanged",
+        { depends_on: ["P05.CP02"] }
+      ),
     ],
   },
 

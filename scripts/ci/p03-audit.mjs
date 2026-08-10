@@ -172,6 +172,19 @@ export const YAML_READER_ALLOWLIST = [
     reason:
       "Re-derives workflow source hashes for drift detection. It reads workflow BYTES and never parses YAML.",
   },
+  {
+    file: "scripts/ci/selftest/placement.mjs",
+    reason:
+      "P05.T02 must NAME the GitHub workflows directory as a sensitive root " +
+      "in order to refuse fixture material there. It declares paths to " +
+      "protect and never opens, reads, or parses a workflow.",
+  },
+  {
+    file: "scripts/ci/selftest/p05-audit.mjs",
+    reason:
+      "P05.AUD02's isolation table must NAME the YAML-parsing patterns it " +
+      "forbids P05 from using. It parses no YAML.",
+  },
 ];
 
 export const YAML_PATTERNS = [

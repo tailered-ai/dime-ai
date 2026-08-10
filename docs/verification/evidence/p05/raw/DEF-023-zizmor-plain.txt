@@ -1,0 +1,13 @@
+error[template-injection]: code injection via template expansion
+ --> .github/workflows/p05-poison-template-injection.yml:9:24
+  |
+9 |         run: echo "${{ github.event.issue.title }}"
+  |         ---            ^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+  |         |
+  |         this run block
+  |
+  = note: audit confidence → High
+  = note: this finding has an auto-fix
+  = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+3 findings (2 suppressed, 1 unsafe fixes): 0 informational, 0 low, 0 medium, 1 high
