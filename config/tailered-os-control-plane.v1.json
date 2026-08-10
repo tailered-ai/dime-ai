@@ -72,25 +72,25 @@
         "name": "Decisions",
         "id": "46ec53110ccc496296a7438203324d21",
         "verified": false,
-        "source": "references/notion-control-plane.md (recorded 2026-08-06); re-verify via the Notion connector before automated use"
+        "source": "git history of references/notion-control-plane.md (2026-08-06 revision; ids removed from the live file); re-verify via the Notion connector before automated use"
       },
       "risks": {
         "name": "Risks",
         "id": "a4a37320164d408c8f0df5dfe7cb2ba1",
         "verified": false,
-        "source": "references/notion-control-plane.md (recorded 2026-08-06); re-verify via the Notion connector before automated use"
+        "source": "git history of references/notion-control-plane.md (2026-08-06 revision; ids removed from the live file); re-verify via the Notion connector before automated use"
       },
       "releases": {
         "name": "Releases",
         "id": "f86c2987ec7e43dfa71b2dce14664467",
         "verified": false,
-        "source": "references/notion-control-plane.md (recorded 2026-08-06); re-verify via the Notion connector before automated use"
+        "source": "git history of references/notion-control-plane.md (2026-08-06 revision; ids removed from the live file); re-verify via the Notion connector before automated use"
       },
       "knowledge": {
         "name": "Knowledge",
         "id": "694ec08d2e544cc797157a24824bbd1d",
         "verified": false,
-        "source": "references/notion-control-plane.md (recorded 2026-08-06); re-verify via the Notion connector before automated use"
+        "source": "git history of references/notion-control-plane.md (2026-08-06 revision; ids removed from the live file); re-verify via the Notion connector before automated use"
       }
     }
   },

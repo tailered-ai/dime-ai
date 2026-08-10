@@ -116,6 +116,96 @@ describe("tailered-os control-plane manifest", () => {
     );
   });
 
+  it("rejects injected unknown keys at every level (adversarial-review C2)", () => {
+    const lookalike = clone();
+    lookalike.notion.commandCenterV2 = {
+      name: "Tailered OS Command Center",
+      id: "deadbeefdeadbeefdeadbeefdeadbeef",
+      verified: true,
+      verifiedOn: "2026-08-10",
+      source: "attacker",
+    };
+    assert.throws(() => validateControlPlaneManifest(lookalike), /unknown key/);
+
+    const safetyBypass = clone();
+    safetyBypass.safety.notionWriteOperationsAuthorizedV2 = true;
+    assert.throws(
+      () => validateControlPlaneManifest(safetyBypass),
+      /unknown key/
+    );
+
+    const topLevel = clone();
+    topLevel.permissions = { write: true };
+    assert.throws(() => validateControlPlaneManifest(topLevel), /unknown key/);
+
+    const extraDatabase = clone();
+    extraDatabase.notion.databases.credentials = clone().notion.databases.tasks;
+    assert.throws(
+      () => validateControlPlaneManifest(extraDatabase),
+      /unknown key/
+    );
+
+    const nodeExtra = clone();
+    nodeExtra.notion.workspaceRootPage.writeToken = "x";
+    assert.throws(() => validateControlPlaneManifest(nodeExtra), /unknown key/);
+  });
+
+  it("rejects impossible dates and stray verifiedOn values (adversarial-review I1)", () => {
+    const impossible = clone();
+    impossible.notion.commandCenter.verifiedOn = "9999-99-99";
+    assert.throws(
+      () => validateControlPlaneManifest(impossible),
+      /calendar date/
+    );
+
+    const strayOnUnverified = clone();
+    strayOnUnverified.notion.databases.decisions.verifiedOn = "not-a-date";
+    assert.throws(
+      () => validateControlPlaneManifest(strayOnUnverified),
+      /calendar date/
+    );
+  });
+
+  it("rejects passworded connection URIs (adversarial-review I2)", () => {
+    const bad = clone();
+    // Assembled at runtime so the raw diff never contains a contiguous
+    // credential-shaped URI (the repo's gitleaks gate scans commit text).
+    bad.notion.databases.risks.source = [
+      "mysql://user",
+      "hunter2@db.internal/x",
+    ].join(":");
+    assert.throws(() => validateControlPlaneManifest(bad), /credential-shaped/);
+  });
+
+  it("every Notion id the runbook shows agents matches the manifest (adversarial-review C3)", () => {
+    const doc = readFileSync(
+      join(repoRoot, "references", "notion-control-plane.md"),
+      "utf8"
+    );
+    const manifest = loadControlPlaneManifest();
+    const manifestIds = new Set<string>([
+      manifest.notion.workspaceRootPage.id,
+      manifest.notion.taileredOsProject.id,
+      manifest.notion.commandCenter.id,
+      manifest.notion.communicationStandard.id,
+      manifest.notion.executionContract.id,
+      ...Object.values(manifest.notion.databases).map(
+        (node: any) => node.id as string
+      ),
+    ]);
+    const docIds = [...new Set(doc.match(/\b[0-9a-f]{32}\b/g) ?? [])];
+    assert.ok(docIds.length >= 8, "runbook lost its canonical-surface ids");
+    for (const id of docIds) {
+      assert.ok(
+        manifestIds.has(id),
+        `runbook shows id ${id} that the manifest does not pin — mis-pasted identifier`
+      );
+    }
+    for (const id of Object.values(CANONICAL)) {
+      assert.ok(docIds.includes(id), `runbook is missing canonical id ${id}`);
+    }
+  });
+
   it("the human runbook names the manifest and the current root page (doc/manifest lockstep)", () => {
     const doc = readFileSync(
       join(repoRoot, "references", "notion-control-plane.md"),
