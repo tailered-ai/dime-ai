@@ -15,6 +15,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  rmdirSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
@@ -162,7 +163,9 @@ export const OWNER_GATE_STATES = Object.freeze([
 ]);
 export const ACTOR_TYPES = Object.freeze(["agent", "human", "system"]);
 
-const ISO_TS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
+// Fixed-width, no fractional seconds: lexicographic order == temporal order.
+// (gstack-review: optional fractions made string comparison unsound.)
+const ISO_TS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 const RUN_ID = /^ONE-\d{8}-[A-Z0-9-]{2,32}$/;
 const EVENT_ID = /^evt_\d{5}$/;
 // Credential-shaped tripwire, same class the control-plane validator enforces:
@@ -412,35 +415,75 @@ export function initRun(manifest) {
     `run ${manifest.run_id} already exists — the run manifest is immutable`
   );
   mkdirSync(runDir(manifest.run_id), { recursive: true });
+  // wx: atomic create-or-fail closes the check-then-write race (gstack-review).
   writeFileSync(
     manifestPath(manifest.run_id),
-    `${JSON.stringify(manifest, null, 2)}\n`
+    `${JSON.stringify(manifest, null, 2)}\n`,
+    { flag: "wx" }
   );
   return manifest;
 }
 
+// Identity fields are tool-assigned; a caller must never forge them into the
+// permanent chain (gstack-review: `...partial` previously spread over them).
+const RESERVED_EVENT_KEYS = Object.freeze([
+  "schema_version",
+  "event_id",
+  "run_id",
+  "sequence",
+  "timestamp",
+  "previous_event_hash",
+  "event_hash",
+]);
+
 export function appendEvent(runId, partial) {
-  const manifest = loadManifest(runId);
-  const events = readEvents(runId);
-  const previous = events[events.length - 1] ?? null;
-  const sequence = (previous?.sequence ?? 0) + 1;
-  const event = {
-    schema_version: 1,
-    event_id: `evt_${String(sequence).padStart(5, "0")}`,
-    run_id: runId,
-    sequence,
-    timestamp: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
-    ...partial,
-  };
-  validateEvent(event, manifest);
-  invariant(
-    previous === null || event.timestamp >= previous.timestamp,
-    "event.timestamp must be monotonically non-decreasing"
+  const clash = Object.keys(partial).filter(key =>
+    RESERVED_EVENT_KEYS.includes(key)
   );
-  event.previous_event_hash = previous?.event_hash ?? null;
-  event.event_hash = hashEvent(event, event.previous_event_hash);
-  appendFileSync(eventsPath(runId), `${JSON.stringify(event)}\n`);
-  return event;
+  invariant(
+    clash.length === 0,
+    `appendEvent must not receive reserved key(s): ${clash.join(", ")} — identity fields are tool-assigned`
+  );
+  const manifest = loadManifest(runId);
+  // mkdir is the atomic lock primitive: a concurrent append fails loudly here
+  // instead of silently chaining two events to the same predecessor.
+  const lockPath = join(runDir(runId), ".append.lock");
+  try {
+    mkdirSync(lockPath);
+  } catch {
+    throw new Error(
+      `one-shot-ledger: another append holds ${lockPath} — the ledger is single-writer; retry after it completes (or remove a stale lock left by a killed process)`
+    );
+  }
+  try {
+    const events = readEvents(runId);
+    const previous = events[events.length - 1] ?? null;
+    const sequence = (previous?.sequence ?? 0) + 1;
+    // JSON round-trip so the hash covers exactly what the file stores —
+    // undefined-valued keys would otherwise diverge hash from serialization
+    // and permanently poison verify (gstack-review).
+    const event = JSON.parse(
+      JSON.stringify({
+        schema_version: 1,
+        event_id: `evt_${String(sequence).padStart(5, "0")}`,
+        run_id: runId,
+        sequence,
+        timestamp: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
+        ...partial,
+      })
+    );
+    validateEvent(event, manifest);
+    invariant(
+      previous === null || event.timestamp >= previous.timestamp,
+      "event.timestamp must be monotonically non-decreasing"
+    );
+    event.previous_event_hash = previous?.event_hash ?? null;
+    event.event_hash = hashEvent(event, event.previous_event_hash);
+    appendFileSync(eventsPath(runId), `${JSON.stringify(event)}\n`);
+    return event;
+  } finally {
+    rmdirSync(lockPath);
+  }
 }
 
 // §43 deterministic integrity verification. Returns {ok, errors[], stats}.

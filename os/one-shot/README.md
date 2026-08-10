@@ -48,10 +48,35 @@ are assigned by the tool):
 ```
 
 `verify` proves: schema validity, monotonic sequence, unique event ids, controlled event
-vocabulary, declared scope membership, timestamp order, hash-chain integrity (edit / delete /
-reorder all detected), duplicate idempotency keys, owner-gate and finding lifecycle
-consistency, and absence of credential-shaped content. `scripts/one-shot/ledger.test.ts`
-demonstrates each control failing under deliberate violation.
+vocabulary, declared scope membership, timestamp order, hash-chain integrity (any edit,
+interior deletion, or reorder is detected), duplicate idempotency keys, owner-gate and
+finding lifecycle consistency, and absence of credential-shaped content.
+**Known limits (tamper-EVIDENT, not tamper-proof):** deleting the FINAL line(s) leaves a
+valid shorter chain — verify has no internal length anchor. The external anchor is
+`closeout.mjs closeout`'s `tail_anchor` (events_total + final_event_hash), quoted in the
+run's PR body and final handoff; tail truncation then contradicts the out-of-band record.
+And a write-capable actor who edits an event AND recomputes every downstream hash produces
+a chain verify passes — the hash chain forces tampering to be a large, reviewable diff; the
+actual integrity anchor is git history + branch protection + CI re-derivation, not the
+chain alone. Do not cite the ledger as cryptographic proof outside that assumption.
+`scripts/one-shot/ledger.test.ts` and `closeout.test.ts` demonstrate each control failing
+under deliberate violation.
+
+## Notion pre-image bounding rule
+
+Snapshot-before-mutate pre-images committed under `runs/<run_id>/notion-preimages/` may
+contain ONLY the specific properties/structure being mutated — never full body dumps of
+records outside the mutation, never Decisions/Risks/People/customer free-text bodies, and
+never secrets (CI scans every committed pre-image with the ledger's credential tripwire via
+`scripts/ci/tos-ledger-verify.mjs`). This content is committable only while the repo is
+private; a visibility flip triggers a pre-image purge review.
+
+`closeout.mjs` derives the run metrics and the closeout gate:
+
+```bash
+node scripts/one-shot/closeout.mjs metrics  <run_id>   # §-metrics, mechanically derived
+node scripts/one-shot/closeout.mjs closeout <run_id>   # exit 0 only when COMPLETE is honest
+```
 
 ## Storage authority
 

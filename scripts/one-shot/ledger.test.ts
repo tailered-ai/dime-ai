@@ -348,3 +348,75 @@ describe("canonicalize depth coverage (FIND-LANE0-0001)", () => {
     assert.match(result.errors.join("\n"), /event_hash mismatch/);
   });
 });
+
+describe("append hardening (gstack-review findings)", () => {
+  it("refuses reserved identity keys in the partial", () => {
+    initTestRun();
+    assert.throws(
+      () =>
+        ledger.appendEvent(BASE_MANIFEST.run_id, { ...EVENT, sequence: 99 }),
+      /reserved key\(s\): sequence/
+    );
+    assert.throws(
+      () =>
+        ledger.appendEvent(BASE_MANIFEST.run_id, {
+          ...EVENT,
+          event_hash: "cafe",
+        }),
+      /reserved key\(s\): event_hash/
+    );
+  });
+
+  it("undefined-valued keys cannot poison the chain (hash covers what the file stores)", () => {
+    initTestRun();
+    ledger.appendEvent(BASE_MANIFEST.run_id, {
+      ...EVENT,
+      gate: undefined,
+      finding: undefined,
+    });
+    ledger.appendEvent(BASE_MANIFEST.run_id, {
+      ...EVENT,
+      event_type: "CONTEXT_VERIFIED",
+      summary: "ok",
+    });
+    const result = ledger.verifyRun(BASE_MANIFEST.run_id);
+    assert.deepEqual(result.errors, []);
+  });
+
+  it("a concurrent append fails loudly on the lock instead of forking the chain", () => {
+    initTestRun();
+    ledger.appendEvent(BASE_MANIFEST.run_id, EVENT);
+    mkdirSync(join(tmpRoot, BASE_MANIFEST.run_id, ".append.lock"));
+    assert.throws(
+      () =>
+        ledger.appendEvent(BASE_MANIFEST.run_id, {
+          ...EVENT,
+          summary: "racer",
+        }),
+      /single-writer/
+    );
+  });
+
+  it("fractional-second timestamps are rejected outright", () => {
+    initTestRun();
+    const manifest = { ...BASE_MANIFEST };
+    assert.throws(
+      () =>
+        ledger.validateEvent(
+          {
+            schema_version: 1,
+            event_id: "evt_00001",
+            run_id: BASE_MANIFEST.run_id,
+            sequence: 1,
+            timestamp: "2099-01-01T00:00:00.500Z",
+            scope_id: "LANE-0",
+            event_type: "RUN_STARTED",
+            actor: EVENT.actor,
+            summary: "x",
+          },
+          manifest
+        ),
+      /ISO-8601/
+    );
+  });
+});

@@ -3,6 +3,7 @@
 // closeout exits 0 only when the run can honestly emit COMPLETE; otherwise it
 // prints exactly which conditions block, exits 1, and the campaign ends with
 // the Owner-Gate Queue instead of a false COMPLETE.
+import { fileURLToPath } from "node:url";
 import { loadManifest, readEvents, verifyRun } from "./ledger.mjs";
 
 export function deriveMetrics(runId) {
@@ -89,10 +90,7 @@ export function closeout(runId) {
     blockers.push(`ledger integrity: ${integrity.errors.length} violation(s)`);
   const metrics = deriveMetrics(runId);
   const events = readEvents(runId);
-  if (metrics.critical_findings > 0 || metrics.high_findings > 0) {
-    const open = events.length && metrics.findings_open > 0;
-    if (open) blockers.push(`${metrics.findings_open} finding(s) not CLOSED`);
-  } else if (metrics.findings_open > 0) {
+  if (metrics.findings_open > 0) {
     blockers.push(`${metrics.findings_open} finding(s) not CLOSED`);
   }
   const requiredScopes = manifest.scopes.filter(scope =>
@@ -104,6 +102,46 @@ export function closeout(runId) {
   const nonTerminal = requiredScopes.filter(scope => !completed.has(scope));
   if (nonTerminal.length > 0) {
     blockers.push(`required scopes not terminal: ${nonTerminal.join(", ")}`);
+  }
+  // Required gates (gstack-review HIGH): every manifest-required gate needs a
+  // terminal evaluation, and its LAST recorded state must be PASS or
+  // NOT_APPLICABLE — a FAIL only clears through re-evaluation, never silently.
+  const gateState = new Map();
+  for (const event of events) {
+    if (event.event_type === "GATE_EVALUATED")
+      gateState.set(event.gate, event.gate_status);
+  }
+  const unevaluatedGates = manifest.required_gates.filter(
+    gate => !gateState.has(gate)
+  );
+  if (unevaluatedGates.length > 0) {
+    blockers.push(
+      `required gates never evaluated: ${unevaluatedGates.join(", ")}`
+    );
+  }
+  const failedGates = manifest.required_gates.filter(gate =>
+    ["FAIL", "BLOCKED"].includes(gateState.get(gate))
+  );
+  if (failedGates.length > 0) {
+    blockers.push(
+      `required gates not terminal-PASS: ${failedGates.map(gate => `${gate}=${gateState.get(gate)}`).join(", ")}`
+    );
+  }
+  // Required gstack workflows: each must be accounted for by a completed run
+  // or an explicit unavailability record — never silently skipped.
+  const gstackText = events
+    .filter(event =>
+      ["GSTACK_COMPLETED", "GSTACK_UNAVAILABLE"].includes(event.event_type)
+    )
+    .map(event => event.summary.toLowerCase())
+    .join("\n");
+  const unaccountedGstack = manifest.required_gstack.filter(
+    name => !gstackText.includes(name.toLowerCase())
+  );
+  if (unaccountedGstack.length > 0) {
+    blockers.push(
+      `required gstack workflows unaccounted: ${unaccountedGstack.join(", ")}`
+    );
   }
   if (metrics.owner_gates_open > 0) {
     blockers.push(
@@ -127,17 +165,25 @@ export function closeout(runId) {
       e.event_type
     )
   );
+  const last = events[events.length - 1] ?? null;
   return {
     run_id: runId,
     complete: blockers.length === 0 && terminalRunEvent,
     terminal_run_event_recorded: terminalRunEvent,
     blockers,
+    // External tail anchor (FIND-LANE0-0002): verify proves chain linearity but
+    // cannot detect deletion of the FINAL lines. Quote these two values in the
+    // PR body / final handoff; any later tail truncation then contradicts an
+    // out-of-band record.
+    tail_anchor: last
+      ? { events_total: events.length, final_event_hash: last.event_hash }
+      : null,
     metrics,
   };
 }
 
 const invokedDirectly =
-  process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
+  process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (invokedDirectly) {
   const [, , command, runId] = process.argv;
   if (command === "metrics") {
