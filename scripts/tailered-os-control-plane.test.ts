@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "vitest";
 import {
   CANONICAL,
+  CANONICAL_DATA_SOURCES,
   CONTROL_PLANE_MANIFEST_PATH,
   loadControlPlaneManifest,
   validateControlPlaneManifest,
@@ -50,8 +51,29 @@ describe("tailered-os control-plane manifest", () => {
       assert.equal(node.verified, true, `${key} was connector-verified`);
       assert.equal(node.verifiedOn, "2026-08-10");
       assert.match(node.source, /Notion connector/);
-      assert.match(node.source, /data-source id is [0-9a-f-]{36}/);
+      assert.equal(node.id, CANONICAL[key]);
+      assert.ok(
+        node.source.includes(CANONICAL_DATA_SOURCES[key]),
+        `${key} source must carry its pinned data-source id`
+      );
     }
+  });
+
+  it("rejects a swapped verified-database id (CSO review: single-file edit must not pass)", () => {
+    const bad = clone();
+    bad.notion.databases.decisions.id = "deadbeefdeadbeefdeadbeefdeadbeef";
+    assert.throws(
+      () => validateControlPlaneManifest(bad),
+      /does not match the owner-verified canonical id/
+    );
+
+    const badDs = clone();
+    badDs.notion.databases.risks.source =
+      "Notion connector, 2026-08-10: wrong data source recorded";
+    assert.throws(
+      () => validateControlPlaneManifest(badDs),
+      /must record its canonical data-source id/
+    );
   });
 
   it("rejects a manifest pointing at the wrong repository", () => {
@@ -81,10 +103,13 @@ describe("tailered-os control-plane manifest", () => {
     );
   });
 
-  it("rejects duplicate Notion ids (mis-pasted identifier)", () => {
+  it("rejects a mis-pasted duplicate id (canonical pin fires; uniqueness stays as defense-in-depth)", () => {
     const bad = clone();
     bad.notion.databases.decisions.id = bad.notion.databases.risks.id;
-    assert.throws(() => validateControlPlaneManifest(bad), /unique/);
+    assert.throws(
+      () => validateControlPlaneManifest(bad),
+      /does not match the owner-verified canonical id/
+    );
   });
 
   it("rejects malformed ids, missing verification dates, and credential-shaped values", () => {
@@ -159,10 +184,10 @@ describe("tailered-os control-plane manifest", () => {
       /calendar date/
     );
 
-    const strayOnUnverified = clone();
-    strayOnUnverified.notion.databases.decisions.verifiedOn = "not-a-date";
+    const strayBadDate = clone();
+    strayBadDate.notion.databases.decisions.verifiedOn = "not-a-date";
     assert.throws(
-      () => validateControlPlaneManifest(strayOnUnverified),
+      () => validateControlPlaneManifest(strayBadDate),
       /calendar date/
     );
   });
@@ -171,10 +196,8 @@ describe("tailered-os control-plane manifest", () => {
     const bad = clone();
     // Assembled at runtime so the raw diff never contains a contiguous
     // credential-shaped URI (the repo's gitleaks gate scans commit text).
-    bad.notion.databases.risks.source = [
-      "mysql://user",
-      "hunter2@db.internal/x",
-    ].join(":");
+    bad.notion.databases.risks.source +=
+      " " + ["mysql://user", "hunter2@db.internal/x"].join(":");
     assert.throws(() => validateControlPlaneManifest(bad), /credential-shaped/);
   });
 
@@ -214,6 +237,14 @@ describe("tailered-os control-plane manifest", () => {
     );
     assert.match(doc, /config\/tailered-os-control-plane\.v1\.json/);
     assert.match(doc, /Tailered Team Home/);
+    // The runbook must not claim a verification state the manifest has moved past
+    // (health-review critical: the 2026-08-10 flips left stale verified:false prose).
+    assert.doesNotMatch(
+      doc,
+      /marked `verified: false`/,
+      "runbook still claims manifest entries are unverified"
+    );
+    assert.match(doc, /re-verified over the authenticated Notion\s+connector/);
     assert.doesNotMatch(
       doc,
       /Root page: \*\*\[Dime AI — Operations HQ\]/,

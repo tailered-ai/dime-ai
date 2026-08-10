@@ -24,6 +24,10 @@ Root page: **[Tailered Team Home](https://app.notion.com/p/3b49673313e781569b59f
 | Tasks database | https://app.notion.com/p/96228d0d4aca436e8527053a27f7472c |
 | Projects database | https://app.notion.com/p/888202aaf938497a91075121646e4cb4 |
 | AI Systems Registry | https://app.notion.com/p/8673b8ac6f424acebc53b6cbf0698251 |
+| Decisions database (connector-verified 2026-08-10) | https://app.notion.com/p/46ec53110ccc496296a7438203324d21 |
+| Risks database (connector-verified 2026-08-10) | https://app.notion.com/p/a4a37320164d408c8f0df5dfe7cb2ba1 |
+| Releases database (connector-verified 2026-08-10) | https://app.notion.com/p/f86c2987ec7e43dfa71b2dce14664467 |
+| Knowledge database (connector-verified 2026-08-10) | https://app.notion.com/p/694ec08d2e544cc797157a24824bbd1d |
 
 Tailered OS work items carry `TOS-###` Scope IDs and live in the canonical Tasks
 database — never in a second tracker.
@@ -66,17 +70,20 @@ database — never in a second tracker.
   registry edits. Machine actors are governed through the AI Systems Registry; an
   unverified integration stays Pending, never Approved.
 
-## Recorded 2026-08-06 inventory — UNVERIFIED, pending connector re-verification
+## Recorded 2026-08-06 inventory — partially re-verified 2026-08-10
 
 The 2026-08-06 build-out recorded seven root-page sections (Founder Cockpit, Product &
 Engineering, AI Systems & Model Operations, Growth & Customer, Operations & People,
 Leadership & Board, Setup & Governance) and sixteen related databases (Goals, Projects,
 Tasks, Knowledge, Decisions, Meetings, Metrics, Releases, Incidents, Risks, AI Systems
 Registry, Evaluation Runs, Market Coverage Matrix, Product Feedback, Experiments, Founder
-Inbox). Of these, only the surfaces in the canonical table above are owner-confirmed as of
-2026-08-10. The Decisions, Risks, Releases, and Knowledge database ids are carried in the
-manifest marked `verified: false` until re-verified over the Notion connector; treat every
-other 2026-08-06 pointer as historical until re-verified. The "Setup & Governance" page is
+Inbox). The surfaces in the canonical table above are owner-confirmed, and the Decisions,
+Risks, Releases, and Knowledge database ids were re-verified over the authenticated Notion
+connector on 2026-08-10 — the manifest carries them connector-verified with provenance.
+Id semantics: the manifest pins each database's **page id**; the same database also has a
+distinct **data-source id** (recorded in the manifest's `source` strings) which is what
+`notion-query-data-sources` needs. Treat every other 2026-08-06 pointer as historical
+until re-verified. The "Setup & Governance" page is
 superseded as a governance source by the Tailered OS Command Center, the Communication &
 Comprehension Standard, and the Claude Code Execution Contract. The prior revision of this
 file (git history, 2026-08-06) preserves the full inventory, seeded state, manual-step
