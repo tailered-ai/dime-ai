@@ -6,7 +6,7 @@
     "workflow_dir": ".github/workflows",
     "workflow_count": 40,
     "job_count": 51,
-    "step_count": 257,
+    "step_count": 258,
     "workflows": [
       {
         "path": ".github/workflows/01-pr-proof-contract.yml",
@@ -25,8 +25,8 @@
       },
       {
         "path": ".github/workflows/05-workflow-security.yml",
-        "raw_sha256": "c40e7194b599f0491cff79f052750d1fb395ba136e56275b0488bd0bc81567bb",
-        "canonical_sha256": "dc0e194a4f5fd93cd97281c04135c83fe8c93e5723089d1434b3ccbb040d3bca"
+        "raw_sha256": "7bf7f454f7fa9bb1c91b7d05e27d123cfec1027d232efbd685e517fc383b3091",
+        "canonical_sha256": "8a039dc619a6ea9416b1777e24def776c0559d8c1c7c60713835d311a87f2455"
       },
       {
         "path": ".github/workflows/06-dependency-review.yml",
@@ -65,8 +65,8 @@
       },
       {
         "path": ".github/workflows/auto-merge-dependabot.yml",
-        "raw_sha256": "ec503bf7147b4694556cbe58a6d4841cd32eba67dea7005d185c368201204aea",
-        "canonical_sha256": "9b6bcc0fee2ca910e088f4d73b37ca3810e5ae8cd432fd51d508740d340ebad8"
+        "raw_sha256": "cc1fdaa050d8091e63dfed614de15d81e95e6d901de53b51324c47fc34f49edc",
+        "canonical_sha256": "55e151f35d3fa2547a787469be1075c6dc4f21184635a72b43e635fcafb4e257"
       },
       {
         "path": ".github/workflows/ci.yml",
@@ -212,7 +212,7 @@
   },
   "construct_census": {
     "parser": "yaml@2.9.0",
-    "candidate_root_is_toolchain_root": false,
+    "candidate_root_is_toolchain_root": true,
     "files": [
       ".github/workflows/01-pr-proof-contract.yml",
       ".github/workflows/02-codeql.yml",
@@ -257,7 +257,7 @@
     ],
     "file_count": 40,
     "job_count": 51,
-    "step_count": 257,
+    "step_count": 258,
     "uses_sha_pinned": 120,
     "uses_unpinned": 0,
     "alias_files": [],
@@ -294,8 +294,8 @@
       "env": 45,
       "id": 6,
       "if": 34,
-      "name": 185,
-      "run": 137,
+      "name": 186,
+      "run": 138,
       "uses": 120,
       "with": 63
     },
@@ -965,7 +965,8 @@
         "LOCAL",
         "LOCAL+TOOL",
         "LOCAL",
-        "CI-ONLY"
+        "CI-ONLY",
+        "LOCAL"
       ],
       "runs_on": "ubuntu-latest",
       "needs": null,
@@ -980,7 +981,7 @@
       "defaults": null,
       "services": null,
       "strategy": null,
-      "step_count": 4,
+      "step_count": 5,
       "steps": [
         {
           "index": 0,
@@ -1004,10 +1005,10 @@
         },
         {
           "index": 2,
-          "name": "[GATE] zizmor — blocking at high severity, SARIF for the security tab",
+          "name": "zizmor — SARIF for the security tab (reporting, NOT the verdict)",
           "id": null,
           "uses": null,
-          "run": "zizmor --min-severity high --format sarif .github/workflows/ > zizmor.sarif\n# zizmor exits non-zero when findings >= min-severity exist; a scan\n# crash also exits non-zero. Either way this step fails — fail-closed.\n",
+          "run": "# SARIF mode exits 0 EVEN WITH findings present (measured, zizmor\n# 1.29.0): this step reports, it does not decide. A scanner crash\n# still exits non-zero here, so scan failure fails the job.\nzizmor --min-severity high --format sarif .github/workflows/ > zizmor.sarif\n",
           "with": null,
           "env": null,
           "if": null
@@ -1024,6 +1025,16 @@
           },
           "env": null,
           "if": "always()"
+        },
+        {
+          "index": 4,
+          "name": "[GATE] zizmor — ENFORCEMENT: any finding at or above the threshold fails",
+          "id": null,
+          "uses": null,
+          "run": "# THE VERDICT. Plain mode exits 14 when findings >= --min-severity\n# exist and non-zero when the scan itself fails, so this step is the\n# fail-closed boundary. Same scope and threshold as the SARIF run\n# above; the scanner's own severity semantics decide, and no policy\n# is reimplemented here. Runs last so the SARIF is always uploaded\n# first, and its status is captured directly — never through a pipe.\n#\n# DEF-023: this gate previously ran ONLY the SARIF form and was\n# therefore green regardless of findings.\nzizmor --min-severity high --format plain .github/workflows/\n",
+          "with": null,
+          "env": null,
+          "if": null
         }
       ]
     },
@@ -2158,7 +2169,7 @@
       ],
       "runs_on": "ubuntu-latest",
       "needs": null,
-      "if": "github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'",
+      "if": "github.event.pull_request.user.login == 'dependabot[bot]'",
       "timeout_minutes": null,
       "permissions": null,
       "environment": null,

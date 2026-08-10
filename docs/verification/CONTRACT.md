@@ -19,7 +19,7 @@ convention.
 | canonicalizer_version | `1.0.0` |
 | workflows | 40 |
 | jobs / checks | 51 / 51 |
-| steps represented | 257 |
+| steps represented | 258 |
 
 ## Runnability
 
@@ -124,7 +124,7 @@ implicit ignored class: an unclassified construct aborts generation with
 | `01-pr-proof-contract.yml` | `76cdc4b5534f5375` | `7f5fa8b6bee01fed` |
 | `02-codeql.yml` | `8368b0ac4e37f06a` | `63f6b6d713029f66` |
 | `03-semgrep.yml` | `e8f9690f3317c1a3` | `3d24f628dd383fea` |
-| `05-workflow-security.yml` | `c40e7194b599f049` | `dc0e194a4f5fd93c` |
+| `05-workflow-security.yml` | `7bf7f454f7fa9bb1` | `8a039dc619a6ea94` |
 | `06-dependency-review.yml` | `d4c5e5deefeb7b7c` | `89f79e1dbb9b4467` |
 | `07-coverage-patch.yml` | `24afae21812686c5` | `f113a26ac11a6dd3` |
 | `08-contract-and-data-integrity.yml` | `459978cb3b7a7e38` | `bc6b76db5b2a53a9` |
@@ -132,7 +132,7 @@ implicit ignored class: an unclassified construct aborts generation with
 | `10-ai-eval-critical.yml` | `83ed21dd5185b119` | `21f867df5ae0effb` |
 | `11-artifact-attestation.yml` | `4b30e6067e3915df` | `e0d4bfe2bf8ff99a` |
 | `12-nightly-verification.yml` | `a77a3a33a807ba0e` | `ddc282b454cfde43` |
-| `auto-merge-dependabot.yml` | `ec503bf7147b4694` | `9b6bcc0fee2ca910` |
+| `auto-merge-dependabot.yml` | `cc1fdaa050d8091e` | `55e151f35d3fa254` |
 | `ci.yml` | `feb30dc96f5ff704` | `027d67e57b47f8d2` |
 | `cron-bet-grade.yml` | `9eeddca74c8c5c96` | `df0cd7873a40af34` |
 | `cron-mlb-canonical-refresh.yml` | `2cada7ec4243c9d7` | `d588d1f3bc4ed030` |

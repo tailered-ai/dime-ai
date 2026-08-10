@@ -30,14 +30,28 @@ jobs:
       - name: Install pinned zizmor
         run: pipx install "zizmor==${ZIZMOR_VERSION}"
 
-      - name: "[GATE] zizmor — blocking at high severity, SARIF for the security tab"
+      - name: "zizmor — SARIF for the security tab (reporting, NOT the verdict)"
         run: |
+          # SARIF mode exits 0 EVEN WITH findings present (measured, zizmor
+          # 1.29.0): this step reports, it does not decide. A scanner crash
+          # still exits non-zero here, so scan failure fails the job.
           zizmor --min-severity high --format sarif .github/workflows/ > zizmor.sarif
-          # zizmor exits non-zero when findings >= min-severity exist; a scan
-          # crash also exits non-zero. Either way this step fails — fail-closed.
 
       - uses: github/codeql-action/upload-sarif@c4dd10e44af883a891fe31ced449bcb4a6728b9b # v3
         if: always()
         with:
           sarif_file: zizmor.sarif
           category: zizmor
+
+      - name: "[GATE] zizmor — ENFORCEMENT: any finding at or above the threshold fails"
+        run: |
+          # THE VERDICT. Plain mode exits 14 when findings >= --min-severity
+          # exist and non-zero when the scan itself fails, so this step is the
+          # fail-closed boundary. Same scope and threshold as the SARIF run
+          # above; the scanner's own severity semantics decide, and no policy
+          # is reimplemented here. Runs last so the SARIF is always uploaded
+          # first, and its status is captured directly — never through a pipe.
+          #
+          # DEF-023: this gate previously ran ONLY the SARIF form and was
+          # therefore green regardless of findings.
+          zizmor --min-severity high --format plain .github/workflows/
