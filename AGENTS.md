@@ -122,7 +122,8 @@ from `.claude/commands/` are `/<name>`.
 - Sports-betting product: keep responsible-gaming language (21+, 1-800-GAMBLER) on marketing
   surfaces.
 - Notion control plane: organizational context (goals, projects, decisions, releases, AI
-  governance metadata) lives in the "Tailered Sports" Notion workspace; GitHub stays
-  authoritative for code and CI evidence. Map + runbook: `references/notion-control-plane.md`.
+  governance metadata) lives in Notion under the "Tailered Team Home" root page; GitHub stays
+  authoritative for code and CI evidence. Machine-readable authority map:
+  `config/tailered-os-control-plane.v1.json`; human runbook: `references/notion-control-plane.md`.
   PRs paste their Notion context URL into the PR template's "Notion context" section; never
   hand-mirror GitHub issues into Notion, never store secrets there.
