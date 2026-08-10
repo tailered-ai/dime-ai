@@ -3,7 +3,9 @@
 # Security-sensitive boundaries require an independent owner explicitly.
 /.github/ @prez-ai-sports-betting @aisportsbettingcontact
 /config/dime-agent-access* @prez-ai-sports-betting @aisportsbettingcontact
+/config/tailered-os-control-plane* @prez-ai-sports-betting @aisportsbettingcontact
 /scripts/dime-* @prez-ai-sports-betting @aisportsbettingcontact
+/scripts/tailered-os-control-plane* @prez-ai-sports-betting @aisportsbettingcontact
 /server/mlbModelRunner.ts @prez-ai-sports-betting @aisportsbettingcontact
 
 # Verification framework (2026-08-05): review-policy and gate files are
