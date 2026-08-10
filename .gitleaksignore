@@ -52,3 +52,12 @@ c63bb85031c2a3404ae2a4a049dfb02e39777c2d:ml/dime-1.0/evidence/benchmarks/base-mo
 9ace77d832bed675f7c06444c477b164f18e80d7:ml/dime-1.0/schemas/runpod_gate_1_authorization.schema.json:generic-api-key:75
 9ace77d832bed675f7c06444c477b164f18e80d7:ml/dime-1.0/configs/runpod_gate_1_authorization_v1.json:generic-api-key:30
 9ace77d832bed675f7c06444c477b164f18e80d7:ml/dime-1.0/configs/runpod_gate_1_authorization_v1.json:generic-api-key:36
+
+# PR #496 Tailered OS pin gate. The cloudflare-api-key detector matched the
+# EXPECTED_CLOUDFLARE_OS_PIN env value in the Tailered OS CI workflow — a 40-hex
+# string adjacent to the word "cloudflare". It is the public cloudflare/cloudflare-os
+# git commit SHA (b2a51b54…) that the workflow deliberately duplicates from the
+# submodule gitlink so an accidental pin move fails CI (see
+# platform/tailered-os/docs/UPSTREAM.md). A commit SHA is not a credential. This
+# exact fingerprint does not suppress the rule, the file, or hex strings elsewhere.
+5823da63238c38b46dfc23d8a12c27e0c6a6b93c:.github/workflows/tailered-os.yml:cloudflare-api-key:28
