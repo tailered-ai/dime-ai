@@ -1,0 +1,134 @@
+name: Edge Arming Gate
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Makes the EDGE_MODE soak verdict BINDING (docs/runbooks/edge-defense-cloudflare.md §8).
+#
+# On 2026-08-06 the origin lock was armed on 23 requests over ~4 minutes and real
+# users were 403'd for ~7 hours. scripts/edge-soak-report.mjs was written to make
+# that verdict mechanical, but nothing invoked it. These two jobs are what invoke
+# it:
+#
+#   validate — runs on every pull request that touches the authorization record
+#              or the gate itself. Offline: re-derives the soak verdict from the
+#              evidence the record embeds, re-checks the integrity hash, the
+#              freshness-at-issue rule and the configuration binding. A record
+#              that would not have been issuable cannot be merged.
+#
+#   enforce  — runs daily, and on demand. Probes the RAW Railway origin, infers
+#              posture from behaviour (env vars are not readable from here), and
+#              FAILS if production is armed without a valid, unexpired,
+#              correctly-bound authorization record.
+#
+# ── ANTI-DEADLOCK: this workflow CANNOT block production recovery ─────────────
+#  * `enforce` PASSES unconditionally when production is not armed — the record
+#    is not even read on that branch (scripts/edge-arming-gate.mjs,
+#    `evaluateEnforcement`, the NOT_ARMED early return). Dropping to
+#    EDGE_MODE=log therefore always CLEARS this gate, immediately, with no
+#    record, no PR and no approval.
+#  * It is deliberately NOT wired to `push`, is not a required status check, and
+#    is not part of the deploy pipeline. Railway deploys on push to main whatever
+#    this workflow says, so a red gate never blocks shipping the fix.
+#  * It holds no credential and calls no mutating API. `permissions: contents:
+#    read`, no secrets, no Railway token. It cannot set EDGE_MODE in either
+#    direction; it can only observe and report.
+#
+# There is no override input. The emergency action is EDGE_MODE=log, which this
+# gate does not gate.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  pull_request:
+    paths:
+      - "docs/runbooks/edge-arming-authorization.json"
+      - "scripts/edge-arming-gate.mjs"
+      - "scripts/edge-arming-gate.test.ts"
+      - "scripts/edge-soak-report.mjs"
+      - "scripts/edge-soak-report.test.ts"
+      - "server/_core/edgeProxy.ts"
+      - "server/_core/originLock.ts"
+      - "server/_core/edgeCircuitBreaker.ts"
+  schedule:
+    # Daily. The authorization has a 30-day validity period, so a daily cadence
+    # surfaces an un-authorized armed state within one day of it appearing.
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+    inputs:
+      origin:
+        description: "RAW Railway origin to read posture from — NOT the Cloudflare host (the lock only 403s on the direct origin)"
+        required: true
+        default: "https://ai-sports-betting-dime-ai-production.up.railway.app"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: edge-arming-gate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Authorization record contract (offline)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271
+        # No 'version' key — packageManager in package.json is the single source of truth.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+      - name: Gate unit tests (the gate must be capable of failing)
+        run: npx vitest run scripts/edge-soak-report.test.ts scripts/edge-arming-gate.test.ts
+      - name: Validate the committed authorization record, if one exists
+        run: |
+          set -uo pipefail
+          if [ ! -f docs/runbooks/edge-arming-authorization.json ]; then
+            echo "no authorization record committed — nothing to validate."
+            echo "(absence is not a failure here: an un-armed production needs no record;"
+            echo " the enforce job is what refuses an ARMED production without one.)"
+            exit 0
+          fi
+          node scripts/edge-arming-gate.mjs validate \
+            --record=docs/runbooks/edge-arming-authorization.json
+
+  enforce:
+    name: Armed production must carry a valid authorization
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+      - name: Enforce the arming gate against live production posture
+        env:
+          # The RAW Railway origin. The Cloudflare-fronted host is wrong here by
+          # construction: through Cloudflare the lock always passes, so posture
+          # would read as NOT_ARMED and the gate would silently never fire.
+          ORIGIN: ${{ inputs.origin || 'https://ai-sports-betting-dime-ai-production.up.railway.app' }}
+        run: |
+          set -uo pipefail
+          # `|| status=$?`, not a bare call followed by `$?`: GitHub runs `run:`
+          # blocks under `bash -e`, so a bare failing call would abort the step
+          # before the remedy text below could be printed. Consuming the failure
+          # with `||` suppresses -e while still capturing the exit code, and the
+          # step still ends with `exit "$status"` — the gate's verdict, unaltered.
+          status=0
+          node scripts/edge-arming-gate.mjs enforce \
+            --origin="$ORIGIN" \
+            --record=docs/runbooks/edge-arming-authorization.json || status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "::error::Edge arming gate FAILED. Either production is armed without a"
+            echo "::error::qualifying soak authorization, or its posture could not be read."
+            echo "::error::Remedy A (always available, never gated): set EDGE_MODE=log."
+            echo "::error::Remedy B: run a >=60min log-mode soak, then"
+            echo "::error::  node scripts/edge-arming-gate.mjs authorize --evidence=... --origin=\$ORIGIN"
+            echo "::error::and land the record through a reviewed PR."
+          fi
+          exit "$status"
