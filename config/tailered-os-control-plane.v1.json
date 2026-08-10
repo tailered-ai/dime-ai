@@ -71,26 +71,30 @@
       "decisions": {
         "name": "Decisions",
         "id": "46ec53110ccc496296a7438203324d21",
-        "verified": false,
-        "source": "git history of references/notion-control-plane.md (2026-08-06 revision; ids removed from the live file); re-verify via the Notion connector before automated use"
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "Notion connector, 2026-08-10 (notion-fetch of the '07. Company Databases' index): database page id confirmed live. This manifest pins DATABASE PAGE ids; the same database's data-source id is e987f7e3-59bd-4c36-9a1d-253c6840b4d9 (use it for query-data-sources)."
       },
       "risks": {
         "name": "Risks",
         "id": "a4a37320164d408c8f0df5dfe7cb2ba1",
-        "verified": false,
-        "source": "git history of references/notion-control-plane.md (2026-08-06 revision; ids removed from the live file); re-verify via the Notion connector before automated use"
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "Notion connector, 2026-08-10 (notion-fetch of the '07. Company Databases' index): database page id confirmed live. This manifest pins DATABASE PAGE ids; the same database's data-source id is e6538397-ee1b-407e-bd7e-5a9e80d9b529 (use it for query-data-sources)."
       },
       "releases": {
         "name": "Releases",
         "id": "f86c2987ec7e43dfa71b2dce14664467",
-        "verified": false,
-        "source": "git history of references/notion-control-plane.md (2026-08-06 revision; ids removed from the live file); re-verify via the Notion connector before automated use"
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "Notion connector, 2026-08-10 (notion-fetch of the '07. Company Databases' index): database page id confirmed live. This manifest pins DATABASE PAGE ids; the same database's data-source id is 1eebcf06-a0c3-4aba-9bb8-d550ad37961d (use it for query-data-sources)."
       },
       "knowledge": {
         "name": "Knowledge",
         "id": "694ec08d2e544cc797157a24824bbd1d",
-        "verified": false,
-        "source": "git history of references/notion-control-plane.md (2026-08-06 revision; ids removed from the live file); re-verify via the Notion connector before automated use"
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "Notion connector, 2026-08-10 (notion-fetch of the '07. Company Databases' index): database page id confirmed live. This manifest pins DATABASE PAGE ids; the same database's data-source id is 456f7bbc-8f8a-4648-95ca-b561ac68bd11 (use it for query-data-sources)."
       }
     }
   },
