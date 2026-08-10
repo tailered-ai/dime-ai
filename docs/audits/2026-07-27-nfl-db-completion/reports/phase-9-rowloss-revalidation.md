@@ -45,14 +45,16 @@ replay ('WillCh03', '2013_01_ARI_STL')   nflverse game_id
 ```
 
 The database stores PFR-style game ids; the replay emits nflverse-style ones.
-`rowloss.PFR_STYLE_ALIASES` exists, so the conversion was once understood —
-`snap_crosswalk.py` was introduced afterwards and the replay was never updated
-to match. Two authorities on one identifier, drifting apart, exactly as the
-unresolved-espn-id list did before Phase 8.
+**CORRECTED 2026-08-09 — see the correction section below.** The first version
+of this report called this undiscovered drift. It is not. `build_db.py`'s
+`pass_rowloss` documents the change explicitly (D7 changed what `pfr_game_id`
+holds) and states that the key comparison is "stale BY DESIGN OF THE FIX",
+substituting a row-count assertion. The mechanism described above is real; the
+claim that nobody had noticed was wrong.
 
-Consequence: the snap_count row-loss control has been reporting
-`missing = everything, extra = everything` — a signal nobody can act on, and one
-that has been failing continuously rather than catching anything.
+What remains true and unresolved is narrower and more serious: because the key
+comparison was superseded rather than repaired, snap_count is now gated on row
+COUNT alone.
 
 ## F9-2 — no input-provenance binding
 
@@ -84,23 +86,60 @@ legitimate live 2026 growth are counted against a source that could not contain
 them. Phase 3 established the frozen/live split precisely so that in-season
 growth would stop fail-closing the build; the reconciliation never adopted it.
 
+## CORRECTION — the compensating gates were missed on first reading
+
+The first version of this report read `rowloss.py` standalone and did not
+account for `build_db.py::pass_rowloss`, which wraps it. That wrapper already
+knows the replays reproduce a previous loader and applies a narrower, documented
+gate per table:
+
+| table | build gate |
+| --- | --- |
+| game, team_game | zero missing, zero extra, no duplicates, manifest clean |
+| game_line | keys AND values reconcile |
+| player | zero missing; every extra is a roster-derived or feed-only addition (D5), compared against derived counts rather than a constant |
+| player_game_stats | the ONLY key movement is D19's 13 documented re-keys |
+| snap_count, roster_season, depth_chart | **row count only** — `loaded == source_rows` |
+
+So three of the four anomalies this report opened with were already explained:
+the 13/13 residue is D19, the player surplus is D5, and the snap_count key
+divergence is D7. They are not defects and this report should not have implied
+they were unnoticed.
+
+## The finding that survives
+
+**Three of eight tables are gated on cardinality alone.** `loaded ==
+source_rows` cannot see a substitution, a swap, or a wrong row — it sees only
+how many. That is precisely the defect class Phase 8 built Layer B to catch, and
+it is the program's own governing principle: counts prove cardinality, not
+identity.
+
+depth_chart is additionally covered by Layers A, B and C, so its exposure is
+small. **snap_count and roster_season are not covered by anything else.** A
+row-for-row substitution in either would pass every gate this build has.
+
+The repair is to make the replays speak the loader's canonical vocabulary — one
+translation authority, not three — so those three tables can be reconciled by
+key again rather than by count. F9-2 (input binding) is a prerequisite: until
+the replayed bytes are provably the bytes that built the database, a key-level
+reconciliation would produce false alarms rather than proof.
+
 ## What this does and does not say
 
 - It does **not** show missing, lost, or corrupted rows. No such finding is made.
-- It does show that three of the eight tables' loss controls are structurally
-  incapable of detecting loss right now, and that a fourth
-  (`player_game_stats`, 13 missing / 13 extra) needs the same input-binding
-  question answered before its residue can be read.
+- It does show that three of the eight tables are gated on row count alone, so
+  a substitution in snap_count or roster_season would not be detected by the
+  row-loss pass. `player_game_stats`'s 13/13 residue is explained (D19).
 - `game`, `game_line` and `team_game` reconcile clean, and the exclusion
   manifest reconciles exactly on every table — including the bidirectional
   check that rejects an undeclared exclusion reason.
 
 ## Phase 9 status
 
-**BLOCKED on Phase 10/11.** Valid row-loss evidence requires inputs provably
-identical to those the database was built from. Attempting to close Phase 9
-against unbound inputs would produce either a false alarm or false confidence;
-this report chooses neither.
+**BLOCKED on Phase 10/11.** Valid key-level row-loss evidence requires inputs
+provably identical to those the database was built from. Attempting to close
+Phase 9 against unbound inputs would produce either a false alarm or false
+confidence; this report chooses neither.
 
 The accounting invariants themselves are now covered by
 `scripts/data/nfl-db/test_rowloss.py`, including a guard that rejects the
