@@ -52,6 +52,13 @@ import {
   assertBlueprintUnique,
   assertSeedComplete,
 } from "./blueprint.mjs";
+import {
+  GATE_CLASSES,
+  RESULT_SCHEMA_VERSION,
+  externalStatus,
+  reduceResults,
+  validateResult,
+} from "./result.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..");
@@ -215,6 +222,10 @@ export function buildLedger(phases, genesis) {
     // never rewritten; `verify` compares against the newest amendment, or
     // against genesis when the log is empty. (PB.T06, DEF-004 remediation.)
     amendments: [],
+    // P03.T07 — gate RESULTS are a separate vocabulary from unit STATUS and
+    // are stored append-only. A later PASS never replaces an earlier record.
+    result_schema_version: RESULT_SCHEMA_VERSION,
+    gate_results: [],
   };
   assertSeedComplete(phases, ledger);
   return ledger;
@@ -416,6 +427,44 @@ const BLOCKING_SEVERITIES = new Set(["MEDIUM", "HIGH", "CRITICAL"]);
  *              AND evidence completeness = 100%
  *              AND zero FLAKY among MANDATORY units
  */
+/**
+ * P03.T07 — append a validated gate result. Append-only: a duplicate gate_id
+ * is refused rather than overwritten, because overwriting is exactly how an
+ * earlier failure disappears.
+ */
+export function recordGateResult(ledger, result) {
+  validateResult(result);
+  ledger.gate_results ??= [];
+  if (
+    ledger.gate_results.some(existing => existing.gate_id === result.gate_id)
+  ) {
+    throw new Error(`DUPLICATE_GATE_RESULT: ${result.gate_id}`);
+  }
+  ledger.gate_results.push(result);
+  return ledger;
+}
+
+/**
+ * P03.T07 — reduce recorded gate results to a SYSTEM TERMINAL state. This is a
+ * separate axis from acceptPhase(): phase acceptance is about blueprint units,
+ * the terminal state is about gate execution. Neither substitutes for the other.
+ */
+export function systemTerminal(ledger, options = {}) {
+  return reduceResults(ledger.gate_results ?? [], options);
+}
+
+/** Six-class counts over recorded gate results. Empty classes always appear. */
+export function gateResultSummary(ledger) {
+  const summary = {};
+  for (const klass of GATE_CLASSES) {
+    const rows = (ledger.gate_results ?? []).filter(r => r.class === klass);
+    const counts = {};
+    for (const row of rows) counts[row.status] = (counts[row.status] ?? 0) + 1;
+    summary[klass] = { total: rows.length, counts };
+  }
+  return summary;
+}
+
 export function acceptPhase(ledger, phaseId, options = {}) {
   const root = options.root ?? REPO_ROOT;
   const mandatory = Object.values(ledger.units).filter(
@@ -606,6 +655,32 @@ export function renderMarkdown(ledger) {
     }
     lines.push("");
   }
+
+  // P03.T08 — six-class gate-result summary, rendered from canonical JSON.
+  // Every class appears even when empty: a class that vanishes from a report is
+  // indistinguishable from a class that passed.
+  lines.push("## Gate results by class (P03)");
+  lines.push("");
+  lines.push(
+    `**Result schema:** \`${ledger.result_schema_version ?? "(not migrated)"}\``
+  );
+  lines.push("");
+  lines.push("| Class | Results | Status breakdown |");
+  lines.push("| --- | --- | --- |");
+  {
+    const summary = gateResultSummary(ledger);
+    for (const klass of GATE_CLASSES) {
+      const entry = summary[klass];
+      const breakdown = Object.keys(entry.counts).length
+        ? Object.entries(entry.counts)
+            .sort()
+            .map(([status, n]) => `${externalStatus(status)}=${n}`)
+            .join(", ")
+        : "—";
+      lines.push(`| \`${klass}\` | ${entry.total} | ${breakdown} |`);
+    }
+  }
+  lines.push("");
 
   lines.push("## Owner decisions");
   lines.push("");
@@ -834,6 +909,27 @@ function main(argv) {
     console.error("[ledger] VERIFY FAILED");
     for (const problem of result.problems) console.error(`  - ${problem}`);
     process.exitCode = 1;
+    return;
+  }
+
+  if (command === "migrate") {
+    // ADDITIVE ONLY (P03.T07). Adds top-level keys a newer schema requires,
+    // preserving every existing value. History is never rewritten as though
+    // the new schema had always existed.
+    const ledger = loadLedger();
+    const added = [];
+    if (ledger.gate_results === undefined) {
+      ledger.gate_results = [];
+      added.push("gate_results");
+    }
+    if (ledger.result_schema_version === undefined) {
+      ledger.result_schema_version = RESULT_SCHEMA_VERSION;
+      added.push("result_schema_version");
+    }
+    persist(ledger);
+    console.log(
+      `[ledger] migrate added ${added.length} key(s): ${added.join(", ") || "(none)"}`
+    );
     return;
   }
 

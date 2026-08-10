@@ -1,0 +1,25 @@
+[p03-audit] contract sha256 58087d2a8262064658cac283703777dce60e414f323fbb5f8b54fb6885e172d5
+[p03-audit] PARITY entries=47 out_of_scope=4 required=9 graduating=5
+[p03-audit] DEF-017 anchor TypeScript Check => LOCAL
+[p03-audit] DEF-017 anchor 08-contract-and-data-integrity => LOCAL
+[p03-audit] DEF-017 anchor 10-ai-eval-critical => LOCAL
+[p03-audit] DEF-017 anchor 07-coverage-patch => LOCAL
+[p03-audit] DEF-018 anchor 05-workflow-security => requires zizmor
+[p03-audit] DEF-018 anchor 03-semgrep-blocking => requires semgrep
+[p03-audit] DEF-018 anchor Security Audit => requires osv-scanner
+[p03-audit] DEF-018 anchor Secret Scan (gitleaks) => requires gitleaks
+[p03-audit] AUD01 PASS — PARITY registry faithful to the frozen contract
+[p03-audit] scanned 16 file(s): other-runtime=4 allowlisted-extractor=2 data=2 test=4 p03-runtime=4
+[p03-audit] allowlisted scripts/ci/contract-extract.mjs — P02 extraction is the designated and only YAML-reading boundary; it produces the frozen contract that P03+ consumes.
+[p03-audit] allowlisted scripts/ci/contract-conformance.mjs — Re-derives workflow source hashes for drift detection. It reads workflow BYTES and never parses YAML.
+[p03-audit] note (test) scripts/ci/contract.test.ts:37 yaml-import
+[p03-audit] note (test) scripts/ci/contract.test.ts:565 yaml-import
+[p03-audit] note (test) scripts/ci/contract.test.ts:53 workflow-path
+[p03-audit] note (test) scripts/ci/contract.test.ts:54 workflow-path
+[p03-audit] note (test) scripts/ci/contract.test.ts:183 workflow-path
+[p03-audit] note (test) scripts/ci/contract.test.ts:221 workflow-path
+[p03-audit] note (test) scripts/ci/contract.test.ts:250 workflow-path
+[p03-audit] note (test) scripts/ci/contract.test.ts:286 workflow-path
+[p03-audit] note (test) scripts/ci/p03.test.ts:769 yaml-import
+[p03-audit] AUD02 PASS — no P03 runtime module parses workflow YAML
+AUDIT_EXIT=0

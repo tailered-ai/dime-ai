@@ -698,6 +698,70 @@ export const PHASES = [
       u("P03.GATE02", M, "P03.NEG03 and P03.NEG04 PASS", {
         depends_on: ["P03.NEG03", "P03.NEG04"],
       }),
+      // Added during P03 implementation. New permanent IDs only; nothing
+      // previously published was renumbered (blueprint contract 0.1).
+      u(
+        "P03.TEST03",
+        M,
+        "False-green adversarial suite: no combination of results, omissions, duplicates, aggregation or rendering can manufacture a misleading green state",
+        {
+          expected_output: "vitest result",
+          exit_requirement:
+            "Missing mandatory result, duplicate id, later-PASS-over-earlier-failure, CI_ONLY-as-executed, INCONCLUSIVE/BLOCKED-as-PASS, BROKEN_GATE downgrade, truncated JSONL and unknown status all fail loudly",
+        }
+      ),
+      u(
+        "P03.AUD01",
+        M,
+        "Contract-to-registry fidelity audit: PARITY membership and every field are a faithful projection of the frozen contract, with DEF-017 and DEF-018 regression anchors",
+        {
+          expected_output:
+            "docs/verification/evidence/p03/AUD01-registry-fidelity.txt",
+          depends_on: ["P03.T03"],
+          exit_requirement:
+            "Zero silent omissions, zero silent extras, zero field drift, zero CI-ONLY without reason",
+        }
+      ),
+      u(
+        "P03.AUD02",
+        M,
+        "Runtime YAML isolation: no P03 runtime module parses workflow YAML or reconstructs P02 semantics",
+        {
+          expected_output:
+            "docs/verification/evidence/p03/AUD02-yaml-isolation.txt",
+          exit_requirement:
+            "Classified audit artifact; extractor and tests separated from runtime; a fixture violation is detected",
+        }
+      ),
+      u(
+        "P03.CONF01",
+        M,
+        "Ledger render conformance after P03 integration: CI-VERIFY-EXECUTION-LEDGER.md is byte-identical to a fresh render and cannot create a green state absent from canonical JSON",
+        {
+          expected_output: "vitest result + ledger verify",
+          depends_on: ["P03.T08"],
+          exit_requirement:
+            "Hand-edited markdown fails conformance; sealed historical records remain intact",
+        }
+      ),
+      u(
+        "P03.EV01",
+        M,
+        "Evidence: PARITY registry snapshot derived from the frozen contract",
+        {
+          expected_output:
+            "docs/verification/evidence/p03/EV01-parity-registry.json",
+        }
+      ),
+      u(
+        "P03.EV02",
+        M,
+        "Evidence: JSONL reporter stream and its six-class summary",
+        {
+          expected_output:
+            "docs/verification/evidence/p03/EV02-reporter-sample.txt",
+        }
+      ),
       u("P03.CP01", M, "P03 checkpoint recorded", {
         depends_on: ["P03.GATE01", "P03.GATE02"],
       }),

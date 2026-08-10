@@ -27,7 +27,7 @@
 | `P00` | Pre-flight resolution | `ACCEPTED` | 14 / 14 | 0 | 0 |
 | `P01` | Snapshot resolution and prospective-merge materialization | `ACCEPTED` | 25 / 25 | 0 | 0 |
 | `P02` | Contract extraction, freeze, conformance | `ACCEPTED` | 23 / 23 | 0 | 0 |
-| `P03` | Registries, taxonomy, reporter, ledger integration | `NOT_STARTED` | 0 / 18 | 0 | 0 |
+| `P03` | Registries, taxonomy, reporter, ledger integration | `ACCEPTED` | 24 / 24 | 0 | 0 |
 | `P04` | Executor core | `NOT_STARTED` | 0 / 24 | 0 | 0 |
 | `P05` | ASSURANCE — the self-test framework | `NOT_STARTED` | 0 / 20 | 0 | 0 |
 | `P06` | PARITY — static, security, supply chain | `NOT_STARTED` | 0 / 29 | 0 | 0 |
@@ -227,13 +227,13 @@
 
 ## P03 — Registries, taxonomy, reporter, ledger integration
 
-**State:** `NOT_STARTED`
+**State:** `ACCEPTED`
 
 **Assurance property:** Every gate result carries a class and a status from a closed vocabulary, and no class can be silently collapsed into one verdict.
 
 **Depends on:** `P02`
 
-**Progress (MANDATORY):** 0 / 18
+**Progress (MANDATORY):** 24 / 24
 
 **Entry checklist**
 
@@ -250,24 +250,30 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P03.T01` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Implement the 12-status result model |
-| `P03.T02` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Class-to-terminal-state reduction |
-| `P03.T03` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | PARITY registry loader — contract-derived and immutable |
-| `P03.T04` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | HARDENING registry scaffold |
-| `P03.T05` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | JSONL reporter |
-| `P03.T06` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Six-class summary renderer |
-| `P03.T07` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | INTEGRATE the already-existing ledger from P-BOOT (bind taxonomy, wire reporter) — does not create the writer |
-| `P03.T08` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Ledger render plus render-conformance wiring |
-| `P03.TEST01` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Table-driven coverage of all 12 statuses across all 6 classes |
-| `P03.TEST02` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Summary renders every class, including empty ones |
-| `P03.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | FLAKY must never reduce to PASS |
-| `P03.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Programmatic append to the PARITY registry throws |
-| `P03.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | set PASS without verifiable evidence is refused |
-| `P03.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Hand-edited ledger yields LEDGER_TAMPERED |
-| `P03.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Rendered markdown diverging from JSON fails conformance |
-| `P03.GATE01` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | Full taxonomy coverage demonstrated |
-| `P03.GATE02` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | P03.NEG03 and P03.NEG04 PASS |
-| `P03.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P03 checkpoint recorded |
+| `P03.T01` | TASK | MANDATORY | `PASS` | 1 | `d0410b15eb5d` `d578bb6b1ab4` | Implement the 12-status result model |
+| `P03.T02` | TASK | MANDATORY | `PASS` | 1 | `d0410b15eb5d` `d578bb6b1ab4` | Class-to-terminal-state reduction |
+| `P03.T03` | TASK | MANDATORY | `PASS` | 1 | `d0410b15eb5d` `d578bb6b1ab4` | PARITY registry loader — contract-derived and immutable |
+| `P03.T04` | TASK | MANDATORY | `PASS` | 1 | `d0410b15eb5d` `d578bb6b1ab4` | HARDENING registry scaffold |
+| `P03.T05` | TASK | MANDATORY | `PASS` | 1 | `d0410b15eb5d` `d578bb6b1ab4` | JSONL reporter |
+| `P03.T06` | TASK | MANDATORY | `PASS` | 1 | `d0410b15eb5d` `d578bb6b1ab4` | Six-class summary renderer |
+| `P03.T07` | TASK | MANDATORY | `PASS` | 1 | `d0410b15eb5d` `d578bb6b1ab4` | INTEGRATE the already-existing ledger from P-BOOT (bind taxonomy, wire reporter) — does not create the writer |
+| `P03.T08` | TASK | MANDATORY | `PASS` | 1 | `d0410b15eb5d` `d578bb6b1ab4` | Ledger render plus render-conformance wiring |
+| `P03.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `d61950688f8c` | Table-driven coverage of all 12 statuses across all 6 classes |
+| `P03.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `d61950688f8c` | Summary renders every class, including empty ones |
+| `P03.TEST03` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `d61950688f8c` | False-green adversarial suite: no combination of results, omissions, duplicates, aggregation or rendering can manufacture a misleading green state |
+| `P03.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `d61950688f8c` | FLAKY must never reduce to PASS |
+| `P03.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `d61950688f8c` | Programmatic append to the PARITY registry throws |
+| `P03.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `d61950688f8c` | set PASS without verifiable evidence is refused |
+| `P03.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `d61950688f8c` `d578bb6b1ab4` | Hand-edited ledger yields LEDGER_TAMPERED |
+| `P03.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `d61950688f8c` `d578bb6b1ab4` | Rendered markdown diverging from JSON fails conformance |
+| `P03.CONF01` | CONFORMANCE | MANDATORY | `PASS` | 1 | `d61950688f8c` | Ledger render conformance after P03 integration: CI-VERIFY-EXECUTION-LEDGER.md is byte-identical to a fresh render and cannot create a green state absent from canonical JSON |
+| `P03.AUD01` | AUDIT | MANDATORY | `PASS` | 1 | `6c5102f18c12` `d61950688f8c` | Contract-to-registry fidelity audit: PARITY membership and every field are a faithful projection of the frozen contract, with DEF-017 and DEF-018 regression anchors |
+| `P03.AUD02` | AUDIT | MANDATORY | `PASS` | 1 | `6c5102f18c12` `d61950688f8c` | Runtime YAML isolation: no P03 runtime module parses workflow YAML or reconstructs P02 semantics |
+| `P03.EV01` | EVIDENCE | MANDATORY | `PASS` | 1 | `e2e2b2985d4a` | Evidence: PARITY registry snapshot derived from the frozen contract |
+| `P03.EV02` | EVIDENCE | MANDATORY | `PASS` | 1 | `a28417ee1e7d` | Evidence: JSONL reporter stream and its six-class summary |
+| `P03.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `d61950688f8c` `d578bb6b1ab4` | Full taxonomy coverage demonstrated |
+| `P03.GATE02` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `d578bb6b1ab4` `6c5102f18c12` | P03.NEG03 and P03.NEG04 PASS |
+| `P03.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `1ccb5c006c3a` `d578bb6b1ab4` | P03 checkpoint recorded |
 
 ## P04 — Executor core
 
@@ -630,6 +636,19 @@
 | `P10.AUTH01` | AUTHORIZATION | MANDATORY | `NOT_STARTED` | 0 | — | Owner authorization to enable the opt-in pre-push hook |
 | `P10.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P10 checkpoint recorded, binding the issued certificate hash |
 
+## Gate results by class (P03)
+
+**Result schema:** `1.0.0`
+
+| Class | Results | Status breakdown |
+| --- | --- | --- |
+| `PARITY` | 0 | — |
+| `HARDENING` | 0 | — |
+| `CLEANROOM` | 0 | — |
+| `ASSURANCE` | 0 | — |
+| `REMOTE` | 0 | — |
+| `AUDIT` | 0 | — |
+
 ## Owner decisions
 
 | ID | Required by | Allowed values | Status | Value |
@@ -662,6 +681,7 @@
 | `DEF-017` | `P02.T04` | HIGH | `CLOSED` | Check runnability marked LOCAL gates as CI-ONLY because the job uploads an artifact |
 | `DEF-018` | `P02.T04` | HIGH | `CLOSED` | Required external tools under-detected: TOOL_SIGNATURES matched JSON-escaped text |
 | `DEF-019` | `P02.GATE01` | HIGH | `CLOSED` | AMD-002 recorded a reason that never took effect (blueprint edit failed; batch continued and wrote a vacuous amendment) |
+| `DEF-020` | `P03.CP01` | MEDIUM | `CLOSED` | P03.CP01 evidence lost three backticked terms to unquoted-heredoc command substitution |
 
 ## Checkpoints
 
@@ -672,3 +692,4 @@
 | `P00` | **PROCEED TO P01 (supersedes CP01; DEF-002/003/004 closed)** | 2026-08-10T08:54:23.461Z | `56e2ba284da9` |
 | `P01` | **PROCEED TO P02** | 2026-08-10T09:24:40.039Z | `51ccc53de3f1` |
 | `P02` | **PROCEED TO P03** | 2026-08-10T09:51:10.828Z | `1a36ea25a1e4` |
+| `P03` | **PROCEED TO P04** | 2026-08-10T10:22:27.089Z | `1ccb5c006c3a` |

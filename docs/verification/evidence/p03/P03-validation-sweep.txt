@@ -1,0 +1,45 @@
+P03 VALIDATION SWEEP
+pwd=/Users/danielwalker/src/ai-sports-betting-dime-ai branch=feat/ci-verify-control-plane HEAD=0576e8bb888188a9a9ea7a3b2f364941cd95a64b
+origin/main=4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6
+Exit codes captured DIRECTLY (DEF-007); negatives assert declared reasons (DEF-008).
+
+P03 suite                    -> exit 0
+ Test Files  1 passed (1)
+      Tests  56 passed (56)
+PB suite (regression)        -> exit 0
+      Tests  35 passed (35)
+P01 suite (regression)       -> exit 0
+      Tests  20 passed (20)
+P02 suite (regression)       -> exit 0
+      Tests  31 passed (31)
+scripts/ surface             -> exit 0
+ Test Files  34 passed (34)
+      Tests  535 passed (535)
+tsc --noEmit                 -> exit 0
+prettier (controlled)        -> exit 0
+All matched files use Prettier code style!
+ledger verify                -> exit 0
+[ledger] VERIFY OK — no tampering, drift, or stale evidence
+contract conformance         -> exit 0
+[conformance] PASS — 40 workflows, 51 checks, 9 required contexts mapped
+CONTRACT.md conformance      -> exit 0
+registry build               -> exit 0
+[registry] PASS — PARITY derived from the frozen contract and fidelity-checked
+P03 audits (AUD01+AUD02)     -> exit 0
+[p03-audit] AUD01 PASS — PARITY registry faithful to the frozen contract
+[p03-audit] AUD02 PASS — no P03 runtime module parses workflow YAML
+P02 YAML isolation audit     -> exit 0
+[yaml-audit] PASS — extraction is the only YAML-reading boundary
+P01 provenance audit         -> exit 0
+[provenance-audit] PASS — no implementation module bypasses snapshot.mjs
+actions-security contract    -> exit 0
+{"status":"PASS","workflowsChecked":40,"compositesChecked":0,"actionReferences":120,"productionSecretReferences":25,"failures":[]}
+federation docs              -> exit 0
+federation docs: OK — no dangling paths, ordinals, schema drift, or dead routing
+frozen install               -> exit 0
+
+### live negative proofs — declared reason asserted
+P03.NEG05 hand-edited markdown -> exit 1  reason: RENDER_DRIFT
+P03.NEG04 tampered ledger      -> exit 1  reason: LEDGER_TAMPERED
+restored                       -> exit 0
+[ledger] VERIFY OK — no tampering, drift, or stale evidence
