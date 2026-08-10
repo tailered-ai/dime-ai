@@ -35,7 +35,10 @@ describe("tailered-os control-plane manifest", () => {
     assert.equal(manifest.safety.notionWriteOperationsAuthorized, false);
   });
 
-  it("unverified identifiers are explicitly marked, never silently trusted", () => {
+  it("the four 2026-08-06 database ids are connector-verified with provenance", () => {
+    // Flipped 2026-08-10: notion-fetch of the '07. Company Databases' index
+    // confirmed each database PAGE id live (the manifest pins page ids; each
+    // source string also records the database's data-source id for queries).
     const manifest = loadControlPlaneManifest();
     for (const key of [
       "decisions",
@@ -44,12 +47,10 @@ describe("tailered-os control-plane manifest", () => {
       "knowledge",
     ] as const) {
       const node = manifest.notion.databases[key];
-      assert.equal(
-        node.verified,
-        false,
-        `${key} has not been re-verified over the connector yet`
-      );
-      assert.match(node.source, /re-verify/i);
+      assert.equal(node.verified, true, `${key} was connector-verified`);
+      assert.equal(node.verifiedOn, "2026-08-10");
+      assert.match(node.source, /Notion connector/);
+      assert.match(node.source, /data-source id is [0-9a-f-]{36}/);
     }
   });
 
