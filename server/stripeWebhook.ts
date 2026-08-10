@@ -34,6 +34,7 @@ import {
 } from "./db";
 import { PLANS, getPlanByPriceId, computeExpiryMs, normalizePlanId } from "./stripe/products";
 import { getPlanBySlug, getPriceById, computeExpiryMsForPrice, defaultPriceOf } from "./stripe/planStore";
+import { isKnownNonDimePrice, nonDimeReason } from "./stripe/nonDimePrices";
 import { applyPurchaseToPlanQuantity } from "./stripe/planProvisioning";
 import { syncDiscordRoleForUser } from "./discord/discordRoleSync";
 import { invalidateCachedAppUser } from "./dbCircuitBreaker";
@@ -600,6 +601,42 @@ async function resolvePlanExpiry(rawSlug: string | null | undefined): Promise<{ 
   return { slug, expiryMs: computeExpiryMs(slug) };
 }
 
+/**
+ * The exact Stripe Price this Checkout Session charged, or null when it cannot
+ * be determined.
+ *
+ * Prefers `metadata.price_id` (pinned by our own checkout) and falls back to
+ * the session's line item, which is the only source a Stripe Payment Link has —
+ * Payment Links cannot carry our metadata, so every Payment-Link purchase
+ * lands on the line-item branch.
+ *
+ * Returns null on lookup failure ON PURPOSE. "We could not read the price" must
+ * never be mistaken for a classification in either direction: the caller treats
+ * null as "not a known non-Dime price" and continues with existing behaviour
+ * rather than inventing a disposition. The failure is logged loudly because it
+ * is the one path where a non-Dime payment could still slip past the check.
+ */
+async function resolveSessionPriceId(
+  session: Stripe.Checkout.Session,
+  tag: string
+): Promise<string | null> {
+  const pinned = session.metadata?.price_id?.trim();
+  if (pinned) return pinned;
+  try {
+    const items = await getStripe().checkout.sessions.listLineItems(session.id, {
+      limit: 1,
+    });
+    return items.data[0]?.price?.id ?? null;
+  } catch (err) {
+    console.error(
+      `${tag} [VERIFY] FAIL — could not read line items for non-Dime classification: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return null;
+  }
+}
+
 async function processWebhookEvent(event: Stripe.Event): Promise<void> {
   const tag = `[Stripe][Webhook][${event.type}][${event.id}]`;
   console.log(`${tag} Processing at ${new Date(event.created * 1000).toISOString()}`);
@@ -666,6 +703,44 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
         await resolveCheckout({ stripeSessionId: session.id, status: "completed", fulfillment: "skipped",
           reason: `payment_status=${session.payment_status}`, paymentStatus: session.payment_status ?? null,
           customerEmail: session.customer_details?.email ?? null });
+        break;
+      }
+
+      // ── Cross-business containment (Session 3, PR A0) ────────────────────
+      // This Stripe account also takes non-Dime money: client project invoices
+      // (OffDuty setup, the WNBA project) and platform donations. Those are
+      // valid revenue that must produce ZERO Dime entitlement.
+      //
+      // This check runs BEFORE plan resolution on purpose. Everything below
+      // defaults an unrecognised price to "monthly" (resolvePlanExpiry →
+      // normalizePlanId) and then CONTINUES — the "not in any plan map" branch
+      // logs without breaking — so by the time we reach the customer guard a
+      // $500 OffDuty invoice has already become a 30-day Dime grant. Resolving
+      // the exact Price first is what makes the boundary real rather than an
+      // accident of Payment Link configuration.
+      //
+      // Keyed on the exact Price ID only. Amounts collide (two live $124.99
+      // one-time prices, one Dime and one not) and product names collide (two
+      // live Products are each named "WNBA Project").
+      const nonDimePriceId = await resolveSessionPriceId(session, tag);
+      if (isKnownNonDimePrice(nonDimePriceId)) {
+        const why = nonDimeReason(nonDimePriceId) ?? "non-Dime price";
+        console.log(
+          `${tag} [STATE] non-Dime price ${nonDimePriceId} (${why}) — payment recorded, no Dime entitlement`
+        );
+        await resolveCheckout({
+          stripeSessionId: session.id,
+          status: "completed",
+          fulfillment: "skipped",
+          reason: `non-Dime transaction — ${why}`,
+          paymentStatus: session.payment_status ?? null,
+          customerEmail: session.customer_details?.email ?? null,
+          stripeCustomerId:
+            typeof session.customer === "string" ? session.customer : null,
+          amountCents: session.amount_total ?? null,
+          currency: session.currency ?? null,
+        });
+        console.log(`${tag} [VERIFY] PASS — non-Dime payment, entitlement not applicable`);
         break;
       }
 
