@@ -26,6 +26,7 @@ import {
   nonDimeReason,
   knownNonDimePriceIds,
 } from "./nonDimePrices";
+import { isWebhookAuthoritative } from "./checkoutReconcile";
 
 const ROOT = path.resolve(__dirname, "../..");
 const WEBHOOK_SRC = fs.readFileSync(
@@ -207,40 +208,47 @@ describe("webhook wiring — source contract", () => {
 });
 
 describe("reconciler must not overturn a deliberate non-Dime skip", () => {
-  // Independent review found this: the containment writes a state combination
-  // classifySession has no case for — completed + Stripe-paid + skipped. The
-  // 30-minute sweep maps EVERY complete+paid session to `dropped`, and its
-  // spare only protected `fulfilled`. So it would rewrite the non-Dime row,
-  // destroy the commercial reason, and log "MONEY TAKEN WITHOUT ACCESS" —
-  // an alarm whose designed response is a MANUAL entitlement grant, i.e. the
-  // false alarm would induce by hand the Dime access this PR blocks.
-  const RECONCILE_SRC = fs.readFileSync(
-    path.join(ROOT, "server/stripe/checkoutReconcile.ts"),
-    "utf8"
-  );
+  // Independent review found this: the containment writes completed + Stripe-
+  // paid + skipped, a combination classifySession has no case for. The 30-min
+  // sweep maps EVERY complete+paid session to `dropped`, and its spare only
+  // protected `fulfilled` — so it would rewrite the non-Dime row, destroy the
+  // commercial reason, and log "MONEY TAKEN WITHOUT ACCESS", an alarm whose
+  // designed response is a MANUAL entitlement grant. The false alarm would have
+  // induced by hand the Dime access this PR blocks.
 
-  it("spares a completed+skipped row from being rewritten", () => {
-    // prettier may wrap the condition, so assert on the normalised form
-    const flat = RECONCILE_SRC.replace(/\s+/g, " ");
-    expect(flat).toContain(
-      'have.fulfillment === "skipped" && have.status === "completed"'
-    );
+  it("spares a fulfilled row (pre-existing rule, unchanged)", () => {
+    expect(
+      isWebhookAuthoritative({ status: "completed", fulfillment: "fulfilled" })
+    ).toBe(true);
   });
 
-  it("the spare sits before the dropped-classification write", () => {
-    const flat = RECONCILE_SRC.replace(/\s+/g, " ");
-    const spare = flat.indexOf(
-      'have.fulfillment === "skipped" && have.status === "completed"'
-    );
-    const unfulfilled = flat.indexOf("out.unfulfilled += 1");
-    expect(spare).toBeGreaterThan(-1);
-    expect(unfulfilled).toBeGreaterThan(-1);
-    expect(spare).toBeLessThan(unfulfilled);
+  it("spares a completed+skipped row — the non-Dime containment state", () => {
+    expect(
+      isWebhookAuthoritative({ status: "completed", fulfillment: "skipped" })
+    ).toBe(true);
   });
 
-  it("classifySession still reports complete+paid as dropped by default", () => {
-    // The fix must not weaken genuine drop detection — only exempt rows the
-    // webhook already decided on.
-    expect(RECONCILE_SRC).toContain('fulfillment: "dropped"');
+  it("still sweeps a dropped row — genuine drop detection is untouched", () => {
+    expect(
+      isWebhookAuthoritative({ status: "completed", fulfillment: "dropped" })
+    ).toBe(false);
+  });
+
+  it("still sweeps a pending row", () => {
+    expect(
+      isWebhookAuthoritative({ status: "created", fulfillment: "pending" })
+    ).toBe(false);
+  });
+
+  it("still sweeps when there is no local row at all", () => {
+    expect(isWebhookAuthoritative(undefined)).toBe(false);
+  });
+
+  it("does not spare an EXPIRED skipped row — that one the sweep may settle", () => {
+    // classifySession has a real case for expired+skipped, so there is no
+    // mismatch to protect against; keep the exemption as narrow as the defect.
+    expect(
+      isWebhookAuthoritative({ status: "expired", fulfillment: "skipped" })
+    ).toBe(false);
   });
 });

@@ -116,6 +116,36 @@ export function classifySession(s: {
   return null; // unknown status — do not guess
 }
 
+/**
+ * Has the webhook already reached a decision this sweep must not overturn?
+ *
+ * This sweep exists to fill SILENCE — sessions the webhook never resolved. It
+ * is not a second opinion on ones it did.
+ *
+ *  - `fulfilled`: the webhook is authoritative for success. The sweep only ever
+ *    sees the Stripe session, never the entitlement it produced.
+ *  - `completed` + `skipped`: a DELIBERATE non-fulfilment. `classifySession`
+ *    knows only two outcomes for complete+paid — fulfilled, or `dropped` — so
+ *    without this a non-Dime sale (see ./nonDimePrices.ts: a valid OffDuty /
+ *    WNBA / donation payment that must never grant Dime access) would be
+ *    rewritten to `dropped`, its commercial reason destroyed, and reported as
+ *    "MONEY TAKEN WITHOUT ACCESS". The designed response to that alarm is a
+ *    manual entitlement grant — so the false alarm would induce by hand exactly
+ *    the Dime access the containment exists to prevent.
+ *
+ * Anything else (pending, dropped, or no row at all) is still the sweep's job.
+ *
+ * Exported because it is the decision table; the loop around it needs Stripe
+ * and a database, and a rule this consequential should be testable without both.
+ */
+export function isWebhookAuthoritative(
+  have: { status: string; fulfillment: string } | undefined
+): boolean {
+  if (!have) return false;
+  if (have.fulfillment === "fulfilled") return true;
+  return have.fulfillment === "skipped" && have.status === "completed";
+}
+
 async function listRecentSessions(
   maxPages: number,
   sinceMs: number
@@ -233,29 +263,8 @@ export async function reconcileCheckoutSessions(opts?: {
         continue;
       }
 
-      // Already settled correctly — the webhook did its job. Do not rewrite a
-      // 'fulfilled' row: the webhook is authoritative for success, and this
-      // sweep only ever sees the session, not the entitlement it produced.
-      if (have && have.fulfillment === "fulfilled") {
-        out.alreadyConsistent += 1;
-        continue;
-      }
-      // Nor a DELIBERATE skip on a completed session. `classifySession` only
-      // knows two outcomes for complete+paid — fulfilled or "dropped" — so a
-      // non-Dime sale (server/stripe/nonDimePrices.ts: a valid OffDuty/WNBA/
-      // donation payment that must never grant Dime access) would otherwise be
-      // rewritten to `dropped`, its commercial reason destroyed, and reported
-      // as "MONEY TAKEN WITHOUT ACCESS". That alarm's designed response is a
-      // manual entitlement grant — i.e. the false alarm would induce by hand
-      // exactly the Dime access the containment exists to prevent.
-      //
-      // The rule is the same as for 'fulfilled': this sweep exists to fill
-      // SILENCE, not to overrule a webhook that already reached a decision.
-      if (
-        have &&
-        have.fulfillment === "skipped" &&
-        have.status === "completed"
-      ) {
+      // The webhook already reached a decision on this session — leave it be.
+      if (isWebhookAuthoritative(have)) {
         out.alreadyConsistent += 1;
         continue;
       }
