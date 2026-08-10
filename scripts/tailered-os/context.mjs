@@ -80,26 +80,18 @@ function apiSource() {
   }
   return {
     mode: "api",
+    // FIND-TOS007-0001: the REST page object (nested typed properties) does not
+    // match the flat connector-SQL record shape buildPacket parses. Until the
+    // owner-gated token exists to develop and TEST that mapping against real
+    // responses, api mode fails EXPLICITLY here — never by mis-parsing into a
+    // misleading "scope-id-malformed".
     async getPage(pageId) {
-      const response = await fetch(
-        `https://api.notion.com/v1/pages/${pageId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Notion-Version": "2022-06-28",
-          },
-        }
+      throw new ResolveError(
+        "api-shape-unmapped",
+        `api mode is not implemented yet (requested page ${pageId}).`,
+        "the Notion REST property shape differs from the record shape this resolver parses; shipping an untested mapper would produce confidently wrong packets.",
+        "use --source fixture:<dir> (export the task row via the connector SQL), or implement + live-test the REST property mapper once the read-only token exists (Owner-Gate Queue)."
       );
-      if (response.status === 404) return null;
-      if (!response.ok) {
-        throw new ResolveError(
-          "connector-error",
-          `Notion API returned ${response.status} for page ${pageId}.`,
-          "a partial read must not produce a confident packet.",
-          "verify the integration has access to the Tasks database, then retry."
-        );
-      }
-      return response.json();
     },
   };
 }
@@ -248,9 +240,13 @@ export async function resolve(taskUrl, sourceSpec) {
   const record = await source.getPage(taskId);
   const packet = buildPacket(record, taskId, manifest, source);
   const rendered = JSON.stringify(packet);
-  // Fail closed if anything credential-shaped ever reaches a packet.
+  // Fail closed if anything credential-shaped ever reaches a packet. Full
+  // pattern set, byte-identical to scripts/one-shot/ledger.mjs SECRETISH
+  // (FIND-TOS007-0002: an earlier copy silently omitted the restricted-key,
+  // Slack, and JWT classes) — consolidate into one shared helper when the
+  // campaign branches land on main.
   if (
-    /(sk_live_|sk_test_|sk-ant-|ghp_[A-Za-z0-9]|github_pat_|AKIA[0-9A-Z]{16}|-----BEGIN|[a-z][a-z0-9+.-]*:\/\/[^/\s:@]+:[^@\s/]+@)/.test(
+    /(sk_live_|sk_test_|rk_live_|sk-ant-|ghp_[A-Za-z0-9]|github_pat_|xox[bpc]-|xapp-|AKIA[0-9A-Z]{16}|eyJ[A-Za-z0-9_-]{10,}|-----BEGIN|[a-z][a-z0-9+.-]*:\/\/[^/\s:@]+:[^@\s/]+@)/.test(
       rendered
     )
   ) {

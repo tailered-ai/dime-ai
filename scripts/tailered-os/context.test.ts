@@ -115,6 +115,40 @@ describe("TOS-007 resolver — the named failure modes fail clearly", () => {
   it("unknown source spec", async () => {
     await expectFailure(TASK_URL, "carrier-pigeon", "bad-source");
   });
+  it("api mode WITH a token fails explicitly as api-shape-unmapped, never by mis-parsing (FIND-TOS007-0001)", async () => {
+    const saved = process.env.NOTION_API_TOKEN;
+    process.env.NOTION_API_TOKEN = "test-placeholder-value";
+    try {
+      const error = await expectFailure(TASK_URL, "api", "api-shape-unmapped");
+      assert.match(error.why, /confidently wrong packets/);
+      assert.match(error.fix, /Owner-Gate Queue/);
+    } finally {
+      if (saved === undefined) delete process.env.NOTION_API_TOKEN;
+      else process.env.NOTION_API_TOKEN = saved;
+    }
+  });
+  it("JWT- and Slack-shaped values are refused too (FIND-TOS007-0002)", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "tos007-jwt-"));
+    const taskId = "00000000000000000000000000000008";
+    // Assembled at runtime (gitleaks scans commit text).
+    const jwtish = ["eyJ", "aGVhZGVyIjoidGVzdC1vbmx5In0"].join("");
+    writeFileSync(
+      join(dir, `task-${taskId}.json`),
+      JSON.stringify({
+        Name: "JWT smuggler",
+        "Scope ID": "TOS-093",
+        Status: "Not started",
+        Owner: '["user://x"]',
+        Project: '["https://www.notion.so/3b89673313e7814da8a4ccfa9a21c969"]',
+        "Why It Matters": `bearer ${jwtish}`,
+      })
+    );
+    await expectFailure(
+      `https://app.notion.com/p/${taskId}`,
+      `fixture:${dir}`,
+      "secret-shaped-content"
+    );
+  });
   it("a credential-shaped value in the record is refused, never packaged", async () => {
     const dir = mkdtempSync(join(tmpdir(), "tos007-secret-"));
     const taskId = "00000000000000000000000000000007";
