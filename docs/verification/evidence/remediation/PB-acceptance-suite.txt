@@ -1,0 +1,45 @@
+
+ RUN  v4.1.10 /Users/danielwalker/src/ai-sports-betting-dime-ai
+
+ ✓ scripts/ci/ledger.test.ts > PB.TEST01 — blueprint IDs are seeded exactly once > seeds one ledger unit per declared blueprint ID 5ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST01 — blueprint IDs are seeded exactly once > declares no duplicate ID anywhere in the blueprint 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST01 — blueprint IDs are seeded exactly once > seeds every unit at NOT_STARTED with zero attempts and no evidence 12ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST01 — blueprint IDs are seeded exactly once > derives a known kind for every declared ID 12ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST01 — blueprint IDs are seeded exactly once > covers every phase from P-BOOT through P10 2ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST02 — rendered markdown conforms exactly to the JSON > regenerates the on-disk markdown byte-for-byte from the on-disk JSON 12ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST02 — rendered markdown conforms exactly to the JSON > pins the on-disk JSON with a matching sha256 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST02 — rendered markdown conforms exactly to the JSON > renders as a pure function of state — no clock, no environment 4ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST02 — rendered markdown conforms exactly to the JSON > serializes canonically and stably 7ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG01 — a duplicate blueprint ID FAILS initialization > throws DUPLICATE_UNIT_ID and names the offending id 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG01 — a duplicate blueprint ID FAILS initialization > refuses to build a ledger at all when a duplicate exists 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG01 — a duplicate blueprint ID FAILS initialization > detects a duplicated PHASE id, not only duplicated units 0ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG02 — a declared ID missing from the seed FAILS initialization > throws SEED_INCOMPLETE naming the missing id 2ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG02 — a declared ID missing from the seed FAILS initialization > throws SEED_INCOMPLETE when the ledger carries an undeclared extra id 2ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG02 — a declared ID missing from the seed FAILS initialization > accepts a complete seed 5ms
+ ✓ scripts/ci/ledger.test.ts > PB.T01 exit requirement — PASS is refused without verifiable evidence > refuses PASS when no evidence is declared 2ms
+ ✓ scripts/ci/ledger.test.ts > PB.T01 exit requirement — PASS is refused without verifiable evidence > refuses PASS when a declared evidence path does not exist 13ms
+ ✓ scripts/ci/ledger.test.ts > PB.T01 exit requirement — PASS is refused without verifiable evidence > refuses a jump from NOT_STARTED straight to PASS 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.T01 exit requirement — PASS is refused without verifiable evidence > refuses evidence pointing at a live control-plane artifact (DEF-001) 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.T01 exit requirement — PASS is refused without verifiable evidence > accepts PASS with real, non-empty, hashable evidence 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST03 — full ACCEPT(P) predicate > returns true only for the complete conjunction, with all seven terms true 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST03 — full ACCEPT(P) predicate > keeps unit status, gate result taxonomy, and phase state as distinct vocabularies 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST03 — full ACCEPT(P) predicate > ignores ADVISORY units entirely 2ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST03 — full ACCEPT(P) predicate > does not block on an OPEN defect below MEDIUM, nor on a CLOSED one 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST03 — full ACCEPT(P) predicate > progress() reports only unit closure and no longer claims acceptance (DEF-004) 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG03 — each acceptance term is independently load-bearing > false when ONLY all_mandatory_closed is violated 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG03 — each acceptance term is independently load-bearing > false when ONLY all_gates_pass is violated 31ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG03 — each acceptance term is independently load-bearing > false when ONLY all_checkpoints_recorded is violated 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG03 — each acceptance term is independently load-bearing > false when ONLY all_authorizations_granted is violated 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG03 — each acceptance term is independently load-bearing > false when ONLY zero_blocking_open_defects is violated 0ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG03 — each acceptance term is independently load-bearing > false when ONLY evidence_complete is violated 0ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG03 — each acceptance term is independently load-bearing > false when ONLY zero_flaky_mandatory is violated 0ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG03 — each acceptance term is independently load-bearing > attributes a defect to BOTH the detecting and the affected phase 0ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG03 — each acceptance term is independently load-bearing > DEF-005 parser regression: a boolean flag never swallows the next token 0ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG03 — each acceptance term is independently load-bearing > DEF-005 genesis regression: corrections apply append-only and GEN-000 is preserved 0ms
+
+ Test Files  1 passed (1)
+      Tests  35 passed (35)
+   Start at  01:50:47
+   Duration  340ms (transform 64ms, setup 0ms, import 84ms, tests 127ms, environment 0ms)
+
+SUITE_EXIT=0

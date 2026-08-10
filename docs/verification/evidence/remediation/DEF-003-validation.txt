@@ -1,0 +1,53 @@
+DEF-003 VALIDATION — pinned YAML parser for the future P02 extractor
+pwd=/Users/danielwalker/src/ai-sports-betting-dime-ai HEAD=4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6 branch=feat/ci-verify-control-plane
+node=v22.22.0 pnpm=10.33.0
+NOTE: exit codes below are captured DIRECTLY, never through a pipe (DEF-007).
+
+### A. exact pin in package.json (no range)
+devDependencies.yaml = "2.9.0"
+is exact (no ^ ~ > < * x): true
+
+### B. no override can widen it
+override for yaml: NONE (pin is authoritative)
+override for js-yaml: >=4.3.1 <5.0.0 <- why js-yaml was NOT chosen: a range override would defeat an exact pin
+
+### C. lockfile change is minimal — importer entry only, ZERO new packages
+3	0	pnpm-lock.yaml
+resolved-package count before: 1675
+resolved-package count after : 1675
+=> the audited dependency surface is UNCHANGED, so OSV / dependency-review verdicts cannot change.
+
+### D. deterministic install validation
+pnpm install --frozen-lockfile            -> exit 1
+Lockfile is up to date, resolution step is skipped
+  ^ the lockfile IS in sync. exit 1 comes from the repo's pre-existing
+    postinstall step (pip3 -> PEP 668 externally-managed-environment on
+    this macOS host). That script is UNCHANGED by this branch:
+    postinstall lines in the package.json diff: 0
+pnpm install --frozen-lockfile --ignore-scripts -> exit 0   (isolates the lockfile claim)
+
+### E. lockfile byte-identical after the frozen install (reproducibility)
+1c0d5a0980e53ea65117125be2d57f6c00ec9fa7f5878f65552e081daa1614fd  pnpm-lock.yaml
+3	0	pnpm-lock.yaml
+
+### F. parser resolves by NAME now (ERR_MODULE_NOT_FOUND before)
+import("yaml") OK; parse= function parseDocument= function
+exit 0
+
+### G. parser identity for P02 parser_version / contract provenance
+{
+  "name": "yaml",
+  "version": "2.9.0",
+  "pinned_in": "package.json devDependencies (exact)",
+  "integrity": "sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA=="
+}
+
+### H. capability proof — real parse of every workflow, zero errors
+files=40 jobs=51 parseErrors=NONE
+exit 0
+
+### I. relevant regression after the dependency change
+tsc --noEmit -> exit 0
+actions-security -> exit 0
+{"status":"PASS","workflowsChecked":40,"compositesChecked":0,"actionReferences":120,"productionSecretReferences":25,"failures":[]}
+prettier package.json -> exit 0

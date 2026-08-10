@@ -1,0 +1,30 @@
+PB.GATE01 NEGATIVE PROOF — the gate must be able to REJECT.
+pwd=/Users/danielwalker/src/ai-sports-betting-dime-ai  HEAD=4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6  branch=feat/ci-verify-control-plane
+
+### CONTROL: untampered state
+[ledger] VERIFY OK — no tampering, drift, or stale evidence
+exit=0
+
+### CASE 1 — hand-edit the canonical JSON out of band (expect LEDGER_TAMPERED)
+[ledger] VERIFY FAILED
+  - LEDGER_TAMPERED: pinned=2c0863107b83 actual=6c5228c050b3
+  - RENDER_DRIFT
+exit=1
+
+### CASE 2 — hand-edit the rendered markdown out of band (expect RENDER_DRIFT)
+[ledger] VERIFY FAILED
+  - RENDER_DRIFT
+exit=1
+
+### CASE 3 — mutate a recorded evidence artifact (expect STALE_EVIDENCE)
+[ledger] VERIFY FAILED
+  - STALE_EVIDENCE: PB.T05 -> docs/verification/evidence/pboot/T05-render.md (hash changed)
+exit=1
+
+### CASE 4 — evidence pointing at a live control-plane artifact (expect EVIDENCE_SELF_REFERENCE, DEF-001)
+[ledger] EVIDENCE_SELF_REFERENCE: docs/verification/ci-verify-ledger.json is a live control-plane artifact and is rewritten on every ledger write; record an immutable observation artifact that cites its hash instead
+exit=1
+
+### RESTORE: all three artifacts returned to their recorded bytes
+[ledger] VERIFY OK — no tampering, drift, or stale evidence
+exit=0
