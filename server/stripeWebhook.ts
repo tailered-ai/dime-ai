@@ -34,8 +34,10 @@ import {
 } from "./db";
 import { PLANS, getPlanByPriceId, computeExpiryMs, normalizePlanId } from "./stripe/products";
 import { getPlanBySlug, getPriceById, computeExpiryMsForPrice, defaultPriceOf } from "./stripe/planStore";
-import { resolveRecurringEntitlement } from "./stripe/recurringAuthority";
-import type { MappedRecurringPrice } from "./stripe/recurringAuthority";
+import {
+  resolveRecurringEntitlement,
+  mapRecurringPrice,
+} from "./stripe/recurringAuthority";
 import { isKnownNonDimePrice, nonDimeReason } from "./stripe/nonDimePrices";
 import { applyPurchaseToPlanQuantity } from "./stripe/planProvisioning";
 import { syncDiscordRoleForUser } from "./discord/discordRoleSync";
@@ -1051,28 +1053,15 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
       // `subNow.priceId` is the same value the lifecycle ledger already read
       // above — one read, one meaning.
       const currentPriceId = subNow.priceId ?? null;
-      const catalogHit = currentPriceId ? await getPriceById(currentPriceId) : null;
-      // Legacy static plans predate the DB catalog and are still live, so a
-      // catalog miss is not yet "unknown". getPlanByPriceId is the existing
-      // authority for those; no second lookup table is introduced here.
-      const legacyHit = !catalogHit && currentPriceId ? getPlanByPriceId(currentPriceId) : null;
-      const mappedPrice: MappedRecurringPrice | null = catalogHit
-        ? {
-            planSlug: catalogHit.plan.slug,
-            planPriceRowId: catalogHit.price.id,
-            interval: catalogHit.price.interval,
-            intervalCount: catalogHit.price.intervalCount,
-            source: "catalog",
-          }
-        : legacyHit
-          ? {
-              planSlug: legacyHit.id,
-              planPriceRowId: null, // no plan_prices row exists — leave stored value alone
-              interval: legacyHit.interval,
-              intervalCount: 1,
-              source: "legacy_static",
-            }
-          : null;
+      // Catalog first, then the legacy static map — see mapRecurringPrice. The
+      // two lookups are passed in rather than called here so that the wiring is
+      // exercised by unit tests: this file sits at the top level of `server/`,
+      // which the patch-coverage gate's `server/**/*.ts` pathspec does not
+      // match, so logic left inline here is measured by nothing.
+      const mappedPrice = await mapRecurringPrice(currentPriceId, {
+        catalog: getPriceById,
+        legacy: getPlanByPriceId,
+      });
 
       const resolution = resolveRecurringEntitlement({
         priceId: currentPriceId,

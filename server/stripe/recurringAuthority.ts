@@ -117,6 +117,63 @@ export function isLifetimeEntitlement(
 }
 
 /**
+ * Resolve an exact Stripe Price through the two authorities that already exist.
+ *
+ * Order is deliberate: the DB catalog first, then the legacy static map. A
+ * catalog miss is NOT yet "unknown" — `products.ts` PLANS predate the catalog
+ * and those subscriptions are still live, so treating a legacy Price as
+ * unrecognised would stop extending a paying member's access.
+ *
+ * The lookups are injected rather than imported so this — the wiring that
+ * decides which authority answers — is executable in a test. `stripeWebhook.ts`
+ * sits at the top level of `server/`, which the patch-coverage gate's
+ * `server/**\/*.ts` pathspec does not match (it matches 0 of the 213 files
+ * there), so logic left inline in the handler is measured by nothing.
+ */
+export async function mapRecurringPrice(
+  priceId: string | null | undefined,
+  deps: {
+    catalog: (id: string) => Promise<{
+      plan: { slug: string };
+      price: {
+        id: number;
+        interval: BillingInterval | null;
+        intervalCount: number | null;
+      };
+    } | null>;
+    legacy: (id: string) => { id: string; interval: string } | null;
+  }
+): Promise<MappedRecurringPrice | null> {
+  if (!priceId) return null;
+
+  const hit = await deps.catalog(priceId);
+  if (hit) {
+    return {
+      planSlug: hit.plan.slug,
+      planPriceRowId: hit.price.id,
+      interval: hit.price.interval,
+      intervalCount: hit.price.intervalCount,
+      source: "catalog",
+    };
+  }
+
+  const legacy = deps.legacy(priceId);
+  if (legacy) {
+    return {
+      planSlug: legacy.id,
+      // No plan_prices row exists for a legacy static plan. Null means "leave
+      // the stored value alone" — nulling a correct id is strictly worse.
+      planPriceRowId: null,
+      interval: legacy.interval as BillingInterval,
+      intervalCount: 1,
+      source: "legacy_static",
+    };
+  }
+
+  return null;
+}
+
+/**
  * Decide what a recurring subscription event should write.
  *
  * Pure on purpose: every input is a value the caller has already resolved, so

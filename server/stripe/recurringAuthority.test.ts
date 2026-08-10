@@ -22,6 +22,7 @@ import fs from "fs";
 import path from "path";
 import {
   resolveRecurringEntitlement,
+  mapRecurringPrice,
   isLifetimeEntitlement,
   type MappedRecurringPrice,
 } from "./recurringAuthority";
@@ -305,6 +306,100 @@ describe("grandfathered lifetime members are never re-dated", () => {
   });
 });
 
+describe("mapRecurringPrice — which authority answers", () => {
+  const catalogRow = {
+    plan: { slug: "dime-sharp" },
+    price: { id: 120004, interval: "year" as const, intervalCount: 1 },
+  };
+  const catalogHit = async () => catalogRow;
+  const catalogMiss = async () => null;
+  const legacyHit = () => ({ id: "monthly", interval: "month" });
+  const legacyMiss = () => null;
+
+  it("returns null for an absent Price without consulting either authority", async () => {
+    let calls = 0;
+    const r = await mapRecurringPrice(null, {
+      catalog: async () => {
+        calls++;
+        return null;
+      },
+      legacy: () => {
+        calls++;
+        return null;
+      },
+    });
+    expect(r).toBeNull();
+    expect(calls).toBe(0);
+  });
+
+  it("prefers the DB catalog and carries the exact row id", async () => {
+    const r = await mapRecurringPrice("price_x", {
+      catalog: catalogHit,
+      legacy: legacyHit,
+    });
+    expect(r).toEqual({
+      planSlug: "dime-sharp",
+      planPriceRowId: 120004,
+      interval: "year",
+      intervalCount: 1,
+      source: "catalog",
+    });
+  });
+
+  it("does not consult the legacy map when the catalog answers", async () => {
+    let legacyCalls = 0;
+    await mapRecurringPrice("price_x", {
+      catalog: catalogHit,
+      legacy: () => {
+        legacyCalls++;
+        return null;
+      },
+    });
+    expect(legacyCalls).toBe(0);
+  });
+
+  it("falls through to the legacy static map on a catalog miss", async () => {
+    // Without this fallback a live legacy subscriber would resolve as unknown
+    // and stop having their access extended.
+    const r = await mapRecurringPrice("price_1TaVc2Pa3TFEAkkYucDoFPcW", {
+      catalog: catalogMiss,
+      legacy: legacyHit,
+    });
+    expect(r).toEqual({
+      planSlug: "monthly",
+      planPriceRowId: null,
+      interval: "month",
+      intervalCount: 1,
+      source: "legacy_static",
+    });
+  });
+
+  it("never invents a plan_prices row for a legacy plan", async () => {
+    const r = await mapRecurringPrice("price_legacy", {
+      catalog: catalogMiss,
+      legacy: legacyHit,
+    });
+    expect(r?.planPriceRowId).toBeNull();
+  });
+
+  it("returns null when neither authority recognises the Price", async () => {
+    const r = await mapRecurringPrice("price_unknown", {
+      catalog: catalogMiss,
+      legacy: legacyMiss,
+    });
+    expect(r).toBeNull();
+  });
+
+  it("an unmapped Price then resolves to manual_review, end to end", async () => {
+    const mapped = await mapRecurringPrice("price_unknown", {
+      catalog: catalogMiss,
+      legacy: legacyMiss,
+    });
+    const r = resolve({ priceId: "price_unknown", mapped });
+    expect(r.kind).toBe("manual_review");
+  });
+});
+
 describe("legacy static plans keep working", () => {
   it("resolves to the legacy slug", () => {
     const r = resolve({
@@ -428,10 +523,15 @@ describe("webhook wiring — the branch actually uses this resolver", () => {
     expect(guarded).not.toContain("grantUserAccess");
   });
 
-  it("consults the catalog first, then the legacy static map — no third table", () => {
-    const branch = subscriptionBranch();
-    expect(branch).toContain("await getPriceById(currentPriceId)");
-    expect(branch).toContain("getPlanByPriceId(currentPriceId)");
+  it("maps the Price through the two existing authorities — no third table", () => {
+    // The lookups are injected, so ORDER and fallback are covered by the
+    // mapRecurringPrice tests above rather than living uncovered in the
+    // handler. What the handler must still prove is that it passes the real
+    // authorities and invents no others.
+    const code = subscriptionBranchCode();
+    expect(code).toContain("await mapRecurringPrice(currentPriceId, {");
+    expect(code).toContain("catalog: getPriceById,");
+    expect(code).toContain("legacy: getPlanByPriceId,");
   });
 });
 
