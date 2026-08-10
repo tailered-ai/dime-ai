@@ -59,6 +59,7 @@ if LIB not in sys.path:
     sys.path.insert(0, LIB)
 
 import build_inputs                    # noqa: E402  the canonical build-input contract
+import build_provenance                # noqa: E402  binds this DB to its input bytes
 import corrections                     # noqa: E402  data corrections, each asserting its prior
 import espn_identities                 # noqa: E402  the ONE T4 loader/validator
 import identity_baseline                # noqa: E402  Layer C: accepted derived identity
@@ -1408,6 +1409,11 @@ def preflight_raw():
 def main():
     skip_external = "--no-external" in sys.argv
     preflight_raw()
+    # Hash every declared input BEFORE anything reads one. Hashing only at the
+    # end cannot tell a stable input from one that was rewritten mid-build, and
+    # a database assembled from two different versions of a file is not the
+    # product of either.
+    pre_inputs = build_provenance.semantic_inputs()
     rows, hist, new, teams, venues = (load_json(UNIFIED), load_json(HIST),
                                       load_json(NEW), load_json(TEAMS), load_json(VENUES))
     tmp = DB_PATH + ".tmp"
@@ -1444,9 +1450,35 @@ def main():
 
     conn.execute("ANALYZE")
     conn.commit()
+
+    # Provenance is computed BEFORE the database is published, and a failure
+    # here fails the build. A database nobody can tie to the bytes that made it
+    # is not a deliverable: every downstream reconciliation would be comparing
+    # it against whatever happened to be sitting in raw/ at the time.
+    print("\nprovenance...")
+    try:
+        doc = build_provenance.build_manifest(
+            conn, require_clean=False, pre_inputs=pre_inputs)
+    except build_provenance.ProvenanceError as exc:
+        print(f"  BUILD REJECTED: {exc}")
+        conn.close()
+        os.unlink(tmp)
+        sys.exit(1)
+    canon = doc["canonical"]
+    print(f"  input  {canon['input_fingerprint']}")
+    print(f"  build  {canon['build_fingerprint']}")
+    print(f"  output {canon['output_fingerprint']}")
+    if canon["dirty"]:
+        print("  NOTE: built from a dirty worktree -- this database is usable "
+              "but is NOT accepted reproducibility evidence")
+
     conn.close()
     os.replace(tmp, DB_PATH)
+    with open(build_provenance.manifest_path(DB_PATH), "w") as fh:
+        json.dump(doc, fh, indent=2, sort_keys=True)
+        fh.write("\n")
     print(f"\n  wrote {DB_PATH} ({os.path.getsize(DB_PATH)/1e6:.1f} MB)")
+    print(f"  wrote {build_provenance.manifest_path(DB_PATH)}")
 
 
 if __name__ == "__main__":
