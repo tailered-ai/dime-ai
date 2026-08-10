@@ -61,6 +61,7 @@ if LIB not in sys.path:
 import build_inputs                    # noqa: E402  the canonical build-input contract
 import corrections                     # noqa: E402  data corrections, each asserting its prior
 import espn_identities                 # noqa: E402  the ONE T4 loader/validator
+import identity_baseline                # noqa: E402  Layer C: accepted derived identity
 import depth_charts as depth_lib       # noqa: E402  B3
 import player_dimension                # noqa: E402  B5
 import rowloss                         # noqa: E402  B4
@@ -1028,6 +1029,34 @@ def pass_reconciliation(conn, rows, hist, new, counts):
         else:
             check(2, f"{tbl}: frozen-window CONTENT is unchanged, not just its count",
                   ok, detail)
+    # ---- LAYER C: accepted derived identity (Phase 7) --------------------
+    # The percentage gate below can only see how MANY identities are filled. It
+    # cannot see WHICH, so it is blind to the two defects that actually matter:
+    # a previously known person disappearing, and a row being reassigned to a
+    # different person at identical coverage. This compares against reviewed
+    # acceptance instead, and reports the three outcomes separately -- a
+    # regression and a legitimate new resolution need different people.
+    id_verdict, id_findings, id_stats = identity_baseline.check(conn, root=ROOT)
+    report("Layer C: accepted identity baseline",
+           f"{id_stats['accepted']} accepted "
+           f"({id_stats['resolved']} resolved / {id_stats['unresolved']} unresolved), "
+           f"verdict {id_verdict}")
+    check(2, "Layer C: no accepted identity was lost or reassigned",
+          not any(f["verdict"] == identity_baseline.FAIL for f in id_findings),
+          "; ".join(f"{f['case']} {f['espn_id']}: {f['why']}"
+                    for f in id_findings
+                    if f["verdict"] == identity_baseline.FAIL)[:300])
+    # REVIEW_REQUIRED is deliberately NOT a check() failure and deliberately NOT
+    # silent: a legitimate new resolution must not fail a build, but it must also
+    # be impossible to call the identity check green while it sits unaccepted.
+    pending = [f for f in id_findings
+               if f["verdict"] == identity_baseline.REVIEW_REQUIRED]
+    if pending:
+        report("Layer C: REVIEW_REQUIRED -- unaccepted identity changes",
+               "; ".join(f"{f['case']} {f['espn_id']} -> {f['observed']}"
+                         for f in pending[:10])
+               + (f" (+{len(pending) - 10} more)" if len(pending) > 10 else ""))
+
     check(2, "depth_chart holds only rows that carry a real season",
           q("SELECT COUNT(*) FROM depth_chart WHERE season IS NULL")[0] == 0)
     bad = q("SELECT COUNT(*) FROM depth_chart WHERE week IS NOT NULL AND week > 18")[0]
@@ -1311,6 +1340,11 @@ def preflight_raw():
         # Presence is not validity. Malformed T4 is knowable at startup, so it must
         # not surface minutes later after the database has been built.
         espn_identities.load(root=ROOT)
+        # Same reasoning for the accepted identity baseline: whether the reviewed
+        # evidence is WELL-FORMED is knowable before a database exists, and is a
+        # separate question from whether this build AGREES with it (that needs the
+        # derived identities, so it runs in pass 2).
+        identity_baseline.load_baseline(root=ROOT)
     if not ok:
         print("\n" + "=" * 68, file=sys.stderr)
         for spec, resolved in failures:

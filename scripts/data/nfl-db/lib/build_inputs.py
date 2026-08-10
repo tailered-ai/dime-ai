@@ -98,6 +98,32 @@ BUILD_INPUTS = {
             "cannot be created without it",
         remediation="repository checkout is incomplete; restore from git"),
 
+    # Phase 7 raised the declared count from 13 to 14. That is a deliberate
+    # contract evolution, not a regression: Layer C became a required integrity
+    # control, so the reviewed acceptance evidence it decides against is now a
+    # build input in exactly the sense this registry means -- required, tracked,
+    # repository-owned, and NOT regenerable from the five upstream extracts.
+    #
+    # Regenerating it from the build it governs would be the purest form of the
+    # laundering defect this project keeps finding: the artifact that decides
+    # whether an identity change is legitimate must not be written by the process
+    # whose output it judges.
+    "accepted_identities": BuildInput(
+        name="accepted_identities",
+        relpath="scripts/data/nfl-db/accepted-identities.json",
+        category=REPO_SEMANTIC, required=True, owner="repository",
+        regenerable=False, mutability="reviewed",
+        acquisition="tracked in git; changed only through targeted, reasoned acceptance",
+        consumers=("build_db", "identity_baseline", "observe_nonblocking"),
+        why="the accepted Layer C identity baseline: 204 source identities, 171 "
+            "resolved and 33 unresolved. It is what makes a lost identity "
+            "distinguishable from a legitimate new resolution. A fill-rate "
+            "percentage cannot make that distinction and never could",
+        remediation="repository checkout is incomplete or corrupt. Do NOT "
+                    "regenerate it from the current crosswalk: that would accept "
+                    "whatever the build produced, including a regression. Restore "
+                    "the reviewed artifact from git"),
+
     "espn_identities": BuildInput(
         name="espn_identities", relpath="scripts/data/nfl-db/espn-identities.json",
         category=REPO_SEMANTIC, required=True, owner="repository",

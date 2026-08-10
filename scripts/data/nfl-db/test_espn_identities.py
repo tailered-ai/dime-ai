@@ -236,6 +236,16 @@ class T2_PreflightOrdering(unittest.TestCase):
                 fh.write("[]" if p.endswith(".json") else "x\n")
         with open(os.path.join(root, "scripts/data/nfl-db/espn-identities.json"), "w") as fh:
             fh.write(t4_bytes)
+        # Phase 7 made the accepted identity baseline a required input, and
+        # preflight validates its STRUCTURE. A stub "[]" is structurally invalid,
+        # so it would abort preflight before T4 ordering is reached and these
+        # tests would pass or fail for the wrong reason. Write a minimal VALID
+        # document instead: the subject here is T4, not Layer C.
+        with open(os.path.join(root,
+                               "scripts/data/nfl-db/accepted-identities.json"), "w") as fh:
+            json.dump({"schema": "nfldb-accepted-identities-1",
+                       "mappings": [{"espn_id": "1234567", "state": "unresolved",
+                                     "gsis_id": None}]}, fh)
         return root
 
     @staticmethod

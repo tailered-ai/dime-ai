@@ -27,6 +27,11 @@ import build_inputs as bi  # noqa: E402
 #: build (every non-.py file opened). This is the ground truth the contract must
 #: cover -- not a list of files someone expected to matter.
 TRACED = {
+    # Added in Phase 7, and verified rather than assumed: an audit hook over
+    # identity_baseline.load_baseline() -- which preflight_raw() calls -- observes
+    # this file being opened. It is a genuine build input, not a phantom
+    # declaration, because Layer C became a required integrity control.
+    "scripts/data/nfl-db/accepted-identities.json",
     "scripts/data/nfl-db/raw/players.csv",
     "scripts/data/nfl-db/raw/rosters.csv",
     "scripts/data/nfl-db/raw/snap_counts.csv",
@@ -78,11 +83,16 @@ class I1_Completeness(unittest.TestCase):
                          "contract declares a file input the executing build never opens")
 
     def test_declared_counts(self):
+        """13 -> 14 in Phase 7. A DELIBERATE contract evolution, not drift: Layer
+        C became a required integrity control, so the reviewed acceptance
+        evidence it decides against is now an input in exactly the sense this
+        registry means. The count is asserted rather than left loose precisely so
+        that a future addition has to be argued for, as this one was."""
         files = [s for s in bi.BUILD_INPUTS.values() if not s.on_path]
         tools = [s for s in bi.BUILD_INPUTS.values() if s.on_path]
-        self.assertEqual(len(files), 12)
+        self.assertEqual(len(files), 13)
         self.assertEqual(len(tools), 1)
-        self.assertEqual(len(bi.BUILD_INPUTS), 13)
+        self.assertEqual(len(bi.BUILD_INPUTS), 14)
 
 
 class I2_T4Classification(unittest.TestCase):

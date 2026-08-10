@@ -33,6 +33,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import identity_baseline  # noqa: E402  THE identity decision engine (Layer C)
 import season_pins as sp  # noqa: E402
 
 BASELINE_VERSION = "nfldb-observational-1"
@@ -315,18 +316,30 @@ def observe_provenance(baseline_values, current_values, current_identity=None,
         if old_src != new_src:
             t = (old_src, new_src)
             p.transitions[t] = p.transitions.get(t, 0) + 1
-        if not ids_known or old_id == new_id:
+        if not ids_known:
             if old_src != new_src:
                 p.benign_relabels += 1
-        elif old_id is None and new_id is not None:
+            continue
+        # THE identity decision is Layer C's, not this module's. Phase 6 reports
+        # provenance; it must never separately decide whether two gsis_ids are
+        # the same person. A second implementation of that judgement is how one
+        # half of an integrity system comes to disagree with the other about a
+        # wrong-person replacement.
+        case, _verdict = identity_baseline.classify_pair(old_id, new_id)
+        if case == "A" or case == "D":
+            if old_src != new_src:
+                p.benign_relabels += 1
+        elif case == "E":
             p.identity_improved += 1
-        elif old_id is not None and new_id is None:
+        elif case == "B":
             p.identity_regressed += 1
-        else:
+        else:                                                   # case C
             p.identity_changed.append({"row": pos, "old_gsis_id": old_id,
                                        "new_gsis_id": new_id,
                                        "old_source": old_src,
-                                       "new_source": new_src})
+                                       "new_source": new_src,
+                                       "case": case,
+                                       "why": identity_baseline.CASE_WHY[case]})
     return p
 
 
