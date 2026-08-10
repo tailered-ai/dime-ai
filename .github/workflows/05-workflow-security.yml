@@ -37,7 +37,7 @@ jobs:
           # still exits non-zero here, so scan failure fails the job.
           zizmor --min-severity high --format sarif .github/workflows/ > zizmor.sarif
 
-      - uses: github/codeql-action/upload-sarif@c4dd10e44af883a891fe31ced449bcb4a6728b9b # v3
+      - uses: github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         if: always()
         with:
           sarif_file: zizmor.sarif
