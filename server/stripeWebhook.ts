@@ -616,7 +616,7 @@ async function resolvePlanExpiry(rawSlug: string | null | undefined): Promise<{ 
  * rather than inventing a disposition. The failure is logged loudly because it
  * is the one path where a non-Dime payment could still slip past the check.
  */
-async function resolveSessionPriceId(
+export async function resolveSessionPriceId(
   session: Stripe.Checkout.Session,
   tag: string
 ): Promise<string | null> {
@@ -719,9 +719,10 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
       // the exact Price first is what makes the boundary real rather than an
       // accident of Payment Link configuration.
       //
-      // Keyed on the exact Price ID only. Amounts collide (two live $124.99
-      // one-time prices, one Dime and one not) and product names collide (two
-      // live Products are each named "WNBA Project").
+      // Keyed on the exact Price ID only. Amounts near-collide (the $125.00
+      // WNBA invoice sits one cent from three live $124.99 Dime prices) and
+      // product names collide outright (two live Products are each named
+      // "WNBA Project", two others are each named "Dime Pro").
       const nonDimePriceId = await resolveSessionPriceId(session, tag);
       if (isKnownNonDimePrice(nonDimePriceId)) {
         const why = nonDimeReason(nonDimePriceId) ?? "non-Dime price";

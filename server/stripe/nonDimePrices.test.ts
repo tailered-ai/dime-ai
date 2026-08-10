@@ -131,11 +131,14 @@ describe("classification keys on exact Price ID only", () => {
     );
   });
 
-  it("same-amount collision: $124.99 Dime vs $124.99 non-Dime stay distinct", () => {
-    // Live account fact: multiple distinct $124.99 one-time prices exist, and
-    // they are not all the same offer. Amount is not identity.
-    expect(isKnownNonDimePrice(DIME_CATALOG_LIFETIME)).toBe(false);
-    expect(isKnownNonDimePrice("price_1TzHDsPa3TFEAkkYSxf13aZu")).toBe(false);
+  it("one cent apart: $125.00 WNBA is non-Dime, $124.99 Dime prices are not", () => {
+    // The real near-collision in this account. Three live $124.99 one-time
+    // prices are all owner-confirmed Dime; the $125.00 WNBA invoice is not.
+    // An amount-based or fuzzy rule would have caught the wrong side of this.
+    expect(isKnownNonDimePrice(WNBA_125)).toBe(true); // $125.00
+    expect(isKnownNonDimePrice(DIME_CATALOG_LIFETIME)).toBe(false); // $124.99
+    expect(isKnownNonDimePrice("price_1TzHDsPa3TFEAkkYSxf13aZu")).toBe(false); // $124.99
+    expect(isKnownNonDimePrice("price_1TwBU5Pa3TFEAkkYf2GBnaqy")).toBe(false); // $124.99
   });
 
   it("a near-miss Price ID does not match", () => {
@@ -158,6 +161,20 @@ describe("webhook wiring — source contract", () => {
     const guarded = after.slice(0, after.indexOf("break;"));
     expect(guarded).not.toContain("grantUserAccess");
     expect(guarded).not.toContain("createPendingUserFromCheckout");
+  });
+
+  it("resolves the price via the line-item fallback, not metadata alone", () => {
+    // THE regression the mutation matrix caught: replacing the call with
+    //   const nonDimePriceId = session.metadata?.price_id ?? null;
+    // leaves resolveSessionPriceId defined (so its unit tests still pass) while
+    // making the id null for every Payment Link — the only channel the
+    // production incident used. Pin the call site itself.
+    expect(WEBHOOK_SRC).toContain(
+      "const nonDimePriceId = await resolveSessionPriceId(session, tag);"
+    );
+    const idx = WEBHOOK_SRC.indexOf("const nonDimePriceId");
+    const decl = WEBHOOK_SRC.slice(idx, WEBHOOK_SRC.indexOf(";", idx));
+    expect(decl).not.toContain("metadata");
   });
 
   it("runs BEFORE plan/expiry resolution, which defaults to monthly", () => {
@@ -186,5 +203,44 @@ describe("webhook wiring — source contract", () => {
       "could not read line items for non-Dime classification"
     );
     expect(isKnownNonDimePrice(null)).toBe(false);
+  });
+});
+
+describe("reconciler must not overturn a deliberate non-Dime skip", () => {
+  // Independent review found this: the containment writes a state combination
+  // classifySession has no case for — completed + Stripe-paid + skipped. The
+  // 30-minute sweep maps EVERY complete+paid session to `dropped`, and its
+  // spare only protected `fulfilled`. So it would rewrite the non-Dime row,
+  // destroy the commercial reason, and log "MONEY TAKEN WITHOUT ACCESS" —
+  // an alarm whose designed response is a MANUAL entitlement grant, i.e. the
+  // false alarm would induce by hand the Dime access this PR blocks.
+  const RECONCILE_SRC = fs.readFileSync(
+    path.join(ROOT, "server/stripe/checkoutReconcile.ts"),
+    "utf8"
+  );
+
+  it("spares a completed+skipped row from being rewritten", () => {
+    // prettier may wrap the condition, so assert on the normalised form
+    const flat = RECONCILE_SRC.replace(/\s+/g, " ");
+    expect(flat).toContain(
+      'have.fulfillment === "skipped" && have.status === "completed"'
+    );
+  });
+
+  it("the spare sits before the dropped-classification write", () => {
+    const flat = RECONCILE_SRC.replace(/\s+/g, " ");
+    const spare = flat.indexOf(
+      'have.fulfillment === "skipped" && have.status === "completed"'
+    );
+    const unfulfilled = flat.indexOf("out.unfulfilled += 1");
+    expect(spare).toBeGreaterThan(-1);
+    expect(unfulfilled).toBeGreaterThan(-1);
+    expect(spare).toBeLessThan(unfulfilled);
+  });
+
+  it("classifySession still reports complete+paid as dropped by default", () => {
+    // The fix must not weaken genuine drop detection — only exempt rows the
+    // webhook already decided on.
+    expect(RECONCILE_SRC).toContain('fulfillment: "dropped"');
   });
 });

@@ -30,8 +30,11 @@
  * Classification keys on the exact Stripe Price ID and nothing else. Not the
  * product name, not the amount, not the presence of metadata:
  *
- *  - Amounts collide. Two different live $124.99 one-time prices exist, one
- *    Dime and one not. Amount cannot identify an offer.
+ *  - Amounts collide, and near-collide. THREE live $124.99 one-time prices
+ *    exist (all owner-confirmed Dime, but with different catalog mapping —
+ *    price_1TxADi carries dime_plan_slug while price_1TzHDs does not), and the
+ *    $125.00 WNBA invoice sits one cent away from all of them. Amount cannot
+ *    identify an offer.
  *  - Product names collide too — two distinct live Products are both named
  *    "Dime Pro", and two distinct Products are both named "WNBA Project".
  *  - `metadata.dime_plan_slug` is write-only in this codebase (three write

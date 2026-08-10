@@ -240,6 +240,25 @@ export async function reconcileCheckoutSessions(opts?: {
         out.alreadyConsistent += 1;
         continue;
       }
+      // Nor a DELIBERATE skip on a completed session. `classifySession` only
+      // knows two outcomes for complete+paid — fulfilled or "dropped" — so a
+      // non-Dime sale (server/stripe/nonDimePrices.ts: a valid OffDuty/WNBA/
+      // donation payment that must never grant Dime access) would otherwise be
+      // rewritten to `dropped`, its commercial reason destroyed, and reported
+      // as "MONEY TAKEN WITHOUT ACCESS". That alarm's designed response is a
+      // manual entitlement grant — i.e. the false alarm would induce by hand
+      // exactly the Dime access the containment exists to prevent.
+      //
+      // The rule is the same as for 'fulfilled': this sweep exists to fill
+      // SILENCE, not to overrule a webhook that already reached a decision.
+      if (
+        have &&
+        have.fulfillment === "skipped" &&
+        have.status === "completed"
+      ) {
+        out.alreadyConsistent += 1;
+        continue;
+      }
       if (
         have &&
         have.status === want.status &&
