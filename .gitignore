@@ -119,6 +119,12 @@ temp/
 # schema, lib modules and audit reports ARE tracked -- they are the source of truth.
 scripts/data/nfl-db/raw/
 scripts/data/nfl-db/cache/
+# The provenance sidecar describes a LOCAL build of the (untracked) nfl.db, so it
+# is untracked for the same reason the database is. Tracking it would also be
+# self-poisoning: every build would dirty the worktree, and the NEXT build would
+# then correctly stamp itself "not accepted reproducibility evidence" because of
+# the artifact the previous build left behind.
+scripts/data/nfl-db/*.provenance.json
 # NOTE: a negation cannot re-include a file inside an excluded DIRECTORY -- git
 # never descends into raw/ to evaluate it. An earlier
 # `!scripts/data/nfl-db/raw/EXTRACT-NOTES.md` here was inert and silently kept
