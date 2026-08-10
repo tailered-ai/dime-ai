@@ -17,6 +17,12 @@ transitions, owner gates, deployments.
 - **Layer C — evidence refs**: each event points at durable proof (CI runs, PRs, Notion
   fetches, test output). Large payloads live at their source, not in the ledger.
 
+## Single-writer rule
+
+Only the orchestrating session appends events, on the run's designated ledger branch. Lanes and
+subagents report facts to the orchestrator; they never append. Parallel writers would fork the
+linear hash chain, and renumbering to repair a fork is indistinguishable from tampering.
+
 ## Tooling
 
 ```bash
@@ -24,6 +30,21 @@ node scripts/one-shot/ledger.mjs init  <run_id> '<manifest json>'   # once per r
 node scripts/one-shot/ledger.mjs append <run_id> '<event json>'     # validates, sequences, hash-chains
 node scripts/one-shot/ledger.mjs verify <run_id>                    # deterministic integrity pass (exit 1 on any violation)
 node scripts/one-shot/ledger.mjs status <run_id>                    # derived heartbeat snapshot
+```
+
+`append` and `init` read the JSON from stdin when the argument is omitted — use that (heredoc)
+for any payload containing quotes or apostrophes. Minimal event (id/sequence/timestamp/hashes
+are assigned by the tool):
+
+```json
+{
+  "scope_id": "TOS-006",
+  "event_type": "TEST_RESULT",
+  "actor": { "type": "agent", "name": "Fable 5", "role": "implementation-owner" },
+  "summary": "Validator suite: 18 passed / 0 failed.",
+  "evidence": [{ "type": "test", "ref": "npx vitest run scripts/ci/tos-notion-context.test.ts" }],
+  "next_action": "Open the TOS-006 PR."
+}
 ```
 
 `verify` proves: schema validity, monotonic sequence, unique event ids, controlled event

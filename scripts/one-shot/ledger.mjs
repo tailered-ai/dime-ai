@@ -174,14 +174,18 @@ function invariant(condition, message) {
   if (!condition) throw new Error(`one-shot-ledger: ${message}`);
 }
 
-// Deterministic canonical form: sorted keys at every depth, event_hash excluded.
-export function canonicalize(value) {
-  if (Array.isArray(value)) return `[${value.map(canonicalize).join(",")}]`;
+// Deterministic canonical form: sorted keys at every depth. event_hash is
+// excluded at the TOP LEVEL ONLY — a nested key that happens to be named
+// event_hash (e.g. inside an evidence item referencing another event) stays
+// inside integrity coverage (FIND-LANE0-0001).
+export function canonicalize(value, isRoot = true) {
+  if (Array.isArray(value))
+    return `[${value.map(item => canonicalize(item, false)).join(",")}]`;
   if (value && typeof value === "object") {
     const keys = Object.keys(value)
-      .filter(key => key !== "event_hash")
+      .filter(key => !(isRoot && key === "event_hash"))
       .sort();
-    return `{${keys.map(key => `${JSON.stringify(key)}:${canonicalize(value[key])}`).join(",")}}`;
+    return `{${keys.map(key => `${JSON.stringify(key)}:${canonicalize(value[key], false)}`).join(",")}}`;
   }
   return JSON.stringify(value);
 }

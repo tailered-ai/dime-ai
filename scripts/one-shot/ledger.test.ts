@@ -323,3 +323,28 @@ describe("one-shot ledger", () => {
     );
   });
 });
+
+describe("canonicalize depth coverage (FIND-LANE0-0001)", () => {
+  it("a NESTED key named event_hash stays inside integrity coverage", () => {
+    process.env.ONE_SHOT_RUNS_ROOT = mkdtempSync(
+      join(tmpdir(), "one-shot-nested-")
+    );
+    const dir = join(process.env.ONE_SHOT_RUNS_ROOT, BASE_MANIFEST.run_id);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      join(dir, "run-manifest.json"),
+      JSON.stringify(BASE_MANIFEST)
+    );
+    ledger.appendEvent(BASE_MANIFEST.run_id, {
+      ...EVENT,
+      evidence: [{ type: "ledger", ref: "evt_00001", event_hash: "cafe" }],
+    });
+    const eventsFile = join(dir, "events.jsonl");
+    const line = JSON.parse(readFileSync(eventsFile, "utf8").trim());
+    line.evidence[0].event_hash = "beef"; // tamper with the NESTED field
+    writeFileSync(eventsFile, JSON.stringify(line) + "\n");
+    const result = ledger.verifyRun(BASE_MANIFEST.run_id);
+    assert.equal(result.ok, false);
+    assert.match(result.errors.join("\n"), /event_hash mismatch/);
+  });
+});
