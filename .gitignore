@@ -240,3 +240,12 @@ dime-ai/design-bundle/**/uploads/
 # Derived claude.ai upload bundles — regenerate by zipping the corresponding
 # skill directory (.claude/skills/<name>/ or .agents/skills/<name>/); never track.
 .claude/skill-zips/
+
+# ci:verify local run artifacts (P01.T09). Deliberately NARROW: root-anchored
+# and enumerated, so no legitimate repository file can be hidden by a broad
+# pattern. .ci-verify/ holds disposable per-run worktrees and snapshot.json;
+# the phase-* reports are written by the gated local vitest runner.
+/.ci-verify/
+/local-proof-contract.json
+/vitest-results.phase-a.json
+/vitest-results.phase-b.json

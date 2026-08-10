@@ -1,0 +1,23 @@
+P01.CLN01 — SIGINT during an active lifecycle, AFTER worktree creation (retest after DEF-014)
+pwd=/Users/danielwalker/src/ai-sports-betting-dime-ai HEAD=f9a35aa281c5ca9d209c7c152cb94da38d80274b
+Interrupt-time teardown deliberately overrides --hold: those flags preserve
+artifacts of a SUCCESSFUL run, and an interrupted run never succeeded.
+
+baseline: worktree_registrations=39 run_dirs=0
+mid-run : worktree_registrations=40 (delta +1)  run_dirs=1  worktree_exists=yes
+materialized worktree: .ci-verify/runs/2026-08-10T09-20-41-667Z-97512-0/worktree
+snapshot.json on disk mid-run: yes
+
+child exit code = 130  (expected 130; non-zero and never PASS)
+[snapshot] SIGINT: teardown complete
+
+### post-interrupt deltas
+worktree registrations delta = 0
+ci-verify run dirs delta     = 0
+worktree directory removed   = yes
+stale registration backlog   = 0
+stdout bytes                 = 0
+stdout certificate emitted   = NO   <- DEF-014 fixed
+working-tree status fingerprint before = 9fe4182ec47ab3c5c3cc0775a6a3f17fb56db13ddaed63f48e22734a3bd0ea4a
+working-tree status fingerprint after  = 9fe4182ec47ab3c5c3cc0775a6a3f17fb56db13ddaed63f48e22734a3bd0ea4a
+unrelated developer files untouched    = yes

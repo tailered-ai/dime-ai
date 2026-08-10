@@ -1,0 +1,46 @@
+
+ RUN  v4.1.10 /Users/danielwalker/src/ai-sports-betting-dime-ai
+
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.TEST01 — clean feature HEAD ahead of base > produces correctly related head/base/merge_tree/merge_commit and materializes the combined tree 747ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.TEST02 — HEAD identical to base > yields the base tree without relying on accidental SHA assumptions 313ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.TEST02 — HEAD identical to base > records the degenerate collapse truthfully in the snapshot artifact 383ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.TEST02 — HEAD identical to base > rejects a snapshot whose degenerate flag disagrees with the stored parents 519ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.TEST03 — snapshot schema and provenance validity > validates every required field, sha format, parent relationship and digest 569ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.TEST03 — snapshot schema and provenance validity > lets a consumer obtain identity WITHOUT shelling out to git 523ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.TEST03 — snapshot schema and provenance validity > rejects a snapshot whose identity_digest does not match 365ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.TEST03 — snapshot schema and provenance validity > keeps observational churn OUT of the stability-critical digest 413ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.TEST04 — determinism of the synthetic merge > produces identical merge_tree_sha and merge_commit_sha across 5 repeats and 2 wall-clock times 2071ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.NEG01 — merge conflict > returns BLOCKED(MERGE_CONFLICT) with exact paths and emits no snapshot 748ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.NEG03 — worktree creation failure > returns INFRA-FAIL(WORKTREE) and leaves no orphan registration 244ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.NEG03 — worktree creation failure > refuses to clean a path outside the owned run root 251ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.NEG04 — provenance bypass > fails the audit when an implementation module resolves identity itself, and restores green 11ms
+ ✓ scripts/ci/snapshot.test.ts > P01.NEG04 — provenance bypass > does not raise a false violation on prose or on declaration-only modules (DEF-009) 16ms
+ ✓ scripts/ci/snapshot.test.ts > P01.NEG04 — provenance bypass > keeps every allowlist entry explicit and reasoned 2ms
+ ✓ scripts/ci/snapshot.test.ts > P01.NEG05 — every pinned metadata dimension is load-bearing > changing any single pinned dimension changes merge_commit_sha 599ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.T03 — dirty-tree policy (fixture half; the live half is P01.NEG02) > blocks a default-mode run on a dirty tree and permits --committed 618ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.T03 — dirty-tree policy (fixture half; the live half is P01.NEG02) > marks stash-probe as advisory — it can never certify 0ms
+ ✓ scripts/ci/snapshot.test.ts > P01.T02 — base resolution never falls back to stale state > raises an explicit terminal state when the base ref cannot be resolved 186ms
+warning: You appear to have cloned an empty repository.
+ ✓ scripts/ci/snapshot.test.ts > P01.T02 — base resolution never falls back to stale state > reports the ref it resolved from 210ms
+
+ Test Files  1 passed (1)
+      Tests  20 passed (20)
+   Start at  02:21:24
+   Duration  9.13s (transform 64ms, setup 0ms, import 87ms, tests 8.91s, environment 0ms)
+
+SUITE_EXIT=0

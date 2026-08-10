@@ -25,7 +25,7 @@
 | --- | --- | --- | --- | --- | --- |
 | `PB` | Control-plane bootstrap | `ACCEPTED` | 15 / 15 | 0 | 0 |
 | `P00` | Pre-flight resolution | `ACCEPTED` | 14 / 14 | 0 | 0 |
-| `P01` | Snapshot resolution and prospective-merge materialization | `NOT_STARTED` | 0 / 25 | 0 | 0 |
+| `P01` | Snapshot resolution and prospective-merge materialization | `ACCEPTED` | 25 / 25 | 0 | 0 |
 | `P02` | Contract extraction, freeze, conformance | `NOT_STARTED` | 0 / 21 | 0 | 0 |
 | `P03` | Registries, taxonomy, reporter, ledger integration | `NOT_STARTED` | 0 / 18 | 0 | 0 |
 | `P04` | Executor core | `NOT_STARTED` | 0 / 24 | 0 | 0 |
@@ -122,13 +122,13 @@
 
 ## P01 — Snapshot resolution and prospective-merge materialization
 
-**State:** `NOT_STARTED`
+**State:** `ACCEPTED`
 
 **Assurance property:** Verification runs against the prospective merge of HEAD into origin/main, with deterministic, single-owner SHA provenance.
 
 **Depends on:** `P00`
 
-**Progress (MANDATORY):** 0 / 25
+**Progress (MANDATORY):** 25 / 25
 
 **Entry checklist**
 
@@ -148,31 +148,31 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P01.T01` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Run layout under the scratch directory (.ci-verify/runs/<run_id>/) |
-| `P01.T02` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Base fetch and resolve (git fetch origin main; base_sha) |
-| `P01.T03` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Head resolve plus dirty-tree policy (--committed default, --stash-probe advisory) |
-| `P01.T04` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | merge-tree --write-tree produces merge_tree_sha; conflict is BLOCKED |
-| `P01.T05` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | commit-tree synthetic merge with DETERMINISTIC metadata (fixed identity, T = max(base,head committer time)+1, +0000, fixed message, parents base-then-head) |
-| `P01.T06` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | worktree add --detach at merge_commit_sha |
-| `P01.T07` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Emit snapshot.json with all four SHAs, mode, dirty flag, git version |
-| `P01.T08` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Provenance API — the sole owner of SHA resolution; no gate calls git rev-parse directly |
-| `P01.T09` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Add .ci-verify/, vitest-results.phase-*.json, local-proof-contract.json to .gitignore |
-| `P01.TEST01` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Clean branch ahead of main yields four distinct SHAs and a worktree at the merge commit |
-| `P01.TEST02` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Branch identical to main: merge_tree_sha equals base tree |
-| `P01.TEST03` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | snapshot.json validates against its schema |
-| `P01.TEST04` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Determinism: same {head,base} yields identical merge_tree_sha AND merge_commit_sha across >=5 runs and two clocks |
-| `P01.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Conflicting branch yields BLOCKED(MERGE_CONFLICT) naming the conflicting paths |
-| `P01.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Dirty tree in default mode yields BLOCKED(DIRTY_TREE) |
-| `P01.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Simulated worktree-add failure yields INFRA-FAIL and leaves no orphan worktree |
-| `P01.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | A gate calling git rev-parse directly fails the provenance audit |
-| `P01.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Unpinning any single commit-metadata field changes merge_commit_sha — proving the pin is load-bearing |
-| `P01.REG01` | REGRESSION | MANDATORY | `NOT_STARTED` | 0 | — | 20 consecutive runs leave the worktree count stable |
-| `P01.CLN01` | CLEANUP | MANDATORY | `NOT_STARTED` | 0 | — | SIGINT during snapshot removes the worktree |
-| `P01.AUD01` | AUDIT | MANDATORY | `NOT_STARTED` | 0 | — | Static proof that no module bypasses the P01.T08 provenance API |
-| `P01.EV01` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: snapshot.json |
-| `P01.EV02` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: worktree residue log |
-| `P01.GATE01` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | P01.REG01 and P01.CLN01 PASS |
-| `P01.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P01 checkpoint recorded |
+| `P01.T01` | TASK | MANDATORY | `PASS` | 1 | `ab238d930369` `9b2c46d8aa79` | Run layout under the scratch directory (.ci-verify/runs/<run_id>/) |
+| `P01.T02` | TASK | MANDATORY | `PASS` | 1 | `ab238d930369` `9b2c46d8aa79` | Base fetch and resolve (git fetch origin main; base_sha) |
+| `P01.T03` | TASK | MANDATORY | `PASS` | 1 | `ab238d930369` `9b2c46d8aa79` | Head resolve plus dirty-tree policy (--committed default, --stash-probe advisory) |
+| `P01.T04` | TASK | MANDATORY | `PASS` | 1 | `ab238d930369` `9b2c46d8aa79` | merge-tree --write-tree produces merge_tree_sha; conflict is BLOCKED |
+| `P01.T05` | TASK | MANDATORY | `PASS` | 1 | `ab238d930369` `9b2c46d8aa79` | commit-tree synthetic merge with DETERMINISTIC metadata (fixed identity, T = max(base,head committer time)+1, +0000, fixed message, parents base-then-head) |
+| `P01.T06` | TASK | MANDATORY | `PASS` | 1 | `ab238d930369` `9b2c46d8aa79` | worktree add --detach at merge_commit_sha |
+| `P01.T07` | TASK | MANDATORY | `PASS` | 1 | `ab238d930369` `9b2c46d8aa79` | Emit snapshot.json with all four SHAs, mode, dirty flag, git version |
+| `P01.T08` | TASK | MANDATORY | `PASS` | 1 | `ab238d930369` `9b2c46d8aa79` | Provenance API — the sole owner of SHA resolution; no gate calls git rev-parse directly |
+| `P01.T09` | TASK | MANDATORY | `PASS` | 1 | `ab238d930369` `9b2c46d8aa79` | Add .ci-verify/, vitest-results.phase-*.json, local-proof-contract.json to .gitignore |
+| `P01.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `058f5c60b32c` | Clean branch ahead of main yields four distinct SHAs and a worktree at the merge commit |
+| `P01.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `058f5c60b32c` | Branch identical to main: merge_tree_sha equals base tree |
+| `P01.TEST03` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `058f5c60b32c` | snapshot.json validates against its schema |
+| `P01.TEST04` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `058f5c60b32c` | Determinism: same {head,base} yields identical merge_tree_sha AND merge_commit_sha across >=5 runs and two clocks |
+| `P01.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `058f5c60b32c` | Conflicting branch yields BLOCKED(MERGE_CONFLICT) naming the conflicting paths |
+| `P01.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `fc14a7941932` `058f5c60b32c` | Dirty tree in default mode yields BLOCKED(DIRTY_TREE) |
+| `P01.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `058f5c60b32c` | Simulated worktree-add failure yields INFRA-FAIL and leaves no orphan worktree |
+| `P01.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `058f5c60b32c` | A gate calling git rev-parse directly fails the provenance audit |
+| `P01.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `058f5c60b32c` | Unpinning any single commit-metadata field changes merge_commit_sha — proving the pin is load-bearing |
+| `P01.REG01` | REGRESSION | MANDATORY | `PASS` | 1 | `da1208e20b82` | 20 consecutive runs leave the worktree count stable |
+| `P01.CLN01` | CLEANUP | MANDATORY | `PASS` | 1 | `b6cf771462ab` `0c1f7618eafa` | SIGINT during snapshot removes the worktree |
+| `P01.AUD01` | AUDIT | MANDATORY | `PASS` | 1 | `419990139fe0` `6fb07e5b0f9b` | Static proof that no module bypasses the P01.T08 provenance API |
+| `P01.EV01` | EVIDENCE | MANDATORY | `PASS` | 1 | `9b2c46d8aa79` | Evidence: snapshot.json |
+| `P01.EV02` | EVIDENCE | MANDATORY | `PASS` | 1 | `38c1a3597f0e` | Evidence: worktree residue log |
+| `P01.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `0203cd21076b` `da1208e20b82` `b6cf771462ab` | P01.REG01 and P01.CLN01 PASS |
+| `P01.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `51ccc53de3f1` `0203cd21076b` | P01 checkpoint recorded |
 
 ## P02 — Contract extraction, freeze, conformance
 
@@ -649,6 +649,14 @@
 | `DEF-006` | `P00.T02` | LOW | `CLOSED` | DEF-002 validator split context names on '(' and mangled 'Secret Scan (gitleaks)' |
 | `DEF-007` | `P00.CP02` | MEDIUM | `CLOSED` | False PASS in DEF-003 evidence: exit code read through a pipe ($? captured tail, not pnpm) |
 | `DEF-008` | `P00.CP02` | LOW | `CLOSED` | Self-reference negative proof exited 1 via ILLEGAL_TRANSITION, not EVIDENCE_SELF_REFERENCE |
+| `DEF-009` | `P01.AUD01` | MEDIUM | `CLOSED` | Provenance audit raised a false violation on a prose string in a declaration-only module |
+| `DEF-010` | `P01.TEST01` | HIGH | `CLOSED` | assertRepository compared unresolved paths; macOS /var vs /private/var symlink caused INFRA-FAIL(REPOSITORY_MISMATCH) |
+| `DEF-011` | `P01.TEST02` | MEDIUM | `CLOSED` | Degenerate base==head case: git deduplicates identical parents, so declared parent_order misrepresented the object |
+| `DEF-012` | `P01.NEG01` | HIGH | `CLOSED` | merge-tree conflict parser sliced FROM the blank separator, capturing informational messages instead of conflicting paths |
+| `DEF-013` | `P01.NEG02` | MEDIUM | `CLOSED` | P01 evidence asserted absolute worktree/stash baselines instead of measured deltas |
+| `DEF-014` | `P01.CLN01` | HIGH | `CLOSED` | Interrupted run had already emitted a snapshot certificate on stdout |
+| `DEF-015` | `P01.GATE01` | LOW | `CLOSED` | False FAIL in P01 sweep: prettier --check given .gitignore, which has no parser |
+| `DEF-016` | `P01.CP01` | LOW | `CLOSED` | CP01 evidence under-specified the unrelated-work verification (one external change, two visibility changes) |
 
 ## Checkpoints
 
@@ -657,3 +665,4 @@
 | `PB` | **PROCEED TO P00** | 2026-08-10T08:20:39.490Z | `7b75b64faad4` |
 | `P00` | **DO NOT PROCEED (blocking: DEF-002, DEF-003)** | 2026-08-10T08:32:07.069Z | `9a0d5373db77` |
 | `P00` | **PROCEED TO P01 (supersedes CP01; DEF-002/003/004 closed)** | 2026-08-10T08:54:23.461Z | `56e2ba284da9` |
+| `P01` | **PROCEED TO P02** | 2026-08-10T09:24:40.039Z | `51ccc53de3f1` |

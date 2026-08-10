@@ -64,6 +64,18 @@
       ],
       "phase": "P00",
       "recorded_at": "2026-08-10T08:54:23.461Z"
+    },
+    {
+      "decision": "PROCEED TO P02",
+      "evidence": [
+        {
+          "bytes": 7085,
+          "path": "docs/verification/evidence/p01/CP01-checkpoint.md",
+          "sha256": "51ccc53de3f10e6d603c4a789a5eb7c91d85638a7f70aa46a028014b8dd9addb"
+        }
+      ],
+      "phase": "P01",
+      "recorded_at": "2026-08-10T09:24:40.039Z"
     }
   ],
   "decisions": [
@@ -556,6 +568,419 @@
       "severity": "LOW",
       "status": "CLOSED",
       "title": "Self-reference negative proof exited 1 via ILLEGAL_TRANSITION, not EVIDENCE_SELF_REFERENCE"
+    },
+    {
+      "affected_gate": "P01.AUD01",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T09:21:33.801Z",
+      "corrective_action": "invokesSubprocess() precondition + comment stripping + declaration-only classification",
+      "detected_by": "P01.AUD01",
+      "evidence": [
+        {
+          "bytes": 2731,
+          "path": "docs/verification/evidence/p01/DEF-009-012-closure.md",
+          "sha256": "6fb07e5b0f9b53dbb422b1059976d2336bd5d6adcf7da05e69be1bd353e8ac77"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:21:33.379Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ],
+            "status": "CORRECTING"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T09:21:33.605Z",
+          "flags": {
+            "corrective_action": "invokesSubprocess() precondition + comment stripping + declaration-only classification",
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ],
+            "regression_test_id": "P01.NEG04 'does not raise a false violation on prose'",
+            "retest_result": "PASS — audit exit 0; blueprint.mjs reported as declaration-only note",
+            "root_cause": "Text match on a prose string in a declaration-only module"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:21:33.800Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-009",
+      "opened_at": "2026-08-10T09:13:27.785Z",
+      "regression_test_id": "P01.NEG04 'does not raise a false violation on prose'",
+      "retest_result": "PASS — audit exit 0; blueprint.mjs reported as declaration-only note",
+      "root_cause": "Text match on a prose string in a declaration-only module",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "Provenance audit raised a false violation on a prose string in a declaration-only module"
+    },
+    {
+      "affected_gate": "P01.T01",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T09:21:33.844Z",
+      "corrective_action": "realpathSync on both sides before comparison",
+      "detected_by": "P01.TEST01",
+      "evidence": [
+        {
+          "bytes": 2731,
+          "path": "docs/verification/evidence/p01/DEF-009-012-closure.md",
+          "sha256": "6fb07e5b0f9b53dbb422b1059976d2336bd5d6adcf7da05e69be1bd353e8ac77"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:21:33.441Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ],
+            "status": "CORRECTING"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T09:21:33.660Z",
+          "flags": {
+            "corrective_action": "realpathSync on both sides before comparison",
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ],
+            "regression_test_id": "P01.TEST01, P01.TEST03",
+            "retest_result": "PASS — all fixture-repo tests green",
+            "root_cause": "assertRepository compared unresolved paths; macOS /var vs /private/var symlink"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:21:33.842Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-010",
+      "opened_at": "2026-08-10T09:13:27.880Z",
+      "regression_test_id": "P01.TEST01, P01.TEST03",
+      "retest_result": "PASS — all fixture-repo tests green",
+      "root_cause": "assertRepository compared unresolved paths; macOS /var vs /private/var symlink",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "assertRepository compared unresolved paths; macOS /var vs /private/var symlink caused INFRA-FAIL(REPOSITORY_MISMATCH)"
+    },
+    {
+      "affected_gate": "P01.T05",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T09:21:33.893Z",
+      "corrective_action": "Record parents_effective + degenerate_merge read back from git; validateSnapshot enforces agreement",
+      "detected_by": "P01.TEST02",
+      "evidence": [
+        {
+          "bytes": 2731,
+          "path": "docs/verification/evidence/p01/DEF-009-012-closure.md",
+          "sha256": "6fb07e5b0f9b53dbb422b1059976d2336bd5d6adcf7da05e69be1bd353e8ac77"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:21:33.496Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ],
+            "status": "CORRECTING"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T09:21:33.704Z",
+          "flags": {
+            "corrective_action": "Record parents_effective + degenerate_merge read back from git; validateSnapshot enforces agreement",
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ],
+            "regression_test_id": "P01.TEST02 (3 cases)",
+            "retest_result": "PASS — collapse asserted explicitly; tampered flag rejected",
+            "root_cause": "git deduplicates identical parents; declared parent_order misrepresented the stored object"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:21:33.892Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-011",
+      "opened_at": "2026-08-10T09:13:27.937Z",
+      "regression_test_id": "P01.TEST02 (3 cases)",
+      "retest_result": "PASS — collapse asserted explicitly; tampered flag rejected",
+      "root_cause": "git deduplicates identical parents; declared parent_order misrepresented the stored object",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "Degenerate base==head case: git deduplicates identical parents, so declared parent_order misrepresented the object"
+    },
+    {
+      "affected_gate": "P01.T04",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T09:21:33.941Z",
+      "corrective_action": "slice(1, firstBlankAfterTree)",
+      "detected_by": "P01.NEG01",
+      "evidence": [
+        {
+          "bytes": 2731,
+          "path": "docs/verification/evidence/p01/DEF-009-012-closure.md",
+          "sha256": "6fb07e5b0f9b53dbb422b1059976d2336bd5d6adcf7da05e69be1bd353e8ac77"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:21:33.544Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ],
+            "status": "CORRECTING"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T09:21:33.748Z",
+          "flags": {
+            "corrective_action": "slice(1, firstBlankAfterTree)",
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ],
+            "regression_test_id": "P01.NEG01",
+            "retest_result": "PASS — conflicting_paths == ['conflict.txt']",
+            "root_cause": "Conflict section sliced FROM the blank separator instead of BEFORE it"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:21:33.940Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-009-012-closure.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-012",
+      "opened_at": "2026-08-10T09:13:27.986Z",
+      "regression_test_id": "P01.NEG01",
+      "retest_result": "PASS — conflicting_paths == ['conflict.txt']",
+      "root_cause": "Conflict section sliced FROM the blank separator instead of BEFORE it",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "merge-tree conflict parser sliced FROM the blank separator, capturing informational messages instead of conflicting paths"
+    },
+    {
+      "affected_gate": "P01.NEG02",
+      "blast_radius": "Evidence transcripts only; no implementation defect — .ci-verify/runs was empty, proving disposal worked",
+      "closed_at": "2026-08-10T09:17:01.310Z",
+      "corrective_action": "Measure baseline before the exercise and assert delta==0; never annotate an unmeasured expectation",
+      "detected_by": "P01.NEG02",
+      "evidence": [
+        {
+          "bytes": 2182,
+          "path": "docs/verification/evidence/p01/DEF-013.md",
+          "sha256": "8d7a4f2f1e1828e25320a2c99f3930324fbf6239c1a21771d9bceaadf2a57a40"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:17:01.227Z",
+          "flags": {
+            "blast_radius": "Evidence transcripts only; no implementation defect — .ci-verify/runs was empty, proving disposal worked",
+            "corrective_action": "Measure baseline before the exercise and assert delta==0; never annotate an unmeasured expectation",
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-013.md"
+            ],
+            "regression_test_id": "NEG02/REG01/CLN01 transcripts regenerated with measured deltas",
+            "retest_result": "PASS — deltas are zero against measured baselines",
+            "root_cause": "Expected values were invented rather than measured; 39 pre-existing worktrees and a 2026-08-06 stash were misread as P01 leakage"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:17:01.306Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-013.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-013",
+      "opened_at": "2026-08-10T09:17:01.079Z",
+      "regression_test_id": "NEG02/REG01/CLN01 transcripts regenerated with measured deltas",
+      "retest_result": "PASS — deltas are zero against measured baselines",
+      "root_cause": "Expected values were invented rather than measured; 39 pre-existing worktrees and a 2026-08-06 stash were misread as P01 leakage",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "P01 evidence asserted absolute worktree/stash baselines instead of measured deltas"
+    },
+    {
+      "affected_gate": "P01.T07",
+      "blast_radius": "Any consumer capturing stdout would have held a valid-looking certificate for a torn-down run",
+      "closed_at": "2026-08-10T09:21:34.034Z",
+      "corrective_action": "Emission tied to completion: --hold writes no stdout certificate",
+      "detected_by": "P01.CLN01",
+      "evidence": [
+        {
+          "bytes": 1886,
+          "path": "docs/verification/evidence/p01/DEF-014.md",
+          "sha256": "0c1f7618eafa841f3b1a4a532ec75f4587002e3897f08adf8f00efa046f4796d"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:21:33.986Z",
+          "flags": {
+            "blast_radius": "Any consumer capturing stdout would have held a valid-looking certificate for a torn-down run",
+            "corrective_action": "Emission tied to completion: --hold writes no stdout certificate",
+            "evidence": [
+              "docs/verification/evidence/p01/CLN01-sigint-teardown.txt"
+            ],
+            "regression_test_id": "P01.CLN01 retest",
+            "retest_result": "PASS — exit 130, all deltas zero, stdout bytes 0",
+            "root_cause": "Certificate emitted at construction time rather than at lifecycle completion; --hold published a certificate for a run that by design never completes",
+            "status": "CORRECTING"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:21:34.032Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-014.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-014",
+      "opened_at": "2026-08-10T09:20:19.582Z",
+      "regression_test_id": "P01.CLN01 retest",
+      "retest_result": "PASS — exit 130, all deltas zero, stdout bytes 0",
+      "root_cause": "Certificate emitted at construction time rather than at lifecycle completion; --hold published a certificate for a run that by design never completes",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "Interrupted run had already emitted a snapshot certificate on stdout"
+    },
+    {
+      "affected_gate": "P01.GATE01",
+      "blast_radius": "One sweep transcript line; no repository formatting issue existed",
+      "closed_at": "2026-08-10T09:23:19.297Z",
+      "corrective_action": "Check only parseable paths (scripts/ci/); assert .gitignore via git check-ignore narrow-scope proof instead",
+      "detected_by": "P01.GATE01",
+      "evidence": [
+        {
+          "bytes": 1389,
+          "path": "docs/verification/evidence/p01/DEF-015.md",
+          "sha256": "dfb49b4d5f82e7bf90760a129d68956b289d7ac17ccc5b5869cf9e92aa642baa"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:23:19.251Z",
+          "flags": {
+            "blast_radius": "One sweep transcript line; no repository formatting issue existed",
+            "corrective_action": "Check only parseable paths (scripts/ci/); assert .gitignore via git check-ignore narrow-scope proof instead",
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-015.md"
+            ],
+            "regression_test_id": "P01 sweep regenerated; T09 narrow-scope proof",
+            "retest_result": "PASS — prettier --check scripts/ci/ exit 0",
+            "root_cause": "Explicitly passing .gitignore forces a parse attempt prettier cannot satisfy"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:23:19.296Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/DEF-015.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-015",
+      "opened_at": "2026-08-10T09:23:19.175Z",
+      "regression_test_id": "P01 sweep regenerated; T09 narrow-scope proof",
+      "retest_result": "PASS — prettier --check scripts/ci/ exit 0",
+      "root_cause": "Explicitly passing .gitignore forces a parse attempt prettier cannot satisfy",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "False FAIL in P01 sweep: prettier --check given .gitignore, which has no parser"
+    },
+    {
+      "affected_gate": "P01.CP01",
+      "blast_radius": "Checkpoint evidence completeness only; no file was modified by P01",
+      "closed_at": "2026-08-10T09:26:08.304Z",
+      "corrective_action": "Append CP01-addendum-unrelated-work.md establishing each delta, its cause, and its disposition",
+      "detected_by": "P01.CP01",
+      "evidence": [
+        {
+          "bytes": 2170,
+          "path": "docs/verification/evidence/p01/CP01-addendum-unrelated-work.md",
+          "sha256": "0a2b105b504c13ca8cd489c5c0d65549e8ae1169bea7b7fa1065704913fa2380"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:26:08.245Z",
+          "flags": {
+            "blast_radius": "Checkpoint evidence completeness only; no file was modified by P01",
+            "corrective_action": "Append CP01-addendum-unrelated-work.md establishing each delta, its cause, and its disposition",
+            "evidence": [
+              "docs/verification/evidence/p01/CP01-addendum-unrelated-work.md"
+            ],
+            "regression_test_id": "before/after fingerprint diff with per-entry attribution",
+            "retest_result": "PASS — 26/27 byte-identical; 2 visibility-only (frozen T09 ignore); 1 external (.claude/scripts/bootstrap-gstack.sh), not staged",
+            "root_cause": "The checkpoint pointed at the after-fingerprint without stating the three deltas or attributing them"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:26:08.302Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p01/CP01-addendum-unrelated-work.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-016",
+      "opened_at": "2026-08-10T09:26:08.162Z",
+      "regression_test_id": "before/after fingerprint diff with per-entry attribution",
+      "retest_result": "PASS — 26/27 byte-identical; 2 visibility-only (frozen T09 ignore); 1 external (.claude/scripts/bootstrap-gstack.sh), not staged",
+      "root_cause": "The checkpoint pointed at the after-fingerprint without stating the three deltas or attributing them",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "CP01 evidence under-specified the unrelated-work verification (one external change, two visibility changes)"
     }
   ],
   "genesis": {
@@ -705,8 +1130,34 @@
         "P01.CP01 recorded"
       ],
       "id": "P01",
-      "state": "NOT_STARTED",
-      "state_history": [],
+      "state": "ACCEPTED",
+      "state_history": [
+        {
+          "at": "2026-08-10T09:23:51.869Z",
+          "from": "NOT_STARTED",
+          "to": "IMPLEMENTED"
+        },
+        {
+          "at": "2026-08-10T09:23:51.928Z",
+          "from": "IMPLEMENTED",
+          "to": "TESTING"
+        },
+        {
+          "at": "2026-08-10T09:23:51.978Z",
+          "from": "TESTING",
+          "to": "AUDITING"
+        },
+        {
+          "at": "2026-08-10T09:23:52.156Z",
+          "from": "AUDITING",
+          "to": "CHECKPOINT_REVIEW"
+        },
+        {
+          "at": "2026-08-10T09:24:40.082Z",
+          "from": "CHECKPOINT_REVIEW",
+          "to": "ACCEPTED"
+        }
+      ],
       "title": "Snapshot resolution and prospective-merge materialization"
     },
     {
@@ -1369,13 +1820,24 @@
       "validation": "P00.EV05"
     },
     "P01.AUD01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:51.595Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2792,
+          "path": "docs/verification/evidence/p01/AUD01-provenance-audit.txt",
+          "sha256": "419990139fe06f53ff4f586f4883e159ea764bf41041555414a5a925201d54c8"
+        },
+        {
+          "bytes": 2731,
+          "path": "docs/verification/evidence/p01/DEF-009-012-closure.md",
+          "sha256": "6fb07e5b0f9b53dbb422b1059976d2336bd5d6adcf7da05e69be1bd353e8ac77"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.AUD01",
@@ -1385,19 +1847,30 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:51.532Z",
+      "status": "PASS",
       "title": "Static proof that no module bypasses the P01.T08 provenance API",
       "validation": null
     },
     "P01.CLN01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:51.477Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 1192,
+          "path": "docs/verification/evidence/p01/CLN01-sigint-teardown.txt",
+          "sha256": "b6cf771462ab348ea169109f866c9a12c6201f8ce729e1d5a7cc6976c55a609a"
+        },
+        {
+          "bytes": 1886,
+          "path": "docs/verification/evidence/p01/DEF-014.md",
+          "sha256": "0c1f7618eafa841f3b1a4a532ec75f4587002e3897f08adf8f00efa046f4796d"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.CLN01",
@@ -1407,21 +1880,32 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:51.423Z",
+      "status": "PASS",
       "title": "SIGINT during snapshot removes the worktree",
       "validation": null
     },
     "P01.CP01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:24:39.985Z",
       "defects": [],
       "depends_on": [
         "P01.GATE01"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 7085,
+          "path": "docs/verification/evidence/p01/CP01-checkpoint.md",
+          "sha256": "51ccc53de3f10e6d603c4a789a5eb7c91d85638a7f70aa46a028014b8dd9addb"
+        },
+        {
+          "bytes": 1874,
+          "path": "docs/verification/evidence/p01/P01-validation-sweep.txt",
+          "sha256": "0203cd21076b44711edc3aa3fe231b52b170a58ac46e7698f7800f442b023f3d"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.CP01",
@@ -1431,19 +1915,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:24:39.922Z",
+      "status": "PASS",
       "title": "P01 checkpoint recorded",
       "validation": null
     },
     "P01.EV01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:51.708Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2015,
+          "path": "docs/verification/evidence/p01/EV01-snapshot.json",
+          "sha256": "9b2c46d8aa7950ce7bdf85eb2705516a2a6336365911480ef87cca2fb57aecff"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.EV01",
@@ -1453,19 +1943,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:51.649Z",
+      "status": "PASS",
       "title": "Evidence: snapshot.json",
       "validation": null
     },
     "P01.EV02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:51.809Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 910,
+          "path": "docs/verification/evidence/p01/EV02-worktree-residue.txt",
+          "sha256": "38c1a3597f0e6f594acd205f81d2ff79d25da9d5276285a9ef61e23f6a5510c2"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.EV02",
@@ -1475,22 +1971,38 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:51.759Z",
+      "status": "PASS",
       "title": "Evidence: worktree residue log",
       "validation": null
     },
     "P01.GATE01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:52.102Z",
       "defects": [],
       "depends_on": [
         "P01.REG01",
         "P01.CLN01"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 1874,
+          "path": "docs/verification/evidence/p01/P01-validation-sweep.txt",
+          "sha256": "0203cd21076b44711edc3aa3fe231b52b170a58ac46e7698f7800f442b023f3d"
+        },
+        {
+          "bytes": 3211,
+          "path": "docs/verification/evidence/p01/REG01-20-run-regression.txt",
+          "sha256": "da1208e20b82852f50898fd97d7964c20bd64b0c3291c120752c2b1e2c191f24"
+        },
+        {
+          "bytes": 1192,
+          "path": "docs/verification/evidence/p01/CLN01-sigint-teardown.txt",
+          "sha256": "b6cf771462ab348ea169109f866c9a12c6201f8ce729e1d5a7cc6976c55a609a"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.GATE01",
@@ -1500,19 +2012,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:52.041Z",
+      "status": "PASS",
       "title": "P01.REG01 and P01.CLN01 PASS",
       "validation": null
     },
     "P01.NEG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:50.789Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4314,
+          "path": "docs/verification/evidence/p01/P01-suite.txt",
+          "sha256": "058f5c60b32cd8fa2f103cb20c2c515d23c3ff580b051928a928761aa160bbaf"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.NEG01",
@@ -1522,19 +2040,30 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:50.735Z",
+      "status": "PASS",
       "title": "Conflicting branch yields BLOCKED(MERGE_CONFLICT) naming the conflicting paths",
       "validation": null
     },
     "P01.NEG02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:51.248Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 1904,
+          "path": "docs/verification/evidence/p01/NEG02-live-dirty-tree.txt",
+          "sha256": "fc14a7941932343b0f5212b188fa7b1059aecc5714a952ff49863437f58d67ab"
+        },
+        {
+          "bytes": 4314,
+          "path": "docs/verification/evidence/p01/P01-suite.txt",
+          "sha256": "058f5c60b32cd8fa2f103cb20c2c515d23c3ff580b051928a928761aa160bbaf"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.NEG02",
@@ -1544,19 +2073,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:51.176Z",
+      "status": "PASS",
       "title": "Dirty tree in default mode yields BLOCKED(DIRTY_TREE)",
       "validation": null
     },
     "P01.NEG03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:50.899Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4314,
+          "path": "docs/verification/evidence/p01/P01-suite.txt",
+          "sha256": "058f5c60b32cd8fa2f103cb20c2c515d23c3ff580b051928a928761aa160bbaf"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.NEG03",
@@ -1566,19 +2101,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:50.851Z",
+      "status": "PASS",
       "title": "Simulated worktree-add failure yields INFRA-FAIL and leaves no orphan worktree",
       "validation": null
     },
     "P01.NEG04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:51.004Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4314,
+          "path": "docs/verification/evidence/p01/P01-suite.txt",
+          "sha256": "058f5c60b32cd8fa2f103cb20c2c515d23c3ff580b051928a928761aa160bbaf"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.NEG04",
@@ -1588,19 +2129,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:50.956Z",
+      "status": "PASS",
       "title": "A gate calling git rev-parse directly fails the provenance audit",
       "validation": null
     },
     "P01.NEG05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:51.114Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4314,
+          "path": "docs/verification/evidence/p01/P01-suite.txt",
+          "sha256": "058f5c60b32cd8fa2f103cb20c2c515d23c3ff580b051928a928761aa160bbaf"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.NEG05",
@@ -1610,19 +2157,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:51.059Z",
+      "status": "PASS",
       "title": "Unpinning any single commit-metadata field changes merge_commit_sha — proving the pin is load-bearing",
       "validation": null
     },
     "P01.REG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:51.363Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3211,
+          "path": "docs/verification/evidence/p01/REG01-20-run-regression.txt",
+          "sha256": "da1208e20b82852f50898fd97d7964c20bd64b0c3291c120752c2b1e2c191f24"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.REG01",
@@ -1632,19 +2185,30 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:51.301Z",
+      "status": "PASS",
       "title": "20 consecutive runs leave the worktree count stable",
       "validation": null
     },
     "P01.T01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:49.229Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2721,
+          "path": "docs/verification/evidence/p01/T01-T09-implementation.md",
+          "sha256": "ab238d930369d97ff8e3542794327a34a9bb54d24f9108a78916287d62b7a549"
+        },
+        {
+          "bytes": 2015,
+          "path": "docs/verification/evidence/p01/EV01-snapshot.json",
+          "sha256": "9b2c46d8aa7950ce7bdf85eb2705516a2a6336365911480ef87cca2fb57aecff"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.T01",
@@ -1654,19 +2218,30 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:49.172Z",
+      "status": "PASS",
       "title": "Run layout under the scratch directory (.ci-verify/runs/<run_id>/)",
       "validation": null
     },
     "P01.T02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:49.324Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2721,
+          "path": "docs/verification/evidence/p01/T01-T09-implementation.md",
+          "sha256": "ab238d930369d97ff8e3542794327a34a9bb54d24f9108a78916287d62b7a549"
+        },
+        {
+          "bytes": 2015,
+          "path": "docs/verification/evidence/p01/EV01-snapshot.json",
+          "sha256": "9b2c46d8aa7950ce7bdf85eb2705516a2a6336365911480ef87cca2fb57aecff"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.T02",
@@ -1676,19 +2251,30 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:49.278Z",
+      "status": "PASS",
       "title": "Base fetch and resolve (git fetch origin main; base_sha)",
       "validation": null
     },
     "P01.T03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:49.502Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2721,
+          "path": "docs/verification/evidence/p01/T01-T09-implementation.md",
+          "sha256": "ab238d930369d97ff8e3542794327a34a9bb54d24f9108a78916287d62b7a549"
+        },
+        {
+          "bytes": 2015,
+          "path": "docs/verification/evidence/p01/EV01-snapshot.json",
+          "sha256": "9b2c46d8aa7950ce7bdf85eb2705516a2a6336365911480ef87cca2fb57aecff"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.T03",
@@ -1698,19 +2284,30 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:49.375Z",
+      "status": "PASS",
       "title": "Head resolve plus dirty-tree policy (--committed default, --stash-probe advisory)",
       "validation": null
     },
     "P01.T04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:49.629Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2721,
+          "path": "docs/verification/evidence/p01/T01-T09-implementation.md",
+          "sha256": "ab238d930369d97ff8e3542794327a34a9bb54d24f9108a78916287d62b7a549"
+        },
+        {
+          "bytes": 2015,
+          "path": "docs/verification/evidence/p01/EV01-snapshot.json",
+          "sha256": "9b2c46d8aa7950ce7bdf85eb2705516a2a6336365911480ef87cca2fb57aecff"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.T04",
@@ -1720,21 +2317,32 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:49.569Z",
+      "status": "PASS",
       "title": "merge-tree --write-tree produces merge_tree_sha; conflict is BLOCKED",
       "validation": null
     },
     "P01.T05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:49.763Z",
       "defects": [],
       "depends_on": [
         "P01.T04"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2721,
+          "path": "docs/verification/evidence/p01/T01-T09-implementation.md",
+          "sha256": "ab238d930369d97ff8e3542794327a34a9bb54d24f9108a78916287d62b7a549"
+        },
+        {
+          "bytes": 2015,
+          "path": "docs/verification/evidence/p01/EV01-snapshot.json",
+          "sha256": "9b2c46d8aa7950ce7bdf85eb2705516a2a6336365911480ef87cca2fb57aecff"
+        }
+      ],
       "exit_requirement": "Identical {head,base} yields identical merge_commit_sha across runs and clocks",
       "expected_output": null,
       "id": "P01.T05",
@@ -1744,19 +2352,30 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:49.685Z",
+      "status": "PASS",
       "title": "commit-tree synthetic merge with DETERMINISTIC metadata (fixed identity, T = max(base,head committer time)+1, +0000, fixed message, parents base-then-head)",
       "validation": "P01.TEST04"
     },
     "P01.T06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:49.884Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2721,
+          "path": "docs/verification/evidence/p01/T01-T09-implementation.md",
+          "sha256": "ab238d930369d97ff8e3542794327a34a9bb54d24f9108a78916287d62b7a549"
+        },
+        {
+          "bytes": 2015,
+          "path": "docs/verification/evidence/p01/EV01-snapshot.json",
+          "sha256": "9b2c46d8aa7950ce7bdf85eb2705516a2a6336365911480ef87cca2fb57aecff"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.T06",
@@ -1766,19 +2385,30 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:49.825Z",
+      "status": "PASS",
       "title": "worktree add --detach at merge_commit_sha",
       "validation": null
     },
     "P01.T07": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:49.980Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2721,
+          "path": "docs/verification/evidence/p01/T01-T09-implementation.md",
+          "sha256": "ab238d930369d97ff8e3542794327a34a9bb54d24f9108a78916287d62b7a549"
+        },
+        {
+          "bytes": 2015,
+          "path": "docs/verification/evidence/p01/EV01-snapshot.json",
+          "sha256": "9b2c46d8aa7950ce7bdf85eb2705516a2a6336365911480ef87cca2fb57aecff"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.T07",
@@ -1788,19 +2418,30 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:49.929Z",
+      "status": "PASS",
       "title": "Emit snapshot.json with all four SHAs, mode, dirty flag, git version",
       "validation": null
     },
     "P01.T08": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:50.091Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2721,
+          "path": "docs/verification/evidence/p01/T01-T09-implementation.md",
+          "sha256": "ab238d930369d97ff8e3542794327a34a9bb54d24f9108a78916287d62b7a549"
+        },
+        {
+          "bytes": 2015,
+          "path": "docs/verification/evidence/p01/EV01-snapshot.json",
+          "sha256": "9b2c46d8aa7950ce7bdf85eb2705516a2a6336365911480ef87cca2fb57aecff"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.T08",
@@ -1810,19 +2451,30 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:50.036Z",
+      "status": "PASS",
       "title": "Provenance API — the sole owner of SHA resolution; no gate calls git rev-parse directly",
       "validation": null
     },
     "P01.T09": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:50.203Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2721,
+          "path": "docs/verification/evidence/p01/T01-T09-implementation.md",
+          "sha256": "ab238d930369d97ff8e3542794327a34a9bb54d24f9108a78916287d62b7a549"
+        },
+        {
+          "bytes": 2015,
+          "path": "docs/verification/evidence/p01/EV01-snapshot.json",
+          "sha256": "9b2c46d8aa7950ce7bdf85eb2705516a2a6336365911480ef87cca2fb57aecff"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.T09",
@@ -1832,19 +2484,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:50.144Z",
+      "status": "PASS",
       "title": "Add .ci-verify/, vitest-results.phase-*.json, local-proof-contract.json to .gitignore",
       "validation": null
     },
     "P01.TEST01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:50.313Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4314,
+          "path": "docs/verification/evidence/p01/P01-suite.txt",
+          "sha256": "058f5c60b32cd8fa2f103cb20c2c515d23c3ff580b051928a928761aa160bbaf"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.TEST01",
@@ -1854,19 +2512,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:50.253Z",
+      "status": "PASS",
       "title": "Clean branch ahead of main yields four distinct SHAs and a worktree at the merge commit",
       "validation": null
     },
     "P01.TEST02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:50.446Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4314,
+          "path": "docs/verification/evidence/p01/P01-suite.txt",
+          "sha256": "058f5c60b32cd8fa2f103cb20c2c515d23c3ff580b051928a928761aa160bbaf"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.TEST02",
@@ -1876,19 +2540,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:50.376Z",
+      "status": "PASS",
       "title": "Branch identical to main: merge_tree_sha equals base tree",
       "validation": null
     },
     "P01.TEST03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:50.574Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4314,
+          "path": "docs/verification/evidence/p01/P01-suite.txt",
+          "sha256": "058f5c60b32cd8fa2f103cb20c2c515d23c3ff580b051928a928761aa160bbaf"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.TEST03",
@@ -1898,19 +2568,25 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:50.505Z",
+      "status": "PASS",
       "title": "snapshot.json validates against its schema",
       "validation": null
     },
     "P01.TEST04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:23:50.679Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4314,
+          "path": "docs/verification/evidence/p01/P01-suite.txt",
+          "sha256": "058f5c60b32cd8fa2f103cb20c2c515d23c3ff580b051928a928761aa160bbaf"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P01.TEST04",
@@ -1920,8 +2596,8 @@
       "notes": [],
       "phase": "P01",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:23:50.629Z",
+      "status": "PASS",
       "title": "Determinism: same {head,base} yields identical merge_tree_sha AND merge_commit_sha across >=5 runs and two clocks",
       "validation": null
     },

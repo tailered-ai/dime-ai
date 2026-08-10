@@ -1,0 +1,34 @@
+[provenance-audit] scanned 6 file(s): declaration-only=2 test=2 allowlisted=2
+[provenance-audit] allowlisted scripts/ci/snapshot.mjs — P01.T08 — this IS the provenance API. It is the single owner of SHA resolution; every other module must consume snapshot.json instead.
+[provenance-audit] allowlisted scripts/ci/provenance-audit.mjs — The audit must name the patterns it forbids in order to detect them. It performs no SHA resolution of its own.
+[provenance-audit] note (declaration-only) scripts/ci/blueprint.mjs:46 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:78 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:89 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:104 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:122 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:135 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:152 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:157 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:273 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:305 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:348 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:404 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:413 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:487 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:495 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:505 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:538 rev-parse
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:89 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:152 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:243 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:273 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:293 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:305 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:321 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:348 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:413 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:507 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:538 remote-tracking-ref
+[provenance-audit] note (test) scripts/ci/snapshot.test.ts:639 remote-tracking-ref
+[provenance-audit] PASS — no implementation module bypasses snapshot.mjs
+AUDIT_EXIT=0
