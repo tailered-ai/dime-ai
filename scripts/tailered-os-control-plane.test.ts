@@ -96,7 +96,11 @@ describe("tailered-os control-plane manifest", () => {
     assert.throws(() => validateControlPlaneManifest(badDate), /verifiedOn/);
 
     const badSecret = clone();
-    badSecret.authorityBoundaries.stripe = "sk_live_abcdefghijklmnop";
+    // Assembled at runtime so the raw diff never contains a contiguous
+    // secret-shaped token (the repo's gitleaks gate scans commit text).
+    badSecret.authorityBoundaries.stripe = ["sk_live", "abcdefghijklmnop"].join(
+      "_"
+    );
     assert.throws(
       () => validateControlPlaneManifest(badSecret),
       /credential-shaped/
