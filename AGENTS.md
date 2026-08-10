@@ -112,6 +112,16 @@ from `.claude/commands/` are `/<name>`.
    owner-authorized code change (see `server/_core/dimeChatModel.ts`); the `dime1` path
    stays gated behind `ml/dime-1.0/docs/RELEASE_GATES.md`.
 
+## Tailered OS (`platform/tailered-os/`)
+
+Embedded isolated app (Cloudflare OS starter wrapper): own package.json/lockfile/pinned
+pnpm, own tests, own future Cloudflare deployment boundary. NOT part of the Dime
+build/Railway image; neither side imports the other. Upstream `cloudflare/cloudflare-os`
+is an exact-pinned submodule declared in the ROOT `.gitmodules`; pin + update contract +
+hazard register: `platform/tailered-os/docs/UPSTREAM.md` (authoritative). CI:
+path-scoped `.github/workflows/tailered-os.yml`. Root prettier/docker/renovate/CodeQL
+deliberately exclude the tree. Not deployed; deployment is owner-gated.
+
 ## Repo conventions
 
 - TypeScript strict; `npx tsc --noEmit` must pass (CI uses `NODE_OPTIONS=--max-old-space-size=6144`).

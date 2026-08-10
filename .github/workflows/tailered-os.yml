@@ -1,0 +1,69 @@
+# CI for the embedded Tailered OS application (platform/tailered-os/).
+# Ported from the accepted standalone tailered-ai/tailered-os workflow — a nested
+# .github/workflows/ file would not execute, so the parent repo owns it.
+# Path-scoped: Dime-only changes never run this suite.
+#
+# EXPECTED_CLOUDFLARE_OS_PIN duplicates the submodule gitlink on purpose: advancing
+# the pin (per platform/tailered-os/docs/UPSTREAM.md) must consciously update this
+# workflow in the same reviewed commit, so an accidental gitlink move fails loudly.
+name: Tailered OS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "platform/tailered-os/**"
+      - ".gitmodules"
+      - ".github/workflows/tailered-os.yml"
+  pull_request:
+    paths:
+      - "platform/tailered-os/**"
+      - ".gitmodules"
+      - ".github/workflows/tailered-os.yml"
+
+permissions:
+  contents: read
+
+env:
+  EXPECTED_CLOUDFLARE_OS_PIN: b2a51b5426398c8353d9d4dd984bd525121ab5f2
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: platform/tailered-os
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Verify Cloudflare OS submodule pin
+        run: |
+          actual="$(git -C cloudflare-os rev-parse HEAD)"
+          if [ "$actual" != "$EXPECTED_CLOUDFLARE_OS_PIN" ]; then
+            echo "::error::cloudflare-os submodule is at $actual, expected $EXPECTED_CLOUDFLARE_OS_PIN — see platform/tailered-os/docs/UPSTREAM.md update contract"
+            exit 1
+          fi
+          url="$(git config -f "$GITHUB_WORKSPACE/.gitmodules" submodule.platform/tailered-os/cloudflare-os.url)"
+          if [ "$url" != "https://github.com/cloudflare/cloudflare-os.git" ]; then
+            echo "::error::submodule URL changed to $url"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22.14.0
+
+      - name: Install pnpm via corepack
+        run: corepack enable
+
+      - name: Install wrapper workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Install upstream workspace
+        run: cd cloudflare-os && pnpm install --frozen-lockfile
+
+      - name: Test (deploy-script units, upstream drift golden, package tests)
+        run: pnpm test

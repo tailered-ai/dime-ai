@@ -69,3 +69,7 @@ perf
 analytics-backend
 archive
 os
+
+# Tailered OS (platform/tailered-os): independent isolated app — never part of the
+# Dime build context or Railway image (Dockerfile does COPY . .).
+platform/tailered-os

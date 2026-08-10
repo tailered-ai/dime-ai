@@ -230,6 +230,28 @@ The legacy platform deployment has been retired (its runbook was removed from th
 2026-07-23).
 Schema changes always need the manual `db-push.yml` workflow before any code deploy.
 
+## Tailered OS (`platform/tailered-os/`) — embedded isolated app
+
+Tailered OS is a Cloudflare OS starter-based application **owned by this repository but
+operationally isolated from the Dime runtime**: its own package.json, pnpm-lock.yaml,
+pinned toolchain, tests, and (future) Cloudflare deployment boundary. It is NOT part of
+the Dime build, NOT deployed by Railway, and neither side imports the other. Upstream
+`cloudflare/cloudflare-os` rides as an exact-pinned git submodule declared in the ROOT
+`.gitmodules` (`platform/tailered-os/cloudflare-os`); the pin, update contract, and
+hazard register live in `platform/tailered-os/docs/UPSTREAM.md` (authoritative). CI is
+the path-scoped root workflow `.github/workflows/tailered-os.yml` — Dime-only changes
+never run it, and it fails on pin/config drift (upstream-drift golden). It is not
+deployed today; deployment needs separate owner authorization.
+
+Commands (its own toolchain via corepack, never Dime's):
+
+```bash
+git submodule update --init platform/tailered-os/cloudflare-os   # once per clone
+cd platform/tailered-os && pnpm install && (cd cloudflare-os && pnpm install)
+cd platform/tailered-os && pnpm test          # deploy-script units + drift golden + package tests
+cd platform/tailered-os/cloudflare-os && pnpm run-local   # local eval on :8787, state in .wrangler/
+```
+
 ## Repo conventions
 
 - TypeScript strict; `npx tsc --noEmit` must pass (CI runs it with `NODE_OPTIONS=--max-old-space-size=6144`)
