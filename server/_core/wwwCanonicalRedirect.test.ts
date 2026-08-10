@@ -40,6 +40,8 @@ import { transformSync } from "esbuild";
 import express from "express";
 import type { Express } from "express";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { edgeMode, edgeProofPasses, immediateUpstreamIp } from "./edgeProxy";
+import { resolveClientIp } from "./trpcRateLimitPolicy";
 
 const INDEX_SRC = readFileSync(
   path.join(import.meta.dirname, "index.ts"),
@@ -84,24 +86,79 @@ function extractRedirectMiddleware(): string {
 }
 
 /**
+ * The origin-lock observation the redirect middleware now calls immediately
+ * before issuing its 308 (docs/runbooks/edge-defense-cloudflare.md §7
+ * recommendation 3). It is extracted and executed here too — not stubbed —
+ * because this file's whole premise is that it runs the shipped text. Every
+ * suite below pins `EDGE_MODE=off`, which is a hard no-op inside the observer,
+ * so it cannot perturb the redirect assertions in this file. Its BEHAVIOUR
+ * under `EDGE_MODE=on` is the subject of originLockObservability.test.ts.
+ */
+const SHIPPED_OBSERVER = extractFunction("observeWwwRedirectIngress");
+
+/**
  * Build an Express app carrying `helpersSrc` + `middlewareSrc`, followed by a
  * terminal handler that reports the request reached normal routing. A `www`
  * Host that is NOT redirected must land there.
  */
 function buildApp(helpersSrc: string, middlewareSrc: string): Express {
   const js = transformSync(
-    `${helpersSrc}\n\nconst app = expressFn();\n${middlewareSrc}\napp.use((req, res) => { res.status(200).send("ORIGIN_CONTENT"); });\nreturn app;`,
+    `${SHIPPED_OBSERVER}\n\n${helpersSrc}\n\nconst app = expressFn();\n${middlewareSrc}\napp.use((req, res) => { res.status(200).send("ORIGIN_CONTENT"); });\nreturn app;`,
     { loader: "ts" }
   ).code;
-  const factory = new Function("expressFn", "logSafe", js) as (
+  const factory = new Function(
+    "expressFn",
+    "logSafe",
+    "edgeMode",
+    "edgeProofPasses",
+    "immediateUpstreamIp",
+    "resolveClientIp",
+    "fireRateLimitEvent",
+    js
+  ) as (
     expressFn: typeof express,
-    logSafe: (v: unknown) => string
+    logSafe: (v: unknown) => string,
+    edgeModeFn: typeof edgeMode,
+    edgeProofPassesFn: typeof edgeProofPasses,
+    immediateUpstreamIpFn: typeof immediateUpstreamIp,
+    resolveClientIpFn: typeof resolveClientIp,
+    fireRateLimitEventFn: (...args: unknown[]) => void
   ) => Express;
-  return factory(express, v => String(v));
+  return factory(
+    express,
+    v => String(v),
+    edgeMode,
+    edgeProofPasses,
+    immediateUpstreamIp,
+    resolveClientIp,
+    (...args: unknown[]) => {
+      firedFromRedirect.push(args);
+    }
+  );
 }
+
+/**
+ * Anything the observer fires while this file's suites run. Asserted EMPTY:
+ * with `EDGE_MODE=off` the observation must be completely inert, so a
+ * regression that makes it fire regardless of mode fails here as well as in
+ * originLockObservability.test.ts.
+ */
+const firedFromRedirect: unknown[][] = [];
 
 const SHIPPED_HELPERS = `${extractFunction("canonicalApexHosts")}\n\n${extractFunction("wwwRedirectTarget")}`;
 const SHIPPED_MIDDLEWARE = extractRedirectMiddleware();
+
+// Pin EDGE_MODE for the WHOLE file, explicitly, both directions. Leaving it to
+// whatever the ambient environment happens to hold would make the observer's
+// inertness (and therefore every assertion here) depend on an unstated value.
+const SAVED_EDGE_MODE = process.env.EDGE_MODE;
+beforeAll(() => {
+  process.env.EDGE_MODE = "off";
+});
+afterAll(() => {
+  if (SAVED_EDGE_MODE === undefined) delete process.env.EDGE_MODE;
+  else process.env.EDGE_MODE = SAVED_EDGE_MODE;
+});
 
 /**
  * The implementation as it stood BEFORE the allowlist, reconstructed for the
@@ -276,6 +333,14 @@ describe("www→apex 308 redirect (shipped index.ts middleware)", () => {
     } finally {
       process.env.PUBLIC_ORIGIN = saved;
     }
+  });
+
+  it("fires no origin-lock telemetry at all while EDGE_MODE is off (the observation is a hard no-op when the feature is dormant)", async () => {
+    firedFromRedirect.length = 0;
+    await request(port, `www.${APEX}`, "/x");
+    await request(port, APEX, "/x");
+    await request(port, "www.evil.com", "/x");
+    expect(firedFromRedirect).toHaveLength(0);
   });
 
   it("honours ADDITIONAL_ALLOWED_ORIGINS, the other origin set the app already declares", async () => {

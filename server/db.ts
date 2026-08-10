@@ -2794,6 +2794,20 @@ export async function getSecurityEvents(opts: {
   limit?: number;
   eventType?: string;
   sinceMs?: number;
+  /**
+   * This read is an EXISTENCE PROBE, not a window survey — the caller wants to
+   * know whether a matching row exists, and `limit` is the answer's shape, not
+   * a ceiling it regrets. Suppresses the truncation warning only.
+   *
+   * Without it, a probe that asks for 1 row and receives 1 row satisfies
+   * `rows.length === limit` and emits "older events in this window were
+   * TRUNCATED ... a LOWER BOUND" at ERROR severity. That is false — nothing
+   * was dropped — and it fired twice per digest run in production
+   * (deployment ff472662, 2026-08-09T13:00:43Z). A security stream that cries
+   * truncation on a successful lookup is the same lying-observability defect
+   * this function was changed to remove.
+   */
+  existenceProbe?: boolean;
 }): Promise<SecurityEventRow[]> {
   const tag = "[DB][getSecurityEvents]";
   const db = await getDb();
@@ -2823,9 +2837,11 @@ export async function getSecurityEvents(opts: {
       .limit(limit) as SecurityEventRow[];
 
     console.log(`${tag} Fetched ${rows.length} rows | limit=${limit} type=${opts.eventType ?? "ALL"}`);
-    if (rows.length === limit) {
+    if (rows.length === limit && !opts.existenceProbe) {
       // Hit the ceiling exactly: newest-first ordering means older events in the
       // window were dropped. Callers summarising a time range must say so.
+      // Existence probes are exempt — see `existenceProbe` above; for them a
+      // full result is the successful answer, not evidence of loss.
       console.warn(
         `${tag} Result hit the limit (${limit}) — older events in this window were TRUNCATED. ` +
           `Counts derived from this read are a LOWER BOUND, not a total.`
