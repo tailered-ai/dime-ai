@@ -381,3 +381,125 @@ Until #1 ships, treat the `www` hostname as **unmonitored** and every anomaly co
 > the counter firing **1×** when the lock is registered first, against a `403`/**1×** apex control.
 > The harness's own first run reported a false negative because WHATWG `fetch()` silently drops a
 > caller-supplied `Host` header; raw `node:http` is required to exercise this path.
+
+## 8. The arming gate — §3 step 12 is now a mechanical control (added 2026-08-09)
+
+§3 step 12 ("soak 15–30 min, stop if legit traffic warns") was a paragraph. A paragraph cannot
+count requests, cannot measure a window, and cannot tell an Azure CI runner from a paying
+customer. On 2026-08-06 arming proceeded on **23 requests over ~4 minutes** and real users were
+403'd for ~7 hours.
+
+`scripts/edge-soak-report.mjs` was written to make that verdict mechanical. It was correct and
+**nothing invoked it**, which is operationally the same as the paragraph. `scripts/edge-arming-gate.mjs`
+plus `.github/workflows/edge-arming-gate.yml` are what invoke it.
+
+### 8.1 The gate in one paragraph
+
+Arming is authorised by a **record**, and a record can only come from evidence that clears all
+eight soak conditions, is less than 6 hours old, was collected while production was demonstrably
+**not** already enforcing, and is bound to the edge-enforcement configuration that produced it.
+A daily CI job reads live posture off the raw origin and **fails** if production is enforcing
+without such a record. There is no `--force`, no threshold flag, and no override input anywhere.
+
+### 8.2 The one thing that can never happen
+
+**Dropping to `EDGE_MODE=log` is never gated.** §5's fast rollback is untouched, and three
+independent properties guarantee it:
+
+1. `evaluateEnforcement()` returns PASS on the `NOT_ARMED` branch **before the record is read**.
+   A missing, corrupt, expired or entirely absent record cannot fail a disarmed production. So
+   de-arming always *clears* this gate — it can never be blocked by it.
+2. The gate holds no credential and calls no mutating API (`permissions: contents: read`, no
+   secrets, no Railway token). It cannot set `EDGE_MODE` in either direction.
+3. It is not wired to `push`, is not a required status check, and is not in the deploy pipeline.
+   Railway deploys on push to `main` whatever this workflow says, so a red gate never blocks
+   shipping a fix.
+
+The gate constrains **arming** (`off`/`log` → `on`). It does not constrain **de-arming** and
+structurally cannot.
+
+### 8.3 Arming procedure (replaces §3 steps 12–13)
+
+1. Set `EDGE_MODE=log`, restart, and soak **≥ 60 minutes** of real production traffic.
+2. Collect the evidence bundle (shape documented in `scripts/edge-soak-report.mjs`'s
+   `SOAK_INPUT_SHAPE`) into e.g. `soak.json`. `--db` may *supplement* it with persisted
+   `security_events` anomaly rows; it can never replace it.
+3. Read the verdict first if you want it in isolation:
+   `node scripts/edge-soak-report.mjs --input=soak.json`
+4. Request the authorization **within 6 hours of the soak closing**:
+
+   ```bash
+   node scripts/edge-arming-gate.mjs authorize \
+     --evidence=soak.json \
+     --origin=https://ai-sports-betting-dime-ai-production.up.railway.app \
+     --actor="<you>" --reason="<why arming now>" \
+     --deployment="<railway deployment id>" \
+     --out=docs/runbooks/edge-arming-authorization.json
+   ```
+
+   Exit 1 and no file written means **do not arm**. There is no second attempt that relaxes
+   anything; collect qualifying evidence instead.
+5. Land `docs/runbooks/edge-arming-authorization.json` through a reviewed PR. The `validate` job
+   in `.github/workflows/edge-arming-gate.yml` re-derives the whole verdict from the evidence the
+   record embeds — the stored `"verdict": "AUTHORIZED"` buys nothing.
+6. Only now set `EDGE_MODE=on` in Railway and restart. Run §4 verification.
+
+### 8.4 What the gate checks
+
+| # | Condition | Where |
+| --- | --- | --- |
+| 1 | Real production evidence, not synthetic probes | `evaluateSoak` — CI/operator sources are excluded from the volume and shape counts |
+| 2 | Bound to a configuration state | `binding.configFingerprint` = SHA-256 over `edgeProxy.ts` + `originLock.ts` + `edgeCircuitBreaker.ts`; re-checked against the checkout on every run |
+| 2b | Bound to a deployment | `/health`'s `commit` must identify the build that produced the evidence |
+| 3 | Expiration | evidence ≤ 6 h old at issue (`MAX_EVIDENCE_AGE_MS`); authorization valid 30 days (`AUTHORIZATION_TTL_MS`), then re-soak |
+| 4 | Fail closed on malformed evidence | inherited from `evaluateSoak`; a non-array `errors` field is a data error, never coerced to `[]` |
+| 5 | Fail closed on query errors | a collector failure in the bundle, an unreadable file, or an unreadable posture all FAIL |
+| 6 | Observation duration | ≥ 60 minutes (`MIN_SOAK_MINUTES`) |
+| 7 | Request volume | ≥ 500 **real** requests (`MIN_REAL_REQUESTS`) |
+| 8 | Distinct sources | ≥ 25 distinct real sources (`MIN_DISTINCT_REAL_SOURCES`) |
+| 9 | Source concentration | no real source > 25 % of real requests (`MAX_REAL_SHARE_PER_SOURCE`) |
+| 10 | Legitimate would-deny | would-deny from non-CI, non-operator sources must be exactly 0 |
+| 11 | Machine-readable | `--json` on every mode; the record is JSON with a `recordSha256` integrity digest |
+| 12 | Audit trail | `audit.actor` + `audit.reason` are required to issue; the record lives in git under review, and each CI run is dated |
+
+### 8.5 Reading posture — why the RAW origin, and why an empty body
+
+Posture is inferred from **behaviour**. Environment variables are not readable from CI.
+
+- **Probe the raw `*.up.railway.app` origin, never the Cloudflare host.** Through Cloudflare the
+  lock always passes, so a CF-host probe would read `NOT_ARMED` forever and the gate would
+  silently never fire.
+- **ARMED requires a positive discriminator**, not a bare status code: `/health` 200 **and**
+  naming a commit (the origin is up and serving *our* build) **and** the non-exempt path
+  returning 403 **with a zero-length body** — `originLock` answers `res.status(403).end()`, which
+  sends nothing.
+- A 403 **with** a body is somebody else's 403 and classifies as `INDETERMINATE` (fail closed).
+  This is not hypothetical: measured 2026-08-09, `curl https://aisportsbettingmodels.com/`
+  returns **403 with a 4561-byte body** — Super Bot Fight Mode blocking the CLI, not the origin
+  lock. A gate that trusted the status code alone would read that as "armed".
+- `INDETERMINATE` always FAILS. "We could not tell" is never "it is fine".
+
+### 8.6 Live posture at the time this section was written
+
+Measured 2026-08-09 against `https://ai-sports-betting-dime-ai-production.up.railway.app`:
+`/health` → 200 (`commit 5e70860`), `/` → **200, 12 486 bytes**, `/api/trpc/games.list` → 400.
+The raw origin is serving requests itself, so **the origin lock is not enforcing** — the gate
+reports `NOT_ARMED` and PASSes.
+
+Read that precisely. `NOT_ARMED` means *the lock is not 403ing*; it does **not** by itself
+distinguish `EDGE_MODE=log`, `EDGE_MODE=off`, `on`-with-no-secret (anti-lockout downgrade), or
+`on`-with-the-breaker-tripped. All four are states in which the origin lock is not enforcing,
+which is exactly what the gate needs to know.
+
+### 8.7 Honest limits
+
+- `enforce` is **detective** for the Railway-dashboard path. Nothing in this repository can stop
+  an owner typing `on` into Railway, and the running server consults no repo artifact. What the
+  gate guarantees is that arming without qualifying evidence becomes a red, dated, machine-readable
+  CI failure within a day instead of an undetected state.
+- `recordSha256` is an **integrity checksum, not a signature**. It catches truncation and partial
+  edits. Authentication comes from the record living in git under review — and, more importantly,
+  from `enforce` re-deriving the soak verdict from the embedded evidence rather than reading it,
+  so a forged record must carry evidence that genuinely clears all eight conditions.
+- The soak evidence itself still inherits §7's measurement gap: `edge_origin_ingress_anomaly` is
+  a **lower bound**, because `www`-Host ingress is redirected before the lock. Cite it as a floor.
