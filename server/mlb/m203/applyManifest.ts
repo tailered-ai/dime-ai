@@ -62,6 +62,7 @@ export type TransactionRunner = <T>(
 
 export type RowOutcome =
   | "APPLIED"
+  | "REVERTED"
   | "SKIPPED_NOT_WRITABLE"
   | "PREIMAGE_MISMATCH"
   | "ROW_MISSING"
@@ -225,6 +226,7 @@ export async function applyRepairManifest(
     const dateRows = byDate.get(date)!;
 
     let dateResults: RowResult[] = [];
+    let reverted = false;
     try {
       dateResults = await runInTransaction(async gw => {
         const out: RowResult[] = [];
@@ -297,15 +299,20 @@ export async function applyRepairManifest(
     } catch (err) {
       if (err instanceof RowFailure) {
         // The transaction rolled back; the whole date is unapplied.
+        // A row that had been written is NOT "skipped" — its write was
+        // reverted with the transaction. Marking it REVERTED (counted as
+        // failed) keeps the totals honest and, critically, keeps the date out
+        // of datesCompleted so a resume cannot skip work that never landed.
         dateResults = err.partial.map(r =>
           r.outcome === "APPLIED"
             ? {
                 ...r,
-                outcome: "SKIPPED_NOT_WRITABLE" as RowOutcome,
-                detail: "date rolled back",
+                outcome: "REVERTED" as RowOutcome,
+                detail: "write reverted with the date transaction",
               }
             : r
         );
+        reverted = true;
         log(
           `${TAG} [ROLLBACK] date=${date} — ${err.outcome} on row ${err.gameRowId}; entire date reverted`
         );
@@ -329,7 +336,12 @@ export async function applyRepairManifest(
       else if (r.outcome === "SKIPPED_NOT_WRITABLE") skipped++;
       else failed++;
     }
-    if (!halt && dateResults.every(r => r.outcome !== "WRITE_ERROR")) {
+    // A date counts as completed ONLY when it neither reverted nor errored.
+    // Anything else must remain re-runnable: reporting a rolled-back date as
+    // complete would let a resume silently skip work that never landed.
+    const dateClean =
+      !reverted && dateResults.every(r => r.outcome !== "WRITE_ERROR");
+    if (dateClean) {
       datesCompleted.push(date);
     }
     log(

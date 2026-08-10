@@ -481,6 +481,65 @@ describe("§13 one-date transaction reverts on failure at any position", () => {
     });
   }
 
+  it("never reports a REVERTED date as completed, even with failFast off", async () => {
+    // Clean-room review finding: with failFast disabled, a rolled-back date had
+    // no WRITE_ERROR row and no halt, so it was pushed to datesCompleted. A
+    // resume driven off that list would silently skip work that never landed.
+    const store = new Map<number, BrierMap>([
+      [1, { ...PREV }],
+      [2, { ...PREV }],
+      [3, { ...PREV }],
+    ]);
+    const sealed = sealManifest(manifest(threeRowDate()));
+    const rb = buildRollbackManifest(sealed, 1);
+    const { runInTransaction } = gateway(store, {
+      failAtIndex: 1,
+      failPhase: "verify",
+    });
+
+    const res = await applyRepairManifest({
+      sealed,
+      rollback: rb,
+      actualCodeSha: "abc1234",
+      actualSchemaVersion: "0134_widen_unit_probability_precision",
+      runInTransaction,
+      failFast: false,
+      log: () => {},
+    });
+
+    expect(res.datesCompleted).toEqual([]);
+    expect(res.applied).toBe(0);
+    // A reverted write is REVERTED, not "skipped" — the totals must not imply
+    // the row was deliberately passed over.
+    expect(res.rows.some(r => r.outcome === "REVERTED")).toBe(true);
+    expect(res.skipped).toBe(0);
+    for (const id of [1, 2, 3]) {
+      expect(store.get(id)!.brierNrfi).toBe(PREV.brierNrfi);
+    }
+  });
+
+  it("reports a clean date as completed", async () => {
+    const store = new Map<number, BrierMap>([
+      [1, { ...PREV }],
+      [2, { ...PREV }],
+      [3, { ...PREV }],
+    ]);
+    const sealed = sealManifest(manifest(threeRowDate()));
+    const rb = buildRollbackManifest(sealed, 1);
+    const { runInTransaction } = gateway(store);
+
+    const res = await applyRepairManifest({
+      sealed,
+      rollback: rb,
+      actualCodeSha: "abc1234",
+      actualSchemaVersion: "0134_widen_unit_probability_precision",
+      runInTransaction,
+      log: () => {},
+    });
+
+    expect(res.datesCompleted).toEqual(["2026-05-01"]);
+  });
+
   it("applies all three rows when nothing fails", async () => {
     const store = new Map<number, BrierMap>([
       [1, { ...PREV }],
