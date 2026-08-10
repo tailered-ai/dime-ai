@@ -313,19 +313,7 @@ class AgainstTheAcceptedBuild(unittest.TestCase):
                          (204, 171, 33))
 
     @unittest.skipUnless(DB and os.path.exists(DB), "needs NFLDB_TEST_DB")
-    def test_scope_is_provenance_agnostic(self):
-        """§7/§40: an accepted identity must not be able to leave governance by
-        having its provenance relabelled. The observation scope therefore does
-        NOT filter on gsis_source."""
-        # Scan the EXECUTABLE region only. The docstring deliberately quotes the
-        # old `gsis_source != 'feed'` filter to record why it was removed, so a
-        # naive text search over the whole function reports the explanation as
-        # the defect.
-        code = executable_body(os.path.join(HERE, "lib", "identity_baseline.py"),
-                               "def observe(", "CASE_WHY = {")
-        self.assertNotIn("!= 'feed'", code)
-        self.assertNotIn("IS NOT 'feed'", code)
-        # The behavioural proof, which is the one that actually matters:
+    def test_scope_is_provenance_agnostic_on_the_real_window(self):
         current, present, derived, per_key, mixed = ib.observe(
             self.conn, set(self.accepted))
         self.assertEqual(len(present), 204, "an accepted identity fell out of scope")
@@ -362,6 +350,80 @@ class AgainstTheAcceptedBuild(unittest.TestCase):
 # --------------------------------------------------------------------------
 # Sections 35 / 36 / 37 -- negative controls against real accepted state
 # --------------------------------------------------------------------------
+class ProvenanceAgnosticScope(unittest.TestCase):
+    """§7/§40: acceptance is permanent; provenance is observational.
+
+    An accepted identity must not be able to leave governance by having its
+    provenance relabelled -- and the commonest relabel is an IMPROVEMENT, where
+    the crosswalk's answer is superseded by a feed-supplied one. Scoping the
+    observation to non-feed rows made that identity vanish from the comparison
+    and be reported as a disappearance: an escape hatch dressed as a bug.
+
+    These run WITHOUT a database on purpose. The guard used to live inside a
+    `skipUnless(NFLDB_TEST_DB)` block together with a query that needed one, so
+    in CI -- where the 610 MB artifact does not exist -- nothing defended this
+    at all. The Phase 8 mutation matrix reinstated the filter and every suite
+    stayed green.
+    """
+
+    def db(self, rows):
+        conn = sqlite3.connect(":memory:")
+        cols = list(sp.FIELD_CLASSES["depth_chart"])
+        conn.execute(f"CREATE TABLE depth_chart ({', '.join(cols)})")
+        for i, (espn, gsis, src) in enumerate(rows, 1):
+            r = {c: None for c in cols}
+            r.update({"depth_chart_id": i, "source_shape": "A", "season": 2020,
+                      "espn_id": espn, "gsis_id": gsis, "gsis_source": src})
+            conn.execute(
+                f"INSERT INTO depth_chart ({','.join(cols)}) "
+                f"VALUES ({','.join('?' * len(cols))})", [r[c] for c in cols])
+        self.addCleanup(conn.close)
+        return conn
+
+    def test_the_scope_does_not_filter_on_provenance(self):
+        code = executable_body(os.path.join(HERE, "lib", "identity_baseline.py"),
+                               "def observe(", "CASE_WHY = {")
+        for forbidden in ("!= 'feed'", "IS NOT 'feed'", "<> 'feed'",
+                          '!= "feed"', 'IS NOT "feed"', '<> "feed"'):
+            self.assertNotIn(forbidden, code, "provenance is back in the scope")
+
+    def test_an_accepted_identity_that_becomes_feed_supplied_stays_governed(self):
+        """The behavioural proof. A text scan can be evaded by spelling the
+        filter differently; this cannot."""
+        accepted = {"1001": "00-0011111"}
+        conn = self.db([("1001", "00-0011111", "feed")])
+        current, present, derived, per_key, mixed = ib.observe(conn, set(accepted))
+        self.assertIn("1001", present, "an improved identity left the scope")
+        self.assertEqual(current.get("1001"), "00-0011111")
+        verdict, findings = ib.classify(accepted, current, present, derived, mixed)
+        self.assertEqual(findings, [])
+        self.assertEqual(verdict, ib.PASS)
+
+    def test_the_same_identity_is_governed_under_every_provenance_label(self):
+        accepted = {"1001": "00-0011111"}
+        for src in ("feed", "T0", "T2", "T3", "T4"):
+            with self.subTest(gsis_source=src):
+                conn = self.db([("1001", "00-0011111", src)])
+                current, present, derived, _, mixed = ib.observe(
+                    conn, set(accepted))
+                self.assertIn("1001", present)
+                self.assertEqual(
+                    ib.classify(accepted, current, present, derived, mixed)[0],
+                    ib.PASS)
+
+    def test_a_genuine_disappearance_is_still_reported(self):
+        """The specificity half: making the scope provenance-agnostic must not
+        make it blind. An identity that is truly gone is still Case G."""
+        accepted = {"1001": "00-0011111"}
+        conn = self.db([("2002", "00-0022222", "feed")])
+        current, present, derived, _, mixed = ib.observe(conn, set(accepted))
+        self.assertNotIn("1001", present)
+        verdict, findings = ib.classify(accepted, current, present, derived, mixed)
+        self.assertEqual(verdict, ib.FAIL)
+        self.assertEqual([f["case"] for f in findings if f["espn_id"] == "1001"],
+                         ["G"])
+
+
 class NegativeControls(unittest.TestCase):
     """Each mutates ACCEPTED state or CURRENT state and requires the right
     verdict. Coverage percentage is held constant where the point is that a

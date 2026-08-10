@@ -113,20 +113,46 @@ def verdicts(conn):
     return out
 
 
+#: The identity mechanisms, as MUTUALLY EXCLUSIVE predicates over the frozen
+#: window. Exclusivity is the whole point and was not always true here: the
+#: first version counted `gsis_source IS NOT 'feed' AND gsis_id IS NOT NULL` as
+#: derived and `gsis_source IS NULL` as unresolved, so a row with an identity
+#: but no label matched BOTH, while a row with a label but no identity matched
+#: NEITHER. One of each cancelled out and `ungoverned` read 0 on a database
+#: that had an ungoverned identity row in it -- a control that fails open. The
+#: buckets are now disjoint by construction and the arithmetic is cross-checked
+#: against a directly counted complement.
+IDENTITY_BUCKETS = (
+    ("layer_b_source_owned", SOURCE_OWNED_PREDICATE),
+    ("layer_c_resolved",
+     "gsis_source IS NOT NULL AND gsis_source <> 'feed' AND gsis_id IS NOT NULL"),
+    ("layer_c_unresolved", "gsis_source IS NULL AND gsis_id IS NULL"),
+)
+
+
 def conservation(conn):
     """Every frozen row is governed by exactly one identity mechanism.
 
     Returned rather than asserted so a caller can report the arithmetic; the
     point is that 'nothing is ungoverned' is a computed fact, not a claim.
+
+    `ungoverned` counts rows matching NO mechanism and `overlapping` counts rows
+    matching MORE THAN ONE. Both are reported, because a single number can be
+    made to look clean by two errors of opposite sign.
     """
     w = sp.window(TABLE).predicate
-    q = lambda extra: conn.execute(
-        f"SELECT COUNT(*) FROM {TABLE} WHERE {w} AND {extra}").fetchone()[0]
-    total = conn.execute(f"SELECT COUNT(*) FROM {TABLE} WHERE {w}").fetchone()[0]
-    source_owned = q(SOURCE_OWNED_PREDICATE)
-    derived = q(f"gsis_source IS NOT 'feed' AND gsis_id IS NOT NULL")
-    unresolved = q("gsis_source IS NULL")
-    return {"frozen_rows": total, "layer_b_source_owned": source_owned,
-            "layer_c_resolved": derived, "layer_c_unresolved": unresolved,
-            "governed": source_owned + derived + unresolved,
-            "ungoverned": total - (source_owned + derived + unresolved)}
+    out = {"frozen_rows": conn.execute(
+        f"SELECT COUNT(*) FROM {TABLE} WHERE {w}").fetchone()[0]}
+    for name, pred in IDENTITY_BUCKETS:
+        out[name] = conn.execute(
+            f"SELECT COUNT(*) FROM {TABLE} WHERE ({w}) AND ({pred})").fetchone()[0]
+    # IFNULL, because `gsis_source='feed'` is NULL -- not 0 -- for an unlabelled
+    # row, and a NULL term would silently swallow the row it is meant to catch.
+    matched = " + ".join(f"IFNULL(({p}),0)" for _, p in IDENTITY_BUCKETS)
+    none_, once, many = conn.execute(
+        f"SELECT SUM(m=0), SUM(m=1), SUM(m>1) FROM "
+        f"(SELECT {matched} AS m FROM {TABLE} WHERE {w})").fetchone()
+    out["governed"] = once or 0
+    out["ungoverned"] = none_ or 0
+    out["overlapping"] = many or 0
+    return out
