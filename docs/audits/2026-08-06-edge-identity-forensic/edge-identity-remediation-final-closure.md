@@ -26,7 +26,7 @@ The record's single open condition (the weekly 2000-row path) is now
 | Record baseline `origin/main` | `23aafc55a` |
 | `origin/main` at closure start | `5e7086083` (7 commits later) |
 | Historical PRs (still merged) | #451 (`8b655b2c8`), #458 (`e68d4055b`) |
-| Closure PRs (open) | #467 `f5a68f4ec`, #468 `2e3c518c6`, #469 `cd0365f07` |
+| Closure PRs (open) | #467 `f5a68f4ec`, #468 `2e3c518c6`, #469 `cd0365f07`, #470 (this record), #471 (probe fix) |
 | Deployment serving Sunday window | `ff472662-e6d4-4b57-bf9f-a4edcadf0118` (commit `aeb1c427d`) |
 | Live deployment at closure | `bf5cc270-443f-4906-b07e-a9d14999e639` (commit `5e7086083`) |
 | Environment posture | `EDGE_MODE=log` (containment). **Not readable** — `list-variables` denied |
@@ -80,7 +80,9 @@ breaker. The origin lock still mounts at line 711, ahead of the preflight (1901)
 | G33 | Production observation clean | — | clean | error sweep | 2 concerns recorded §L | **PASS with concerns** |
 | G34 | Repository clean, owner files preserved | — | verified | file inventory | 5 `.tmp-*` intact, `Aug 7 05:07` | **PASS** `[INSPECTION]` |
 
-**Summary: 27 PASS · 6 BLOCKED (owner infrastructure) · 0 FAIL**
+| G35 | Truncation warning truthful on probes | spurious ERROR | fixed (#471) | probe silent, survey still warns | 11/11, falsified | **PASS** `[TEST]` |
+
+**Summary: 28 PASS · 6 BLOCKED (owner infrastructure) · 0 FAIL**
 
 ---
 
@@ -306,11 +308,14 @@ Full surface: **306/306** across 11 suites · `tsc` 0 errors · `prettier --chec
    `index.ts` work was lost entirely and was reconstructed from its surviving test.
 7. **Recurring MySQL connection loss in ScoreRefresh** — three occurrences in a 25-minute
    band, self-healing, pre-existing, unrelated to this work.
-8. **`TRUNCATED` warning fires at ERROR severity on `limit=1` reads.** A marker lookup
-   requesting exactly one row and receiving one row satisfies `rows.length === limit` and
-   emits a spurious truncation warning. Introduced by PR #458 — mine. Cosmetic but it is
-   log-hygiene noise in the security stream, and it should be fixed by excluding
-   single-row lookups from the check.
+8. ~~`TRUNCATED` warning fires at ERROR severity on `limit=1` reads.~~ **RESOLVED in
+   PR #471.** Confirmed in production first (deployment `ff472662`,
+   `2026-08-09T13:00:43Z`, fired **twice** at ERROR severity in one run), then fixed with
+   an explicit opt-in `existenceProbe` flag on the four digest marker lookups. Made
+   opt-in rather than inferred from `limit === 1`, so a genuine one-row survey that loses
+   rows still warns — a test pins exactly that. Falsification: removing the exemption
+   turns exactly ONE test RED (the probe) while both survey tests stay green, proving the
+   exemption is narrow. `[PROVEN BY TEST]` — production contract in the PR.
 9. **Circuit breaker remains blind to `www`** by design — feeding it from the redirect
    path would change enforcement.
 
@@ -346,7 +351,7 @@ MLB pipelines reporting `errors=0`.
 
 **COMPLETE WITH EXPLICIT EXTERNAL BLOCKER.**
 
-27 gates PASS, 6 BLOCKED on owner infrastructure permissions, 0 FAIL.
+28 gates PASS, 6 BLOCKED on owner infrastructure permissions, 0 FAIL.
 
 The record's one open condition is closed in production. All remaining engineering work
 is implemented, falsifiably tested, and staged in three reviewable PRs. What cannot be
@@ -360,7 +365,7 @@ BLOCKED, never upgraded.
 
 ### Owner actions to reach full closure
 
-1. Merge #467, #468, #469; confirm deployment SHA and health.
+1. Merge #467, #468, #469, #471; confirm deployment SHA and health.
 2. Execute each PR's production-validation contract.
 3. Set `EDGE_ORIGIN_SECRET_PREV` to the current secret's value (enables safe rotation).
 4. Run the arming gate; confirm PASS on real soak evidence.
