@@ -15,6 +15,7 @@ import { resolveClientIdentity, identitySource } from "./clientIdentity";
 import {
   cfConnectingIp,
   edgeMode,
+  edgeProofPasses,
   immediateUpstreamIp,
   isCloudflareEdgeIp,
 } from "./edgeProxy";
@@ -243,6 +244,74 @@ function wwwRedirectTarget(host: string): string | null {
   const port = m[5];
   if (port !== undefined && Number(port) > 65535) return null;
   return canonicalApexHosts().has(hostname) ? stripped : null;
+}
+
+/**
+ * Record a direct-origin `www` hit that the canonical redirect is about to
+ * answer, so it is COUNTED even though it never reaches the origin lock.
+ *
+ * THE GAP THIS CLOSES. The www→apex 308 is registered ahead of the origin-lock
+ * mount (deliberately — see the redirect's own comment), so a request arriving
+ * at the raw origin with a `www` Host is answered by the redirect and never
+ * observed by the lock. Every `edge_origin_ingress_anomaly` count was therefore
+ * a LOWER BOUND, understated by exactly the direct-origin-plus-www class. The
+ * arming decision on 2026-08-06 was made against that understated number.
+ *
+ * WHY INSTRUMENTATION AND NOT REORDERING. Moving the lock ahead of the redirect
+ * would change request flow for every www visitor and put a 403 in front of a
+ * path that currently always succeeds — a materially larger blast radius than
+ * the measurement problem justifies. This records the observation and changes
+ * nothing about what the client receives: same 308, same Location, same body
+ * preservation.
+ *
+ * The outcome is "observed", never "blocked": this request IS being served.
+ * Passing the default would recreate the exact lying-alert defect that the
+ * 2026-08-07 review removed.
+ *
+ * Silent when the feature is dormant (`EDGE_MODE=off`), when the request is
+ * `/health` (mirroring originLock's own exemption, so Railway's probe never
+ * generates security events), and when the request is genuinely edge-verified
+ * — a www visitor arriving through Cloudflare is not an anomaly and must not
+ * be counted as one.
+ *
+ * It can never throw into the redirect path. A telemetry failure must not cost
+ * a user their redirect.
+ *
+ * Returns a diagnostic fragment for the redirect's own log line, so that line
+ * states on its face whether this request was counted and why. A reader of the
+ * logs should never have to infer from an absence.
+ */
+function observeWwwRedirectIngress(req: express.Request): string {
+  try {
+    const mode = edgeMode();
+    // Dormant. The fields still appear, with "-" meaning NOT EVALUATED, so a
+    // log parser never has to distinguish an absent field from a false one.
+    if (mode === "off") return "edgeMode=off edgeVerified=- counted=false";
+
+    const verified = edgeProofPasses(req);
+    const upstream = immediateUpstreamIp(req);
+    const base = `edgeMode=${mode} edgeVerified=${verified} upstream=${logSafe(upstream || "none")}`;
+
+    // Railway's probe is lock-exempt; counting it would manufacture anomalies.
+    if (req.path === "/health") return `${base} counted=false reason=health`;
+    // Arrived through Cloudflare — not an anomaly, nothing to count.
+    if (verified) return `${base} counted=false reason=edge-verified`;
+
+    fireRateLimitEvent(
+      upstream || resolveClientIp(req),
+      req.path,
+      req.method,
+      "edge_origin_ingress_anomaly",
+      (req.headers["user-agent"] as string | undefined) ?? null,
+      "observed"
+    );
+    return `${base} counted=true reason=direct-origin`;
+  } catch (err) {
+    console.warn(
+      `[edge][origin-lock] www ingress observation failed (non-fatal, redirect unaffected): ${logSafe(err)}`
+    );
+    return "counted=false reason=observation-error";
+  }
 }
 
 // ─── Rate limit event helper ─────────────────────────────────────────────────
@@ -672,8 +741,13 @@ async function startServer() {
     const canonical = wwwRedirectTarget(host);
     if (canonical) {
       const redirectUrl = `${req.protocol}://${canonical}${req.originalUrl}`;
+      // Count it before answering. This middleware sits AHEAD of the origin
+      // lock, so without this the direct-origin www class is served and never
+      // measured — the understatement in every historical anomaly total. The
+      // returned fragment makes the log line state whether it was counted.
+      const observation = observeWwwRedirectIngress(req);
       console.log(
-        `[www→canonical] 308 redirect: ${logSafe(host)}${logSafe(req.originalUrl)} → ${logSafe(redirectUrl)}`
+        `[www→canonical] 308 redirect: ${logSafe(host)}${logSafe(req.originalUrl)} → ${logSafe(redirectUrl)} | ${observation}`
       );
       return res.redirect(308, redirectUrl);
     }

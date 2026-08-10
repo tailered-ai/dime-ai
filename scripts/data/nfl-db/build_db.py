@@ -58,7 +58,10 @@ VENUES = os.path.join(ROOT, "scripts/data/nfl-2026/venues.json")
 if LIB not in sys.path:
     sys.path.insert(0, LIB)
 
+import build_inputs                    # noqa: E402  the canonical build-input contract
 import corrections                     # noqa: E402  data corrections, each asserting its prior
+import espn_identities                 # noqa: E402  the ONE T4 loader/validator
+import identity_baseline                # noqa: E402  Layer C: accepted derived identity
 import depth_charts as depth_lib       # noqa: E402  B3
 import player_dimension                # noqa: E402  B5
 import rowloss                         # noqa: E402  B4
@@ -516,13 +519,33 @@ def build(conn, rows, teams, venues):
     calendar = depth_lib.GameCalendar(conn.execute(
         "SELECT season, season_type, week, playoff_round, kickoff_utc FROM game"))
     team_map = depth_lib.load_team_map(TEAMS)
-    # Same shaping B3's own self-check does (lib/depth_charts.py:810-814).
-    identities_path = os.path.join(HERE, "cache/b3/espn_identities.json")
-    identities = {}
-    if os.path.exists(identities_path):
-        identities = {r["espn_id"]: {"fullName": r.get("espn_full"),
-                                     "college": r.get("college")}
-                      for r in load_json(identities_path)}
+    # T4's input. This file used to live at cache/b3/espn_identities.json, and
+    # `scripts/data/nfl-db/cache/` is gitignored -- so it existed on exactly one
+    # machine and NO clone ever had it. The loader skipped T4 silently when it was
+    # missing (`if os.path.exists(...)` with no else), so a clean clone built
+    # green while 316 audited depth-chart rows quietly lost their resolved
+    # gsis_id. Verified by holding the extract constant and varying only this
+    # file: 3,814 espn ids resolve with it, 3,809 without -- the 5 T4-only ids
+    # 3043133, 4240033, 4244814, 4339830, 4362191 cover exactly those 316 rows.
+    #
+    # Same defect as #427's EXTRACT-NOTES.md, same fix: a negation cannot
+    # re-include a file inside an excluded DIRECTORY, so it moved one level up to
+    # scripts/data/nfl-db/espn-identities.json where nothing excludes it.
+    #
+    # ONE path authority: build_inputs.BUILD_INPUTS["espn_identities"]. The
+    # gitignored cache/ copy is deliberately NOT a fallback. Letting untracked
+    # developer residue stand in for a missing tracked input is precisely the
+    # defect this contract exists to prevent, and it would let two clones of the
+    # same revision build different databases. Its presence is REPORTED to help
+    # the operator diagnose an incomplete checkout; it is never consumed.
+    # ONE authority: lib/espn_identities validates and canonicalises T4. No
+    # parsing happens here, so build and self-check cannot interpret a record
+    # differently. Preflight has already run this; loading again is cheap and
+    # keeps the call site honest about where the data comes from.
+    t4 = espn_identities.load(root=ROOT)
+    identities = t4.as_crosswalk_map()
+    counts["espn_identities"] = len(t4)
+    counts["espn_identities_capable"] = len(t4.t4_capable)
     espn_gsis = depth_lib.build_espn_gsis_crosswalk(RAW, espn_identities=identities)
     dc_rows = []
     dc_ordinal = Counter()
@@ -956,10 +979,9 @@ def pass_reconciliation(conn, rows, hist, new, counts):
     # fails claiming closed history moved. season_pins.frozen_verdict() now
     # refuses this table outright to keep the mistake from being made twice.
     cutoff = season_pins.DEPTH_CHART_EXTRACT_CUTOFF
-    dc_frozen = q("""SELECT COUNT(*) FROM depth_chart
-                     WHERE source_shape='A' OR snapshot_ts <= ?""", cutoff)[0]
-    dc_live = q("""SELECT COUNT(*) FROM depth_chart
-                   WHERE source_shape='B' AND snapshot_ts > ?""", cutoff)[0]
+    _dcw = season_pins.window("depth_chart")
+    dc_frozen = q(f"SELECT COUNT(*) FROM depth_chart WHERE {_dcw.predicate}")[0]
+    dc_live = q(f"SELECT COUNT(*) FROM depth_chart WHERE {_dcw.live_predicate}")[0]
     frozen_ok, frozen_detail = season_pins.frozen_counts_verdict(
         "depth_chart", dc_frozen, dc_live, basis=f"snapshot <= {cutoff}")
     check(2, "depth_chart: the audited extract is present and unchanged",
@@ -967,8 +989,8 @@ def pass_reconciliation(conn, rows, hist, new, counts):
     # Shape A closed when nflverse retired that release format; it can never grow
     # again. Shape B spans the audited window and everything published since, so
     # only the audited part is pinned.
-    b_frozen = q("""SELECT COUNT(*) FROM depth_chart
-                    WHERE source_shape='B' AND snapshot_ts <= ?""", cutoff)[0]
+    b_frozen = q(f"SELECT COUNT(*) FROM depth_chart "
+                 f"WHERE source_shape='B' AND {_dcw.predicate}")[0]
     shape_ok, shape_detail = season_pins.frozen_shape_verdict(
         counts["depth_shape_a"], b_frozen)
     check(2, "depth_chart shape split across the audited window matches B3",
@@ -984,6 +1006,57 @@ def pass_reconciliation(conn, rows, hist, new, counts):
                    f"{live:,} rows, not pinned")
     if dc_live:
         report(f"depth_chart: snapshots after {cutoff}", f"{dc_live:,} rows, not pinned")
+
+    # CONTENT, not just count. Every frozen check above compares row COUNTS, and a
+    # count cannot see a value change: on 2026-08-07 a clean-clone rebuild had
+    # 5,655 settled player_game_stats rows and 331 audited depth_chart rows with
+    # different content -- 316 of them silently missing a gsis_id -- while every
+    # count matched and all 154 checks passed. These digests close that gap.
+    # Excluded columns are documented per table in season_pins.CONTENT_DIGEST_EXCLUDE.
+    #
+    # The frozen population comes from season_pins.FROZEN_WINDOWS -- the ONE
+    # authority. It used to be written out here AND again in content_digest.py,
+    # so the enforcer and the generator each carried their own WHERE clause and
+    # column list for the same contract. Two independent definitions of one
+    # contract eventually disagree, and a correct hash over the wrong population
+    # is still wrong.
+    for tbl in season_pins.governed_tables():
+        spec = season_pins.window(tbl)
+        dg, nrows, _ = season_pins.content_digest(conn, tbl, spec.predicate)
+        ok, detail = season_pins.content_verdict(tbl, dg)
+        if ok is None:
+            report(f"{tbl}: frozen-window content digest", f"{detail}, {nrows:,} rows")
+        else:
+            check(2, f"{tbl}: frozen-window CONTENT is unchanged, not just its count",
+                  ok, detail)
+    # ---- LAYER C: accepted derived identity (Phase 7) --------------------
+    # The percentage gate below can only see how MANY identities are filled. It
+    # cannot see WHICH, so it is blind to the two defects that actually matter:
+    # a previously known person disappearing, and a row being reassigned to a
+    # different person at identical coverage. This compares against reviewed
+    # acceptance instead, and reports the three outcomes separately -- a
+    # regression and a legitimate new resolution need different people.
+    id_verdict, id_findings, id_stats = identity_baseline.check(conn, root=ROOT)
+    report("Layer C: accepted identity baseline",
+           f"{id_stats['accepted']} accepted "
+           f"({id_stats['resolved']} resolved / {id_stats['unresolved']} unresolved), "
+           f"verdict {id_verdict}")
+    check(2, "Layer C: no accepted identity was lost or reassigned",
+          not any(f["verdict"] == identity_baseline.FAIL for f in id_findings),
+          "; ".join(f"{f['case']} {f['espn_id']}: {f['why']}"
+                    for f in id_findings
+                    if f["verdict"] == identity_baseline.FAIL)[:300])
+    # REVIEW_REQUIRED is deliberately NOT a check() failure and deliberately NOT
+    # silent: a legitimate new resolution must not fail a build, but it must also
+    # be impossible to call the identity check green while it sits unaccepted.
+    pending = [f for f in id_findings
+               if f["verdict"] == identity_baseline.REVIEW_REQUIRED]
+    if pending:
+        report("Layer C: REVIEW_REQUIRED -- unaccepted identity changes",
+               "; ".join(f"{f['case']} {f['espn_id']} -> {f['observed']}"
+                         for f in pending[:10])
+               + (f" (+{len(pending) - 10} more)" if len(pending) > 10 else ""))
+
     check(2, "depth_chart holds only rows that carry a real season",
           q("SELECT COUNT(*) FROM depth_chart WHERE season IS NULL")[0] == 0)
     bad = q("SELECT COUNT(*) FROM depth_chart WHERE week IS NOT NULL AND week > 18")[0]
@@ -1258,6 +1331,28 @@ def preflight_raw():
     that is exactly how this database silently carried zero 2012 snap counts.
     A short extract is a corruption risk, so it stops the build.
     """
+    # PRESENCE of every declared mandatory input -- upstream extracts AND the
+    # repository-owned semantic inputs -- comes from the canonical contract, so a
+    # second static list can never drift from it. An audit-hook trace of a real
+    # build opens 12 data files; the old list here named 5.
+    ok, failures = build_inputs.preflight(root=ROOT, raw_dir=RAW)
+    if ok:
+        # Presence is not validity. Malformed T4 is knowable at startup, so it must
+        # not surface minutes later after the database has been built.
+        espn_identities.load(root=ROOT)
+        # Same reasoning for the accepted identity baseline: whether the reviewed
+        # evidence is WELL-FORMED is knowable before a database exists, and is a
+        # separate question from whether this build AGREES with it (that needs the
+        # derived identities, so it runs in pass 2).
+        identity_baseline.load_baseline(root=ROOT)
+    if not ok:
+        print("\n" + "=" * 68, file=sys.stderr)
+        for spec, resolved in failures:
+            print(build_inputs.format_failure(spec, resolved), file=sys.stderr)
+            print("", file=sys.stderr)
+        print("=" * 68, file=sys.stderr)
+        sys.exit(1)
+
     missing, short = [], []
     for name, floor in REQUIRED_RAW:
         path = os.path.join(RAW, name)

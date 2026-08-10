@@ -124,6 +124,15 @@ scripts/data/nfl-db/cache/
 # `!scripts/data/nfl-db/raw/EXTRACT-NOTES.md` here was inert and silently kept
 # the extract provenance out of the repo. The notes now live one level up, at
 # scripts/data/nfl-db/EXTRACT-NOTES.md, where nothing excludes them.
+#
+# THIS BIT US TWICE. cache/b3/espn_identities.json (9 KB, 39 records) is a build
+# INPUT, not a cache: it feeds the crosswalk's T4 tier. Being under cache/ it was
+# never in any clone, and build_db.py skipped T4 silently when it was absent --
+# so a clean clone built green while 316 audited depth_chart rows quietly lost
+# their gsis_id, and the loss looked like upstream drift. It now lives at
+# scripts/data/nfl-db/espn-identities.json and its absence is a hard error.
+# Before adding anything under raw/ or cache/, ask whether the build READS it. If
+# it does, it is an input and belongs outside these directories.
 
 # Forensic audit ledgers: one JSON line per row-level comparison, ~2 GB raw.
 # They compress ~37:1, so the .gz form plus the extracted findings are what get
