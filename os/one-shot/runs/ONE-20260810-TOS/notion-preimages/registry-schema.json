@@ -1,0 +1,14 @@
+{
+  "captured_at": "2026-08-10 (notion-fetch of collection://8503d418-6137-4212-96b9-492ef03d8ba4)",
+  "data_source": "AI Models and Assets (8503d418-6137-4212-96b9-492ef03d8ba4), database 8673b8ac6f424acebc53b6cbf0698251",
+  "mutation": "ADD COLUMN \"Kill / Disable Path\" RICH_TEXT; ADD COLUMN \"Forbidden Operations\" RICH_TEXT — nothing else",
+  "all_property_names_pre": ["Access and Limits", "Approval Status", "Asset ID", "Automation Readiness", "Blast Radius", "Checksum", "Code Version", "Constraint", "Coverage", "Customer Decision Improved", "Customer Value Metrics", "Data Version", "Decision Class", "Decision Needed?", "Decision Route", "Did It Actually Help?", "Expected Customer Outcome", "Failure Visibility", "Flywheel", "Human Exception Path", "Inputs", "Known Weaknesses", "Last Reviewed", "Leverage Types", "Lifecycle", "Name", "Next Improvement", "Outputs", "Owner", "Product Releases", "Production Issues", "Release Stage", "Retirement Criteria", "Reusable By", "Review Cadence", "Risk Level", "Rollback Ready", "Safe Rollback Version", "Test Results", "Type", "Value Stage", "Version", "Weakest Link", "What Becomes Easier to Understand", "What It Does", "What We Are Trying to Improve", "What We Learned From Errors", "Where It Lives"],
+  "confirmed_absent_pre": ["Kill / Disable Path", "Forbidden Operations"],
+  "select_option_constraints_noted": {
+    "Lifecycle": ["Proposed", "Development", "Evaluation", "Production", "Dormant", "Retired"],
+    "Review Cadence": ["Weekly", "Monthly", "Quarterly", "Before release", "After incident"],
+    "Blast Radius": ["Local", "Limited", "Broad", "Company-wide"],
+    "Type": ["Model", "Agent", "Dataset", "Evaluation suite", "Prompt/instructions", "Tool", "Memory store", "Deployment"],
+    "Automation Readiness": ["Do not automate", "Explore manually", "Understand", "Stabilize", "Ready to automate", "Automated", "Monitor and improve", "Retire"]
+  }
+}

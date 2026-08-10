@@ -1,0 +1,21 @@
+{
+  "captured_at": "2026-08-10 (notion-fetch of collection://06a44772-1ae8-4d9d-be70-30741b334b85)",
+  "data_source": "Tasks (06a44772-1ae8-4d9d-be70-30741b334b85), database 96228d0d4aca436e8527053a27f7472c",
+  "mutation_target": "Execution State select — pre-image options verbatim",
+  "Execution State_verbatim": {
+    "description": "",
+    "name": "Execution State",
+    "options": [
+      {"color": "gray", "name": "Ready", "url": "collectionPropertyOption://06a44772-1ae8-4d9d-be70-30741b334b85/U2hcYQ/NmE1MzhjNTktZTBlNS00ZDM3LWJjMWUtNTcxNjJlYmYxYmQx"},
+      {"color": "blue", "name": "Executing", "url": "collectionPropertyOption://06a44772-1ae8-4d9d-be70-30741b334b85/U2hcYQ/OWY1NTJlYWItZTMyZS00Mzg4LWIxNWEtNjlhYjNiNzJjM2Qz"},
+      {"color": "purple", "name": "PR Open", "url": "collectionPropertyOption://06a44772-1ae8-4d9d-be70-30741b334b85/U2hcYQ/YTVlMGI3MzEtOGNhNC00YTA2LThmZWYtYTNjZGY2YzExZmVi"},
+      {"color": "yellow", "name": "CI", "url": "collectionPropertyOption://06a44772-1ae8-4d9d-be70-30741b334b85/U2hcYQ/MDNjMTJlZmQtMmNhNi00Zjk2LTljNDEtYjc5Yjk2OGE2Mzg4"},
+      {"color": "orange", "name": "Review", "url": "collectionPropertyOption://06a44772-1ae8-4d9d-be70-30741b334b85/U2hcYQ/YWRmZDYyYTQtNTA2MC00Zjk3LWE3YTQtNjEwN2YxMTBhMDMw"},
+      {"color": "red", "name": "Approval", "url": "collectionPropertyOption://06a44772-1ae8-4d9d-be70-30741b334b85/U2hcYQ/ZTY1NTllNmUtZDUwMy00MTU1LTgwOTYtNDQyNmI1Y2I3NmUw"},
+      {"color": "red", "name": "Blocked", "url": "collectionPropertyOption://06a44772-1ae8-4d9d-be70-30741b334b85/U2hcYQ/MmRiNzAxMTktNDRhYS00NjI1LWExYmYtM2I0M2IxZGE5ZDRj"},
+      {"color": "green", "name": "Verified", "url": "collectionPropertyOption://06a44772-1ae8-4d9d-be70-30741b334b85/U2hcYQ/YWRjOGZmMmYtYjg4MC00MGM2LWFkNmUtZDE3MWY2ODM3Y2Nl"}
+    ],
+    "type": "select"
+  },
+  "all_property_names_pre": ["AI Executor", "Blocking These Tasks", "Confidentiality", "Constraint", "Created", "Created By", "Customer Problem", "Customer Value Metrics", "Decision", "Due", "Execution Mode", "Execution State", "Leverage Step", "Manual Effort Removed", "Meeting", "Name", "Owner", "Owner Name", "Priority", "Product", "Project", "Proof / Result", "Research", "Reusable Result", "Scope ID", "Status", "Status Name", "Team", "Updated", "Updated By", "Value Stage", "Waiting On", "What Done Means", "Why Archived", "Why It Matters", "Why It's Blocked", "Will We Do This Again?", "Work Link", "Work Tracked In", "ID (auto_increment_id)"]
+}
