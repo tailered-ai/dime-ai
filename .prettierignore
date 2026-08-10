@@ -63,6 +63,15 @@ docs/verification/ci-verify-ledger.sha256
 docs/verification/CI-VERIFY-EXECUTION-LEDGER.md
 docs/verification/evidence/
 
+# P02 frozen contract, its integrity pin, and the document rendered from it.
+# The BYTES of contract.frozen.json are the value contract.sha256 pins, and
+# CONTRACT.md is byte-compared against a fresh render (P02.CONF02). Letting
+# prettier reformat any of them would trip CONTRACT_DRIFT / DOC_DRIFT on a
+# purely cosmetic change. Source under scripts/ci/ stays fully format-gated.
+scripts/ci/contract.frozen.json
+scripts/ci/contract.sha256
+docs/verification/CONTRACT.md
+
 # Vendored / pinned upstream trees — formatting breaks provenance against
 # the pinned upstream commits recorded in CLAUDE.md / skills-lock.json.
 .claude/

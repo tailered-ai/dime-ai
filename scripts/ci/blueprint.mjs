@@ -613,6 +613,29 @@ export const PHASES = [
       u("P02.GATE01", M, "P02.NEG01..NEG04 all PASS", {
         depends_on: ["P02.NEG01", "P02.NEG02", "P02.NEG03", "P02.NEG04"],
       }),
+      // Added during P02 implementation. New permanent IDs only; nothing
+      // previously published was renumbered (blueprint contract 0.1).
+      u(
+        "P02.REG01",
+        M,
+        "Pinned-parser regression: yaml@2.9.0 correctly handles every construct class actually present, and its YAML 1.2 semantics are intentional rather than accidental",
+        {
+          expected_output: "vitest result",
+          exit_requirement:
+            "Every observed construct class exercised; YAML 1.1-vs-1.2 scalar behaviour asserted explicitly",
+        }
+      ),
+      u(
+        "P02.CONF02",
+        M,
+        "Rendered-document conformance: CONTRACT.md is byte-identical to a fresh render of contract.frozen.json",
+        {
+          expected_output: "vitest result + conformance doc exit code",
+          depends_on: ["P02.T08"],
+          exit_requirement:
+            "Stale human documentation cannot silently disagree with the machine contract",
+        }
+      ),
       u("P02.CP01", M, "P02 checkpoint recorded", {
         depends_on: ["P02.GATE01"],
       }),

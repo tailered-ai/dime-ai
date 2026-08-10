@@ -26,7 +26,7 @@
 | `PB` | Control-plane bootstrap | `ACCEPTED` | 15 / 15 | 0 | 0 |
 | `P00` | Pre-flight resolution | `ACCEPTED` | 14 / 14 | 0 | 0 |
 | `P01` | Snapshot resolution and prospective-merge materialization | `ACCEPTED` | 25 / 25 | 0 | 0 |
-| `P02` | Contract extraction, freeze, conformance | `NOT_STARTED` | 0 / 21 | 0 | 0 |
+| `P02` | Contract extraction, freeze, conformance | `ACCEPTED` | 23 / 23 | 0 | 0 |
 | `P03` | Registries, taxonomy, reporter, ledger integration | `NOT_STARTED` | 0 / 18 | 0 | 0 |
 | `P04` | Executor core | `NOT_STARTED` | 0 / 24 | 0 | 0 |
 | `P05` | ASSURANCE — the self-test framework | `NOT_STARTED` | 0 / 20 | 0 | 0 |
@@ -176,13 +176,13 @@
 
 ## P02 — Contract extraction, freeze, conformance
 
-**State:** `NOT_STARTED`
+**State:** `ACCEPTED`
 
 **Assurance property:** There is exactly one machine-readable definition of the merge contract, frozen and checksummed, and the runtime never parses YAML.
 
 **Depends on:** `P01`
 
-**Progress (MANDATORY):** 0 / 21
+**Progress (MANDATORY):** 23 / 23
 
 **Entry checklist**
 
@@ -201,27 +201,29 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P02.T01` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Census consumer — read the P00.T04 construct inventory as the parser allowlist |
-| `P02.T02` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Canonicalizer — stable key order and expression normalization |
-| `P02.T03` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Per-workflow sha256 hashing |
-| `P02.T04` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Emitter with schema_version and parser_version |
-| `P02.T05` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Allowlist enforcement — abort on any non-allowlisted construct, never partial output |
-| `P02.T06` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Generate contract.sha256 |
-| `P02.T07` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Conformance test — workflow change without regeneration fails |
-| `P02.T08` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Render docs/verification/CONTRACT.md |
-| `P02.TEST01` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Regeneration is byte-stable across runs |
-| `P02.TEST02` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Every required status context maps to a check id |
-| `P02.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Non-allowlisted construct aborts generation with NO partial file written |
-| `P02.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Workflow mutated without regeneration yields CONTRACT-DRIFT |
-| `P02.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Hand-edited frozen contract yields sha256 mismatch |
-| `P02.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Required context with no local mapping fails, naming the context |
-| `P02.CONF01` | CONFORMANCE | MANDATORY | `NOT_STARTED` | 0 | — | Conformance: frozen contract matches the workflow tree |
-| `P02.AUD01` | AUDIT | MANDATORY | `NOT_STARTED` | 0 | — | Audit: zero YAML parsing in any runtime execution path |
-| `P02.EV01` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: contract.frozen.json |
-| `P02.EV02` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: contract.sha256 |
-| `P02.EV03` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: construct census as consumed |
-| `P02.GATE01` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | P02.NEG01..NEG04 all PASS |
-| `P02.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P02 checkpoint recorded |
+| `P02.T01` | TASK | MANDATORY | `PASS` | 1 | `a7863a04df4e` `ae32cd8de4b8` | Census consumer — read the P00.T04 construct inventory as the parser allowlist |
+| `P02.T02` | TASK | MANDATORY | `PASS` | 1 | `a7863a04df4e` `ae32cd8de4b8` | Canonicalizer — stable key order and expression normalization |
+| `P02.T03` | TASK | MANDATORY | `PASS` | 1 | `a7863a04df4e` `ae32cd8de4b8` | Per-workflow sha256 hashing |
+| `P02.T04` | TASK | MANDATORY | `PASS` | 1 | `a7863a04df4e` `ae32cd8de4b8` | Emitter with schema_version and parser_version |
+| `P02.T05` | TASK | MANDATORY | `PASS` | 1 | `a7863a04df4e` `ae32cd8de4b8` | Allowlist enforcement — abort on any non-allowlisted construct, never partial output |
+| `P02.T06` | TASK | MANDATORY | `PASS` | 1 | `a7863a04df4e` `ae32cd8de4b8` | Generate contract.sha256 |
+| `P02.T07` | TASK | MANDATORY | `PASS` | 1 | `a7863a04df4e` `ae32cd8de4b8` | Conformance test — workflow change without regeneration fails |
+| `P02.T08` | TASK | MANDATORY | `PASS` | 1 | `a7863a04df4e` `ae32cd8de4b8` | Render docs/verification/CONTRACT.md |
+| `P02.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `7be688044165` | Regeneration is byte-stable across runs |
+| `P02.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `7be688044165` | Every required status context maps to a check id |
+| `P02.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `7be688044165` | Non-allowlisted construct aborts generation with NO partial file written |
+| `P02.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `7be688044165` | Workflow mutated without regeneration yields CONTRACT-DRIFT |
+| `P02.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `7be688044165` | Hand-edited frozen contract yields sha256 mismatch |
+| `P02.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `7be688044165` | Required context with no local mapping fails, naming the context |
+| `P02.REG01` | REGRESSION | MANDATORY | `PASS` | 1 | `7be688044165` | Pinned-parser regression: yaml@2.9.0 correctly handles every construct class actually present, and its YAML 1.2 semantics are intentional rather than accidental |
+| `P02.CONF01` | CONFORMANCE | MANDATORY | `PASS` | 1 | `7be688044165` `ae32cd8de4b8` | Conformance: frozen contract matches the workflow tree |
+| `P02.CONF02` | CONFORMANCE | MANDATORY | `PASS` | 1 | `7be688044165` `ae32cd8de4b8` | Rendered-document conformance: CONTRACT.md is byte-identical to a fresh render of contract.frozen.json |
+| `P02.AUD01` | AUDIT | MANDATORY | `PASS` | 1 | `12d5fa4efd7e` `7be688044165` | Audit: zero YAML parsing in any runtime execution path |
+| `P02.EV01` | EVIDENCE | MANDATORY | `PASS` | 1 | `ac630d2ea196` | Evidence: contract.frozen.json |
+| `P02.EV02` | EVIDENCE | MANDATORY | `PASS` | 1 | `46efbe66e64b` `21ba3fa355a8` | Evidence: contract.sha256 |
+| `P02.EV03` | EVIDENCE | MANDATORY | `PASS` | 1 | `207733e171d2` | Evidence: construct census as consumed |
+| `P02.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `ae32cd8de4b8` `7be688044165` `46efbe66e64b` | P02.NEG01..NEG04 all PASS |
+| `P02.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `1a36ea25a1e4` `ae32cd8de4b8` | P02 checkpoint recorded |
 
 ## P03 — Registries, taxonomy, reporter, ledger integration
 
@@ -657,6 +659,9 @@
 | `DEF-014` | `P01.CLN01` | HIGH | `CLOSED` | Interrupted run had already emitted a snapshot certificate on stdout |
 | `DEF-015` | `P01.GATE01` | LOW | `CLOSED` | False FAIL in P01 sweep: prettier --check given .gitignore, which has no parser |
 | `DEF-016` | `P01.CP01` | LOW | `CLOSED` | CP01 evidence under-specified the unrelated-work verification (one external change, two visibility changes) |
+| `DEF-017` | `P02.T04` | HIGH | `CLOSED` | Check runnability marked LOCAL gates as CI-ONLY because the job uploads an artifact |
+| `DEF-018` | `P02.T04` | HIGH | `CLOSED` | Required external tools under-detected: TOOL_SIGNATURES matched JSON-escaped text |
+| `DEF-019` | `P02.GATE01` | HIGH | `CLOSED` | AMD-002 recorded a reason that never took effect (blueprint edit failed; batch continued and wrote a vacuous amendment) |
 
 ## Checkpoints
 
@@ -666,3 +671,4 @@
 | `P00` | **DO NOT PROCEED (blocking: DEF-002, DEF-003)** | 2026-08-10T08:32:07.069Z | `9a0d5373db77` |
 | `P00` | **PROCEED TO P01 (supersedes CP01; DEF-002/003/004 closed)** | 2026-08-10T08:54:23.461Z | `56e2ba284da9` |
 | `P01` | **PROCEED TO P02** | 2026-08-10T09:24:40.039Z | `51ccc53de3f1` |
+| `P02` | **PROCEED TO P03** | 2026-08-10T09:51:10.828Z | `1a36ea25a1e4` |

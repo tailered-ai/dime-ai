@@ -1,0 +1,41 @@
+P02 VALIDATION SWEEP
+pwd=/Users/danielwalker/src/ai-sports-betting-dime-ai branch=feat/ci-verify-control-plane HEAD=b7f36723b20e1d0de87607b53d64ebf1601ecf49
+origin/main=4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6
+Exit codes captured DIRECTLY (DEF-007); negatives assert declared reasons (DEF-008).
+
+P02 suite                    -> exit 0
+ Test Files  1 passed (1)
+      Tests  31 passed (31)
+P01 suite (regression)       -> exit 0
+      Tests  20 passed (20)
+PB suite (regression)        -> exit 0
+      Tests  35 passed (35)
+scripts/ subset              -> exit 0
+ Test Files  33 passed (33)
+      Tests  479 passed (479)
+tsc --noEmit                 -> exit 0
+prettier (controlled files)  -> exit 0
+All matched files use Prettier code style!
+  NOTE: contract.frozen.json / contract.sha256 / CONTRACT.md are prettier-ignored
+  for cause — their exact bytes are what contract.sha256 pins and what P02.CONF02
+  byte-compares. Source under scripts/ci/ remains fully format-gated.
+ledger verify                -> exit 0
+[ledger] VERIFY OK — no tampering, drift, or stale evidence
+contract conformance         -> exit 0
+[conformance] PASS — 40 workflows, 51 checks, 9 required contexts mapped
+CONTRACT.md conformance      -> exit 0
+[conformance] PASS — CONTRACT.md matches the machine contract
+YAML isolation audit         -> exit 0
+[yaml-audit] PASS — extraction is the only YAML-reading boundary
+provenance audit (P01)       -> exit 0
+[provenance-audit] PASS — no implementation module bypasses snapshot.mjs
+actions-security contract    -> exit 0
+{"status":"PASS","workflowsChecked":40,"compositesChecked":0,"actionReferences":120,"productionSecretReferences":25,"failures":[]}
+federation docs              -> exit 0
+federation docs: OK — no dangling paths, ordinals, schema drift, or dead routing
+frozen install (parser pin)  -> exit 0
+yaml pin: 2.9.0 | resolved: 2.9.0
+
+### contract identity
+contract sha256 : 58087d2a8262064658cac283703777dce60e414f323fbb5f8b54fb6885e172d5
+pin file        : 58087d2a8262064658cac283703777dce60e414f323fbb5f8b54fb6885e172d5  contract.frozen.json

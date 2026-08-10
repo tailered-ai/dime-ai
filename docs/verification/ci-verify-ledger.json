@@ -25,6 +25,44 @@
       "superseded_blueprint_sha256": "c6fedcf41a842f55786737e2f8cd64c938b2cd626ba3dfb0b5518dcbeb6d139d",
       "superseded_ledger_impl_sha256": "690ba34fb1e40871ea1a7d29f0c3afc28ed4ba2b05f81432a11cd9f96687873d",
       "superseded_source": "GEN-000"
+    },
+    {
+      "at": "2026-08-10T09:49:21.695Z",
+      "defect": "P02.REG01,P02.CONF02",
+      "evidence": [
+        {
+          "bytes": 1314,
+          "path": "docs/verification/evidence/p02/AMD-002-rationale.md",
+          "sha256": "cd5580eb55700d9141805198bbdceae2756ffb911f73fa7d8607dd25391e6f3b"
+        }
+      ],
+      "genesis_corrections": [],
+      "id": "AMD-002",
+      "new_blueprint_sha256": "f2e7328f8871cc9678ee397b1bba9feb293ac885df1036ef4c105b3f68aa56e3",
+      "new_ledger_impl_sha256": "eeea59ca437d80ad56f966e5b887aa820807c1bb218b6cac97b6405a3a3eb194",
+      "reason": "P02 implementation reality: declare P02.REG01 (pinned-parser regression) and P02.CONF02 (rendered-document conformance)",
+      "superseded_blueprint_sha256": "f2e7328f8871cc9678ee397b1bba9feb293ac885df1036ef4c105b3f68aa56e3",
+      "superseded_ledger_impl_sha256": "eeea59ca437d80ad56f966e5b887aa820807c1bb218b6cac97b6405a3a3eb194",
+      "superseded_source": "AMD-001"
+    },
+    {
+      "at": "2026-08-10T09:50:31.877Z",
+      "defect": "DEF-019",
+      "evidence": [
+        {
+          "bytes": 1609,
+          "path": "docs/verification/evidence/p02/AMD-003-rationale.md",
+          "sha256": "999a404d7889131d585e55c775191e4916ae8c1196763a2a035d18df15dbf723"
+        }
+      ],
+      "genesis_corrections": [],
+      "id": "AMD-003",
+      "new_blueprint_sha256": "4728953d1f93c37349a1bdbca49fb9f0195823727b33b661ea85f0cb383e97bd",
+      "new_ledger_impl_sha256": "eeea59ca437d80ad56f966e5b887aa820807c1bb218b6cac97b6405a3a3eb194",
+      "reason": "DEF-019 correction: actually declare P02.REG01 and P02.CONF02 (AMD-002 recorded this reason without effecting it)",
+      "superseded_blueprint_sha256": "f2e7328f8871cc9678ee397b1bba9feb293ac885df1036ef4c105b3f68aa56e3",
+      "superseded_ledger_impl_sha256": "eeea59ca437d80ad56f966e5b887aa820807c1bb218b6cac97b6405a3a3eb194",
+      "superseded_source": "AMD-002"
     }
   ],
   "blueprint_version": "1.0.0",
@@ -76,6 +114,18 @@
       ],
       "phase": "P01",
       "recorded_at": "2026-08-10T09:24:40.039Z"
+    },
+    {
+      "decision": "PROCEED TO P03",
+      "evidence": [
+        {
+          "bytes": 5189,
+          "path": "docs/verification/evidence/p02/CP01-checkpoint.md",
+          "sha256": "1a36ea25a1e4907a55aca0712f8db4734f9d940a0227bf6572e27eadfcfe0cc0"
+        }
+      ],
+      "phase": "P02",
+      "recorded_at": "2026-08-10T09:51:10.828Z"
     }
   ],
   "decisions": [
@@ -981,6 +1031,150 @@
       "severity": "LOW",
       "status": "CLOSED",
       "title": "CP01 evidence under-specified the unrelated-work verification (one external change, two visibility changes)"
+    },
+    {
+      "affected_gate": "P02.T04",
+      "blast_radius": "TypeScript Check, Vitest, Security Audit, 01-pr-proof-contract, 05-workflow-security would have been permanently skipped by P06 while the verifier claimed parity",
+      "closed_at": "2026-08-10T09:48:47.234Z",
+      "corrective_action": "Step-level classification + NON_GATING_ACTIONS (artifact upload/download, SARIF upload); check runnability = worst case over GATING steps only; every step still represented with its own runnability",
+      "detected_by": "P02.T04",
+      "evidence": [
+        {
+          "bytes": 2149,
+          "path": "docs/verification/evidence/p02/DEF-017.md",
+          "sha256": "510fa5113944602ac4f746ef0687248a805e1c37d36c23564f0adc57c99bbc28"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:48:47.160Z",
+          "flags": {
+            "blast_radius": "TypeScript Check, Vitest, Security Audit, 01-pr-proof-contract, 05-workflow-security would have been permanently skipped by P06 while the verifier claimed parity",
+            "corrective_action": "Step-level classification + NON_GATING_ACTIONS (artifact upload/download, SARIF upload); check runnability = worst case over GATING steps only; every step still represented with its own runnability",
+            "evidence": [
+              "docs/verification/evidence/p02/DEF-017.md"
+            ],
+            "regression_test_id": "P02.REG01 'treats artifact and SARIF upload as non-gating side effects'",
+            "retest_result": "PASS — LOCAL 18 / LOCAL+TOOL 11 / CI-ONLY 22; all 257 steps represented",
+            "root_cause": "classifyRunnability marked a whole job CI-ONLY if ANY step used a CI-only action; actions/upload-artifact is a side-effect sink present in most gating jobs",
+            "status": "CORRECTING"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:48:47.233Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p02/DEF-017.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-017",
+      "opened_at": "2026-08-10T09:41:27.457Z",
+      "regression_test_id": "P02.REG01 'treats artifact and SARIF upload as non-gating side effects'",
+      "retest_result": "PASS — LOCAL 18 / LOCAL+TOOL 11 / CI-ONLY 22; all 257 steps represented",
+      "root_cause": "classifyRunnability marked a whole job CI-ONLY if ANY step used a CI-only action; actions/upload-artifact is a side-effect sink present in most gating jobs",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "Check runnability marked LOCAL gates as CI-ONLY because the job uploads an artifact"
+    },
+    {
+      "affected_gate": "P02.T04",
+      "blast_radius": "05-workflow-security and 03-semgrep-blocking reported LOCAL with no tools; P06 would have run gates whose binaries are absent, defeating the missing-tool BLOCKED rule",
+      "closed_at": "2026-08-10T09:48:47.340Z",
+      "corrective_action": "Match raw run + uses text only; escaped renderings are never used for detection",
+      "detected_by": "P02.T04",
+      "evidence": [
+        {
+          "bytes": 1635,
+          "path": "docs/verification/evidence/p02/DEF-018.md",
+          "sha256": "6e94e8f11348a84ce5511bdfc269ba4d2af13fd2c0c441425e6eed763b0012d7"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:48:47.289Z",
+          "flags": {
+            "blast_radius": "05-workflow-security and 03-semgrep-blocking reported LOCAL with no tools; P06 would have run gates whose binaries are absent, defeating the missing-tool BLOCKED rule",
+            "corrective_action": "Match raw run + uses text only; escaped renderings are never used for detection",
+            "evidence": [
+              "docs/verification/evidence/p02/DEF-018.md"
+            ],
+            "regression_test_id": "P02.REG01 'classifies tool requirements from RAW text'",
+            "retest_result": "PASS — zizmor, semgrep, osv-scanner, gitleaks, docker, trivy, playwright-browsers all detected",
+            "root_cause": "TOOL_SIGNATURES matched JSON.stringify(step); escaping turned install \"zizmor into install \\\"zizmor so the pattern stopped matching",
+            "status": "CORRECTING"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:48:47.337Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p02/DEF-018.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-018",
+      "opened_at": "2026-08-10T09:42:49.549Z",
+      "regression_test_id": "P02.REG01 'classifies tool requirements from RAW text'",
+      "retest_result": "PASS — zizmor, semgrep, osv-scanner, gitleaks, docker, trivy, playwright-browsers all detected",
+      "root_cause": "TOOL_SIGNATURES matched JSON.stringify(step); escaping turned install \"zizmor into install \\\"zizmor so the pattern stopped matching",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "Required external tools under-detected: TOOL_SIGNATURES matched JSON-escaped text"
+    },
+    {
+      "affected_gate": "PB.T06",
+      "blast_radius": "Amendment/audit chain only — a misleading provenance record; no unit status, evidence hash or contract byte was affected",
+      "closed_at": "2026-08-10T09:50:32.215Z",
+      "corrective_action": "AMD-002 retained (append-only); AMD-003 records the real change; edit re-applied against the current file shape with its effect asserted via sync before any amendment is written",
+      "detected_by": "P02.GATE01",
+      "evidence": [
+        {
+          "bytes": 2449,
+          "path": "docs/verification/evidence/p02/DEF-019.md",
+          "sha256": "79478d4736715406d64c72ea915c1a45edc049f70f81a454d06ec4ec07590a87"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T09:50:32.157Z",
+          "flags": {
+            "blast_radius": "Amendment/audit chain only — a misleading provenance record; no unit status, evidence hash or contract byte was affected",
+            "corrective_action": "AMD-002 retained (append-only); AMD-003 records the real change; edit re-applied against the current file shape with its effect asserted via sync before any amendment is written",
+            "evidence": [
+              "docs/verification/evidence/p02/DEF-019.md"
+            ],
+            "regression_test_id": "sync reported 'added 2 unit(s): P02.REG01, P02.CONF02' before AMD-003 was written",
+            "retest_result": "PASS — both units declared and recorded; ledger verify exit 0",
+            "root_cause": "Edit matched a pre-prettier source shape; batch continued past the failed precondition and wrote an amendment for a change that had not landed",
+            "status": "CORRECTING"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T09:50:32.213Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p02/DEF-019.md"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-019",
+      "opened_at": "2026-08-10T09:50:06.854Z",
+      "regression_test_id": "sync reported 'added 2 unit(s): P02.REG01, P02.CONF02' before AMD-003 was written",
+      "retest_result": "PASS — both units declared and recorded; ledger verify exit 0",
+      "root_cause": "Edit matched a pre-prettier source shape; batch continued past the failed precondition and wrote an amendment for a change that had not landed",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "AMD-002 recorded a reason that never took effect (blueprint edit failed; batch continued and wrote a vacuous amendment)"
     }
   ],
   "genesis": {
@@ -1179,8 +1373,39 @@
         "P02.CP01 recorded"
       ],
       "id": "P02",
-      "state": "NOT_STARTED",
-      "state_history": [],
+      "state": "ACCEPTED",
+      "state_history": [
+        {
+          "at": "2026-08-10T09:34:34.637Z",
+          "from": "NOT_STARTED",
+          "to": "PRECONDITIONS"
+        },
+        {
+          "at": "2026-08-10T09:49:21.911Z",
+          "from": "PRECONDITIONS",
+          "to": "IMPLEMENTED"
+        },
+        {
+          "at": "2026-08-10T09:49:21.971Z",
+          "from": "IMPLEMENTED",
+          "to": "TESTING"
+        },
+        {
+          "at": "2026-08-10T09:49:22.025Z",
+          "from": "TESTING",
+          "to": "AUDITING"
+        },
+        {
+          "at": "2026-08-10T09:49:22.230Z",
+          "from": "AUDITING",
+          "to": "CHECKPOINT_REVIEW"
+        },
+        {
+          "at": "2026-08-10T09:51:10.887Z",
+          "from": "CHECKPOINT_REVIEW",
+          "to": "ACCEPTED"
+        }
+      ],
       "title": "Contract extraction, freeze, conformance"
     },
     {
@@ -2602,13 +2827,24 @@
       "validation": null
     },
     "P02.AUD01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:49.245Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 1062,
+          "path": "docs/verification/evidence/p02/AUD01-yaml-isolation.txt",
+          "sha256": "12d5fa4efd7e7318822cff740c9ea31ca9f1ba3be0f4526643936a237b7edbb6"
+        },
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.AUD01",
@@ -2618,19 +2854,30 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:49.186Z",
+      "status": "PASS",
       "title": "Audit: zero YAML parsing in any runtime execution path",
       "validation": null
     },
     "P02.CONF01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:49.130Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.CONF01",
@@ -2640,21 +2887,68 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:49.077Z",
+      "status": "PASS",
       "title": "Conformance: frozen contract matches the workflow tree",
       "validation": null
     },
-    "P02.CP01": {
-      "attempts": 0,
+    "P02.CONF02": {
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:50:32.108Z",
+      "defects": [],
+      "depends_on": [
+        "P02.T08"
+      ],
+      "evidence": [
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
+      "exit_requirement": "Stale human documentation cannot silently disagree with the machine contract",
+      "expected_output": "vitest result + conformance doc exit code",
+      "flaky": false,
+      "id": "P02.CONF02",
+      "inputs": [],
+      "kind": "CONFORMANCE",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P02",
+      "remediation": null,
+      "started_at": "2026-08-10T09:50:32.055Z",
+      "status": "PASS",
+      "title": "Rendered-document conformance: CONTRACT.md is byte-identical to a fresh render of contract.frozen.json",
+      "validation": null
+    },
+    "P02.CP01": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T09:51:10.775Z",
       "defects": [],
       "depends_on": [
         "P02.GATE01"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 5189,
+          "path": "docs/verification/evidence/p02/CP01-checkpoint.md",
+          "sha256": "1a36ea25a1e4907a55aca0712f8db4734f9d940a0227bf6572e27eadfcfe0cc0"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.CP01",
@@ -2664,19 +2958,25 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:51:10.700Z",
+      "status": "PASS",
       "title": "P02 checkpoint recorded",
       "validation": null
     },
     "P02.EV01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:49.362Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2868,
+          "path": "docs/verification/evidence/p02/raw/T01-census-yaml290.json",
+          "sha256": "ac630d2ea1963da624d809a1f139834c76aad0ba98768f31d0760ad960fdf5b1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.EV01",
@@ -2686,19 +2986,30 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:49.307Z",
+      "status": "PASS",
       "title": "Evidence: contract.frozen.json",
       "validation": null
     },
     "P02.EV02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:49.490Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 217,
+          "path": "docs/verification/evidence/p02/raw/T01-parser-compare.txt",
+          "sha256": "46efbe66e64b3a90fe15c2d57a716cbbfe6fb393961ea9690c51c50e14265022"
+        },
+        {
+          "bytes": 3648,
+          "path": "docs/verification/evidence/p02/raw/T01-parser-compare.mjs",
+          "sha256": "21ba3fa355a82d539bb5d09be38ca4f460a5070508e8672758506fae33e1a5ce"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.EV02",
@@ -2708,19 +3019,25 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:49.425Z",
+      "status": "PASS",
       "title": "Evidence: contract.sha256",
       "validation": null
     },
     "P02.EV03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:49.618Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 1604,
+          "path": "docs/verification/evidence/p02/raw/T04-runnability.txt",
+          "sha256": "207733e171d20ed7a75024700eb622dc1ac0e7f4b815faf50f01d2349ccb3344"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.EV03",
@@ -2730,16 +3047,16 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:49.562Z",
+      "status": "PASS",
       "title": "Evidence: construct census as consumed",
       "validation": null
     },
     "P02.GATE01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:49:22.128Z",
       "defects": [],
       "depends_on": [
         "P02.NEG01",
@@ -2747,7 +3064,23 @@
         "P02.NEG03",
         "P02.NEG04"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        },
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        },
+        {
+          "bytes": 217,
+          "path": "docs/verification/evidence/p02/raw/T01-parser-compare.txt",
+          "sha256": "46efbe66e64b3a90fe15c2d57a716cbbfe6fb393961ea9690c51c50e14265022"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.GATE01",
@@ -2757,19 +3090,25 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:49:22.078Z",
+      "status": "PASS",
       "title": "P02.NEG01..NEG04 all PASS",
       "validation": null
     },
     "P02.NEG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:48.678Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.NEG01",
@@ -2779,19 +3118,25 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:48.623Z",
+      "status": "PASS",
       "title": "Non-allowlisted construct aborts generation with NO partial file written",
       "validation": null
     },
     "P02.NEG02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:48.787Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.NEG02",
@@ -2801,19 +3146,25 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:48.737Z",
+      "status": "PASS",
       "title": "Workflow mutated without regeneration yields CONTRACT-DRIFT",
       "validation": null
     },
     "P02.NEG03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:48.903Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.NEG03",
@@ -2823,19 +3174,25 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:48.842Z",
+      "status": "PASS",
       "title": "Hand-edited frozen contract yields sha256 mismatch",
       "validation": null
     },
     "P02.NEG04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:49.008Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.NEG04",
@@ -2845,21 +3202,61 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:48.949Z",
+      "status": "PASS",
       "title": "Required context with no local mapping fails, naming the context",
       "validation": null
     },
-    "P02.T01": {
-      "attempts": 0,
+    "P02.REG01": {
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:50:32.004Z",
+      "defects": [],
+      "depends_on": [],
+      "evidence": [
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        }
+      ],
+      "exit_requirement": "Every observed construct class exercised; YAML 1.1-vs-1.2 scalar behaviour asserted explicitly",
+      "expected_output": "vitest result",
+      "flaky": false,
+      "id": "P02.REG01",
+      "inputs": [],
+      "kind": "REGRESSION",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P02",
+      "remediation": null,
+      "started_at": "2026-08-10T09:50:31.944Z",
+      "status": "PASS",
+      "title": "Pinned-parser regression: yaml@2.9.0 correctly handles every construct class actually present, and its YAML 1.2 semantics are intentional rather than accidental",
+      "validation": null
+    },
+    "P02.T01": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T09:48:47.515Z",
       "defects": [],
       "depends_on": [
         "P00.T04"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2293,
+          "path": "docs/verification/evidence/p02/T01-T08-implementation.md",
+          "sha256": "a7863a04df4e9ed127bc7a8e1820492f87b855eb9a4120176e1c39569df4ba41"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.T01",
@@ -2869,19 +3266,30 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:47.406Z",
+      "status": "PASS",
       "title": "Census consumer — read the P00.T04 construct inventory as the parser allowlist",
       "validation": null
     },
     "P02.T02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:47.627Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2293,
+          "path": "docs/verification/evidence/p02/T01-T08-implementation.md",
+          "sha256": "a7863a04df4e9ed127bc7a8e1820492f87b855eb9a4120176e1c39569df4ba41"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.T02",
@@ -2891,19 +3299,30 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:47.570Z",
+      "status": "PASS",
       "title": "Canonicalizer — stable key order and expression normalization",
       "validation": null
     },
     "P02.T03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:47.754Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2293,
+          "path": "docs/verification/evidence/p02/T01-T08-implementation.md",
+          "sha256": "a7863a04df4e9ed127bc7a8e1820492f87b855eb9a4120176e1c39569df4ba41"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.T03",
@@ -2913,19 +3332,30 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:47.679Z",
+      "status": "PASS",
       "title": "Per-workflow sha256 hashing",
       "validation": null
     },
     "P02.T04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:47.865Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2293,
+          "path": "docs/verification/evidence/p02/T01-T08-implementation.md",
+          "sha256": "a7863a04df4e9ed127bc7a8e1820492f87b855eb9a4120176e1c39569df4ba41"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.T04",
@@ -2935,19 +3365,30 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:47.806Z",
+      "status": "PASS",
       "title": "Emitter with schema_version and parser_version",
       "validation": null
     },
     "P02.T05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:47.982Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2293,
+          "path": "docs/verification/evidence/p02/T01-T08-implementation.md",
+          "sha256": "a7863a04df4e9ed127bc7a8e1820492f87b855eb9a4120176e1c39569df4ba41"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.T05",
@@ -2957,19 +3398,30 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:47.922Z",
+      "status": "PASS",
       "title": "Allowlist enforcement — abort on any non-allowlisted construct, never partial output",
       "validation": null
     },
     "P02.T06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:48.098Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2293,
+          "path": "docs/verification/evidence/p02/T01-T08-implementation.md",
+          "sha256": "a7863a04df4e9ed127bc7a8e1820492f87b855eb9a4120176e1c39569df4ba41"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.T06",
@@ -2979,19 +3431,30 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:48.041Z",
+      "status": "PASS",
       "title": "Generate contract.sha256",
       "validation": null
     },
     "P02.T07": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:48.203Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2293,
+          "path": "docs/verification/evidence/p02/T01-T08-implementation.md",
+          "sha256": "a7863a04df4e9ed127bc7a8e1820492f87b855eb9a4120176e1c39569df4ba41"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.T07",
@@ -3001,19 +3464,30 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:48.149Z",
+      "status": "PASS",
       "title": "Conformance test — workflow change without regeneration fails",
       "validation": null
     },
     "P02.T08": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:48.325Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2293,
+          "path": "docs/verification/evidence/p02/T01-T08-implementation.md",
+          "sha256": "a7863a04df4e9ed127bc7a8e1820492f87b855eb9a4120176e1c39569df4ba41"
+        },
+        {
+          "bytes": 2091,
+          "path": "docs/verification/evidence/p02/P02-validation-sweep.txt",
+          "sha256": "ae32cd8de4b84d6fae00023a21fa0d6a669df2c3932499e4ebefff6ac6217da1"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.T08",
@@ -3023,19 +3497,25 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:48.270Z",
+      "status": "PASS",
       "title": "Render docs/verification/CONTRACT.md",
       "validation": null
     },
     "P02.TEST01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:48.446Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.TEST01",
@@ -3045,19 +3525,25 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:48.381Z",
+      "status": "PASS",
       "title": "Regeneration is byte-stable across runs",
       "validation": null
     },
     "P02.TEST02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T09:48:48.568Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 5000,
+          "path": "docs/verification/evidence/p02/P02-suite.txt",
+          "sha256": "7be688044165fbf7d61c6c62e6802739d7f98ecafb96741f350bd0d47c68cf75"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P02.TEST02",
@@ -3067,8 +3553,8 @@
       "notes": [],
       "phase": "P02",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T09:48:48.508Z",
+      "status": "PASS",
       "title": "Every required status context maps to a check id",
       "validation": null
     },
