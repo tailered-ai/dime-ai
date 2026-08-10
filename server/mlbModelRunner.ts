@@ -46,6 +46,58 @@ const __dirname = path.dirname(__filename);
 const ENGINE_PATH = path.join(__dirname, "MLBAIModel.py");
 const PYTHON = "/usr/bin/python3"; // version-agnostic path; on the Railway image (Debian bookworm) this is apt python3, i.e. 3.11
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CANONICAL DATE BASIS
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * The one place a UTC instant becomes an MLB calendar day.
+ *
+ * Internal basis is UTC throughout: `modelRunAt` is documented in
+ * drizzle/schema.ts as "UTC timestamp (ms) when the model last ran for this
+ * game", and every instant this module handles is epoch ms. `games.gameDate`
+ * is NOT a UTC date — it is the venue-local schedule date (MLB `officialDate`),
+ * and where the provider omits it, server/mlbScheduleSync.ts derives it as the
+ * EASTERN date of the start instant with the comment "NEVER the UTC calendar
+ * date (late games cross UTC midnight)".
+ *
+ * So any comparison between an instant and a gameDate must cross the boundary
+ * here, in America/New_York. `en-CA` yields YYYY-MM-DD — the same formatter
+ * mlbScheduleSync.todayEasternDate() uses, deliberately, so the two agree byte
+ * for byte.
+ */
+export function easternCalendarDate(instant: number | Date): string {
+  const d = instant instanceof Date ? instant : new Date(instant);
+  return d.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+}
+
+/** Today's MLB slate date (Eastern), or an offset from it. */
+export function mlbSlateDate(offsetDays = 0): string {
+  return easternCalendarDate(Date.now() + offsetDays * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * Is a stored model run still valid for the date the row now carries?
+ *
+ * Intent (unchanged): a game row whose `modelRunAt` was stamped on a DIFFERENT
+ * calendar day than its `gameDate` was modelled against another day's data —
+ * mlbScheduleSync can relocate a row's gameDate — so it must be re-modelled.
+ *
+ * The defect this replaces compared `new Date(modelRunAt).toISOString()
+ * .slice(0, 10)` — a UTC calendar date — against the Eastern/venue-local
+ * gameDate. The two agree only while UTC and Eastern share a calendar day, so
+ * the guard INVERTED every night from 00:00 UTC (20:00 EDT) to midnight
+ * Eastern: every game modelled inside that window was re-modelled on every
+ * 5-minute tick, including games already under way, overwriting their pregame
+ * projection with post-first-pitch lines.
+ */
+export function isModelRunFreshForGameDate(
+  modelRunAtMs: number,
+  gameDateStr: string
+): boolean {
+  if (!Number.isFinite(modelRunAtMs)) return false;
+  return easternCalendarDate(modelRunAtMs) === gameDateStr;
+}
+
 const MLB_MODEL_CHILD_TEXT_ENV = [
   "LANG",
   "LC_ALL",
@@ -2759,9 +2811,69 @@ export function buildLineupOrder(
   return result;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ENGINE CONCURRENCY BOUND
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * The Python engine is CPU-bound Monte Carlo work (400k sims per game, run
+ * serially inside one subprocess for the whole batch). Nothing about it is
+ * abortable, so it is bounded rather than cancelled: at most ONE engine
+ * subprocess exists process-wide, and callers queue FIFO behind it.
+ *
+ * Callers that can genuinely overlap: the MLB cycle's model job, the
+ * LineupWatcher's trigger inside the same cycle, the Layer-3 immediate re-run
+ * fired and NOT awaited from refreshAnApiOdds, and the admin tRPC procedures.
+ * Without this bound, two or more full-slate Monte Carlo batches can run at
+ * once on a shared Railway container.
+ *
+ * The queue is bounded too: an unbounded one converts a CPU stall into
+ * unbounded memory growth and a backlog that outlives the reason for it.
+ * Overflow fails loudly and immediately — the caller's error path already
+ * treats a model failure as non-fatal, and the next 5-minute tick retries.
+ */
+export const MLB_ENGINE_MAX_QUEUE = 8;
+let engineTail: Promise<void> = Promise.resolve();
+let engineQueued = 0;
+
+/** Test/telemetry seam: how many engine batches are queued or running. */
+export function getMlbEngineQueueDepth(): number {
+  return engineQueued;
+}
+
+export async function runWithMlbEngineSlot<T>(
+  label: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  if (engineQueued >= MLB_ENGINE_MAX_QUEUE) {
+    throw new Error(
+      `[MLBModelRunner] engine queue full (${engineQueued}/${MLB_ENGINE_MAX_QUEUE}) — refusing ${label}`
+    );
+  }
+  engineQueued += 1;
+  const prior = engineTail;
+  let release!: () => void;
+  engineTail = new Promise<void>(resolve => {
+    release = resolve;
+  });
+  try {
+    // `prior` never rejects: every holder resolves its own gate in `finally`.
+    await prior;
+    return await fn();
+  } finally {
+    engineQueued -= 1;
+    release();
+  }
+}
+
 async function runPythonEngine(
   inputs: EngineInput[]
 ): Promise<MlbModelResult[]> {
+  return runWithMlbEngineSlot(`engine batch of ${inputs.length} game(s)`, () =>
+    spawnPythonEngine(inputs)
+  );
+}
+
+function spawnPythonEngine(inputs: EngineInput[]): Promise<MlbModelResult[]> {
   return new Promise((resolve, reject) => {
     const proc = spawn(
       PYTHON,
@@ -3147,15 +3259,17 @@ export async function runMlbModelForDate(
       g.modelRunAt !== null &&
       g.modelRunAt !== undefined
     ) {
-      const modelRunDate = new Date(Number(g.modelRunAt))
-        .toISOString()
-        .slice(0, 10);
-      if (modelRunDate === dateStr) {
-        return false; // already modeled today — skip
+      // modelRunAt is a UTC instant; gameDate is Eastern/venue-local. Cross the
+      // boundary in Eastern (see easternCalendarDate) — comparing against the
+      // UTC calendar date inverted this guard for 7 hours every night.
+      const modelRunAtMs = Number(g.modelRunAt);
+      if (isModelRunFreshForGameDate(modelRunAtMs, dateStr)) {
+        return false; // already modeled on this game's own date — skip
       }
+      const modelRunDate = easternCalendarDate(modelRunAtMs);
       // modelRunAt was set on a different date — clear it and re-model
       console.warn(
-        `${TAG} [STALE-MODEL] id=${g.id} ${g.awayTeam}@${g.homeTeam} — modelRunAt=${modelRunDate} ≠ gameDate=${dateStr} — re-modeling`
+        `${TAG} [STALE-MODEL] id=${g.id} ${g.awayTeam}@${g.homeTeam} — modelRunAt=${modelRunDate} (ET) ≠ gameDate=${dateStr} — re-modeling`
       );
     }
     // CRITICAL: require confirmed DK run line — never fall back to ML-derived RL direction
@@ -4476,25 +4590,29 @@ export async function runMlbModelForDate(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// STANDALONE MLB MODEL SYNC SCHEDULER
+// MLB MODEL SYNC JOB (single owner: the MLB cycle)
 // ─────────────────────────────────────────────────────────────────────────────
 /**
- * startMlbModelSyncScheduler
+ * Until 2026-08-10 this section owned a SECOND independent scheduler:
+ * `startMlbModelSyncScheduler()` registered its own 5-minute setInterval that
+ * called runMlbModelForDate(today) + runMlbModelForDate(tomorrow) — the exact
+ * pair that vsinAutoRefresh's MLB cycle already ran, on the same 5-minute
+ * cadence, over the same rows. Its `_cycleRunning` flag was a separate
+ * module-local boolean and could not see the cycle's `mlbCycleInFlight`, so
+ * the two overlapped freely and each spawned its own Monte Carlo subprocess.
  *
- * Independent 5-minute heartbeat that calls runMlbModelForDate for both today
- * and tomorrow. This is the catch-all safety net that guarantees the model runs
- * even if the watcher misses a trigger (server restart, hash collision, etc.).
+ * Production evidence (Railway deployment ff472662, service a46ea921,
+ * 2026-08-09): "[MLBModelRunner][2026-08-10] Spawning Python engine for N
+ * games..." logged in pairs seconds apart — 18:05:42.875/18:05:50.119,
+ * 19:05:44.322/19:05:52.290, 23:50:42.493/23:50:52.290 — identical date,
+ * identical game count, one per scheduler.
  *
- * The modelRunAt IS NULL guard inside runMlbModelForDate prevents re-running
- * games that are already modeled, so this scheduler is fully idempotent.
- *
- * Runs 24/7 — no time gates. Parallel to startVsinAutoRefresh (MLBCycle Step 6)
- * but independent of it so the model fires even if the MLBCycle stalls.
+ * The workload is now a JOB, not a scheduler: one acquisition path
+ * (`runMlbModelSyncJob`), its own single-flight guard, invoked from the single
+ * authoritative scheduler (the MLB cycle) which already carries a re-entrancy
+ * guard, a 20-minute watchdog, and an HTTP cron entry point.
  */
 
-const MLB_MODEL_SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-const MLB_MODEL_WATCHDOG_MS = 15 * 60 * 1000; // alert if no cycle in 15 min
-let _lastCycleAt: number = 0;
 let _cycleRunning: boolean = false;
 
 /**
@@ -4530,161 +4648,180 @@ async function withDbRetry<T>(
   throw lastErr;
 }
 
-function getMlbTodayStr(): string {
-  const now = new Date();
-  const etStr = now.toLocaleDateString("en-US", {
-    timeZone: "America/New_York",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  const [m, d, y] = etStr.split("/");
-  return `${y}-${m}-${d}`;
+/**
+ * Result of one model-sync job. Returned (not just logged) so the caller — the
+ * MLB cycle — can report a real outcome instead of "it was fired".
+ */
+export interface MlbModelSyncDateOutcome {
+  date: string;
+  ok: boolean;
+  written: number;
+  notYetModelable: number;
+  errors: number;
+  validationPassed: boolean;
+  failure?: string;
 }
 
-function getMlbTomorrowStr(): string {
-  const now = new Date();
-  // Add 1 day in ET
-  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-  const etStr = tomorrow.toLocaleDateString("en-US", {
-    timeZone: "America/New_York",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  const [m, d, y] = etStr.split("/");
-  return `${y}-${m}-${d}`;
+export interface MlbModelSyncJobResult {
+  /** false when the single-flight guard rejected this invocation. */
+  ran: boolean;
+  dates: MlbModelSyncDateOutcome[];
 }
 
-async function runMlbModelSyncCycle(): Promise<void> {
+/**
+ * The dates one job covers, in the canonical Eastern basis.
+ *
+ * Today + tomorrow: MLB seeds games a day ahead, and pitchers/odds for
+ * tomorrow's slate land through the afternoon, so the day-ahead pass is what
+ * gets a game modelled the moment it becomes modelable.
+ *
+ * Eastern, NOT Pacific: `games.gameDate` is the venue-local schedule date and
+ * mlbScheduleSync writes/queries it in Eastern. The MLB cycle's own `todayStr`
+ * is Pacific and is deliberately NOT changed — it holds the slate open through
+ * the end of west-coast games for score refresh and prop grading, which is a
+ * different question from "which calendar day is this game filed under".
+ */
+export function mlbModelSyncDates(): { today: string; tomorrow: string } {
+  return { today: mlbSlateDate(0), tomorrow: mlbSlateDate(1) };
+}
+
+async function runOneSyncDate(
+  TAG: string,
+  label: string,
+  dateStr: string
+): Promise<MlbModelSyncDateOutcome> {
+  try {
+    const result = await withDbRetry(`runMlbModelForDate(${dateStr})`, () =>
+      runMlbModelForDate(dateStr)
+    );
+    console.log(
+      `${TAG} ${label}=${dateStr}: ` +
+        `written=${result.written} ` +
+        `not_yet_modelable=${result.skipped} ` +
+        `errors=${result.errors} ` +
+        `validation=${result.validation.passed ? "✅ PASSED" : "❌ FAILED (" + result.validation.issues.length + " issues)"}`
+    );
+    if (result.written > 0) {
+      console.log(
+        `${TAG} ✅ ${label.toUpperCase()}: ${result.written} game(s) newly modeled and published`
+      );
+    }
+    if (!result.validation.passed) {
+      console.error(
+        `${TAG} [VALIDATION FAIL] ${label} issues:`,
+        result.validation.issues
+      );
+    }
+    return {
+      date: dateStr,
+      ok: true,
+      written: result.written,
+      notYetModelable: result.skipped,
+      errors: result.errors,
+      validationPassed: result.validation.passed,
+    };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(
+      `${TAG} [ERROR] ${label}=${dateStr} failed after all retries: ${msg}`
+    );
+    return {
+      date: dateStr,
+      ok: false,
+      written: 0,
+      notYetModelable: 0,
+      errors: 1,
+      validationPassed: false,
+      failure: msg,
+    };
+  }
+}
+
+async function runMlbModelSyncWork(): Promise<MlbModelSyncDateOutcome[]> {
   const TAG = "[MlbModelSync]";
+  const { today, tomorrow } = mlbModelSyncDates();
+  console.log(`${TAG} ► Job start — today=${today} tomorrow=${tomorrow}`);
 
-  // Guard: prevent overlapping cycles (model run can take 8-10 min for a full slate)
+  // Sequential on purpose: each call may spawn a full-slate Monte Carlo batch,
+  // and runWithMlbEngineSlot would serialise them anyway. Running them in sequence
+  // keeps the ordering (today before tomorrow) explicit rather than emergent.
+  const outcomes = [
+    await runOneSyncDate(TAG, "today", today),
+    await runOneSyncDate(TAG, "tomorrow", tomorrow),
+  ];
+
+  console.log(
+    `${TAG} ◄ Job complete — ` +
+      outcomes
+        .map(
+          o =>
+            `${o.date}:${o.ok ? `written=${o.written}` : `FAILED(${o.failure})`}`
+        )
+        .join(" ")
+  );
+  return outcomes;
+}
+
+/** Test seam: swap the job body. Production never calls this. */
+let mlbModelSyncWork: () => Promise<MlbModelSyncDateOutcome[]> =
+  runMlbModelSyncWork;
+export function __setMlbModelSyncWorkForTest(
+  fn: (() => Promise<MlbModelSyncDateOutcome[]>) | null
+): void {
+  mlbModelSyncWork = fn ?? runMlbModelSyncWork;
+}
+
+/**
+ * The single acquisition path for the MLB model workload.
+ *
+ * Single-flight on the FUNCTION, not at a call site, for the same reason the
+ * MLB cycle's guard lives on runMlbCycleOnce: a guard held by one caller is
+ * invisible to every other caller. Released in `finally` so a throwing job
+ * cannot wedge it shut — a wedged guard here is a silent, permanent stop to
+ * MLB modelling.
+ *
+ * There is no watchdog here, deliberately. The only production caller is the
+ * MLB cycle, whose 20-minute deadline (MLB_CYCLE_WATCHDOG_MS) already bounds
+ * this job; a second watchdog racing the first would just re-enter the same
+ * CPU-bound work. The engine slot (runWithMlbEngineSlot) is what actually bounds
+ * the damage a slow batch can do.
+ */
+export async function runMlbModelSyncJob(): Promise<MlbModelSyncJobResult> {
   if (_cycleRunning) {
-    console.log(`${TAG} ⏭ Cycle skipped — previous cycle still running`);
-    return;
+    console.log(
+      "[MlbModelSync] ⏭ Job skipped — previous job still running (single-flight)"
+    );
+    return { ran: false, dates: [] };
   }
   _cycleRunning = true;
-
-  const todayStr = getMlbTodayStr();
-  const tomorrowStr = getMlbTomorrowStr();
-
-  console.log(
-    `${TAG} ► Cycle start — today=${todayStr} tomorrow=${tomorrowStr}`
-  );
-
   try {
-    // ── TODAY ──────────────────────────────────────────────────────────────────
-    const todayResult = await withDbRetry(
-      `runMlbModelForDate(${todayStr})`,
-      () => runMlbModelForDate(todayStr)
-    );
-    const todayAlreadyModeled =
-      todayResult.total -
-      todayResult.written -
-      (todayResult.total -
-        todayResult.skipped -
-        todayResult.written -
-        todayResult.errors);
-    console.log(
-      `${TAG} today=${todayStr}: ` +
-        `written=${todayResult.written} ` +
-        `not_yet_modelable=${todayResult.skipped} ` +
-        `errors=${todayResult.errors} ` +
-        `validation=${todayResult.validation.passed ? "✅ PASSED" : "❌ FAILED (" + todayResult.validation.issues.length + " issues)"}`
-    );
-    if (todayResult.written > 0) {
-      console.log(
-        `${TAG} ✅ TODAY: ${todayResult.written} game(s) newly modeled and published`
-      );
-    }
-    if (!todayResult.validation.passed) {
-      console.error(
-        `${TAG} [VALIDATION FAIL] today issues:`,
-        todayResult.validation.issues
-      );
-    }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error(
-      `${TAG} [ERROR] today=${todayStr} failed after all retries: ${msg}`
-    );
+    const dates = await mlbModelSyncWork();
+    return { ran: true, dates };
+  } finally {
+    _cycleRunning = false;
   }
-
-  try {
-    // ── TOMORROW ───────────────────────────────────────────────────────────────
-    // Ensures games seeded a day ahead are modeled as soon as pitchers + odds
-    // are available, without waiting for the MLBCycle watcher.
-    const tomorrowResult = await withDbRetry(
-      `runMlbModelForDate(${tomorrowStr})`,
-      () => runMlbModelForDate(tomorrowStr)
-    );
-    console.log(
-      `${TAG} tomorrow=${tomorrowStr}: ` +
-        `written=${tomorrowResult.written} ` +
-        `not_yet_modelable=${tomorrowResult.skipped} ` +
-        `errors=${tomorrowResult.errors} ` +
-        `validation=${tomorrowResult.validation.passed ? "✅ PASSED" : "❌ FAILED (" + tomorrowResult.validation.issues.length + " issues)"}`
-    );
-    if (tomorrowResult.written > 0) {
-      console.log(
-        `${TAG} ✅ TOMORROW: ${tomorrowResult.written} game(s) newly modeled and published`
-      );
-    }
-    if (!tomorrowResult.validation.passed) {
-      console.error(
-        `${TAG} [VALIDATION FAIL] tomorrow issues:`,
-        tomorrowResult.validation.issues
-      );
-    }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error(
-      `${TAG} [ERROR] tomorrow=${tomorrowStr} failed after all retries: ${msg}`
-    );
-  }
-
-  _lastCycleAt = Date.now();
-  _cycleRunning = false;
-  console.log(`${TAG} ◄ Cycle complete`);
 }
 
+/**
+ * RETIRED 2026-08-10 — kept as an inert no-op so server/_core/index.ts needs no
+ * deploy-ordered change and no other call site can silently resurrect a second
+ * scheduler.
+ *
+ * What it used to do: register its own 5-minute setInterval plus a 2-minute
+ * watchdog that fired ANOTHER cycle when one looked stalled — a second,
+ * independent owner of the same workload the MLB cycle already ran (see the
+ * section header above for the production log evidence of the duplicate
+ * subprocess spawns).
+ *
+ * The workload now lives in runMlbModelSyncJob(), invoked from the one
+ * authoritative scheduler: vsinAutoRefresh's MLB cycle.
+ */
 export function startMlbModelSyncScheduler(): void {
-  const TAG = "[MlbModelSync]";
   console.log(
-    `${TAG} Starting — interval=${MLB_MODEL_SYNC_INTERVAL_MS / 1000}s watchdog=${MLB_MODEL_WATCHDOG_MS / 1000}s (24/7, no time gates)`
+    "[MlbModelSync] RETIRED — no independent scheduler is registered. The MLB " +
+      "model workload is owned solely by the MLB cycle " +
+      "(vsinAutoRefresh runMlbCycleWork Step 6 → runMlbModelSyncJob), which " +
+      "carries the re-entrancy guard, the 20-minute watchdog, and the " +
+      "/api/cron/mlb-cycle entry point."
   );
-
-  // Run immediately on boot, then every 5 minutes
-  // .unref() prevents this interval from keeping the process alive if all other work is done
-  _lastCycleAt = Date.now(); // initialize so watchdog doesn't fire on first boot
-  void runMlbModelSyncCycle();
-  setInterval(
-    () => void runMlbModelSyncCycle(),
-    MLB_MODEL_SYNC_INTERVAL_MS
-  ).unref();
-
-  // ── Watchdog: alert if no cycle has completed in MLB_MODEL_WATCHDOG_MS ──────
-  // Fires every 2 minutes to check cycle health. If _lastCycleAt is stale,
-  // it means the scheduler is stuck (e.g., a cycle is running for >15 min).
-  // This surfaces silent failures that would otherwise go undetected.
-  setInterval(
-    () => {
-      const staleSince = Date.now() - _lastCycleAt;
-      if (staleSince > MLB_MODEL_WATCHDOG_MS) {
-        const staleMin = Math.round(staleSince / 60000);
-        if (_cycleRunning) {
-          console.warn(
-            `${TAG} [WATCHDOG] ⚠ Cycle has been running for ${staleMin}min — possible hang. Last completed: ${new Date(_lastCycleAt).toISOString()}`
-          );
-        } else {
-          console.error(
-            `${TAG} [WATCHDOG] ❌ No cycle completed in ${staleMin}min — scheduler may be stalled. Triggering emergency cycle.`
-          );
-          void runMlbModelSyncCycle(); // self-healing: trigger a new cycle
-        }
-      }
-    },
-    2 * 60 * 1000
-  ).unref();
 }
