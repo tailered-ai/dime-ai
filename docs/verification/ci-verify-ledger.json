@@ -82,6 +82,25 @@
       "superseded_blueprint_sha256": "4728953d1f93c37349a1bdbca49fb9f0195823727b33b661ea85f0cb383e97bd",
       "superseded_ledger_impl_sha256": "eeea59ca437d80ad56f966e5b887aa820807c1bb218b6cac97b6405a3a3eb194",
       "superseded_source": "AMD-003"
+    },
+    {
+      "at": "2026-08-10T10:38:30.222Z",
+      "defect": "P04.NEG07,P04.NEG08,P04.AUD01,P04.AUD02,P04.AUD03,P04.EV01",
+      "evidence": [
+        {
+          "bytes": 1758,
+          "path": "docs/verification/evidence/p04/AMD-005-rationale.md",
+          "sha256": "9e1ab87686438887bc3fe64e647f8fab2d9e483b32e20300ee5a9a5c4e177325"
+        }
+      ],
+      "genesis_corrections": [],
+      "id": "AMD-005",
+      "new_blueprint_sha256": "fb18bfad5908a497c830af462f3726ed8298d8ead9b852819ea6b11b91ef4bb5",
+      "new_ledger_impl_sha256": "5a5be7ad815e4b06709d7108d60f7df76df9556237ab5fa21044233f2367e93a",
+      "reason": "P04 authorization scope: declare P04.NEG07/NEG08 adversarial suites, P04.AUD01..AUD03 audits, P04.EV01 executor evidence (additive, per AMD-004 precedent)",
+      "superseded_blueprint_sha256": "423ccd3169000118bb876e1f0cfe99d5756fbf53c957d325ab6268e9cb45866d",
+      "superseded_ledger_impl_sha256": "5a5be7ad815e4b06709d7108d60f7df76df9556237ab5fa21044233f2367e93a",
+      "superseded_source": "AMD-004"
     }
   ],
   "blueprint_version": "1.0.0",
@@ -157,6 +176,28 @@
       ],
       "phase": "P03",
       "recorded_at": "2026-08-10T10:22:27.089Z"
+    },
+    {
+      "decision": "PROCEED TO P05",
+      "evidence": [
+        {
+          "bytes": 13700,
+          "path": "docs/verification/evidence/p04/CP01-checkpoint.md",
+          "sha256": "d710f47496b9aa46bff0d635958386d7dbbbba5f14452545cb3faf4c301a772b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        },
+        {
+          "bytes": 3327,
+          "path": "docs/verification/evidence/p04/entry-record.md",
+          "sha256": "0dd066e93e4c92539a88341c20d6295ce0f315be029c2aa5fea19fdd12489809"
+        }
+      ],
+      "phase": "P04",
+      "recorded_at": "2026-08-10T11:11:17.814Z"
     }
   ],
   "decisions": [
@@ -1254,6 +1295,57 @@
       "severity": "MEDIUM",
       "status": "CLOSED",
       "title": "P03.CP01 evidence lost three backticked terms to unquoted-heredoc command substitution"
+    },
+    {
+      "affected_gate": "P04.T09",
+      "blast_radius": "false-completion: an interrupted run could publish a complete manifest readable as green; contained to P04 development, caught by NEG03/CLN01 first execution before any unit closed",
+      "closed_at": "2026-08-10T11:03:36.223Z",
+      "corrective_action": "synchronous interrupted-latch at signal entry (teardown.mjs onSignalStart) + completion guards PARK instead of throwing (executor.mjs); signal handler owns termination",
+      "detected_by": "P04.NEG03",
+      "evidence": [
+        {
+          "bytes": 2645,
+          "path": "docs/verification/evidence/p04/DEF-021.md",
+          "sha256": "e6864db608b5f9887100506678b9a2f8c4fb9cedb63e5c7db0539f193cab2375"
+        },
+        {
+          "bytes": 1052,
+          "path": "docs/verification/evidence/p04/raw/DEF-021-detect.txt",
+          "sha256": "3988fab2e997695dfb3cabd37e98e96da0d06e394903c18bf8b9cadcae82e8ba"
+        }
+      ],
+      "history": [
+        {
+          "action": "classify",
+          "at": "2026-08-10T11:03:36.158Z",
+          "flags": {
+            "blast_radius": "false-completion: an interrupted run could publish a complete manifest readable as green; contained to P04 development, caught by NEG03/CLN01 first execution before any unit closed",
+            "corrective_action": "synchronous interrupted-latch at signal entry (teardown.mjs onSignalStart) + completion guards PARK instead of throwing (executor.mjs); signal handler owns termination",
+            "evidence": [],
+            "regression_test_id": "P04.NEG03,P04.CLN01",
+            "retest_result": "52/52 x4 consecutive; NEG03 exit=130 no-manifest; CLN01 10/10 zero residue",
+            "root_cause": "async signal-teardown raced the still-progressing main flow; first repair moved the race to the caller exit path which preempted teardown"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T11:03:36.222Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p04/DEF-021.md",
+              "docs/verification/evidence/p04/raw/DEF-021-detect.txt"
+            ]
+          }
+        }
+      ],
+      "id": "DEF-021",
+      "opened_at": "2026-08-10T10:59:37.142Z",
+      "regression_test_id": "P04.NEG03,P04.CLN01",
+      "retest_result": "52/52 x4 consecutive; NEG03 exit=130 no-manifest; CLN01 10/10 zero residue",
+      "root_cause": "async signal-teardown raced the still-progressing main flow; first repair moved the race to the caller exit path which preempted teardown",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "Interrupted executor run can still write a complete manifest: the async signal-teardown races the main flow, which keeps settling child exits and reaches the manifest write before process.exit(130)"
     }
   ],
   "gate_results": [],
@@ -1558,8 +1650,44 @@
         "P04.CP01 recorded"
       ],
       "id": "P04",
-      "state": "NOT_STARTED",
-      "state_history": [],
+      "state": "ACCEPTED",
+      "state_history": [
+        {
+          "at": "2026-08-10T10:37:43.011Z",
+          "from": "NOT_STARTED",
+          "to": "PRECONDITIONS"
+        },
+        {
+          "at": "2026-08-10T10:37:43.074Z",
+          "from": "PRECONDITIONS",
+          "to": "IN_PROGRESS"
+        },
+        {
+          "at": "2026-08-10T11:09:41.717Z",
+          "from": "IN_PROGRESS",
+          "to": "IMPLEMENTED"
+        },
+        {
+          "at": "2026-08-10T11:09:41.788Z",
+          "from": "IMPLEMENTED",
+          "to": "TESTING"
+        },
+        {
+          "at": "2026-08-10T11:09:41.918Z",
+          "from": "TESTING",
+          "to": "AUDITING"
+        },
+        {
+          "at": "2026-08-10T11:09:41.965Z",
+          "from": "AUDITING",
+          "to": "CHECKPOINT_REVIEW"
+        },
+        {
+          "at": "2026-08-10T11:11:18.100Z",
+          "from": "CHECKPOINT_REVIEW",
+          "to": "ACCEPTED"
+        }
+      ],
       "title": "Executor core"
     },
     {
@@ -4437,14 +4565,118 @@
       "title": "False-green adversarial suite: no combination of results, omissions, duplicates, aggregation or rendering can manufacture a misleading green state",
       "validation": null
     },
-    "P04.CLN01": {
-      "attempts": 0,
+    "P04.AUD01": {
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:29.176Z",
+      "defects": [],
+      "depends_on": [
+        "P04.T07"
+      ],
+      "evidence": [
+        {
+          "bytes": 2648,
+          "path": "docs/verification/evidence/p04/AUD01-teardown-ownership.txt",
+          "sha256": "e64dbfa7f6859847e359e9c8c17645a2e02825cb7efffd25f53b05fe7a0494da"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": "docs/verification/evidence/p04/AUD01-teardown-ownership.txt",
+      "flaky": false,
+      "id": "P04.AUD01",
+      "inputs": [],
+      "kind": "AUDIT",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P04",
+      "remediation": null,
+      "started_at": "2026-08-10T11:09:29.103Z",
+      "status": "PASS",
+      "title": "Audit: every cleanup operation maps to proven ownership; zero broad destructive mechanisms",
+      "validation": null
+    },
+    "P04.AUD02": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T11:09:29.302Z",
+      "defects": [],
+      "depends_on": [
+        "P04.T06"
+      ],
+      "evidence": [
+        {
+          "bytes": 1009,
+          "path": "docs/verification/evidence/p04/AUD02-process-fidelity.txt",
+          "sha256": "db4e1ad76f44616602de32164c6466571d892f2794b304f6c3668933564b145e"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": "docs/verification/evidence/p04/AUD02-process-fidelity.txt",
+      "flaky": false,
+      "id": "P04.AUD02",
+      "inputs": [],
+      "kind": "AUDIT",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P04",
+      "remediation": null,
+      "started_at": "2026-08-10T11:09:29.238Z",
+      "status": "PASS",
+      "title": "Audit: spawn/exit-code fidelity on every execution path; the piped-exit-status false-PASS class is regression-anchored",
+      "validation": null
+    },
+    "P04.AUD03": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T11:09:29.431Z",
+      "defects": [],
+      "depends_on": [
+        "P04.T09"
+      ],
+      "evidence": [
+        {
+          "bytes": 384,
+          "path": "docs/verification/evidence/p04/AUD03-p03-integration.txt",
+          "sha256": "b7bb3566b3af7e339a085388cb74cdc35cb8e5ccd4941203d86fb0905256758e"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": "docs/verification/evidence/p04/AUD03-p03-integration.txt",
+      "flaky": false,
+      "id": "P04.AUD03",
+      "inputs": [],
+      "kind": "AUDIT",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P04",
+      "remediation": null,
+      "started_at": "2026-08-10T11:09:29.370Z",
+      "status": "PASS",
+      "title": "Audit: P04 emits results only through the P03 result/reporter model — no second taxonomy, summary, registry, YAML parser, or ledger",
+      "validation": null
+    },
+    "P04.CLN01": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T11:09:29.038Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 2713,
+          "path": "docs/verification/evidence/p04/raw/cln01-iterations.json",
+          "sha256": "aa565d25f311cade8ae311b5c09e06a66414d891846dc6c1e51fb6be485f7a61"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.CLN01",
@@ -4454,21 +4686,27 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:28.964Z",
+      "status": "PASS",
       "title": "SIGINT teardown: 10 of 10 runs leave zero residue",
       "validation": null
     },
     "P04.CP01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:11:17.958Z",
       "defects": [],
       "depends_on": [
         "P04.GATE01"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 13700,
+          "path": "docs/verification/evidence/p04/CP01-checkpoint.md",
+          "sha256": "d710f47496b9aa46bff0d635958386d7dbbbba5f14452545cb3faf4c301a772b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.CP01",
@@ -4478,19 +4716,71 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:11:17.897Z",
+      "status": "PASS",
       "title": "P04 checkpoint recorded",
       "validation": null
     },
-    "P04.FI01": {
-      "attempts": 0,
+    "P04.EV01": {
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:29.572Z",
+      "defects": [],
+      "depends_on": [
+        "P04.T09"
+      ],
+      "evidence": [
+        {
+          "bytes": 30835,
+          "path": "docs/verification/evidence/p04/EV01-executor-sample.jsonl",
+          "sha256": "a847e483b9af219e3c5f6d25fee71eee21199a72212b48d5b3875978a6c74cf2"
+        },
+        {
+          "bytes": 9671,
+          "path": "docs/verification/evidence/p04/raw/EV01-results-sample.jsonl",
+          "sha256": "ba2d18f01f2d49870fae68db0feb1ca653d0cf5fc8fd5ffd0435d9c250ba14eb"
+        },
+        {
+          "bytes": 825,
+          "path": "docs/verification/evidence/p04/raw/EV01-manifest-sample.json",
+          "sha256": "16f1672a996fe29ea0cc03c430b48db654d2955e083dfef1f290c42e272beac5"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": "docs/verification/evidence/p04/EV01-executor-sample.jsonl",
+      "flaky": false,
+      "id": "P04.EV01",
+      "inputs": [],
+      "kind": "EVIDENCE",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P04",
+      "remediation": null,
+      "started_at": "2026-08-10T11:09:29.502Z",
+      "status": "PASS",
+      "title": "Evidence: canonical executor.jsonl from a real mixed-outcome fixture run",
+      "validation": null
+    },
+    "P04.FI01": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T11:09:28.598Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.FI01",
@@ -4500,19 +4790,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:28.545Z",
+      "status": "PASS",
       "title": "Failure injection: kill the executor mid-gate",
       "validation": null
     },
     "P04.FI02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:28.726Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.FI02",
@@ -4522,23 +4823,39 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:28.668Z",
+      "status": "PASS",
       "title": "Failure injection: exhaust the memory budget",
       "validation": null
     },
     "P04.GATE01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:29.700Z",
       "defects": [],
       "depends_on": [
         "P04.CLN01",
         "P04.NEG01",
         "P04.NEG04"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        },
+        {
+          "bytes": 2713,
+          "path": "docs/verification/evidence/p04/raw/cln01-iterations.json",
+          "sha256": "aa565d25f311cade8ae311b5c09e06a66414d891846dc6c1e51fb6be485f7a61"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.GATE01",
@@ -4548,19 +4865,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:29.642Z",
+      "status": "PASS",
       "title": "P04.CLN01, P04.NEG01, P04.NEG04 PASS",
       "validation": null
     },
     "P04.NEG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:27.655Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.NEG01",
@@ -4570,19 +4898,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:27.588Z",
+      "status": "PASS",
       "title": "Orphaned process is reaped and reported INFRA-FAIL",
       "validation": null
     },
     "P04.NEG02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:27.782Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.NEG02",
@@ -4592,19 +4931,35 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:27.722Z",
+      "status": "PASS",
       "title": "Hanging gate yields TIMEOUT, not FAIL",
       "validation": null
     },
     "P04.NEG03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:28.865Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 1052,
+          "path": "docs/verification/evidence/p04/raw/DEF-021-detect.txt",
+          "sha256": "3988fab2e997695dfb3cabd37e98e96da0d06e394903c18bf8b9cadcae82e8ba"
+        },
+        {
+          "bytes": 2645,
+          "path": "docs/verification/evidence/p04/DEF-021.md",
+          "sha256": "e6864db608b5f9887100506678b9a2f8c4fb9cedb63e5c7db0539f193cab2375"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.NEG03",
@@ -4614,19 +4969,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:28.794Z",
+      "status": "PASS",
       "title": "SIGINT yields clean teardown and a non-zero exit",
       "validation": null
     },
     "P04.NEG04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:27.915Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.NEG04",
@@ -4636,19 +5002,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:27.855Z",
+      "status": "PASS",
       "title": "network: deny on host yields INCONCLUSIVE, never PASS",
       "validation": null
     },
     "P04.NEG05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:28.045Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.NEG05",
@@ -4658,19 +5035,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:27.976Z",
+      "status": "PASS",
       "title": "Top-level exit-code suppression is detected by audit",
       "validation": null
     },
     "P04.NEG06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:28.186Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.NEG06",
@@ -4680,19 +5068,102 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:28.119Z",
+      "status": "PASS",
       "title": "Direct concurrent invocation bypassing the scheduler trips LANE_VIOLATION deterministically",
       "validation": null
     },
-    "P04.T01": {
-      "attempts": 0,
+    "P04.NEG07": {
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:28.327Z",
+      "defects": [],
+      "depends_on": [
+        "P04.T07"
+      ],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": null,
+      "flaky": false,
+      "id": "P04.NEG07",
+      "inputs": [],
+      "kind": "NEGATIVE_VALIDATION",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P04",
+      "remediation": null,
+      "started_at": "2026-08-10T11:09:28.253Z",
+      "status": "PASS",
+      "title": "Ownership boundary adversarial suite: teardown can never destroy a resource it cannot prove it owns",
+      "validation": null
+    },
+    "P04.NEG08": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T11:09:28.479Z",
+      "defects": [],
+      "depends_on": [
+        "P04.T09"
+      ],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
+      "exit_requirement": null,
+      "expected_output": null,
+      "flaky": false,
+      "id": "P04.NEG08",
+      "inputs": [],
+      "kind": "NEGATIVE_VALIDATION",
+      "negative_validation": null,
+      "notes": [],
+      "phase": "P04",
+      "remediation": null,
+      "started_at": "2026-08-10T11:09:28.405Z",
+      "status": "PASS",
+      "title": "Executor false-green adversarial suite: no loss, drift, interruption, or infrastructure failure converts to PASS",
+      "validation": null
+    },
+    "P04.T01": {
+      "attempts": 1,
+      "blocker": null,
+      "class": "MANDATORY",
+      "completed_at": "2026-08-10T11:09:26.554Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4874,
+          "path": "docs/verification/evidence/p04/T01-T10-implementation.md",
+          "sha256": "e24278a9eab396a355771b18e15ccf12f3f66b41aa51dbbe5c68a7fe89f7948f"
+        },
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.T01",
@@ -4702,19 +5173,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T10:40:47.879Z",
+      "status": "PASS",
       "title": "DAG scheduler over declared requires",
       "validation": null
     },
     "P04.T02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:26.623Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4874,
+          "path": "docs/verification/evidence/p04/T01-T10-implementation.md",
+          "sha256": "e24278a9eab396a355771b18e15ccf12f3f66b41aa51dbbe5c68a7fe89f7948f"
+        },
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.T02",
@@ -4724,19 +5206,35 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T10:40:47.953Z",
+      "status": "PASS",
       "title": "Concurrency and memory budget",
       "validation": null
     },
     "P04.T03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:26.690Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4874,
+          "path": "docs/verification/evidence/p04/T01-T10-implementation.md",
+          "sha256": "e24278a9eab396a355771b18e15ccf12f3f66b41aa51dbbe5c68a7fe89f7948f"
+        },
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 30835,
+          "path": "docs/verification/evidence/p04/EV01-executor-sample.jsonl",
+          "sha256": "a847e483b9af219e3c5f6d25fee71eee21199a72212b48d5b3875978a6c74cf2"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.T03",
@@ -4746,19 +5244,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T10:40:48.016Z",
+      "status": "PASS",
       "title": "Serial DB lane",
       "validation": null
     },
     "P04.T04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:26.816Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4874,
+          "path": "docs/verification/evidence/p04/T01-T10-implementation.md",
+          "sha256": "e24278a9eab396a355771b18e15ccf12f3f66b41aa51dbbe5c68a7fe89f7948f"
+        },
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.T04",
@@ -4768,19 +5277,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T10:40:48.073Z",
+      "status": "PASS",
       "title": "Hermetic env: TZ=UTC, LC_ALL=C.UTF-8, seed, reserved ports, isolated TMPDIR",
       "validation": null
     },
     "P04.T05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:26.885Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4874,
+          "path": "docs/verification/evidence/p04/T01-T10-implementation.md",
+          "sha256": "e24278a9eab396a355771b18e15ccf12f3f66b41aa51dbbe5c68a7fe89f7948f"
+        },
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.T05",
@@ -4790,19 +5310,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T10:40:48.143Z",
+      "status": "PASS",
       "title": "Network policy plus ENFORCEMENT DETECTION (host runs report HERMETIC:UNENFORCED)",
       "validation": null
     },
     "P04.T06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:26.944Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4874,
+          "path": "docs/verification/evidence/p04/T01-T10-implementation.md",
+          "sha256": "e24278a9eab396a355771b18e15ccf12f3f66b41aa51dbbe5c68a7fe89f7948f"
+        },
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.T06",
@@ -4812,19 +5343,35 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T10:40:48.205Z",
+      "status": "PASS",
       "title": "Timeout: SIGTERM, grace, SIGKILL",
       "validation": null
     },
     "P04.T07": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:27.003Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4874,
+          "path": "docs/verification/evidence/p04/T01-T10-implementation.md",
+          "sha256": "e24278a9eab396a355771b18e15ccf12f3f66b41aa51dbbe5c68a7fe89f7948f"
+        },
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 2645,
+          "path": "docs/verification/evidence/p04/DEF-021.md",
+          "sha256": "e6864db608b5f9887100506678b9a2f8c4fb9cedb63e5c7db0539f193cab2375"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.T07",
@@ -4834,19 +5381,35 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T10:40:48.273Z",
+      "status": "PASS",
       "title": "Teardown registry across success, failure, SIGINT, SIGTERM, timeout, uncaught exception",
       "validation": null
     },
     "P04.T08": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:27.082Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4874,
+          "path": "docs/verification/evidence/p04/T01-T10-implementation.md",
+          "sha256": "e24278a9eab396a355771b18e15ccf12f3f66b41aa51dbbe5c68a7fe89f7948f"
+        },
+        {
+          "bytes": 30835,
+          "path": "docs/verification/evidence/p04/EV01-executor-sample.jsonl",
+          "sha256": "a847e483b9af219e3c5f6d25fee71eee21199a72212b48d5b3875978a6c74cf2"
+        },
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.T08",
@@ -4856,19 +5419,35 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T10:40:48.332Z",
+      "status": "PASS",
       "title": "Attempts and flake recording",
       "validation": null
     },
     "P04.T09": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:27.148Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4874,
+          "path": "docs/verification/evidence/p04/T01-T10-implementation.md",
+          "sha256": "e24278a9eab396a355771b18e15ccf12f3f66b41aa51dbbe5c68a7fe89f7948f"
+        },
+        {
+          "bytes": 30835,
+          "path": "docs/verification/evidence/p04/EV01-executor-sample.jsonl",
+          "sha256": "a847e483b9af219e3c5f6d25fee71eee21199a72212b48d5b3875978a6c74cf2"
+        },
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.T09",
@@ -4878,21 +5457,37 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T10:40:48.400Z",
+      "status": "PASS",
       "title": "Emit executor.jsonl",
       "validation": null
     },
     "P04.T10": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:26.751Z",
       "defects": [],
       "depends_on": [
         "P04.T03"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4874,
+          "path": "docs/verification/evidence/p04/T01-T10-implementation.md",
+          "sha256": "e24278a9eab396a355771b18e15ccf12f3f66b41aa51dbbe5c68a7fe89f7948f"
+        },
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 30835,
+          "path": "docs/verification/evidence/p04/EV01-executor-sample.jsonl",
+          "sha256": "a847e483b9af219e3c5f6d25fee71eee21199a72212b48d5b3875978a6c74cf2"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.T10",
@@ -4902,19 +5497,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T10:40:48.471Z",
+      "status": "PASS",
       "title": "Lane sentinel: named lane lock with entered_at/exited_at intervals, released on crash and timeout",
       "validation": null
     },
     "P04.TEST01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:27.268Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.TEST01",
@@ -4924,19 +5530,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:27.209Z",
+      "status": "PASS",
       "title": "Scheduler respects declared requires ordering",
       "validation": null
     },
     "P04.TEST02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:27.395Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.TEST02",
@@ -4946,19 +5563,30 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:27.335Z",
+      "status": "PASS",
       "title": "Serial lane exclusivity holds",
       "validation": null
     },
     "P04.TEST03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-10T11:09:27.526Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 236,
+          "path": "docs/verification/evidence/p04/P04-suite.txt",
+          "sha256": "487ff557025bdd92555a1db9dd53b2784084498b7b3ee9c8ef1d94a546e5980b"
+        },
+        {
+          "bytes": 3329,
+          "path": "docs/verification/evidence/p04/P04-validation-sweep.txt",
+          "sha256": "258a5a137e3be048ed51a4d23803e21cf08029cd928a5da36ca2182d7ca7cead"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P04.TEST03",
@@ -4968,8 +5596,8 @@
       "notes": [],
       "phase": "P04",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-10T11:09:27.458Z",
+      "status": "PASS",
       "title": "Hermetic env is observed inside a child process",
       "validation": null
     },

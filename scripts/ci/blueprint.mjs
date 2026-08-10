@@ -835,9 +835,61 @@ export const PHASES = [
         M,
         "Direct concurrent invocation bypassing the scheduler trips LANE_VIOLATION deterministically"
       ),
+      u(
+        "P04.NEG07",
+        M,
+        "Ownership boundary adversarial suite: teardown can never destroy a resource it cannot prove it owns",
+        { depends_on: ["P04.T07"] }
+      ),
+      u(
+        "P04.NEG08",
+        M,
+        "Executor false-green adversarial suite: no loss, drift, interruption, or infrastructure failure converts to PASS",
+        { depends_on: ["P04.T09"] }
+      ),
       u("P04.FI01", M, "Failure injection: kill the executor mid-gate"),
       u("P04.FI02", M, "Failure injection: exhaust the memory budget"),
       u("P04.CLN01", M, "SIGINT teardown: 10 of 10 runs leave zero residue"),
+      u(
+        "P04.AUD01",
+        M,
+        "Audit: every cleanup operation maps to proven ownership; zero broad destructive mechanisms",
+        {
+          depends_on: ["P04.T07"],
+          expected_output:
+            "docs/verification/evidence/p04/AUD01-teardown-ownership.txt",
+        }
+      ),
+      u(
+        "P04.AUD02",
+        M,
+        "Audit: spawn/exit-code fidelity on every execution path; the piped-exit-status false-PASS class is regression-anchored",
+        {
+          depends_on: ["P04.T06"],
+          expected_output:
+            "docs/verification/evidence/p04/AUD02-process-fidelity.txt",
+        }
+      ),
+      u(
+        "P04.AUD03",
+        M,
+        "Audit: P04 emits results only through the P03 result/reporter model — no second taxonomy, summary, registry, YAML parser, or ledger",
+        {
+          depends_on: ["P04.T09"],
+          expected_output:
+            "docs/verification/evidence/p04/AUD03-p03-integration.txt",
+        }
+      ),
+      u(
+        "P04.EV01",
+        M,
+        "Evidence: canonical executor.jsonl from a real mixed-outcome fixture run",
+        {
+          depends_on: ["P04.T09"],
+          expected_output:
+            "docs/verification/evidence/p04/EV01-executor-sample.jsonl",
+        }
+      ),
       u("P04.GATE01", M, "P04.CLN01, P04.NEG01, P04.NEG04 PASS", {
         depends_on: ["P04.CLN01", "P04.NEG01", "P04.NEG04"],
       }),

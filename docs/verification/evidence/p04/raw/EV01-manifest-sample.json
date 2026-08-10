@@ -1,0 +1,19 @@
+{
+  "executor_schema_version": "1.0.0",
+  "run_id": "2026-08-10T11-04-29-410Z-94249-3af4f6683bdb",
+  "candidate": {
+    "head_sha": "1fa8e2153809261da6b426dce2e31ba650b8866a",
+    "base_sha": "4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6",
+    "merge_tree_sha": "394b9559640995085b2607bda2fcca83479fddb0",
+    "merge_commit_sha": "f03b6db328b7164fd554ddbf21e126638c1a3d4d",
+    "identity_digest": "a9a86c6b41532ae98222d0b9b5b920c4b930061bbfc076f0c2f4948d1ccc8418"
+  },
+  "complete": true,
+  "interrupted": false,
+  "teardown_clean": true,
+  "teardown_failures": [],
+  "scheduler_decisions": 42,
+  "executor_jsonl_sha256": "a847e483b9af219e3c5f6d25fee71eee21199a72212b48d5b3875978a6c74cf2",
+  "results_jsonl_sha256": "ba2d18f01f2d49870fae68db0feb1ca653d0cf5fc8fd5ffd0435d9c250ba14eb",
+  "finished_at": "2026-08-10T11:04:30.034Z"
+}

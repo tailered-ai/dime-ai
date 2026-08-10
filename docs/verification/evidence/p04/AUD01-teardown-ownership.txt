@@ -1,0 +1,17 @@
+[p04-audit] AUD01 modules=7 allowed_sites=10 violations=0
+[p04-audit]   ALLOWED scripts/ci/lane.mjs:184 rmdir/unlink — lock-dir removal happens ONLY in release/reclaimStale, both of which verify ownership (run_id + acquisition_id) or journal a classified stale reclaim first
+[p04-audit]   ALLOWED scripts/ci/lane.mjs:185 rmdir/unlink — lock-dir removal happens ONLY in release/reclaimStale, both of which verify ownership (run_id + acquisition_id) or journal a classified stale reclaim first
+[p04-audit]   ALLOWED scripts/ci/lane.mjs:204 rmdir/unlink — lock-dir removal happens ONLY in release/reclaimStale, both of which verify ownership (run_id + acquisition_id) or journal a classified stale reclaim first
+[p04-audit]   ALLOWED scripts/ci/lane.mjs:205 rmdir/unlink — lock-dir removal happens ONLY in release/reclaimStale, both of which verify ownership (run_id + acquisition_id) or journal a classified stale reclaim first
+[p04-audit]   ALLOWED scripts/ci/proc.mjs:56 process.kill — teardown kills only marker-verified pids; proc kills only the group of a child it spawned itself (handle ownership)
+[p04-audit]   ALLOWED scripts/ci/proc.mjs:60 process.kill — teardown kills only marker-verified pids; proc kills only the group of a child it spawned itself (handle ownership)
+[p04-audit]   ALLOWED scripts/ci/teardown.mjs:66 rmSync — file deletion exists ONLY behind safeRemoveOwned's realpath containment
+[p04-audit]   ALLOWED scripts/ci/teardown.mjs:73 process.kill — teardown kills only marker-verified pids; proc kills only the group of a child it spawned itself (handle ownership)
+[p04-audit]   ALLOWED scripts/ci/teardown.mjs:136 process.kill — teardown kills only marker-verified pids; proc kills only the group of a child it spawned itself (handle ownership)
+[p04-audit]   ALLOWED scripts/ci/teardown.mjs:147 process.kill — teardown kills only marker-verified pids; proc kills only the group of a child it spawned itself (handle ownership)
+[p04-audit]   surface: safeRemoveOwned [temp_dir,scratch_artifact,worktree] proof=realpath containment inside the run's owned_root
+[p04-audit]   surface: ChildProcess handle kill (proc.mjs) [process,process_group] proof=live handle from our own spawn() call
+[p04-audit]   surface: killVerifiedOwned [process] proof=fresh CI_VERIFY_OWNER=<run_id> marker in live process env
+[p04-audit]   surface: lane release (lane.mjs) [lane_lock] proof=owner.json run_id + acquisition_id match
+[p04-audit]   surface: port release (environment.mjs) [port] proof=live net.Server handle from our own listen()
+[p04-audit] AUD01 PASS — every destructive primitive lives behind an ownership proof

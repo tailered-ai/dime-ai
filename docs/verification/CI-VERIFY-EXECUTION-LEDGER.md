@@ -28,7 +28,7 @@
 | `P01` | Snapshot resolution and prospective-merge materialization | `ACCEPTED` | 25 / 25 | 0 | 0 |
 | `P02` | Contract extraction, freeze, conformance | `ACCEPTED` | 23 / 23 | 0 | 0 |
 | `P03` | Registries, taxonomy, reporter, ledger integration | `ACCEPTED` | 24 / 24 | 0 | 0 |
-| `P04` | Executor core | `NOT_STARTED` | 0 / 24 | 0 | 0 |
+| `P04` | Executor core | `ACCEPTED` | 30 / 30 | 0 | 0 |
 | `P05` | ASSURANCE — the self-test framework | `NOT_STARTED` | 0 / 20 | 0 | 0 |
 | `P06` | PARITY — static, security, supply chain | `NOT_STARTED` | 0 / 29 | 0 | 0 |
 | `P07` | PARITY — test and data | `NOT_STARTED` | 0 / 24 | 0 | 0 |
@@ -277,13 +277,13 @@
 
 ## P04 — Executor core
 
-**State:** `NOT_STARTED`
+**State:** `ACCEPTED`
 
 **Assurance property:** Gates execute under declared scheduling, hermeticity, timeout, and teardown guarantees, and no exit code is ever silently suppressed.
 
 **Depends on:** `P03`
 
-**Progress (MANDATORY):** 0 / 24
+**Progress (MANDATORY):** 30 / 30
 
 **Entry checklist**
 
@@ -301,30 +301,36 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P04.T01` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | DAG scheduler over declared requires |
-| `P04.T02` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Concurrency and memory budget |
-| `P04.T03` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Serial DB lane |
-| `P04.T04` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Hermetic env: TZ=UTC, LC_ALL=C.UTF-8, seed, reserved ports, isolated TMPDIR |
-| `P04.T05` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Network policy plus ENFORCEMENT DETECTION (host runs report HERMETIC:UNENFORCED) |
-| `P04.T06` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Timeout: SIGTERM, grace, SIGKILL |
-| `P04.T07` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Teardown registry across success, failure, SIGINT, SIGTERM, timeout, uncaught exception |
-| `P04.T08` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Attempts and flake recording |
-| `P04.T09` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Emit executor.jsonl |
-| `P04.T10` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Lane sentinel: named lane lock with entered_at/exited_at intervals, released on crash and timeout |
-| `P04.TEST01` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Scheduler respects declared requires ordering |
-| `P04.TEST02` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Serial lane exclusivity holds |
-| `P04.TEST03` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Hermetic env is observed inside a child process |
-| `P04.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Orphaned process is reaped and reported INFRA-FAIL |
-| `P04.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Hanging gate yields TIMEOUT, not FAIL |
-| `P04.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | SIGINT yields clean teardown and a non-zero exit |
-| `P04.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | network: deny on host yields INCONCLUSIVE, never PASS |
-| `P04.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Top-level exit-code suppression is detected by audit |
-| `P04.NEG06` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Direct concurrent invocation bypassing the scheduler trips LANE_VIOLATION deterministically |
-| `P04.FI01` | FAILURE_INJECTION | MANDATORY | `NOT_STARTED` | 0 | — | Failure injection: kill the executor mid-gate |
-| `P04.FI02` | FAILURE_INJECTION | MANDATORY | `NOT_STARTED` | 0 | — | Failure injection: exhaust the memory budget |
-| `P04.CLN01` | CLEANUP | MANDATORY | `NOT_STARTED` | 0 | — | SIGINT teardown: 10 of 10 runs leave zero residue |
-| `P04.GATE01` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | P04.CLN01, P04.NEG01, P04.NEG04 PASS |
-| `P04.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P04 checkpoint recorded |
+| `P04.T01` | TASK | MANDATORY | `PASS` | 1 | `e24278a9eab3` `487ff557025b` | DAG scheduler over declared requires |
+| `P04.T02` | TASK | MANDATORY | `PASS` | 1 | `e24278a9eab3` `487ff557025b` | Concurrency and memory budget |
+| `P04.T03` | TASK | MANDATORY | `PASS` | 1 | `e24278a9eab3` `487ff557025b` `a847e483b9af` | Serial DB lane |
+| `P04.T04` | TASK | MANDATORY | `PASS` | 1 | `e24278a9eab3` `487ff557025b` | Hermetic env: TZ=UTC, LC_ALL=C.UTF-8, seed, reserved ports, isolated TMPDIR |
+| `P04.T05` | TASK | MANDATORY | `PASS` | 1 | `e24278a9eab3` `487ff557025b` | Network policy plus ENFORCEMENT DETECTION (host runs report HERMETIC:UNENFORCED) |
+| `P04.T06` | TASK | MANDATORY | `PASS` | 1 | `e24278a9eab3` `487ff557025b` | Timeout: SIGTERM, grace, SIGKILL |
+| `P04.T07` | TASK | MANDATORY | `PASS` | 1 | `e24278a9eab3` `487ff557025b` `e6864db608b5` | Teardown registry across success, failure, SIGINT, SIGTERM, timeout, uncaught exception |
+| `P04.T08` | TASK | MANDATORY | `PASS` | 1 | `e24278a9eab3` `a847e483b9af` `487ff557025b` | Attempts and flake recording |
+| `P04.T09` | TASK | MANDATORY | `PASS` | 1 | `e24278a9eab3` `a847e483b9af` `487ff557025b` | Emit executor.jsonl |
+| `P04.T10` | TASK | MANDATORY | `PASS` | 1 | `e24278a9eab3` `487ff557025b` `a847e483b9af` | Lane sentinel: named lane lock with entered_at/exited_at intervals, released on crash and timeout |
+| `P04.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Scheduler respects declared requires ordering |
+| `P04.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Serial lane exclusivity holds |
+| `P04.TEST03` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Hermetic env is observed inside a child process |
+| `P04.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Orphaned process is reaped and reported INFRA-FAIL |
+| `P04.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Hanging gate yields TIMEOUT, not FAIL |
+| `P04.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `3988fab2e997` `e6864db608b5` | SIGINT yields clean teardown and a non-zero exit |
+| `P04.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | network: deny on host yields INCONCLUSIVE, never PASS |
+| `P04.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Top-level exit-code suppression is detected by audit |
+| `P04.NEG06` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Direct concurrent invocation bypassing the scheduler trips LANE_VIOLATION deterministically |
+| `P04.NEG07` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Ownership boundary adversarial suite: teardown can never destroy a resource it cannot prove it owns |
+| `P04.NEG08` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Executor false-green adversarial suite: no loss, drift, interruption, or infrastructure failure converts to PASS |
+| `P04.FI01` | FAILURE_INJECTION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Failure injection: kill the executor mid-gate |
+| `P04.FI02` | FAILURE_INJECTION | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` | Failure injection: exhaust the memory budget |
+| `P04.CLN01` | CLEANUP | MANDATORY | `PASS` | 1 | `487ff557025b` `aa565d25f311` | SIGINT teardown: 10 of 10 runs leave zero residue |
+| `P04.AUD01` | AUDIT | MANDATORY | `PASS` | 1 | `e64dbfa7f685` | Audit: every cleanup operation maps to proven ownership; zero broad destructive mechanisms |
+| `P04.AUD02` | AUDIT | MANDATORY | `PASS` | 1 | `db4e1ad76f44` | Audit: spawn/exit-code fidelity on every execution path; the piped-exit-status false-PASS class is regression-anchored |
+| `P04.AUD03` | AUDIT | MANDATORY | `PASS` | 1 | `b7bb3566b3af` | Audit: P04 emits results only through the P03 result/reporter model — no second taxonomy, summary, registry, YAML parser, or ledger |
+| `P04.EV01` | EVIDENCE | MANDATORY | `PASS` | 1 | `a847e483b9af` `ba2d18f01f2d` `16f1672a996f` | Evidence: canonical executor.jsonl from a real mixed-outcome fixture run |
+| `P04.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `487ff557025b` `258a5a137e3b` `aa565d25f311` | P04.CLN01, P04.NEG01, P04.NEG04 PASS |
+| `P04.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `d710f47496b9` | P04 checkpoint recorded |
 
 ## P05 — ASSURANCE — the self-test framework
 
@@ -682,6 +688,7 @@
 | `DEF-018` | `P02.T04` | HIGH | `CLOSED` | Required external tools under-detected: TOOL_SIGNATURES matched JSON-escaped text |
 | `DEF-019` | `P02.GATE01` | HIGH | `CLOSED` | AMD-002 recorded a reason that never took effect (blueprint edit failed; batch continued and wrote a vacuous amendment) |
 | `DEF-020` | `P03.CP01` | MEDIUM | `CLOSED` | P03.CP01 evidence lost three backticked terms to unquoted-heredoc command substitution |
+| `DEF-021` | `P04.NEG03` | HIGH | `CLOSED` | Interrupted executor run can still write a complete manifest: the async signal-teardown races the main flow, which keeps settling child exits and reaches the manifest write before process.exit(130) |
 
 ## Checkpoints
 
@@ -693,3 +700,4 @@
 | `P01` | **PROCEED TO P02** | 2026-08-10T09:24:40.039Z | `51ccc53de3f1` |
 | `P02` | **PROCEED TO P03** | 2026-08-10T09:51:10.828Z | `1a36ea25a1e4` |
 | `P03` | **PROCEED TO P04** | 2026-08-10T10:22:27.089Z | `1ccb5c006c3a` |
+| `P04` | **PROCEED TO P05** | 2026-08-10T11:11:17.814Z | `d710f47496b9` `258a5a137e3b` `0dd066e93e4c` |

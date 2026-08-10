@@ -1,0 +1,24 @@
+First execution of scripts/ci/p04.test.ts (before the DEF-021 fix):
+
+ FAIL  P04.NEG03 > interrupting a live run ...
+   line 740: expect(() => readExecutorEvidence(ready.run_dir)).toThrow(/INCOMPLETE_RUN/)
+   -> readExecutorEvidence SUCCEEDED on a SIGINT'd run (manifest existed, complete:true)
+
+ FAIL  P04.CLN01 > ten consecutive interrupted runs each tear down completely
+   AssertionError: iteration 1 manifest: expected true to be false
+   -> manifest_exists=true after SIGINT
+
+ Test Files  1 failed (1);  Tests  3 failed | 49 passed (52)
+
+After repair attempt 1 (throw RUN_INTERRUPTED at completion guards):
+
+ FAIL  P04.NEG03: AssertionError: expected 3 to be 130
+   -> driver catch(exit 3) preempted the signal handler teardown
+ FAIL  P04.CLN01: AssertionError: iteration 1 tmp: expected true to be false
+   -> tmp dir leaked because process.exit(3) cut teardown short
+
+ Tests  2 failed | 50 passed (52)
+
+After repair attempt 2 (synchronous latch + park; the shipped fix):
+
+ Tests  52 passed (52)   — and 3 further consecutive runs, 52/52 each.
