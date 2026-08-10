@@ -46,7 +46,8 @@ __all__ = [
     "GameCalendar",
     "build_espn_gsis_crosswalk",
     "load_team_map",
-    "UNRESOLVED_ESPN_IDS",
+    "UNRESOLVED_NOTES",
+    "unresolved_baseline_ids",
     "SHAPE_A_COLUMNS",
     "SHAPE_B_COLUMNS",
     "BUCKETS",
@@ -401,7 +402,18 @@ def load_team_map(teams_json_path):
 #: Every one is a 2025 camp/practice-squad body who never reached a roster
 #: nflverse publishes, so no GSIS id was ever minted. Absent, not missing.
 #: Regenerate with build_espn_gsis_crosswalk(..., report_unresolved=True).
-UNRESOLVED_ESPN_IDS = {
+#:
+#: DESCRIPTIVE ONLY since Phase 8. This is a human-readable note for each id that
+#: was unresolved when the set was itemised; it is NOT the authority on which ids
+#: are currently accepted as unresolved. That is accepted-identities.json, read
+#: through unresolved_baseline_ids() below.
+#:
+#: Keeping it as an authority was already wrong: it still names 4431597 (Roc
+#: Taylor) unresolved, which Phase 0R reviewed and accepted as RESOLVED to
+#: 00-0040531, so it carried 34 ids against the accepted baseline's 33. The
+#: entry is left in place deliberately -- it is true history of what was once
+#: unresolved, and deleting it would erase the evidence that the two drifted.
+UNRESOLVED_NOTES = {
     "4605489": "Damien Alford (Utah, WR, NO)",
     "4749258": "Boog Smith (South Carolina State, LB, NYJ)",
     "4361444": "Toa Taua (Nevada, RB, CLE)",
@@ -437,6 +449,19 @@ UNRESOLVED_ESPN_IDS = {
     "4565535": "DK Kaufman (Northern Illinois, RB, SEA)",
     "4429488": "Fentrell Cypress II (Florida State, CB, WAS)",
 }
+
+def unresolved_baseline_ids():
+    """THE authority on which source identities are accepted as unresolved.
+
+    Derived from accepted-identities.json on every call rather than duplicated
+    here. A second hand-maintained list is exactly how UNRESOLVED_NOTES came to
+    disagree with reviewed acceptance about Roc Taylor without anyone noticing:
+    it carried 34 ids where the accepted baseline carried 33.
+    """
+    import identity_baseline
+    accepted, _ = identity_baseline.load_baseline()
+    return identity_baseline.accepted_unresolved(accepted)
+
 
 _SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
 _COLLEGE_ALIASES = {
@@ -932,18 +957,39 @@ def _self_check(raw_dir=None, db_path=None, teams_json=None, identities=None):
     # re-arms the same trap. Gate on the fill RATE with a floor -- the pattern the
     # shape-A coverage check below already uses -- and report the movement, which
     # is the part a human should actually look at.
+    # COVERAGE IS TELEMETRY, NOT AN AUTHORITY (Phase 8).
+    #
+    # This was `expect(... fill_rate >= 0.85 ...)`. A percentage can only see how
+    # MANY identities are filled, never WHICH, so it is structurally blind to the
+    # two defects that actually matter:
+    #
+    #   * a previously known person disappears -- 5 lost T4 mappings move the rate
+    #     by a fraction of a point and sail over any floor;
+    #   * a row is reassigned to a DIFFERENT person -- the rate does not move at
+    #     all, because the count of filled identities is identical.
+    #
+    # Both now fail through the accepted identity baseline (Layer C), which
+    # compares WHICH person each source identity resolves to against reviewed
+    # acceptance. The rate is still worth looking at, so it is still reported --
+    # it just no longer decides anything.
     fill_rate = 1.0 - (no_gsis_audited / b_blank_source) if b_blank_source else 1.0
-    expect("crosswalk fills >=85%% of the audited window's blank-gsis rows "
-           "(now %.1f%%, %d of %d still blank)"
-           % (fill_rate * 100, no_gsis_audited, b_blank_source),
-           fill_rate >= 0.85,
-           "%.1f%%" % (fill_rate * 100))
-    added = sorted(set(unresolved_audited) - set(UNRESOLVED_ESPN_IDS))
-    gone = sorted(set(UNRESOLVED_ESPN_IDS) - set(unresolved_audited))
+    print("    [INFO] crosswalk fills %.1f%% of the audited window's blank-gsis "
+          "rows (%d of %d still blank) -- telemetry; identity correctness is "
+          "decided by the accepted baseline, not by this rate"
+          % (fill_rate * 100, no_gsis_audited, b_blank_source))
+    # The unresolved set is DERIVED from the accepted baseline. It used to be a
+    # second, independently maintained list -- and the two had already drifted:
+    # the list still named espn_id 4431597 (Roc Taylor) unresolved after Phase 0R
+    # reviewed and accepted his resolution, so it carried 34 ids against the
+    # baseline's 33. Two authorities for one fact eventually disagree; this one
+    # already had.
+    accepted_unresolved = unresolved_baseline_ids()
+    added = sorted(set(unresolved_audited) - accepted_unresolved)
+    gone = sorted(accepted_unresolved - set(unresolved_audited))
     if added or gone:
-        print("    [INFO] unresolved espn_id set moved vs the %d itemised: "
+        print("    [INFO] unresolved espn_id set moved vs the %d accepted: "
               "%d new %s, %d now resolved %s"
-              % (len(UNRESOLVED_ESPN_IDS), len(added), added[:6],
+              % (len(accepted_unresolved), len(added), added[:6],
                  len(gone), gone[:6]))
     if shapes["B"] > b_audited:
         print("    [INFO] %d shape-B rows newer than %s (%d still blank-gsis) -- "

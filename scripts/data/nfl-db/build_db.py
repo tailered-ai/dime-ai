@@ -62,6 +62,7 @@ import build_inputs                    # noqa: E402  the canonical build-input c
 import corrections                     # noqa: E402  data corrections, each asserting its prior
 import espn_identities                 # noqa: E402  the ONE T4 loader/validator
 import identity_baseline                # noqa: E402  Layer C: accepted derived identity
+import identity_layers                  # noqa: E402  Layers A/B: facts + source identity
 import depth_charts as depth_lib       # noqa: E402  B3
 import player_dimension                # noqa: E402  B5
 import rowloss                         # noqa: E402  B4
@@ -1029,6 +1030,21 @@ def pass_reconciliation(conn, rows, hist, new, counts):
         else:
             check(2, f"{tbl}: frozen-window CONTENT is unchanged, not just its count",
                   ok, detail)
+    # ---- LAYERS A and B: depth_chart historical facts and source identity ----
+    # These replace the retired monolithic depth_chart digest (Phase 8). A holds
+    # immutable row facts; B binds source-owned identity TO its row, so swapping
+    # two identities fails even though the multiset of identifiers is unchanged.
+    for layer, ok, detail in identity_layers.verdicts(conn):
+        check(2, f"Layer {layer}: depth_chart "
+                 f"{'historical facts are unchanged' if layer == 'A' else 'source-owned identity is unchanged'}",
+              ok, detail)
+    cons = identity_layers.conservation(conn)
+    check(2, "every frozen depth_chart row is governed by exactly one identity mechanism",
+          cons["ungoverned"] == 0,
+          f"B {cons['layer_b_source_owned']:,} + C resolved {cons['layer_c_resolved']:,} "
+          f"+ C unresolved {cons['layer_c_unresolved']:,} = {cons['governed']:,} "
+          f"of {cons['frozen_rows']:,}")
+
     # ---- LAYER C: accepted derived identity (Phase 7) --------------------
     # The percentage gate below can only see how MANY identities are filled. It
     # cannot see WHICH, so it is blind to the two defects that actually matter:

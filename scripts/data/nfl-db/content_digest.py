@@ -31,7 +31,11 @@ import season_pins as sp  # noqa: E402
 # carry its own copy of every predicate and column list, so the regenerator could
 # silently protect a different population than the gate it feeds. Same authority,
 # same rows, or the digest means nothing.
-WINDOWS = {t: sp.window(t).predicate for t in sp.governed_tables()}
+# all_frozen_tables(), not governed_tables(): the GENERATOR still emits
+# depth_chart's digest because that pin is retained as historical evidence and
+# must stay reproducible. Only the BUILD GATE excludes it -- retiring an
+# authority is not the same as losing the ability to compute it.
+WINDOWS = {t: sp.window(t).predicate for t in sp.all_frozen_tables()}
 
 
 def main() -> int:
