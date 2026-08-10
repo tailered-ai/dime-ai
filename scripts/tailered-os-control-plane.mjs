@@ -25,6 +25,21 @@ export const CANONICAL = Object.freeze({
   tasks: "96228d0d4aca436e8527053a27f7472c",
   projects: "888202aaf938497a91075121646e4cb4",
   aiSystemsRegistry: "8673b8ac6f424acebc53b6cbf0698251",
+  decisions: "46ec53110ccc496296a7438203324d21",
+  risks: "a4a37320164d408c8f0df5dfe7cb2ba1",
+  releases: "f86c2987ec7e43dfa71b2dce14664467",
+  knowledge: "694ec08d2e544cc797157a24824bbd1d",
+});
+
+// Data-source ids of the four databases above (connector-verified 2026-08-10).
+// A database's page id and data-source id are different identifiers for the
+// same object; query tools need the data-source id. Pinned so a manifest edit
+// cannot silently repoint the prose either.
+export const CANONICAL_DATA_SOURCES = Object.freeze({
+  decisions: "e987f7e3-59bd-4c36-9a1d-253c6840b4d9",
+  risks: "e6538397-ee1b-407e-bd7e-5a9e80d9b529",
+  releases: "1eebcf06-a0c3-4aba-9bb8-d550ad37961d",
+  knowledge: "456f7bbc-8f8a-4648-95ca-b561ac68bd11",
 });
 
 const NOTION_ID = /^[0-9a-f]{32}$/;
@@ -196,7 +211,16 @@ export function validateControlPlaneManifest(manifest) {
   );
 
   for (const key of ["decisions", "risks", "releases", "knowledge"]) {
-    validateNode(notion.databases[key], `notion.databases.${key}`);
+    const node = notion.databases[key];
+    validateNode(node, `notion.databases.${key}`);
+    invariant(
+      node.id === CANONICAL[key],
+      `notion.databases.${key}.id (${node?.id}) does not match the owner-verified canonical id — control-plane drift`
+    );
+    invariant(
+      node.source.includes(CANONICAL_DATA_SOURCES[key]),
+      `notion.databases.${key}.source must record its canonical data-source id ${CANONICAL_DATA_SOURCES[key]}`
+    );
   }
 
   const ids = [
@@ -207,7 +231,7 @@ export function validateControlPlaneManifest(manifest) {
   ];
   invariant(
     new Set(ids).size === ids.length,
-    "notion ids must be unique — with the canonical eight individually pinned above, a duplicate means a mis-pasted unverified-database id"
+    "notion ids must be unique — with the canonical eight individually pinned above, a duplicate means a mis-pasted database id"
   );
 
   invariant(
