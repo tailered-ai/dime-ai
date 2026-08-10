@@ -817,6 +817,7 @@ export async function loadLastDigestDate(): Promise<string | null> {
   const rows = await getSecurityEvents({
     eventType: DIGEST_MARKER_DAILY_EVENT_TYPE,
     limit: 1,
+    existenceProbe: true,
   });
   return decodeDigestMarkerContext(rows[0]?.context)?.date ?? null;
 }
@@ -837,6 +838,7 @@ export async function loadLastDigestDeliveryFailure(): Promise<{
   const rows = await getSecurityEvents({
     eventType: DIGEST_MARKER_DAILY_EVENT_TYPE,
     limit: 1,
+    existenceProbe: true,
   });
   const decoded = decodeDigestMarkerContext(rows[0]?.context);
   if (!decoded || !decoded.failureReason) return null;

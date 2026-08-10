@@ -1,0 +1,1666 @@
+{
+ "_acceptance_log": [
+  {
+   "accepted_in": "Phase 0R",
+   "espn_id": "4431597",
+   "evidence": "Independently verified during Phase 0R. Recorded here so the baseline does not present every entry as though it had always held its current state: this one was admitted through the unresolved -> resolved review path.",
+   "from_state": "unresolved",
+   "frozen_rows": 15,
+   "gsis_id": "00-0040531",
+   "name": "Roc Taylor",
+   "to_state": "resolved"
+  }
+ ],
+ "_comment": "Accepted identity baseline for CROSSWALK-DERIVED depth-chart identities in the frozen window. Feed-supplied identities are NOT here -- they are governed by the blocking content digest. Current derivation PROPOSES an identity; this file DECIDES whether that identity is already trusted. It is reviewed evidence and is NOT regenerable from the build it governs.",
+ "_counts": {
+  "distinct_gsis": 171,
+  "mappings": 204,
+  "resolved": 171,
+  "rows_covered": 5577,
+  "unresolved": 33
+ },
+ "_provenance": {
+  "admitted_from": "Phase 0R reviewed accepted state (artifact dated 2026-08-08 19:39)",
+  "auto_generated_from_current_output": false,
+  "derived_from_build": "clean-clone build against live nflverse, 2026-08-08, T4 present",
+  "frozen_window_at_admission": "source_shape='B' AND snapshot_ts <= '2026-03-14T07:32:09Z' AND gsis_source != 'feed'",
+  "note": "The candidate mapping set was produced by a corrected clean-clone build, then REVIEWED in Phase 0R (12/12 controls) before admission. Phase 7 re-reconciled it against the accepted Phase 6 database before tracking it. It was not written from the current crosswalk to make a gate pass.",
+  "phase_0r_reconciliation": "204/204 identical; 0 regressions, 0 reassignments, 0 new resolutions, 0 unknown, 0 collisions"
+ },
+ "_scope": "Membership is PERMANENT once admitted. It is deliberately NOT re-derived from gsis_source on each build: an accepted identity whose resolution later improves to feed-supplied must stay governed, not silently leave scope.",
+ "mappings": [
+  {
+   "espn_id": "2531358",
+   "evidence_rows_at_admission": 221,
+   "evidence_tier_at_admission": "T2",
+   "gsis_id": "00-0031484",
+   "name": null,
+   "state": "resolved"
+  },
+  {
+   "espn_id": "3043133",
+   "evidence_rows_at_admission": 221,
+   "evidence_tier_at_admission": "T4",
+   "gsis_id": "00-0037073",
+   "name": null,
+   "state": "resolved"
+  },
+  {
+   "espn_id": "3928939",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040555",
+   "name": "Jordan Williams",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4240033",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T4",
+   "gsis_id": "00-0038873",
+   "name": "Ontaria Wilson",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4240843",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0038199",
+   "name": "Ryan Nelson",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4241278",
+   "evidence_rows_at_admission": 217,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0037106",
+   "name": "Jaylon Jones",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4243557",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0038670",
+   "name": "Samuel Jackson",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4243913",
+   "evidence_rows_at_admission": 3,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039224",
+   "name": "Marvin Moody",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4244814",
+   "evidence_rows_at_admission": 2,
+   "evidence_tier_at_admission": "T4",
+   "gsis_id": "00-0037200",
+   "name": "Jake Julien",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4244834",
+   "evidence_rows_at_admission": 17,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039159",
+   "name": "Gunnar Oakes",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4339830",
+   "evidence_rows_at_admission": 6,
+   "evidence_tier_at_admission": "T4",
+   "gsis_id": "00-0034696",
+   "name": "Chris Okoye",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4361444",
+   "evidence_rows_at_admission": 18,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Toa Taua",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4361493",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039501",
+   "name": "Jack Plummer",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4361945",
+   "evidence_rows_at_admission": 4,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039271",
+   "name": "Jarveon Howard",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4362191",
+   "evidence_rows_at_admission": 66,
+   "evidence_tier_at_admission": "T4",
+   "gsis_id": "00-0039949",
+   "name": "Jaylon Hutchings",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4362248",
+   "evidence_rows_at_admission": 8,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Anthony Torres",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4362892",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039941",
+   "name": "Geor'Quarius Spivey",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4363054",
+   "evidence_rows_at_admission": 17,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039468",
+   "name": "Gunner Britton",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4367843",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0038771",
+   "name": "Jacob Sykes",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4369991",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039654",
+   "name": "Steven Stilianos",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4370170",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040353",
+   "name": "Landon Parker",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4371740",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039564",
+   "name": "Jaylon Allen",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4373895",
+   "evidence_rows_at_admission": 19,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040569",
+   "name": "Ben Wooldridge",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4384852",
+   "evidence_rows_at_admission": 64,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040785",
+   "name": null,
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4426398",
+   "evidence_rows_at_admission": 9,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "David Gbenda",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4426484",
+   "evidence_rows_at_admission": 10,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Marcus Major Jr.",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4426508",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040426",
+   "name": "Shilo Sanders",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4426528",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040703",
+   "name": "Ife Adeyi",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4426530",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040288",
+   "name": "Kay'Ron Lynch-Adams",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4426696",
+   "evidence_rows_at_admission": 3,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040510",
+   "name": "Micah Bernard",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4426857",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040381",
+   "name": "Oscar Cardenas",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4427196",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040665",
+   "name": "Michael Fletcher",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4427243",
+   "evidence_rows_at_admission": 1,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Brett Gabbert",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4427389",
+   "evidence_rows_at_admission": 3,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Hayden Harris",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4427569",
+   "evidence_rows_at_admission": 17,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Giles Jackson",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4427812",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040040",
+   "name": "J.J. Lippe",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4427813",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040351",
+   "name": "Desmond Little",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4427829",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040287",
+   "name": "Steven Losoya",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4427952",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040278",
+   "name": "JaTravis Broughton",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4428132",
+   "evidence_rows_at_admission": 1,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Tuasivi Nomura",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4428204",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040596",
+   "name": "Josh Pearcy",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4428637",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040657",
+   "name": "Da'Jon Terry",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4428726",
+   "evidence_rows_at_admission": 14,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040776",
+   "name": "Alphonzo Tuputala",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4428803",
+   "evidence_rows_at_admission": 60,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040601",
+   "name": "Jordan Waters",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4428817",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040755",
+   "name": "J.J. Weaver",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4428823",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040312",
+   "name": "Addison West",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4428825",
+   "evidence_rows_at_admission": 5,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0037531",
+   "name": "Dohnovan West",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4428987",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040513",
+   "name": "Desmond Evans",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429008",
+   "evidence_rows_at_admission": 17,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040607",
+   "name": "Wesley Steiner",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429036",
+   "evidence_rows_at_admission": 17,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040268",
+   "name": "Major Burns",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429056",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040285",
+   "name": "Kobe Hudson",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429057",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040542",
+   "name": "Omari Thomas",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429139",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040437",
+   "name": "Makari Paige",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429147",
+   "evidence_rows_at_admission": 19,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040681",
+   "name": "R.J. Moten",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429184",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040080",
+   "name": "Elijhah Badger",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429207",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039957",
+   "name": "Ajou Ajou",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429285",
+   "evidence_rows_at_admission": 17,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040511",
+   "name": "Philip Blidi",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429488",
+   "evidence_rows_at_admission": 1,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Fentrell Cypress II",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4429538",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040614",
+   "name": "Ben Dooley",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429747",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040515",
+   "name": "Jermari Harris",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429797",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040282",
+   "name": "Isaac Gifford",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429871",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040483",
+   "name": "Jarrod Hufford",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4429932",
+   "evidence_rows_at_admission": 9,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Christian Johnstone",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4430111",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040486",
+   "name": "Jah Joyner",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430116",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040286",
+   "name": "Luke Kandra",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430254",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040447",
+   "name": "Jerjuan Newton",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430349",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039463",
+   "name": "Keith Randolph",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430376",
+   "evidence_rows_at_admission": 16,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040774",
+   "name": "Nate Matlack",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430470",
+   "evidence_rows_at_admission": 41,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040627",
+   "name": "TJ Sheffield",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430577",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040376",
+   "name": "Rashod Owens",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430590",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040378",
+   "name": "Payton Thorne",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430632",
+   "evidence_rows_at_admission": 74,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040781",
+   "name": "Joseph Vaughn",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430736",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040119",
+   "name": "Major Williams",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430738",
+   "evidence_rows_at_admission": 19,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040439",
+   "name": "Jaison Williams",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4430804",
+   "evidence_rows_at_admission": 7,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Chris Tyree",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4430875",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040412",
+   "name": "Daniel Jackson",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431008",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040536",
+   "name": "Jasheen Davis",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431023",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040491",
+   "name": "Parker Clements",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431045",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040327",
+   "name": "John Copenhaver",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431048",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040084",
+   "name": "Jacobe Covington",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431053",
+   "evidence_rows_at_admission": 83,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040086",
+   "name": "Mac Dalena",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431065",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040346",
+   "name": "Solomon DeShields",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431068",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040538",
+   "name": "Moochie Dixon",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431169",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040622",
+   "name": "D'Eryk Jackson",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431333",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040540",
+   "name": "Tyreem Powell",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431356",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040481",
+   "name": "Mello Dotson",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431389",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040605",
+   "name": "Ketron Jackson Jr.",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431509",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040239",
+   "name": "Kaden Prather",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431548",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040664",
+   "name": "Michael Gonzalez",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431584",
+   "evidence_rows_at_admission": 74,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040572",
+   "name": "Jahvaree Ritzie",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431597",
+   "evidence_rows_at_admission": 15,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040531",
+   "name": "Roc Taylor",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4431618",
+   "evidence_rows_at_admission": 74,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040603",
+   "name": "Mario Williams",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4432045",
+   "evidence_rows_at_admission": 19,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040435",
+   "name": "O'Donnell Fortune",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4432270",
+   "evidence_rows_at_admission": 16,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040516",
+   "name": "Garnett Hollis Jr.",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4432387",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040671",
+   "name": "Nate McCollum",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4432436",
+   "evidence_rows_at_admission": 9,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040780",
+   "name": "Xander Mueller",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4432630",
+   "evidence_rows_at_admission": 18,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040343",
+   "name": "Aydan White",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4432772",
+   "evidence_rows_at_admission": 30,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040457",
+   "name": "Jermaine Terry II",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4433922",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040355",
+   "name": "Ladarius Tennison",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4433945",
+   "evidence_rows_at_admission": 19,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040095",
+   "name": "Elijah Young",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4565535",
+   "evidence_rows_at_admission": 2,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "DK Kaufman",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4565547",
+   "evidence_rows_at_admission": 29,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040423",
+   "name": "Roman Parodie",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4565811",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040484",
+   "name": "John Humphrey",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4567044",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040030",
+   "name": "Taylor Morin",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4567158",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040479",
+   "name": "Hudson Clark",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4567400",
+   "evidence_rows_at_admission": 18,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040773",
+   "name": "Nay'Quan Wright",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4567784",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040281",
+   "name": "Jacolby George",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4568016",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040348",
+   "name": "Joe Evans",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4568671",
+   "evidence_rows_at_admission": 9,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Jonathan Kim",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4569006",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040612",
+   "name": "Malik Dixon-Williams",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4569032",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0039322",
+   "name": "D.J. Miller Jr.",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4569452",
+   "evidence_rows_at_admission": 1,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Winston Wright",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4569496",
+   "evidence_rows_at_admission": 1,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Tank Booker",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4569600",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040505",
+   "name": "Mishael Powell",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4570055",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040626",
+   "name": "Dvon J-Thomas",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4570688",
+   "evidence_rows_at_admission": 14,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Caden Davis",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4570888",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040523",
+   "name": "Davion Ross",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4571882",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040485",
+   "name": "Matt Jones",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4571935",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040096",
+   "name": "Jahmal Banks",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4572341",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040732",
+   "name": "Tyson Russell",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4572380",
+   "evidence_rows_at_admission": 20,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040553",
+   "name": "Quincy Skinner Jr.",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4572538",
+   "evidence_rows_at_admission": 20,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040549",
+   "name": "Nick Kubitz",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4572544",
+   "evidence_rows_at_admission": 16,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Eli Mostaert",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4572650",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040717",
+   "name": "Joey Lombard",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4573629",
+   "evidence_rows_at_admission": 12,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040750",
+   "name": "Kam Alexander",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4573696",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040760",
+   "name": "Jonathan Mendoza",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4574571",
+   "evidence_rows_at_admission": 15,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Brent Matiscik",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4574833",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040345",
+   "name": "Devonta Davis",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4575369",
+   "evidence_rows_at_admission": 65,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040786",
+   "name": null,
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4576845",
+   "evidence_rows_at_admission": 63,
+   "evidence_tier_at_admission": "T2",
+   "gsis_id": "00-0039730",
+   "name": "Isaiah Wooden",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4578080",
+   "evidence_rows_at_admission": 1,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Ozzie Hutchinson",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4578233",
+   "evidence_rows_at_admission": 10,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Ryan Coe",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4578857",
+   "evidence_rows_at_admission": 16,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Bruce Harmon",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4578937",
+   "evidence_rows_at_admission": 126,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "CON687807",
+   "name": "Nik Constantinou",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4579591",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040325",
+   "name": "James Carpenter",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4579667",
+   "evidence_rows_at_admission": 1,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Pat Conroy",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4585283",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040266",
+   "name": "Dartanyan Tinsley",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4587977",
+   "evidence_rows_at_admission": 11,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Sam Brown Jr.",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4594446",
+   "evidence_rows_at_admission": 13,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040778",
+   "name": "Roderick Daniels Jr.",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4596596",
+   "evidence_rows_at_admission": 1,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "J.J. Jones",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4605489",
+   "evidence_rows_at_admission": 65,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": null,
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4605861",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040707",
+   "name": "Decarius Hawthorne",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4606672",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040465",
+   "name": "Corey Stewart",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4607419",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040606",
+   "name": "Key'Shawn Smith",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4608357",
+   "evidence_rows_at_admission": 87,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040349",
+   "name": "Marshall Foerner",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4610703",
+   "evidence_rows_at_admission": 17,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Jalen White",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4613032",
+   "evidence_rows_at_admission": 19,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040306",
+   "name": "Nate Noel",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4643729",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040448",
+   "name": "Joshua Pickett",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4682568",
+   "evidence_rows_at_admission": 8,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040783",
+   "name": "Jake Chaney",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4682634",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040608",
+   "name": "Shaquan Loyal",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4683044",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040029",
+   "name": "BJ Mayes",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4683330",
+   "evidence_rows_at_admission": 29,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040474",
+   "name": "Jaylen Jones",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4683464",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040103",
+   "name": "Desmond Igbinosun",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4685826",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040297",
+   "name": "BJ Adams",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4686238",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040051",
+   "name": "Mike Smith Jr.",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4686271",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040502",
+   "name": "Robert Lewis",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4686338",
+   "evidence_rows_at_admission": 6,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Josh Minkins",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4686388",
+   "evidence_rows_at_admission": 15,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040276",
+   "name": "Jereme Robinson",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4686438",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040469",
+   "name": "Stevo Klotz",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4686830",
+   "evidence_rows_at_admission": 9,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040520",
+   "name": "Devonte O'Malley",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4686885",
+   "evidence_rows_at_admission": 218,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0038851",
+   "name": "Caleb Murphy",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4687373",
+   "evidence_rows_at_admission": 37,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040430",
+   "name": "Jordan Bly",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4690170",
+   "evidence_rows_at_admission": 8,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "DJ Thomas-Jones",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4691085",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040610",
+   "name": "Jeremiah Walker",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4692562",
+   "evidence_rows_at_admission": 6,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040082",
+   "name": "Will Brooks",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4692628",
+   "evidence_rows_at_admission": 75,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040341",
+   "name": "Doneiko Slaughter",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4692807",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040091",
+   "name": "Glendon Miller",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4692972",
+   "evidence_rows_at_admission": 67,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040373",
+   "name": "Jamoi Mayes",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4694302",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040544",
+   "name": "Marcus Yarns",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4694583",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040368",
+   "name": "Quali Conley",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4695231",
+   "evidence_rows_at_admission": 43,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040768",
+   "name": "Oscar Chapman",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4695679",
+   "evidence_rows_at_admission": 17,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "JB Brown",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4695765",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040050",
+   "name": "Tyler Neville",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4695910",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040099",
+   "name": "Xavier Guillory",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4696821",
+   "evidence_rows_at_admission": 4,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040052",
+   "name": "Zy Alexander",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4697755",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040115",
+   "name": "Paris Shand",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4708127",
+   "evidence_rows_at_admission": 8,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Monaray Baldwin",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4711055",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040340",
+   "name": "Dorian Singer",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4749258",
+   "evidence_rows_at_admission": 24,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Aaron Smith",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "4775214",
+   "evidence_rows_at_admission": 5,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040367",
+   "name": "Rush Reimer",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4775266",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040402",
+   "name": "Dymere Miller",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4875633",
+   "evidence_rows_at_admission": 12,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0039694",
+   "name": "Mikey Victor",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4876907",
+   "evidence_rows_at_admission": 88,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040032",
+   "name": "ShunDerrick Powell",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4879326",
+   "evidence_rows_at_admission": 98,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040356",
+   "name": "Maddux Trujillo",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4880048",
+   "evidence_rows_at_admission": 44,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040114",
+   "name": "James Burnip",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4882116",
+   "evidence_rows_at_admission": 36,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040256",
+   "name": "Jason Ivey",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "4911840",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040424",
+   "name": "Warren Peeples",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5081322",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040324",
+   "name": "Cam Camper",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5082289",
+   "evidence_rows_at_admission": 10,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Kelly Akharaiyi",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "5082390",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040463",
+   "name": "Kylan Guidry",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5083198",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040334",
+   "name": "Darius Lassiter",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5083552",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040354",
+   "name": "Blayne Taylor",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5087235",
+   "evidence_rows_at_admission": 53,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040055",
+   "name": "Jalan Gaines",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5093062",
+   "evidence_rows_at_admission": 21,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040526",
+   "name": "Tre Stewart",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5093928",
+   "evidence_rows_at_admission": 19,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040575",
+   "name": "Jordan Polk",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5153868",
+   "evidence_rows_at_admission": 4,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040779",
+   "name": "Phil Lutz",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5223003",
+   "evidence_rows_at_admission": 6,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040777",
+   "name": "JayVian Farr",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5278091",
+   "evidence_rows_at_admission": 11,
+   "evidence_tier_at_admission": null,
+   "gsis_id": null,
+   "name": "Jordan Petaia",
+   "state": "unresolved"
+  },
+  {
+   "espn_id": "5278103",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040591",
+   "name": "Taylor Elgersma",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5278715",
+   "evidence_rows_at_admission": 60,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "BAR591037",
+   "name": "Dante Barnett",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5279793",
+   "evidence_rows_at_admission": 23,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040350",
+   "name": "Tyler Kahmann",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5281603",
+   "evidence_rows_at_admission": 22,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040389",
+   "name": "Ian Kennelly",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5289897",
+   "evidence_rows_at_admission": 20,
+   "evidence_tier_at_admission": "T0",
+   "gsis_id": "00-0040702",
+   "name": "Mitch Van Vooren",
+   "state": "resolved"
+  },
+  {
+   "espn_id": "5299008",
+   "evidence_rows_at_admission": 10,
+   "evidence_tier_at_admission": "T3",
+   "gsis_id": "00-0040775",
+   "name": "Shane Watts",
+   "state": "resolved"
+  }
+ ],
+ "schema": "nfldb-accepted-identities-1"
+}

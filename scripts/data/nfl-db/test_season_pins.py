@@ -203,6 +203,58 @@ class TestDepthChartUsesTheSnapshotAxis(unittest.TestCase):
         self.assertEqual(sp.DEPTH_CHART_EXTRACT_CUTOFF, "2026-03-14T07:32:09Z")
 
 
+class TestContentPins(unittest.TestCase):
+    """A row COUNT cannot see a value change. On 2026-08-07 a clean-clone rebuild
+    had 5,655 settled player_game_stats rows and 331 audited depth_chart rows with
+    different CONTENT while every count matched and all 154 checks passed -- 316 of
+    those had silently lost their gsis_id. These pin the content."""
+
+    def test_every_pinned_table_has_a_digest(self):
+        self.assertEqual(set(sp.CONTENT_DIGESTS), set(sp.FROZEN_COUNTS))
+
+    def test_gsis_id_is_never_excluded(self):
+        # The regression that started this: 316 audited rows lost their gsis_id
+        # and every count still matched. Excluding gsis_id would re-open exactly
+        # that hole, so this is the load-bearing assertion of the whole mechanism.
+        for table, excluded in sp.CONTENT_DIGEST_EXCLUDE.items():
+            self.assertNotIn("gsis_id", excluded,
+                             f"{table}: excluding gsis_id would hide identity loss")
+
+    def test_player_game_stats_excludes_only_derived_metrics(self):
+        # Upstream recomputes these when its play-by-play models change; raw
+        # counting stats and identities do not move. Anything else appearing here
+        # is a loophole, not an exclusion.
+        self.assertEqual(
+            sp.CONTENT_DIGEST_EXCLUDE["player_game_stats"],
+            {"passing_epa", "rushing_epa", "receiving_epa", "target_share",
+             "air_yards_share", "fantasy_points", "fantasy_points_ppr"})
+
+    def test_depth_chart_excludes_the_tier_label_but_not_the_identity(self):
+        excl = sp.CONTENT_DIGEST_EXCLUDE["depth_chart"]
+        self.assertIn("gsis_source", excl)   # which tier resolved it: may move
+        self.assertNotIn("gsis_id", excl)    # what it resolved to: may not
+        self.assertNotIn("espn_id", excl)
+
+    def test_verdict_reports_when_unpinned_and_asserts_when_pinned(self):
+        ok, detail = sp.content_verdict("no_such_table", "abc")
+        self.assertIsNone(ok)
+        self.assertIn("not yet pinned", detail)
+        ok, _ = sp.content_verdict("depth_chart", sp.CONTENT_DIGESTS["depth_chart"])
+        self.assertTrue(ok)
+        # A CONTENT fault: right algorithm, wrong bytes. The detail must name
+        # the pin the operator is supposed to investigate against.
+        ok, detail = sp.content_verdict("depth_chart", "0" * 60 + "dead")
+        self.assertFalse(ok)
+        self.assertIn(sp.CONTENT_DIGESTS["depth_chart"], detail)
+        # An ALGORITHM fault: a legacy-width digest. This is deliberately NOT
+        # reported as a content mismatch -- quoting the expected pin here would
+        # send an operator hunting for data corruption that has not happened.
+        ok, detail = sp.content_verdict("depth_chart", "0000000000000000dead")
+        self.assertFalse(ok)
+        self.assertIn("legacy digest?", detail)
+        self.assertNotIn(sp.CONTENT_DIGESTS["depth_chart"], detail)
+
+
 class TestAgainstRealUpstream(unittest.TestCase):
     """The numbers measured against live nflverse on 2026-08-07."""
 

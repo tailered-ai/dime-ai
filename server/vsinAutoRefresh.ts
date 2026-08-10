@@ -2458,37 +2458,47 @@ async function runMlbCycleWork(): Promise<void> {
     console.warn("[MLBCycle] LineupWatcher failed (non-fatal):", err);
   }
 
-  // Step 6: Fallback full model run — catches games that were modelable before
-  // the watcher was deployed (lineupVersion=0 but pitchers+lines present).
-  // Safe to run because mlbModelRunner is idempotent.
+  // Step 6: MLB model run — today + tomorrow, through the ONE job that owns it.
+  //
+  // Until 2026-08-10 this step called runMlbModelForDate(today) and
+  // runMlbModelForDate(tomorrow) directly, and mlbModelRunner ALSO ran its own
+  // independent 5-minute setInterval (startMlbModelSyncScheduler) doing the
+  // identical pair. Two schedulers, one workload, same cadence, separate and
+  // mutually blind in-flight flags — so both spawned their own CPU-bound Monte
+  // Carlo subprocess over the same rows. Production evidence (Railway
+  // deployment ff472662, 2026-08-09): "[MLBModelRunner][2026-08-10] Spawning
+  // Python engine for N games..." logged in pairs seconds apart, e.g.
+  // 18:05:42.875/18:05:50.119 and 23:50:42.493/23:50:52.290.
+  //
+  // That registration is retired; the workload is now a job with a single
+  // acquisition path, so this cycle's re-entrancy guard, its 20-minute
+  // watchdog, and /api/cron/mlb-cycle cover the model too.
+  //
+  // The job picks its own dates in EASTERN — games.gameDate is the venue-local
+  // schedule date that mlbScheduleSync writes and queries in Eastern. The
+  // cycle's `todayStr` above is Pacific and stays Pacific on purpose: it holds
+  // the slate open through the end of west-coast games for score refresh and
+  // prop grading, a different question from which calendar day a game is filed
+  // under.
   try {
-    const { runMlbModelForDate } = await import("./mlbModelRunner");
-    // Run model for today
-    const todayResult = await runMlbModelForDate(todayStr);
-    console.log(
-      `[MLBCycle] Model fallback (today): written=${todayResult.written} skipped=${todayResult.skipped} errors=${todayResult.errors} ` +
-        `validation=${todayResult.validation.passed ? "\u2705 PASSED" : "\u274c FAILED (" + todayResult.validation.issues.length + " issues)"}`
-    );
-    if (!todayResult.validation.passed) {
-      console.error(
-        "[MLBCycle] Validation issues (today):",
-        todayResult.validation.issues
+    const { runMlbModelSyncJob } = await import("./mlbModelRunner");
+    const modelJob = await runMlbModelSyncJob();
+    if (!modelJob.ran) {
+      console.warn(
+        "[MLBCycle] Model job [SKIP] — a previous model job is still running"
       );
-    }
-    // Run model for tomorrow (games seeded a day ahead)
-    const tomorrowResult = await runMlbModelForDate(mlbTomorrowStr);
-    console.log(
-      `[MLBCycle] Model fallback (tomorrow): written=${tomorrowResult.written} skipped=${tomorrowResult.skipped} errors=${tomorrowResult.errors} ` +
-        `validation=${tomorrowResult.validation.passed ? "\u2705 PASSED" : "\u274c FAILED (" + tomorrowResult.validation.issues.length + " issues)"}`
-    );
-    if (!tomorrowResult.validation.passed) {
-      console.error(
-        "[MLBCycle] Validation issues (tomorrow):",
-        tomorrowResult.validation.issues
-      );
+    } else {
+      for (const outcome of modelJob.dates) {
+        console.log(
+          `[MLBCycle] Model ${outcome.date}: ok=${outcome.ok} written=${outcome.written} ` +
+            `not_yet_modelable=${outcome.notYetModelable} errors=${outcome.errors} ` +
+            `validation=${outcome.validationPassed ? "✅ PASSED" : "❌ FAILED"}` +
+            (outcome.failure ? ` failure=${outcome.failure}` : "")
+        );
+      }
     }
   } catch (err) {
-    console.warn("[MLBCycle] MLB model fallback run failed (non-fatal):", err);
+    console.warn("[MLBCycle] MLB model job failed (non-fatal):", err);
   }
   // ── K-Props: fetch live AN lines + run backtest for completed games ────────
   try {
