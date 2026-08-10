@@ -68,6 +68,10 @@ export const CLASSIFICATIONS = [
   "SOURCE_ERROR",
   /** Structurally impossible to repair (e.g. no game identity at all). */
   "UNREPAIRABLE",
+  /** Proven to have been scored OUTSIDE the defect window — not a candidate. */
+  "OUTSIDE_DEFECT_WINDOW",
+  /** Required manifest evidence was not supplied by the dry run. */
+  "EVIDENCE_INCOMPLETE",
   /** Anything that does not fit above — must be zero before closure. */
   "INVESTIGATION_REQUIRED",
 ] as const;
@@ -83,6 +87,40 @@ export const WRITABLE_CLASSIFICATIONS: readonly Classification[] = [
 export const CLOSURE_BLOCKING_CLASSIFICATIONS: readonly Classification[] = [
   "SOURCE_ERROR",
   "INVESTIGATION_REQUIRED",
+  "EVIDENCE_INCOMPLETE",
+];
+
+/**
+ * Terminal dispositions that are PROVEN safe to leave unwritten. A row here is
+ * genuinely fine: its stored value already equals the corrected value, the
+ * correct value is null and the row holds null, or it was scored outside the
+ * defect window entirely.
+ */
+export const ACCEPTED_NO_WRITE_CLASSIFICATIONS: readonly Classification[] = [
+  "ALREADY_CORRECT",
+  "EXPECTED_UNCHANGED",
+  "VALID_NULL_RESULT",
+  "OUTSIDE_DEFECT_WINDOW",
+];
+
+/**
+ * Unresolved dispositions that BLOCK mutation of the date they appear on.
+ *
+ * These are not "safely skipped". Each one means the evidence for that row is
+ * incomplete or contradictory, and mutating its neighbours while it sits
+ * unexplained is exactly how a repair silently leaves a hole. An ambiguous
+ * doubleheader match must stop the date, not quietly become a skip.
+ */
+export const APPLY_BLOCKING_CLASSIFICATIONS: readonly Classification[] = [
+  "MISSING_REQUIRED_INPUT",
+  "INVALID_PROBABILITY",
+  "MISSING_MLB_MATCH",
+  "AMBIGUOUS_MATCH",
+  "DOUBLEHEADER_REVIEW",
+  "SOURCE_ERROR",
+  "UNREPAIRABLE",
+  "INVESTIGATION_REQUIRED",
+  "EVIDENCE_INCOMPLETE",
 ];
 
 // ─── Manifest shapes ──────────────────────────────────────────────────────────
@@ -356,6 +394,9 @@ export interface AccountingResult {
   balanced: boolean;
   writable: number;
   closureBlocking: number;
+  /** Rows whose unresolved evidence blocks mutation of their date. */
+  applyBlocking: number;
+  acceptedNoWrite: number;
 }
 
 /**
@@ -371,6 +412,14 @@ export function reconcileAccounting(rows: ManifestRow[]): AccountingResult {
     balanced: summed === rows.length,
     writable: WRITABLE_CLASSIFICATIONS.reduce((s, c) => s + counts[c], 0),
     closureBlocking: CLOSURE_BLOCKING_CLASSIFICATIONS.reduce(
+      (s, c) => s + counts[c],
+      0
+    ),
+    applyBlocking: APPLY_BLOCKING_CLASSIFICATIONS.reduce(
+      (s, c) => s + counts[c],
+      0
+    ),
+    acceptedNoWrite: ACCEPTED_NO_WRITE_CLASSIFICATIONS.reduce(
       (s, c) => s + counts[c],
       0
     ),
@@ -454,23 +503,90 @@ export function buildRollbackManifest(
 }
 
 /**
+ * Validates a rollback artifact against the manifest it claims to reverse.
+ *
+ * Row-ID coverage alone is insufficient: an artifact can name every correct row
+ * and still carry the wrong values, which would "restore" the data to a state
+ * it never held. Every writable row is therefore checked for exact CONTENT
+ * agreement in both directions — expectedCurrent must equal what the repair
+ * will write, and restoreTo must equal what was there before it.
+ */
+export function validateRollback(
+  sealed: SealedManifest,
+  rollback: RollbackManifest
+): string[] {
+  const problems: string[] = [];
+
+  if (rollback.sourceManifestSha256 !== sealed.manifestSha256) {
+    problems.push(
+      `sourceManifestSha256 mismatch: rollback=${rollback.sourceManifestSha256} manifest=${sealed.manifestSha256}`
+    );
+  }
+  if (rollback.repairRunId !== sealed.manifest.repairRunId) {
+    problems.push(
+      `repairRunId mismatch: rollback=${rollback.repairRunId} manifest=${sealed.manifest.repairRunId}`
+    );
+  }
+
+  const writable = sealed.manifest.rows.filter(r =>
+    WRITABLE_CLASSIFICATIONS.includes(r.classification)
+  );
+  const byId = new Map<number, RollbackRow[]>();
+  for (const rb of rollback.rows) {
+    if (!byId.has(rb.gameRowId)) byId.set(rb.gameRowId, []);
+    byId.get(rb.gameRowId)!.push(rb);
+  }
+
+  for (const [id, entries] of Array.from(byId.entries())) {
+    if (entries.length > 1) {
+      problems.push(`duplicate rollback entry for row ${id}`);
+    }
+  }
+  const writableIds = new Set(writable.map(r => r.gameRowId));
+  for (const id of Array.from(byId.keys())) {
+    if (!writableIds.has(id)) {
+      problems.push(
+        `rollback covers row ${id}, which the manifest does not write`
+      );
+    }
+  }
+
+  for (const row of writable) {
+    const entries = byId.get(row.gameRowId);
+    if (!entries || entries.length === 0) {
+      problems.push(`rollback is missing writable row ${row.gameRowId}`);
+      continue;
+    }
+    const rb = entries[0];
+    for (const m of BRIER_MARKETS) {
+      if (
+        !brierEquals(rb.expectedCurrent[m.field], row.proposedBrier[m.field])
+      ) {
+        problems.push(
+          `row ${row.gameRowId} ${m.field}: rollback expectedCurrent=${rb.expectedCurrent[m.field]} != manifest proposed=${row.proposedBrier[m.field]}`
+        );
+      }
+      if (!brierEquals(rb.restoreTo[m.field], row.previousBrier[m.field])) {
+        problems.push(
+          `row ${row.gameRowId} ${m.field}: rollback restoreTo=${rb.restoreTo[m.field]} != manifest previous=${row.previousBrier[m.field]}`
+        );
+      }
+    }
+  }
+
+  return problems;
+}
+
+/**
  * A rollback artifact is complete when every row the repair would write has a
- * corresponding restore entry. Mutation must never begin without this.
+ * corresponding restore entry whose CONTENT matches the manifest exactly.
+ * Mutation must never begin without this.
  */
 export function rollbackIsComplete(
   sealed: SealedManifest,
   rollback: RollbackManifest
 ): boolean {
-  const writable = sealed.manifest.rows
-    .filter(r => WRITABLE_CLASSIFICATIONS.includes(r.classification))
-    .map(r => r.gameRowId)
-    .sort((a, b) => a - b);
-  const covered = rollback.rows.map(r => r.gameRowId).sort((a, b) => a - b);
-  return (
-    rollback.sourceManifestSha256 === sealed.manifestSha256 &&
-    writable.length === covered.length &&
-    writable.every((id, i) => id === covered[i])
-  );
+  return validateRollback(sealed, rollback).length === 0;
 }
 
 // ─── Oracle cross-check ───────────────────────────────────────────────────────

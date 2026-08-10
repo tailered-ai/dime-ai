@@ -25,7 +25,9 @@
  * rather than leaving that date half-applied.
  */
 import {
+  APPLY_BLOCKING_CLASSIFICATIONS,
   WRITABLE_CLASSIFICATIONS,
+  reconcileAccounting,
   crossCheckWithOracle,
   findInvariantViolations,
   rollbackIsComplete,
@@ -63,6 +65,7 @@ export type TransactionRunner = <T>(
 export type RowOutcome =
   | "APPLIED"
   | "REVERTED"
+  | "NOT_ATTEMPTED_DATE_ABORTED"
   | "SKIPPED_NOT_WRITABLE"
   | "PREIMAGE_MISMATCH"
   | "ROW_MISSING"
@@ -83,7 +86,8 @@ export type AbortReason =
   | "ROLLBACK_INCOMPLETE"
   | "INVARIANT_VIOLATION"
   | "ORACLE_DISAGREEMENT"
-  | "ACCOUNTING_UNBALANCED";
+  | "ACCOUNTING_UNBALANCED"
+  | "APPLY_BLOCKING_CLASSIFICATION";
 
 export interface ApplyResult {
   repairRunId: string;
@@ -105,7 +109,12 @@ export interface ApplyOptions {
   actualSchemaVersion: string;
   /** Opens a transaction for one date's worth of rows. */
   runInTransaction: TransactionRunner;
-  /** Stop the entire run on the first row failure. Default true. */
+  /**
+   * Stop the entire run on the first row failure. Defaults to TRUE and the
+   * production apply surface never exposes it — a stop condition discovered
+   * during a run must halt that run. `false` exists only so tests can prove
+   * the full-accounting behaviour of a continued run.
+   */
   failFast?: boolean;
   log?: (msg: string) => void;
 }
@@ -203,8 +212,34 @@ export async function applyRepairManifest(
     );
   }
 
+  // ── Guard 7: the candidate ledger must balance ──────────────────────────
+  const accounting = reconcileAccounting(sealed.manifest.rows);
+  if (!accounting.balanced) {
+    return abort(
+      sealed,
+      "ACCOUNTING_UNBALANCED",
+      `total=${accounting.total} does not equal the sum of its classifications`
+    );
+  }
+
+  // ── Guard 8: no unresolved row may sit beside a mutating one ────────────
+  // An ambiguous match or missing input is not "safely skipped": mutating its
+  // neighbours while it stands unexplained is how a repair silently leaves a
+  // hole in the population it claims to have fixed.
+  if (accounting.applyBlocking > 0) {
+    const offenders = sealed.manifest.rows
+      .filter(r => APPLY_BLOCKING_CLASSIFICATIONS.includes(r.classification))
+      .slice(0, 5)
+      .map(r => `${r.gameRowId}:${r.classification}`);
+    return abort(
+      sealed,
+      "APPLY_BLOCKING_CLASSIFICATION",
+      `${accounting.applyBlocking} unresolved row(s); first: ${offenders.join(", ")}`
+    );
+  }
+
   log(
-    `${TAG} guards passed — runId=${sealed.manifest.repairRunId} sha=${sealed.manifestSha256.slice(0, 12)} rows=${sealed.rowCount}`
+    `${TAG} guards passed — runId=${sealed.manifest.repairRunId} sha=${sealed.manifestSha256.slice(0, 12)} rows=${sealed.rowCount} writable=${accounting.writable}`
   );
 
   // ── Execution, one transaction per date ─────────────────────────────────
@@ -312,6 +347,20 @@ export async function applyRepairManifest(
               }
             : r
         );
+        // Every row on the date must appear in the ledger, including the ones
+        // the loop never reached. A partial iteration prefix would understate
+        // the population and let a resume believe those rows were handled.
+        const touched = new Set(dateResults.map(r => r.gameRowId));
+        for (const missed of dateRows) {
+          if (!touched.has(missed.gameRowId)) {
+            dateResults.push({
+              gameRowId: missed.gameRowId,
+              outcome: "NOT_ATTEMPTED_DATE_ABORTED",
+              changedFields: [],
+              detail: "date aborted before this row was reached",
+            });
+          }
+        }
         reverted = true;
         log(
           `${TAG} [ROLLBACK] date=${date} — ${err.outcome} on row ${err.gameRowId}; entire date reverted`

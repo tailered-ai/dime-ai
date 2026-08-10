@@ -268,17 +268,36 @@ describe("normal ingestion (no options)", () => {
 // ── 3. Historical mode ───────────────────────────────────────────────────────
 
 describe("historical mode", () => {
-  it("writes but CANNOT trigger recalibration or notify the owner", async () => {
+  it("REFUSES a historical write — the manifest applier is the only path", async () => {
+    // M-203 CRITICAL: a direct historical mutation would bypass manifest
+    // sealing, oracle verification, the invariant scan, CAS and rollback.
+    state.rows = [dbRow()];
+    mockApi([apiGame(700001)]);
+
+    await expect(
+      ingestMlbOutcomes("2026-08-01", true, { historical: true, dryRun: false })
+    ).rejects.toThrow(/historical=true requires dryRun=true/);
+
+    // The refusal happens before any query, fetch, or write.
+    expect(state.updates).toHaveLength(0);
+    expect(checkDriftSpy).not.toHaveBeenCalled();
+    expect(notifyOwnerSpy).not.toHaveBeenCalled();
+  });
+
+  it("ALLOWS a historical dry run and suppresses every live-model side effect", async () => {
     state.rows = [dbRow()];
     mockApi([apiGame(700001)]);
 
     const s = await ingestMlbOutcomes("2026-08-01", true, {
       historical: true,
+      dryRun: true,
     });
 
-    expect(s.written).toBe(1); // still a real write
     expect(s.historical).toBe(true);
-    expect(checkDriftSpy).not.toHaveBeenCalled(); // no recalibration path
+    expect(s.dryRun).toBe(true);
+    expect(s.wouldWrite).toBe(1);
+    expect(state.updates).toHaveLength(0);
+    expect(checkDriftSpy).not.toHaveBeenCalled();
     expect(notifyOwnerSpy).not.toHaveBeenCalled();
   });
 });
@@ -299,9 +318,7 @@ describe("null Brier correction", () => {
     ];
     mockApi([apiGame(700001)]);
 
-    const s = await ingestMlbOutcomes("2026-08-01", true, {
-      historical: true,
-    });
+    const s = await ingestMlbOutcomes("2026-08-01", true);
 
     expect(s.written).toBe(1);
     const payload = state.updates[0].payload;
@@ -325,7 +342,7 @@ describe("null Brier correction", () => {
       },
     ]);
 
-    await ingestMlbOutcomes("2026-08-01", true, { historical: true });
+    await ingestMlbOutcomes("2026-08-01", true);
 
     const payload = state.updates[0].payload;
     expect(payload.actualFgTotal).toBeUndefined();
@@ -410,7 +427,7 @@ describe("post-write verification", () => {
     mockApi([apiGame(700001)]);
     const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    await ingestMlbOutcomes("2026-08-01", true, { historical: true });
+    await ingestMlbOutcomes("2026-08-01", true);
 
     const failLogged = errSpy.mock.calls
       .map(c => String(c[0]))
@@ -427,9 +444,7 @@ describe("repeated forced ingestion", () => {
     state.rows = [dbRow({ prevBrierNrfi: "0.990000" })];
     mockApi([apiGame(700001)]);
 
-    const first = await ingestMlbOutcomes("2026-08-01", true, {
-      historical: true,
-    });
+    const first = await ingestMlbOutcomes("2026-08-01", true);
     expect(first.written).toBe(1);
     expect(first.brierChanged).toBe(1);
 
@@ -447,9 +462,7 @@ describe("repeated forced ingestion", () => {
     ];
     state.updates = [];
 
-    const second = await ingestMlbOutcomes("2026-08-01", true, {
-      historical: true,
-    });
+    const second = await ingestMlbOutcomes("2026-08-01", true);
 
     expect(second.written).toBe(1);
     expect(second.brierChanged).toBe(0); // nothing moved the second time

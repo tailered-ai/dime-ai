@@ -11,7 +11,11 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { isInDefectWindow, type DefectWindow } from "./buildManifest";
+import {
+  isInDefectWindow,
+  classifyWindowAdmission,
+  type DefectWindow,
+} from "./buildManifest";
 import {
   buildRollbackManifest,
   diffBrier,
@@ -71,13 +75,38 @@ describe("§7 defect-window predicate — explicit boundary contract", () => {
     expect(isInDefectWindow(Number.NEGATIVE_INFINITY, WINDOW)).toBe(false);
   });
 
-  it("still accepts the legacy single-bound form", () => {
-    expect(
-      isInDefectWindow(WINDOW.fixDeployedAtMs - 1, WINDOW.fixDeployedAtMs)
-    ).toBe(true);
-    expect(
-      isInDefectWindow(WINDOW.fixDeployedAtMs, WINDOW.fixDeployedAtMs)
-    ).toBe(false);
+  it("REJECTS an invalid window rather than admitting everything", () => {
+    // The removed single-bound overload implied defectStart = -Infinity, which
+    // would admit rows scored before the defective code existed.
+    expect(() =>
+      isInDefectWindow(1, { defectStartMs: Number.NaN, fixDeployedAtMs: 2 })
+    ).toThrow(/not a finite production timestamp/);
+    expect(() =>
+      isInDefectWindow(1, {
+        defectStartMs: Number.NEGATIVE_INFINITY,
+        fixDeployedAtMs: 2,
+      })
+    ).toThrow(/not a finite production timestamp/);
+  });
+
+  it("REJECTS a window whose start does not precede its end", () => {
+    expect(() =>
+      isInDefectWindow(1, { defectStartMs: 100, fixDeployedAtMs: 100 })
+    ).toThrow(/must precede/);
+    expect(() =>
+      isInDefectWindow(1, { defectStartMs: 200, fixDeployedAtMs: 100 })
+    ).toThrow(/must precede/);
+  });
+
+  it("distinguishes NOT_PROVEN from PROVEN_OUTSIDE", () => {
+    expect(classifyWindowAdmission(null, WINDOW)).toBe("NOT_PROVEN");
+    expect(classifyWindowAdmission(Number.NaN, WINDOW)).toBe("NOT_PROVEN");
+    expect(classifyWindowAdmission(WINDOW.fixDeployedAtMs, WINDOW)).toBe(
+      "PROVEN_OUTSIDE"
+    );
+    expect(classifyWindowAdmission(WINDOW.defectStartMs, WINDOW)).toBe(
+      "IN_WINDOW"
+    );
   });
 });
 

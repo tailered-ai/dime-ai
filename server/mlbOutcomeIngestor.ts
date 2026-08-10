@@ -198,7 +198,51 @@ export interface OutcomeIngestResult {
   previousBrier?: BrierSnapshot | null;
   /** True when at least one Brier field differs from previousBrier. */
   brierChanged?: boolean;
+  /**
+   * ── M-203 manifest evidence ──────────────────────────────────────────────
+   * Populated on dry-run rows so buildRepairManifest() can construct an
+   * authoritative manifest WITHOUT inventing anything. Every field here has a
+   * specific integrity purpose; absent evidence must classify the row, never be
+   * defaulted to a clean-looking empty value.
+   */
+  mlbGamePk?: number | null;
+  /** When this row was originally SCORED — the defect-window predicate input. */
+  outcomeIngestedAt?: number | null;
+  /** How the API outcome was paired to this row. */
+  matchMethod?: "mlbGamePk" | "teamAbbrev" | "none";
+  /** True when >1 same-matchup outcomes existed and mlbGamePk was absent. */
+  ambiguous?: boolean;
+  /** True when the date carried a same-matchup duplicate. */
+  doubleheader?: boolean;
+  /** The persisted model probabilities and book lines used for scoring. */
+  inputs?: OutcomeInputsEvidence;
+  /** The binary outcomes each market was scored against. */
+  outcomes?: OutcomeBinaryEvidence;
+  previousActualFgTotal?: string | null;
   error?: string;
+}
+
+/** Persisted inputs a manifest row must record, verbatim. */
+export interface OutcomeInputsEvidence {
+  modelOverRate: string | null;
+  modelF5OverRate: string | null;
+  modelPNrfi: string | null;
+  modelHomeWinPct: string | null;
+  modelF5HomeWinPct: string | null;
+  bookTotal: string | null;
+  f5Total: string | null;
+}
+
+/** The binary outcome each market was graded against. */
+export interface OutcomeBinaryEvidence {
+  actualFgTotal: number | null;
+  actualF5Total: number | null;
+  actualNrfiBinary: number | null;
+  outcomeFgOver: 0 | 1 | null;
+  outcomeF5Over: 0 | 1 | null;
+  outcomeNrfi: 0 | 1 | null;
+  outcomeHomeWin: 0 | 1 | null;
+  outcomeF5HomeWin: 0 | 1 | null;
 }
 
 /** Batch ingestion summary */
@@ -388,6 +432,82 @@ export function computeBrierScores(
   }
 
   return { brierFgTotal, brierF5Total, brierNrfi, brierFgMl, brierF5Ml };
+}
+
+/**
+ * Derives the binary outcome each market was graded against, for manifest
+ * evidence.
+ *
+ * computeBrierScores() derives these internally and returns only the scores, and
+ * it is formula-invariant for M-203 — it must not be modified. So these rules
+ * are mirrored here for EVIDENCE ONLY.
+ *
+ * The duplication is self-checking rather than a second source of truth: the
+ * independent oracle recomputes each Brier from (probability, scale, outcome)
+ * using exactly these values and compares against the proposed score. If this
+ * mirror ever diverged from computeBrierScores, the oracle cross-check would
+ * fail and the manifest would be refused before any write.
+ */
+export function deriveOutcomeEvidence(
+  game: {
+    bookTotal: string | null | undefined;
+    f5Total: string | null | undefined;
+  },
+  outcome: GameOutcome
+): OutcomeBinaryEvidence {
+  const num = (v: string | null | undefined): number | null =>
+    v ? parseFloat(String(v)) : null;
+
+  const actualFgTotal =
+    outcome.awayFgRuns !== null && outcome.homeFgRuns !== null
+      ? outcome.awayFgRuns + outcome.homeFgRuns
+      : null;
+  const actualF5Total =
+    outcome.awayF5Runs !== null && outcome.homeF5Runs !== null
+      ? outcome.awayF5Runs + outcome.homeF5Runs
+      : null;
+
+  const bookTotal = num(game.bookTotal);
+  let outcomeFgOver: 0 | 1 | null = null;
+  if (actualFgTotal !== null && bookTotal !== null && bookTotal > 0) {
+    if (actualFgTotal !== bookTotal) {
+      outcomeFgOver = actualFgTotal > bookTotal ? 1 : 0;
+    }
+  }
+
+  const bookF5 = num(game.f5Total);
+  let outcomeF5Over: 0 | 1 | null = null;
+  if (actualF5Total !== null && bookF5 !== null && bookF5 > 0) {
+    if (actualF5Total !== bookF5) {
+      outcomeF5Over = actualF5Total > bookF5 ? 1 : 0;
+    }
+  }
+
+  let outcomeHomeWin: 0 | 1 | null = null;
+  if (outcome.awayFgRuns !== null && outcome.homeFgRuns !== null) {
+    if (outcome.homeFgRuns !== outcome.awayFgRuns) {
+      outcomeHomeWin = outcome.homeFgRuns > outcome.awayFgRuns ? 1 : 0;
+    }
+  }
+
+  let outcomeF5HomeWin: 0 | 1 | null = null;
+  if (outcome.awayF5Runs !== null && outcome.homeF5Runs !== null) {
+    if (outcome.homeF5Runs !== outcome.awayF5Runs) {
+      outcomeF5HomeWin = outcome.homeF5Runs > outcome.awayF5Runs ? 1 : 0;
+    }
+  }
+
+  const nrfi = outcome.nrfiBinary;
+  return {
+    actualFgTotal,
+    actualF5Total,
+    actualNrfiBinary: nrfi,
+    outcomeFgOver,
+    outcomeF5Over,
+    outcomeNrfi: nrfi === null ? null : nrfi === 1 ? 1 : 0,
+    outcomeHomeWin,
+    outcomeF5HomeWin,
+  };
 }
 
 // ─── Brier diffing + write verification ───────────────────────────────────────
@@ -603,6 +723,28 @@ export async function ingestMlbOutcomes(
 ): Promise<OutcomeIngestSummary> {
   const dryRun = options.dryRun === true;
   const historical = options.historical === true;
+
+  // ── M-203 CRITICAL GUARD: no direct historical mutation ─────────────────
+  //
+  // Historical repair must pass through the sealed-manifest applier
+  // (server/mlb/m203/applyManifest.ts), which enforces manifest identity,
+  // code/schema identity, candidate accounting, apply-blocking classifications,
+  // the invariant scan, an independent oracle cross-check, per-row
+  // compare-and-swap on the recorded pre-image, and per-field read-back.
+  //
+  // Allowing `historical: true` to write directly from here would recreate the
+  // exact bypass this architecture exists to remove: an operator could mutate
+  // historical rows with none of those guards, from values recomputed at run
+  // time rather than the values a human reviewed. Fail closed, before any
+  // query or fetch.
+  if (historical && !dryRun) {
+    throw new Error(
+      "[OutcomeIngestor] REFUSED: historical=true requires dryRun=true. " +
+        "Historical M-203 repair cannot be written through ingestMlbOutcomes. " +
+        "Generate a sealed manifest from a historical dry run, have it reviewed, " +
+        "then apply it via the M-203 manifest applier."
+    );
+  }
   // A dry run must have no side effects at all, so it implies the historical
   // suppressions on top of skipping the write.
   const suppressSideEffects = dryRun || historical;
@@ -654,6 +796,7 @@ export async function ingestMlbOutcomes(
       actualF5HomeScore: games.actualF5HomeScore,
       // Previously-stored Brier values, so a dry run can report before/after
       // without a second query. Read-only — never fed to computeBrierScores.
+      prevActualFgTotal: games.actualFgTotal,
       prevBrierFgTotal: games.brierFgTotal,
       prevBrierF5Total: games.brierF5Total,
       prevBrierNrfi: games.brierNrfi,
@@ -779,6 +922,9 @@ export async function ingestMlbOutcomes(
         brierNrfi: null,
         brierFgMl: null,
         brierF5Ml: null,
+        mlbGamePk: game.mlbGamePk ?? null,
+        outcomeIngestedAt: game.outcomeIngestedAt ?? null,
+        matchMethod: "none",
       });
       skippedAlreadyIngested++;
       continue;
@@ -786,11 +932,18 @@ export async function ingestMlbOutcomes(
 
     // Match to API outcome
     let apiOutcome: GameOutcome | undefined;
+    // M-203 manifest evidence: HOW the pairing was established matters, because
+    // a team-abbreviation fallback is weaker identity than an mlbGamePk and a
+    // doubleheader makes it unusable.
+    let matchMethod: "mlbGamePk" | "teamAbbrev" | "none" = "none";
+    let ambiguousMatch = false;
+    let doubleheaderOnDate = false;
 
     // Primary match: mlbGamePk
     if (game.mlbGamePk) {
       apiOutcome = apiOutcomes.get(game.mlbGamePk);
       if (apiOutcome) {
+        matchMethod = "mlbGamePk";
         console.log(`${TAG} [STATE] Matched by mlbGamePk=${game.mlbGamePk}`);
       }
     }
@@ -813,8 +966,13 @@ export async function ingestMlbOutcomes(
             normalizeTeamAbbrev(game.homeTeam);
         return awayMatch && homeMatch;
       });
+      if (teamMatches.length > 1) {
+        doubleheaderOnDate = true;
+        ambiguousMatch = true;
+      }
       if (teamMatches.length === 1) {
         apiOutcome = teamMatches[0];
+        matchMethod = "teamAbbrev";
         console.log(
           `${TAG} [STATE] Matched by team abbreviation: ${apiOutcome.awayAbbrev}@${apiOutcome.homeAbbrev}`
         );
@@ -844,6 +1002,13 @@ export async function ingestMlbOutcomes(
         brierNrfi: null,
         brierFgMl: null,
         brierF5Ml: null,
+        // Identity evidence survives a failed match: the manifest must be able
+        // to say WHY the row could not be paired, not merely that it wasn't.
+        mlbGamePk: game.mlbGamePk ?? null,
+        outcomeIngestedAt: game.outcomeIngestedAt ?? null,
+        matchMethod: "none",
+        ambiguous: ambiguousMatch,
+        doubleheader: doubleheaderOnDate,
       });
       skippedNoApiMatch++;
       continue;
@@ -866,6 +1031,11 @@ export async function ingestMlbOutcomes(
         brierNrfi: null,
         brierFgMl: null,
         brierF5Ml: null,
+        mlbGamePk: game.mlbGamePk ?? null,
+        outcomeIngestedAt: game.outcomeIngestedAt ?? null,
+        matchMethod,
+        ambiguous: ambiguousMatch,
+        doubleheader: doubleheaderOnDate,
       });
       skippedNotFinal++;
       continue;
@@ -938,6 +1108,23 @@ export async function ingestMlbOutcomes(
         brierF5Ml: briers.brierF5Ml,
         previousBrier,
         brierChanged,
+        // ── Complete M-203 manifest evidence ──────────────────────────────
+        mlbGamePk: game.mlbGamePk ?? null,
+        outcomeIngestedAt: game.outcomeIngestedAt ?? null,
+        matchMethod,
+        ambiguous: ambiguousMatch,
+        doubleheader: doubleheaderOnDate,
+        inputs: {
+          modelOverRate: game.modelOverRate ?? null,
+          modelF5OverRate: game.modelF5OverRate ?? null,
+          modelPNrfi: game.modelPNrfi ?? null,
+          modelHomeWinPct: game.modelHomeWinPct ?? null,
+          modelF5HomeWinPct: game.modelF5HomeWinPct ?? null,
+          bookTotal: game.bookTotal ?? null,
+          f5Total: game.f5Total ?? null,
+        },
+        outcomes: deriveOutcomeEvidence(game, apiOutcome),
+        previousActualFgTotal: game.prevActualFgTotal ?? null,
       });
       wouldWrite++;
       continue;
