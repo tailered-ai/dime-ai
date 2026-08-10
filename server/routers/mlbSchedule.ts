@@ -409,25 +409,34 @@ export const mlbScheduleRouter = router({
    * actualF5Total, actualNrfiBinary, and 5 Brier scores to the games table.
    *
    * Input:
-   *   dateStr — "YYYY-MM-DD" format
-   *   force   — if true, re-ingest games that already have outcomeIngestedAt set
+   *   dateStr    — "YYYY-MM-DD" format
+   *   force      — if true, re-ingest games that already have outcomeIngestedAt set
+   *   dryRun     — compute and report with ZERO database mutation
+   *   historical — suppress the drift detector (and the recalibration it can
+   *                trigger) plus the owner notification, so replaying a past
+   *                date cannot alter or react to the live-model window
    */
   triggerOutcomeIngestion: ownerProcedure
     .input(
       z.object({
         dateStr: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         force: z.boolean().optional().default(false),
+        dryRun: z.boolean().optional().default(false),
+        historical: z.boolean().optional().default(false),
       })
     )
     .mutation(async ({ input }) => {
       const tag = `${TAG}[triggerOutcomeIngestion]`;
       console.log(
-        `${tag} Manual trigger: dateStr=${input.dateStr} force=${input.force}`
+        `${tag} Manual trigger: dateStr=${input.dateStr} force=${input.force} dryRun=${input.dryRun} historical=${input.historical}`
       );
       try {
-        const summary = await ingestMlbOutcomes(input.dateStr, input.force);
+        const summary = await ingestMlbOutcomes(input.dateStr, input.force, {
+          dryRun: input.dryRun,
+          historical: input.historical,
+        });
         console.log(
-          `${tag} COMPLETE: written=${summary.written} errors=${summary.errors}`
+          `${tag} COMPLETE: written=${summary.written} wouldWrite=${summary.wouldWrite} brierChanged=${summary.brierChanged} errors=${summary.errors}`
         );
         return summary;
       } catch (err) {
