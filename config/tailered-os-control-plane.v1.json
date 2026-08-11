@@ -104,7 +104,14 @@
     "foundationPullRequest": 496
   },
   "safety": {
-    "notionWriteOperationsAuthorized": false,
+    "notionWriteOperationsAuthorized": true,
+    "notionWriteAuthorization": {
+      "decision": "https://app.notion.com/p/3b99673313e781229b85f35a0b9f2966",
+      "grantedBy": "PREZ",
+      "grantedOn": "2026-08-11",
+      "actor": "AI-10",
+      "scope": "Lifecycle bookkeeping writes only: Execution State, Work Link, Proof / Result, Why It's Blocked on TOS-* Tasks in the canonical Tasks data source; transition+evidence+reread-gated, reversible, attested (scripts/tailered-os/lifecycle-writer.mjs WRITE_ALLOWLIST). Conditional on OG-006 qualification passing."
+    },
     "secretMaterialAllowed": false,
     "manualGithubMirroringAllowed": false
   }

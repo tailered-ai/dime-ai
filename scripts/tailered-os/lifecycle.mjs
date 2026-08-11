@@ -732,21 +732,23 @@ export function planMutation(state, manifest, mode = "fixture") {
 
 // api mode fails CLOSED with the missing authority named — the same law as
 // context.mjs apiSource(): credential presence is governed, not discovered.
+// OG-006 (2026-08-11): with the owner grant recorded in the manifest, an
+// authorized manifest now RETURNS the grant descriptor instead of throwing
+// api-write-unimplemented — the sanctioned live path is the policy-separated
+// writer (scripts/tailered-os/lifecycle-writer.mjs), never this engine.
 export function assertLiveNotionAuthority(manifest) {
   if (manifest.safety.notionWriteOperationsAuthorized !== true)
     throw new LifecycleError(
       "notion-write-unauthorized",
-      "mode 'api' requested, but Notion write access is unavailable in headless sessions (manifest safety.notionWriteOperationsAuthorized is false).",
+      "live Notion write authority is not granted (manifest safety.notionWriteOperationsAuthorized is false).",
       "the lifecycle engine mutates the organizational control plane; an unauthorized write path would let an agent move its own approval state.",
-      "run with --fixture <path> (the engine emits mutation plans, executed: false); live Notion wiring is a separate owner-gated activation by PREZ, recorded in config/tailered-os-control-plane.v1.json."
+      "run with --fixture <path> (the engine emits mutation plans, executed: false); flipping the flag is an owner-reviewed PR carrying the decision grant (safety.notionWriteAuthorization)."
     );
-  // Even a future authorized manifest still needs the credential itself.
-  throw new LifecycleError(
-    "api-write-unimplemented",
-    "the live Notion write path is not implemented.",
-    "shipping an untested writer would produce confidently wrong control-plane records.",
-    "implement + live-test the writer under the owner-gated activation; until then use --fixture."
-  );
+  return Object.freeze({
+    authorized: true,
+    grant: manifest.safety.notionWriteAuthorization,
+    write_path: "scripts/tailered-os/lifecycle-writer.mjs",
+  });
 }
 
 function loadFixture(path) {
@@ -800,7 +802,18 @@ if (invokedDirectly) {
     }
     const fixturePath = argOf("--fixture");
     const manifest = loadControlPlaneManifest();
-    if (!fixturePath) assertLiveNotionAuthority(manifest); // always throws today
+    if (!fixturePath) {
+      assertLiveNotionAuthority(manifest); // throws while the kill switch is engaged
+      // Authority alone does not make the CLI a write surface: live mutation
+      // runs through the writer contract (plan → authorize → write → reread →
+      // attest) with an injected transport the CLI does not hold.
+      throw new LifecycleError(
+        "cli-live-unsupported",
+        "the CLI folds fixtures only; it holds no live transport.",
+        "a CLI write path would bypass the writer's pre-write gates and attestation contract.",
+        "use --fixture <path> here; live mutations go through scripts/tailered-os/lifecycle-writer.mjs (see references/tailered-os-lifecycle.md)."
+      );
+    }
     const fixture = loadFixture(fixturePath);
     const taskArg = argOf("--task");
     if (taskArg && fixture.task_id && taskArg !== fixture.task_id)

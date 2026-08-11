@@ -14,6 +14,7 @@ import {
   extractNotionId,
   resolve,
 } from "./context.mjs";
+import { loadControlPlaneManifest } from "../tailered-os-control-plane.mjs";
 
 const FIXTURES = `fixture:${join(__dirname, "fixtures", "tos-007")}`;
 const TASK_URL = "https://app.notion.com/p/3b89673313e781e9a2e5c5e703cba8d3";
@@ -49,9 +50,11 @@ describe("TOS-007 resolver — happy path (live-exported fixture)", () => {
     assert.ok(packet.forbidden_actions.length >= 5);
     assert.ok(packet.human_gates.length >= 3);
     assert.ok(
-      packet.authority.notion_write_default === false,
+      packet.authority.notion_write_default ===
+        loadControlPlaneManifest().safety.notionWriteOperationsAuthorized,
       "packet must carry the manifest's standing write default"
     );
+    assert.equal(typeof packet.authority.notion_write_default, "boolean");
     const size = JSON.stringify(packet).length;
     assert.ok(size < 8192, `packet must stay bounded (got ${size} bytes)`);
     assert.match(packet.source.mode, /^fixture:/);
