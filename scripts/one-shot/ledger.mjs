@@ -757,6 +757,18 @@ export function verifyRun(runId) {
       .filter(event => event.event_type === "OWNER_GATE_CREATED")
       .map(event => event.owner_gate?.id)
   );
+  // Same order-independence for gstack workflows: a COMPLETED is legitimate if
+  // its workflow was STARTED anywhere in the run (atomic workflows like learn /
+  // benchmark may record STARTED and COMPLETED adjacently or out of order).
+  const allStartedGstackWorkflows = new Set(
+    events
+      .filter(
+        event =>
+          event.event_type === "GSTACK_STARTED" &&
+          (event.schema_version ?? 1) >= 2
+      )
+      .map(event => event.workflow)
+  );
   const openOwnerGates = new Map();
   const seenCreatedGateIds = new Set();
   const openFindings = new Map();
@@ -851,13 +863,16 @@ export function verifyRun(runId) {
           `${at}: SCOPE_COMPLETED for ${event.scope_id} without a prior SCOPE_STARTED`
         );
       }
+      // Order-INDEPENDENT within the run (matching the owner-gate lifecycle):
+      // a COMPLETED is valid if a STARTED for that workflow exists ANYWHERE in
+      // the run. Still catches a COMPLETED with no STARTED at all.
       if (
         event.event_type === "GSTACK_COMPLETED" &&
-        !startedGstack.has(event.workflow) &&
+        !allStartedGstackWorkflows.has(event.workflow) &&
         !legacyGstackStarted
       ) {
         errors.push(
-          `${at}: GSTACK_COMPLETED for workflow "${event.workflow}" without a prior GSTACK_STARTED naming it`
+          `${at}: GSTACK_COMPLETED for workflow "${event.workflow}" with no GSTACK_STARTED naming it anywhere in the run`
         );
       }
       if (
