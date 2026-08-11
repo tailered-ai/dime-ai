@@ -158,6 +158,19 @@ A human decision that lives only in Notion is therefore not machine-authenticabl
 and fails closed; the Notion decision URL remains in the grant as the human-readable
 cross-reference it always was.
 
+Human authority is also bound to its **subject**, not merely to a human. A fact answers
+"did an allowed human do this?" — the evidence must be about the pull request this task
+recorded, and an unblock comment must name the task. Round 2's first build failed this:
+a genuine approval and merge of an unrelated PR drove an unrelated task to `Approval` and
+then `Merged`, and a months-old comment about a CVE authorized an unblock (R2-02,
+CRITICAL, independent verification).
+
+Scope confinement is verified against **the record the transport returns**, before any
+byte moves — not against the caller's snapshot. The first build checked the data source,
+the `TOS-*` scope and the project against caller-supplied fields and only fetched the page
+*after* writing, so the four allowlisted properties could be written to any page the
+connector could reach, including the canonical Decisions database (R2-04/A9, CRITICAL).
+
 `post_merge_verified` (→ `Verified`) is machine authority by design, but the proof is now
 **fetched**: `evidence_ref` must be a GitHub run, PR or commit URL that resolves, whose
 object exists, concluded successfully, and is about the expected commit. An unresolvable
@@ -170,13 +183,20 @@ text is not the authority. `safety.notionWriteAuthorization.activationPullReques
 the PR whose reviewed merge introduced the grant, and on **every** authorization the
 adapter proves: that PR is merged; an allowed human approved it at its final head; that
 human is not the author; the merge commit is an ancestor of the running tree; and the
-manifest bytes at that merge commit are IDENTICAL to the bytes on disk now. The last
-check makes editing the grant after approval detectable — the armed grant must be exactly
-the grant a human read.
+manifest bytes at that merge commit are IDENTICAL to **the bytes this process loaded** —
+and that the manifest merged by that PR actually armed authority and carries this exact
+grant, naming that same PR.
 
-Consequence worth stating plainly: the writer cannot be armed by editing a file. It can
-only be armed by a merge that passed branch protection, and it disarms itself if the file
-is touched afterwards.
+Read that carefully, because the first Round-2 build got it wrong in a way that mattered:
+it compared `git show HEAD:` against `git cat-file <merge>:` — two committed blobs,
+neither of which is the working-tree file the loader obeys. An **uncommitted** one-line
+edit therefore armed the writer while both blobs agreed it was disarmed (adversarial
+finding A1, CRITICAL, independently reproduced). It also compared the blobs only to each
+other, so two copies of `{}` authenticated (A2, CRITICAL).
+
+Consequence, now actually delivered: the writer cannot be armed by editing a file, staged
+or not. It can only be armed by a merge that passed branch protection and that introduced
+this exact grant, and it disarms itself if the file is touched afterwards.
 
 ## Authority has no caller seam
 
@@ -201,6 +221,11 @@ equivalent.
 
 ## Residual weaknesses (read before trusting any of the above)
 
+0. **Two independent reviews of the first Round-2 build returned FAIL** (2026-08-11), with
+   four CRITICAL findings between them. Everything above describes the state AFTER those
+   were remediated — but the remediation has NOT itself been independently verified as of
+   this revision, and the writer stays disarmed until it is. Treat the guarantees above as
+   claims with tests behind them, not as an audited result.
 1. **Same-process integrity is assumed.** The adapter is unforgeable *through its calling
    surface*: a look-alike object is not a fact, because authenticity is WeakMap membership.
    It is not proof against code that can patch the module graph or replace `execFileSync`

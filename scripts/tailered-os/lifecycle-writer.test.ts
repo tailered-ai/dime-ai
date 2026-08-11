@@ -15,6 +15,12 @@ import { beforeEach, describe, it, vi } from "vitest";
 // manifest option and no transport option to pass.
 const mocks = vi.hoisted(() => ({
   manifest: null as any,
+  // A1: the grant check compares the bytes the LOADER read against the bytes at
+  // the reviewed merge. Those are two independent facts about the world, so the
+  // test drives them independently — the earlier fixture called the HEAD blob
+  // "manifestOnDisk" and thereby encoded the same conflation the production bug
+  // had, which is why 145 tests and 14 mutants all missed it.
+  manifestFileBytes: null as any,
   tool: (_file: string, _args: string[]): string => "",
 }));
 
@@ -25,6 +31,17 @@ vi.mock("../tailered-os-control-plane.mjs", async importActual => {
 vi.mock("node:child_process", () => ({
   execFileSync: (file: string, args: string[]) => mocks.tool(file, args),
 }));
+vi.mock("node:fs", async importActual => {
+  const actual: any = await importActual();
+  return {
+    ...actual,
+    readFileSync: (path: any, ...rest: any[]) =>
+      String(path).endsWith("tailered-os-control-plane.v1.json") &&
+      mocks.manifestFileBytes !== null
+        ? mocks.manifestFileBytes
+        : actual.readFileSync(path, ...rest),
+  };
+});
 
 import {
   CAPABILITY_TTL_MS,
@@ -49,6 +66,7 @@ import {
   isAuthorityFact,
   resolveApprovalAuthority,
   resolveHeadAuthority,
+  resolveHumanActAuthority,
   resolveMergeAuthority,
   resolveProofEvidence,
 } from "./authority.mjs";
@@ -230,6 +248,7 @@ function installWorld(world: World = {}) {
 
 beforeEach(() => {
   mocks.manifest = ARMED_MANIFEST;
+  mocks.manifestFileBytes = JSON.stringify(ARMED_MANIFEST);
   installWorld();
 });
 
@@ -241,8 +260,13 @@ const SELF_GRANTED: any = { __manifest: "selfgrant" };
 
 function applyManifestMarker(opts: any) {
   const { __manifest, ...rest } = opts ?? {};
-  if (__manifest === "disarmed") mocks.manifest = DISARMED_MANIFEST;
-  else if (__manifest === "selfgrant") mocks.manifest = SELF_GRANT_MANIFEST;
+  if (__manifest === "disarmed") {
+    mocks.manifest = DISARMED_MANIFEST;
+    mocks.manifestFileBytes = JSON.stringify(DISARMED_MANIFEST);
+  } else if (__manifest === "selfgrant") {
+    mocks.manifest = SELF_GRANT_MANIFEST;
+    mocks.manifestFileBytes = JSON.stringify(SELF_GRANT_MANIFEST);
+  }
   return rest;
 }
 
@@ -324,7 +348,7 @@ function authorize(plan: any, over: any = {}, opts: any = {}) {
 }
 
 // A well-behaved fake transport backed by a mutable record.
-function fakeTransport(initial: any) {
+function fakeTransport(initial: any, identity: any = {}) {
   const record = { ...initial };
   return {
     record,
@@ -333,9 +357,20 @@ function fakeTransport(initial: any) {
       this.calls.update += 1;
       Object.assign(record, props);
     },
-    async fetchTask(_pageId: string) {
+    // R2-04: the writer re-verifies confinement against what the transport
+    // reports BEFORE writing, so a fake must answer for the page's identity —
+    // not just its properties.
+    async fetchTask(pageId: string) {
       this.calls.fetch += 1;
-      return { properties: { ...record }, fetched_at: Date.now() };
+      return {
+        page_id: pageId,
+        data_source_id: WRITE_ALLOWLIST.data_source_id,
+        scope_id: "TOS-TEST",
+        project_ids: [PROJECT_ID],
+        properties: { ...record },
+        fetched_at: Date.now(),
+        ...identity,
+      };
     },
   };
 }
@@ -428,6 +463,7 @@ describe("writer AUTHORIZE — the sixteen pre-write gates fail closed", () => {
     // and it is the proof that nothing ships armed.
     assert.equal(REAL_MANIFEST.safety.notionWriteOperationsAuthorized, false);
     mocks.manifest = REAL_MANIFEST;
+    mocks.manifestFileBytes = JSON.stringify(REAL_MANIFEST);
     const shipped: any = authorizeWrite(planFor(), snapshotFor(planFor()), {});
     assert.equal(shipped.ok, false);
     assert.equal(shipped.failure_class, "permission_denial");
@@ -715,7 +751,7 @@ describe("writer EXECUTE — write / reread / compare / attest", () => {
     const result = await executeMutation(plan, transport);
     assert.equal(result.applied, "full");
     assert.equal(transport.calls.update, 1);
-    assert.equal(transport.calls.fetch, 1);
+    assert.equal(transport.calls.fetch, 2); // R2-04: confinement re-verify + reread
     assert.equal(
       result.attestation.observed_after["Execution State"],
       "Executing"
@@ -757,23 +793,41 @@ describe("writer EXECUTE — write / reread / compare / attest", () => {
     assert.equal(transport.record["Execution State"], "Ready");
   });
 
-  it("timeout with unreadable outcome fails closed as partial (freeze), never assumed success", async () => {
+  it("timeout with unreadable outcome fails closed — never assumed success", async () => {
+    // Two distinct timings, and R2-04 made the difference between them visible.
+    // (a) the transport is unreachable BEFORE the write: the confinement
+    //     re-verify cannot run, so nothing is written at all — "none".
     const plan = authorizedPlan();
-    const transport = fakeTransport({});
-    transport.updatePage = async () => {
+    const dead = fakeTransport({});
+    const timeout = () => {
       const err: any = new Error("ETIMEDOUT");
       err.code = "ETIMEDOUT";
       throw err;
     };
-    transport.fetchTask = async () => {
-      const err: any = new Error("ETIMEDOUT");
-      err.code = "ETIMEDOUT";
-      throw err;
+    dead.updatePage = async () => timeout();
+    dead.fetchTask = async () => timeout();
+    const before: any = await executeMutation(plan, dead);
+    assert.equal(before.applied, "none");
+    assert.equal(before.failure_class, "api_timeout");
+    assert.match(before.attestation.detail, /could not be read before writing/);
+    assert.equal(dead.calls.update, 0, "no write may be attempted");
+
+    // (b) the reread fails AFTER the bytes may have landed: the outcome is
+    //     unreadable, so it freezes as a partial write.
+    const plan2 = authorizedPlan();
+    const flaky = fakeTransport({});
+    const inner = flaky.fetchTask.bind(flaky);
+    let fetches = 0;
+    flaky.fetchTask = async (pageId: string) => {
+      fetches += 1;
+      if (fetches === 1) return inner(pageId);
+      return timeout();
     };
-    const result = await executeMutation(plan, transport);
-    assert.equal(result.applied, "partial");
-    assert.equal(result.failure_class, "partial_write");
-    assert.equal(result.attestation.reread_error, "api_timeout");
+    flaky.updatePage = async () => timeout();
+    const after: any = await executeMutation(plan2, flaky);
+    assert.equal(after.applied, "partial");
+    assert.equal(after.failure_class, "partial_write");
+    assert.equal(after.attestation.reread_error, "api_timeout");
   });
 
   it("expired credentials are classified and visible", async () => {
@@ -1685,6 +1739,7 @@ describe("writer v2 — the six Round-1 mutants, each with a killing test", () =
     assert.equal(authorized.ok, true);
     // The kill switch is thrown AFTER the capability exists and BEFORE it runs.
     mocks.manifest = DISARMED_MANIFEST;
+    mocks.manifestFileBytes = JSON.stringify(DISARMED_MANIFEST);
     const transport = fakeTransport(liveRecord());
     await assert.rejects(
       () => executeMutation(authorized.authorized_plan, transport),
@@ -1708,10 +1763,12 @@ describe("writer v2 — the six Round-1 mutants, each with a killing test", () =
     );
     // Same flag, DIFFERENT grant: still refuses, because a capability is
     // permission under one specific reviewed grant.
-    mocks.manifest = manifestWith({
+    const swapped = manifestWith({
       notionWriteOperationsAuthorized: true,
       notionWriteAuthorization: { ...GRANT, scope: "everything, actually" },
     });
+    mocks.manifest = swapped;
+    mocks.manifestFileBytes = JSON.stringify(swapped);
     const transport = fakeTransport(liveRecord());
     await assert.rejects(
       () => executeMutation(authorized.authorized_plan, transport),
@@ -1797,8 +1854,8 @@ describe("writer v2 — the six Round-1 mutants, each with a killing test", () =
     await executeMutation(authorized.authorized_plan, transport);
     assert.deepEqual(
       pages,
-      [TASK, TASK],
-      "the write must land on the GATED page"
+      [TASK, TASK, TASK],
+      "every touch — the pre-write confinement fetch, the update, and the reread — must be the GATED page"
     );
     assert.ok(reads >= 1, "the proxy must have been read at least once");
   });
@@ -1896,5 +1953,284 @@ describe("writer v2 — the six Round-1 mutants, each with a killing test", () =
       { authority_fact: mergeFact().fact }
     );
     assert.equal(withFact.ok, true, JSON.stringify(withFact));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Round-2 adversarial + independent-verification regressions. Every one of
+// these was a live exploit against the first Round-2 build, and every one is
+// paired with a mutant in mutation-check.mjs — the fixes are held to the same
+// bar as the Round-1 fixes they follow.
+// ---------------------------------------------------------------------------
+describe("writer v2.1 — adversarial + verification regressions", () => {
+  const planFor = (events: any[] = START) => {
+    const { state, record } = recordFor(events);
+    const derived: any = deriveWrites(record, state);
+    assert.equal(derived.ok, true);
+    return derived.plan;
+  };
+  const liveRecord = () => ({
+    "Execution State": "Ready",
+    "Work Link": "",
+    "Proof / Result": "",
+    [WHY_BLOCKED_PROPERTY]: "",
+  });
+  const APPROVED_EVENTS = [
+    ...START,
+    ev("pr_opened", { pr_number: PR, head_sha: HEAD }),
+    ev("checks_observed", { head_sha: HEAD, check_rollup: "success" }),
+    ev("review_requested", { review_ref: "rr-1" }),
+    ev(
+      "approval_observed",
+      {
+        reviewer: HUMAN,
+        review_id: REVIEW_ID,
+        review_state: "APPROVED",
+        observed_via: REVIEW_URL,
+      },
+      { actor: "human" }
+    ),
+  ];
+
+  it("R2-02: a genuine human approval of ANOTHER PR is not authority over this task", () => {
+    // The independent verifier drove an unrelated task Review→Approval→Merged
+    // with a real prez approval of an unrelated PR. A fact proved that a human
+    // did SOMETHING; it never proved they did THIS.
+    const other: any = approvalFact({ pr: { number: 4242 } });
+    assert.equal(other.ok, false, "a mismatched PR should not even derive");
+    // The realistic shape: the fact is genuine, but for a different PR number
+    // than the one this task recorded.
+    const genuine: any = approvalFact();
+    const events = [
+      ...START,
+      ev("pr_opened", { pr_number: 4242, head_sha: HEAD }),
+      ev("checks_observed", { head_sha: HEAD, check_rollup: "success" }),
+      ev("review_requested", { review_ref: "rr-1" }),
+      ev(
+        "approval_observed",
+        {
+          reviewer: HUMAN,
+          review_id: REVIEW_ID,
+          review_state: "APPROVED",
+          observed_via: REVIEW_URL,
+        },
+        { actor: "human" }
+      ),
+    ];
+    const result: any = authorize(
+      planFor(events),
+      {},
+      {
+        authority_fact: genuine.fact,
+      }
+    );
+    assert.equal(result.ok, false);
+    assert.equal(result.failure_class, "authority_violation");
+    assert.match(
+      result.detail,
+      /authenticated evidence must be about THIS task|about PR #/
+    );
+  });
+
+  it("R2-02: an unblock must name this task — an unrelated human remark is not a decision", () => {
+    const blocked = [
+      ...START,
+      ev("failure_observed", { failure_class: "ci_failure", detail_ref: "r" }),
+      ev(
+        "unblocked",
+        {
+          resolution_ref: "fixed",
+          observed_via: `https://github.com/tailered-ai/dime-ai/pull/${PR}#issuecomment-77`,
+        },
+        { actor: "human" }
+      ),
+    ];
+    const plan = planFor(blocked);
+    const snap = { execution_state: "Blocked", blocked_from: "Executing" };
+    // A real comment by the allowed human — about something else entirely.
+    installWorld({
+      comment: {
+        id: "77",
+        user: { login: HUMAN },
+        issue_url: `https://api.github.com/repos/tailered-ai/dime-ai/issues/${PR}`,
+        html_url: `https://github.com/tailered-ai/dime-ai/pull/${PR}#issuecomment-77`,
+        created_at: "2026-08-11T22:00:00Z",
+        body: "nit: typo in the comment above",
+      },
+    });
+    const fact: any = resolveHumanActAuthority({
+      repository: "tailered-ai/dime-ai",
+      pr_number: PR,
+      comment_id: "77",
+    });
+    assert.equal(fact.ok, true, JSON.stringify(fact));
+    // This task recorded no PR of its own, so the comment must NAME it.
+    const result: any = authorize(plan, snap, { authority_fact: fact.fact });
+    assert.equal(result.ok, false, JSON.stringify(result));
+    assert.match(
+      result.detail,
+      /an unblock must name this task|does not name task/
+    );
+
+    // The same comment, naming the task, is accepted.
+    installWorld({
+      comment: {
+        id: "78",
+        user: { login: HUMAN },
+        issue_url: `https://api.github.com/repos/tailered-ai/dime-ai/issues/${PR}`,
+        html_url: `https://github.com/tailered-ai/dime-ai/pull/${PR}#issuecomment-78`,
+        created_at: "2026-08-11T22:00:00Z",
+        body: `Unblocking ${TASK}: the migration ran.`,
+      },
+    });
+    const named: any = resolveHumanActAuthority({
+      repository: "tailered-ai/dime-ai",
+      pr_number: PR,
+      comment_id: "78",
+    });
+    const plan2 = {
+      ...plan,
+      evidence: {
+        ...plan.evidence,
+        observed_via: named.fact.evidence_url,
+      },
+    };
+    const ok: any = authorize(plan2, snap, { authority_fact: named.fact });
+    assert.equal(ok.ok, true, JSON.stringify(ok));
+  });
+
+  it("A3: a trigger may only write the properties it derives", () => {
+    const plan = planFor();
+    const overreach = {
+      ...plan,
+      writes: {
+        ...plan.writes,
+        "Proof / Result": "https://example.com/not-a-real-proof",
+        [WHY_BLOCKED_PROPERTY]: "arbitrary machine-authored text",
+      },
+    };
+    const result: any = authorize(overreach);
+    assert.equal(result.ok, false);
+    assert.equal(result.failure_class, "permission_denial");
+    assert.match(result.detail, /may only write/);
+  });
+
+  it("A5: a captured prior is validated — an unvalidated prior is a future write", () => {
+    const plan = planFor();
+    const result: any = authorize(plan, {
+      properties: {
+        "Execution State": "",
+        "Work Link": "javascript:alert(1)",
+        "Proof / Result": "",
+        [WHY_BLOCKED_PROPERTY]: "",
+      },
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.failure_class, "stale_task");
+    assert.match(result.detail, /not a lawful value|unvalidated prior/);
+  });
+
+  it("A7: an undo may not land on a page other than the one it reverts", async () => {
+    const forward: any = authorize(planFor());
+    assert.equal(forward.ok, true);
+    const undo: any = buildUndoPlan(forward.authorized_plan);
+    const elsewhere = { ...undo.plan, task_id: "d".repeat(32) };
+    const snap = snapshotFor(elsewhere, {
+      execution_state: "Executing",
+      properties: { ...liveRecord(), "Execution State": "Executing" },
+    });
+    const result: any = authorizeWrite(elsewhere, snap, {
+      undo_of: forward.authorized_plan,
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.failure_class, "permission_denial");
+    assert.match(result.detail, /different page|reverts an authorization for/);
+  });
+
+  it("A6: a machine may not walk back a human decision with caller strings", () => {
+    const merged = [
+      ...APPROVED_EVENTS,
+      ev(
+        "merge_observed",
+        { merge_sha: MERGE, observed_via: MERGE_URL },
+        { actor: "human" }
+      ),
+    ];
+    const forward: any = authorize(
+      planFor(merged),
+      {},
+      {
+        authority_fact: mergeFact().fact,
+      }
+    );
+    assert.equal(forward.ok, true, JSON.stringify(forward));
+    const undo: any = buildUndoPlan(forward.authorized_plan);
+    // The Round-1 defect, alive in the undo path: `actor: "human"` plus a
+    // plausible string used to be enough to reverse a human merge.
+    const asserted = {
+      ...undo.plan,
+      actor: "human",
+      evidence: { ...undo.plan.evidence, observed_via: "I said so" },
+    };
+    const snap = snapshotFor(asserted, {
+      execution_state: "Merged",
+      properties: { ...liveRecord(), "Execution State": "Merged" },
+    });
+    const result: any = authorizeWrite(asserted, snap, {
+      undo_of: forward.authorized_plan,
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.failure_class, "authority_violation");
+    assert.match(result.detail, /not a fact this system minted|derived/);
+  });
+
+  it("R2-04: confinement is verified against the record the TRANSPORT returns", async () => {
+    const authorized: any = authorize(planFor());
+    assert.equal(authorized.ok, true);
+    // The caller's snapshot claimed the allowlisted data source; the source
+    // system says otherwise. Nothing may be written.
+    const transport = fakeTransport(liveRecord(), {
+      data_source_id: "deadbeef-0000-0000-0000-000000000000",
+    });
+    const result: any = await executeMutation(
+      authorized.authorized_plan,
+      transport
+    );
+    assert.equal(result.applied, "none");
+    assert.equal(result.failure_class, "permission_denial");
+    assert.equal(transport.calls.update, 0, "no byte may move");
+    assert.match(result.attestation.detail, /refused before writing/);
+
+    for (const identity of [
+      { scope_id: "OPS-1" },
+      { project_ids: ["ffffffffffffffffffffffffffffffff"] },
+      { page_id: "e".repeat(32) },
+    ]) {
+      const again: any = authorize(planFor());
+      const t = fakeTransport(liveRecord(), identity);
+      const r: any = await executeMutation(again.authorized_plan, t);
+      assert.equal(r.applied, "none", JSON.stringify(identity));
+      assert.equal(t.calls.update, 0, JSON.stringify(identity));
+    }
+  });
+
+  it("A5b: the SOURCE SYSTEM decides what state a record is in", async () => {
+    // Both `expected_from_state` and `snapshot.execution_state` are caller
+    // assertions, and agreeing with each other proved nothing: two ordinary
+    // machine writes captured "Approval" as a prior and the undo wrote it back.
+    const authorized: any = authorize(planFor());
+    assert.equal(authorized.ok, true);
+    const transport = fakeTransport({
+      ...liveRecord(),
+      "Execution State": "Merged",
+    });
+    const result: any = await executeMutation(
+      authorized.authorized_plan,
+      transport
+    );
+    assert.equal(result.applied, "none");
+    assert.equal(result.failure_class, "permission_denial");
+    assert.equal(transport.calls.update, 0);
+    assert.match(result.attestation.detail, /actually at Execution State/);
   });
 });

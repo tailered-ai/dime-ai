@@ -415,12 +415,22 @@ describe("authority — the owner grant is only as good as its reviewed merge", 
     activationPullRequest: PR,
     ...over,
   });
+  // A2: the compared blob must CONTAIN this grant. Two equal copies of `{}` used
+  // to authenticate, so the fixture is now a real manifest shape.
+  const manifestText = (g: any = grant()) =>
+    JSON.stringify({
+      safety: {
+        notionWriteOperationsAuthorized: true,
+        notionWriteAuthorization: g,
+      },
+    });
   const raw = (over: any = {}) => ({
     ...world(),
     approving_review_id: REVIEW_ID,
     merge_is_ancestor: true,
-    manifest_at_merge: '{"safety":{"notionWriteOperationsAuthorized":true}}',
-    manifest_on_disk: '{"safety":{"notionWriteOperationsAuthorized":true}}',
+    manifest_at_merge: manifestText(),
+    // A1: the bytes the LOADER read, not a git blob.
+    manifest_loaded: manifestText(),
     ...over,
   });
 
@@ -459,17 +469,81 @@ describe("authority — the owner grant is only as good as its reviewed merge", 
     assert.match(derived.detail, /not authentic/);
   });
 
-  it("EDITING THE GRANT AFTER APPROVAL is detected — disk bytes must equal merged bytes", () => {
+  it("A1 — an UNCOMMITTED edit cannot arm: loaded bytes must equal merged bytes", () => {
+    // The Round-2 adversarial pass armed the writer with an unstaged one-line
+    // edit, because this check compared `git show HEAD:` to
+    // `git cat-file <merge>:` — two committed blobs, neither of which is the
+    // file the loader obeys. The comparison is now against the loaded bytes.
     const derived: any = deriveOwnerGrantFact(
       raw({
-        manifest_on_disk:
-          '{"safety":{"notionWriteOperationsAuthorized":true,"scope":"everything"}}',
+        manifest_loaded: manifestText({ ...grant(), scope: "everything" }),
       }),
       grant()
     );
     assert.equal(derived.ok, false);
     assert.equal(derived.failure_class, "authority_violation");
-    assert.match(derived.detail, /not the grant a human reviewed/);
+    assert.match(
+      derived.detail,
+      /uncommitted edit|not the grant a human reviewed/
+    );
+  });
+
+  it("A2 — blob equality is not enough: the merged manifest must CONTAIN this grant", () => {
+    // Two equal blobs used to authenticate anything, so activationPullRequest
+    // could name any merged, human-approved PR that never touched the manifest.
+    const empty: any = deriveOwnerGrantFact(
+      raw({ manifest_at_merge: "{}\n", manifest_loaded: "{}\n" }),
+      grant()
+    );
+    assert.equal(empty.ok, false);
+    assert.equal(empty.failure_class, "authority_violation");
+
+    // A merge that did not arm anything cannot authenticate a grant.
+    const unarmed = JSON.stringify({
+      safety: { notionWriteOperationsAuthorized: false },
+    });
+    const disarmedMerge: any = deriveOwnerGrantFact(
+      raw({ manifest_at_merge: unarmed, manifest_loaded: unarmed }),
+      grant()
+    );
+    assert.equal(disarmedMerge.ok, false);
+    assert.match(disarmedMerge.detail, /did not grant write authority/);
+
+    // M15: the grant merged by this PR must name THIS PR. Without it,
+    // activationPullRequest could ride on any approved merge whose manifest
+    // happens to match.
+    const foreign = { ...grant(), activationPullRequest: 4242 };
+    const rides: any = deriveOwnerGrantFact(
+      raw({
+        manifest_at_merge: manifestText(foreign),
+        manifest_loaded: manifestText(foreign),
+      }),
+      grant()
+    );
+    assert.equal(rides.ok, false);
+    assert.match(rides.detail, /introduced IT|not the grant merged by PR/);
+
+    // A grant naming a DIFFERENT activation PR than the merge it rides on.
+    const wrongPr = { ...grant(), activationPullRequest: 1 };
+    const mismatched: any = deriveOwnerGrantFact(
+      raw({
+        manifest_at_merge: manifestText(wrongPr),
+        manifest_loaded: manifestText(wrongPr),
+      }),
+      wrongPr
+    );
+    assert.equal(mismatched.ok, false);
+    assert.match(mismatched.detail, /introduced IT|is not the requested PR/);
+
+    // Field-level drift between the merged grant and the in-memory grant, with
+    // the loaded bytes matching the merge so A1 is not what fires.
+    const widened = manifestText({ ...grant(), scope: "wider" });
+    const drifted: any = deriveOwnerGrantFact(
+      raw({ manifest_at_merge: widened, manifest_loaded: widened }),
+      grant()
+    );
+    assert.equal(drifted.ok, false);
+    assert.match(drifted.detail, /not the grant merged by PR/);
   });
 
   it("a checkout that does not contain the approved activation cannot be armed by it", () => {
@@ -484,12 +558,22 @@ describe("authority — the owner grant is only as good as its reviewed merge", 
   it("unreadable manifest bytes fail closed", () => {
     for (const over of [
       { manifest_at_merge: null },
-      { manifest_on_disk: null },
+      { manifest_loaded: null },
     ]) {
       const derived: any = deriveOwnerGrantFact(raw(over), grant());
-      assert.equal(derived.ok, false);
+      assert.equal(derived.ok, false, JSON.stringify(over));
       assert.equal(derived.failure_class, "missing_evidence");
     }
+    // Unparseable bytes: the byte-equality gate fires first (the loaded file and
+    // the merged blob genuinely differ), and if a caller makes them equal, the
+    // parse refuses. Both are fail-closed; neither authenticates.
+    const bothGarbage: any = deriveOwnerGrantFact(
+      raw({ manifest_at_merge: "not json", manifest_loaded: "not json" }),
+      grant()
+    );
+    assert.equal(bothGarbage.ok, false);
+    assert.equal(bothGarbage.failure_class, "missing_evidence");
+    assert.match(bothGarbage.detail, /not parseable JSON/);
   });
 });
 

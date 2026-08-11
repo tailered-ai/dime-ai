@@ -55,6 +55,7 @@
 // controlling the bytes the forge returned, which is the thing a test is
 // entitled to control. Production exposes no equivalent.
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -96,6 +97,7 @@ const REPO_ROOT = resolvePath(
   ".."
 );
 const MANIFEST_REPO_PATH = "config/tailered-os-control-plane.v1.json";
+const CONTROL_PLANE_MANIFEST_PATH = resolvePath(REPO_ROOT, MANIFEST_REPO_PATH);
 
 function isPlainObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -283,6 +285,12 @@ function validateLocator(locator, required) {
     if (field === "pr_number") {
       if (!Number.isInteger(locator.pr_number) || locator.pr_number <= 0)
         return "locator.pr_number must be a positive integer";
+    } else if (field === "review_id" || field === "comment_id") {
+      // A14: these are interpolated into a `gh api` path. Unvalidated, a
+      // traversal string performed an arbitrary authenticated GET with the
+      // operator's credentials before the identity echo-check refused it.
+      if (!/^\d+$/.test(String(locator[field] ?? "")))
+        return `locator.${field} must be a numeric GitHub id`;
     } else if (
       typeof locator[field] !== "string" ||
       locator[field].length === 0
@@ -507,6 +515,16 @@ export function deriveHumanActFact(raw, locator) {
           `https://github.com/${CANONICAL_REPOSITORY}/pull/${locator.pr_number}`
       ),
       body_excerpt: String(comment.body ?? "").slice(0, 280),
+      // R2-02: WHICH task the human was talking about, derived from the fetched
+      // body. Without this, any comment by an allowed human authorized an
+      // unblock on any task — a 2026-07-24 note about a CVE moved an unrelated
+      // record out of Blocked.
+      mentioned_task_ids: Object.freeze([
+        ...new Set(String(comment.body ?? "").match(/\b[0-9a-f]{32}\b/g) ?? []),
+      ]),
+      mentioned_scope_ids: Object.freeze([
+        ...new Set(String(comment.body ?? "").match(/\bTOS-\d+\b/g) ?? []),
+      ]),
     },
   };
 }
@@ -672,12 +690,61 @@ export function deriveOwnerGrantFact(raw, grant) {
       "missing_evidence",
       "could not read the manifest as it existed at the activation merge commit"
     );
-  if (typeof raw?.manifest_on_disk !== "string" || raw.manifest_on_disk === "")
-    return refuse("missing_evidence", "could not read the manifest on disk");
-  if (raw.manifest_at_merge !== raw.manifest_on_disk)
+  // A1 (CRITICAL, adversarial pass 1): the bytes compared here MUST be the bytes
+  // the loader actually read. The first version compared `git show HEAD:` with
+  // `git cat-file -p <merge>:` — two git blobs, neither of which is the
+  // working-tree file `loadControlPlaneManifest` reads. An UNCOMMITTED
+  // one-character edit therefore armed the writer while both blobs agreed it was
+  // disarmed: precisely the act this check exists to detect.
+  if (typeof raw?.manifest_loaded !== "string" || raw.manifest_loaded === "")
+    return refuse(
+      "missing_evidence",
+      "could not read the control-plane manifest file that authority was loaded from"
+    );
+  if (raw.manifest_at_merge !== raw.manifest_loaded)
     return refuse(
       "authority_violation",
-      `the control-plane manifest on disk differs from the version approved and merged in PR #${prNumber} — the armed grant is not the grant a human reviewed`
+      `the control-plane manifest this process loaded differs from the version approved and merged in PR #${prNumber} — the armed grant is not the grant a human reviewed (an uncommitted edit is exactly this)`
+    );
+  // A2 (CRITICAL, adversarial pass 1): equality of two blobs proves nothing
+  // unless the blob CONTAINS this grant. Without this, two copies of `{}`
+  // authenticated, and activationPullRequest could name any merged,
+  // human-approved PR that never touched the manifest.
+  let merged;
+  try {
+    merged = JSON.parse(raw.manifest_at_merge);
+  } catch (error) {
+    return refuse(
+      "missing_evidence",
+      `the manifest at the activation merge is not parseable JSON: ${error.message}`
+    );
+  }
+  const mergedGrant = merged?.safety?.notionWriteAuthorization;
+  if (merged?.safety?.notionWriteOperationsAuthorized !== true)
+    return refuse(
+      "authority_violation",
+      `PR #${prNumber} did not grant write authority — the manifest at its merge has notionWriteOperationsAuthorized ${JSON.stringify(merged?.safety?.notionWriteOperationsAuthorized)}. A grant must name the PR that INTRODUCED it.`
+    );
+  if (!isPlainObject(mergedGrant))
+    return refuse(
+      "authority_violation",
+      `the manifest merged by PR #${prNumber} carries no owner grant to authenticate`
+    );
+  if (Number(mergedGrant.activationPullRequest) !== prNumber)
+    return refuse(
+      "authority_violation",
+      `the grant merged by PR #${prNumber} names activationPullRequest ${mergedGrant.activationPullRequest} — a grant must be authenticated by the merge that introduced IT, not by an unrelated approved merge`
+    );
+  const canonicalise = value =>
+    JSON.stringify(
+      Object.fromEntries(
+        Object.entries(value).sort(([a], [b]) => (a < b ? -1 : 1))
+      )
+    );
+  if (canonicalise(mergedGrant) !== canonicalise(grant))
+    return refuse(
+      "authority_violation",
+      `the grant in memory is not the grant merged by PR #${prNumber} — every field of an owner grant must survive unchanged from the reviewed merge to the write`
     );
   return {
     ok: true,
@@ -753,8 +820,13 @@ export function resolveHeadAuthority(locator) {
   if (bad) return refuse("malformed_input", bad);
   const pr = fetchPullRequest(locator.pr_number);
   if (!pr.ok) return pr;
+  // A10: the rollup fetch used to be opt-in via locator.want_check_rollup, so a
+  // caller could turn the CI cross-check off by omitting one boolean and record
+  // a FAILING build as `CI` instead of routing it to Blocked. It is now
+  // unconditional; the writer additionally refuses a checks_observed plan whose
+  // fact carries a null rollup.
   let rollup;
-  if (locator.want_check_rollup === true) {
+  {
     const query =
       "query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){commits(last:1){nodes{commit{statusCheckRollup{state}}}}}}}";
     const [owner, name] = CANONICAL_REPOSITORY.split("/");
@@ -863,7 +935,17 @@ export function resolveOwnerGrantAuthority(grant) {
   const atMerge = SHA40.test(mergeSha)
     ? runTool("git", ["cat-file", "-p", `${mergeSha}:${MANIFEST_REPO_PATH}`])
     : { ok: false };
-  const onDisk = runTool("git", ["show", `HEAD:${MANIFEST_REPO_PATH}`]);
+  // THE BYTES THAT ARMED THIS PROCESS — read from the same file the manifest
+  // loader reads, not from git. See A1 in deriveOwnerGrantFact.
+  let loaded;
+  try {
+    loaded = readFileSync(CONTROL_PLANE_MANIFEST_PATH, "utf8");
+  } catch (error) {
+    return refuse(
+      "missing_evidence",
+      `could not read the canonical control-plane manifest: ${error.message}`
+    );
+  }
 
   const derived = deriveOwnerGrantFact(
     {
@@ -873,7 +955,7 @@ export function resolveOwnerGrantAuthority(grant) {
       approving_review_id: String(approving.id),
       merge_is_ancestor: ancestry.ok === true,
       manifest_at_merge: atMerge.ok ? atMerge.stdout : null,
-      manifest_on_disk: onDisk.ok ? onDisk.stdout : null,
+      manifest_loaded: loaded,
     },
     grant
   );
