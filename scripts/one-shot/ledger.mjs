@@ -1149,15 +1149,48 @@ export function foldArtifacts(events) {
           `DEPENDENCY_REVALIDATED for ${id} which is not stale (${event.event_id})`
         );
       } else {
+        // v4.2 (independent-verifier hardening): identity-EXACT where the
+        // kernel knows the current truth; otherwise versioned-root citation
+        // that is never rooted in the dead identity (closes the bare-id,
+        // @aaa2-prefix, and dead+suffix escapes).
         const cause = entry.stale_cause;
         const cited = event.upstream_identity;
-        const rooted =
-          cited === cause.upstream || cited.startsWith(`${cause.upstream}@`);
-        const isDeadIdentity =
-          cause.old_identity !== null && cited === cause.old_identity;
-        if (!rooted || isDeadIdentity) {
+        const upstreamEntry = registry.get(cause.upstream);
+        let refusal = null;
+        if (upstreamEntry?.lifecycle_state === "RETIRED") {
+          // A retired upstream has no new identity to cite — the consumer must
+          // be rebuilt (re-registered) on a living input, not revalidated.
+          refusal = `upstream ${cause.upstream} is RETIRED — there is no new identity to revalidate against; rebuild the consumer on a living input`;
+        } else if (upstreamEntry?.lifecycle_state === "SUPERSEDED") {
+          // The new identity of a superseded upstream IS its successor.
+          const successor = upstreamEntry.superseded_by;
+          if (cited !== successor && !cited.startsWith(`${successor}@`)) {
+            refusal = `upstream ${cause.upstream} was superseded by ${successor} — the citation must reference the successor`;
+          }
+        } else if ((upstreamEntry?.content_hash ?? null) !== null) {
+          const knownHash = upstreamEntry.content_hash;
+          const required = `${cause.upstream}@${knownHash}`;
+          if (cited !== required) {
+            refusal = `the upstream's current identity is known — the citation must be exactly "${required}"`;
+          }
+        } else {
+          // Versioned root: for a dead identity ext:x@aaaa the root is ext:x;
+          // for a hashless artifact the root is its id. The citation must be
+          // <root>@<something-new> and never sit inside the dead identity.
+          const dead = cause.old_identity;
+          const root =
+            dead !== null && dead.includes("@")
+              ? dead.slice(0, dead.lastIndexOf("@"))
+              : cause.upstream;
+          const versionedUnderRoot = cited.startsWith(`${root}@`);
+          const rootedInDead = dead !== null && cited.startsWith(dead);
+          if (!versionedUnderRoot || rootedInDead) {
+            refusal = `the citation must be a NEW versioned identity under "${root}@…"${dead ? ` and not rooted in the dead identity "${dead}"` : ""}`;
+          }
+        }
+        if (refusal !== null) {
           problems.push(
-            `DEPENDENCY_REVALIDATED for ${id} cites "${cited}" which does not authenticate against its stale cause (upstream ${cause.upstream}${cause.old_identity ? `, dead identity ${cause.old_identity}` : ""}) (${event.event_id})`
+            `DEPENDENCY_REVALIDATED for ${id} cites "${cited}" which does not authenticate against its stale cause (upstream ${cause.upstream}): ${refusal} (${event.event_id})`
           );
         } else {
           entry.stale = false;
@@ -1401,6 +1434,14 @@ const WEAK_PROGRESS_TYPES = new Set([
   "PLAN_REVIEWED",
   "SCOPE_DISCOVERED",
   "NOTION_READ_VERIFIED",
+  // v4.2 (verifier N4): narrative claims are cheap to fabricate — a stalled
+  // agent emitting varied "learnings"/"findings" must not reset the stall
+  // clock indefinitely. State-changing and externally-verifiable types stay
+  // strong; narration counts once per (type, scope).
+  "LEARNING_CAPTURED",
+  "SUBAGENT_FINDING",
+  "GSTACK_FINDING",
+  "SKILLIFY_CANDIDATE",
 ]);
 const PROGRESS_TYPES = new Set([
   // resolving an unknown IS progress (§10 "previously unknown fact resolved");

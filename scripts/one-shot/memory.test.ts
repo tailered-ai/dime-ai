@@ -1086,6 +1086,150 @@ describe("refutation regressions (kernel v4.1)", () => {
   });
 });
 
+describe("v4.2 verifier-hardening regressions", () => {
+  const staleConsumerSetup = () => {
+    happyBase();
+    register("ART-src", { content_hash: "aaa" });
+    register("ART-consumer", { depends_on: ["ART-src"] });
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_UPDATED",
+      summary: "src changed",
+      artifact: { id: "ART-src", content_hash: "bbb" },
+    });
+  };
+
+  it("identity-exact citation when the kernel knows the current hash — bare id and near-miss both refused", () => {
+    staleConsumerSetup();
+    for (const cited of ["ART-src", "ART-src@aaa2", "ART-src@almost-bbb"]) {
+      assert.throws(
+        () =>
+          add({
+            scope_id: "TOS-006",
+            event_type: "DEPENDENCY_REVALIDATED",
+            summary: `citing ${cited}`,
+            artifact: { id: "ART-consumer" },
+            upstream_identity: cited,
+          }),
+        /must be exactly "ART-src@bbb"/
+      );
+    }
+    add({
+      scope_id: "TOS-006",
+      event_type: "DEPENDENCY_REVALIDATED",
+      summary: "exact current identity",
+      artifact: { id: "ART-consumer" },
+      upstream_identity: "ART-src@bbb",
+    });
+    assert.deepEqual(ledger.deriveArtifacts(RUN).stale, []);
+  });
+
+  it("ext invalidation: dead identity + suffix refused; a NEW version under the resource root clears", () => {
+    happyBase();
+    register("ART-packet", {
+      depends_on: ["ext:github:pr:496@aaaa"],
+    });
+    add({
+      scope_id: "TOS-006",
+      event_type: "DEPENDENCY_INVALIDATED",
+      summary: "pr head moved",
+      upstream: "ext:github:pr:496@aaaa",
+    });
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-006",
+          event_type: "DEPENDENCY_REVALIDATED",
+          summary: "dead identity plus suffix",
+          artifact: { id: "ART-packet" },
+          upstream_identity: "ext:github:pr:496@aaaa@bbbb",
+        }),
+      /not rooted in the dead identity/
+    );
+    add({
+      scope_id: "TOS-006",
+      event_type: "DEPENDENCY_REVALIDATED",
+      summary: "rechecked against the new head",
+      artifact: { id: "ART-packet" },
+      upstream_identity: "ext:github:pr:496@bbbb",
+    });
+    assert.deepEqual(ledger.deriveArtifacts(RUN).stale, []);
+  });
+
+  it("superseded upstream: only a successor citation revalidates", () => {
+    happyBase();
+    register("ART-old");
+    register("ART-consumer", { depends_on: ["ART-old"] });
+    register("ART-new");
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_SUPERSEDED",
+      summary: "old superseded",
+      artifact: { id: "ART-old", superseded_by: "ART-new" },
+    });
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-006",
+          event_type: "DEPENDENCY_REVALIDATED",
+          summary: "citing the corpse",
+          artifact: { id: "ART-consumer" },
+          upstream_identity: "ART-old@whatever",
+        }),
+      /must reference the successor/
+    );
+    add({
+      scope_id: "TOS-006",
+      event_type: "DEPENDENCY_REVALIDATED",
+      summary: "rebuilt on the successor",
+      artifact: { id: "ART-consumer" },
+      upstream_identity: "ART-new",
+    });
+    assert.deepEqual(ledger.deriveArtifacts(RUN).stale, []);
+  });
+
+  it("retired upstream: revalidation is impossible — rebuild, don't launder", () => {
+    happyBase();
+    register("ART-input");
+    register("ART-consumer", { depends_on: ["ART-input"] });
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_RETIRED",
+      summary: "input retired",
+      artifact: { id: "ART-input" },
+    });
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-006",
+          event_type: "DEPENDENCY_REVALIDATED",
+          summary: "citing anything",
+          artifact: { id: "ART-consumer" },
+          upstream_identity: "ART-input@fresh",
+        }),
+      /is RETIRED — there is no new identity/
+    );
+  });
+
+  it("N4: narrative-type wash (LEARNING_CAPTURED) no longer resets the stall clock", () => {
+    happyBase();
+    for (let i = 0; i < 4; i += 1) {
+      add({
+        scope_id: "LANE-0",
+        event_type: "TEST_STARTED",
+        summary: "same retry",
+      });
+      add({
+        scope_id: "LANE-0",
+        event_type: "LEARNING_CAPTURED",
+        summary: `deep insight ${i}`,
+        evidence: [{ type: "url", ref: `https://github.com/x/y/pull/${i}` }],
+      });
+    }
+    assert.equal(ledger.deriveProgress(RUN).stall_breached, true);
+  });
+});
+
 describe("owner-gate census (§24)", () => {
   it("classification vocabulary is controlled", () => {
     assert.throws(
