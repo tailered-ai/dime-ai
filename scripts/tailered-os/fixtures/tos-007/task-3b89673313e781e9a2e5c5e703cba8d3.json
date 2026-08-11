@@ -1,0 +1,16 @@
+{
+  "Name": "TOS-006 Rebuild GitHub to Notion handoff around tailered-ai/dime-ai",
+  "Scope ID": "TOS-006",
+  "Status": "Not started",
+  "Execution State": "Ready",
+  "Execution Mode": "Human + AI",
+  "Priority": "P1",
+  "Owner": "[\"user://3b5d872b-594c-815f-a165-0002ae0542e3\"]",
+  "AI Executor": "[\"https://www.notion.so/3b89673313e781f78a91ca66085b493d\"]",
+  "Project": "[\"https://www.notion.so/3b89673313e7814da8a4ccfa9a21c969\"]",
+  "Work Link": "https://github.com/tailered-ai/dime-ai",
+  "Waiting On": "[]",
+  "What Done Means": "Tailered-OS-scoped PRs carry a CI-enforced Notion context block binding them to canonical Project, Task, Scope ID, human owner, and classifications.",
+  "Why It Matters": "The GitHub-Notion join is the traceability backbone of Tailered OS.",
+  "Proof / Result": null
+}
