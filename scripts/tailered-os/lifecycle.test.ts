@@ -432,7 +432,14 @@ describe("TOS-009 authority + mutation plan — fail closed, plan only", () => {
       authority.write_path,
       "scripts/tailered-os/lifecycle-writer.mjs"
     );
-    assert.match(String(authority.grant.decision), /app\.notion\.com/);
+    // Fully anchored: an unanchored host pattern would accept
+    // https://evil.test/app.notion.com/... (CodeQL js/regex/missing-regexp-anchor,
+    // alert #453 — a true positive even in a test, since it is the assertion
+    // that is supposed to pin the canonical decision URL).
+    assert.match(
+      String(authority.grant.decision),
+      /^https:\/\/app\.notion\.com\/p\/[0-9a-f]{32}$/
+    );
   });
 
   it("the mutation plan is DATA and never claims execution", () => {
