@@ -1,0 +1,8 @@
+## Notion context
+
+- Project: <!-- canonical Tailered OS project URL from config/tailered-os-control-plane.v1.json -->
+- Task: <!-- direct Notion Task URL -->
+- Scope ID: <!-- TOS-### -->
+- Human owner: <!-- accountable human, never an AI -->
+- Decision class: <!-- routine | material | owner-gated -->
+- Deployment consequence: <!-- none | dime-runtime | tailered-os-runtime -->

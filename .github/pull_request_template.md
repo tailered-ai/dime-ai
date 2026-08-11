@@ -7,8 +7,22 @@ required; write "none" explicitly where a section does not apply. -->
 
 ## Notion context
 
-<!-- Notion project/spec URL, or "none". Pasting the URL lets Notion's GitHub
-sync auto-relate this PR to its spec (see references/notion-control-plane.md). -->
+<!-- The governing Notion Project/Task URL, or "none" for changes with no Notion
+scope. The pasted link IS the traceability mechanism (the Notion GitHub Sync
+integration is archived — see references/notion-control-plane.md).
+
+For Tailered-OS-scoped PRs (platform/tailered-os/, config/tailered-os-control-plane*,
+scripts/tailered-os*, scripts/ci/tos-*, scripts/one-shot/, os/one-shot/) the
+structured block below is REQUIRED and enforced by the 13-tos-notion-context
+check; fill every line (canonical ids: config/tailered-os-control-plane.v1.json).
+Other PRs may delete the block. -->
+
+- Project: <!-- canonical Tailered OS project URL -->
+- Task: <!-- direct Notion Task URL -->
+- Scope ID: <!-- TOS-### -->
+- Human owner: <!-- accountable human, never an AI -->
+- Decision class: <!-- routine | material | owner-gated -->
+- Deployment consequence: <!-- none | dime-runtime | tailered-os-runtime -->
 
 ## Linked incident / finding
 

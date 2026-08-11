@@ -1,0 +1,22 @@
+{
+  "run_id": "ONE-20260810-C2",
+  "program": "Tailered OS",
+  "campaign": "Two — one-shot protocol corrections + integration",
+  "artifacts_location": "out-of-git: ~/.gstack/projects/tailered-ai-dime-ai/one-shot-runs/ONE-20260810-C2 (Law 8)",
+  "events_total": 67,
+  "final_event_hash": "5656f59d834963a9a77f6978cb1dd85b58ba1a07a7ab48d58db2c5468a2988ca",
+  "directive_sha256": "633230dd60c33502579fb7ef44a24309efd215326ab5c72ab10269d2235dfd40",
+  "terminal_event": "RUN_PAUSED_EXTERNAL",
+  "complete": false,
+  "closeout_blockers": [
+    "required scopes not terminal (owner-gated at merge/ratification)",
+    "G9 BLOCKED (owner-held releases)",
+    "9 owner gates OPEN"
+  ],
+  "run_one_anchor_unchanged": {
+    "run_id": "ONE-20260810-TOS",
+    "events_total": 102,
+    "final_event_hash": "7efad216ae715b522ca5400578d790a39f61c2b533f57a7e26863a8c5a624831",
+    "verified_byte_identical_at_c2_start_and_end": true
+  }
+}

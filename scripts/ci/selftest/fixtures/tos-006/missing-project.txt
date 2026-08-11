@@ -1,0 +1,7 @@
+## Notion context
+
+- Task: https://app.notion.com/p/abcdef0123456789abcdef0123456789
+- Scope ID: TOS-006
+- Human owner: PREZ
+- Decision class: routine
+- Deployment consequence: none

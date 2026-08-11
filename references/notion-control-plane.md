@@ -51,7 +51,12 @@ database — never in a second tracker.
 - **PR linking.** The PR template has a "Notion context" section. Paste the governing
   Notion Project/Task URL there (or "none"). The link itself is the traceability
   mechanism. The Notion **GitHub Sync integration is archived** — do not rely on it to
-  auto-relate PRs; a rebuilt, governed integration is TOS-006 scope.
+  auto-relate PRs. For Tailered-OS-scoped PRs the section is a structured block
+  (Project, Task, Scope ID, Human owner, Decision class, Deployment consequence)
+  enforced statically by the `13-tos-notion-context` check
+  (`scripts/ci/tos-notion-context.mjs`, identifiers from the manifest only, zero
+  Notion API calls, no bot, org-wide sync mode disabled) — this IS the TOS-006
+  contract. Editing the PR description re-runs the check.
 - **Releases.** Every production deploy gets a Release record: exact commit SHA, PRs, CI
   link, deployment, health verification (`node scripts/smoke-deploy.mjs` output),
   migration state, and rollback SHA. A record never says "passed" without those links.
