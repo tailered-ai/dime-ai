@@ -1,0 +1,8 @@
+# Scope note: platform/tailered-os is the embedded, operationally isolated
+# Tailered OS app (starter-derived wrapper code + a cloudflare-os submodule that
+# checkout doesn't initialize here). Excluding it keeps CodeQL PR gating on Dime
+# product code — otherwise pre-existing alerts in vendored wrapper code get
+# attributed to whatever PR first touches the tree. Tailered OS security review
+# rides its own lane (platform/tailered-os/docs/UPSTREAM.md update contract).
+paths-ignore:
+  - platform/tailered-os
