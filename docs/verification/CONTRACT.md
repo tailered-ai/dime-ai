@@ -17,9 +17,9 @@ convention.
 | schema_version | `1.0.0` |
 | parser_version | `yaml@2.9.0` |
 | canonicalizer_version | `1.0.0` |
-| workflows | 40 |
-| jobs / checks | 51 / 51 |
-| steps represented | 258 |
+| workflows | 42 |
+| jobs / checks | 53 / 53 |
+| steps represented | 271 |
 
 ## Runnability
 
@@ -31,7 +31,7 @@ excluded from the verdict.
 | Class | Count |
 | --- | --- |
 | `CI-ONLY` | 22 |
-| `LOCAL` | 18 |
+| `LOCAL` | 20 |
 | `LOCAL+TOOL` | 11 |
 
 ## Required status contexts (enforced today)
@@ -122,16 +122,17 @@ implicit ignored class: an unclassified construct aborts generation with
 | Workflow | raw sha256 | canonical sha256 |
 | --- | --- | --- |
 | `01-pr-proof-contract.yml` | `82d494f62bd738f4` | `ab9895ac3c6fce20` |
-| `02-codeql.yml` | `8368b0ac4e37f06a` | `63f6b6d713029f66` |
+| `02-codeql.yml` | `420935d9e5bdda30` | `6a26a5eefd1e71a3` |
 | `03-semgrep.yml` | `e8f9690f3317c1a3` | `3d24f628dd383fea` |
 | `05-workflow-security.yml` | `8ae009b88cbed2e3` | `16e963daa80edd0e` |
-| `06-dependency-review.yml` | `d4c5e5deefeb7b7c` | `89f79e1dbb9b4467` |
+| `06-dependency-review.yml` | `d07c7dfbf545a3d1` | `99321a8cb286d806` |
 | `07-coverage-patch.yml` | `279534ab67c27b84` | `e1f4e66474e8453b` |
 | `08-contract-and-data-integrity.yml` | `3fbb9a310be3d592` | `b602a09c79f266f6` |
 | `09-artifact-build-and-smoke.yml` | `16d6f64cf7663d27` | `184a6d189f04b4e7` |
 | `10-ai-eval-critical.yml` | `3be89dbd7541e6c6` | `ebb8699b3f36eeab` |
 | `11-artifact-attestation.yml` | `4b30e6067e3915df` | `e0d4bfe2bf8ff99a` |
 | `12-nightly-verification.yml` | `b30d52e0b8408445` | `60a6720a6c3bd7a2` |
+| `13-tos-notion-context.yml` | `9fa213c94feed404` | `04b9661d52b0f3cb` |
 | `auto-merge-dependabot.yml` | `cc1fdaa050d8091e` | `55e151f35d3fa254` |
 | `ci.yml` | `0cf19f689a4091b7` | `3f80478fa4661ac3` |
 | `cron-bet-grade.yml` | `9eeddca74c8c5c96` | `df0cd7873a40af34` |
@@ -161,6 +162,7 @@ implicit ignored class: an unclassified construct aborts generation with
 | `seed-cfb.yml` | `709959dddd4e0848` | `cfecfc570b0f90e8` |
 | `seed-nfl.yml` | `29835145f26688db` | `fc409e0797f8bb0a` |
 | `stripe-e2e.yml` | `3d70f0863b4c4ac8` | `6859763df2380ba7` |
+| `tailered-os.yml` | `c1bd1b6520bb4c09` | `07f77928e63c4889` |
 
 ## Regeneration and failure semantics
 

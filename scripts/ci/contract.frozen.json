@@ -4,9 +4,9 @@
   "canonicalizer_version": "1.0.0",
   "generated_from": {
     "workflow_dir": ".github/workflows",
-    "workflow_count": 40,
-    "job_count": 51,
-    "step_count": 258,
+    "workflow_count": 42,
+    "job_count": 53,
+    "step_count": 271,
     "workflows": [
       {
         "path": ".github/workflows/01-pr-proof-contract.yml",
@@ -15,8 +15,8 @@
       },
       {
         "path": ".github/workflows/02-codeql.yml",
-        "raw_sha256": "8368b0ac4e37f06a7b4eda7671975aadfa6b2037ccbbb1ea4ecb2bf9db8eafaf",
-        "canonical_sha256": "63f6b6d713029f66acf8be2d42e35d5e1866de424224556f0b78fad354365aca"
+        "raw_sha256": "420935d9e5bdda30ac1c6d3e3cf73a6b44e529d036c82842176080feeb22000a",
+        "canonical_sha256": "6a26a5eefd1e71a37986088b2c80c9b61100f4ef2a7ec99f8e89284e0d90e208"
       },
       {
         "path": ".github/workflows/03-semgrep.yml",
@@ -30,8 +30,8 @@
       },
       {
         "path": ".github/workflows/06-dependency-review.yml",
-        "raw_sha256": "d4c5e5deefeb7b7c66c93c3708a3b4511385d288d0b4d885fe85a638d4115e2e",
-        "canonical_sha256": "89f79e1dbb9b4467444178f9c1258b98e2a3b83e54738aab32ecc01259893cb8"
+        "raw_sha256": "d07c7dfbf545a3d111218fd6d2e1232fe4ea211b8ca0b486facec434f125f184",
+        "canonical_sha256": "99321a8cb286d8066fe8347d5f6825aa7fbf49e2f3fe109481aa22fed9a254e8"
       },
       {
         "path": ".github/workflows/07-coverage-patch.yml",
@@ -62,6 +62,11 @@
         "path": ".github/workflows/12-nightly-verification.yml",
         "raw_sha256": "b30d52e0b840844557838b6bbe79aa83b2e292a1b5374f97c9df565952b368a7",
         "canonical_sha256": "60a6720a6c3bd7a28d4485dbc59bde11ddcb38700533b4c0e2f7880f030c77db"
+      },
+      {
+        "path": ".github/workflows/13-tos-notion-context.yml",
+        "raw_sha256": "9fa213c94feed4042f1b8a3233b7ee239983f68e89ed2b3291d9dd4089782dc4",
+        "canonical_sha256": "04b9661d52b0f3cb6bc54fa7f4979e194410b95771f3e0535f16f87e2f0475bc"
       },
       {
         "path": ".github/workflows/auto-merge-dependabot.yml",
@@ -207,6 +212,11 @@
         "path": ".github/workflows/stripe-e2e.yml",
         "raw_sha256": "3d70f0863b4c4ac8fbdc37e9d089b4faf2c72b881addbaf901b00abf2f3817ad",
         "canonical_sha256": "6859763df2380ba784a5acc2e47cde7ac25b485cf8398102b318381cd9eae15b"
+      },
+      {
+        "path": ".github/workflows/tailered-os.yml",
+        "raw_sha256": "c1bd1b6520bb4c0960d24ec8d59acae10cc0122af265e9c7f1d88accac106927",
+        "canonical_sha256": "07f77928e63c4889321e600d532d4b94144502dca23eb82e9a8b8ca976f31ff3"
       }
     ]
   },
@@ -225,6 +235,7 @@
       ".github/workflows/10-ai-eval-critical.yml",
       ".github/workflows/11-artifact-attestation.yml",
       ".github/workflows/12-nightly-verification.yml",
+      ".github/workflows/13-tos-notion-context.yml",
       ".github/workflows/auto-merge-dependabot.yml",
       ".github/workflows/ci.yml",
       ".github/workflows/cron-bet-grade.yml",
@@ -253,55 +264,56 @@
       ".github/workflows/security-audit-weekly.yml",
       ".github/workflows/seed-cfb.yml",
       ".github/workflows/seed-nfl.yml",
-      ".github/workflows/stripe-e2e.yml"
+      ".github/workflows/stripe-e2e.yml",
+      ".github/workflows/tailered-os.yml"
     ],
-    "file_count": 40,
-    "job_count": 51,
-    "step_count": 258,
-    "uses_sha_pinned": 120,
+    "file_count": 42,
+    "job_count": 53,
+    "step_count": 271,
+    "uses_sha_pinned": 124,
     "uses_unpinned": 0,
     "alias_files": [],
     "workflow_keys": {
-      "concurrency": 22,
-      "env": 2,
-      "jobs": 40,
-      "name": 40,
-      "on": 40,
-      "permissions": 40
+      "concurrency": 23,
+      "env": 3,
+      "jobs": 42,
+      "name": 42,
+      "on": 42,
+      "permissions": 42
     },
     "triggers": {
-      "merge_group": 10,
-      "pull_request": 15,
-      "push": 8,
+      "merge_group": 11,
+      "pull_request": 17,
+      "push": 9,
       "schedule": 14,
       "workflow_dispatch": 37
     },
     "job_keys": {
-      "defaults": 1,
+      "defaults": 2,
       "env": 4,
       "environment": 17,
       "if": 3,
-      "name": 46,
+      "name": 47,
       "needs": 4,
-      "permissions": 17,
-      "runs-on": 51,
+      "permissions": 18,
+      "runs-on": 53,
       "services": 1,
-      "steps": 51,
+      "steps": 53,
       "strategy": 2,
-      "timeout-minutes": 25
+      "timeout-minutes": 26
     },
     "step_keys": {
-      "env": 45,
+      "env": 47,
       "id": 6,
-      "if": 34,
-      "name": 186,
-      "run": 138,
-      "uses": 120,
-      "with": 63
+      "if": 37,
+      "name": 195,
+      "run": 147,
+      "uses": 124,
+      "with": 67
     },
     "shells": {},
     "expression_roots": {
-      "github": 49,
+      "github": 53,
       "inputs": 27,
       "matrix": 6,
       "secrets": 30,
@@ -481,7 +493,7 @@
     "actions/upload-artifact": "GitHub artifact storage"
   },
   "runnability_summary": {
-    "LOCAL": 18,
+    "LOCAL": 20,
     "LOCAL+TOOL": 11,
     "CI-ONLY": 22
   },
@@ -797,7 +809,8 @@
           "run": null,
           "with": {
             "languages": "${{ matrix.language }}",
-            "queries": "security-extended"
+            "queries": "security-extended",
+            "config-file": "./.github/codeql/codeql-config.yml"
           },
           "env": null,
           "if": null
@@ -1089,6 +1102,7 @@
           "with": {
             "fail-on-severity": "high",
             "allow-licenses": "MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, Unlicense, CC0-1.0, CC-BY-4.0, Python-2.0, BlueOak-1.0.0, Zlib",
+            "allow-dependencies-licenses": "pkg:npm/%40img/sharp-libvips-darwin-arm64, pkg:npm/%40img/sharp-libvips-darwin-x64, pkg:npm/%40img/sharp-libvips-linux-arm, pkg:npm/%40img/sharp-libvips-linux-arm64, pkg:npm/%40img/sharp-libvips-linux-ppc64, pkg:npm/%40img/sharp-libvips-linux-riscv64, pkg:npm/%40img/sharp-libvips-linux-s390x, pkg:npm/%40img/sharp-libvips-linux-x64, pkg:npm/%40img/sharp-libvips-linuxmusl-arm64, pkg:npm/%40img/sharp-libvips-linuxmusl-x64, pkg:npm/%40img/sharp-wasm32, pkg:npm/%40img/sharp-win32-arm64, pkg:npm/%40img/sharp-win32-ia32, pkg:npm/%40img/sharp-win32-x64, pkg:npm/lightningcss, pkg:npm/lightningcss-android-arm64, pkg:npm/lightningcss-darwin-arm64, pkg:npm/lightningcss-darwin-x64, pkg:npm/lightningcss-freebsd-x64, pkg:npm/lightningcss-linux-arm-gnueabihf, pkg:npm/lightningcss-linux-arm64-gnu, pkg:npm/lightningcss-linux-arm64-musl, pkg:npm/lightningcss-linux-x64-gnu, pkg:npm/lightningcss-linux-x64-musl, pkg:npm/lightningcss-win32-arm64-msvc, pkg:npm/lightningcss-win32-x64-msvc",
             "comment-summary-in-pr": "on-failure"
           },
           "env": null,
@@ -2143,6 +2157,109 @@
             "sarif_file": "scorecard.sarif",
             "category": "scorecard"
           },
+          "env": null,
+          "if": null
+        }
+      ]
+    },
+    {
+      "check_id": ".github/workflows/13-tos-notion-context.yml#tos-notion-context",
+      "workflow": ".github/workflows/13-tos-notion-context.yml",
+      "job_id": "tos-notion-context",
+      "status_context": "13-tos-notion-context",
+      "status_context_dynamic": false,
+      "status_context_template": null,
+      "runnability": "LOCAL",
+      "non_gating_step_count": 0,
+      "non_gating_reasons": [],
+      "step_runnability": [
+        "LOCAL",
+        "LOCAL",
+        "LOCAL",
+        "LOCAL",
+        "LOCAL",
+        "LOCAL"
+      ],
+      "runs_on": "ubuntu-latest",
+      "needs": null,
+      "if": null,
+      "timeout_minutes": 10,
+      "permissions": {
+        "contents": "read"
+      },
+      "environment": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "strategy": null,
+      "step_count": 6,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": {
+            "fetch-depth": 0
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "run": null,
+          "with": {
+            "node-version": 22
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Merge queue — contract already enforced at PR stage",
+          "id": null,
+          "uses": null,
+          "run": "echo \"merge_group ref — the Notion-context body contract ran on the pull_request events; ledger integrity re-verifies below.\"",
+          "with": null,
+          "env": null,
+          "if": "github.event_name == 'merge_group'"
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Changed files — offline, from git (no API)",
+          "id": null,
+          "uses": null,
+          "run": "# --no-renames: a rename prints only its destination, so a pure\n# `git mv` out of the TOS tree would otherwise dodge the scope\n# predicate entirely (gstack-review finding).\ngit diff --name-only --no-renames \"$(git merge-base \"$BASE_SHA\" \"$HEAD_SHA\")\" \"$HEAD_SHA\" > changed-files.txt\necho \"changed files: $(wc -l < changed-files.txt)\"\n",
+          "with": null,
+          "env": {
+            "BASE_SHA": "${{ github.event.pull_request.base.sha }}",
+            "HEAD_SHA": "${{ github.event.pull_request.head.sha }}"
+          },
+          "if": "github.event_name == 'pull_request'"
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Notion-context contract (body via env only; scope decided in-job)",
+          "id": null,
+          "uses": null,
+          "run": "printf '%s' \"$PR_BODY\" > pr-body.txt\nnode scripts/ci/tos-notion-context.mjs --body-file pr-body.txt --changed-files changed-files.txt\n",
+          "with": null,
+          "env": {
+            "PR_BODY": "${{ github.event.pull_request.body }}"
+          },
+          "if": "github.event_name == 'pull_request'"
+        },
+        {
+          "index": 5,
+          "name": "[STEP] Committed one-shot ledger integrity (hash-chain re-derivation)",
+          "id": null,
+          "uses": null,
+          "run": "node scripts/ci/tos-ledger-verify.mjs",
+          "with": null,
           "env": null,
           "if": null
         }
@@ -5227,6 +5344,118 @@
           },
           "env": null,
           "if": "always() && steps.guard.outputs.enabled == 'true'"
+        }
+      ]
+    },
+    {
+      "check_id": ".github/workflows/tailered-os.yml#test",
+      "workflow": ".github/workflows/tailered-os.yml",
+      "job_id": "test",
+      "status_context": "test",
+      "status_context_dynamic": false,
+      "status_context_template": null,
+      "runnability": "LOCAL",
+      "non_gating_step_count": 0,
+      "non_gating_reasons": [],
+      "step_runnability": [
+        "LOCAL",
+        "LOCAL",
+        "LOCAL",
+        "LOCAL",
+        "LOCAL",
+        "LOCAL",
+        "LOCAL"
+      ],
+      "runs_on": "ubuntu-latest",
+      "needs": null,
+      "if": null,
+      "timeout_minutes": null,
+      "permissions": null,
+      "environment": null,
+      "env": null,
+      "defaults": {
+        "run": {
+          "working-directory": "platform/tailered-os"
+        }
+      },
+      "services": null,
+      "strategy": null,
+      "step_count": 7,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8",
+          "run": null,
+          "with": {
+            "submodules": "recursive",
+            "persist-credentials": false
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "Verify Cloudflare OS submodule pin",
+          "id": null,
+          "uses": null,
+          "run": "actual=\"$(git -C cloudflare-os rev-parse HEAD)\"\nif [ \"$actual\" != \"$EXPECTED_CLOUDFLARE_OS_PIN\" ]; then\n  echo \"::error::cloudflare-os submodule is at $actual, expected $EXPECTED_CLOUDFLARE_OS_PIN — see platform/tailered-os/docs/UPSTREAM.md update contract\"\n  exit 1\nfi\nurl=\"$(git config -f \"$GITHUB_WORKSPACE/.gitmodules\" submodule.platform/tailered-os/cloudflare-os.url)\"\nif [ \"$url\" != \"https://github.com/cloudflare/cloudflare-os.git\" ]; then\n  echo \"::error::submodule URL changed to $url\"\n  exit 1\nfi\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": "22.14.0"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "Install pnpm via corepack",
+          "id": null,
+          "uses": null,
+          "run": "corepack enable",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "Install wrapper workspace",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "Install upstream workspace",
+          "id": null,
+          "uses": null,
+          "run": "cd cloudflare-os && pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "Test (deploy-script units, upstream drift golden, package tests)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm test",
+          "with": null,
+          "env": null,
+          "if": null
         }
       ]
     }
