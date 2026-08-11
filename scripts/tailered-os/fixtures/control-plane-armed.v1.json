@@ -104,7 +104,14 @@
     "foundationPullRequest": 496
   },
   "safety": {
-    "notionWriteOperationsAuthorized": false,
+    "notionWriteOperationsAuthorized": true,
+    "notionWriteAuthorization": {
+      "decision": "https://app.notion.com/p/3b99673313e781229b85f35a0b9f2966",
+      "grantedBy": "PREZ",
+      "grantedOn": "2026-08-11",
+      "actor": "AI-10",
+      "scope": "TEST FIXTURE ONLY \u2014 exercises the writer's armed path in vitest. The canonical manifest is DISARMED; arming it is a separate owner-reviewed PR that must first remove the manifest_path test seam."
+    },
     "secretMaterialAllowed": false,
     "manualGithubMirroringAllowed": false
   }

@@ -33,15 +33,12 @@ describe("tailered-os control-plane manifest", () => {
       manifest.notion.databases.aiSystemsRegistry.id,
       CANONICAL.aiSystemsRegistry
     );
-    // OG-006 (2026-08-11): write authority is granted, and the grant is
-    // evidence-pinned — a bare true would refuse to load (tested below).
-    assert.equal(manifest.safety.notionWriteOperationsAuthorized, true);
-    assert.match(
-      manifest.safety.notionWriteAuthorization.decision,
-      /^https:\/\/app\.notion\.com\/p\/[0-9a-f]{32}$/
-    );
-    assert.equal(manifest.safety.notionWriteAuthorization.grantedBy, "PREZ");
-    assert.equal(manifest.safety.notionWriteAuthorization.actor, "AI-10");
+    // OG-006: the committed manifest ships DISARMED. Three independent
+    // verification rounds failed the writer, so no live write authority is
+    // granted; the loader's evidence law (a bare true is a self-grant, a
+    // dormant grant is refused) is what makes a future arming reviewable.
+    assert.equal(manifest.safety.notionWriteOperationsAuthorized, false);
+    assert.equal(manifest.safety.notionWriteAuthorization, undefined);
   });
 
   it("the four 2026-08-06 database ids are connector-verified with provenance", () => {

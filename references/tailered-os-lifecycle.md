@@ -58,7 +58,13 @@ acting) · `missing_pr` · `stale_sha` (observation for a superseded head) · `c
   carries `executed: false, reason: "fixture mode — no live authority"`. The CLI is
   fixture-only permanently (`cli-live-unsupported`): it holds no transport, so it can
   never bypass the writer's gates.
-- **live** (OG-006 activation, 2026-08-11): the ONLY sanctioned write path is the
+- **live — NOT ACTIVE.** The committed manifest ships with
+  `safety.notionWriteOperationsAuthorized: false`, so **no live write capability exists
+  today**. Three independent verification rounds (2026-08-11) each returned FAIL against
+  this writer, so the owner's conditional Gate-B approval of actor AI-10 has **not
+  vested**. The code below is what a future, separately reviewed activation PR would
+  arm — after closing the open items in "What is still unsound", which that PR must
+  treat as its entry bar. The ONLY sanctioned write path is the
   policy-separated writer, `scripts/tailered-os/lifecycle-writer.mjs`. Contract:
   **observed fact → event schema → pure kernel → mutation plan (`deriveWrites`) →
   policy/authority validation (`authorizeWrite`, ~30 distinct refusal points) → injected
@@ -99,30 +105,65 @@ acting) · `missing_pr` · `stale_sha` (observation for a superseded head) · `c
     `(trigger, from)` existed said nothing about what was written, which let a plain
     machine `work_started` plan write `Merged` (NEW2-OG6-0014). Annotation rows may not
     change state at all.
-  - **`write_reverified` is not a write primitive**: it carries a live write only as an
-    undo bound to a capability this writer authorized, restoring exactly that
-    capability's captured priors — so it cannot launder a record to `Merged`,
-    `Approval`, or `Verified`. Undoing a human-authority write itself requires an
-    observed human act.
+  - **`write_reverified` is not a general write primitive**: it carries a live write
+    only as an undo bound to a capability this writer authorized, restoring exactly that
+    capability's captured priors. Undoing a human-authority write itself requires an
+    observed human act. (Round 3 showed the *effect* was still reachable by feeding a
+    self-inconsistent snapshot; that specific route is now closed by the
+    snapshot-consistency gate, but see "What is still unsound".)
   - **No optimistic success**: reread mismatch ⇒ `applied: "partial"` ⇒ the kernel
     freezes the task (`mutation_result` applied=partial) until a human-visible
     `write_reverified`. A write whose outcome is unreadable is partial, never assumed.
-  - **Kill switch / rollback**: set the manifest flag back to `false` (owner-reviewed
-    PR) — `authorizeWrite` refuses every plan (fresh manifest read per write),
-    `executeMutation` refuses outstanding capabilities on its own re-read, the
+  - **Kill switch / rollback**: the committed manifest is already `false`. Were it
+    armed, setting it back (owner-reviewed PR) makes `authorizeWrite` refuse every plan
+    on the canonical path (fresh manifest read per write) and `executeMutation` refuse
+    outstanding capabilities minted against that path on its own re-read — but see
+    "What is still unsound" #2 for the per-path gap. The
     engine's `assertLiveNotionAuthority` throws `notion-write-unauthorized`, and all
-    ledger/attestation history is preserved append-only.
+    ledger history is preserved append-only. (The writer itself persists nothing; it
+    RETURNS attestations for the caller to record.)
 
 ## What stays human, permanently
 
-Review approval, the merge itself, the unblock decision, and the deploy decision — all
-four are `authority: "human"` ROWS requiring `observed_via`, enforced by the kernel and
-re-checked by the writer. The engine records them from observed evidence; it can neither
-perform nor infer them, and `nextAction()` labels those stages `authority: "human"`.
+Review approval, the merge itself, the unblock decision, and the deploy decision are all
+`authority: "human"` ROWS requiring `observed_via`, enforced by the kernel and re-checked
+by the writer, and `nextAction()` labels those stages `authority: "human"`.
+
+**Read this before trusting that sentence.** `actor: "human"` and `observed_via` are
+strings the CALLER supplies. Nothing in the kernel or the writer authenticates them: a
+machine caller can assert `actor: "human"` with a fabricated `observed_via` and the
+transition is accepted (independent verification round 3, NEW3-OG6-0024). The controls
+are therefore honest about *shape* — a human row cannot be taken with a machine label —
+but they do **not** prove a human acted. Making that claim true requires binding the
+transition to something a machine cannot mint: for `approval_observed` and
+`merge_observed`, fetching the review/merge from the GitHub API inside the writer and
+matching reviewer identity and commit, rather than trusting evidence fields. That work
+is an entry-bar item for any activation PR.
 
 `post_merge_verified` (→ `Verified`) is machine authority by design: it requires an https
 `evidence_ref`, but that URL is **not fetched**, so `Verified` rests on a machine-supplied
 link. Stated rather than implied.
+
+## What is still unsound (entry bar for any activation PR)
+
+Recorded from three independent verification rounds so a future session starts from the
+truth rather than from this document's optimism:
+
+1. **Human authority is asserted, not proven** (NEW3-OG6-0024, HIGH). See above.
+2. **The kill switch is per-path** (NEW3-OG6-0027): `executeMutation` re-reads the manifest
+   the capability was minted against. A capability minted via `manifest_path` against an
+   armed in-repo file still executes while the canonical manifest is disarmed. Activation
+   must pin execute-time authority to the canonical manifest and remove the
+   `manifest_path` test seam (the armed fixture under
+   `scripts/tailered-os/fixtures/` exists only so vitest can exercise the armed path).
+3. **Test seam = authority source.** While `manifest_path` exists, any in-repo manifest
+   under `config/` or `scripts/tailered-os/fixtures/` can grant authority to a caller that
+   explicitly names it.
+4. **Six mutants survived** the round-3 mutation check — the execute-time authority
+   re-read, the TTL, the realpath rule, `target.page_id` derivation, the undo capability
+   binding, and the human `deploy_consequence_recorded` row all lack a test that fails
+   when the fix is deleted.
+5. **`Verified` is reachable on an unfetched URL** (see above).
 
 ## Determinism / replay
 
@@ -132,8 +173,8 @@ any mismatch into a visible `replay_divergence`. Duplicate `event_key`s are no-o
 no second record.
 
 Tests: `scripts/tailered-os/lifecycle.test.ts` (21-test §36/§37 battery — every failure
-class proven to fire) + `scripts/tailered-os/lifecycle-writer.test.ts` (43-test OG-006
-writer battery — every pre-write gate, transport failure class, partial-write freeze,
+class proven to fire) + `scripts/tailered-os/lifecycle-writer.test.ts` (OG-006
+writer battery, 51 tests as of this revision — every pre-write gate, transport failure class, partial-write freeze,
 and authority spoof proven to refuse, plus twelve regressions from two independent
 adversarial rounds: deep-frozen capability, trust-boundary re-validation, own-property
 allowlist lookup, on-disk authority, unforgeable capabilities, single-read write maps,

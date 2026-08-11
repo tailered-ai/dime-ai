@@ -135,14 +135,22 @@ function validValueForProperty(property, value, { allowClear = false } = {}) {
 // present different keys to the validator and to the transport.
 function snapshotWrites(writes) {
   if (!isPlainObject(writes)) return { error: "writes is not an object" };
-  if (Object.getOwnPropertySymbols(writes).length > 0)
-    return {
-      error:
-        "writes carries symbol-keyed properties — the allowlist is string-keyed, and a symbol key is not an allowlisted property",
-    };
+  // Reflection itself can throw (a Proxy ownKeys trap): every refusal is a
+  // VALUE, never an escaping Error (NEW3-OG6-0028).
+  let keys;
+  try {
+    if (Object.getOwnPropertySymbols(writes).length > 0)
+      return {
+        error:
+          "writes carries symbol-keyed properties — the allowlist is string-keyed, and a symbol key is not an allowlisted property",
+      };
+    keys = Object.keys(writes);
+  } catch (error) {
+    return { error: `enumerating writes threw (${error.message}) — refusing` };
+  }
   const copy = Object.create(null);
   let count = 0;
-  for (const key of Object.keys(writes)) {
+  for (const key of keys) {
     let value;
     try {
       value = writes[key];
@@ -351,7 +359,7 @@ function snapshotPlan(plan) {
     }
   };
   const scalars = {
-    schema_version: read("schema_version"),
+    schema_version: read("schema_version"), // read once, like every other field
     plan_id: read("plan_id"),
     event_key: read("event_key"),
     task_id: read("task_id"),
@@ -503,6 +511,22 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
       `task is not related to the canonical Tailered OS project (${projectId}) — cross-project writes are forbidden.`
     );
 
+  // The snapshot must be SELF-CONSISTENT before any gate trusts it: the state
+  // the gates read and the property value the priors are captured from are the
+  // same field of the same record, so a disagreement means the snapshot is not
+  // a faithful read (NEW3-OG6-0023). An unset select ("" / null / absent) is
+  // legitimate on a fresh row and is not a disagreement.
+  if (Object.hasOwn(snapshot.properties ?? {}, "Execution State")) {
+    const asProperty = snapshot.properties["Execution State"];
+    const unset =
+      asProperty === "" || asProperty === null || asProperty === undefined;
+    if (!unset && asProperty !== snapshot.execution_state)
+      return refuse(
+        "stale_task",
+        `snapshot is internally inconsistent: execution_state "${snapshot.execution_state}" but properties["Execution State"] is "${asProperty}" — a snapshot that disagrees with itself is not a faithful read; re-read the task.`
+      );
+  }
+
   // current state equals the plan's expected from-state
   if (snapshot.execution_state !== safe.expected_from_state)
     return refuse(
@@ -538,6 +562,25 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
   // runbook calls permanently human, through the sanctioned path, with no
   // Proxy and no forged capability (NEW2-OG6-0014). This is the gate that makes
   // "approval and merge are human" true at the writer, not just at the kernel.
+  // Bookkeeping triggers imply no live write. deriveWrites refuses them, but a
+  // hand-built plan reached authorizeWrite through the from:"*" row and
+  // overwrote Proof / Result on a Verified record (NEW3-OG6-0026).
+  if (safe.trigger === "mutation_result")
+    return refuse(
+      "malformed_input",
+      "mutation_result is writer bookkeeping and never carries a live Notion write."
+    );
+
+  // Every state-bearing row MUST declare the state it writes; the gate used to
+  // be keyed on the key being present, so omitting it skipped the gate
+  // entirely (NEW3-OG6-0026).
+  if (!isUndo && typeof transition.to === "string" && transition.to !== null) {
+    if (!Object.hasOwn(writes, "Execution State"))
+      return refuse(
+        "malformed_input",
+        `trigger "${safe.trigger}" moves the record to "${transition.to}" — the plan must declare that Execution State write, not omit it.`
+      );
+  }
   if (!isUndo && Object.hasOwn(writes, "Execution State")) {
     const declared = writes["Execution State"];
     if (typeof transition.to === "string") {
@@ -547,13 +590,26 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
           `plan writes Execution State "${declared}" but trigger "${safe.trigger}" from "${safe.expected_from_state}" may only produce "${transition.to}" — the transition table decides the target state, never the plan.`
         );
     } else if (safe.trigger === "unblocked") {
-      // Dynamic row: returns to the recorded blocked_from, which the writer
-      // cannot recompute — but it must leave Blocked, and this row is
-      // human-authority (checked below), so it carries an observed human act.
+      // Dynamic row: returns to the state recorded when the task was blocked.
+      // "not Blocked" was the only constraint, which made this a one-step jump
+      // to any state including Merged (NEW3-OG6-0025). The caller must now
+      // carry blocked_from from the kernel fold and it must match what is
+      // written.
       if (declared === "Blocked")
         return refuse(
           "malformed_input",
           "an unblock must leave Blocked — writing Blocked is not an unblock."
+        );
+      const blockedFrom = snapshot.blocked_from;
+      if (typeof blockedFrom !== "string" || blockedFrom === "")
+        return refuse(
+          "missing_evidence",
+          "an unblock must carry the recorded blocked_from state (snapshot.blocked_from) — without it the target state is unconstrained."
+        );
+      if (declared !== blockedFrom)
+        return refuse(
+          "authority_violation",
+          `an unblock returns the record to "${blockedFrom}", not "${declared}" — the recorded blocked_from decides, never the plan.`
         );
     } else {
       // Annotation rows (mutation_result) never change state.
@@ -692,7 +748,7 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
   // copy, deep-frozen, and registered in a module-private WeakSet that
   // executeMutation checks. Shape is not authenticity.
   const capability = deepFreeze({
-    schema_version: plan.schema_version,
+    schema_version: safe.schema_version,
     plan_id: safe.plan_id,
     event_key: safe.event_key,
     task_id: safe.task_id,

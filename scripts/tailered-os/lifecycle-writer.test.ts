@@ -25,6 +25,12 @@ const MERGE = "b".repeat(40);
 // simply the committed manifest and the other states are in-repo fixtures
 // (only a code-reviewed file can ever grant write authority).
 const manifest = loadControlPlaneManifest();
+// The COMMITTED manifest is disarmed — the writer ships inert — so the armed
+// path exists only as a test fixture. Every happy-path test must ask for it
+// explicitly, which is itself the proof that nothing is armed by default.
+const ARMED = {
+  manifest_path: "scripts/tailered-os/fixtures/control-plane-armed.v1.json",
+};
 const DISARMED = {
   manifest_path: "scripts/tailered-os/fixtures/control-plane-disarmed.v1.json",
 };
@@ -79,7 +85,7 @@ function snapshotFor(plan: any, over: any = {}) {
 }
 
 function authorize(plan: any, over: any = {}, opts: any = {}) {
-  return authorizeWrite(plan, snapshotFor(plan, over), opts);
+  return authorizeWrite(plan, snapshotFor(plan, over), { ...ARMED, ...opts });
 }
 
 // A well-behaved fake transport backed by a mutable record.
@@ -182,7 +188,13 @@ describe("writer AUTHORIZE — the sixteen pre-write gates fail closed", () => {
     );
   });
 
-  it("kill switch: manifest flag false refuses every write (rollback path)", () => {
+  it("kill switch: the COMMITTED manifest is disarmed, so the default path refuses every write", () => {
+    // No manifest_path at all — this is what a real caller gets.
+    const shipped: any = authorizeWrite(planFor(), snapshotFor(planFor()), {});
+    assert.equal(shipped.ok, false);
+    assert.equal(shipped.failure_class, "permission_denial");
+    assert.match(shipped.detail, /notion-write-unauthorized/);
+
     const result: any = authorize(planFor(), {}, DISARMED);
     assert.equal(result.ok, false);
     assert.equal(result.failure_class, "permission_denial");
@@ -219,10 +231,36 @@ describe("writer AUTHORIZE — the sixteen pre-write gates fail closed", () => {
   });
 
   it("live state drift refuses: snapshot state ≠ expected from-state", () => {
-    const result: any = authorize(planFor(), { execution_state: "PR Open" });
+    const result: any = authorize(planFor(), {
+      execution_state: "PR Open",
+      properties: {
+        "Execution State": "PR Open",
+        "Work Link": "",
+        "Proof / Result": "",
+        [WHY_BLOCKED_PROPERTY]: "",
+      },
+    });
     assert.equal(result.ok, false);
     assert.equal(result.failure_class, "stale_task");
     assert.match(result.detail, /the record moved/);
+  });
+
+  it("NEW3-OG6-0023: a snapshot that disagrees with itself is refused — priors cannot be captured from a lie", () => {
+    // execution_state says Ready (passing the from-state gate) while the
+    // property the priors are captured from says Merged. Two ordinary machine
+    // calls used to turn that into a live "Merged" via the undo path.
+    const result: any = authorize(planFor(), {
+      execution_state: "Ready",
+      properties: {
+        "Execution State": "Merged",
+        "Work Link": "",
+        "Proof / Result": "",
+        [WHY_BLOCKED_PROPERTY]: "",
+      },
+    });
+    assert.equal(result.ok, false);
+    assert.equal(result.failure_class, "stale_task");
+    assert.match(result.detail, /internally inconsistent/);
   });
 
   it("cross-database write refuses (wrong data source)", () => {
@@ -674,7 +712,7 @@ describe("writer v1.1 — adversarial regressions", () => {
         fetched_at: fresh(),
         properties: { ...transport.record },
       },
-      { undo_of: forward.authorized_plan }
+      { ...ARMED, undo_of: forward.authorized_plan }
     );
     assert.equal(undoAuth.ok, true, JSON.stringify(undoAuth));
     const undone = await executeMutation(undoAuth.authorized_plan, transport);
@@ -702,7 +740,7 @@ describe("writer v1.1 — adversarial regressions", () => {
 
     // (a) An unbound undo — no opts.undo_of — refuses.
     const undo: any = buildUndoPlan(forward.authorized_plan);
-    const unbound: any = authorizeWrite(undo.plan, liveSnapshot, {});
+    const unbound: any = authorizeWrite(undo.plan, liveSnapshot, ARMED);
     assert.equal(unbound.ok, false);
     assert.equal(unbound.failure_class, "permission_denial");
 
@@ -714,6 +752,7 @@ describe("writer v1.1 — adversarial regressions", () => {
       writes: { "Execution State": "Verified" },
     };
     const laundering: any = authorizeWrite(forged, liveSnapshot, {
+      ...ARMED,
       undo_of: forward.authorized_plan,
     });
     assert.equal(laundering.ok, false);
@@ -724,12 +763,13 @@ describe("writer v1.1 — adversarial regressions", () => {
     const notAnUndo: any = authorizeWrite(
       { ...undo.plan, plan_id: "plan:sneaky" },
       liveSnapshot,
-      { undo_of: forward.authorized_plan }
+      { ...ARMED, undo_of: forward.authorized_plan }
     );
     assert.equal(notAnUndo.ok, false);
 
     // (d) The genuine bound undo still authorizes.
     const bound: any = authorizeWrite(undo.plan, liveSnapshot, {
+      ...ARMED,
       undo_of: forward.authorized_plan,
     });
     assert.equal(bound.ok, true, JSON.stringify(bound));
@@ -919,7 +959,7 @@ describe("writer v1.2 — independent-verification regressions", () => {
       fetched_at: fresh(),
       properties: { "Execution State": "", "Work Link": "" },
     };
-    const forward: any = authorizeWrite(plan, emptySnapshot, {});
+    const forward: any = authorizeWrite(plan, emptySnapshot, ARMED);
     assert.equal(forward.ok, true, JSON.stringify(forward));
     assert.equal(forward.authorized_plan.prior["Execution State"], "");
     const undo: any = buildUndoPlan(forward.authorized_plan);
@@ -934,7 +974,7 @@ describe("writer v1.2 — independent-verification regressions", () => {
           "Work Link": plan.writes["Work Link"],
         },
       },
-      { undo_of: forward.authorized_plan }
+      { ...ARMED, undo_of: forward.authorized_plan }
     );
     assert.equal(undoAuth.ok, true, JSON.stringify(undoAuth));
     assert.equal(undoAuth.authorized_plan.writes["Execution State"], "");
@@ -1044,7 +1084,7 @@ describe("writer v1.2 — independent-verification regressions", () => {
         fetched_at: fresh(),
         properties: { "Execution State": "Ready", "Work Link": null },
       },
-      {}
+      ARMED
     );
     assert.equal(result.ok, true, JSON.stringify(result));
     assert.equal(result.authorized_plan.prior["Work Link"], "");
@@ -1135,7 +1175,7 @@ describe("writer + kernel — replay and freeze compose", () => {
         fetched_at: fresh(),
         properties: { "Execution State": "Ready", "Work Link": "" },
       },
-      {}
+      ARMED
     );
     assert.equal(auth.ok, false);
     assert.equal(auth.failure_class, "partial_write");
