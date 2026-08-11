@@ -80,13 +80,10 @@ acting) · `missing_pr` · `stale_sha` (observation for a superseded head) · `c
     validates the control-plane manifest itself on **every** write, so the kill switch
     is a real switch. `safety.notionWriteOperationsAuthorized` must be `true` AND carry
     the owner grant `safety.notionWriteAuthorization` (decision URL, grantedBy PREZ,
-    actor AI-10) — the loader refuses a bare `true` as a self-grant, and refuses a
-    dormant grant while the flag is `false`. A `manifest_path` override must resolve
-    (after following symlinks) inside `config/` or `scripts/tailered-os/fixtures/`.
-    Residual, stated plainly: in-repo is not the same as committed — an attacker with
-    repository write access could place a file there, though they could equally edit the
-    canonical manifest, so this grants no new capability. The manifest that authorized a
-    write is recorded in its attestation (`authority_source`).
+    actor AI-10, and the `activationPullRequest` whose reviewed merge introduced it) —
+    the loader refuses a bare `true` as a self-grant, and refuses a dormant grant while
+    the flag is `false`. There is no caller-selectable manifest path. The manifest that
+    authorized a write is recorded in its attestation (`authority_source`).
     Registry actor: AI-10, approved by PREZ 2026-08-11 conditional on qualification.
   - **Capabilities are unforgeable, single-use, and time-bounded**: the object
     `authorizeWrite` returns is registered in a module-private `WeakMap`;
@@ -129,41 +126,123 @@ Review approval, the merge itself, the unblock decision, and the deploy decision
 `authority: "human"` ROWS requiring `observed_via`, enforced by the kernel and re-checked
 by the writer, and `nextAction()` labels those stages `authority: "human"`.
 
-**Read this before trusting that sentence.** `actor: "human"` and `observed_via` are
-strings the CALLER supplies. Nothing in the kernel or the writer authenticates them: a
-machine caller can assert `actor: "human"` with a fabricated `observed_via` and the
-transition is accepted (independent verification round 3, NEW3-OG6-0024). The controls
-are therefore honest about *shape* — a human row cannot be taken with a machine label —
-but they do **not** prove a human acted. Making that claim true requires binding the
-transition to something a machine cannot mint: for `approval_observed` and
-`merge_observed`, fetching the review/merge from the GitHub API inside the writer and
-matching reviewer identity and commit, rather than trusting evidence fields. That work
-is an entry-bar item for any activation PR.
+**That sentence used to be false at the layer claiming to enforce it.** Through Round 1,
+`actor: "human"` and `observed_via` were strings the CALLER supplied; nothing
+authenticated them, so a machine caller asserted them and the transition was accepted
+(independent verification round 3, NEW3-OG6-0024). That is what stopped the first
+campaign and why the writer shipped inert.
 
-`post_merge_verified` (→ `Verified`) is machine authority by design: it requires an https
-`evidence_ref`, but that URL is **not fetched**, so `Verified` rests on a machine-supplied
-link. Stated rather than implied.
+**Round 2 inverted the direction of trust.** The caller may now name an evidence
+*locator* — which PR, which review id, which comment. `scripts/tailered-os/authority.mjs`
+independently fetches that object from GitHub over an authenticated transport and
+DERIVES the authority fact; the plan's evidence must then AGREE with what the forge
+returned, and cannot supply it. For `approval_observed` the adapter proves: repository,
+PR identity, base branch, that the named review exists on that PR, that its state is
+`APPROVED` (a dismissed review refuses), that the reviewer login is an allowed human —
+not a bot, not this agent's own account — that the approval is of the CURRENT reviewable
+head, that branch protection itself still reports `APPROVED`, and that the reviewer is
+not the author.
 
-## What is still unsound (entry bar for any activation PR)
+**Why this is not another string check.** GitHub attributes a review to the credential
+that submitted it. This agent holds exactly one credential, `tailered-ai`, which is also
+the account that authors these PRs; `prez-tailered-ai` is a separate account it has no
+token for. An `APPROVED` review by that login is an artifact this process cannot
+manufacture regardless of what it passes to the adapter. The security rests on account
+separation, not on code in this repository.
 
-Recorded from three independent verification rounds so a future session starts from the
-truth rather than from this document's optimism:
+**Notion is deliberately NOT an authority source.** Actor AI-10 holds a Notion connector
+that can create and edit pages in the Decisions database — the Round 1 "owner decision"
+record was itself created by the machine, transcribing a decision made in conversation.
+Deriving authority from a record the machine can write is a self-grant with extra steps.
+A human decision that lives only in Notion is therefore not machine-authenticable here
+and fails closed; the Notion decision URL remains in the grant as the human-readable
+cross-reference it always was.
 
-1. **Human authority is asserted, not proven** (NEW3-OG6-0024, HIGH). See above.
-2. **The kill switch is per-path** (NEW3-OG6-0027): `executeMutation` re-reads the manifest
-   the capability was minted against. A capability minted via `manifest_path` against an
-   armed in-repo file still executes while the canonical manifest is disarmed. Activation
-   must pin execute-time authority to the canonical manifest and remove the
-   `manifest_path` test seam (the armed fixture under
-   `scripts/tailered-os/fixtures/` exists only so vitest can exercise the armed path).
-3. **Test seam = authority source.** While `manifest_path` exists, any in-repo manifest
-   under `config/` or `scripts/tailered-os/fixtures/` can grant authority to a caller that
-   explicitly names it.
-4. **Six mutants survived** the round-3 mutation check — the execute-time authority
-   re-read, the TTL, the realpath rule, `target.page_id` derivation, the undo capability
-   binding, and the human `deploy_consequence_recorded` row all lack a test that fails
-   when the fix is deleted.
-5. **`Verified` is reachable on an unfetched URL** (see above).
+Human authority is also bound to its **subject**, not merely to a human. A fact answers
+"did an allowed human do this?" — the evidence must be about the pull request this task
+recorded, and an unblock comment must name the task. Round 2's first build failed this:
+a genuine approval and merge of an unrelated PR drove an unrelated task to `Approval` and
+then `Merged`, and a months-old comment about a CVE authorized an unblock (R2-02,
+CRITICAL, independent verification).
+
+Scope confinement is verified against **the record the transport returns**, before any
+byte moves — not against the caller's snapshot. The first build checked the data source,
+the `TOS-*` scope and the project against caller-supplied fields and only fetched the page
+*after* writing, so the four allowlisted properties could be written to any page the
+connector could reach, including the canonical Decisions database (R2-04/A9, CRITICAL).
+
+`post_merge_verified` (→ `Verified`) is machine authority by design, but the proof is now
+**fetched**: `evidence_ref` must be a GitHub run, PR or commit URL that resolves, whose
+object exists, concluded successfully, and is about the expected commit. An unresolvable
+or non-GitHub URL refuses rather than being taken at face value.
+
+## The owner grant is only as good as its reviewed merge
+
+`safety.notionWriteOperationsAuthorized: true` is JSON the machine can edit, so the grant
+text is not the authority. `safety.notionWriteAuthorization.activationPullRequest` pins
+the PR whose reviewed merge introduced the grant, and on **every** authorization the
+adapter proves: that PR is merged; an allowed human approved it at its final head; that
+human is not the author; the merge commit is an ancestor of the running tree; and the
+manifest bytes at that merge commit are IDENTICAL to **the bytes this process loaded** —
+and that the manifest merged by that PR actually armed authority and carries this exact
+grant, naming that same PR.
+
+Read that carefully, because the first Round-2 build got it wrong in a way that mattered:
+it compared `git show HEAD:` against `git cat-file <merge>:` — two committed blobs,
+neither of which is the working-tree file the loader obeys. An **uncommitted** one-line
+edit therefore armed the writer while both blobs agreed it was disarmed (adversarial
+finding A1, CRITICAL, independently reproduced). It also compared the blobs only to each
+other, so two copies of `{}` authenticated (A2, CRITICAL).
+
+Consequence, now actually delivered: the writer cannot be armed by editing a file, staged
+or not. It can only be armed by a merge that passed branch protection and that introduced
+this exact grant, and it disarms itself if the file is touched afterwards.
+
+## Authority has no caller seam
+
+There is no `manifest_path` option, and no transport option. `authorizeWrite` resolves the
+canonical manifest from a path derived from the module's own location, so cwd cannot move
+it, no environment variable is read, and a symlink has nothing to redirect. The option
+surface is closed: an unknown key is a VISIBLE refusal rather than a silent ignore,
+because a silently-dropped option is how a seam comes back unnoticed. Tests reach armed
+and disarmed states by mocking the manifest loader module and `node:child_process` —
+dependency injection strictly below the authority boundary, with no production
+equivalent.
+
+## Round 1 items, and where they stand
+
+| Round 1 entry-bar item | Round 2 |
+| --- | --- |
+| 1. Bind human authority to something a machine cannot mint | `authority.mjs` derives it from an authenticated GitHub fetch; identity comes from the forge |
+| 2. Pin execute-time authority to the canonical manifest, remove the `manifest_path` seam | seam deleted; `executeMutation` re-reads the canonical manifest AND requires the same grant fingerprint |
+| 3. Kill the six surviving mutants | `scripts/tailered-os/mutation-check.mjs` — 14 mutants, 0 survivors, 1 declared equivalent with proof |
+| 4. Re-qualify live against the build that will actually merge | see the activation PR's evidence record |
+| 5. Pass an independent verification | see the activation PR |
+
+## Residual weaknesses (read before trusting any of the above)
+
+0. **Two independent reviews of the first Round-2 build returned FAIL** (2026-08-11), with
+   four CRITICAL findings between them. Everything above describes the state AFTER those
+   were remediated — but the remediation has NOT itself been independently verified as of
+   this revision, and the writer stays disarmed until it is. Treat the guarantees above as
+   claims with tests behind them, not as an audited result.
+1. **Same-process integrity is assumed.** The adapter is unforgeable *through its calling
+   surface*: a look-alike object is not a fact, because authenticity is WeakMap membership.
+   It is not proof against code that can patch the module graph or replace `execFileSync`
+   — at which point the attacker is already executing arbitrary code in this process and
+   every in-process control is moot. This is the standard boundary of an in-process
+   policy layer, stated rather than papered over.
+2. **The reviewer allowlist is the crown jewel.** `ALLOWED_HUMAN_REVIEWERS` in
+   `authority.mjs` is one line; adding a login there is equivalent to granting human
+   authority. It is protected by code review and nothing else.
+3. **Notion-only human decisions cannot be authenticated** (above). Unblocks must be
+   evidenced by an authored GitHub comment.
+4. **The connector credential is broader than the allowlist.** Property-level enforcement
+   is in-process policy; the governed Notion connector could write anything. The
+   allowlist constrains this writer, not the credential.
+5. **NEW3-OG6-0030 and NEW3-OG6-0031 have unrecoverable substance.** Round 3 named them
+   only inside a range expression; no commit, comment, test or report describes what they
+   were. They are carried as UNKNOWN rather than closed.
 
 ## Determinism / replay
 
@@ -174,9 +253,8 @@ no second record.
 
 Tests: `scripts/tailered-os/lifecycle.test.ts` (21-test §36/§37 battery — every failure
 class proven to fire) + `scripts/tailered-os/lifecycle-writer.test.ts` (OG-006
-writer battery, 51 tests as of this revision — every pre-write gate, transport failure class, partial-write freeze,
-and authority spoof proven to refuse, plus twelve regressions from two independent
-adversarial rounds: deep-frozen capability, trust-boundary re-validation, own-property
-allowlist lookup, on-disk authority, unforgeable capabilities, single-read write maps,
-undo binding, cycle-safe freezing, symbol rejection, empty-select restoration, and a
-freshness bound the caller cannot widen).
+writer battery, 65 tests — every pre-write gate, transport failure class, partial-write freeze,
+and authority spoof proven to refuse) + `scripts/tailered-os/authority.test.ts` (44-test
+adapter battery — every identity, freshness, substitution and forgery attack proven to
+refuse). Run `node scripts/tailered-os/mutation-check.mjs` to re-prove that the
+load-bearing controls are load-bearing; it exits non-zero on any survivor.
