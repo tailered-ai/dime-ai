@@ -8,6 +8,10 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   HISTORICAL_V1_RUNS,
+  MEMORY_MUTATING_TYPES,
+  deriveArtifacts,
+  deriveInteractionGraph,
+  deriveProgress,
   loadManifest,
   readEvents,
   resolveProofRef,
@@ -317,6 +321,92 @@ export function closeout(runId) {
       `${metrics.notion_writes_committed - metrics.notion_writes_verified} Notion write(s) committed without a recorded re-read verification`
     );
   }
+  // §13: no stale-dependent anything may integrate or deploy — a run cannot
+  // COMPLETE while any registered artifact sits in STALE-DEPENDENCY without an
+  // explicit revalidation citing the new upstream identity.
+  const artifactManifest = deriveArtifacts(runId);
+  if (artifactManifest.stale.length > 0) {
+    blockers.push(
+      `stale-dependency artifact(s) never revalidated: ${artifactManifest.stale.map(a => `${a.id} (upstream ${a.cause?.upstream} via ${a.cause?.via})`).join("; ")} (§13)`
+    );
+  }
+  if (artifactManifest.ephemeral_unretired.length > 0) {
+    blockers.push(
+      `ephemeral artifact(s) not RETIRED before closeout: ${artifactManifest.ephemeral_unretired.join(", ")} (§6 removal condition)`
+    );
+  }
+  // Refutation R7: the manifest must not repeat fabrications — offline-
+  // checkable bytes are checked, and mismatches block.
+  if (artifactManifest.fidelity_defects.length > 0) {
+    blockers.push(
+      `artifact-manifest fidelity defect(s): ${artifactManifest.fidelity_defects.join("; ")}`
+    );
+  }
+  // Refutation R8: work consumed while stale is poisoned until the SAME scope
+  // re-consumes the artifact after revalidation — recorded-but-toothless is
+  // not a control.
+  const unclearedStaleConsumptions = artifactManifest.stale_consumptions.filter(
+    poisoned => {
+      const artifact = artifactManifest.artifacts.find(
+        a => a.id === poisoned.artifact
+      );
+      return !(artifact?.consumers ?? []).some(
+        c =>
+          c.scope === poisoned.scope &&
+          !c.while_stale &&
+          c.event > poisoned.event
+      );
+    }
+  );
+  if (unclearedStaleConsumptions.length > 0) {
+    blockers.push(
+      `stale consumption(s) never repeated on fresh bytes: ${unclearedStaleConsumptions.map(c => `${c.artifact} by ${c.scope} at ${c.event}`).join("; ")} (§13: no stale-dependent work integrates)`
+    );
+  }
+  // §16: every integration boundary evaluated must END at NO_GAP — a gap
+  // clears only through a later re-evaluation of the SAME integration_id.
+  const compositionState = new Map();
+  for (const event of events) {
+    if (event.event_type === "COMPOSITION_EVALUATED")
+      compositionState.set(event.integration_id, event.composition_verdict);
+  }
+  const openGaps = [...compositionState.entries()].filter(
+    ([, verdict]) => verdict !== "NO_GAP"
+  );
+  if (openGaps.length > 0) {
+    blockers.push(
+      `composition gap(s) not closed: ${openGaps.map(([id, verdict]) => `${id}=${verdict}`).join(", ")} — individually green components do not certify the composed system (§16)`
+    );
+  }
+  // Refutation R5: an unevaluated boundary is invisible to the latest-verdict
+  // rule, so the manifest may DECLARE the boundaries that objectively exist —
+  // each then requires a terminal NO_GAP, mirroring required_gates.
+  const unevaluatedCompositions = (manifest.required_compositions ?? []).filter(
+    id => compositionState.get(id) !== "NO_GAP"
+  );
+  if (unevaluatedCompositions.length > 0) {
+    blockers.push(
+      `required composition boundaries without a terminal NO_GAP: ${unevaluatedCompositions.join(", ")} (§16)`
+    );
+  }
+  // §47: if this run mutated execution memory, the LAST mutation must be
+  // followed by a MEMORY_RECONCILED clean:true — reconcile-then-mutate-again
+  // does not count.
+  const lastMutationIndex = events.reduce(
+    (latest, event, index) =>
+      MEMORY_MUTATING_TYPES.includes(event.event_type) ? index : latest,
+    -1
+  );
+  if (lastMutationIndex >= 0) {
+    const reconciledAfter = events
+      .slice(lastMutationIndex + 1)
+      .some(e => e.event_type === "MEMORY_RECONCILED" && e.clean === true);
+    if (!reconciledAfter) {
+      blockers.push(
+        `execution memory mutated after the last clean MEMORY_RECONCILED (last mutation: ${events[lastMutationIndex].event_id}) — run memory reconciliation before closeout (§47)`
+      );
+    }
+  }
   const terminalRunEvent = events.some(e =>
     ["RUN_COMPLETED", "RUN_FAILED", "RUN_PAUSED_EXTERNAL"].includes(
       e.event_type
@@ -393,6 +483,67 @@ export function closeout(runId) {
     interventions: events
       .filter(e => e.event_type === "INTERVENTION")
       .map(e => ({ choice: e.intervention, summary: e.summary })),
+    // §5-§7: the derived Artifact Manifest summary — never hand-counted.
+    artifacts: {
+      total: artifactManifest.artifacts_total,
+      by_state: artifactManifest.by_state,
+      stale: artifactManifest.stale,
+      stale_consumptions: artifactManifest.stale_consumptions,
+    },
+    // §16: final composition verdicts per integration boundary.
+    composition: Object.fromEntries(compositionState),
+    // §14: derived multi-resource conflicts beyond the write-scope equality.
+    resource_conflicts: deriveInteractionGraph(runId).potential_conflicts,
+    // §10-§11: derived progress verdict (stream-derived; honest boundary in
+    // the README — reported facts, not raw behavior).
+    progress: (() => {
+      const p = deriveProgress(runId);
+      return {
+        loop_candidates: p.loop_candidates.length,
+        stall_breached: p.stall_breached,
+        stall_suspected_recorded: p.stall_suspected_recorded,
+        interventions_recorded: p.interventions_recorded,
+      };
+    })(),
+  };
+  // §24: owner-gate census by state AND classification with exact ids — no
+  // future reader reconstructs counts from prose. Latest event per gate wins.
+  const gateCensus = new Map();
+  for (const event of events) {
+    if (event.event_type?.startsWith("OWNER_GATE_")) {
+      const prior = gateCensus.get(event.owner_gate.id);
+      gateCensus.set(event.owner_gate.id, {
+        state: event.owner_gate.state,
+        classification:
+          event.owner_gate.classification ?? prior?.classification ?? null,
+      });
+    }
+  }
+  const gateIdsWhere = predicate =>
+    [...gateCensus.entries()]
+      .filter(([, gate]) => predicate(gate))
+      .map(([id]) => id)
+      .sort();
+  const ownerGateCensus = {
+    RUN_BLOCKING: gateIdsWhere(
+      g => g.state === "OPEN" && g.classification === "RUN_BLOCKING"
+    ),
+    PROGRAM_OPEN: gateIdsWhere(
+      g => g.state === "OPEN" && g.classification === "PROGRAM_OPEN"
+    ),
+    SEQUENCED: gateIdsWhere(
+      g => g.state === "OPEN" && g.classification === "SEQUENCED"
+    ),
+    STANDING: gateIdsWhere(
+      g => g.state === "OPEN" && g.classification === "STANDING"
+    ),
+    OPEN_UNCLASSIFIED: gateIdsWhere(
+      g => g.state === "OPEN" && g.classification === null
+    ),
+    RESOLVED: gateIdsWhere(g => g.state === "ANSWERED"),
+    SUPERSEDED: gateIdsWhere(g => g.state === "SUPERSEDED"),
+    CANCELLED: gateIdsWhere(g => g.state === "CANCELLED"),
+    TOTAL_MINTED: [...gateCensus.keys()].sort(),
   };
   // Law 12: denominators emitted, never prosed.
   const requiredTos = requiredScopes.length;
@@ -402,6 +553,9 @@ export function closeout(runId) {
     gstack_accounted_of_required: `${manifest.required_gstack.length - unaccountedGstack.length} of ${manifest.required_gstack.length}`,
     owner_gates_open: metrics.owner_gates_open,
     findings_open_of_total: `${metrics.findings_open} of ${metrics.findings_total}`,
+    artifacts_stale_of_total: `${artifactManifest.stale.length} of ${artifactManifest.artifacts_total}`,
+    composition_no_gap_of_evaluated: `${[...compositionState.values()].filter(v => v === "NO_GAP").length} of ${compositionState.size}`,
+    owner_gate_census: ownerGateCensus,
   };
   return {
     run_id: runId,

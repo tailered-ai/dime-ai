@@ -159,3 +159,92 @@ derive progress-truth from raw agent behavior. Specifically:
 The honest one-line guarantee: *"machine-verified structure, chain integrity, and
 existence-checked non-URL proofs for what the orchestrator reports"* — not "machine-verified
 progress-truth."
+
+## Envelope contract v4 (Campaign Four: universal execution memory)
+
+Appends stamp `schema_version: 4`; v1/v2/v3 events in historical runs keep their original
+rules (backward verification against all three prior campaign runs is a hard requirement,
+tested). v4 adds, enforced at append/verify/closeout:
+
+- **Artifact Manifest is derived, never hand-maintained.** `ledger.mjs artifacts <run_id>`
+  folds the artifact lifecycle events into the registry: every artifact carries a stable
+  `ART-<slug>` identity, canonical `uri`, `artifact_type`, and a `storage_class` from the
+  §8 hierarchy (`committed` = in-repo, `external` = out-of-git run artifacts, `canonical` =
+  Notion/GitHub-resident, `generated` = derived, `ephemeral` = scratch that must be RETIRED
+  before closeout). Registration is once-per-identity; lifecycle events on unregistered ids,
+  consumption after retirement, and supersession by an unregistered successor are verify
+  violations.
+- **§13 dependency invalidation cascade.** `depends_on` records upstream inputs by identity
+  (`ART-` ids or `ext:`-prefixed external identities). A content-hash change, supersession,
+  retirement, or explicit `DEPENDENCY_INVALIDATED` marks every transitive consumer
+  STALE-DEPENDENCY. Staleness clears ONLY through `DEPENDENCY_REVALIDATED` citing the NEW
+  upstream identity — per consumer, no transitive forgiveness. Any stale artifact at
+  closeout blocks COMPLETE.
+- **§47 memory reconciliation gate.** `MEMORY_RECONCILED` carries `clean: true|false`; a
+  `clean:true` is re-derived against the registry at that point in the stream (false
+  cleanliness is a verify violation), and closeout requires the LAST memory-mutating event
+  to be followed by a clean reconcile.
+- **§16 composition gap.** `COMPOSITION_EVALUATED` names an `integration_id`, its
+  `components`, and one of the nine controlled verdicts (`NO_GAP` … `UNKNOWN_GAP`). Any
+  boundary whose latest verdict is not `NO_GAP` blocks COMPLETE — individually green
+  components never certify the composed system.
+- **§14 interaction graph.** `ledger.mjs graph <run_id>` derives the multi-resource graph
+  (scopes, agents, PRs, commits, artifacts, owner gates, declared write-resources; typed
+  edges: produces/consumes/depends_on/writes/owns/supersedes/blocks/verified_by/deployed_as/
+  invalidates/potential_conflict). String-identity equality still cannot see aliased paths —
+  a self-reported CONFLICT remains the fallback for those.
+- **§10-§11 derived progress.** `ledger.mjs progress <run_id>` classifies the REPORTED
+  stream: dispatches are not progress, results/verifications are; repeated identical action
+  signatures with no interleaved progress become loop candidates against the manifest's
+  declared thresholds, and consecutive non-progress streaks are measured against
+  `stall_threshold_actions_without_new_evidence`. Honest boundary unchanged in kind: this
+  observes what the orchestrator reports, not raw agent behavior — it upgrades stall/loop
+  detection from purely self-reported to stream-derived, and no further.
+- **§24 owner-gate census.** Owner gates may carry a `classification`
+  (`RUN_BLOCKING`/`PROGRAM_OPEN`/`SEQUENCED`/`STANDING`); closeout emits the census by state
+  and class with exact gate ids under `denominators.owner_gate_census`.
+
+`scripts/one-shot/memory.test.ts` proves each of these controls can fail (45-test battery
+alongside the ledger/closeout suites).
+
+### v4.1 (refutation-driven hardening)
+
+A standing refutation agent reproduced six laundering paths against the v4 memory layer;
+v4.1 closes them:
+
+- **Authenticated revalidation (R1).** `DEPENDENCY_REVALIDATED` clears staleness only when
+  its cited `upstream_identity` is rooted in the upstream recorded in the artifact's
+  structured `stale_cause` AND differs from the dead identity. Revalidating a non-stale
+  artifact is refused.
+- **Invalidation has memory (R2).** Registering an artifact whose `depends_on` names an
+  already-invalidated identity — or a currently stale/superseded/retired artifact — starts
+  life STALE.
+- **Fail-closed change cascade (R3).** An `ARTIFACT_UPDATED` invalidates consumers UNLESS
+  both old and new `content_hash` are present and equal — omitting hashes is no longer an
+  opt-out.
+- **Refuse-before-record (review F4/F5).** Memory-contract violations (unregistered
+  references, double registration, consume-after-retire, update-after-terminal,
+  supersede-before-successor, unauthenticated revalidation, false `clean:true`) are refused
+  at APPEND — they never enter the append-only chain, where they would block verify forever.
+  verify re-derives the same rules purely as tamper evidence against hand-edited files.
+  Consequence: register a successor BEFORE superseding into it.
+- **Evidence-backed composition (R4).** Every `COMPOSITION_EVALUATED` must attach evidence —
+  a bare `NO_GAP` cannot launder a prior gap. Manifests may declare
+  `required_compositions`: each listed boundary must reach a terminal `NO_GAP` (R5's
+  bypass-by-omission stays real for UNdeclared boundaries — that is now an explicit
+  boundary, not an implication of safety).
+- **Manifest fidelity (R7).** Where bytes are offline-checkable the kernel checks them at
+  closeout: committed-class URIs must exist inside the repo; external URIs resolving inside
+  the run directory must exist; sha256-shaped `content_hash` declarations must match the
+  actual bytes; live artifacts must not share a URI. URIs outside both roots and
+  non-sha256 hash formats remain a trust boundary.
+- **Poisoned consumption blocks (R8).** A consumption recorded `while_stale` blocks
+  COMPLETE until the SAME scope re-consumes the artifact after revalidation.
+- **Progress-wash resistance (R6, partial).** Context/plan/read-class events count as
+  progress only on their FIRST occurrence per (type, scope); repeats no longer reset the
+  stall clock or shield loops. Residual honest boundary: an agent that fabricates varied
+  STRONG-class events (e.g. artifact updates, which now at least trigger cascades) can
+  still wash the derived detector — stream-derived detection bounds, but does not replace,
+  orchestrator duty and human review.
+- **Forged-version refusal (review F7).** Memory-typed events stamped `schema_version < 4`
+  are refused as definitionally forged (the vocabulary did not exist earlier).
