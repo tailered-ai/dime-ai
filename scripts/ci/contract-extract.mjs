@@ -531,6 +531,12 @@ export function buildChecks(census, root) {
   const checks = [];
   for (const entry of census.per_file) {
     const rawSource = readFileSync(path.join(root, entry.file), "utf8");
+    // GHA's env cascade is workflow ∪ job ∪ step (later layer wins). The
+    // contract's per-check `env` must therefore fold the workflow-level env:
+    // block under the job's — capturing only job?.env dropped
+    // EXPECTED_CLOUDFLARE_OS_PIN and turned a correct submodule pin into a
+    // detector FAIL (DEF-058).
+    const workflowEnv = entry.doc?.env ?? null;
     for (const [jobId, job] of Object.entries(entry.jobs)) {
       const jobSource = JSON.stringify(job);
       const contextName = job?.name ?? jobId;
@@ -559,7 +565,10 @@ export function buildChecks(census, root) {
         timeout_minutes: job?.["timeout-minutes"] ?? null,
         permissions: job?.permissions ?? null,
         environment: job?.environment ?? null,
-        env: job?.env ?? null,
+        env:
+          workflowEnv || job?.env
+            ? { ...(workflowEnv ?? {}), ...(job?.env ?? {}) }
+            : null,
         defaults: job?.defaults ?? null,
         services: job?.services ?? null,
         strategy: job?.strategy ?? null,

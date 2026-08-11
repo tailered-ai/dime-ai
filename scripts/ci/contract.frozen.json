@@ -857,7 +857,9 @@
         "contents": "read"
       },
       "environment": null,
-      "env": null,
+      "env": {
+        "SEMGREP_VERSION": "1.172.0"
+      },
       "defaults": null,
       "services": null,
       "strategy": null,
@@ -921,7 +923,9 @@
         "contents": "read"
       },
       "environment": null,
-      "env": null,
+      "env": {
+        "SEMGREP_VERSION": "1.172.0"
+      },
       "defaults": null,
       "services": null,
       "strategy": null,
@@ -990,7 +994,9 @@
         "security-events": "write"
       },
       "environment": null,
-      "env": null,
+      "env": {
+        "ZIZMOR_VERSION": "1.29.0"
+      },
       "defaults": null,
       "services": null,
       "strategy": null,
@@ -5372,7 +5378,9 @@
       "timeout_minutes": null,
       "permissions": null,
       "environment": null,
-      "env": null,
+      "env": {
+        "EXPECTED_CLOUDFLARE_OS_PIN": "b2a51b5426398c8353d9d4dd984bd525121ab5f2"
+      },
       "defaults": {
         "run": {
           "working-directory": "platform/tailered-os"

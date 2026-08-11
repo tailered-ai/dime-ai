@@ -398,6 +398,147 @@
       ],
       "phase": "P05",
       "recorded_at": "2026-08-10T14:03:07.890Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — Blocking IDs: DEF-031, DEF-032, DEF-033",
+      "evidence": [
+        {
+          "bytes": 3668,
+          "path": "docs/verification/evidence/p06/CP01-checkpoint.md",
+          "sha256": "cc14465b43fad8ff73ece8b52ac4872faaded920b1f44818d1ee2d54df4cd792"
+        },
+        {
+          "bytes": 3112,
+          "path": "docs/verification/evidence/p06/T01-scope.txt",
+          "sha256": "190c484a3703f1476eeb269d43a444a1077aabd8ab6cb2c3cfc8c92207831240"
+        },
+        {
+          "bytes": 2264,
+          "path": "docs/verification/evidence/p06/T02-T12-gate-execution.txt",
+          "sha256": "ae0d6be4ea276553a74bdb0c457f3e42b5ccd5b0160663ef34fe18468b6bac89"
+        }
+      ],
+      "phase": "P06",
+      "recorded_at": "2026-08-10T14:22:28.227Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — Blocking IDs: DEF-034",
+      "evidence": [
+        {
+          "bytes": 2457,
+          "path": "docs/verification/evidence/p07/CP01-checkpoint.md",
+          "sha256": "f388f46ae9f9553d8c3d9925e54648f5a5a4ae67c07c65da5d953f061757ed3d"
+        },
+        {
+          "bytes": 914,
+          "path": "docs/verification/evidence/p07/T01-db-blocker.txt",
+          "sha256": "9f5ddae08867515282ab9df1db1cee91e9012ea56ae5020fd79e33d4219ea03c"
+        }
+      ],
+      "phase": "P07",
+      "recorded_at": "2026-08-10T14:22:28.288Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — Blocking IDs: DEF-031, DEF-032, DEF-033",
+      "evidence": [
+        {
+          "bytes": 4529,
+          "path": "docs/verification/evidence/p06/CP02-checkpoint.md",
+          "sha256": "0f8dca748667d09a1d0e20c4cec96481d34054de0083cd63372319dc2b22a7dc"
+        },
+        {
+          "bytes": 7518,
+          "path": "docs/verification/evidence/p06/T01-boundary-classification.json",
+          "sha256": "4dded656ac556819f2846d2c33fe7f631eda32d58606a3232284de70bd90ffa2"
+        },
+        {
+          "bytes": 1734,
+          "path": "docs/verification/evidence/p06/T01-boundary-classification.txt",
+          "sha256": "abc590181a04af1efcbe0f391c96a30b7964fa0a9725a33a5e6732ed82ad2005"
+        }
+      ],
+      "phase": "P06",
+      "recorded_at": "2026-08-10T14:34:03.422Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — Blocking IDs: DEF-034",
+      "evidence": [
+        {
+          "bytes": 1717,
+          "path": "docs/verification/evidence/p07/CP02-checkpoint.md",
+          "sha256": "2b7514164ab6e6ba153f389441f5d0847629c4bd9243df5e081be844ad1fa48f"
+        },
+        {
+          "bytes": 914,
+          "path": "docs/verification/evidence/p07/T01-db-blocker.txt",
+          "sha256": "9f5ddae08867515282ab9df1db1cee91e9012ea56ae5020fd79e33d4219ea03c"
+        }
+      ],
+      "phase": "P07",
+      "recorded_at": "2026-08-10T14:34:03.488Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — blocking: DEF-047 (mandatory #proof gate intermittent on this host; ASSURANCE coverage 5/6, #proof UNPROVEN because a proof requires a green control leg)",
+      "evidence": [
+        {
+          "bytes": 9474,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2b5c209dd15e6920573f4439ee49621737253a32f6beba87a38d1a66d475c0de"
+        },
+        {
+          "bytes": 3691,
+          "path": "docs/verification/evidence/p06/T13-nonlocal-audit.md",
+          "sha256": "eb7ea91ec878483b8d024b713c6cea706749fb875e47cba24752c4b5d35eb9a1"
+        },
+        {
+          "bytes": 3888,
+          "path": "docs/verification/evidence/p06/action-sources/DERIVATION.md",
+          "sha256": "4ed0818286bcb3bdd9a26a0a4155f7922cede17301553bec83aa444a3a83ec8e"
+        }
+      ],
+      "phase": "P06",
+      "recorded_at": "2026-08-10T18:37:18.002Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — blocking: DEF-047 (shared test-surface instability prevents asserting zero_flaky_mandatory). DB parity itself PROVEN: digest-bound mysql 8.4.11, migration replay to 0134, 10 files/92 tests, zero residue; DEF-034 CLOSED",
+      "evidence": [
+        {
+          "bytes": 4991,
+          "path": "docs/verification/evidence/p07/CP03-checkpoint.md",
+          "sha256": "f01e7bf16e52e5e9acd348469b2252122b19cffbb9fb4a5f88e8c707bab43263"
+        },
+        {
+          "bytes": 3069,
+          "path": "docs/verification/evidence/p07/T02-db-parity.md",
+          "sha256": "e688f054502df5be498a694383325118f99085e4498c2f57715574518336b838"
+        }
+      ],
+      "phase": "P07",
+      "recorded_at": "2026-08-10T18:37:18.174Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — blocking: DEF-050 (no candidate: origin/main advanced to 29a4a97e and conflicts on pnpm-lock.yaml), DEF-047 (root cause established and remediated via DEF-049, but the 5-run determinism campaign requires the blocked candidate)",
+      "evidence": [
+        {
+          "bytes": 7949,
+          "path": "docs/verification/evidence/p06/CP04-checkpoint.md",
+          "sha256": "71abf520c025414192f9f39835edaa43ecf12f3e2ec06dc2b36fb36c817c4981"
+        }
+      ],
+      "phase": "P06",
+      "recorded_at": "2026-08-10T19:28:40.157Z"
+    },
+    {
+      "decision": "DO NOT PROCEED — blocking: DEF-050, DEF-047. DB parity evidence is real but now stale-based: it binds to 7fa4b3fe and origin/main has moved to 29a4a97e",
+      "evidence": [
+        {
+          "bytes": 3520,
+          "path": "docs/verification/evidence/p07/CP04-checkpoint.md",
+          "sha256": "9d23daccdf9b90be8e046bec93b248ae8809f91eff2ba9f3681c67c72c0e4592"
+        }
+      ],
+      "phase": "P07",
+      "recorded_at": "2026-08-10T19:28:40.241Z"
     }
   ],
   "decisions": [
@@ -2079,6 +2220,1281 @@
       "severity": "HIGH",
       "status": "CLOSED",
       "title": "Authorized main integration cannot land on the branch: four unrelated UNCOMMITTED developer paths (.gitignore, .claude/settings.json, CLAUDE.md, .claude/scripts/bootstrap-gstack.sh) collide with the incoming merge, and git refuses; resolving requires committing, stashing, or removing developer work, which section 1 forbids"
+    },
+    {
+      "affected_gate": "P06.T03",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:31:27.265Z",
+      "corrective_action": "boundary.mjs classifies every contract step PROVISIONING vs DETECTOR; the step driver returns a distinct exit code per class (10 provisioning, 11 mixed, 12 no-detector, 20 detector); liftVerdict maps provisioning failure to BLOCKED/INFRA_FAIL via provisioningOutcome and can never emit FAIL for it. WIRED into runOneGate(), the single execution path used by both the roster and ASSURANCE",
+      "detected_by": "P06.T02",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T14:33:20.034Z",
+          "flags": {
+            "corrective_action": "boundary.mjs adds PROVISIONING_PATTERNS + provisioningOutcome(), mapping privilege-escalation to BLOCKED(PROVISIONING_REQUIRES_PRIVILEGE) and download/other provisioning failure to INFRA_FAIL - never a detector FAIL",
+            "evidence": [],
+            "retest_result": "classification separates provisioning from detector steps for all 16 P06 gates. NOT yet closed: provisioningOutcome is not yet wired into the executing runner.",
+            "root_cause": "the runner executed contract provisioning steps (sudo-based tool install, curl download) and interpreted their failure as a detector verdict; ci.yml#security-audit reported FAIL on 'sudo: a terminal is required' AFTER its real checks had passed, and full-osv reported FAIL on a curl write error"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:31:26.921Z",
+          "flags": {
+            "corrective_action": "boundary.mjs classifies every contract step PROVISIONING vs DETECTOR; the step driver returns a distinct exit code per class (10 provisioning, 11 mixed, 12 no-detector, 20 detector); liftVerdict maps provisioning failure to BLOCKED/INFRA_FAIL via provisioningOutcome and can never emit FAIL for it. WIRED into runOneGate(), the single execution path used by both the roster and ASSURANCE",
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ],
+            "regression_test_id": "P06.DRV05, DRV06, DRV07, DRV08, DRV09, DRV14; P06.LIFT01-08",
+            "retest_result": "ci.yml#security-audit, previously FAIL on 'sudo: a terminal is required' AFTER its real checks passed, now PASS on the wired runner. full-osv's curl provisioning is satisfied by the governed osv-scanner 2.2.4 and its detector now executes, returning a genuine finding that matches CI"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:31:27.263Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-031",
+      "opened_at": "2026-08-10T14:21:26.502Z",
+      "regression_test_id": "P06.DRV05, DRV06, DRV07, DRV08, DRV09, DRV14; P06.LIFT01-08",
+      "retest_result": "ci.yml#security-audit, previously FAIL on 'sudo: a terminal is required' AFTER its real checks passed, now PASS on the wired runner. full-osv's curl provisioning is satisfied by the governed osv-scanner 2.2.4 and its detector now executes, returning a genuine finding that matches CI",
+      "root_cause": "the runner executed contract provisioning steps (sudo-based tool install, curl download) and interpreted their failure as a detector verdict; ci.yml#security-audit reported FAIL on 'sudo: a terminal is required' AFTER its real checks had passed, and full-osv reported FAIL on a curl write error",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "P06 gate runner executes contract provisioning steps that cannot run non-interactively, producing FAIL that is not a detector verdict: ci.yml#security-audit fails on 'sudo: a terminal is required' AFTER its actual checks passed, and full-osv fails on a curl write error"
+    },
+    {
+      "affected_gate": "P06.T03",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:31:27.466Z",
+      "corrective_action": "classifySteps computes an effective cwd per step (step working-directory, else job defaults.run.working-directory, else candidate root); the driver resolves it, verifies containment by realpath, records cwd_verified in the journal, and liftVerdict voids any PASS/FAIL whose executed steps are not all cwd-verified",
+      "detected_by": "P06.T02",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T14:33:19.963Z",
+          "flags": {
+            "corrective_action": "boundary.mjs classifySteps() now computes an effective_cwd per run-step (step working-directory, else job default, else candidate root) and the classification records it",
+            "evidence": [],
+            "retest_result": "dime-llm-validation#validate now classifies LOCAL with contract cwd ml/dime-1.0 recorded. NOT yet closed: the runner does not yet execute steps at that cwd.",
+            "root_cause": "the P06 runner executed every gate from the candidate root, ignoring the contract's job-level defaults.run.working-directory and any step-level working-directory. The contract DOES capture this: dime-llm-validation#validate carries defaults {run:{working-directory: ml/dime-1.0}}"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:31:27.374Z",
+          "flags": {
+            "corrective_action": "classifySteps computes an effective cwd per step (step working-directory, else job defaults.run.working-directory, else candidate root); the driver resolves it, verifies containment by realpath, records cwd_verified in the journal, and liftVerdict voids any PASS/FAIL whose executed steps are not all cwd-verified",
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ],
+            "regression_test_id": "P06.BND05, BND06; P06.DRV01, DRV02, DRV03, DRV04; P06.LIFT03",
+            "retest_result": "dime-llm-validation#validate now executes in ml/dime-1.0 and no longer reports 'No pyproject.toml'. Its current FAIL is the repository's own pre-existing evidence-chain drift, measured identical on a clean origin/main worktree"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:31:27.465Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-032",
+      "opened_at": "2026-08-10T14:21:26.579Z",
+      "regression_test_id": "P06.BND05, BND06; P06.DRV01, DRV02, DRV03, DRV04; P06.LIFT03",
+      "retest_result": "dime-llm-validation#validate now executes in ml/dime-1.0 and no longer reports 'No pyproject.toml'. Its current FAIL is the repository's own pre-existing evidence-chain drift, measured identical on a clean origin/main worktree",
+      "root_cause": "the P06 runner executed every gate from the candidate root, ignoring the contract's job-level defaults.run.working-directory and any step-level working-directory. The contract DOES capture this: dime-llm-validation#validate carries defaults {run:{working-directory: ml/dime-1.0}}",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "P06 gate runner ignores contract working-directory: dime-llm-validation#validate fails with 'No pyproject.toml found' because it runs from the worktree root instead of its declared ml/dime-1.0 cwd"
+    },
+    {
+      "affected_gate": "P06.T01",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:31:27.733Z",
+      "corrective_action": "provisionCandidate() physically performs the contract's own install inside the disposable candidate before any detector runs, and its result is the AUTHORITY on node-deps satisfaction; secret dependence is derived from the contract rather than assumed, so only gitleaks.yml#gitleaks is SECRET_BOUND; the hard invariant in liftVerdict makes a detector verdict impossible unless the journal proves the detector validly began",
+      "detected_by": "P06.T02",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T14:33:19.903Z",
+          "flags": {
+            "corrective_action": "built scripts/ci/p06/boundary.mjs: an execution-boundary model that separates PROVISIONING from DETECTOR steps, computes contract-effective cwd, derives secret dependence from the contract rather than assumption, and requires provisioning satisfaction to be PROVEN (node-deps via a lockfile-consistent frozen install, playwright via cached browsers, uv via a present toolchain) instead of assumed in either direction",
+            "evidence": [],
+            "retest_result": "classification now: 7 LOCAL, 5 LOCAL+TOOL, 2 RUNTIME_UNAVAILABLE, 1 ACTION_SEMANTICS_UNREPRODUCED, 1 SECRET_BOUND; of 7 required gates 6 are locally executable and only gitleaks is nonlocal. NOT yet closed: the model is not wired into the executing runner and the gates have not been re-run under it.",
+            "root_cause": "CORRECTED DIAGNOSIS. My original record said these jobs were 'secret-bound'; that was wrong and is retained in history. Measured against the contract, 01-pr-proof-contract#proof and ci.yml#test contain ZERO secrets.* references, and ci.yml states pull-request CI is 'intentionally secretless' - credential probes are SKIPPED and declared in vitest.environment-failure-allowlist.json, whose 64 entries exactly match the environmentBound=64 the gate reported. The real cause was that the runner skipped the job's own provisioning (pnpm install --frozen-lockfile, playwright install) inside a disposable candidate, so the detector never validly executed and its output was reported as FAIL. Only gitleaks.yml#gitleaks is genuinely SECRET_BOUND (secrets.GITHUB_TOKEN)."
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:31:27.546Z",
+          "flags": {
+            "corrective_action": "provisionCandidate() physically performs the contract's own install inside the disposable candidate before any detector runs, and its result is the AUTHORITY on node-deps satisfaction; secret dependence is derived from the contract rather than assumed, so only gitleaks.yml#gitleaks is SECRET_BOUND; the hard invariant in liftVerdict makes a detector verdict impossible unless the journal proves the detector validly began",
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ],
+            "regression_test_id": "P06.BND03 (zero secrets.* in #proof and ci#test), BND04, BND07; P06.SPEC03 (unproven capability EXECUTES rather than assumes); P06.LIFT01, LIFT02",
+            "retest_result": "01-pr-proof-contract#proof now PASSES on the wired runner (317 files, 5089 tests, environmentBound handled by the repo's own declared allowlist). The false-red path is closed structurally: with provisioning unsatisfied the gate returns INFRA_FAIL/BLOCKED and the detector never runs, which was observed live when an offline install failed — the gate reported INFRA_FAIL, never FAIL"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:31:27.719Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-033",
+      "opened_at": "2026-08-10T14:21:26.642Z",
+      "regression_test_id": "P06.BND03 (zero secrets.* in #proof and ci#test), BND04, BND07; P06.SPEC03 (unproven capability EXECUTES rather than assumes); P06.LIFT01, LIFT02",
+      "retest_result": "01-pr-proof-contract#proof now PASSES on the wired runner (317 files, 5089 tests, environmentBound handled by the repo's own declared allowlist). The false-red path is closed structurally: with provisioning unsatisfied the gate returns INFRA_FAIL/BLOCKED and the detector never runs, which was observed live when an offline install failed — the gate reported INFRA_FAIL, never FAIL",
+      "root_cause": "CORRECTED DIAGNOSIS. My original record said these jobs were 'secret-bound'; that was wrong and is retained in history. Measured against the contract, 01-pr-proof-contract#proof and ci.yml#test contain ZERO secrets.* references, and ci.yml states pull-request CI is 'intentionally secretless' - credential probes are SKIPPED and declared in vitest.environment-failure-allowlist.json, whose 64 entries exactly match the environmentBound=64 the gate reported. The real cause was that the runner skipped the job's own provisioning (pnpm install --frozen-lockfile, playwright install) inside a disposable candidate, so the detector never validly executed and its output was reported as FAIL. Only gitleaks.yml#gitleaks is genuinely SECRET_BOUND (secrets.GITHUB_TOKEN).",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "Secret-bound gates are classified EXECUTABLE by P06 scope derivation: 01-pr-proof-contract#proof runs the full suite and reports FAIL from 80 credential/DB-dependent test failures (64 env-bound by the repo's own env-gate); these gates require GitHub Actions secrets and must be NOT_LOCALLY_EXECUTABLE, never FAIL"
+    },
+    {
+      "affected_gate": "P07.T01",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:31:27.869Z",
+      "corrective_action": "with the daemon authorized and started, P07 resolves mysql:8 to an immutable digest, starts a verifier-owned labelled container on loopback 3306 with the contract's exact env and health command, replays the reconciled migration chain, runs the ten contract-named suites in P04's serial lane, and tears down with docker rm -fv",
+      "detected_by": "P07.T01",
+      "evidence": [
+        {
+          "bytes": 3069,
+          "path": "docs/verification/evidence/p07/T02-db-parity.md",
+          "sha256": "e688f054502df5be498a694383325118f99085e4498c2f57715574518336b838"
+        },
+        {
+          "bytes": 4991,
+          "path": "docs/verification/evidence/p07/CP03-checkpoint.md",
+          "sha256": "f01e7bf16e52e5e9acd348469b2252122b19cffbb9fb4a5f88e8c707bab43263"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:31:27.795Z",
+          "flags": {
+            "corrective_action": "with the daemon authorized and started, P07 resolves mysql:8 to an immutable digest, starts a verifier-owned labelled container on loopback 3306 with the contract's exact env and health command, replays the reconciled migration chain, runs the ten contract-named suites in P04's serial lane, and tears down with docker rm -fv",
+            "evidence": [
+              "docs/verification/evidence/p07/T02-db-parity.md",
+              "docs/verification/evidence/p07/CP03-checkpoint.md"
+            ],
+            "regression_test_id": "P07.NEG05 (lane serialization), NEG10 (occupied port refuses), NEG11 (failed step blocks later steps)",
+            "retest_result": "PASS under the final code: mysql 8.4.11 at digest sha256:b3b90af2…857fd3fb, ready in 10.9s; migration replay reached 0134_widen_unit_probability_precision; 10 test files / 92 tests passed; docker residue new_containers=[] new_volumes=[]",
+            "root_cause": "the Docker daemon was unreachable, so the contract-required mysql:8 service container could not exist; no substitution was permitted and none was made"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:31:27.867Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-034",
+      "opened_at": "2026-08-10T14:21:26.701Z",
+      "regression_test_id": "P07.NEG05 (lane serialization), NEG10 (occupied port refuses), NEG11 (failed step blocks later steps)",
+      "retest_result": "PASS under the final code: mysql 8.4.11 at digest sha256:b3b90af2…857fd3fb, ready in 10.9s; migration replay reached 0134_widen_unit_probability_precision; 10 test files / 92 tests passed; docker residue new_containers=[] new_volumes=[]",
+      "root_cause": "the Docker daemon was unreachable, so the contract-required mysql:8 service container could not exist; no substitution was permitted and none was made",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "P07 DB parity is blocked: ci.yml#db-tests requires a mysql:8 service container and the Docker daemon is unreachable, so no digest-pinned MySQL fixture, migration replay, or DB test execution is possible; faking it is forbidden"
+    },
+    {
+      "affected_gate": "P06.T03",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:32:44.733Z",
+      "corrective_action": "runOneGate builds PATH with path.dirname(process.execPath) ahead of /usr/local/bin, so the measured node-22 that matches the contract pin always wins",
+      "detected_by": "P06.T03 execution",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:55.155Z",
+          "flags": {
+            "corrective_action": "runOneGate builds PATH with path.dirname(process.execPath) ahead of /usr/local/bin, so the measured node-22 that matches the contract pin always wins",
+            "evidence": [],
+            "retest_result": "ci.yml#typecheck PASS on the wired runner (roster v4); previously FAIL at step 5",
+            "root_cause": "the gate PATH placed /usr/local/bin ahead of the orchestrator's own node; the host carries a root-owned node 24.11.1 there while CI's setup-node pins node 22, so every child spawned through a shim resolved v24"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:32:44.401Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ]
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:32:44.731Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-035",
+      "opened_at": "2026-08-10T18:30:55.017Z",
+      "regression_test_id": null,
+      "retest_result": "ci.yml#typecheck PASS on the wired runner (roster v4); previously FAIL at step 5",
+      "root_cause": "the gate PATH placed /usr/local/bin ahead of the orchestrator's own node; the host carries a root-owned node 24.11.1 there while CI's setup-node pins node 22, so every child spawned through a shim resolved v24",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "P06 runner let a stale /usr/local/bin/node v24.11.1 shadow the contract's node-22 pin, so tsx children ran the wrong runtime and ci.yml#typecheck's pi:audit step crashed"
+    },
+    {
+      "affected_gate": "P06.T03",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:32:44.971Z",
+      "corrective_action": "the step driver allocates a short per-invocation /tmp/cv-<10-hex> TMPDIR (unique per driver run, removed on exit) — this is also CI fidelity, since GHA runners use a plain short TMPDIR",
+      "detected_by": "P06.T03 execution",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:55.335Z",
+          "flags": {
+            "corrective_action": "the step driver allocates a short per-invocation /tmp/cv-<10-hex> TMPDIR (unique per driver run, removed on exit) — this is also CI fidelity, since GHA runners use a plain short TMPDIR",
+            "evidence": [],
+            "retest_result": "typecheck's pi:audit step exits 0; isolation preserved (unique dir per driver invocation, removed on exit)",
+            "root_cause": "P04's per-gate TMPDIR nests run id + gate id under .ci-verify/p06/exec/<run>/tmp/<gate>, which exceeds sun_path on darwin; any child creating a unix socket in TMPDIR fails, unrelated to the candidate"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:32:44.827Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ],
+            "retest_result": "ci.yml#typecheck PASS on the wired runner AND p06-typecheck-ts2322 ASSURANCE PROVEN (control PASS -> poison FAIL at step 4 with the exact TS2322 signature -> restore -> control PASS)"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:32:44.970Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-036",
+      "opened_at": "2026-08-10T18:30:55.236Z",
+      "regression_test_id": null,
+      "retest_result": "ci.yml#typecheck PASS on the wired runner AND p06-typecheck-ts2322 ASSURANCE PROVEN (control PASS -> poison FAIL at step 4 with the exact TS2322 signature -> restore -> control PASS)",
+      "root_cause": "P04's per-gate TMPDIR nests run id + gate id under .ci-verify/p06/exec/<run>/tmp/<gate>, which exceeds sun_path on darwin; any child creating a unix socket in TMPDIR fails, unrelated to the candidate",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "executor's gate-isolated TMPDIR path exceeded the 104-byte AF_UNIX sun_path limit, so tsx IPC socket creation failed with EINVAL inside ci.yml#typecheck"
+    },
+    {
+      "affected_gate": "P06.T03",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:32:45.125Z",
+      "corrective_action": "the driver selects GHA_UNDECLARED_SHELL (bash -e, no pipefail) for steps without shell:, and keeps pipefail only where the step declares shell: bash; the chosen mode is recorded per step in the journal",
+      "detected_by": "P06.T03 execution",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:55.515Z",
+          "flags": {
+            "corrective_action": "the driver selects GHA_UNDECLARED_SHELL (bash -e, no pipefail) for steps without shell:, and keeps pipefail only where the step declares shell: bash; the chosen mode is recorded per step in the journal",
+            "evidence": [],
+            "regression_test_id": "P06.DRV15 + P06.DRV16",
+            "retest_result": "09-artifact PASS on roster v4 (previously FAIL at step 9 with '::error::no listen line in logs')",
+            "root_cause": "GitHub runs a run: step with no declared shell: as 'bash -e {0}' WITHOUT pipefail; pipefail belongs only to steps that declare shell: bash. This contract declares a shell on zero steps and its PIPESTATUS discipline is written for those semantics. Under pipefail, grep -q exiting early on a long stream SIGPIPEs the writer and the pipeline reports 141 even though the match succeeded"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:32:45.050Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ]
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:32:45.124Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-037",
+      "opened_at": "2026-08-10T18:30:55.415Z",
+      "regression_test_id": "P06.DRV15 + P06.DRV16",
+      "retest_result": "09-artifact PASS on roster v4 (previously FAIL at step 9 with '::error::no listen line in logs')",
+      "root_cause": "GitHub runs a run: step with no declared shell: as 'bash -e {0}' WITHOUT pipefail; pipefail belongs only to steps that declare shell: bash. This contract declares a shell on zero steps and its PIPESTATUS discipline is written for those semantics. Under pipefail, grep -q exiting early on a long stream SIGPIPEs the writer and the pipeline reports 141 even though the match succeeded",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "step driver ran undeclared-shell contract steps under pipefail, converting a SUCCESSFUL 'docker logs | grep -q' into exit 141 (SIGPIPE) and reporting a false detector FAIL for 09-artifact"
+    },
+    {
+      "affected_gate": "P06.T03",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:32:45.259Z",
+      "corrective_action": "the gate PATH includes GNU tar's gnubin directory, resolving tar to GNU tar 1.35 — the same implementation ubuntu-latest provides",
+      "detected_by": "P06.T03 execution",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:55.704Z",
+          "flags": {
+            "corrective_action": "the gate PATH includes GNU tar's gnubin directory, resolving tar to GNU tar 1.35 — the same implementation ubuntu-latest provides",
+            "evidence": [],
+            "retest_result": "01-pr-proof-contract#proof PASS on roster v4",
+            "root_cause": "ubuntu-latest ships GNU tar; macOS ships bsdtar, which has no --sort. The contract's proof step builds a deterministic archive with 'tar --sort=name --mtime=...', so the step died on an ambient toolchain difference that says nothing about the candidate"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:32:45.184Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ]
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:32:45.257Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-038",
+      "opened_at": "2026-08-10T18:30:55.625Z",
+      "regression_test_id": null,
+      "retest_result": "01-pr-proof-contract#proof PASS on roster v4",
+      "root_cause": "ubuntu-latest ships GNU tar; macOS ships bsdtar, which has no --sort. The contract's proof step builds a deterministic archive with 'tar --sort=name --mtime=...', so the step died on an ambient toolchain difference that says nothing about the candidate",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "bsdtar on the host rejected the proof contract's 'tar --sort=name', producing a false FAIL in 01-pr-proof-contract#proof's digest step"
+    },
+    {
+      "affected_gate": "P06.T03",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:32:45.410Z",
+      "corrective_action": "provisionCandidate() physically runs the contract's own 'pnpm install --frozen-lockfile --ignore-scripts' inside the disposable candidate, and its result is the sole AUTHORITY on node-deps satisfaction; --offline was removed because the contract's command has none and forcing it made provisioning depend on local store contents",
+      "detected_by": "P06.T03 execution",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:55.873Z",
+          "flags": {
+            "corrective_action": "provisionCandidate() physically runs the contract's own 'pnpm install --frozen-lockfile' (offline against the proven-consistent host store, --ignore-scripts for the measured-unconsumed python leg) inside the disposable candidate, once per run; its failure blocks node-deps gates as a provisioning outcome, never a detector FAIL",
+            "evidence": [],
+            "retest_result": "01-pr-proof-contract#proof PASS with 317 test files passed and zero contract.test.ts failures",
+            "root_cause": "the runner treated the host's lockfile-consistent node_modules as satisfying the candidate's install because a nested worktree resolves modules upward. That holds for import resolution but NOT for code that reads a node_modules path literally — P02's own parser-pin check reads node_modules/yaml/package.json to prove yaml@2.9.0, and inside the candidate that path does not exist"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:32:45.335Z",
+          "flags": {
+            "corrective_action": "provisionCandidate() physically runs the contract's own 'pnpm install --frozen-lockfile --ignore-scripts' inside the disposable candidate, and its result is the sole AUTHORITY on node-deps satisfaction; --offline was removed because the contract's command has none and forcing it made provisioning depend on local store contents",
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ]
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:32:45.408Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-039",
+      "opened_at": "2026-08-10T18:30:55.788Z",
+      "regression_test_id": null,
+      "retest_result": "01-pr-proof-contract#proof PASS with 317 test files passed and zero contract.test.ts failures",
+      "root_cause": "the runner treated the host's lockfile-consistent node_modules as satisfying the candidate's install because a nested worktree resolves modules upward. That holds for import resolution but NOT for code that reads a node_modules path literally — P02's own parser-pin check reads node_modules/yaml/package.json to prove yaml@2.9.0, and inside the candidate that path does not exist",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "node_modules equivalence-by-upward-resolution was insufficient: contract-extract.mjs resolves node_modules/yaml/package.json as a literal path, so 10 contract.test.ts assertions failed inside the candidate"
+    },
+    {
+      "affected_gate": "P07.T02",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:32:45.553Z",
+      "corrective_action": "teardown uses docker rm -fv, scoped to the owned container id only — named and developer volumes are never touched and nothing is pruned; the stranded volume was removed by exact id with ownership proven by the recorded inventory delta",
+      "detected_by": "P07.T02 execution",
+      "evidence": [
+        {
+          "bytes": 3069,
+          "path": "docs/verification/evidence/p07/T02-db-parity.md",
+          "sha256": "e688f054502df5be498a694383325118f99085e4498c2f57715574518336b838"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:56.037Z",
+          "flags": {
+            "corrective_action": "teardown uses docker rm -fv, scoped to the owned container id only — named and developer volumes are never touched and nothing is pruned; the stranded volume was removed by exact id with ownership proven by the recorded inventory delta",
+            "evidence": [],
+            "retest_result": "see DEF-040 retest evidence: second P07 db run reports new_containers=[] and new_volumes=[]",
+            "root_cause": "mysql:8 declares /var/lib/mysql as a VOLUME, so each run creates an anonymous volume; teardown used docker rm -f, which detaches but does not delete it. The run's own before/after inventory delta detected the residue"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:32:45.503Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p07/T02-db-parity.md"
+            ]
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:32:45.553Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-040",
+      "opened_at": "2026-08-10T18:30:55.955Z",
+      "regression_test_id": null,
+      "retest_result": "see DEF-040 retest evidence: second P07 db run reports new_containers=[] and new_volumes=[]",
+      "root_cause": "mysql:8 declares /var/lib/mysql as a VOLUME, so each run creates an anonymous volume; teardown used docker rm -f, which detaches but does not delete it. The run's own before/after inventory delta detected the residue",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "verifier-owned MySQL container left an anonymous volume behind: docker rm -f does not remove a container's own anonymous volumes, violating the zero-owned-residue law"
+    },
+    {
+      "affected_gate": "P06.T12",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:32:45.752Z",
+      "corrective_action": "expectedPatchBytes() reconstructs the intended file from the patch's own + lines independently of git, and arm() compares the applied bytes against it, refusing with BROKEN_GATE(POISON_TRUNCATED) on any mismatch",
+      "detected_by": "P06 ASSURANCE",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:56.222Z",
+          "flags": {
+            "corrective_action": "expectedPatchBytes() reconstructs the intended file from the patch's own + lines independently of git, and arm() compares the applied bytes against it, refusing with BROKEN_GATE(POISON_TRUNCATED) on any mismatch",
+            "evidence": [],
+            "retest_result": "p06-security-audit-unpinned-action PROVEN: fails at step 2 with the exact 'action is not pinned to a commit' signature",
+            "root_cause": "git apply honours the hunk header's declared line count and silently drops surplus body lines. A patch declaring '@@ -0,0 +1,9 @@' over a 10-line body dropped the final 'uses:' line, so the unpinned-action poison tripped only the permissions rule — the gate looked incapable of rejecting for the declared reason when it was not. A truncated poison that happened to still trip the target rule would have produced a FALSE proof"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:32:45.610Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ],
+            "retest_result": "final ASSURANCE run: 7 of 8 fixtures PROVEN, including p06-security-audit-unpinned-action failing at step 2 with the exact 'action is not pinned to a commit' signature; a truncated poison now refuses with BROKEN_GATE(POISON_TRUNCATED)"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:32:45.668Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-041",
+      "opened_at": "2026-08-10T18:30:56.158Z",
+      "regression_test_id": null,
+      "retest_result": "final ASSURANCE run: 7 of 8 fixtures PROVEN, including p06-security-audit-unpinned-action failing at step 2 with the exact 'action is not pinned to a commit' signature; a truncated poison now refuses with BROKEN_GATE(POISON_TRUNCATED)",
+      "root_cause": "git apply honours the hunk header's declared line count and silently drops surplus body lines. A patch declaring '@@ -0,0 +1,9 @@' over a 10-line body dropped the final 'uses:' line, so the unpinned-action poison tripped only the permissions rule — the gate looked incapable of rejecting for the declared reason when it was not. A truncated poison that happened to still trip the target rule would have produced a FALSE proof",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "ASSURANCE arm() trusted git apply: a mis-counted @@ hunk silently TRUNCATED the poison, yielding a weaker defect that tripped a different rule than the one under proof"
+    },
+    {
+      "affected_gate": "P06.T12",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:32:45.918Z",
+      "corrective_action": "each cycle sweeps declared artifacts and captures a per-cycle cleanliness BASELINE before its first leg, then compares the post-cycle state against that baseline rather than against empty",
+      "detected_by": "P06 ASSURANCE",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:56.398Z",
+          "flags": {
+            "corrective_action": "each cycle sweeps declared artifacts and captures a per-cycle cleanliness BASELINE before its first leg, then compares the post-cycle state against that baseline rather than against empty",
+            "evidence": [],
+            "retest_result": "p06-gitleaks-canary and p06-security-audit-unpinned-action both PROVEN in the same run",
+            "root_cause": "declared artifacts were swept only after the poison leg, so an artifact written by the control-after leg survived into the following fixture's cycle, where it read as undeclared residue"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:32:45.814Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ],
+            "retest_result": "final ASSURANCE run: gitleaks, security-audit, semgrep, zizmor, contracts, ai-eval and typecheck all PROVEN in one pass with per-cycle baselines; no cross-fixture residue"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:32:45.917Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-042",
+      "opened_at": "2026-08-10T18:30:56.291Z",
+      "regression_test_id": null,
+      "retest_result": "final ASSURANCE run: gitleaks, security-audit, semgrep, zizmor, contracts, ai-eval and typecheck all PROVEN in one pass with per-cycle baselines; no cross-fixture residue",
+      "root_cause": "declared artifacts were swept only after the poison leg, so an artifact written by the control-after leg survived into the following fixture's cycle, where it read as undeclared residue",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "ASSURANCE cross-fixture contamination: one fixture's declared execution artifact (gitleaks' results.sarif) surfaced as the NEXT fixture's restore residue, producing a false NON_RESTORING"
+    },
+    {
+      "affected_gate": "P06.T12",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:32:46.084Z",
+      "corrective_action": "arm() stages the poisoned paths with git add --force after the truncation check, reproducing the tracked-tree state CI actually scans; restore() unstages with git reset before reversing the patch",
+      "detected_by": "P06 ASSURANCE",
+      "evidence": [
+        {
+          "bytes": 7347,
+          "path": "docs/verification/evidence/p06/CP03-checkpoint.md",
+          "sha256": "2034333283b34569714832603e92e9c42b0cb0150f04b270215b512a9dd7401c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:56.540Z",
+          "flags": {
+            "corrective_action": "arm() stages the poisoned paths with git add --force after the truncation check, reproducing the tracked-tree state CI actually scans; restore() unstages with git reset before reversing the patch",
+            "evidence": [],
+            "retest_result": "semgrep blocking gate proven via the dime-session-secret-fallback rule",
+            "root_cause": "the poison was written to the worktree without being added to the index. Semgrep scans only git-tracked files, so an unstaged poison is invisible to it; CI never sees this because actions/checkout produces a tree in which every file is tracked"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:32:45.995Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p06/CP03-checkpoint.md"
+            ],
+            "retest_result": "p06-semgrep-blocking-session-secret PROVEN: the staged poison is scanned and the blocking gate rejects at step 2 naming dime-session-secret-fallback"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:32:46.081Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-043",
+      "opened_at": "2026-08-10T18:30:56.464Z",
+      "regression_test_id": null,
+      "retest_result": "p06-semgrep-blocking-session-secret PROVEN: the staged poison is scanned and the blocking gate rejects at step 2 naming dime-session-secret-fallback",
+      "root_cause": "the poison was written to the worktree without being added to the index. Semgrep scans only git-tracked files, so an unstaged poison is invisible to it; CI never sees this because actions/checkout produces a tree in which every file is tracked",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "ASSURANCE poison was applied but left unstaged, so semgrep skipped it entirely — 'Scan was limited to files tracked by git' — and the blocking gate could not be proven"
+    },
+    {
+      "affected_gate": ".github/workflows/03-semgrep.yml#blocking",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T20:07:54.342Z",
+      "corrective_action": "Superseded. DEF-053 carries the finding forward with the accurate root cause, the second affected rule, and the proven correction. Closing this record preserves the original diagnosis and its correction rather than rewriting history",
+      "detected_by": "P06 ASSURANCE",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:56.970Z",
+          "flags": {
+            "corrective_action": "NOT FIXED — editing .semgrep/ rules is outside the authorized P06 scope. Recorded for the owner: the rule needs the metavariable-regex constraints moved inside their respective pattern-either branches",
+            "evidence": [],
+            "root_cause": "the rule ANDs a pattern-either with metavariable-regex constraints on BOTH $F and $C. $C binds only in the parseFloat alternative and $F only in the arithmetic alternatives, so each alternative fails the other's constraint. Isolated proof: the identical rule minus the $C constraint reports 1 finding on 'invoice.amountCents * 1.0825'; with the constraint, 0"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T20:07:54.277Z",
+          "flags": {
+            "corrective_action": "Superseded. DEF-053 carries the finding forward with the accurate root cause, the second affected rule, and the proven correction. Closing this record preserves the original diagnosis and its correction rather than rewriting history",
+            "evidence": [],
+            "retest_result": "Production rule vs a deterministic three-branch fixture: 0 findings. Same fixture with a corrected two-rule form: 3 findings, and 0 false positives against a clean fixture exercising integer multiplication, integer division, an unrelated parseFloat, and unrelated float arithmetic",
+            "root_cause": "CORRECTED AND SUPERSEDED BY DEF-053. The original diagnosis — that the metavariable-regex constraints contradict across pattern-either branches — described a real problem but was not the whole cause. Re-proven this turn with stderr surfaced: the rule does not merely fail to match, it fails to PARSE. semgrep-core reports 'rule validation failed (PatternParseError): Invalid pattern for TypeScript' because 'parseFloat(... $C ...)' is not valid TypeScript pattern syntax. The rule is dropped before matching is ever attempted, against all three of its branches (multiplication, division, parseFloat), not just the arithmetic ones"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T20:07:54.341Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-044",
+      "opened_at": "2026-08-10T18:30:56.726Z",
+      "regression_test_id": null,
+      "retest_result": "Production rule vs a deterministic three-branch fixture: 0 findings. Same fixture with a corrected two-rule form: 3 findings, and 0 false positives against a clean fixture exercising integer multiplication, integer division, an unrelated parseFloat, and unrelated float arithmetic",
+      "root_cause": "CORRECTED AND SUPERSEDED BY DEF-053. The original diagnosis — that the metavariable-regex constraints contradict across pattern-either branches — described a real problem but was not the whole cause. Re-proven this turn with stderr surfaced: the rule does not merely fail to match, it fails to PARSE. semgrep-core reports 'rule validation failed (PatternParseError): Invalid pattern for TypeScript' because 'parseFloat(... $C ...)' is not valid TypeScript pattern syntax. The rule is dropped before matching is ever attempted, against all three of its branches (multiplication, division, parseFloat), not just the arithmetic ones",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "CANDIDATE FINDING: the blocking Semgrep rule dime-money-float-arithmetic-on-cents is structurally incapable of firing on its multiplication/division alternatives, so billing-math protection is vacuous"
+    },
+    {
+      "affected_gate": ".github/workflows/dime-llm-validation.yml#validate",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": "DISPOSITION: OPEN, ADVISORY, NON-BLOCKING for P06/P07 acceptance. dime-llm-validation#validate is NOT among the nine required contexts (contracts, dependency-review, deterministic, gitleaks, proof, security-audit, test, typecheck, zizmor), so it is not part of the merge contract and a base-existing red does not gate this branch. It is reported truthfully rather than recorded as PASS, and re-pinning the governed ml evidence chain remains outside P06's authorized scope and subject to its own decision-immutability rules",
+      "detected_by": "P06.T03 execution",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:57.552Z",
+          "flags": {
+            "corrective_action": "NOT FIXED — re-pinning the governed ml evidence chain is outside the authorized P06 scope and has its own decision-immutability rules. Recorded for the owner",
+            "evidence": [],
+            "root_cause": "PRE-EXISTING ON BASE, NOT INTRODUCED BY THIS BRANCH. Measured differentially: a clean origin/main worktree reports 6 failed / 1201 passed, and the candidate's failing-test set is byte-identical to base's. The failures are checksum mismatches in ml/dime-1.0's governed evidence chain against files that have since changed (drizzle/schema.ts, server/_core/dimeChatContext.ts). The workflow triggers only on the ml/ tree, so main's last green run (2026-08-06) predates the drift"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T20:07:54.394Z",
+          "flags": {
+            "corrective_action": "DISPOSITION: OPEN, ADVISORY, NON-BLOCKING for P06/P07 acceptance. dime-llm-validation#validate is NOT among the nine required contexts (contracts, dependency-review, deterministic, gitleaks, proof, security-audit, test, typecheck, zizmor), so it is not part of the merge contract and a base-existing red does not gate this branch. It is reported truthfully rather than recorded as PASS, and re-pinning the governed ml evidence chain remains outside P06's authorized scope and subject to its own decision-immutability rules",
+            "evidence": [],
+            "root_cause": "BASELINE_RED, confirmed against the NEW base. Re-run this turn on a clean worktree of origin/main 29a4a97e: 6 failed / 1201 passed, and the failing set is byte-identical to the candidate's — test_model_artifact_architecture_v1, test_phase1_observability_closure, test_provider_selection_v1, and three in test_runpod_gate_1_authorization_v1. Classification is BASELINE_RED IDENTICAL, not CANDIDATE_REGRESSION and not BASE_CHANGED. The workflow's ml/** path filter explains why GitHub has not re-run it since the drift landed: main's recent commits are dependabot bumps touching no ml/ path"
+          }
+        }
+      ],
+      "id": "DEF-045",
+      "opened_at": "2026-08-10T18:30:57.458Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "BASELINE_RED, confirmed against the NEW base. Re-run this turn on a clean worktree of origin/main 29a4a97e: 6 failed / 1201 passed, and the failing set is byte-identical to the candidate's — test_model_artifact_architecture_v1, test_phase1_observability_closure, test_provider_selection_v1, and three in test_runpod_gate_1_authorization_v1. Classification is BASELINE_RED IDENTICAL, not CANDIDATE_REGRESSION and not BASE_CHANGED. The workflow's ml/** path filter explains why GitHub has not re-run it since the drift landed: main's recent commits are dependabot bumps touching no ml/ path",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "CANDIDATE FINDING: dime-llm-validation#validate fails on origin/main itself — 6 governed evidence-chain pytest failures — and the workflow's ml/** path filter means main has not re-run it since the drift landed"
+    },
+    {
+      "affected_gate": ".github/workflows/12-nightly-verification.yml",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": "DISPOSITION: OPEN, ADVISORY, NON-BLOCKING by architecture. The nightly tier is an AUDIT-class schedule, not a merge-contract required context, and both failures are reproduced identically by the local verifier and by GitHub — parity, not a candidate-introduced finding. The 10 CRITICAL and 1,213 total findings are base-image and dependency debt; they are neither suppressed nor allowed to contaminate candidate verdicts, and they are routed to later remediation rather than treated as resolved",
+      "detected_by": "P06.T03 execution",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:57.988Z",
+          "flags": {
+            "corrective_action": "NOT FIXED — dependency and base-image remediation is outside the authorized P06 scope. Recorded with the parity observation that local and CI agree",
+            "evidence": [],
+            "root_cause": "PRE-EXISTING AND VISIBLE IN CI. GitHub nightly run 31380149460 reports full-container-scan=failure and full-osv-scan=failure; the local governed-tool runs reproduce the same verdicts (trivy reports 1213 findings incl. 10 CRITICAL in the Debian base image; osv-scanner exits 2 on the pinned lockfiles). Both gates are non-mandatory"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T20:07:54.444Z",
+          "flags": {
+            "corrective_action": "DISPOSITION: OPEN, ADVISORY, NON-BLOCKING by architecture. The nightly tier is an AUDIT-class schedule, not a merge-contract required context, and both failures are reproduced identically by the local verifier and by GitHub — parity, not a candidate-introduced finding. The 10 CRITICAL and 1,213 total findings are base-image and dependency debt; they are neither suppressed nor allowed to contaminate candidate verdicts, and they are routed to later remediation rather than treated as resolved",
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-046",
+      "opened_at": "2026-08-10T18:30:57.629Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "PRE-EXISTING AND VISIBLE IN CI. GitHub nightly run 31380149460 reports full-container-scan=failure and full-osv-scan=failure; the local governed-tool runs reproduce the same verdicts (trivy reports 1213 findings incl. 10 CRITICAL in the Debian base image; osv-scanner exits 2 on the pinned lockfiles). Both gates are non-mandatory",
+      "severity": "LOW",
+      "status": "OPEN",
+      "title": "CANDIDATE FINDING: the nightly tier is red on main (full-osv-scan and full-container-scan), and the local verifier reproduces both failures — parity confirmed, not a verifier defect"
+    },
+    {
+      "affected_gate": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T20:36:53.541Z",
+      "corrective_action": "THREE independent causes, all fixed at source, none by hiding a failure. (A) Environmental: eight orphaned CPU-load generators from a prior session held load at 36.9-58.2 on 8 cores for 2d23h — terminated (DEF-049). (B) Verifier input: the contract had been re-derived only in the working tree, and docs/verification/CONTRACT.md was never re-rendered, so every candidate carried a stale contract against merged-new workflows — committed as d37ae215 and ff5d3a48. (C) Candidate: the bcrypt assertion measured host CPU rather than bcrypt, failing at 531ms against its 500ms bound inside the full suite while measuring 60ms median idle. Restructured to assert the real invariant — a deterministic embedded-cost check, a NEW deterministic check that every production bcrypt.hash site uses cost >= 10, and the SAME 500ms bound taken as a median of 5 samples. No threshold widened, no cost lowered, no test excluded, retried, or allowlisted",
+      "detected_by": "P06 ASSURANCE control leg",
+      "evidence": [
+        {
+          "bytes": 4532,
+          "path": "docs/verification/evidence/p06/T14-def047-resolution.md",
+          "sha256": "c371079e0828c2bb210da1b787781e981e8b4cd6143f9c3da0321ea2e13eb448"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:58.478Z",
+          "flags": {
+            "corrective_action": "NOT CLOSED. A mandatory gate that cannot be shown to be stably green cannot carry an ASSURANCE proof (the control leg is a precondition), and ACCEPT(P06)'s zero_flaky_mandatory term is therefore false. Recorded rather than retried-until-green, because retrying until a flake disappears is how a false proof gets manufactured",
+            "evidence": [],
+            "root_cause": "load-dependent and NOT confined to one test — it is a CLASS of timing/contention-sensitive assertions failing under full-suite load on this host. Observed twice with DIFFERENT tests: (1) scripts/os/observe-crons.test.ts, which spawns 'npx tsx' per assertion inside a temp sandbox, and (2) server/updateUserTimeout.test.ts's '[VERIFY] bcrypt cost=10 completes in < 500ms', a wall-clock assertion whose outcome depends on host CPU availability. Measured: observe-crons passes 3/3 in isolation in a provisioned candidate; the full roster passed both. Classified as a HOST-ENVIRONMENT instability rather than a candidate defect, because CI's own proof job is green, the failures do not reproduce in isolation, and a bcrypt wall-clock bound is inherently a property of the machine rather than of the code under test"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T19:27:08.430Z",
+          "flags": {
+            "corrective_action": "The eight load generators were identified by exact signature, confirmed orphaned (ppid=1) with no output or side effects, and terminated (SIGTERM ignored; SIGKILL required). Host load fell from 58.2 to 5.3. NO test was modified, no threshold widened, no retry added, nothing excluded or allowlisted — the environment defect was fixed at its source, which is why none of the forbidden stabilizations were needed",
+            "evidence": [],
+            "retest_result": "PARTIAL — hypothesis confirmed but the formal campaign is BLOCKED. On the recovered host: scripts/os/observe-crons.test.ts passes 10/10 isolated; a full 5326-test collection run passed BOTH named tests (observe-crons passed, updateUserTimeout passed); bcrypt cost=10 measured over 40 samples at min 58ms / median 60ms / p95 65ms / max 86ms, roughly 8x under its 500ms bound. The 5-consecutive-full-#proof determinism campaign required to CLOSE this defect cannot be run: #proof must execute against a P01 candidate, and DEF-050 makes the candidate unconstructable",
+            "root_cause": "ROOT CAUSE ESTABLISHED — see DEF-049. Not a property of either test and not a test-design defect. Eight orphaned synthetic CPU-load generators ('while :; do :; done') left by a PRIOR Claude Code session had been saturating all 8 cores continuously for 2 days 23 hours, at host load average 36.9-58.2 on an 8-core/8GB machine. Every #proof execution recorded under this defect ran under 5-7x CPU oversubscription. This explains the signatures exactly: a bcrypt cost=10 wall-clock bound and a subprocess-startup/cron-observation test are precisely what fails under CPU starvation, and both passed in isolation because a single test still gets scheduled promptly. The failures were also NOT confined to one test, which is itself the signature of resource starvation rather than a race in any one test"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T20:36:53.494Z",
+          "flags": {
+            "corrective_action": "THREE independent causes, all fixed at source, none by hiding a failure. (A) Environmental: eight orphaned CPU-load generators from a prior session held load at 36.9-58.2 on 8 cores for 2d23h — terminated (DEF-049). (B) Verifier input: the contract had been re-derived only in the working tree, and docs/verification/CONTRACT.md was never re-rendered, so every candidate carried a stale contract against merged-new workflows — committed as d37ae215 and ff5d3a48. (C) Candidate: the bcrypt assertion measured host CPU rather than bcrypt, failing at 531ms against its 500ms bound inside the full suite while measuring 60ms median idle. Restructured to assert the real invariant — a deterministic embedded-cost check, a NEW deterministic check that every production bcrypt.hash site uses cost >= 10, and the SAME 500ms bound taken as a median of 5 samples. No threshold widened, no cost lowered, no test excluded, retried, or allowlisted",
+            "evidence": [
+              "docs/verification/evidence/p06/T14-def047-resolution.md"
+            ],
+            "regression_test_id": "5-run determinism campaign; p06-proof-failing-test ASSURANCE cycle; server/updateUserTimeout.test.ts bcrypt group with its DEF-054 negative proof",
+            "retest_result": "Determinism campaign 5/5 PASS with no retries, terminating-on-first-failure harness, same candidate and parameters throughout: 143.4s, 212.6s, 204.4s, 145.8s, 157.9s. Run 3 began at host load 12.55 on 8 cores — above nominal capacity — and still passed, so stability holds under real contention rather than only on a quiet machine. Final collection: passed=5092 failed=0 skipped=105 notExecuted=0 environmentBound=0 across 317 test files. ASSURANCE on the current candidate (head ff5d3a48, base 29a4a97e): control PASS -> poison FAIL at the declared step 6 for the declared reason -> restore clean -> control PASS. Mandatory local proof coverage DERIVED, not assumed: 6 of 6 PROVEN (proof, zizmor, contracts, deterministic, security-audit, typecheck); 8 of 8 fixtures PROVEN overall; unproven list empty"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T20:36:53.540Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-047",
+      "opened_at": "2026-08-10T18:30:58.371Z",
+      "regression_test_id": "5-run determinism campaign; p06-proof-failing-test ASSURANCE cycle; server/updateUserTimeout.test.ts bcrypt group with its DEF-054 negative proof",
+      "retest_result": "Determinism campaign 5/5 PASS with no retries, terminating-on-first-failure harness, same candidate and parameters throughout: 143.4s, 212.6s, 204.4s, 145.8s, 157.9s. Run 3 began at host load 12.55 on 8 cores — above nominal capacity — and still passed, so stability holds under real contention rather than only on a quiet machine. Final collection: passed=5092 failed=0 skipped=105 notExecuted=0 environmentBound=0 across 317 test files. ASSURANCE on the current candidate (head ff5d3a48, base 29a4a97e): control PASS -> poison FAIL at the declared step 6 for the declared reason -> restore clean -> control PASS. Mandatory local proof coverage DERIVED, not assumed: 6 of 6 PROVEN (proof, zizmor, contracts, deterministic, security-audit, typecheck); 8 of 8 fixtures PROVEN overall; unproven list empty",
+      "root_cause": "ROOT CAUSE ESTABLISHED — see DEF-049. Not a property of either test and not a test-design defect. Eight orphaned synthetic CPU-load generators ('while :; do :; done') left by a PRIOR Claude Code session had been saturating all 8 cores continuously for 2 days 23 hours, at host load average 36.9-58.2 on an 8-core/8GB machine. Every #proof execution recorded under this defect ran under 5-7x CPU oversubscription. This explains the signatures exactly: a bcrypt cost=10 wall-clock bound and a subprocess-startup/cron-observation test are precisely what fails under CPU starvation, and both passed in isolation because a single test still gets scheduled promptly. The failures were also NOT confined to one test, which is itself the signature of resource starvation rather than a race in any one test",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "the mandatory #proof gate is INTERMITTENT on this host: its ASSURANCE control leg failed on a single test (scripts/os/observe-crons.test.ts) that passes 3/3 in isolation and passed in the immediately preceding full roster run"
+    },
+    {
+      "affected_gate": "P06.T05",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T18:32:46.213Z",
+      "corrective_action": "the host probe is now read-only (lockfile hash + runtime versions); the authoritative measurement is the install performed inside the disposable candidate, which runs the contract's own command without --offline",
+      "detected_by": "P07.T02 execution",
+      "evidence": [
+        {
+          "bytes": 4991,
+          "path": "docs/verification/evidence/p07/CP03-checkpoint.md",
+          "sha256": "f01e7bf16e52e5e9acd348469b2252122b19cffbb9fb4a5f88e8c707bab43263"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T18:30:59.590Z",
+          "flags": {
+            "corrective_action": "the host probe is now read-only (lockfile hash + runtime versions); the authoritative measurement is the install performed inside the disposable candidate, which runs the contract's own command without --offline",
+            "evidence": [],
+            "retest_result": "see P07 db re-run: provisioning ok=true and the gate returns a detector verdict again",
+            "root_cause": "measureCapabilities() executed 'pnpm install --frozen-lockfile --offline --ignore-scripts' in REPO_ROOT to 'measure host consistency'. Two problems: it wrote to the developer's tree, and --offline is not in the contract's command, so a tarball missing from the local store surfaced as ERR_PNPM_NO_OFFLINE_TARBALL (framer-motion 13.0.0) — an environment condition masquerading as a provisioning verdict"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T18:32:46.147Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p07/CP03-checkpoint.md"
+            ]
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T18:32:46.210Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-048",
+      "opened_at": "2026-08-10T18:30:58.542Z",
+      "regression_test_id": null,
+      "retest_result": "see P07 db re-run: provisioning ok=true and the gate returns a detector verdict again",
+      "root_cause": "measureCapabilities() executed 'pnpm install --frozen-lockfile --offline --ignore-scripts' in REPO_ROOT to 'measure host consistency'. Two problems: it wrote to the developer's tree, and --offline is not in the contract's command, so a tarball missing from the local store surfaced as ERR_PNPM_NO_OFFLINE_TARBALL (framer-motion 13.0.0) — an environment condition masquerading as a provisioning verdict",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "the capability probe ran a frozen pnpm install in the DEVELOPER'S repository root, mutating node_modules outside the verifier's scope, and forcing --offline made provisioning depend on local store contents"
+    },
+    {
+      "affected_gate": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "blast_radius": "Every timing- or scheduling-sensitive assertion in the 5090-test #proof collection, and by extension every DEF-047 observation. Explains the specific failure signatures exactly: a bcrypt cost=10 wall-clock bound and a subprocess-startup/cron-observation test are precisely the assertions that fail under CPU starvation, and both passed in isolation because a single test still gets scheduled promptly",
+      "closed_at": "2026-08-10T19:27:18.266Z",
+      "corrective_action": "Identified by exact signature ('# background CPU load' + 'while :; do :; done'), confirmed all eight were orphaned with ppid=1 and no output/side effects, and terminated precisely those eight PIDs (SIGTERM ignored; SIGKILL required). No other process matched the busy-loop signature; no developer work, service, or container was touched",
+      "detected_by": "P06 resumption, host measurement",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T19:14:36.896Z",
+          "flags": {
+            "blast_radius": "Every timing- or scheduling-sensitive assertion in the 5090-test #proof collection, and by extension every DEF-047 observation. Explains the specific failure signatures exactly: a bcrypt cost=10 wall-clock bound and a subprocess-startup/cron-observation test are precisely the assertions that fail under CPU starvation, and both passed in isolation because a single test still gets scheduled promptly",
+            "corrective_action": "Identified by exact signature ('# background CPU load' + 'while :; do :; done'), confirmed all eight were orphaned with ppid=1 and no output/side effects, and terminated precisely those eight PIDs (SIGTERM ignored; SIGKILL required). No other process matched the busy-loop signature; no developer work, service, or container was touched",
+            "evidence": [],
+            "root_cause": "A previous session (scratchpad cd9fc09a.../guardfix2) deliberately spawned 'for c in 1..8; do (while :; do :; done) & done' as synthetic load to test whether schemaGuardServiceScope.test.ts failed under CPU pressure. Its own script ends with 'kill $LOADPIDS', but the parent shell died before that ran, so the eight busy-loops were reparented to launchd (ppid=1) and never terminated. Measured at resumption: etime 02-23:26:07, 50-85% CPU each, host load average 36.9-58.2 on an 8-core/8GB machine — roughly 5-7x oversubscription, present during every #proof execution recorded under DEF-047"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T19:27:18.265Z",
+          "flags": {
+            "evidence": []
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T19:27:18.308Z",
+          "flags": {
+            "evidence": [],
+            "regression_test_id": "observe-crons 10/10 isolated; full-collection run 1 on recovered host",
+            "retest_result": "Host load average fell from 58.22 to 5.32 after termination; zero processes match the busy-loop signature; observe-crons passes 10/10 isolated and both previously-failing tests pass inside a full 5326-test collection run"
+          }
+        }
+      ],
+      "id": "DEF-049",
+      "opened_at": "2026-08-10T19:14:36.807Z",
+      "regression_test_id": "observe-crons 10/10 isolated; full-collection run 1 on recovered host",
+      "retest_result": "Host load average fell from 58.22 to 5.32 after termination; zero processes match the busy-loop signature; observe-crons passes 10/10 isolated and both previously-failing tests pass inside a full 5326-test collection run",
+      "root_cause": "A previous session (scratchpad cd9fc09a.../guardfix2) deliberately spawned 'for c in 1..8; do (while :; do :; done) & done' as synthetic load to test whether schemaGuardServiceScope.test.ts failed under CPU pressure. Its own script ends with 'kill $LOADPIDS', but the parent shell died before that ran, so the eight busy-loops were reparented to launchd (ppid=1) and never terminated. Measured at resumption: etime 02-23:26:07, 50-85% CPU each, host load average 36.9-58.2 on an 8-core/8GB machine — roughly 5-7x oversubscription, present during every #proof execution recorded under DEF-047",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "ROOT CAUSE OF DEF-047: eight orphaned synthetic CPU-load generators from a PRIOR Claude Code session had been saturating all 8 cores continuously for 2 days 23 hours, starving every full-suite #proof run"
+    },
+    {
+      "affected_gate": "P01",
+      "blast_radius": "Total for this turn: every P06 gate, the #proof determinism campaign, the #proof ASSURANCE cycle, and all P07 DB/test parity bind to a candidate that cannot be materialized. It also invalidates the base binding of all prior P06/P07 evidence, which was measured against 7fa4b3fe",
+      "closed_at": "2026-08-10T19:46:06.200Z",
+      "corrective_action": "Integration authorized and landed as commit 4b8ee4cd180d956c88abb9e536493c94d4b2767a — a real merge with both parents preserved (705c9898 branch + 29a4a97e base), recorded as an integration/provenance commit that asserts nothing about phase acceptance. The single pnpm-lock.yaml conflict was reconciled canonically rather than by hand-editing markers: package.json auto-merged, the upstream lockfile became the post-upstream basis, and 'pnpm install --lockfile-only' regenerated under governed pnpm 10.33.0. Contract and registry were then re-derived through P02/P03 only",
+      "detected_by": "P06/P07 resumption, P01 candidate construction",
+      "evidence": [
+        {
+          "bytes": 3653,
+          "path": "docs/verification/evidence/p06/T00-integration.md",
+          "sha256": "ebf314113563c20bf68cb21de52dbde512d642242a90a033c2ae88728c9fe1ad"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T19:19:59.957Z",
+          "flags": {
+            "blast_radius": "Total for this turn: every P06 gate, the #proof determinism campaign, the #proof ASSURANCE cycle, and all P07 DB/test parity bind to a candidate that cannot be materialized. It also invalidates the base binding of all prior P06/P07 evidence, which was measured against 7fa4b3fe",
+            "corrective_action": "NOT APPLIED — the remedy requires an integration merge commit on the branch, and this turn's commit policy scopes commits to P06-authorized and P07-authorized files upon phase acceptance. The exact remedy was PROVEN in a disposable worktree without touching the branch: merge origin/main, resolve pnpm-lock.yaml by taking main's copy, then regenerate with 'pnpm install --lockfile-only'. Verified outcome: zero conflict markers, our yaml 2.9.0 pin preserved (specifier 2.9.0, version 2.9.0), and 'pnpm install --frozen-lockfile --ignore-scripts' exits 0 against the regenerated lockfile",
+            "evidence": [],
+            "root_cause": "origin/main moved from 7fa4b3fe to 29a4a97e (dependabot: framer-motion 12.43.0->13.0.0, nanoid 5.1.16->6.0.1, @types/node 24.7.0->26.1.2, react-resizable-panels 3.0.6->4.12.2, actions/setup-node 4.4.0->7.0.0 and codeql-action/upload-sarif across 23 workflow files). Both sides edit pnpm-lock.yaml: main rewrote 165 lines of dependency resolution, while this branch adds exactly one devDependency, yaml@2.9.0 — the parser P02's contract extraction is pinned to. package.json auto-merges cleanly; only the derived lockfile conflicts. P01 correctly refuses to invent a resolution"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T19:46:06.137Z",
+          "flags": {
+            "corrective_action": "Integration authorized and landed as commit 4b8ee4cd180d956c88abb9e536493c94d4b2767a — a real merge with both parents preserved (705c9898 branch + 29a4a97e base), recorded as an integration/provenance commit that asserts nothing about phase acceptance. The single pnpm-lock.yaml conflict was reconciled canonically rather than by hand-editing markers: package.json auto-merged, the upstream lockfile became the post-upstream basis, and 'pnpm install --lockfile-only' regenerated under governed pnpm 10.33.0. Contract and registry were then re-derived through P02/P03 only",
+            "evidence": [
+              "docs/verification/evidence/p06/T00-integration.md"
+            ],
+            "regression_test_id": "P02 conformance correctly reported 23 CONTRACT_DRIFT entries BEFORE regeneration (drift detection proved working, not assumed); P03 registry re-derived to identical 47/9/5 and 17/10/20 with no required check lost; P01/P02/P03 isolation audits all 0 violations",
+            "retest_result": "All eight closure conditions met and measured. (1) exact current main 29a4a97e integrated; (2) lockfile reconciled canonically to aab9301b9ff7cf6c…, applied byte-identical to the artifact proven in a disposable worktree; (3) yaml parser pin preserved exactly (specifier 2.9.0, version 2.9.0), importer delta vs upstream basis exactly {yaml: 2.9.0} with nothing removed or otherwise changed; (4) pnpm install --frozen-lockfile --ignore-scripts exits 0, byte-stable across two regenerations; (5) zero unresolved conflicts and zero conflict markers; (6) fresh P01 prospective merge SUCCEEDS — head 4b8ee4cd, base 29a4a97e, merge_tree 9f8587a3, merge_commit 7a0b53f3, degenerate_merge false; (7) contract re-derived 400cc039 -> 17ab9315 with the new setup-node pin represented 28 times and the old pin absent, repeat-generation byte-identical, conformance PASS; (8) no stale candidate evidence remains active — all prior P06/P07 gate evidence is explicitly superseded because it binds to base 7fa4b3fe"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T19:46:06.199Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-050",
+      "opened_at": "2026-08-10T19:19:59.879Z",
+      "regression_test_id": "P02 conformance correctly reported 23 CONTRACT_DRIFT entries BEFORE regeneration (drift detection proved working, not assumed); P03 registry re-derived to identical 47/9/5 and 17/10/20 with no required check lost; P01/P02/P03 isolation audits all 0 violations",
+      "retest_result": "All eight closure conditions met and measured. (1) exact current main 29a4a97e integrated; (2) lockfile reconciled canonically to aab9301b9ff7cf6c…, applied byte-identical to the artifact proven in a disposable worktree; (3) yaml parser pin preserved exactly (specifier 2.9.0, version 2.9.0), importer delta vs upstream basis exactly {yaml: 2.9.0} with nothing removed or otherwise changed; (4) pnpm install --frozen-lockfile --ignore-scripts exits 0, byte-stable across two regenerations; (5) zero unresolved conflicts and zero conflict markers; (6) fresh P01 prospective merge SUCCEEDS — head 4b8ee4cd, base 29a4a97e, merge_tree 9f8587a3, merge_commit 7a0b53f3, degenerate_merge false; (7) contract re-derived 400cc039 -> 17ab9315 with the new setup-node pin represented 28 times and the old pin absent, repeat-generation byte-identical, conformance PASS; (8) no stale candidate evidence remains active — all prior P06/P07 gate evidence is explicitly superseded because it binds to base 7fa4b3fe",
+      "root_cause": "origin/main moved from 7fa4b3fe to 29a4a97e (dependabot: framer-motion 12.43.0->13.0.0, nanoid 5.1.16->6.0.1, @types/node 24.7.0->26.1.2, react-resizable-panels 3.0.6->4.12.2, actions/setup-node 4.4.0->7.0.0 and codeql-action/upload-sarif across 23 workflow files). Both sides edit pnpm-lock.yaml: main rewrote 165 lines of dependency resolution, while this branch adds exactly one devDependency, yaml@2.9.0 — the parser P02's contract extraction is pinned to. package.json auto-merges cleanly; only the derived lockfile conflicts. P01 correctly refuses to invent a resolution",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "BLOCKER: no prospective candidate can be constructed — origin/main advanced to 29a4a97e and now conflicts with the branch on pnpm-lock.yaml, so P01 refuses with BLOCKED(MERGE_CONFLICT) and no P06/P07 gate can execute against a current base"
+    },
+    {
+      "affected_gate": "P01/P03 audits",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T19:25:22.800Z",
+      "corrective_action": "Fixed at the root rather than by exemption. The independent origin/main resolutions were REMOVED: assertFreshBase now compares two values P01 already produced (the base recorded in reused evidence vs the freshly constructed candidate's base), which is the real staleness question and needs no ref resolution. assurance.mjs's two post-commit rev-parse calls were replaced with the symbolic ref HEAD, which git resolves inside the disposable candidate and is exactly equivalent. Only the genuinely descriptive cases — modules that NAME contract check IDs beginning with the workflows directory — received documented per-file allowlist entries in P03's YAML_READER_ALLOWLIST, each stating that the module opens no workflow file",
+      "detected_by": "P06/P07 cross-phase regression",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T19:25:22.753Z",
+          "flags": {
+            "corrective_action": "Fixed at the root rather than by exemption. The independent origin/main resolutions were REMOVED: assertFreshBase now compares two values P01 already produced (the base recorded in reused evidence vs the freshly constructed candidate's base), which is the real staleness question and needs no ref resolution. assurance.mjs's two post-commit rev-parse calls were replaced with the symbolic ref HEAD, which git resolves inside the disposable candidate and is exactly equivalent. Only the genuinely descriptive cases — modules that NAME contract check IDs beginning with the workflows directory — received documented per-file allowlist entries in P03's YAML_READER_ALLOWLIST, each stating that the module opens no workflow file",
+            "evidence": [],
+            "regression_test_id": "P07.NEG08 (rewritten), scripts/ci/p03.test.ts AUD02, scripts/ci/snapshot.test.ts provenance audit",
+            "retest_result": "P03 workflow-path violations 56 -> 0; P01 provenance violations 8 -> 0 (ok:true); scripts/ci/p03.test.ts and snapshot.test.ts pass; P06+P07 suites 56/56 pass with NEG08 rewritten to the new no-ref-resolution contract",
+            "root_cause": "Two independent lapses. (1) P03's AUD02 workflow-path audit and P01's provenance audit were never executed against the new scripts/ci/p06 and scripts/ci/p07 modules, so the previous turn's regression evidence was incomplete — only P02's equivalent audit had been reconciled. (2) More seriously, run-gates.mjs and run-p07.mjs each resolved 'git rev-parse origin/main' themselves to check candidate freshness. P01 is the sole resolver of branch provenance, and a second module deciding what the base is, is exactly the defect class DEF-025 recorded"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T19:25:22.799Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-051",
+      "opened_at": "2026-08-10T19:25:22.671Z",
+      "regression_test_id": "P07.NEG08 (rewritten), scripts/ci/p03.test.ts AUD02, scripts/ci/snapshot.test.ts provenance audit",
+      "retest_result": "P03 workflow-path violations 56 -> 0; P01 provenance violations 8 -> 0 (ok:true); scripts/ci/p03.test.ts and snapshot.test.ts pass; P06+P07 suites 56/56 pass with NEG08 rewritten to the new no-ref-resolution contract",
+      "root_cause": "Two independent lapses. (1) P03's AUD02 workflow-path audit and P01's provenance audit were never executed against the new scripts/ci/p06 and scripts/ci/p07 modules, so the previous turn's regression evidence was incomplete — only P02's equivalent audit had been reconciled. (2) More seriously, run-gates.mjs and run-p07.mjs each resolved 'git rev-parse origin/main' themselves to check candidate freshness. P01 is the sole resolver of branch provenance, and a second module deciding what the base is, is exactly the defect class DEF-025 recorded",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "the P06/P07 modules added last turn violated two ALREADY-ACCEPTED phases' isolation audits: 56 P03 workflow-path violations and 8 P01 provenance violations, neither of which was run before the previous halt"
+    },
+    {
+      "affected_gate": "server/updateUserTimeout.test.ts",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T20:06:44.782Z",
+      "corrective_action": "REMEDIATED under the authority of section 14, whose condition was met: the healthy current candidate reproduced the failure at elapsed=531ms against the 500ms bound, on an 8-core host with no synthetic load, versus ~60ms median idle. That is decisive evidence the single-sample assertion measures CPU availability rather than bcrypt configuration. The group was restructured, not weakened: (1) a deterministic assertion that a hash generated at the production cost embeds cost >= 10, read from the bcrypt modular-crypt prefix; (2) a NEW deterministic assertion that every production bcrypt.hash site uses cost >= 10, which is the invariant the old test's name claimed but never checked; (3) the timing signal retained with the SAME 500ms bound but taken as the median of 5 samples, so one scheduling stall cannot fail the build while a genuine cost regression — each +1 doubles the work — still shifts the whole distribution past the bound. bcrypt cost was not lowered, no threshold was widened, and nothing was excluded or allowlisted",
+      "detected_by": "DEF-047 invariant analysis",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T19:25:22.891Z",
+          "flags": {
+            "corrective_action": "NOT CHANGED. The evidence does NOT support weakening or restructuring it: with 8x headroom on a healthy host the timing bound is not a contention proxy, and its three observed breaches are fully explained by DEF-049's eight orphaned CPU-load generators. Changing a test to fix an environment defect would be the exact dishonest stabilization this program forbids. Recorded instead as a genuine coverage gap for the owner: a deterministic assertion that production's configured bcrypt cost is >= 10, with a wrong-cost poison proving rejection, would test the invariant the test's name claims",
+            "evidence": [],
+            "root_cause": "The assertion is 'await bcrypt.hash(pw, 10)' followed by 'expect(elapsed).toBeLessThan(500)'. Because the test supplies the cost itself, it cannot detect a production misconfiguration: the five production hashing sites (server/routers/appUsers.ts x3, server/routers/stripe.ts, server/stripeWebhook.ts) each pass 10 independently, and nothing asserts they do. What the test actually measures is how fast this machine hashes at cost 10 — measured on a healthy host at min 58ms / median 60ms / p95 65ms / max 86ms over 40 samples, roughly 8x under its own 500ms bound"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-10T20:06:44.731Z",
+          "flags": {
+            "corrective_action": "REMEDIATED under the authority of section 14, whose condition was met: the healthy current candidate reproduced the failure at elapsed=531ms against the 500ms bound, on an 8-core host with no synthetic load, versus ~60ms median idle. That is decisive evidence the single-sample assertion measures CPU availability rather than bcrypt configuration. The group was restructured, not weakened: (1) a deterministic assertion that a hash generated at the production cost embeds cost >= 10, read from the bcrypt modular-crypt prefix; (2) a NEW deterministic assertion that every production bcrypt.hash site uses cost >= 10, which is the invariant the old test's name claimed but never checked; (3) the timing signal retained with the SAME 500ms bound but taken as the median of 5 samples, so one scheduling stall cannot fail the build while a genuine cost regression — each +1 doubles the work — still shifts the whole distribution past the bound. bcrypt cost was not lowered, no threshold was widened, and nothing was excluded or allowlisted",
+            "evidence": [],
+            "regression_test_id": "server/updateUserTimeout.test.ts bcrypt cost factor group (3 tests)",
+            "retest_result": "16/16 pass; negative proof recorded under DEF-054 shows the new production-cost assertion rejects a lowered cost at the exact offending site and restores cleanly"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T20:06:44.781Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-052",
+      "opened_at": "2026-08-10T19:25:22.843Z",
+      "regression_test_id": "server/updateUserTimeout.test.ts bcrypt cost factor group (3 tests)",
+      "retest_result": "16/16 pass; negative proof recorded under DEF-054 shows the new production-cost assertion rejects a lowered cost at the exact offending site and restores cleanly",
+      "root_cause": "The assertion is 'await bcrypt.hash(pw, 10)' followed by 'expect(elapsed).toBeLessThan(500)'. Because the test supplies the cost itself, it cannot detect a production misconfiguration: the five production hashing sites (server/routers/appUsers.ts x3, server/routers/stripe.ts, server/stripeWebhook.ts) each pass 10 independently, and nothing asserts they do. What the test actually measures is how fast this machine hashes at cost 10 — measured on a healthy host at min 58ms / median 60ms / p95 65ms / max 86ms over 40 samples, roughly 8x under its own 500ms bound",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "CANDIDATE FINDING: the test named 'bcrypt cost=10 (OWASP-compliant)' hardcodes cost 10 in its own call, so it verifies nothing about the cost production actually uses; the genuine security invariant is untested"
+    },
+    {
+      "affected_gate": ".github/workflows/03-semgrep.yml#blocking",
+      "blast_radius": "Two ERROR-severity detectors have contributed nothing for as long as the parse errors have existed: float arithmetic on integer cents (billing rounding drift) and production code importing test doubles. The gate they belong to is GRADUATING, not required, so this does not by itself block the merge contract — but any confidence that these two invariants are enforced is unfounded",
+      "closed_at": null,
+      "corrective_action": "Correction DESIGNED AND PROVEN in a sandbox but NOT APPLIED. Splitting the money rule into two rules, each carrying only the metavariable constraint that binds in its own branch, and replacing the invalid 'parseFloat(... $C ...)' with 'parseFloat($C)', yields 3 findings against a deterministic three-branch fixture (multiplication, division, parseFloat) and 0 false positives against a clean fixture exercising integer math, integer division, an unrelated parseFloat, and unrelated float arithmetic. Not applied because .semgrep/ rule content is candidate source outside P06's authorized static-security scope, and dime-test-mock-imported-by-prod needs its own separate correction",
+      "detected_by": "P06 re-proof of DEF-044",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T19:53:10.412Z",
+          "flags": {
+            "blast_radius": "Two ERROR-severity detectors have contributed nothing for as long as the parse errors have existed: float arithmetic on integer cents (billing rounding drift) and production code importing test doubles. The gate they belong to is GRADUATING, not required, so this does not by itself block the merge contract — but any confidence that these two invariants are enforced is unfounded",
+            "corrective_action": "Correction DESIGNED AND PROVEN in a sandbox but NOT APPLIED. Splitting the money rule into two rules, each carrying only the metavariable constraint that binds in its own branch, and replacing the invalid 'parseFloat(... $C ...)' with 'parseFloat($C)', yields 3 findings against a deterministic three-branch fixture (multiplication, division, parseFloat) and 0 false positives against a clean fixture exercising integer math, integer division, an unrelated parseFloat, and unrelated float arithmetic. Not applied because .semgrep/ rule content is candidate source outside P06's authorized static-security scope, and dime-test-mock-imported-by-prod needs its own separate correction",
+            "evidence": [],
+            "root_cause": "Running the contract's exact blocking command with stderr surfaced shows 'semgrep-core rule validation failed (PatternParseError)' twice: dime-money-float-arithmetic-on-cents ('parseFloat(... $C ...)' is not a valid TypeScript pattern) and dime-test-mock-imported-by-prod ('import ... from \"$PATH\"'). Both are severity ERROR. Crucially the exact gate command — semgrep scan --config .semgrep/ server client/src shared scripts --severity ERROR --error — exits 0 despite both parse errors, because a whole-directory config drops unparseable rules with a warning rather than failing. Scanning the single file in isolation exits 2, which is why this stayed invisible: the gate's own invocation shape hides it. This is the DEF-023 class exactly — a security gate structurally incapable of rejecting, reporting success"
+          }
+        }
+      ],
+      "id": "DEF-053",
+      "opened_at": "2026-08-10T19:53:10.343Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "Running the contract's exact blocking command with stderr surfaced shows 'semgrep-core rule validation failed (PatternParseError)' twice: dime-money-float-arithmetic-on-cents ('parseFloat(... $C ...)' is not a valid TypeScript pattern) and dime-test-mock-imported-by-prod ('import ... from \"$PATH\"'). Both are severity ERROR. Crucially the exact gate command — semgrep scan --config .semgrep/ server client/src shared scripts --severity ERROR --error — exits 0 despite both parse errors, because a whole-directory config drops unparseable rules with a warning rather than failing. Scanning the single file in isolation exits 2, which is why this stayed invisible: the gate's own invocation shape hides it. This is the DEF-023 class exactly — a security gate structurally incapable of rejecting, reporting success",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "title": "CANDIDATE FINDING, escalates DEF-044: TWO ERROR-severity Semgrep rules fail to PARSE, so semgrep-core silently drops them and the blocking gate still exits 0 — the gate reports success while carrying invalid detectors"
+    },
+    {
+      "affected_gate": "server/updateUserTimeout.test.ts",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T20:06:44.607Z",
+      "corrective_action": "Pathspec changed to the directory ('server') with the .ts and .test.ts filtering done in code. The prior glob and the reason it was wrong are recorded in a comment at the call site so it is not reintroduced",
+      "detected_by": "negative proof of my own DEF-052 remediation",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T20:06:44.561Z",
+          "flags": {
+            "corrective_action": "Pathspec changed to the directory ('server') with the .ts and .test.ts filtering done in code. The prior glob and the reason it was wrong are recorded in a comment at the call site so it is not reintroduced",
+            "evidence": [],
+            "regression_test_id": "server/updateUserTimeout.test.ts :: every production hashing site uses cost >= 10",
+            "retest_result": "Full poison/control cycle: control 16/16 PASS; poison at server/stripeWebhook.ts cost 10->4 FAILS with the exact message 'these production sites hash below cost 10: server/stripeWebhook.ts(cost=4)'; restore returns 16/16 PASS; zero working-tree residue",
+            "root_cause": "git ls-files 'server/**/*.ts' returns 228 files; git ls-files server returns 441 .ts files. The ** form requires an intervening directory, so every module sitting directly in server/ — including server/stripeWebhook.ts, one of the five production hashing sites — was invisible to the check. Caught only because the remediation was negatively tested rather than assumed correct: lowering stripeWebhook's cost to 4 produced 16 passed"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T20:06:44.607Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-054",
+      "opened_at": "2026-08-10T20:06:44.485Z",
+      "regression_test_id": "server/updateUserTimeout.test.ts :: every production hashing site uses cost >= 10",
+      "retest_result": "Full poison/control cycle: control 16/16 PASS; poison at server/stripeWebhook.ts cost 10->4 FAILS with the exact message 'these production sites hash below cost 10: server/stripeWebhook.ts(cost=4)'; restore returns 16/16 PASS; zero working-tree residue",
+      "root_cause": "git ls-files 'server/**/*.ts' returns 228 files; git ls-files server returns 441 .ts files. The ** form requires an intervening directory, so every module sitting directly in server/ — including server/stripeWebhook.ts, one of the five production hashing sites — was invisible to the check. Caught only because the remediation was negatively tested rather than assumed correct: lowering stripeWebhook's cost to 4 produced 16 passed",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "the first version of my production-bcrypt-cost assertion was itself vacuous: the pathspec 'server/**/*.ts' silently excludes files directly under server/, so the poisoned site was never scanned and the test passed"
+    },
+    {
+      "affected_gate": "P05.AUD01 poison containment",
+      "blast_radius": null,
+      "closed_at": "2026-08-10T21:42:53.921Z",
+      "corrective_action": "Registered the p06 poison family in POISON_SIGNATURES and added fixture.json to INERT_FIXTURE_FILES, both with comments stating why. The audit now SEES P06 poison and must actively classify it as INERT_FIXTURE under the approved fixtures root — and would refuse it as a violation anywhere else. Neither change relaxes a rule; both widen what the audit examines",
+      "detected_by": "P06 full-regression surface (P05.AUD01)",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T21:42:53.878Z",
+          "flags": {
+            "corrective_action": "Registered the p06 poison family in POISON_SIGNATURES and added fixture.json to INERT_FIXTURE_FILES, both with comments stating why. The audit now SEES P06 poison and must actively classify it as INERT_FIXTURE under the approved fixtures root — and would refuse it as a violation anywhere else. Neither change relaxes a rule; both widen what the audit examines",
+            "evidence": [],
+            "regression_test_id": "scripts/ci/selftest/p05.test.ts :: P05.AUD01",
+            "retest_result": "auditPoisonContainment: violations 0, ok true, INERT_FIXTURE classifications 9 -> 15 as P06 poison became visible; P05.AUD01 passes. No file moved and no poison content changed — only the audit's coverage widened",
+            "root_cause": "auditPoisonContainment classifies only files matching a POISON_SIGNATURE. The list carried p05-marker, template-injection, unpinned-uses, secret-reference and destructive-sql, but nothing matching the p06 family (p06Poison..., p06-...-assurance-poison, 'P06 ASSURANCE poison'). Consequently only 1 of the 8 P06 fixtures' poison files was seen at all — the zizmor one, which matched template-injection incidentally. The audit reported ok:true while never examining the rest, which is precisely the hole it exists to close. A second, smaller gap: INERT_FIXTURE_FILES listed P05's expect.json but not P06's fixture.json manifest, so P06 expectation files were also unrecognized"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-10T21:42:53.920Z",
+          "flags": {
+            "evidence": []
+          }
+        }
+      ],
+      "id": "DEF-055",
+      "opened_at": "2026-08-10T21:42:53.828Z",
+      "regression_test_id": "scripts/ci/selftest/p05.test.ts :: P05.AUD01",
+      "retest_result": "auditPoisonContainment: violations 0, ok true, INERT_FIXTURE classifications 9 -> 15 as P06 poison became visible; P05.AUD01 passes. No file moved and no poison content changed — only the audit's coverage widened",
+      "root_cause": "auditPoisonContainment classifies only files matching a POISON_SIGNATURE. The list carried p05-marker, template-injection, unpinned-uses, secret-reference and destructive-sql, but nothing matching the p06 family (p06Poison..., p06-...-assurance-poison, 'P06 ASSURANCE poison'). Consequently only 1 of the 8 P06 fixtures' poison files was seen at all — the zizmor one, which matched template-injection incidentally. The audit reported ok:true while never examining the rest, which is precisely the hole it exists to close. A second, smaller gap: INERT_FIXTURE_FILES listed P05's expect.json but not P06's fixture.json manifest, so P06 expectation files were also unrecognized",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "the P06 fixtures were INVISIBLE to P05's poison-containment audit: its signature list knew only the p05 marker, so most P06 poison passed through unexamined rather than being proven inert"
+    },
+    {
+      "affected_gate": "P01/acceptance model",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": "NOT a verifier defect and not fixable by changing the verifier: the freshness rule is correct and is what prevents certifying a state GitHub would not evaluate. Recorded so the acceptance model's real-world constraint is explicit. Practical resolutions belong to the owner: accept during a quiet window, brief-freeze main for the certification window, or amend the frozen model to permit acceptance against a base whose delta is provably disjoint from the candidate's verification surface — the last would need its own decision record, since 'provably disjoint' is exactly the kind of judgement this programme exists to avoid making informally",
+      "detected_by": "P06/P07 fresh-base checks",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-10T21:46:18.109Z",
+          "flags": {
+            "corrective_action": "NOT a verifier defect and not fixable by changing the verifier: the freshness rule is correct and is what prevents certifying a state GitHub would not evaluate. Recorded so the acceptance model's real-world constraint is explicit. Practical resolutions belong to the owner: accept during a quiet window, brief-freeze main for the certification window, or amend the frozen model to permit acceptance against a base whose delta is provably disjoint from the candidate's verification surface — the last would need its own decision record, since 'provably disjoint' is exactly the kind of judgement this programme exists to avoid making informally",
+            "evidence": [],
+            "root_cause": "The frozen governing principle forbids reusing any proof, gate result, classification, or ASSURANCE artifact across a base change, and section 29/31 require a fresh-base check immediately before each phase acceptance. A complete cycle — P06 roster over 16 gates including a Docker image build, the full ASSURANCE set over 8 fixtures each running three legs of the 5,090-test proof gate, and P07 including migration replay and the DB suite — takes roughly 40-50 minutes on this host. origin/main moved THREE times inside this single turn: 7fa4b3fe -> 29a4a97e -> a85fd95f -> fdb4bfee, roughly hourly, driven by dependabot merges and active feature PRs. Each move invalidates the base binding of evidence that was still being produced"
+          }
+        }
+      ],
+      "id": "DEF-056",
+      "opened_at": "2026-08-10T21:46:18.058Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "The frozen governing principle forbids reusing any proof, gate result, classification, or ASSURANCE artifact across a base change, and section 29/31 require a fresh-base check immediately before each phase acceptance. A complete cycle — P06 roster over 16 gates including a Docker image build, the full ASSURANCE set over 8 fixtures each running three legs of the 5,090-test proof gate, and P07 including migration replay and the DB suite — takes roughly 40-50 minutes on this host. origin/main moved THREE times inside this single turn: 7fa4b3fe -> 29a4a97e -> a85fd95f -> fdb4bfee, roughly hourly, driven by dependabot merges and active feature PRs. Each move invalidates the base binding of evidence that was still being produced",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "STRUCTURAL: origin/main advances faster than a full P06+P07 verification cycle completes, so a strictly-current-base acceptance may never converge on an active day"
+    },
+    {
+      "affected_gate": ".github/workflows/tailered-os.yml#test",
+      "blast_radius": null,
+      "closed_at": "2026-08-11T09:34:26.504Z",
+      "corrective_action": "provisionCandidate now runs git submodule update --init --recursive in any candidate carrying .gitmodules (scripts/ci/p06/capability.mjs)",
+      "detected_by": "P06 roster at base 43a33c84",
+      "evidence": [
+        {
+          "bytes": 3476,
+          "path": "docs/verification/evidence/p06/T16-def057-def058-workflow-env.md",
+          "sha256": "c2b293efba354d97651765c1328fdbfc86116ee8ddf6fb06a3cbda67bdf6b927"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-11T08:49:57.955Z",
+          "flags": {
+            "corrective_action": "provisionCandidate now runs 'git submodule update --init --recursive' inside the candidate whenever .gitmodules exists, matching the contract's own checkout semantics; worktrees share the super-repo's .git/modules store so only the first init pays the network cost. Init failure is recorded distinctly rather than allowed to masquerade as a candidate verdict",
+            "evidence": [],
+            "root_cause": "PR #496 added platform/tailered-os/cloudflare-os as a git submodule, and the tailered-os contract job checks out with 'submodules: recursive'. git worktree candidates never initialize gitlinks, so the gate's first detector step (cwd platform/tailered-os) failed at 0.1s reading the submodule HEAD. The gate is LOCAL, non-required, non-graduating — but reporting a materialization gap as detector FAIL is the exact false-verdict class the boundary model exists to prevent"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-11T09:34:26.502Z",
+          "flags": {
+            "corrective_action": "provisionCandidate now runs git submodule update --init --recursive in any candidate carrying .gitmodules (scripts/ci/p06/capability.mjs)",
+            "evidence": [
+              "docs/verification/evidence/p06/T16-def057-def058-workflow-env.md"
+            ],
+            "retest_result": "PASS: serial roster @43a33c84 — detector read b2a51b5426398c8353d9d4dd984bd525121ab5f2 from the initialized submodule inside the candidate worktree; exact-geometry manual repro confirms initialized:true. Gate's residual FAIL is DEF-058 (workflow-level env fidelity), a distinct verifier defect"
+          }
+        }
+      ],
+      "id": "DEF-057",
+      "opened_at": "2026-08-11T08:49:57.886Z",
+      "regression_test_id": null,
+      "retest_result": "PASS: serial roster @43a33c84 — detector read b2a51b5426398c8353d9d4dd984bd525121ab5f2 from the initialized submodule inside the candidate worktree; exact-geometry manual repro confirms initialized:true. Gate's residual FAIL is DEF-058 (workflow-level env fidelity), a distinct verifier defect",
+      "root_cause": "PR #496 added platform/tailered-os/cloudflare-os as a git submodule, and the tailered-os contract job checks out with 'submodules: recursive'. git worktree candidates never initialize gitlinks, so the gate's first detector step (cwd platform/tailered-os) failed at 0.1s reading the submodule HEAD. The gate is LOCAL, non-required, non-graduating — but reporting a materialization gap as detector FAIL is the exact false-verdict class the boundary model exists to prevent",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "candidate materialization gap: P01 worktree candidates leave the new cloudflare-os gitlink EMPTY, so the tailered-os gate's detector failed on 'git -C cloudflare-os rev-parse HEAD' — a provisioning gap surfacing as a false detector FAIL (the DEF-031 class)"
+    },
+    {
+      "affected_gate": ".github/workflows/tailered-os.yml#test",
+      "blast_radius": "1 gate false-FAIL (tailered-os#test); 0 verdict impact elsewhere (proven by grep of all 3 workflow-level env consumers)",
+      "closed_at": null,
+      "corrective_action": null,
+      "detected_by": "P06 serial roster @43a33c84, tailered-os.yml#test step journal",
+      "evidence": [
+        {
+          "bytes": 3476,
+          "path": "docs/verification/evidence/p06/T16-def057-def058-workflow-env.md",
+          "sha256": "c2b293efba354d97651765c1328fdbfc86116ee8ddf6fb06a3cbda67bdf6b927"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-11T09:34:18.876Z",
+          "flags": {
+            "blast_radius": "1 gate false-FAIL (tailered-os#test); 0 verdict impact elsewhere (proven by grep of all 3 workflow-level env consumers)",
+            "evidence": [
+              "docs/verification/evidence/p06/T16-def057-def058-workflow-env.md"
+            ],
+            "root_cause": "contract-extract.mjs env capture is job?.env ?? null; GHA env cascade is workflow<job<step but workflow layer never folded into checks"
+          }
+        }
+      ],
+      "id": "DEF-058",
+      "opened_at": "2026-08-11T09:34:18.813Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "contract-extract.mjs env capture is job?.env ?? null; GHA env cascade is workflow<job<step but workflow layer never folded into checks",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "title": "VERIFIER FIDELITY: contract extractor drops workflow-level env: blocks (records job?.env only), so EXPECTED_CLOUDFLARE_OS_PIN never reaches the detector step — a correct candidate pin (b2a51b54) is reported as detector FAIL. Blast radius bounded to this one gate: 03-semgrep/05-workflow-security use their workflow-level vars in provisioning steps already satisfied by governed tools"
     }
   ],
   "gate_results": [],
@@ -2513,8 +3929,19 @@
         "P06.CP01 recorded"
       ],
       "id": "P06",
-      "state": "NOT_STARTED",
-      "state_history": [],
+      "state": "BLOCKED",
+      "state_history": [
+        {
+          "at": "2026-08-10T14:22:27.935Z",
+          "from": "NOT_STARTED",
+          "to": "IN_PROGRESS"
+        },
+        {
+          "at": "2026-08-10T14:22:28.019Z",
+          "from": "IN_PROGRESS",
+          "to": "BLOCKED"
+        }
+      ],
       "title": "PARITY — static, security, supply chain"
     },
     {
@@ -2537,8 +3964,19 @@
         "P07.CP01 recorded"
       ],
       "id": "P07",
-      "state": "NOT_STARTED",
-      "state_history": [],
+      "state": "BLOCKED",
+      "state_history": [
+        {
+          "at": "2026-08-10T14:22:28.074Z",
+          "from": "NOT_STARTED",
+          "to": "IN_PROGRESS"
+        },
+        {
+          "at": "2026-08-10T14:22:28.151Z",
+          "from": "IN_PROGRESS",
+          "to": "BLOCKED"
+        }
+      ],
       "title": "PARITY — test and data"
     },
     {

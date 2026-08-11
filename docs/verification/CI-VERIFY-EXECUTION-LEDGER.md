@@ -30,8 +30,8 @@
 | `P03` | Registries, taxonomy, reporter, ledger integration | `ACCEPTED` | 24 / 24 | 0 | 0 |
 | `P04` | Executor core | `ACCEPTED` | 30 / 30 | 0 | 0 |
 | `P05` | ASSURANCE — the self-test framework | `ACCEPTED` | 27 / 27 | 0 | 0 |
-| `P06` | PARITY — static, security, supply chain | `NOT_STARTED` | 0 / 29 | 0 | 0 |
-| `P07` | PARITY — test and data | `NOT_STARTED` | 0 / 24 | 0 | 0 |
+| `P06` | PARITY — static, security, supply chain | `BLOCKED` | 0 / 29 | 0 | 0 |
+| `P07` | PARITY — test and data | `BLOCKED` | 0 / 24 | 0 | 0 |
 | `P08` | CLEANROOM — image identity, container build, dual runtime proof | `NOT_STARTED` | 0 / 23 | 0 | 0 |
 | `P09` | HARDENING | `NOT_STARTED` | 0 / 17 | 0 | 0 |
 | `P10` | Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR | `NOT_STARTED` | 0 / 22 | 0 | 0 |
@@ -392,7 +392,7 @@
 
 ## P06 — PARITY — static, security, supply chain
 
-**State:** `NOT_STARTED`
+**State:** `BLOCKED`
 
 **Assurance property:** Every locally reproducible static and supply-chain requirement of the merge contract is executed verbatim, with pinned tools.
 
@@ -448,7 +448,7 @@
 
 ## P07 — PARITY — test and data
 
-**State:** `NOT_STARTED`
+**State:** `BLOCKED`
 
 **Assurance property:** The full test contract runs with CI's partitioning, with no impact selection, and DB-lane exclusion is proven deterministically.
 
@@ -705,6 +705,34 @@
 | `DEF-028` | `P05.EV01` | MEDIUM | `CLOSED` | Regenerating assurance.json in place invalidated evidence under three already-closed units (P05.EV01/EV02/GATE01); PASS is terminal by design so they cannot be re-pointed, and the run artifact was never a stable path to record as immutable unit evidence |
 | `DEF-029` | `P05.T03` | HIGH | `CLOSED` | origin/main advanced mid-session (4d644cf4 -> 1c17c555, 5 commits touching 19 workflow files) and now conflicts with this branch in .gitignore; P01 reports BLOCKED(MERGE_CONFLICT) so no candidate can be constructed, and the existing proofs certify a merge GitHub will no longer evaluate |
 | `DEF-030` | `P05.T03` | HIGH | `CLOSED` | Authorized main integration cannot land on the branch: four unrelated UNCOMMITTED developer paths (.gitignore, .claude/settings.json, CLAUDE.md, .claude/scripts/bootstrap-gstack.sh) collide with the incoming merge, and git refuses; resolving requires committing, stashing, or removing developer work, which section 1 forbids |
+| `DEF-031` | `P06.T02` | MEDIUM | `CLOSED` | P06 gate runner executes contract provisioning steps that cannot run non-interactively, producing FAIL that is not a detector verdict: ci.yml#security-audit fails on 'sudo: a terminal is required' AFTER its actual checks passed, and full-osv fails on a curl write error |
+| `DEF-032` | `P06.T02` | MEDIUM | `CLOSED` | P06 gate runner ignores contract working-directory: dime-llm-validation#validate fails with 'No pyproject.toml found' because it runs from the worktree root instead of its declared ml/dime-1.0 cwd |
+| `DEF-033` | `P06.T02` | HIGH | `CLOSED` | Secret-bound gates are classified EXECUTABLE by P06 scope derivation: 01-pr-proof-contract#proof runs the full suite and reports FAIL from 80 credential/DB-dependent test failures (64 env-bound by the repo's own env-gate); these gates require GitHub Actions secrets and must be NOT_LOCALLY_EXECUTABLE, never FAIL |
+| `DEF-034` | `P07.T01` | HIGH | `CLOSED` | P07 DB parity is blocked: ci.yml#db-tests requires a mysql:8 service container and the Docker daemon is unreachable, so no digest-pinned MySQL fixture, migration replay, or DB test execution is possible; faking it is forbidden |
+| `DEF-035` | `P06.T03 execution` | MEDIUM | `CLOSED` | P06 runner let a stale /usr/local/bin/node v24.11.1 shadow the contract's node-22 pin, so tsx children ran the wrong runtime and ci.yml#typecheck's pi:audit step crashed |
+| `DEF-036` | `P06.T03 execution` | MEDIUM | `CLOSED` | executor's gate-isolated TMPDIR path exceeded the 104-byte AF_UNIX sun_path limit, so tsx IPC socket creation failed with EINVAL inside ci.yml#typecheck |
+| `DEF-037` | `P06.T03 execution` | HIGH | `CLOSED` | step driver ran undeclared-shell contract steps under pipefail, converting a SUCCESSFUL 'docker logs | grep -q' into exit 141 (SIGPIPE) and reporting a false detector FAIL for 09-artifact |
+| `DEF-038` | `P06.T03 execution` | MEDIUM | `CLOSED` | bsdtar on the host rejected the proof contract's 'tar --sort=name', producing a false FAIL in 01-pr-proof-contract#proof's digest step |
+| `DEF-039` | `P06.T03 execution` | MEDIUM | `CLOSED` | node_modules equivalence-by-upward-resolution was insufficient: contract-extract.mjs resolves node_modules/yaml/package.json as a literal path, so 10 contract.test.ts assertions failed inside the candidate |
+| `DEF-040` | `P07.T02 execution` | MEDIUM | `CLOSED` | verifier-owned MySQL container left an anonymous volume behind: docker rm -f does not remove a container's own anonymous volumes, violating the zero-owned-residue law |
+| `DEF-041` | `P06 ASSURANCE` | HIGH | `CLOSED` | ASSURANCE arm() trusted git apply: a mis-counted @@ hunk silently TRUNCATED the poison, yielding a weaker defect that tripped a different rule than the one under proof |
+| `DEF-042` | `P06 ASSURANCE` | LOW | `CLOSED` | ASSURANCE cross-fixture contamination: one fixture's declared execution artifact (gitleaks' results.sarif) surfaced as the NEXT fixture's restore residue, producing a false NON_RESTORING |
+| `DEF-043` | `P06 ASSURANCE` | MEDIUM | `CLOSED` | ASSURANCE poison was applied but left unstaged, so semgrep skipped it entirely — 'Scan was limited to files tracked by git' — and the blocking gate could not be proven |
+| `DEF-044` | `P06 ASSURANCE` | MEDIUM | `CLOSED` | CANDIDATE FINDING: the blocking Semgrep rule dime-money-float-arithmetic-on-cents is structurally incapable of firing on its multiplication/division alternatives, so billing-math protection is vacuous |
+| `DEF-045` | `P06.T03 execution` | MEDIUM | `OPEN` | CANDIDATE FINDING: dime-llm-validation#validate fails on origin/main itself — 6 governed evidence-chain pytest failures — and the workflow's ml/** path filter means main has not re-run it since the drift landed |
+| `DEF-046` | `P06.T03 execution` | LOW | `OPEN` | CANDIDATE FINDING: the nightly tier is red on main (full-osv-scan and full-container-scan), and the local verifier reproduces both failures — parity confirmed, not a verifier defect |
+| `DEF-047` | `P06 ASSURANCE control leg` | HIGH | `CLOSED` | the mandatory #proof gate is INTERMITTENT on this host: its ASSURANCE control leg failed on a single test (scripts/os/observe-crons.test.ts) that passes 3/3 in isolation and passed in the immediately preceding full roster run |
+| `DEF-048` | `P07.T02 execution` | LOW | `CLOSED` | the capability probe ran a frozen pnpm install in the DEVELOPER'S repository root, mutating node_modules outside the verifier's scope, and forcing --offline made provisioning depend on local store contents |
+| `DEF-049` | `P06 resumption, host measurement` | HIGH | `CLOSED` | ROOT CAUSE OF DEF-047: eight orphaned synthetic CPU-load generators from a PRIOR Claude Code session had been saturating all 8 cores continuously for 2 days 23 hours, starving every full-suite #proof run |
+| `DEF-050` | `P06/P07 resumption, P01 candidate construction` | HIGH | `CLOSED` | BLOCKER: no prospective candidate can be constructed — origin/main advanced to 29a4a97e and now conflicts with the branch on pnpm-lock.yaml, so P01 refuses with BLOCKED(MERGE_CONFLICT) and no P06/P07 gate can execute against a current base |
+| `DEF-051` | `P06/P07 cross-phase regression` | MEDIUM | `CLOSED` | the P06/P07 modules added last turn violated two ALREADY-ACCEPTED phases' isolation audits: 56 P03 workflow-path violations and 8 P01 provenance violations, neither of which was run before the previous halt |
+| `DEF-052` | `DEF-047 invariant analysis` | MEDIUM | `CLOSED` | CANDIDATE FINDING: the test named 'bcrypt cost=10 (OWASP-compliant)' hardcodes cost 10 in its own call, so it verifies nothing about the cost production actually uses; the genuine security invariant is untested |
+| `DEF-053` | `P06 re-proof of DEF-044` | HIGH | `OPEN` | CANDIDATE FINDING, escalates DEF-044: TWO ERROR-severity Semgrep rules fail to PARSE, so semgrep-core silently drops them and the blocking gate still exits 0 — the gate reports success while carrying invalid detectors |
+| `DEF-054` | `negative proof of my own DEF-052 remediation` | MEDIUM | `CLOSED` | the first version of my production-bcrypt-cost assertion was itself vacuous: the pathspec 'server/**/*.ts' silently excludes files directly under server/, so the poisoned site was never scanned and the test passed |
+| `DEF-055` | `P06 full-regression surface (P05.AUD01)` | HIGH | `CLOSED` | the P06 fixtures were INVISIBLE to P05's poison-containment audit: its signature list knew only the p05 marker, so most P06 poison passed through unexamined rather than being proven inert |
+| `DEF-056` | `P06/P07 fresh-base checks` | MEDIUM | `OPEN` | STRUCTURAL: origin/main advances faster than a full P06+P07 verification cycle completes, so a strictly-current-base acceptance may never converge on an active day |
+| `DEF-057` | `P06 roster at base 43a33c84` | MEDIUM | `CLOSED` | candidate materialization gap: P01 worktree candidates leave the new cloudflare-os gitlink EMPTY, so the tailered-os gate's detector failed on 'git -C cloudflare-os rev-parse HEAD' — a provisioning gap surfacing as a false detector FAIL (the DEF-031 class) |
+| `DEF-058` | `P06 serial roster @43a33c84, tailered-os.yml#test step journal` | HIGH | `OPEN` | VERIFIER FIDELITY: contract extractor drops workflow-level env: blocks (records job?.env only), so EXPECTED_CLOUDFLARE_OS_PIN never reaches the detector step — a correct candidate pin (b2a51b54) is reported as detector FAIL. Blast radius bounded to this one gate: 03-semgrep/05-workflow-security use their workflow-level vars in provisioning steps already satisfied by governed tools |
 
 ## Checkpoints
 
@@ -722,3 +750,11 @@
 | `P05` | **DO NOT PROCEED — Blocking IDs: DEF-029** | 2026-08-10T13:15:11.937Z | `3272fd4ce86f` `c94494e91c9a` `8f98269979b8` |
 | `P05` | **DO NOT PROCEED — Blocking IDs: DEF-029, DEF-030** | 2026-08-10T13:44:51.683Z | `84975bcad146` `b15f0425e1ce` |
 | `P05` | **PROCEED TO P06/P07** | 2026-08-10T14:03:07.890Z | `ab45fd7b558b` `abf4c803c515` `27c38bf1eaa0` |
+| `P06` | **DO NOT PROCEED — Blocking IDs: DEF-031, DEF-032, DEF-033** | 2026-08-10T14:22:28.227Z | `cc14465b43fa` `190c484a3703` `ae0d6be4ea27` |
+| `P07` | **DO NOT PROCEED — Blocking IDs: DEF-034** | 2026-08-10T14:22:28.288Z | `f388f46ae9f9` `9f5ddae08867` |
+| `P06` | **DO NOT PROCEED — Blocking IDs: DEF-031, DEF-032, DEF-033** | 2026-08-10T14:34:03.422Z | `0f8dca748667` `4dded656ac55` `abc590181a04` |
+| `P07` | **DO NOT PROCEED — Blocking IDs: DEF-034** | 2026-08-10T14:34:03.488Z | `2b7514164ab6` `9f5ddae08867` |
+| `P06` | **DO NOT PROCEED — blocking: DEF-047 (mandatory #proof gate intermittent on this host; ASSURANCE coverage 5/6, #proof UNPROVEN because a proof requires a green control leg)** | 2026-08-10T18:37:18.002Z | `2b5c209dd15e` `eb7ea91ec878` `4ed0818286bc` |
+| `P07` | **DO NOT PROCEED — blocking: DEF-047 (shared test-surface instability prevents asserting zero_flaky_mandatory). DB parity itself PROVEN: digest-bound mysql 8.4.11, migration replay to 0134, 10 files/92 tests, zero residue; DEF-034 CLOSED** | 2026-08-10T18:37:18.174Z | `f01e7bf16e52` `e688f054502d` |
+| `P06` | **DO NOT PROCEED — blocking: DEF-050 (no candidate: origin/main advanced to 29a4a97e and conflicts on pnpm-lock.yaml), DEF-047 (root cause established and remediated via DEF-049, but the 5-run determinism campaign requires the blocked candidate)** | 2026-08-10T19:28:40.157Z | `71abf520c025` |
+| `P07` | **DO NOT PROCEED — blocking: DEF-050, DEF-047. DB parity evidence is real but now stale-based: it binds to 7fa4b3fe and origin/main has moved to 29a4a97e** | 2026-08-10T19:28:40.241Z | `9d23daccdf9b` |
