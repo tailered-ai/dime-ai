@@ -1230,6 +1230,71 @@ describe("v4.2 verifier-hardening regressions", () => {
   });
 });
 
+describe("v4.3 CSO hardening", () => {
+  it("a symlink inside the run dir pointing outside is a fidelity defect, not an oracle", async () => {
+    const { symlinkSync } = await import("node:fs");
+    happyBase();
+    // Plant a target OUTSIDE the run dir and a contained-looking symlink to it.
+    const outside = join(tmpRoot, "outside-secret.txt");
+    writeFileSync(outside, "bytes outside the run dir\n");
+    mkdirSync(join(tmpRoot, RUN, "reports"), { recursive: true });
+    symlinkSync(outside, join(tmpRoot, RUN, "reports", "escape.md"));
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_REGISTERED",
+      summary: "artifact through a symlink",
+      artifact: {
+        id: "ART-escape",
+        uri: "reports/escape.md",
+        artifact_type: "report",
+        storage_class: "external",
+        content_hash: "0".repeat(64),
+      },
+    });
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "reconciled",
+      clean: true,
+    });
+    terminal();
+    const blockers = closeout(RUN).blockers.join("\n");
+    assert.match(blockers, /escapes the run directory through a symlink/);
+    // And crucially: NO hash comparison happened (no equality oracle).
+    assert.doesNotMatch(blockers, /does not match actual/);
+  });
+
+  it("fidelity hashing refuses oversized files visibly instead of slurping them", () => {
+    happyBase();
+    const big = join(tmpRoot, RUN, "reports", "huge.md");
+    mkdirSync(join(tmpRoot, RUN, "reports"), { recursive: true });
+    writeFileSync(big, Buffer.alloc(ledger.FIDELITY_HASH_MAX_BYTES + 1));
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_REGISTERED",
+      summary: "oversized artifact",
+      artifact: {
+        id: "ART-huge",
+        uri: "reports/huge.md",
+        artifact_type: "report",
+        storage_class: "external",
+        content_hash: "0".repeat(64),
+      },
+    });
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "reconciled",
+      clean: true,
+    });
+    terminal();
+    assert.match(
+      closeout(RUN).blockers.join("\n"),
+      /exceeds the \d+-byte fidelity-hash cap/
+    );
+  });
+});
+
 describe("owner-gate census (§24)", () => {
   it("classification vocabulary is controlled", () => {
     assert.throws(

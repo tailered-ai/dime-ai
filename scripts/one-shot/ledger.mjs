@@ -15,7 +15,9 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  realpathSync,
   rmdirSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 import {
@@ -799,8 +801,31 @@ export function validateEvent(event, manifest) {
 // file INSIDE the repo, not any path the process can stat.
 function isContained(parent, child) {
   const rel = relative(parent, child);
-  return rel.length > 0 && !rel.startsWith("..") && !isAbsolute(rel);
+  if (rel.length === 0 || rel.startsWith("..") || isAbsolute(rel)) return false;
+  // Lexical containment can be defeated by a symlink planted inside the tree
+  // (CSO MEDIUM-1): when the target exists, re-check against physical paths so
+  // a contained-looking link cannot read or attest bytes outside the root.
+  if (existsSync(child)) {
+    try {
+      const realChild = realpathSync(child);
+      const realParent = existsSync(parent) ? realpathSync(parent) : parent;
+      const realRel = relative(realParent, realChild);
+      if (
+        realRel.length === 0 ||
+        realRel.startsWith("..") ||
+        isAbsolute(realRel)
+      )
+        return false;
+    } catch {
+      return false; // unresolvable link chain: fail closed
+    }
+  }
+  return true;
 }
+
+// CSO MEDIUM-2: fidelity hashing slurps the file — cap it so a huge target
+// cannot OOM the evidence CLI. Evidence artifacts are documents, not datasets.
+export const FIDELITY_HASH_MAX_BYTES = 32 * 1024 * 1024;
 
 export function resolveProofRef(proof, runId, events) {
   if (!proof || !PROOF_TYPES.includes(proof.type)) return false;
@@ -1230,6 +1255,13 @@ export function deriveArtifacts(runId) {
     // Only sha256-shaped declarations are checkable against bytes; other hash
     // formats (short ids, non-sha digests) remain a trust boundary.
     if (artifact.content_hash && /^[0-9a-f]{64}$/.test(artifact.content_hash)) {
+      const size = statSync(resolved).size;
+      if (size > FIDELITY_HASH_MAX_BYTES) {
+        fidelityDefects.push(
+          `${artifact.id}: uri "${artifact.uri}" is ${size} bytes — exceeds the ${FIDELITY_HASH_MAX_BYTES}-byte fidelity-hash cap (CSO MEDIUM-2); evidence artifacts are documents, not datasets`
+        );
+        return;
+      }
       const actual = createHash("sha256")
         .update(readFileSync(resolved))
         .digest("hex");
@@ -1253,7 +1285,20 @@ export function deriveArtifacts(runId) {
     } else if (artifact.storage_class === "external") {
       const root = runDir(runId);
       const resolved = resolvePath(root, artifact.uri);
-      if (isContained(root, resolved)) checkFile(artifact, root, resolved);
+      const lexicalRel = relative(root, resolved);
+      const lexicallyInside =
+        lexicalRel.length > 0 &&
+        !lexicalRel.startsWith("..") &&
+        !isAbsolute(lexicalRel);
+      if (lexicallyInside && !isContained(root, resolved)) {
+        // Looks inside the run dir but physically escapes through a symlink —
+        // flagged, never silently skipped (CSO MEDIUM-1).
+        fidelityDefects.push(
+          `${artifact.id}: uri "${artifact.uri}" escapes the run directory through a symlink`
+        );
+      } else if (lexicallyInside) {
+        checkFile(artifact, root, resolved);
+      }
     }
   }
   const uriOwners = new Map();
