@@ -3499,8 +3499,8 @@
     {
       "affected_gate": ".github/workflows/gitleaks.yml#gitleaks",
       "blast_radius": "1 required gate red on the candidate; no real secret involved",
-      "closed_at": null,
-      "corrective_action": null,
+      "closed_at": "2026-08-11T10:52:56.518Z",
+      "corrective_action": "One fully-anchored literal for the public cloudflare-os submodule pin added to .gitleaks.toml regexes (the config's established class for public git commit SHAs); no rule disabled, no path excluded",
       "detected_by": "P06 serial rebind roster @ candidate 7e86ad23, gitleaks gate + ASSURANCE CONTROL_NOT_GREEN",
       "evidence": [
         {
@@ -3520,16 +3520,63 @@
             ],
             "root_cause": "gitleaks cloudflare-api-key rule matches keyword+quoted 40-hex; JSON form of the contract env embed matches, YAML workflow form does not"
           }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-11T10:52:56.507Z",
+          "flags": {
+            "corrective_action": "One fully-anchored literal for the public cloudflare-os submodule pin added to .gitleaks.toml regexes (the config's established class for public git commit SHAs); no rule disabled, no path excluded",
+            "evidence": [
+              "docs/verification/evidence/p06/T17-def059-gitleaks-pin-fp.md"
+            ],
+            "retest_result": "PASS: serial chain @ e672bb11 — gitleaks gate PASS (0.8s) over the full branch range, and the p06-gitleaks-canary ASSURANCE cycle returned to PROVEN (planted secret still FAILs the gate). Local proofs: exact-range rescan 1→0 leaks; two planted real-shaped secrets (AKIA…, different 40-hex) still fire"
+          }
         }
       ],
       "id": "DEF-059",
       "opened_at": "2026-08-11T10:11:14.012Z",
       "regression_test_id": null,
-      "retest_result": null,
+      "retest_result": "PASS: serial chain @ e672bb11 — gitleaks gate PASS (0.8s) over the full branch range, and the p06-gitleaks-canary ASSURANCE cycle returned to PROVEN (planted secret still FAILs the gate). Local proofs: exact-range rescan 1→0 leaks; two planted real-shaped secrets (AKIA…, different 40-hex) still fire",
       "root_cause": "gitleaks cloudflare-api-key rule matches keyword+quoted 40-hex; JSON form of the contract env embed matches, YAML workflow form does not",
       "severity": "HIGH",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "CANDIDATE FINDING introduced by DEF-058 remediation: embedding workflow-level env in contract.frozen.json juxtaposes CLOUDFLARE keyword with the 40-hex submodule pin in quoted-JSON form, tripping gitleaks cloudflare-api-key. The value is the public immutable cloudflare-os commit SHA (present in .gitmodules and tailered-os.yml), not a credential"
+    },
+    {
+      "affected_gate": ".github/workflows/07-coverage-patch.yml#coverage",
+      "blast_radius": "1 gate false-FAIL once under load spike; no assertion weakened by remediation",
+      "closed_at": null,
+      "corrective_action": "static top-level import of appRouter (pattern used by 5 sibling test files); assertions unchanged; testTimeout NOT widened; isolated 9/9 PASS + tsc clean",
+      "detected_by": "P07 coverage gate @ e672bb11 (serial chain), single test failure under v8 instrumentation at host load 18/8-cores",
+      "evidence": [
+        {
+          "bytes": 2449,
+          "path": "docs/verification/evidence/p07/T18-def060-coverage-import-timeout.md",
+          "sha256": "cb3bab798c9333804dd06c46edcd9d9514dcd7348e63275c8c61a979ad30dd36"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-11T10:52:56.641Z",
+          "flags": {
+            "blast_radius": "1 gate false-FAIL once under load spike; no assertion weakened by remediation",
+            "corrective_action": "static top-level import of appRouter (pattern used by 5 sibling test files); assertions unchanged; testTimeout NOT widened; isolated 9/9 PASS + tsc clean",
+            "evidence": [
+              "docs/verification/evidence/p07/T18-def060-coverage-import-timeout.md"
+            ],
+            "root_cause": "heavyweight dynamic import inside a wall-clock-bounded test body; timeout is a proxy for host capacity under instrumentation"
+          }
+        }
+      ],
+      "id": "DEF-060",
+      "opened_at": "2026-08-11T10:52:56.587Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "heavyweight dynamic import inside a wall-clock-bounded test body; timeout is a proxy for host capacity under instrumentation",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "CANDIDATE TEST-QUALITY (DEF-047 Cause-C class): strikeoutProps.test.ts loaded the entire app-router graph via await import inside the 15s testTimeout; under coverage instrumentation + load the bound measures CPU availability, not router existence. Same test PASSed ci#test in the same chain; coverage gate PASSed the two prior candidates; content delta was toml/docs only"
     }
   ],
   "gate_results": [],
