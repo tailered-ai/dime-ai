@@ -28,25 +28,33 @@
 //     success: a write whose reread does not match the plan is applied:"partial"
 //     and the caller must freeze the lifecycle until a human-visible
 //     write_reverified.
-//   - Human authority is re-checked here (defense in depth with the kernel):
-//     a plan derived from a human-authority transition must carry actor "human"
-//     and observed_via evidence, and so must any undo of one.
+//   - HUMAN AUTHORITY IS DERIVED, NEVER ASSERTED (OG-006 Round 2). Round 1
+//     re-checked human authority by reading `actor: "human"` and
+//     `evidence.observed_via` off the caller's own plan, which is why three
+//     independent verifications failed it (NEW3-OG6-0024). A human-authority
+//     transition now requires an authority FACT that ./authority.mjs derived by
+//     independently fetching the forge — and the plan's evidence must AGREE
+//     with that fact rather than supply it. Same for the SHA cross-checks
+//     (`opts.github` was a caller object too) and for terminal proof.
+//   - AUTHORITY HAS NO CALLER SEAM. There is no manifest path parameter: the
+//     canonical manifest is the only authority source, and unknown option keys
+//     are refused rather than ignored, so an attempt to reintroduce a seam is
+//     visible instead of silent.
 //   - Every refusal is a visible value naming one of the kernel's 15 failure
 //     classes. Silence is never success.
-import { realpathSync } from "node:fs";
-import {
-  dirname,
-  resolve as resolvePath,
-  relative,
-  isAbsolute,
-} from "node:path";
-
 import { LIFECYCLE_STATES, TRANSITIONS, LifecycleError } from "./lifecycle.mjs";
 import {
   CONTROL_PLANE_MANIFEST_PATH,
   SECRETISH,
   loadControlPlaneManifest,
 } from "../tailered-os-control-plane.mjs";
+import {
+  TRIGGER_AUTHORITY_SOURCE,
+  consumeAuthorityFact,
+  isAuthorityFact,
+  readAuthorityFact,
+  resolveOwnerGrantAuthority,
+} from "./authority.mjs";
 
 export const WRITER_SCHEMA_VERSION = 1;
 
@@ -86,7 +94,19 @@ export const WRITE_ALLOWLIST = Object.freeze({
 const AUTHORIZED_CAPABILITIES = new WeakMap();
 export const CAPABILITY_TTL_MS = 120_000;
 
-const REPO_ROOT = dirname(dirname(CONTROL_PLANE_MANIFEST_PATH));
+// The complete option surface. Unknown keys REFUSE rather than being ignored:
+// `manifest_path` and `github` were both real authority seams in Round 1, and a
+// silently-ignored option is how a seam comes back without anyone noticing.
+const ALLOWED_OPTION_KEYS = Object.freeze([
+  "connector_failure",
+  "attested_event_keys",
+  "max_snapshot_age_ms",
+  "authority_fact",
+  "github_fact",
+  "proof_fact",
+  "undo_of",
+  "pending_partial_write",
+]);
 
 function refuse(failureClass, detail) {
   return { ok: false, failure_class: failureClass, detail };
@@ -297,50 +317,64 @@ export function deriveWrites(record, state) {
   };
 }
 
-// The ONLY directories an authority manifest may live in. `opts.manifest_path`
-// exists so tests can exercise disarmed/forged manifests; round-2 verification
-// showed a lexical containment check was not enough — a gitignored file and an
-// in-repo symlink pointing at /tmp both authorized live writes (NEW2-OG6-0016).
-// The path is now realpath-resolved (so symlinks cannot escape) and confined to
-// these two tracked directories.
-const AUTHORITY_DIRS = Object.freeze([
-  resolvePath(REPO_ROOT, "config"),
-  resolvePath(REPO_ROOT, "scripts/tailered-os/fixtures"),
-]);
-
-function isInside(root, candidate) {
-  const rel = relative(root, candidate);
-  return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
-}
-
-// Authority is read from DISK and validated, never accepted from the caller.
-function loadAuthority(manifestPath) {
-  let path = CONTROL_PLANE_MANIFEST_PATH;
-  if (manifestPath !== undefined) {
-    if (typeof manifestPath !== "string" || manifestPath === "")
-      return { error: "manifest_path must be a non-empty string" };
-    let resolved;
-    try {
-      // realpath BEFORE the containment test: a symlink that looks in-repo but
-      // physically escapes must not pass.
-      resolved = realpathSync(resolvePath(REPO_ROOT, manifestPath));
-    } catch (error) {
-      return { error: `manifest_path cannot be resolved: ${error.message}` };
-    }
-    if (!AUTHORITY_DIRS.some(dir => isInside(dir, resolved)))
-      return {
-        error:
-          "manifest_path must resolve (after following symlinks) inside config/ or scripts/tailered-os/fixtures/ — authority may not come from anywhere else",
-      };
-    path = resolved;
-  }
+// AUTHORITY COMES FROM THE CANONICAL MANIFEST — full stop.
+//
+// Round 1 accepted `opts.manifest_path` so tests could exercise armed and
+// disarmed manifests. That was a production seam: a caller could name an
+// alternate armed manifest, and hardening it into "realpath, then confine to
+// two directories" only narrowed the seam (NEW2-OG6-0016) instead of closing
+// it. There is now no path parameter at all. The canonical manifest's location
+// is derived from this module's own location, so cwd cannot move it, no
+// environment variable is read, and a symlink has nothing to redirect.
+//
+// Tests reach the armed/disarmed cases by mocking the manifest LOADER module,
+// which is dependency injection strictly below the authority boundary and has
+// no production equivalent.
+function loadCanonicalAuthority() {
   try {
-    return { manifest: loadControlPlaneManifest(path), path };
+    return {
+      manifest: loadControlPlaneManifest(),
+      path: CONTROL_PLANE_MANIFEST_PATH,
+    };
   } catch (error) {
     return {
-      error: `control-plane manifest at ${path} failed validation: ${error.message}`,
+      error: `canonical control-plane manifest failed validation: ${error.message}`,
     };
   }
+}
+
+// The manifest's grant is JSON the machine can edit, so the grant TEXT is not
+// the authority — the reviewed merge behind it is. This authenticates that
+// merge against the forge on every authorization (see authority.mjs), which is
+// what makes arming a reviewable human act rather than a one-character edit.
+function authenticateGrant(manifest) {
+  const grant = manifest.safety.notionWriteAuthorization;
+  if (!isPlainObject(grant))
+    return refuse(
+      "permission_denial",
+      "write authority carries no owner grant — a bare true is a self-grant, not authority."
+    );
+  if (grant.grantedBy !== "PREZ" || grant.actor !== "AI-10")
+    return refuse(
+      "permission_denial",
+      "owner grant does not name PREZ as grantor and AI-10 as actor."
+    );
+  const authenticated = resolveOwnerGrantAuthority(grant);
+  if (!authenticated.ok)
+    return refuse(
+      authenticated.failure_class ?? "permission_denial",
+      `owner grant is not authentic: ${authenticated.detail}`
+    );
+  return { ok: true, fact: authenticated.fact };
+}
+
+// Identifies WHICH grant authorized a capability, so execute time can prove the
+// authority on disk is still the same authority — not merely still truthy.
+function grantFingerprint(manifest) {
+  return JSON.stringify([
+    manifest.safety.notionWriteOperationsAuthorized,
+    manifest.safety.notionWriteAuthorization ?? null,
+  ]);
 }
 
 // EVERY scalar the gates rely on is read from the caller's plan exactly ONCE,
@@ -397,6 +431,19 @@ function snapshotPlan(plan) {
 // fail-fast but every gate is independent law.
 // ---------------------------------------------------------------------------
 export function authorizeWrite(plan, snapshot, opts = {}) {
+  // The option surface is closed. An unknown key is refused, not ignored:
+  // silently dropping `manifest_path` would make a reintroduced seam invisible.
+  if (!isPlainObject(opts))
+    return refuse("malformed_input", "opts must be an object.");
+  const unknownOptions = Object.keys(opts).filter(
+    key => !ALLOWED_OPTION_KEYS.includes(key)
+  );
+  if (unknownOptions.length > 0)
+    return refuse(
+      "malformed_input",
+      `unknown writer option(s): ${unknownOptions.join(", ")} — the option surface is closed, and authority in particular is never caller-selectable.`
+    );
+
   // connector health — unresolved credential/permission failure blocks all writes
   if (opts.connector_failure)
     return refuse(
@@ -404,9 +451,10 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
       `unresolved connector failure: ${opts.connector_failure.detail ?? "(no detail)"} — resolve it before any write.`
     );
 
-  // authority — loaded and validated from disk on EVERY write, so the kill
-  // switch is a real switch and a caller cannot assert its own permission.
-  const authority = loadAuthority(opts.manifest_path);
+  // authority — loaded and validated from the CANONICAL manifest on EVERY
+  // write, so the kill switch is a real switch and a caller cannot assert,
+  // redirect, or select its own permission.
+  const authority = loadCanonicalAuthority();
   if (authority.error) return refuse("permission_denial", authority.error);
   const manifest = authority.manifest;
   if (manifest.safety.notionWriteOperationsAuthorized !== true)
@@ -414,16 +462,8 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
       "permission_denial",
       "notion-write-unauthorized: manifest safety.notionWriteOperationsAuthorized is not true — the kill switch is engaged; no live write may execute."
     );
-  const grant = manifest.safety.notionWriteAuthorization;
-  if (
-    !isPlainObject(grant) ||
-    grant.grantedBy !== "PREZ" ||
-    grant.actor !== "AI-10"
-  )
-    return refuse(
-      "permission_denial",
-      "write authority carries no owner grant naming PREZ and actor AI-10 — a self-grant is not authority."
-    );
+  const grantCheck = authenticateGrant(manifest);
+  if (!grantCheck.ok) return grantCheck;
 
   // plan shape — the caller's plan is read EXACTLY ONCE into a frozen copy, and
   // only that copy is used from here on. Reading safe.task_id again later let a
@@ -661,51 +701,150 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
     }
   }
 
-  // actor authority — human transitions demand an observed human act
+  // actor authority — human transitions demand DERIVED evidence of a human act
   if (transition.authority !== safe.authority)
     return refuse(
       "authority_violation",
       `plan claims authority "${safe.authority}" but the table says "${transition.authority}" — plans never reinterpret authority.`
     );
+
+  // Facts are validated here and CONSUMED only once every gate has passed, so a
+  // plan that fails a later gate does not burn evidence the operator must then
+  // re-resolve.
+  const toConsume = [];
+  const checkFact = (token, expectedKind, label) => {
+    if (!isAuthorityFact(token))
+      return refuse(
+        "authority_violation",
+        `${label} requires authority evidence derived by the authority adapter; what was supplied is not a fact this system minted. A caller-built object with the right shape is not evidence — resolve it against the source system.`
+      );
+    const meta = readAuthorityFact(token);
+    if (meta.kind !== expectedKind)
+      return refuse(
+        "authority_violation",
+        `${label} requires a ${expectedKind} fact; a ${meta.kind} fact was supplied.`
+      );
+    if (meta.consumed)
+      return refuse(
+        "authority_violation",
+        `the ${meta.kind} fact for ${label} was already consumed — evidence authorizes one transition.`
+      );
+    if (meta.age_ms > MAX_SNAPSHOT_AGE_MS || meta.age_ms < 0)
+      return refuse(
+        "stale_task",
+        `the ${meta.kind} fact for ${label} is ${meta.age_ms}ms old (max ${MAX_SNAPSHOT_AGE_MS}ms) — re-resolve it.`
+      );
+    return { ok: true };
+  };
+  const mustEqual = (actual, expected, label) =>
+    String(actual ?? "") === String(expected ?? "")
+      ? null
+      : refuse(
+          "authority_violation",
+          `${label}: the plan says "${actual}" but the authenticated evidence says "${expected}" — the source system decides, never the plan.`
+        );
+
+  const authoritySource = Object.hasOwn(TRIGGER_AUTHORITY_SOURCE, safe.trigger)
+    ? TRIGGER_AUTHORITY_SOURCE[safe.trigger]
+    : null;
+
   if (transition.authority === "human" && !isUndo) {
+    if (!authoritySource)
+      return refuse(
+        "authority_violation",
+        `${safe.trigger} is a human-authority transition with no declared authority source — it cannot be authenticated, so it fails closed.`
+      );
+    // `actor: "human"` is still required as the kernel's vocabulary, but it is
+    // no longer what makes the transition lawful — the derived fact is.
     if (safe.actor !== "human")
       return refuse(
         "authority_violation",
         `${safe.trigger} is a human-authority transition; plan actor is "${safe.actor}". The writer records observed human acts; it never performs them.`
       );
-    if (!safe.evidence?.observed_via)
-      return refuse(
-        "authority_violation",
-        `${safe.trigger} carries no observed_via evidence — an unobserved human act is an inferred one, and inference is forbidden.`
-      );
+    const fact = opts.authority_fact;
+    const usable = checkFact(fact, authoritySource.kind, safe.trigger);
+    if (usable.ok !== true) return usable;
+
+    // The plan's evidence must AGREE with the fetched evidence. It cannot
+    // supply it: every field below is compared against what the forge returned.
+    const disagreement =
+      mustEqual(
+        safe.evidence?.observed_via,
+        fact.evidence_url,
+        `${safe.trigger} observed_via`
+      ) ??
+      (safe.trigger === "approval_observed"
+        ? (mustEqual(
+            safe.evidence?.reviewer,
+            fact.human_identity,
+            "approval reviewer"
+          ) ??
+          mustEqual(
+            safe.evidence?.review_id,
+            fact.review_id,
+            "approval review_id"
+          ) ??
+          mustEqual(
+            safe.evidence?.review_state,
+            fact.review_state,
+            "approval review_state"
+          ))
+        : safe.trigger === "merge_observed"
+          ? mustEqual(safe.evidence?.merge_sha, fact.merge_sha, "merge sha")
+          : null);
+    if (disagreement) return disagreement;
+    toConsume.push({ token: fact, kind: authoritySource.kind });
   }
 
-  // PR/SHA evidence must match CURRENT GitHub state where applicable
+  // PR/SHA evidence must match CURRENT forge state. Round 1 satisfied this with
+  // `opts.github`, an object the caller also filled in — the same defect one
+  // layer over. It now takes a derived github_head/github_merge fact.
   if (
     ["pr_opened", "checks_observed", "merge_observed"].includes(safe.trigger)
   ) {
-    const live = opts.github;
-    if (!isPlainObject(live))
-      return refuse(
-        "missing_evidence",
-        `${safe.trigger} writes require a live GitHub cross-check (opts.github) — none was provided.`
+    const isMerge = safe.trigger === "merge_observed";
+    // merge_observed already carries an authenticated github_merge fact above;
+    // requiring a second fetch of the same object would add no evidence.
+    const fact = isMerge ? opts.authority_fact : opts.github_fact;
+    if (!isMerge) {
+      const usable = checkFact(
+        fact,
+        "github_head",
+        `${safe.trigger} SHA check`
       );
-    if (
-      safe.trigger === "merge_observed" &&
-      live.merge_sha !== safe.evidence.merge_sha
-    )
-      return refuse(
-        "stale_sha",
-        `plan merge_sha ${safe.evidence.merge_sha} does not match live GitHub merge ${live.merge_sha}.`
-      );
-    if (
-      safe.trigger !== "merge_observed" &&
-      live.head_sha !== safe.evidence.head_sha
-    )
+      if (usable.ok !== true) return usable;
+      toConsume.push({ token: fact, kind: "github_head" });
+    }
+    const claimed = isMerge ? safe.evidence.merge_sha : safe.evidence.head_sha;
+    const live = isMerge ? fact.merge_sha : fact.head_sha;
+    if (String(claimed) !== String(live))
       return refuse(
         "stale_sha",
-        `plan head_sha ${safe.evidence.head_sha} does not match live GitHub head ${live.head_sha}.`
+        `plan ${isMerge ? "merge_sha" : "head_sha"} ${claimed} does not match the authenticated GitHub ${isMerge ? "merge" : "head"} ${live}.`
       );
+    if (safe.trigger === "checks_observed" && fact.check_rollup !== null) {
+      if (String(safe.evidence.check_rollup) !== String(fact.check_rollup))
+        return refuse(
+          "stale_sha",
+          `plan check_rollup "${safe.evidence.check_rollup}" does not match the authenticated rollup "${fact.check_rollup}".`
+        );
+    }
+  }
+
+  // Terminal verification evidence must be FETCHED, not asserted. Round 1 let a
+  // record reach Verified on the strength of an https-shaped string nobody
+  // resolved; a proof URL alone is a caller string with a scheme on the front.
+  if (safe.trigger === "post_merge_verified") {
+    const fact = opts.proof_fact;
+    const usable = checkFact(fact, "github_proof", "post_merge_verified");
+    if (usable.ok !== true) return usable;
+    const mismatch = mustEqual(
+      safe.evidence?.evidence_ref,
+      fact.evidence_url,
+      "post_merge_verified evidence_ref"
+    );
+    if (mismatch) return mismatch;
+    toConsume.push({ token: fact, kind: "github_proof" });
   }
 
   // target database, properties, and mutation shapes are allowlisted —
@@ -744,6 +883,20 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
       `task ${safe.task_id} has an unresolved partially applied mutation — write_reverified is required before any further write.`
     );
 
+  // Every gate has passed: burn the evidence now, so one authenticated human
+  // act authorizes exactly one transition and cannot be replayed into a second.
+  for (const { token, kind } of toConsume) {
+    const consumed = consumeAuthorityFact(token, {
+      kind,
+      max_age_ms: MAX_SNAPSHOT_AGE_MS,
+    });
+    if (!consumed.ok)
+      return refuse(
+        consumed.failure_class,
+        `authority evidence: ${consumed.detail}`
+      );
+  }
+
   // The authorized plan is an UNFORGEABLE CAPABILITY: built from the validated
   // copy, deep-frozen, and registered in a module-private WeakSet that
   // executeMutation checks. Shape is not authenticity.
@@ -762,6 +915,7 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
     prior,
     authorized_at: now,
     authority_source: authority.path,
+    grant_fingerprint: grantFingerprint(manifest),
     target: {
       data_source_id: WRITE_ALLOWLIST.data_source_id,
       page_id: safe.task_id,
@@ -769,7 +923,7 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
   });
   AUTHORIZED_CAPABILITIES.set(capability, {
     minted_at: now,
-    authority_path: authority.path,
+    grant_fingerprint: grantFingerprint(manifest),
     consumed: false,
   });
   return { ok: true, duplicate: false, authorized_plan: capability };
@@ -818,11 +972,7 @@ export async function executeMutation(authorizedPlan, transport) {
       "an old capability was authorized against a snapshot of the world that no longer holds.",
       "re-read the task and authorize again."
     );
-  const recheck = loadAuthority(
-    mint.authority_path === CONTROL_PLANE_MANIFEST_PATH
-      ? undefined
-      : relative(REPO_ROOT, mint.authority_path)
-  );
+  const recheck = loadCanonicalAuthority();
   if (
     recheck.error ||
     recheck.manifest.safety.notionWriteOperationsAuthorized !== true
@@ -832,6 +982,15 @@ export async function executeMutation(authorizedPlan, transport) {
       `write authority is no longer granted at execute time (${recheck.error ?? "kill switch engaged"}).`,
       "the kill switch must stop writes that are already in flight, not merely new authorizations.",
       "re-arm the manifest through an owner-reviewed PR if the write is still intended."
+    );
+  // Still true is not enough: it must be the SAME grant. A grant swapped
+  // between authorize and execute would otherwise ride an in-flight capability.
+  if (grantFingerprint(recheck.manifest) !== mint.grant_fingerprint)
+    throw new LifecycleError(
+      "notion-write-unauthorized",
+      "the owner grant on disk changed between authorization and execution.",
+      "a capability is permission under one specific reviewed grant; a different grant is a different decision.",
+      "re-read the task and authorize again under the current grant."
     );
   AUTHORIZED_CAPABILITIES.set(authorizedPlan, { ...mint, consumed: true });
   if (
