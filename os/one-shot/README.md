@@ -159,3 +159,50 @@ derive progress-truth from raw agent behavior. Specifically:
 The honest one-line guarantee: *"machine-verified structure, chain integrity, and
 existence-checked non-URL proofs for what the orchestrator reports"* — not "machine-verified
 progress-truth."
+
+## Envelope contract v4 (Campaign Four: universal execution memory)
+
+Appends stamp `schema_version: 4`; v1/v2/v3 events in historical runs keep their original
+rules (backward verification against all three prior campaign runs is a hard requirement,
+tested). v4 adds, enforced at append/verify/closeout:
+
+- **Artifact Manifest is derived, never hand-maintained.** `ledger.mjs artifacts <run_id>`
+  folds the artifact lifecycle events into the registry: every artifact carries a stable
+  `ART-<slug>` identity, canonical `uri`, `artifact_type`, and a `storage_class` from the
+  §8 hierarchy (`committed` = in-repo, `external` = out-of-git run artifacts, `canonical` =
+  Notion/GitHub-resident, `generated` = derived, `ephemeral` = scratch that must be RETIRED
+  before closeout). Registration is once-per-identity; lifecycle events on unregistered ids,
+  consumption after retirement, and supersession by an unregistered successor are verify
+  violations.
+- **§13 dependency invalidation cascade.** `depends_on` records upstream inputs by identity
+  (`ART-` ids or `ext:`-prefixed external identities). A content-hash change, supersession,
+  retirement, or explicit `DEPENDENCY_INVALIDATED` marks every transitive consumer
+  STALE-DEPENDENCY. Staleness clears ONLY through `DEPENDENCY_REVALIDATED` citing the NEW
+  upstream identity — per consumer, no transitive forgiveness. Any stale artifact at
+  closeout blocks COMPLETE.
+- **§47 memory reconciliation gate.** `MEMORY_RECONCILED` carries `clean: true|false`; a
+  `clean:true` is re-derived against the registry at that point in the stream (false
+  cleanliness is a verify violation), and closeout requires the LAST memory-mutating event
+  to be followed by a clean reconcile.
+- **§16 composition gap.** `COMPOSITION_EVALUATED` names an `integration_id`, its
+  `components`, and one of the nine controlled verdicts (`NO_GAP` … `UNKNOWN_GAP`). Any
+  boundary whose latest verdict is not `NO_GAP` blocks COMPLETE — individually green
+  components never certify the composed system.
+- **§14 interaction graph.** `ledger.mjs graph <run_id>` derives the multi-resource graph
+  (scopes, agents, PRs, commits, artifacts, owner gates, declared write-resources; typed
+  edges: produces/consumes/depends_on/writes/owns/supersedes/blocks/verified_by/deployed_as/
+  invalidates/potential_conflict). String-identity equality still cannot see aliased paths —
+  a self-reported CONFLICT remains the fallback for those.
+- **§10-§11 derived progress.** `ledger.mjs progress <run_id>` classifies the REPORTED
+  stream: dispatches are not progress, results/verifications are; repeated identical action
+  signatures with no interleaved progress become loop candidates against the manifest's
+  declared thresholds, and consecutive non-progress streaks are measured against
+  `stall_threshold_actions_without_new_evidence`. Honest boundary unchanged in kind: this
+  observes what the orchestrator reports, not raw agent behavior — it upgrades stall/loop
+  detection from purely self-reported to stream-derived, and no further.
+- **§24 owner-gate census.** Owner gates may carry a `classification`
+  (`RUN_BLOCKING`/`PROGRAM_OPEN`/`SEQUENCED`/`STANDING`); closeout emits the census by state
+  and class with exact gate ids under `denominators.owner_gate_census`.
+
+`scripts/one-shot/memory.test.ts` proves each of these controls can fail (26-test battery
+alongside the ledger/closeout suites).
