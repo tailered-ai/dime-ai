@@ -625,18 +625,24 @@ describe("writer v1.1 — adversarial regressions", () => {
     assert.equal(selfGrant.failure_class, "permission_denial");
     assert.match(selfGrant.detail, /failed validation/);
 
-    // Authority may only come from an in-repo, code-reviewed file: a path that
-    // escapes the repository is refused before anything is read.
-    const escaped: any = authorize(
-      plan,
-      {},
-      {
-        manifest_path: "../../../tmp/forged-manifest.json",
-      }
-    );
-    assert.equal(escaped.ok, false);
-    assert.equal(escaped.failure_class, "permission_denial");
-    assert.match(escaped.detail, /outside the repository/);
+    // Authority may only come from config/ or the tailered-os fixtures dir,
+    // resolved through symlinks (NEW2-OG6-0016: lexical containment let a
+    // gitignored file and an in-repo symlink to /tmp authorize live writes).
+    for (const path of [
+      "../../../tmp/forged-manifest.json",
+      "/tmp/forged-manifest.json",
+      "package.json",
+      ".gstack/forged-authority.json",
+      "scripts/tailered-os/lifecycle.mjs",
+    ]) {
+      const escaped: any = authorize(plan, {}, { manifest_path: path });
+      assert.equal(escaped.ok, false, `${path} must refuse`);
+      assert.equal(escaped.failure_class, "permission_denial");
+      assert.match(
+        escaped.detail,
+        /cannot be resolved|inside config\/|failed validation/
+      );
+    }
   });
 
   it("FIND-OG6-0004: the undo plan AUTHORIZES and executes through the same contract (reversibility is real)", async () => {
@@ -932,6 +938,119 @@ describe("writer v1.2 — independent-verification regressions", () => {
     );
     assert.equal(undoAuth.ok, true, JSON.stringify(undoAuth));
     assert.equal(undoAuth.authorized_plan.writes["Execution State"], "");
+  });
+
+  it("NEW2-OG6-0014: the TRANSITION TABLE decides the target state — a machine plan cannot write Approval, Merged or Verified", async () => {
+    const plan = planFor();
+    // No Proxy, no forged capability: a plain machine work_started plan from
+    // Ready that simply declares a different target state.
+    for (const target of ["Merged", "Approval", "Verified", "Review", "CI"]) {
+      const laundering = {
+        ...plan,
+        writes: { ...plan.writes, "Execution State": target },
+      };
+      const result: any = authorize(laundering);
+      assert.equal(result.ok, false, `${target} must refuse`);
+      assert.equal(result.failure_class, "authority_violation");
+      assert.match(result.detail, /may only produce "Executing"/);
+    }
+    // The honest target still authorizes.
+    assert.equal(authorize(plan).ok, true);
+  });
+
+  it("NEW2-OG6-0013: the plan is read ONCE — a getter cannot pass the gates for one page and write to another", async () => {
+    const plan = planFor();
+    let reads = 0;
+    const twoFaced: any = { ...plan };
+    Object.defineProperty(twoFaced, "task_id", {
+      enumerable: true,
+      get() {
+        reads += 1;
+        return reads === 1 ? TASK : "ffffffffffffffffffffffffffffffff";
+      },
+    });
+    const result: any = authorize(twoFaced, {}, {});
+    if (result.ok) {
+      // Whatever happened, the capability must target the page the gates saw.
+      assert.equal(result.authorized_plan.target.page_id, TASK);
+      assert.equal(result.authorized_plan.task_id, TASK);
+      const pages: string[] = [];
+      const transport = {
+        async updatePage(pageId: string) {
+          pages.push(pageId);
+        },
+        async fetchTask() {
+          return {
+            properties: { ...result.authorized_plan.writes },
+            fetched_at: Date.now(),
+          };
+        },
+      };
+      await executeMutation(result.authorized_plan, transport);
+      assert.deepEqual(pages, [TASK], "the write must land on the gated page");
+    } else {
+      assert.equal(result.ok, false);
+    }
+  });
+
+  it("NEW2-OG6-0015: a NaN freshness value or NaN bound cannot defeat the age gate", () => {
+    const plan = planFor();
+    const nanBound: any = authorize(
+      plan,
+      { fetched_at: Date.now() - 10 * 24 * 3600 * 1000 },
+      { max_snapshot_age_ms: Number.NaN }
+    );
+    assert.equal(nanBound.ok, false);
+    const nanFetched: any = authorize(plan, { fetched_at: Number.NaN });
+    assert.equal(nanFetched.ok, false);
+    assert.equal(nanFetched.failure_class, "stale_task");
+  });
+
+  it("NEW2-OG6-0017: a capability is SINGLE USE, time-bounded, and dies when the kill switch engages", async () => {
+    const plan = planFor();
+    const result: any = authorize(plan);
+    const transport = fakeTransport({
+      "Execution State": "Ready",
+      "Work Link": "",
+    });
+    const first = await executeMutation(result.authorized_plan, transport);
+    assert.equal(first.applied, "full");
+    // Replay of the same capability is refused, not silently repeated.
+    await assert.rejects(
+      () => executeMutation(result.authorized_plan, transport),
+      /writer-capability-spent/
+    );
+    assert.equal(transport.calls.update, 1, "exactly one write");
+
+    // A capability minted while armed must die if authority is withdrawn
+    // before it executes.
+    const armedCap: any = authorize(planFor());
+    assert.equal(armedCap.ok, true);
+    const disarmedCap: any = authorize(planFor(), {}, DISARMED);
+    assert.equal(disarmedCap.ok, false);
+  });
+
+  it("NEW2-OG6-0022: a null live value is captured as an empty prior and stays restorable", () => {
+    const plan = planFor();
+    const result: any = authorizeWrite(
+      plan,
+      {
+        page_id: TASK,
+        data_source_id: WRITE_ALLOWLIST.data_source_id,
+        scope_id: "TOS-TEST",
+        project_ids: [PROJECT_ID],
+        execution_state: "Ready",
+        pending_partial_write: false,
+        fetched_at: fresh(),
+        properties: { "Execution State": "Ready", "Work Link": null },
+      },
+      {}
+    );
+    assert.equal(result.ok, true, JSON.stringify(result));
+    assert.equal(result.authorized_plan.prior["Work Link"], "");
+    const undo: any = buildUndoPlan(result.authorized_plan);
+    assert.equal(undo.ok, true);
+    assert.equal(undo.plan.writes["Work Link"], "");
   });
 
   it("NEW-OG6-0012: the freshness bound cannot be widened by the caller, and attested keys must be a real Set", () => {

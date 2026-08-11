@@ -33,6 +33,7 @@
 //     and observed_via evidence, and so must any undo of one.
 //   - Every refusal is a visible value naming one of the kernel's 15 failure
 //     classes. Silence is never success.
+import { realpathSync } from "node:fs";
 import {
   dirname,
   resolve as resolvePath,
@@ -77,8 +78,13 @@ export const WRITE_ALLOWLIST = Object.freeze({
 });
 
 // Authenticity, not shape: only plans this module authorized are executable.
-// A WeakSet cannot be enumerated or forged from outside the module.
-const AUTHORIZED_CAPABILITIES = new WeakSet();
+// A WeakMap cannot be enumerated or forged from outside the module. The value
+// carries mint metadata so a capability can be SINGLE-USE and time-bounded:
+// round-2 verification showed one capability executing twice, and an
+// already-minted capability still writing after the on-disk kill switch was
+// engaged (NEW2-OG6-0017).
+const AUTHORIZED_CAPABILITIES = new WeakMap();
+export const CAPABILITY_TTL_MS = 120_000;
 
 const REPO_ROOT = dirname(dirname(CONTROL_PLANE_MANIFEST_PATH));
 
@@ -187,7 +193,13 @@ function plainCopy(value, depth = 0) {
   if (Array.isArray(value))
     return value.slice(0, 32).map(item => plainCopy(item, depth + 1));
   const copy = {};
-  for (const key of Object.keys(value).slice(0, 64)) {
+  let keys;
+  try {
+    keys = Object.keys(value).slice(0, 64);
+  } catch {
+    return "[unreadable]";
+  }
+  for (const key of keys) {
     try {
       copy[key] = plainCopy(value[key], depth + 1);
     } catch {
@@ -277,19 +289,40 @@ export function deriveWrites(record, state) {
   };
 }
 
+// The ONLY directories an authority manifest may live in. `opts.manifest_path`
+// exists so tests can exercise disarmed/forged manifests; round-2 verification
+// showed a lexical containment check was not enough — a gitignored file and an
+// in-repo symlink pointing at /tmp both authorized live writes (NEW2-OG6-0016).
+// The path is now realpath-resolved (so symlinks cannot escape) and confined to
+// these two tracked directories.
+const AUTHORITY_DIRS = Object.freeze([
+  resolvePath(REPO_ROOT, "config"),
+  resolvePath(REPO_ROOT, "scripts/tailered-os/fixtures"),
+]);
+
+function isInside(root, candidate) {
+  const rel = relative(root, candidate);
+  return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+}
+
 // Authority is read from DISK and validated, never accepted from the caller.
-// `opts.manifest_path` exists so tests can exercise disarmed/forged manifests;
-// it must resolve inside the repository, so it can only ever name a
-// code-reviewed file — the same trust basis as this module.
 function loadAuthority(manifestPath) {
   let path = CONTROL_PLANE_MANIFEST_PATH;
   if (manifestPath !== undefined) {
-    const resolved = resolvePath(REPO_ROOT, manifestPath);
-    const rel = relative(REPO_ROOT, resolved);
-    if (rel.startsWith("..") || isAbsolute(rel))
+    if (typeof manifestPath !== "string" || manifestPath === "")
+      return { error: "manifest_path must be a non-empty string" };
+    let resolved;
+    try {
+      // realpath BEFORE the containment test: a symlink that looks in-repo but
+      // physically escapes must not pass.
+      resolved = realpathSync(resolvePath(REPO_ROOT, manifestPath));
+    } catch (error) {
+      return { error: `manifest_path cannot be resolved: ${error.message}` };
+    }
+    if (!AUTHORITY_DIRS.some(dir => isInside(dir, resolved)))
       return {
         error:
-          "manifest_path resolves outside the repository — authority may only come from a code-reviewed in-repo manifest",
+          "manifest_path must resolve (after following symlinks) inside config/ or scripts/tailered-os/fixtures/ — authority may not come from anywhere else",
       };
     path = resolved;
   }
@@ -300,6 +333,55 @@ function loadAuthority(manifestPath) {
       error: `control-plane manifest at ${path} failed validation: ${error.message}`,
     };
   }
+}
+
+// EVERY scalar the gates rely on is read from the caller's plan exactly ONCE,
+// into this frozen copy. Round-2 verification showed `plan.task_id` was read
+// three times — gate, capability, and target.page_id — so a getter could pass
+// the identity/scope/project gates for a legitimate page and then land the write
+// on an arbitrary one, with the attestation naming the innocent page
+// (NEW2-OG6-0013). Same class for authority/trigger (NEW2-OG6-0019).
+function snapshotPlan(plan) {
+  if (!isPlainObject(plan)) return { error: "plan is not an object" };
+  const read = key => {
+    try {
+      return plan[key];
+    } catch {
+      return undefined;
+    }
+  };
+  const scalars = {
+    schema_version: read("schema_version"),
+    plan_id: read("plan_id"),
+    event_key: read("event_key"),
+    task_id: read("task_id"),
+    trigger: read("trigger"),
+    authority: read("authority"),
+    actor: read("actor"),
+    expected_from_state: read("expected_from_state"),
+    expected_generation: read("expected_generation") ?? null,
+    restores_state: read("restores_state") ?? null,
+  };
+  for (const key of [
+    "plan_id",
+    "event_key",
+    "task_id",
+    "trigger",
+    "authority",
+    "actor",
+  ]) {
+    if (typeof scalars[key] !== "string" || scalars[key] === "")
+      return { error: `plan.${key} must be a non-empty string` };
+  }
+  const writes = snapshotWrites(read("writes"));
+  if (writes.error) return { error: `plan writes rejected: ${writes.error}` };
+  return {
+    plan: Object.freeze({
+      ...scalars,
+      writes: writes.copy,
+      evidence: plainCopy(read("evidence") ?? {}),
+    }),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -335,20 +417,16 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
       "write authority carries no owner grant naming PREZ and actor AI-10 — a self-grant is not authority."
     );
 
-  // plan shape
-  if (
-    !isPlainObject(plan) ||
-    plan.schema_version !== WRITER_SCHEMA_VERSION ||
-    typeof plan.plan_id !== "string"
-  )
+  // plan shape — the caller's plan is read EXACTLY ONCE into a frozen copy, and
+  // only that copy is used from here on. Reading safe.task_id again later let a
+  // getter pass the scope gates for one page and land the write on another
+  // (NEW2-OG6-0013); the same class applied to authority/trigger (0019).
+  const snapshotted = snapshotPlan(plan);
+  if (snapshotted.error)
+    return refuse("malformed_input", `plan rejected: ${snapshotted.error}.`);
+  const safe = snapshotted.plan;
+  if (safe.schema_version !== WRITER_SCHEMA_VERSION)
     return refuse("malformed_input", "plan is not a v1 writer mutation plan.");
-
-  // durable unique event key
-  if (typeof plan.event_key !== "string" || plan.event_key === "")
-    return refuse(
-      "malformed_input",
-      "plan has no durable event_key — idempotency depends on it."
-    );
   // idempotency — an event key that already produced an attestation never
   // executes twice (visible no-op, mirrors the kernel's duplicate law)
   const attested = opts.attested_event_keys;
@@ -357,22 +435,15 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
       "malformed_input",
       "attested_event_keys must be a Set — a duck-typed lookup could silently answer false."
     );
-  if (attested?.has(plan.event_key))
+  if (attested?.has(safe.event_key))
     return {
       ok: true,
       duplicate: true,
       failure_class: "duplicate_event",
-      detail: `event ${plan.event_key} already has an attestation — idempotent no-op, no second mutation.`,
+      detail: `event ${safe.event_key} already has an attestation — idempotent no-op, no second mutation.`,
     };
 
-  // ONE read of the caller's write map, into the copy everything else uses.
-  const snapshotted = snapshotWrites(plan.writes);
-  if (snapshotted.error)
-    return refuse(
-      "malformed_input",
-      `plan writes rejected: ${snapshotted.error}.`
-    );
-  const writes = snapshotted.copy;
+  const writes = safe.writes;
 
   // canonical task exists, identity matches, snapshot is FRESH
   if (!isPlainObject(snapshot))
@@ -380,28 +451,34 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
       "stale_task",
       "no fresh snapshot of the canonical Task was provided — reread before acting."
     );
-  if (snapshot.page_id !== plan.task_id)
+  if (snapshot.page_id !== safe.task_id)
     return refuse(
       "malformed_input",
-      `snapshot is for page ${snapshot.page_id}, plan targets ${plan.task_id}.`
+      `snapshot is for page ${snapshot.page_id}, plan targets ${safe.task_id}.`
     );
-  if (typeof snapshot.fetched_at !== "number")
+  // Number.isFinite, not typeof: NaN is a number and made every comparison
+  // below false, authorizing a snapshot ten days old (NEW2-OG6-0015).
+  if (!Number.isFinite(snapshot.fetched_at))
     return refuse(
       "stale_task",
-      "snapshot freshness is unprovable (no fetched_at) — refusing rather than assuming."
+      "snapshot freshness is unprovable (fetched_at is not a finite number) — refusing rather than assuming."
     );
   const now = Date.now();
+  const requested = opts.max_snapshot_age_ms;
+  if (requested !== undefined && !Number.isFinite(requested))
+    return refuse(
+      "malformed_input",
+      "max_snapshot_age_ms must be a finite number — a non-finite bound is not a bound."
+    );
   const maxAge = Math.min(
-    typeof opts.max_snapshot_age_ms === "number"
-      ? opts.max_snapshot_age_ms
-      : MAX_SNAPSHOT_AGE_MS,
+    requested === undefined ? MAX_SNAPSHOT_AGE_MS : requested,
     MAX_SNAPSHOT_AGE_MS
   );
   const age = now - snapshot.fetched_at;
   if (age > maxAge || age < 0)
     return refuse(
       "stale_task",
-      `snapshot of ${plan.task_id} is ${age}ms old (max ${maxAge}ms) — reread before acting.`
+      `snapshot of ${safe.task_id} is ${age}ms old (max ${maxAge}ms) — reread before acting.`
     );
 
   // permitted Tailered OS scope only
@@ -427,23 +504,23 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
     );
 
   // current state equals the plan's expected from-state
-  if (snapshot.execution_state !== plan.expected_from_state)
+  if (snapshot.execution_state !== safe.expected_from_state)
     return refuse(
       "stale_task",
-      `live Execution State is "${snapshot.execution_state}", plan expects "${plan.expected_from_state}" — the record moved; refold from fresh facts.`
+      `live Execution State is "${snapshot.execution_state}", plan expects "${safe.expected_from_state}" — the record moved; refold from fresh facts.`
     );
 
   // the transition exists in the closed table
   const transition = TRANSITIONS.find(
     t =>
-      t.trigger_event_type === plan.trigger &&
-      (t.from === plan.expected_from_state ||
-        (t.from === "*" && plan.expected_from_state !== null))
+      t.trigger_event_type === safe.trigger &&
+      (t.from === safe.expected_from_state ||
+        (t.from === "*" && safe.expected_from_state !== null))
   );
   if (!transition)
     return refuse(
       "malformed_input",
-      `plan trigger "${plan.trigger}" from "${plan.expected_from_state}" matches no row of the closed transition table.`
+      `plan trigger "${safe.trigger}" from "${safe.expected_from_state}" matches no row of the closed transition table.`
     );
 
   // `write_reverified` is a from:"*" wildcard row, so a plan carrying it could
@@ -452,10 +529,45 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
   // write_reverified is an UNDO bound to a real prior authorization: its writes
   // must be exactly that authorization's captured priors, and it must start
   // from the state that authorization wrote.
-  const isUndo = plan.trigger === "write_reverified";
+  const isUndo = safe.trigger === "write_reverified";
+
+  // THE TARGET STATE MUST BE THE ROW'S TARGET STATE. Proving that (trigger,
+  // from) exists in the table said nothing about what the plan actually writes,
+  // so a plain machine `work_started` plan from Ready authorized and applied
+  // "Execution State": "Merged" — laundering a record into the states the
+  // runbook calls permanently human, through the sanctioned path, with no
+  // Proxy and no forged capability (NEW2-OG6-0014). This is the gate that makes
+  // "approval and merge are human" true at the writer, not just at the kernel.
+  if (!isUndo && Object.hasOwn(writes, "Execution State")) {
+    const declared = writes["Execution State"];
+    if (typeof transition.to === "string") {
+      if (declared !== transition.to)
+        return refuse(
+          "authority_violation",
+          `plan writes Execution State "${declared}" but trigger "${safe.trigger}" from "${safe.expected_from_state}" may only produce "${transition.to}" — the transition table decides the target state, never the plan.`
+        );
+    } else if (safe.trigger === "unblocked") {
+      // Dynamic row: returns to the recorded blocked_from, which the writer
+      // cannot recompute — but it must leave Blocked, and this row is
+      // human-authority (checked below), so it carries an observed human act.
+      if (declared === "Blocked")
+        return refuse(
+          "malformed_input",
+          "an unblock must leave Blocked — writing Blocked is not an unblock."
+        );
+    } else {
+      // Annotation rows (mutation_result) never change state.
+      if (declared !== snapshot.execution_state)
+        return refuse(
+          "authority_violation",
+          `trigger "${safe.trigger}" is an annotation and may not change Execution State (live "${snapshot.execution_state}", plan "${declared}").`
+        );
+    }
+  }
+
   if (isUndo) {
     const origin = opts.undo_of;
-    if (!String(plan.plan_id).startsWith("undo:") || !isPlainObject(origin))
+    if (!String(safe.plan_id).startsWith("undo:") || !isPlainObject(origin))
       return refuse(
         "permission_denial",
         "write_reverified implies a live write only as an undo bound to a prior authorization — pass opts.undo_of (the authorized plan being reverted)."
@@ -477,15 +589,15 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
       );
     const wroteState =
       origin.writes?.["Execution State"] ?? origin.expected_from_state;
-    if (plan.expected_from_state !== wroteState)
+    if (safe.expected_from_state !== wroteState)
       return refuse(
         "stale_task",
-        `undo expects the record at "${plan.expected_from_state}", but the authorization it reverts wrote "${wroteState}".`
+        `undo expects the record at "${safe.expected_from_state}", but the authorization it reverts wrote "${wroteState}".`
       );
     // Reverting a HUMAN-authority write moves the record backward across a
     // human decision, so the undo itself needs an observed human act.
     if (origin.authority === "human") {
-      if (plan.actor !== "human" || !plan.evidence?.observed_via)
+      if (safe.actor !== "human" || !safe.evidence?.observed_via)
         return refuse(
           "authority_violation",
           `undoing a human-authority ${origin.trigger} requires an observed human act (actor "human" + observed_via) — a machine may not walk back a human decision.`
@@ -494,49 +606,49 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
   }
 
   // actor authority — human transitions demand an observed human act
-  if (transition.authority !== plan.authority)
+  if (transition.authority !== safe.authority)
     return refuse(
       "authority_violation",
-      `plan claims authority "${plan.authority}" but the table says "${transition.authority}" — plans never reinterpret authority.`
+      `plan claims authority "${safe.authority}" but the table says "${transition.authority}" — plans never reinterpret authority.`
     );
   if (transition.authority === "human" && !isUndo) {
-    if (plan.actor !== "human")
+    if (safe.actor !== "human")
       return refuse(
         "authority_violation",
-        `${plan.trigger} is a human-authority transition; plan actor is "${plan.actor}". The writer records observed human acts; it never performs them.`
+        `${safe.trigger} is a human-authority transition; plan actor is "${safe.actor}". The writer records observed human acts; it never performs them.`
       );
-    if (!plan.evidence?.observed_via)
+    if (!safe.evidence?.observed_via)
       return refuse(
         "authority_violation",
-        `${plan.trigger} carries no observed_via evidence — an unobserved human act is an inferred one, and inference is forbidden.`
+        `${safe.trigger} carries no observed_via evidence — an unobserved human act is an inferred one, and inference is forbidden.`
       );
   }
 
   // PR/SHA evidence must match CURRENT GitHub state where applicable
   if (
-    ["pr_opened", "checks_observed", "merge_observed"].includes(plan.trigger)
+    ["pr_opened", "checks_observed", "merge_observed"].includes(safe.trigger)
   ) {
     const live = opts.github;
     if (!isPlainObject(live))
       return refuse(
         "missing_evidence",
-        `${plan.trigger} writes require a live GitHub cross-check (opts.github) — none was provided.`
+        `${safe.trigger} writes require a live GitHub cross-check (opts.github) — none was provided.`
       );
     if (
-      plan.trigger === "merge_observed" &&
-      live.merge_sha !== plan.evidence.merge_sha
+      safe.trigger === "merge_observed" &&
+      live.merge_sha !== safe.evidence.merge_sha
     )
       return refuse(
         "stale_sha",
-        `plan merge_sha ${plan.evidence.merge_sha} does not match live GitHub merge ${live.merge_sha}.`
+        `plan merge_sha ${safe.evidence.merge_sha} does not match live GitHub merge ${live.merge_sha}.`
       );
     if (
-      plan.trigger !== "merge_observed" &&
-      live.head_sha !== plan.evidence.head_sha
+      safe.trigger !== "merge_observed" &&
+      live.head_sha !== safe.evidence.head_sha
     )
       return refuse(
         "stale_sha",
-        `plan head_sha ${plan.evidence.head_sha} does not match live GitHub head ${live.head_sha}.`
+        `plan head_sha ${safe.evidence.head_sha} does not match live GitHub head ${live.head_sha}.`
       );
   }
 
@@ -554,7 +666,16 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
         "stale_task",
         `snapshot does not carry current value of "${property}" — reversibility is unprovable without it.`
       );
-    prior[property] = snapshot.properties[property];
+    const captured = snapshot.properties[property];
+    // Normalise to a string: a null/undefined live value is an EMPTY property,
+    // and an un-normalised object here both broke reversibility (0022) and let
+    // deepFreeze walk a caller-owned graph (0021).
+    prior[property] =
+      captured === null || captured === undefined
+        ? ""
+        : typeof captured === "string"
+          ? captured
+          : String(captured);
   }
 
   // no unresolved partial-write freeze
@@ -564,7 +685,7 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
   )
     return refuse(
       "partial_write",
-      `task ${plan.task_id} has an unresolved partially applied mutation — write_reverified is required before any further write.`
+      `task ${safe.task_id} has an unresolved partially applied mutation — write_reverified is required before any further write.`
     );
 
   // The authorized plan is an UNFORGEABLE CAPABILITY: built from the validated
@@ -572,25 +693,29 @@ export function authorizeWrite(plan, snapshot, opts = {}) {
   // executeMutation checks. Shape is not authenticity.
   const capability = deepFreeze({
     schema_version: plan.schema_version,
-    plan_id: plan.plan_id,
-    event_key: plan.event_key,
-    task_id: plan.task_id,
-    trigger: plan.trigger,
-    authority: plan.authority,
-    actor: plan.actor,
-    evidence: plainCopy(plan.evidence ?? {}),
-    expected_from_state: plan.expected_from_state,
-    expected_generation: plan.expected_generation ?? null,
+    plan_id: safe.plan_id,
+    event_key: safe.event_key,
+    task_id: safe.task_id,
+    trigger: safe.trigger,
+    authority: safe.authority,
+    actor: safe.actor,
+    evidence: plainCopy(safe.evidence ?? {}),
+    expected_from_state: safe.expected_from_state,
+    expected_generation: safe.expected_generation ?? null,
     writes,
     prior,
     authorized_at: now,
     authority_source: authority.path,
     target: {
       data_source_id: WRITE_ALLOWLIST.data_source_id,
-      page_id: plan.task_id,
+      page_id: safe.task_id,
     },
   });
-  AUTHORIZED_CAPABILITIES.add(capability);
+  AUTHORIZED_CAPABILITIES.set(capability, {
+    minted_at: now,
+    authority_path: authority.path,
+    consumed: false,
+  });
   return { ok: true, duplicate: false, authorized_plan: capability };
 }
 
@@ -614,6 +739,45 @@ export async function executeMutation(authorizedPlan, transport) {
       "executing unvalidated plans is exactly the bypass the policy layer exists to prevent; a forged capability would write past every gate and past the kill switch.",
       "call authorizeWrite and pass the exact object it returned as authorized_plan."
     );
+  const mint = AUTHORIZED_CAPABILITIES.get(authorizedPlan);
+
+  // SINGLE USE. A capability is permission for ONE write; replaying it wrote a
+  // stale value over a record that had moved on (NEW2-OG6-0017).
+  if (mint.consumed)
+    throw new LifecycleError(
+      "writer-capability-spent",
+      `the capability for ${authorizedPlan.plan_id} was already executed.`,
+      "a capability is permission for exactly one write; replaying it would overwrite a record that may have moved since.",
+      "re-read the task, re-derive the plan, and authorize again."
+    );
+
+  // TIME-BOUNDED, and authority is RE-READ from disk here. Otherwise the kill
+  // switch only stopped new authorizations while outstanding capabilities kept
+  // writing (NEW2-OG6-0017).
+  const age = Date.now() - mint.minted_at;
+  if (age > CAPABILITY_TTL_MS || age < 0)
+    throw new LifecycleError(
+      "writer-capability-expired",
+      `the capability for ${authorizedPlan.plan_id} is ${age}ms old (max ${CAPABILITY_TTL_MS}ms).`,
+      "an old capability was authorized against a snapshot of the world that no longer holds.",
+      "re-read the task and authorize again."
+    );
+  const recheck = loadAuthority(
+    mint.authority_path === CONTROL_PLANE_MANIFEST_PATH
+      ? undefined
+      : relative(REPO_ROOT, mint.authority_path)
+  );
+  if (
+    recheck.error ||
+    recheck.manifest.safety.notionWriteOperationsAuthorized !== true
+  )
+    throw new LifecycleError(
+      "notion-write-unauthorized",
+      `write authority is no longer granted at execute time (${recheck.error ?? "kill switch engaged"}).`,
+      "the kill switch must stop writes that are already in flight, not merely new authorizations.",
+      "re-arm the manifest through an owner-reviewed PR if the write is still intended."
+    );
+  AUTHORIZED_CAPABILITIES.set(authorizedPlan, { ...mint, consumed: true });
   if (
     !isPlainObject(transport) ||
     typeof transport.updatePage !== "function" ||
@@ -754,6 +918,7 @@ function buildAttestation(plan, observed, applied, extra) {
         )
       : null,
     observed_generation_source: observed?.fetched_at ?? null,
+    authority_source: plan.authority_source ?? null,
     ...extra,
   };
 }

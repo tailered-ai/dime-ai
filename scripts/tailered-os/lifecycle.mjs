@@ -10,7 +10,10 @@
 //
 // Laws this file enforces (Campaign Four directive §35–§37):
 //   - controlled transition table; authority "human" transitions require an
-//     observed human fact, never a machine-initiated event;
+//     observed human fact, never a machine-initiated event — approval, merge,
+//     unblock AND the deploy decision (deploy_consequence_recorded), which
+//     round-2 independent verification caught declared as "machine" while this
+//     header and the runbook called it permanently human;
 //   - idempotent + replay-safe: duplicate event_keys are visible no-ops,
 //     out-of-order events refuse loudly naming the expected from-state, and
 //     foldLifecycle(events) is deterministic (record.at comes from the event,
@@ -132,13 +135,21 @@ export const TRANSITIONS = Object.freeze(
       authority: "human",
     },
     {
-      // Deploy/No-Deploy CONSEQUENCE of the human merge, observed post-fact
-      // (merging dime-ai main IS a production deploy — deploy law).
+      // Deploy/No-Deploy DECISION, observed post-fact (merging dime-ai main IS
+      // a production deploy — deploy law). Independent verification round 2
+      // (NEW2-OG6-0018) caught this row declaring "machine" while the runbook
+      // and this file's own header call the deploy decision permanently human:
+      // the enforcing table must say what the law says, so it is a human row
+      // requiring an observed act.
       from: "Merged",
       to: "Merged",
       trigger_event_type: "deploy_consequence_recorded",
-      required_evidence_fields: ["deploy_decision", "consequence_ref"],
-      authority: "machine",
+      required_evidence_fields: [
+        "deploy_decision",
+        "consequence_ref",
+        "observed_via",
+      ],
+      authority: "human",
     },
     {
       from: "Merged",

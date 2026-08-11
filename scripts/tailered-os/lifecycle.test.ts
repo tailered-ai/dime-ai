@@ -64,10 +64,17 @@ const HAPPY: any[] = [
     { merge_sha: MERGE, observed_via: "gh pr view 496" },
     { actor: "human" }
   ),
-  ev("deploy_consequence_recorded", {
-    deploy_decision: "no-deploy",
-    consequence_ref: "railway-image-excludes-platform",
-  }),
+  // The deploy decision is a HUMAN act the engine only records (round-2
+  // verification NEW2-OG6-0018 made the table say what the law says).
+  ev(
+    "deploy_consequence_recorded",
+    {
+      deploy_decision: "no-deploy",
+      consequence_ref: "railway-image-excludes-platform",
+      observed_via: "owner decision recorded in the release thread",
+    },
+    { actor: "human" }
+  ),
   ev("post_merge_verified", { evidence_ref: "post-merge-report-1" }),
   ev("learning_captured", { learning_ref: "learning-1" }),
 ];

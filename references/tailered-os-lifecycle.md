@@ -28,7 +28,7 @@ data source `06a44772-1ae8-4d9d-be70-30741b334b85`):
 | CI | Review | `review_requested` | `review_ref` + recorded green rollup | machine |
 | Review | Approval | `approval_observed` | `reviewer`, `review_id`, `review_state=APPROVED`, `observed_via` | **human** |
 | Approval | Merged | `merge_observed` | `merge_sha` (40-hex), `observed_via` | **human** |
-| Merged | Merged | `deploy_consequence_recorded` | `deploy_decision` (deploy/no-deploy), `consequence_ref` | machine |
+| Merged | Merged | `deploy_consequence_recorded` | `deploy_decision` (deploy/no-deploy), `consequence_ref`, `observed_via` | **human** |
 | Merged | Verified | `post_merge_verified` | `evidence_ref` (consequence must be recorded first) | machine |
 | Verified | Verified | `learning_captured` | `learning_ref` | machine |
 | any | Blocked | `failure_observed` | `failure_class`, `detail_ref` | machine |
@@ -61,7 +61,7 @@ acting) · `missing_pr` · `stale_sha` (observation for a superseded head) · `c
 - **live** (OG-006 activation, 2026-08-11): the ONLY sanctioned write path is the
   policy-separated writer, `scripts/tailered-os/lifecycle-writer.mjs`. Contract:
   **observed fact → event schema → pure kernel → mutation plan (`deriveWrites`) →
-  policy/authority validation (`authorizeWrite`, 16 pre-write gates) → injected
+  policy/authority validation (`authorizeWrite`, ~30 distinct refusal points) → injected
   transport write → reread → compare → attestation (`executeMutation`)**. The writer
   executes prevalidated plans only; it never invents transitions, never reinterprets
   evidence, never expands its own scope.
@@ -76,14 +76,29 @@ acting) · `missing_pr` · `stale_sha` (observation for a superseded head) · `c
     the owner grant `safety.notionWriteAuthorization` (decision URL, grantedBy PREZ,
     actor AI-10) — the loader refuses a bare `true` as a self-grant, and refuses a
     dormant grant while the flag is `false`. A `manifest_path` override must resolve
-    inside the repository, so authority can only ever come from a code-reviewed file.
+    (after following symlinks) inside `config/` or `scripts/tailered-os/fixtures/`.
+    Residual, stated plainly: in-repo is not the same as committed — an attacker with
+    repository write access could place a file there, though they could equally edit the
+    canonical manifest, so this grants no new capability. The manifest that authorized a
+    write is recorded in its attestation (`authority_source`).
     Registry actor: AI-10, approved by PREZ 2026-08-11 conditional on qualification.
-  - **Capabilities are unforgeable**: the object `authorizeWrite` returns is registered
-    in a module-private `WeakSet`; `executeMutation` refuses anything not in it. Object
-    shape is not authenticity — a JSON round-trip of a real capability is refused.
-  - **Copy, then validate, then send the copy**: the write map is read from caller
-    memory exactly once; a getter or Proxy cannot show the validator one set of keys
-    and the transport another. Symbol-keyed writes are refused outright.
+  - **Capabilities are unforgeable, single-use, and time-bounded**: the object
+    `authorizeWrite` returns is registered in a module-private `WeakMap`;
+    `executeMutation` refuses anything not in it, refuses a second execution of the same
+    capability, refuses one older than `CAPABILITY_TTL_MS`, and **re-reads authority from
+    disk** before writing — so engaging the kill switch stops writes already in flight,
+    not merely new authorizations. Object shape is not authenticity: a JSON round-trip of
+    a real capability is refused.
+  - **Copy, then validate, then send the copy**: the whole plan — `task_id`, `trigger`,
+    `authority`, `actor` and the write map — is read from caller memory exactly once into
+    a frozen snapshot, and every gate, the capability and the payload read only that
+    snapshot. A getter cannot pass the scope gates for one page and land the write on
+    another. Symbol-keyed writes are refused outright.
+  - **The transition table decides the target state**: a plan's
+    `writes["Execution State"]` must equal the matched row's `to`. Proving that
+    `(trigger, from)` existed said nothing about what was written, which let a plain
+    machine `work_started` plan write `Merged` (NEW2-OG6-0014). Annotation rows may not
+    change state at all.
   - **`write_reverified` is not a write primitive**: it carries a live write only as an
     undo bound to a capability this writer authorized, restoring exactly that
     capability's captured priors — so it cannot launder a record to `Merged`,
@@ -93,15 +108,21 @@ acting) · `missing_pr` · `stale_sha` (observation for a superseded head) · `c
     freezes the task (`mutation_result` applied=partial) until a human-visible
     `write_reverified`. A write whose outcome is unreadable is partial, never assumed.
   - **Kill switch / rollback**: set the manifest flag back to `false` (owner-reviewed
-    PR) — `authorizeWrite` refuses every plan (fresh manifest read per write), the
+    PR) — `authorizeWrite` refuses every plan (fresh manifest read per write),
+    `executeMutation` refuses outstanding capabilities on its own re-read, the
     engine's `assertLiveNotionAuthority` throws `notion-write-unauthorized`, and all
     ledger/attestation history is preserved append-only.
 
 ## What stays human, permanently
 
-Review approval, the merge itself, the unblock decision, and the deploy decision. The
-engine records these from observed evidence (`observed_via` is required); it can neither
+Review approval, the merge itself, the unblock decision, and the deploy decision — all
+four are `authority: "human"` ROWS requiring `observed_via`, enforced by the kernel and
+re-checked by the writer. The engine records them from observed evidence; it can neither
 perform nor infer them, and `nextAction()` labels those stages `authority: "human"`.
+
+`post_merge_verified` (→ `Verified`) is machine authority by design: it requires an https
+`evidence_ref`, but that URL is **not fetched**, so `Verified` rests on a machine-supplied
+link. Stated rather than implied.
 
 ## Determinism / replay
 
