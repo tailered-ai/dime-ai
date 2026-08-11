@@ -154,6 +154,7 @@ describe("tailered-os control-plane manifest", () => {
       grantedOn: "2026-08-11",
       actor: "AI-10",
       scope: "x",
+      activationPullRequest: 510,
     };
     assert.throws(
       () => validateControlPlaneManifest(wrongGrantor),
@@ -168,6 +169,7 @@ describe("tailered-os control-plane manifest", () => {
       grantedOn: "2026-08-11",
       actor: "AI-99",
       scope: "x",
+      activationPullRequest: 510,
     };
     assert.throws(
       () => validateControlPlaneManifest(wrongActor),
@@ -182,6 +184,7 @@ describe("tailered-os control-plane manifest", () => {
       grantedOn: "2026-08-11",
       actor: "AI-10",
       scope: "x",
+      activationPullRequest: 510,
     };
     assert.throws(
       () => validateControlPlaneManifest(badDecision),
@@ -196,6 +199,45 @@ describe("tailered-os control-plane manifest", () => {
     );
   });
 
+  it("rejects a grant with no activation PR behind it — the grant text is not the authority", () => {
+    // OG-006 Round 2. `grantedBy: "PREZ"` is a string the machine can type into
+    // a JSON file. What makes a grant authority is the reviewed merge that
+    // introduced it, which scripts/tailered-os/authority.mjs authenticates
+    // against GitHub before any write. A grant naming no such PR cannot be
+    // authenticated at all, so it is refused here rather than later.
+    for (const activationPullRequest of [undefined, 0, -1, "510", 1.5, null]) {
+      const bad = clone();
+      bad.safety.notionWriteOperationsAuthorized = true;
+      bad.safety.notionWriteAuthorization = {
+        decision: "https://app.notion.com/p/3b99673313e781229b85f35a0b9f2966",
+        grantedBy: "PREZ",
+        grantedOn: "2026-08-11",
+        actor: "AI-10",
+        scope: "TOS-* Tasks, four properties",
+        ...(activationPullRequest === undefined
+          ? {}
+          : { activationPullRequest }),
+      };
+      assert.throws(
+        () => validateControlPlaneManifest(bad),
+        /activationPullRequest/,
+        String(activationPullRequest)
+      );
+    }
+    // The same grant WITH a real activation PR validates.
+    const good = clone();
+    good.safety.notionWriteOperationsAuthorized = true;
+    good.safety.notionWriteAuthorization = {
+      decision: "https://app.notion.com/p/3b99673313e781229b85f35a0b9f2966",
+      grantedBy: "PREZ",
+      grantedOn: "2026-08-11",
+      actor: "AI-10",
+      scope: "TOS-* Tasks, four properties",
+      activationPullRequest: 510,
+    };
+    assert.equal(validateControlPlaneManifest(good), good);
+  });
+
   it("rejects a dormant grant riding along while authority is false", () => {
     const dormant = clone();
     dormant.safety.notionWriteOperationsAuthorized = false;
@@ -205,6 +247,7 @@ describe("tailered-os control-plane manifest", () => {
       grantedOn: "2026-08-11",
       actor: "AI-10",
       scope: "x",
+      activationPullRequest: 510,
     };
     assert.throws(
       () => validateControlPlaneManifest(dormant),

@@ -294,16 +294,6 @@ export function validateControlPlaneManifest(manifest) {
       ],
       "safety.notionWriteAuthorization"
     );
-    // OG-006 Round 2: the grant TEXT is JSON the machine can edit, so it is not
-    // the authority. This pins the reviewed merge that the authority adapter
-    // authenticates against GitHub before any write (see
-    // scripts/tailered-os/authority.mjs). A grant with no activation PR behind
-    // it is unauthenticatable and therefore a self-grant.
-    invariant(
-      Number.isInteger(grant.activationPullRequest) &&
-        grant.activationPullRequest > 0,
-      "safety.notionWriteAuthorization.activationPullRequest must be the positive integer PR number whose reviewed merge introduced this grant"
-    );
     invariant(
       /^https:\/\/app\.notion\.com\/p\/[0-9a-f]{32}$/.test(
         String(grant.decision)
@@ -325,6 +315,16 @@ export function validateControlPlaneManifest(manifest) {
     invariant(
       typeof grant.scope === "string" && grant.scope.length > 0,
       "safety.notionWriteAuthorization.scope must state the approved write scope"
+    );
+    // OG-006 Round 2: the grant TEXT is JSON the machine can edit, so it is not
+    // the authority. This pins the reviewed merge that the authority adapter
+    // authenticates against GitHub before any write (see
+    // scripts/tailered-os/authority.mjs). A grant with no activation PR behind
+    // it is unauthenticatable and therefore a self-grant.
+    invariant(
+      Number.isInteger(grant.activationPullRequest) &&
+        grant.activationPullRequest > 0,
+      "safety.notionWriteAuthorization.activationPullRequest must be the positive integer PR number whose reviewed merge introduced this grant"
     );
   } else {
     invariant(
