@@ -641,8 +641,67 @@ describe("falsification re-battery — audited v1 bypasses now fail closed", () 
     );
     assert.equal(ledger.verifyRun(RUN).ok, true);
     const result = closeout(RUN);
+    // Surfaced...
     assert.deepEqual(result.claims.legacy_terminalizations, ["TOS-006"]);
-    assert.equal(result.claims.terminal_scopes[0].delivered, "legacy-v1");
+    // ...AND BLOCKED (FIND-TOS011-0001): this RUN id is not a pinned historical
+    // v1 run, so its forgeable v1 terminalization does not count as terminal.
+    assert.equal(result.complete, false);
+    assert.match(result.blockers.join("\n"), /not a pinned historical v1 run/);
+    // The scope is NOT in terminal_scopes.
+    assert.ok(
+      !result.claims.terminal_scopes.some((t: any) => t.scope === "TOS-006")
+    );
+  });
+
+  it("the REAL pinned historical run's v1 terminalizations DO count (anchor match)", () => {
+    const repoRunsRoot = join(__dirname, "..", "..", "os", "one-shot", "runs");
+    if (!existsSync(join(repoRunsRoot, "ONE-20260810-TOS"))) return;
+    const saved = process.env.ONE_SHOT_RUNS_ROOT;
+    delete process.env.ONE_SHOT_RUNS_ROOT;
+    try {
+      // ONE-20260810-TOS is in HISTORICAL_V1_RUNS with a matching tail anchor;
+      // its v1 SCOPE_COMPLETED events terminalize without blocking.
+      const result = closeout("ONE-20260810-TOS");
+      assert.ok(
+        !result.blockers.some((b: string) =>
+          b.includes("not a pinned historical v1 run")
+        ),
+        "the pinned historical run must not be blocked as forgeable"
+      );
+      assert.ok(result.claims.legacy_terminalizations.length > 0);
+    } finally {
+      process.env.ONE_SHOT_RUNS_ROOT = saved;
+    }
+  });
+
+  it("repo-proof path traversal outside the repo does NOT resolve (FIND-TOS011-0002)", () => {
+    // A file that exists but is OUTSIDE REPO_ROOT via ../ must not count.
+    assert.equal(
+      ledger.resolveProofRef(
+        { type: "repo", ref: "../../../../etc/hosts" },
+        RUN,
+        []
+      ),
+      false
+    );
+    // An absolute escape likewise.
+    assert.equal(
+      ledger.resolveProofRef(
+        { type: "repo", ref: "../../../../../etc/hosts" },
+        RUN,
+        []
+      ),
+      false
+    );
+    // A real in-repo file still resolves.
+    assert.equal(
+      ledger.resolveProofRef(
+        { type: "repo", ref: "scripts/one-shot/ledger.mjs" },
+        RUN,
+        []
+      ),
+      true
+    );
   });
 
   it("backward verification: the REAL Campaign One run verifies untouched under the v2 kernel", () => {

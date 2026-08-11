@@ -94,9 +94,14 @@ Campaign One run). v2 adds, enforced at append:
 - **SCOPE_COMPLETED carries the delivery contract**: `delivered: true | "gated" |
   "not_applicable" | "superseded"`, `authority_plane` (candidate/main/staging/production/
   live-canonical/design), `dod_ref`, and for `delivered: true` a `proof {type, ref}` the
-  closeout resolves (repo path, run artifact, event id, or system-of-record URL) — dead
-  links block completion. Non-delivery counts as terminal ONLY with a `decision_ref` to a
-  canonical owner Decision record: a campaign never reclassifies its own definition of done.
+  closeout resolves **offline**: `repo` / `run-artifact` / `event` refs must exist and be
+  contained within their root (dead or out-of-root refs block completion); **`url` proofs
+  are validated for well-formedness against the systems-of-record host only and are never
+  fetched — a well-formed but nonexistent URL resolves.** Proof strength beyond that is a
+  git-history + review assumption, not a kernel guarantee. Non-delivery counts as terminal
+  ONLY with a non-empty `decision_ref` string — the kernel checks **presence, not
+  validity** (it does not resolve the reference against Notion; a reviewer confirms it names
+  a real owner Decision record). A campaign never reclassifies its own definition of done.
 - **Exact PR identity**: PR_OPENED/PR_UPDATED/PR_READY/CI_STATE_CHANGED require `pr` +
   40-hex `head_sha`; PR_MERGED additionally requires `merge_sha`.
 - **Lifecycle completeness**: COMPLETED events (scope, gstack, subagent) require their
@@ -106,8 +111,18 @@ Campaign One run). v2 adds, enforced at append:
 - **Structured gstack accounting**: GSTACK_* events carry a `workflow` field; required-
   workflow accounting is exact-match (never substring); `GSTACK_UNAVAILABLE` requires a
   `reason` proving genuine uninvocability — a skill not invoked by choice is OMITTED.
-- **DoD divergence detection**: when `directive.md` is pinned into a run directory, every
+- **DoD divergence detection**: when a `directive.md` **exists** in the run directory, every
   manifest `definition_of_done` line must appear in it verbatim, or closeout blocks.
+  `directive.md` is author-placed and is **not** sha-pinned to any owner-held source, and the
+  check is skipped if the file is absent — it detects manifest-vs-directive drift, not a
+  directive weakened relative to owner intent. Pin the directive's sha against an owner source
+  out of band.
+- **Legacy (schema_version 1) grandfathering**: v1 events keep their original rules, but the
+  v1 marker is author-assertable. A hand-built v1 run (chained with the exported `hashEvent`)
+  verifies — so closeout only lets v1 SCOPE_COMPLETED events terminalize a scope when the run
+  is in `HISTORICAL_V1_RUNS` **and** its tail anchor (event count + final hash) matches the
+  committed pin. Unlisted legacy terminalizations are surfaced in
+  `claims.legacy_terminalizations` AND block completion.
 
 `closeout` additionally emits a machine-readable `claims` index (PR identities, terminal
 scopes with delivery class + proof, owner gates, legacy v1 terminalizations surfaced

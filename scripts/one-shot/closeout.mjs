@@ -7,6 +7,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  HISTORICAL_V1_RUNS,
   loadManifest,
   readEvents,
   resolveProofRef,
@@ -119,7 +120,23 @@ export function closeout(runId) {
     if (!completion) continue;
     if ((completion.schema_version ?? 1) < 2) {
       legacyTerminalizations.push(scope);
-      terminalScopes.push(scope);
+      // A v1 terminalization only counts if this run is a KNOWN historical run
+      // whose tail anchor matches the committed pin — otherwise the v1 marker
+      // is author-forgeable and would dodge the whole delivery contract
+      // (FIND-TOS011-0001). Unlisted legacy terminalizations block.
+      const historical = HISTORICAL_V1_RUNS[runId];
+      const lastEvent = events[events.length - 1];
+      const anchorMatches =
+        historical &&
+        historical.events_total === events.length &&
+        historical.final_event_hash === lastEvent?.event_hash;
+      if (anchorMatches) {
+        terminalScopes.push(scope);
+      } else {
+        blockers.push(
+          `scope ${scope} terminalized by a schema_version:1 event, but run ${runId} is not a pinned historical v1 run (or its tail anchor does not match) — legacy terminalizations from a new run are forgeable and do not count`
+        );
+      }
       continue;
     }
     if (completion.delivered === true) {

@@ -18,7 +18,13 @@ import {
   rmdirSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join } from "node:path";
+import {
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve as resolvePath,
+} from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const REPO_ROOT = join(
@@ -193,6 +199,19 @@ export const PROOF_TYPES = Object.freeze([
   "run-artifact",
 ]);
 const GIT_SHA = /^[0-9a-f]{40}$/;
+// Runs that legitimately predate the v2 envelope contract. A run whose events
+// are schema_version 1 is only trusted to terminalize scopes if it is one of
+// these — otherwise a new run could hand-forge v1 events (the marker is
+// author-assertable) to dodge the delivery contract. Each entry pins the run's
+// tail anchor so a listed id cannot be reused for a different, forged chain.
+// (FIND-TOS011-0001: closeout BLOCKS unlisted legacy terminalizations.)
+export const HISTORICAL_V1_RUNS = Object.freeze({
+  "ONE-20260810-TOS": {
+    events_total: 102,
+    final_event_hash:
+      "7efad216ae715b522ca5400578d790a39f61c2b533f57a7e26863a8c5a624831",
+  },
+});
 const PR_IDENTITY_EVENTS = Object.freeze([
   "PR_OPENED",
   "PR_UPDATED",
@@ -492,11 +511,25 @@ export function validateEvent(event, manifest) {
 // Resolve a proof reference (§53: terminal-task proof). Offline-deterministic:
 // repo paths and run artifacts must exist, event refs must exist in the run,
 // URLs must be well-formed against the systems of record.
+// Is `child` contained within `parent` after normalization? Closes the
+// repo-proof `../` traversal hole (FIND-TOS011-0002): "repo proof" must mean a
+// file INSIDE the repo, not any path the process can stat.
+function isContained(parent, child) {
+  const rel = relative(parent, child);
+  return rel.length > 0 && !rel.startsWith("..") && !isAbsolute(rel);
+}
+
 export function resolveProofRef(proof, runId, events) {
   if (!proof || !PROOF_TYPES.includes(proof.type)) return false;
-  if (proof.type === "repo") return existsSync(join(REPO_ROOT, proof.ref));
-  if (proof.type === "run-artifact")
-    return existsSync(join(runDir(runId), proof.ref));
+  if (proof.type === "repo") {
+    const resolved = resolvePath(REPO_ROOT, proof.ref);
+    return isContained(REPO_ROOT, resolved) && existsSync(resolved);
+  }
+  if (proof.type === "run-artifact") {
+    const root = runDir(runId);
+    const resolved = resolvePath(root, proof.ref);
+    return isContained(root, resolved) && existsSync(resolved);
+  }
   if (proof.type === "event")
     return events.some(event => event.event_id === proof.ref);
   if (proof.type === "url")
