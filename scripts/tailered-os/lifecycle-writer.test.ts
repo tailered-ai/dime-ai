@@ -542,6 +542,154 @@ describe("writer EXECUTE — write / reread / compare / attest", () => {
   });
 });
 
+// Adversarial-review regressions (independent refutation, 2026-08-11). Each of
+// these FAILED against the pre-remediation writer; they are the proof the
+// findings are closed, not the claim.
+describe("writer v1.1 — adversarial regressions", () => {
+  const planFor = (events = START) => {
+    const { state, record } = recordFor(events);
+    const derived: any = deriveWrites(record, state);
+    assert.equal(derived.ok, true);
+    return derived.plan;
+  };
+
+  it("FIND-OG6-0001: the authorized plan is DEEP-frozen and un-aliased — post-authorization tampering cannot reach the transport", async () => {
+    const plan = planFor();
+    const result: any = authorize(plan);
+    const ap = result.authorized_plan;
+    assert.equal(Object.isFrozen(ap), true);
+    assert.equal(Object.isFrozen(ap.writes), true, "writes must be frozen");
+    assert.equal(Object.isFrozen(ap.evidence), true, "evidence must be frozen");
+    assert.equal(Object.isFrozen(ap.prior), true);
+    // Un-aliased: mutating the ORIGINAL plan's writes must not touch the
+    // authorized capability.
+    plan.writes["Owner"] = "attacker";
+    assert.equal(ap.writes.Owner, undefined);
+    // And the frozen copy silently ignores (non-strict) or throws (strict) —
+    // either way the value never appears.
+    try {
+      (ap.writes as any)["Owner"] = "attacker";
+    } catch {
+      /* strict-mode TypeError is the stronger outcome */
+    }
+    assert.equal(ap.writes.Owner, undefined);
+    // End-to-end: the transport only ever sees allowlisted properties.
+    const transport = fakeTransport({
+      "Execution State": "Ready",
+      "Work Link": "",
+    });
+    const sent: any[] = [];
+    const inner = transport.updatePage.bind(transport);
+    transport.updatePage = async (pageId: string, props: any) => {
+      sent.push(props);
+      await inner(pageId, props);
+    };
+    await executeMutation(ap, transport);
+    assert.deepEqual(Object.keys(sent[0]).sort(), [
+      "Execution State",
+      "Work Link",
+    ]);
+  });
+
+  it("FIND-OG6-0001b: a tampered plan reaching executeMutation throws writer-plan-tampered (trust-boundary re-validation)", async () => {
+    const plan = planFor();
+    const result: any = authorize(plan);
+    // Simulate a serialize/queue/handoff that reconstitutes a mutable plan —
+    // exactly the phased PLAN → AUTHORIZE → WRITE pattern the design implies.
+    const rehydrated = {
+      ...JSON.parse(JSON.stringify(result.authorized_plan)),
+      prior: { ...result.authorized_plan.prior },
+    };
+    rehydrated.writes["Owner"] = "attacker";
+    const transport = fakeTransport({ "Execution State": "Ready" });
+    await assert.rejects(
+      () => executeMutation(rehydrated, transport),
+      /writer-plan-tampered/
+    );
+    assert.equal(transport.calls.update, 0, "nothing may be sent");
+  });
+
+  it("FIND-OG6-0002: prototype-chain property names are NOT allowlisted (own-property check)", () => {
+    const plan = planFor();
+    for (const name of [
+      "__proto__",
+      "constructor",
+      "toString",
+      "hasOwnProperty",
+    ]) {
+      const tampered = {
+        ...plan,
+        writes: JSON.parse(
+          JSON.stringify({ ...plan.writes, [name]: "attacker" })
+        ),
+      };
+      const result: any = authorize(tampered);
+      assert.equal(result.ok, false, `${name} must refuse`);
+      assert.equal(result.failure_class, "permission_denial");
+    }
+  });
+
+  it("FIND-OG6-0003: the writer validates the manifest itself — a self-granted manifest the loader rejects is refused here too", () => {
+    const plan = planFor();
+    const selfGranted: any = {
+      safety: { notionWriteOperationsAuthorized: true },
+      notion: { taileredOsProject: { id: PROJECT_ID } },
+    };
+    const result: any = authorize(plan, {}, { manifest: selfGranted });
+    assert.equal(result.ok, false);
+    assert.equal(result.failure_class, "permission_denial");
+
+    // A grant naming the wrong grantor or actor is not authority either.
+    const wrongActor = armed();
+    wrongActor.safety.notionWriteAuthorization = {
+      ...wrongActor.safety.notionWriteAuthorization,
+      actor: "AI-99",
+    };
+    const result2: any = authorize(plan, {}, { manifest: wrongActor });
+    assert.equal(result2.ok, false);
+    assert.equal(result2.failure_class, "permission_denial");
+  });
+
+  it("FIND-OG6-0004: the undo plan AUTHORIZES and executes through the same contract (reversibility is real)", async () => {
+    // Do the forward write.
+    const plan = planFor();
+    const forward: any = authorize(plan);
+    const transport = fakeTransport({
+      "Execution State": "Ready",
+      "Work Link": "",
+      "Proof / Result": "",
+      [WHY_BLOCKED_PROPERTY]: "",
+    });
+    const applied = await executeMutation(forward.authorized_plan, transport);
+    assert.equal(applied.applied, "full");
+    assert.equal(transport.record["Execution State"], "Executing");
+
+    // Now undo it — same authorize gauntlet, no special path.
+    const undo: any = buildUndoPlan(forward.authorized_plan);
+    assert.equal(undo.ok, true);
+    const undoAuth: any = authorizeWrite(
+      undo.plan,
+      {
+        page_id: TASK,
+        data_source_id: WRITE_ALLOWLIST.data_source_id,
+        scope_id: "TOS-TEST",
+        project_ids: [PROJECT_ID],
+        execution_state: "Executing", // the state the forward write produced
+        pending_partial_write: false,
+        fetched_at: NOW - 10,
+        properties: { ...transport.record },
+      },
+      armed(),
+      { now: NOW }
+    );
+    assert.equal(undoAuth.ok, true, JSON.stringify(undoAuth));
+    const undone = await executeMutation(undoAuth.authorized_plan, transport);
+    assert.equal(undone.applied, "full");
+    assert.equal(transport.record["Execution State"], "Ready");
+    assert.equal(transport.record["Work Link"], "");
+  });
+});
+
 describe("writer + kernel — replay and freeze compose", () => {
   it("full event replay reconstructs the same final state, and duplicates never double-mutate", () => {
     const events = [

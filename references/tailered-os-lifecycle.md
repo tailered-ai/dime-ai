@@ -97,6 +97,9 @@ any mismatch into a visible `replay_divergence`. Duplicate `event_key`s are no-o
 no second record.
 
 Tests: `scripts/tailered-os/lifecycle.test.ts` (21-test §36/§37 battery — every failure
-class proven to fire) + `scripts/tailered-os/lifecycle-writer.test.ts` (30-test OG-006
+class proven to fire) + `scripts/tailered-os/lifecycle-writer.test.ts` (35-test OG-006
 writer battery — every pre-write gate, transport failure class, partial-write freeze,
-and authority spoof proven to refuse).
+and authority spoof proven to refuse, plus five adversarial regressions that each
+FAILED against the pre-remediation writer: deep-frozen capability, trust-boundary
+re-validation, own-property allowlist lookup, independent manifest-grant enforcement,
+and an undo that actually authorizes).

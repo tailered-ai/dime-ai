@@ -25,7 +25,10 @@
 //   - Every refusal is a visible value naming one of the kernel's 15 failure
 //     classes. Silence is never success.
 import { LIFECYCLE_STATES, TRANSITIONS, LifecycleError } from "./lifecycle.mjs";
-import { SECRETISH } from "../tailered-os-control-plane.mjs";
+import {
+  SECRETISH,
+  validateControlPlaneManifest,
+} from "../tailered-os-control-plane.mjs";
 
 export const WRITER_SCHEMA_VERSION = 1;
 
@@ -66,8 +69,18 @@ function isPlainObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+// Adversarial finding FIND-OG6-0002: bracket access walks the prototype chain,
+// so "__proto__"/"constructor"/"toString" resolved to truthy Object.prototype
+// members and skipped every value check — the allowlist failed OPEN on exactly
+// the names an attacker would try. Own-property only, always.
+function ruleFor(property) {
+  return Object.hasOwn(WRITE_ALLOWLIST.properties, property)
+    ? WRITE_ALLOWLIST.properties[property]
+    : null;
+}
+
 function validValueForProperty(property, value) {
-  const rule = WRITE_ALLOWLIST.properties[property];
+  const rule = ruleFor(property);
   if (!rule) return `property "${property}" is not allowlisted`;
   if (typeof value !== "string")
     return `property "${property}" value must be a string`;
@@ -76,12 +89,39 @@ function validValueForProperty(property, value) {
   if (rule.kind === "select" && !rule.values.includes(value))
     return `property "${property}" value "${value}" is not in the closed vocabulary`;
   if (rule.kind === "url") {
-    if (!HTTPS_URL.test(value) || value.length > MAX_URL_LENGTH)
-      return `property "${property}" value must be an https URL (≤${MAX_URL_LENGTH} chars)`;
+    // "" is the explicit CLEAR of a URL property — required for reversibility
+    // (restoring a previously empty Work Link / Proof / Result).
+    if (
+      value !== "" &&
+      (!HTTPS_URL.test(value) || value.length > MAX_URL_LENGTH)
+    )
+      return `property "${property}" value must be an https URL (≤${MAX_URL_LENGTH} chars) or "" to clear`;
   }
   if (rule.kind === "text" && value.length > MAX_TEXT_LENGTH)
     return `property "${property}" value exceeds ${MAX_TEXT_LENGTH} chars`;
   return null;
+}
+
+// Every write map the writer will ever send is validated through this one
+// function — at authorize time AND again at the transport boundary.
+function validateWriteMap(writes) {
+  if (!isPlainObject(writes)) return "writes is not an object";
+  const entries = Object.entries(writes);
+  if (entries.length === 0) return "plan writes nothing";
+  for (const [property, value] of entries) {
+    const problem = validValueForProperty(property, value);
+    if (problem) return problem;
+  }
+  return null;
+}
+
+// Object.freeze is SHALLOW (finding FIND-OG6-0001): freezing the plan left
+// plan.writes mutable, so a holder of the reference could append off-allowlist
+// properties after authorization and executeMutation would send them verbatim.
+function deepFreeze(value) {
+  if (value === null || typeof value !== "object") return value;
+  for (const key of Object.getOwnPropertyNames(value)) deepFreeze(value[key]);
+  return Object.freeze(value);
 }
 
 // ---------------------------------------------------------------------------
@@ -176,16 +216,41 @@ export function authorizeWrite(plan, snapshot, manifest, opts = {}) {
       `unresolved connector failure: ${opts.connector_failure.detail ?? "(no detail)"} — resolve it before any write.`
     );
 
-  // authority flag — read from the freshly loaded manifest, every write
+  // authority — the manifest is re-validated HERE, every write, not trusted
+  // because a loader ran somewhere upstream (finding FIND-OG6-0003: a
+  // hand-built manifest the loader rejects as a self-grant was being accepted).
+  // This module is the only sanctioned live write path, so it enforces the
+  // owner-grant law itself.
   if (!isPlainObject(manifest) || !isPlainObject(manifest.safety))
     return refuse(
       "malformed_input",
       "manifest is not a control-plane manifest."
     );
+  try {
+    validateControlPlaneManifest(manifest);
+  } catch (error) {
+    return refuse(
+      "permission_denial",
+      `manifest failed control-plane validation at the write boundary: ${error.message} — an unvalidated manifest never authorizes a write.`
+    );
+  }
   if (manifest.safety.notionWriteOperationsAuthorized !== true)
     return refuse(
       "permission_denial",
       "notion-write-unauthorized: manifest safety.notionWriteOperationsAuthorized is not true — the kill switch is engaged; no live write may execute."
+    );
+  // Belt and braces on the grant itself: validation above already refuses a
+  // bare true, but the writer states its own requirement rather than inheriting
+  // it silently.
+  const grant = manifest.safety.notionWriteAuthorization;
+  if (
+    !isPlainObject(grant) ||
+    grant.grantedBy !== "PREZ" ||
+    grant.actor !== "AI-10"
+  )
+    return refuse(
+      "permission_denial",
+      "write authority carries no owner grant naming PREZ and actor AI-10 — a self-grant is not authority."
     );
 
   // plan shape
@@ -327,22 +392,14 @@ export function authorizeWrite(plan, snapshot, manifest, opts = {}) {
   }
 
   // 11./12./13. target database, properties, and mutation shapes are allowlisted
-  const entries = Object.entries(plan.writes);
-  if (entries.length === 0)
-    return refuse(
-      "malformed_input",
-      "plan writes nothing — refusing a no-op mutation."
-    );
-  for (const [property, value] of entries) {
-    const problem = validValueForProperty(property, value);
-    if (problem)
-      return refuse("permission_denial", `allowlist violation: ${problem}.`);
-  }
+  const writeProblem = validateWriteMap(plan.writes);
+  if (writeProblem)
+    return refuse("permission_denial", `allowlist violation: ${writeProblem}.`);
 
   // 14. reversibility — capture prior values so every write has an undo
   const prior = {};
   for (const property of Object.keys(plan.writes)) {
-    if (!(property in (snapshot.properties ?? {})))
+    if (!Object.hasOwn(snapshot.properties ?? {}, property))
       return refuse(
         "stale_task",
         `snapshot does not carry current value of "${property}" — reversibility is unprovable without it.`
@@ -360,17 +417,23 @@ export function authorizeWrite(plan, snapshot, manifest, opts = {}) {
       `task ${plan.task_id} has an unresolved partially applied mutation — write_reverified is required before any further write.`
     );
 
+  // The authorized plan is a CAPABILITY: deep-frozen, with its own copies of
+  // writes/evidence. A shallow freeze left plan.writes aliased and mutable, so
+  // a holder could append off-allowlist properties after every gate had passed
+  // (FIND-OG6-0001). executeMutation re-validates anyway — two locks.
   return {
     ok: true,
     duplicate: false,
-    authorized_plan: Object.freeze({
+    authorized_plan: deepFreeze({
       ...plan,
-      prior: Object.freeze(prior),
+      writes: { ...plan.writes },
+      evidence: { ...(plan.evidence ?? {}) },
+      prior,
       authorized_at: now,
-      target: Object.freeze({
+      target: {
         data_source_id: WRITE_ALLOWLIST.data_source_id,
         page_id: plan.task_id,
-      }),
+      },
     }),
   };
 }
@@ -400,6 +463,18 @@ export async function executeMutation(authorizedPlan, transport, opts = {}) {
       "no transport with updatePage + fetchTask was injected.",
       "the writer never talks to Notion directly; the governed connector is injected by the session.",
       "pass { updatePage, fetchTask }."
+    );
+  // Re-validate at the TRUST BOUNDARY, not only at authorize time: the bytes
+  // about to leave this process are the ones that must be lawful. Tampering
+  // between authorize and execute is a defect or an attack, never a routine
+  // refusal — so it throws instead of returning a failure value.
+  const tampering = validateWriteMap(authorizedPlan.writes);
+  if (tampering)
+    throw new LifecycleError(
+      "writer-plan-tampered",
+      `the plan handed to executeMutation violates the allowlist at the transport boundary: ${tampering}.`,
+      "a plan that changed after authorization is exactly the TOCTOU bypass the policy layer exists to prevent.",
+      "re-derive and re-authorize the plan; never mutate an authorized plan."
     );
 
   const classifyTransportError = error => {
@@ -512,14 +587,24 @@ function buildAttestation(plan, observed, applied, extra) {
 }
 
 // Reversibility made concrete: the undo plan writes the captured prior values
-// back through the same authorize/execute contract (same allowlist, same
-// attestation). Undo of an undo is the original plan.
+// back through the same authorize/execute contract (same allowlist, same gates,
+// same attestation).
+//
+// It is modelled as a `write_reverified` repair, not as a replay of the original
+// trigger: the original trigger's transition row does not exist from the state
+// the write just produced, so an undo carrying it could never authorize
+// (FIND-OG6-0004 — the reversibility guarantee was hollow). `write_reverified`
+// is the table's from:"*" machine-authority repair row, which is exactly what an
+// undo is. The undo is still fully gated: allowlist, scope, freshness, priors.
 export function buildUndoPlan(authorizedPlan) {
   if (!isPlainObject(authorizedPlan) || !isPlainObject(authorizedPlan.prior))
     return refuse(
       "malformed_input",
       "only an authorized plan (with captured priors) can be undone."
     );
+  const restoredState =
+    authorizedPlan.prior["Execution State"] ??
+    authorizedPlan.expected_from_state;
   return {
     ok: true,
     plan: {
@@ -527,13 +612,19 @@ export function buildUndoPlan(authorizedPlan) {
       plan_id: `undo:${authorizedPlan.plan_id}`,
       event_key: `undo:${authorizedPlan.event_key}`,
       task_id: authorizedPlan.task_id,
-      trigger: authorizedPlan.trigger,
-      authority: authorizedPlan.authority,
-      actor: authorizedPlan.actor,
-      evidence: { ...authorizedPlan.evidence },
+      trigger: "write_reverified",
+      authority: "machine",
+      actor: "machine",
+      evidence: {
+        verification_ref: `undo-of:${authorizedPlan.plan_id}`,
+        reverting_trigger: authorizedPlan.trigger,
+      },
+      // The live record should currently hold what the original write put
+      // there; the undo restores the captured priors.
       expected_from_state:
         authorizedPlan.writes["Execution State"] ??
         authorizedPlan.expected_from_state,
+      restores_state: restoredState,
       expected_generation: null,
       writes: { ...authorizedPlan.prior },
     },
