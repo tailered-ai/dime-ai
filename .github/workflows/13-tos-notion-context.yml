@@ -17,15 +17,20 @@
 # is parsed by a node script, not by the shell.
 name: 13-tos-notion-context
 
+# merge_group: required checks must report on merge-queue refs or the queue
+# stalls (audit M5). The PR body does not exist there, so the contract steps
+# run only on pull_request; the queue run re-verifies committed ledgers and
+# reports pass — the body contract was already enforced at PR stage.
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
+  merge_group:
 
 permissions:
   contents: read
 
 concurrency:
-  group: tos-context-${{ github.event.pull_request.number }}
+  group: tos-context-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -44,7 +49,12 @@ jobs:
         with:
           node-version: 22
 
+      - name: "[STEP] Merge queue — contract already enforced at PR stage"
+        if: github.event_name == 'merge_group'
+        run: echo "merge_group ref — the Notion-context body contract ran on the pull_request events; ledger integrity re-verifies below."
+
       - name: "[STEP] Changed files — offline, from git (no API)"
+        if: github.event_name == 'pull_request'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -56,6 +66,7 @@ jobs:
           echo "changed files: $(wc -l < changed-files.txt)"
 
       - name: "[STEP] Notion-context contract (body via env only; scope decided in-job)"
+        if: github.event_name == 'pull_request'
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
