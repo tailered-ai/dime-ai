@@ -327,12 +327,40 @@ export function closeout(runId) {
   const artifactManifest = deriveArtifacts(runId);
   if (artifactManifest.stale.length > 0) {
     blockers.push(
-      `stale-dependency artifact(s) never revalidated: ${artifactManifest.stale.map(a => `${a.id} (${a.cause})`).join("; ")} (§13)`
+      `stale-dependency artifact(s) never revalidated: ${artifactManifest.stale.map(a => `${a.id} (upstream ${a.cause?.upstream} via ${a.cause?.via})`).join("; ")} (§13)`
     );
   }
   if (artifactManifest.ephemeral_unretired.length > 0) {
     blockers.push(
       `ephemeral artifact(s) not RETIRED before closeout: ${artifactManifest.ephemeral_unretired.join(", ")} (§6 removal condition)`
+    );
+  }
+  // Refutation R7: the manifest must not repeat fabrications — offline-
+  // checkable bytes are checked, and mismatches block.
+  if (artifactManifest.fidelity_defects.length > 0) {
+    blockers.push(
+      `artifact-manifest fidelity defect(s): ${artifactManifest.fidelity_defects.join("; ")}`
+    );
+  }
+  // Refutation R8: work consumed while stale is poisoned until the SAME scope
+  // re-consumes the artifact after revalidation — recorded-but-toothless is
+  // not a control.
+  const unclearedStaleConsumptions = artifactManifest.stale_consumptions.filter(
+    poisoned => {
+      const artifact = artifactManifest.artifacts.find(
+        a => a.id === poisoned.artifact
+      );
+      return !(artifact?.consumers ?? []).some(
+        c =>
+          c.scope === poisoned.scope &&
+          !c.while_stale &&
+          c.event > poisoned.event
+      );
+    }
+  );
+  if (unclearedStaleConsumptions.length > 0) {
+    blockers.push(
+      `stale consumption(s) never repeated on fresh bytes: ${unclearedStaleConsumptions.map(c => `${c.artifact} by ${c.scope} at ${c.event}`).join("; ")} (§13: no stale-dependent work integrates)`
     );
   }
   // §16: every integration boundary evaluated must END at NO_GAP — a gap
@@ -350,6 +378,17 @@ export function closeout(runId) {
       `composition gap(s) not closed: ${openGaps.map(([id, verdict]) => `${id}=${verdict}`).join(", ")} — individually green components do not certify the composed system (§16)`
     );
   }
+  // Refutation R5: an unevaluated boundary is invisible to the latest-verdict
+  // rule, so the manifest may DECLARE the boundaries that objectively exist —
+  // each then requires a terminal NO_GAP, mirroring required_gates.
+  const unevaluatedCompositions = (manifest.required_compositions ?? []).filter(
+    id => compositionState.get(id) !== "NO_GAP"
+  );
+  if (unevaluatedCompositions.length > 0) {
+    blockers.push(
+      `required composition boundaries without a terminal NO_GAP: ${unevaluatedCompositions.join(", ")} (§16)`
+    );
+  }
   // §47: if this run mutated execution memory, the LAST mutation must be
   // followed by a MEMORY_RECONCILED clean:true — reconcile-then-mutate-again
   // does not count.
@@ -364,7 +403,7 @@ export function closeout(runId) {
       .some(e => e.event_type === "MEMORY_RECONCILED" && e.clean === true);
     if (!reconciledAfter) {
       blockers.push(
-        "execution memory mutated after the last clean MEMORY_RECONCILED — run memory reconciliation before closeout (§47)"
+        `execution memory mutated after the last clean MEMORY_RECONCILED (last mutation: ${events[lastMutationIndex].event_id}) — run memory reconciliation before closeout (§47)`
       );
     }
   }

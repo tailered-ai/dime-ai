@@ -51,19 +51,52 @@ beforeEach(() => {
 const add = (partial: any) =>
   ledger.appendEvent(RUN, { actor: ACTOR, label: "SUPPORTED", ...partial });
 
-const register = (id: string, extra: any = {}) =>
-  add({
+// Fidelity (refutation R7): external URIs inside the run dir are existence-
+// checked, so the fixture creates real bytes for every registered artifact.
+const register = (id: string, extra: any = {}) => {
+  const uri = extra.uri ?? `reports/${id}.md`;
+  const target = join(tmpRoot, RUN, uri);
+  mkdirSync(join(tmpRoot, RUN, "reports"), { recursive: true });
+  if (!extra.__skip_file) writeFileSync(target, `bytes of ${id}\n`);
+  const { __skip_file, ...artifactExtra } = extra;
+  return add({
     scope_id: "TOS-006",
     event_type: "ARTIFACT_REGISTERED",
     summary: `register ${id}`,
     artifact: {
       id,
-      uri: `reports/${id}.md`,
+      uri,
       artifact_type: "report",
       storage_class: "external",
-      ...extra,
+      ...artifactExtra,
     },
   });
+};
+
+// Verify-side coverage: appendEvent now REFUSES memory-contract violations
+// (refuse-before-record), so proving verify still detects them requires
+// forging the line the way a hand-editor would — chained with the exported
+// hashEvent, bypassing appendEvent.
+const forgeAppend = (partial: any) => {
+  const eventsPath = join(tmpRoot, RUN, "events.jsonl");
+  const existing = ledger.readEvents(RUN);
+  const previous = existing[existing.length - 1] ?? null;
+  const sequence = (previous?.sequence ?? 0) + 1;
+  const event: any = {
+    schema_version: ledger.EVENT_SCHEMA_VERSION,
+    event_id: `evt_${String(sequence).padStart(5, "0")}`,
+    run_id: RUN,
+    sequence,
+    timestamp: previous?.timestamp ?? "2099-01-01T00:00:00Z",
+    actor: ACTOR,
+    label: "SUPPORTED",
+    ...partial,
+  };
+  event.previous_event_hash = previous?.event_hash ?? null;
+  event.event_hash = ledger.hashEvent(event, event.previous_event_hash);
+  writeFileSync(eventsPath, `${JSON.stringify(event)}\n`, { flag: "a" });
+  return event;
+};
 
 // A run that satisfies every PRE-v4 closeout condition, so each v4 blocker can
 // be shown to be the ONLY thing standing between the run and COMPLETE.
@@ -158,12 +191,23 @@ describe("artifact lifecycle contract (§6/§7)", () => {
     register("ART-a2", { depends_on: ["ext:github:pr:496@6c00a6df"] });
   });
 
-  it("lifecycle events on an unregistered artifact are verify violations", () => {
+  it("lifecycle events on an unregistered artifact are REFUSED at append, and a forged line is a verify violation", () => {
     happyBase();
-    add({
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-006",
+          event_type: "ARTIFACT_CONSUMED",
+          summary: "consume ghost",
+          artifact: { id: "ART-ghost" },
+        }),
+      /memory contract violation refused at append.*never registered/
+    );
+    // Hand-edited history still cannot hide: verify re-derives the same rule.
+    forgeAppend({
       scope_id: "TOS-006",
       event_type: "ARTIFACT_CONSUMED",
-      summary: "consume ghost",
+      summary: "forged ghost consumption",
       artifact: { id: "ART-ghost" },
     });
     const result = ledger.verifyRun(RUN);
@@ -171,15 +215,25 @@ describe("artifact lifecycle contract (§6/§7)", () => {
     assert.match(result.errors.join("\n"), /never registered/);
   });
 
-  it("double registration of one identity is refused", () => {
+  it("double registration of one identity is refused at append and detected by verify on a forged line", () => {
     happyBase();
     register("ART-a1");
-    register("ART-a1");
-    const result = ledger.verifyRun(RUN);
-    assert.match(result.errors.join("\n"), /registered twice/);
+    assert.throws(() => register("ART-a1"), /registered twice/);
+    forgeAppend({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_REGISTERED",
+      summary: "forged double registration",
+      artifact: {
+        id: "ART-a1",
+        uri: "reports/ART-a1.md",
+        artifact_type: "report",
+        storage_class: "external",
+      },
+    });
+    assert.match(ledger.verifyRun(RUN).errors.join("\n"), /registered twice/);
   });
 
-  it("consumption after retirement is a violation — retired means retired", () => {
+  it("consumption after retirement is refused — retired means retired", () => {
     happyBase();
     register("ART-a1");
     add({
@@ -188,30 +242,60 @@ describe("artifact lifecycle contract (§6/§7)", () => {
       summary: "retire",
       artifact: { id: "ART-a1" },
     });
-    add({
-      scope_id: "TOS-006",
-      event_type: "ARTIFACT_CONSUMED",
-      summary: "consume the corpse",
-      artifact: { id: "ART-a1" },
-    });
-    assert.match(
-      ledger.verifyRun(RUN).errors.join("\n"),
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-006",
+          event_type: "ARTIFACT_CONSUMED",
+          summary: "consume the corpse",
+          artifact: { id: "ART-a1" },
+        }),
       /consumed after retirement/
     );
   });
 
-  it("supersession must name a registered successor", () => {
+  it("supersession must name an ALREADY-registered successor (register successor first)", () => {
+    happyBase();
+    register("ART-a1");
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-006",
+          event_type: "ARTIFACT_SUPERSEDED",
+          summary: "superseded by vapor",
+          artifact: { id: "ART-a1", superseded_by: "ART-vapor" },
+        }),
+      /unregistered ART-vapor/
+    );
+    // The sanctioned order works: successor first, then supersession.
+    register("ART-a2");
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_SUPERSEDED",
+      summary: "superseded by the registered successor",
+      artifact: { id: "ART-a1", superseded_by: "ART-a2" },
+    });
+    assert.equal(ledger.verifyRun(RUN).ok, true);
+  });
+
+  it("updating a retired or superseded artifact is refused — no silent resurrection", () => {
     happyBase();
     register("ART-a1");
     add({
       scope_id: "TOS-006",
-      event_type: "ARTIFACT_SUPERSEDED",
-      summary: "superseded by vapor",
-      artifact: { id: "ART-a1", superseded_by: "ART-vapor" },
+      event_type: "ARTIFACT_RETIRED",
+      summary: "retire",
+      artifact: { id: "ART-a1" },
     });
-    assert.match(
-      ledger.verifyRun(RUN).errors.join("\n"),
-      /unregistered ART-vapor/
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-006",
+          event_type: "ARTIFACT_UPDATED",
+          summary: "necromancy",
+          artifact: { id: "ART-a1", content_hash: "fff" },
+        }),
+      /updated after retired/
     );
   });
 
@@ -335,7 +419,7 @@ describe("memory reconciliation gate (§47)", () => {
     );
   });
 
-  it("claiming clean:true with stale artifacts outstanding is a verify violation", () => {
+  it("claiming clean:true with stale artifacts outstanding is REFUSED at append; a forged claim is a verify violation", () => {
     happyBase();
     register("ART-src", { content_hash: "aaa" });
     register("ART-consumer", { depends_on: ["ART-src"] });
@@ -345,10 +429,20 @@ describe("memory reconciliation gate (§47)", () => {
       summary: "src changed",
       artifact: { id: "ART-src", content_hash: "bbb" },
     });
-    add({
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-PROGRAM",
+          event_type: "MEMORY_RECONCILED",
+          summary: "false cleanliness",
+          clean: true,
+        }),
+      /clean:true refused: 1 stale artifact/
+    );
+    forgeAppend({
       scope_id: "TOS-PROGRAM",
       event_type: "MEMORY_RECONCILED",
-      summary: "false cleanliness",
+      summary: "forged cleanliness",
       clean: true,
     });
     const result = ledger.verifyRun(RUN);
@@ -356,6 +450,36 @@ describe("memory reconciliation gate (§47)", () => {
     assert.match(
       result.errors.join("\n"),
       /claims clean:true with 1 stale artifact/
+    );
+  });
+
+  it("claiming clean:true over a forged registry defect is a verify violation (problems branch)", () => {
+    happyBase();
+    register("ART-a1");
+    // Forge a double registration (zero staleness, pure registry problem)…
+    forgeAppend({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_REGISTERED",
+      summary: "forged duplicate",
+      artifact: {
+        id: "ART-a1",
+        uri: "reports/ART-a1.md",
+        artifact_type: "report",
+        storage_class: "external",
+      },
+    });
+    // …then a forged clean:true over it.
+    forgeAppend({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "forged cleanliness over a defect",
+      clean: true,
+    });
+    const result = ledger.verifyRun(RUN);
+    assert.equal(result.ok, false);
+    assert.match(
+      result.errors.join("\n"),
+      /claims clean:true with registry defect/
     );
   });
 
@@ -450,7 +574,22 @@ describe("composition gap (§16)", () => {
     );
   });
 
-  it("an open gap blocks COMPLETE; only a NO_GAP re-evaluation of the SAME boundary clears it", () => {
+  it("a composition verdict without evidence is refused — a bare NO_GAP is an assertion (R4)", () => {
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-PROGRAM",
+          event_type: "COMPOSITION_EVALUATED",
+          summary: "trust me, it composes",
+          integration_id: "INT-1",
+          components: ["a", "b"],
+          composition_verdict: "NO_GAP",
+        }),
+      /must attach the evidence behind its verdict/
+    );
+  });
+
+  it("an open gap blocks COMPLETE; only an evidence-backed NO_GAP re-evaluation of the SAME boundary clears it", () => {
     happyBase();
     add({
       scope_id: "TOS-PROGRAM",
@@ -459,6 +598,7 @@ describe("composition gap (§16)", () => {
       integration_id: "INT-kernel-contract",
       components: ["ledger.mjs", "tos-notion-context.mjs"],
       composition_verdict: "STATE_GAP",
+      evidence: [{ type: "event", ref: "evt_00001" }],
     });
     terminal();
     assert.match(
@@ -472,10 +612,28 @@ describe("composition gap (§16)", () => {
       integration_id: "INT-kernel-contract",
       components: ["ledger.mjs", "tos-notion-context.mjs"],
       composition_verdict: "NO_GAP",
+      evidence: [{ type: "event", ref: "evt_00002" }],
     });
     const result = closeout(RUN);
     assert.deepEqual(result.blockers, []);
     assert.equal(result.claims.composition["INT-kernel-contract"], "NO_GAP");
+  });
+
+  it("a manifest-declared composition boundary must reach a terminal NO_GAP (R5)", () => {
+    const manifestWithBoundary = {
+      ...MANIFEST,
+      required_compositions: ["INT-declared-boundary"],
+    };
+    writeFileSync(
+      join(tmpRoot, RUN, "run-manifest.json"),
+      JSON.stringify(manifestWithBoundary)
+    );
+    happyBase();
+    terminal();
+    assert.match(
+      closeout(RUN).blockers.join("\n"),
+      /required composition boundaries without a terminal NO_GAP: INT-declared-boundary/
+    );
   });
 });
 
@@ -589,6 +747,342 @@ describe("derived progress + loop detection (§10-§11)", () => {
     const progress = ledger.deriveProgress(RUN);
     assert.equal(progress.stall_breached, true);
     assert.equal(progress.longest_no_progress_streak.length, 4);
+  });
+});
+
+describe("refutation regressions (kernel v4.1)", () => {
+  it("R1: revalidation citing the DEAD identity is refused — the citation authenticates against the recorded cause", () => {
+    happyBase();
+    register("ART-src", { content_hash: "aaa" });
+    register("ART-consumer", { depends_on: ["ART-src"] });
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_UPDATED",
+      summary: "src changed",
+      artifact: { id: "ART-src", content_hash: "bbb" },
+    });
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-006",
+          event_type: "DEPENDENCY_REVALIDATED",
+          summary: "laundering with the old identity",
+          artifact: { id: "ART-consumer" },
+          upstream_identity: "ART-src@aaa",
+        }),
+      /does not authenticate against its stale cause/
+    );
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-006",
+          event_type: "DEPENDENCY_REVALIDATED",
+          summary: "laundering with an unrelated string",
+          artifact: { id: "ART-consumer" },
+          upstream_identity: "totally-unrelated-thing",
+        }),
+      /does not authenticate against its stale cause/
+    );
+    // The genuine new identity clears.
+    add({
+      scope_id: "TOS-006",
+      event_type: "DEPENDENCY_REVALIDATED",
+      summary: "rechecked against the new bytes",
+      artifact: { id: "ART-consumer" },
+      upstream_identity: "ART-src@bbb",
+    });
+    assert.deepEqual(ledger.deriveArtifacts(RUN).stale, []);
+  });
+
+  it("R1b: revalidating a non-stale artifact is refused", () => {
+    happyBase();
+    register("ART-a1");
+    assert.throws(
+      () =>
+        add({
+          scope_id: "TOS-006",
+          event_type: "DEPENDENCY_REVALIDATED",
+          summary: "pre-emptive absolution",
+          artifact: { id: "ART-a1" },
+          upstream_identity: "ART-a1@fresh",
+        }),
+      /which is not stale/
+    );
+  });
+
+  it("R2: registering AFTER an invalidation of a depended-on identity starts stale", () => {
+    happyBase();
+    add({
+      scope_id: "TOS-006",
+      event_type: "DEPENDENCY_INVALIDATED",
+      summary: "upstream went bad first",
+      upstream: "ext:github:pr:496@deadbeef",
+    });
+    register("ART-late", { depends_on: ["ext:github:pr:496@deadbeef"] });
+    const stale = ledger.deriveArtifacts(RUN).stale;
+    assert.equal(stale.length, 1);
+    assert.equal(stale[0].id, "ART-late");
+  });
+
+  it("R2b: depending on a currently-stale or superseded artifact starts stale", () => {
+    happyBase();
+    register("ART-old");
+    register("ART-new");
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_SUPERSEDED",
+      summary: "old superseded",
+      artifact: { id: "ART-old", superseded_by: "ART-new" },
+    });
+    register("ART-builds-on-old", { depends_on: ["ART-old"] });
+    assert.ok(
+      ledger
+        .deriveArtifacts(RUN)
+        .stale.some((s: any) => s.id === "ART-builds-on-old")
+    );
+  });
+
+  it("R3: an update WITHOUT hashes cascades — omitting content_hash is no longer an opt-out", () => {
+    happyBase();
+    register("ART-src"); // no content_hash
+    register("ART-consumer", { depends_on: ["ART-src"] });
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_UPDATED",
+      summary: "repointed with no hash evidence",
+      artifact: { id: "ART-src", uri: "reports/ART-src.md" },
+    });
+    assert.ok(
+      ledger
+        .deriveArtifacts(RUN)
+        .stale.some((s: any) => s.id === "ART-consumer")
+    );
+  });
+
+  it("R3b: an update proving an UNCHANGED hash does not cascade", () => {
+    happyBase();
+    register("ART-src", { content_hash: "aaa" });
+    register("ART-consumer", { depends_on: ["ART-src"] });
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_UPDATED",
+      summary: "metadata-only update, bytes proven unchanged",
+      artifact: { id: "ART-src", content_hash: "aaa" },
+    });
+    assert.deepEqual(ledger.deriveArtifacts(RUN).stale, []);
+  });
+
+  it("R9a: supersession cascades staleness to consumers of the superseded artifact", () => {
+    happyBase();
+    register("ART-old");
+    register("ART-consumer", { depends_on: ["ART-old"] });
+    register("ART-new");
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_SUPERSEDED",
+      summary: "old superseded",
+      artifact: { id: "ART-old", superseded_by: "ART-new" },
+    });
+    assert.ok(
+      ledger
+        .deriveArtifacts(RUN)
+        .stale.some((s: any) => s.id === "ART-consumer")
+    );
+  });
+
+  it("R9b: retirement cascades staleness to consumers of the retired artifact", () => {
+    happyBase();
+    register("ART-input");
+    register("ART-consumer", { depends_on: ["ART-input"] });
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_RETIRED",
+      summary: "input retired",
+      artifact: { id: "ART-input" },
+    });
+    assert.ok(
+      ledger
+        .deriveArtifacts(RUN)
+        .stale.some((s: any) => s.id === "ART-consumer")
+    );
+  });
+
+  it("R9c: DEPENDENCY_INVALIDATED on an ART- id cascades to its consumers", () => {
+    happyBase();
+    register("ART-input");
+    register("ART-consumer", { depends_on: ["ART-input"] });
+    add({
+      scope_id: "TOS-006",
+      event_type: "DEPENDENCY_INVALIDATED",
+      summary: "input formally invalidated",
+      upstream: "ART-input",
+    });
+    assert.ok(
+      ledger
+        .deriveArtifacts(RUN)
+        .stale.some((s: any) => s.id === "ART-consumer")
+    );
+  });
+
+  it("R6: repeated weak-progress events stop resetting the stall clock (progress-wash)", () => {
+    happyBase();
+    // Wash pattern: dispatch + varied-evidence CONTEXT_VERIFIED, repeated.
+    for (let i = 0; i < 4; i += 1) {
+      add({
+        scope_id: "LANE-0",
+        event_type: "TEST_STARTED",
+        summary: "same retry",
+      });
+      add({
+        scope_id: "LANE-0",
+        event_type: "CONTEXT_VERIFIED",
+        summary: `probe ${i}`,
+        evidence: [{ type: "url", ref: `https://github.com/x/y/pull/${i}` }],
+      });
+    }
+    const progress = ledger.deriveProgress(RUN);
+    // First CONTEXT_VERIFIED on LANE-0 counts; the repeats do not.
+    assert.equal(progress.stall_breached, true);
+  });
+
+  it("R7a: a committed-class artifact with a fabricated content_hash blocks closeout", () => {
+    happyBase();
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_REGISTERED",
+      summary: "kernel copy with fabricated hash",
+      artifact: {
+        id: "ART-kernel-claim",
+        uri: "scripts/one-shot/ledger.mjs",
+        artifact_type: "kernel",
+        storage_class: "committed",
+        content_hash: "0".repeat(64),
+      },
+    });
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "reconciled (fidelity is a closeout gate, not staleness)",
+      clean: true,
+    });
+    terminal();
+    assert.match(
+      closeout(RUN).blockers.join("\n"),
+      /fidelity defect.*does not match actual/
+    );
+  });
+
+  it("R7b: a ghost external uri inside the run dir blocks closeout", () => {
+    happyBase();
+    register("ART-ghost", { __skip_file: true });
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "reconciled",
+      clean: true,
+    });
+    terminal();
+    assert.match(
+      closeout(RUN).blockers.join("\n"),
+      /fidelity defect.*does not exist under its external root/
+    );
+  });
+
+  it("R7c: two live artifacts claiming one uri block closeout", () => {
+    happyBase();
+    register("ART-one");
+    register("ART-two", { uri: "reports/ART-one.md" });
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "reconciled",
+      clean: true,
+    });
+    terminal();
+    assert.match(
+      closeout(RUN).blockers.join("\n"),
+      /claimed by 2 live artifacts/
+    );
+  });
+
+  it("R8: consuming while stale blocks closeout until the same scope re-consumes fresh bytes", () => {
+    happyBase();
+    register("ART-src", { content_hash: "aaa" });
+    register("ART-consumer", { depends_on: ["ART-src"] });
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_UPDATED",
+      summary: "src changed",
+      artifact: { id: "ART-src", content_hash: "bbb" },
+    });
+    add({
+      scope_id: "LANE-0",
+      event_type: "ARTIFACT_CONSUMED",
+      summary: "consumed the poisoned artifact",
+      artifact: { id: "ART-consumer" },
+    });
+    add({
+      scope_id: "TOS-006",
+      event_type: "DEPENDENCY_REVALIDATED",
+      summary: "revalidated against new src",
+      artifact: { id: "ART-consumer" },
+      upstream_identity: "ART-src@bbb",
+    });
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "staleness cleared",
+      clean: true,
+    });
+    terminal();
+    assert.match(
+      closeout(RUN).blockers.join("\n"),
+      /stale consumption\(s\) never repeated on fresh bytes: ART-consumer by LANE-0/
+    );
+    // The same scope re-consumes after revalidation → cleared.
+    add({
+      scope_id: "LANE-0",
+      event_type: "ARTIFACT_CONSUMED",
+      summary: "re-consumed on fresh bytes",
+      artifact: { id: "ART-consumer" },
+    });
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "clean after re-consumption",
+      clean: true,
+    });
+    const result = closeout(RUN);
+    assert.deepEqual(result.blockers, []);
+  });
+
+  it("F7: a memory-typed event stamped below v4 is refused as forged", () => {
+    // validateEvent path — hand-build the event to control schema_version.
+    assert.throws(
+      () =>
+        ledger.validateEvent(
+          {
+            schema_version: 3,
+            event_id: "evt_00001",
+            run_id: RUN,
+            sequence: 1,
+            timestamp: "2099-01-01T00:00:00Z",
+            scope_id: "TOS-006",
+            event_type: "ARTIFACT_REGISTERED",
+            actor: ACTOR,
+            label: "SUPPORTED",
+            summary: "forged v3 artifact event",
+            artifact: {
+              id: "ART-forged",
+              uri: "x",
+              artifact_type: "t",
+              storage_class: "external",
+            },
+          },
+          MANIFEST
+        ),
+      /requires schema_version >= 4/
+    );
   });
 });
 

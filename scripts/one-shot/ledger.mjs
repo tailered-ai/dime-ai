@@ -421,6 +421,15 @@ export function validateManifest(manifest) {
     manifest.required_gates.every(gate => GATES.includes(gate)),
     "manifest.required_gates contains an unknown gate"
   );
+  if (manifest.required_compositions !== undefined) {
+    invariant(
+      Array.isArray(manifest.required_compositions) &&
+        manifest.required_compositions.every(
+          id => typeof id === "string" && id.length > 0
+        ),
+      "manifest.required_compositions must be an array of integration ids (§16)"
+    );
+  }
   invariant(
     !SECRETISH.test(JSON.stringify(manifest)),
     "manifest contains a credential-shaped value"
@@ -665,6 +674,20 @@ export function validateEvent(event, manifest) {
     }
   }
   // ---- v4 universal-execution-memory contract (Campaign Four, §6/§7/§13/§16/§47) ----
+  // The memory vocabulary did not exist before v4, so a memory-typed event
+  // stamped with an older schema_version is definitionally forged — it would
+  // dodge every artifact-shape rule and be invisible to the registry while
+  // crashing the graph/closeout consumers (review F7).
+  invariant(
+    !(
+      (MEMORY_MUTATING_TYPES.includes(event.event_type) ||
+        ["COMPOSITION_EVALUATED", "MEMORY_RECONCILED"].includes(
+          event.event_type
+        )) &&
+      event.schema_version < 4
+    ),
+    `${event.event_type} requires schema_version >= 4 — the memory vocabulary does not exist in earlier envelope versions`
+  );
   if (event.schema_version >= 4) {
     if (ARTIFACT_EVENT_TYPES.includes(event.event_type)) {
       invariant(
@@ -745,6 +768,13 @@ export function validateEvent(event, manifest) {
       invariant(
         COMPOSITION_VERDICTS.includes(event.composition_verdict),
         `COMPOSITION_EVALUATED requires composition_verdict in ${COMPOSITION_VERDICTS.join("|")} (§16)`
+      );
+      // Refutation R4: a composition verdict is a claim about observed
+      // behavior — with no evidence it is an unbacked assertion, and a bare
+      // NO_GAP could launder any prior gap.
+      invariant(
+        Array.isArray(event.evidence) && event.evidence.length > 0,
+        "COMPOSITION_EVALUATED must attach the evidence behind its verdict (§16; a bare NO_GAP is an assertion, not an evaluation)"
       );
     }
     if (event.event_type === "MEMORY_RECONCILED") {
@@ -893,6 +923,33 @@ export function appendEvent(runId, partial) {
       previous === null || event.timestamp >= previous.timestamp,
       "event.timestamp must be monotonically non-decreasing"
     );
+    // Refuse-before-record for the memory contract (review F4/F5, refutation
+    // R1/R2): a memory-rule violation must never enter the permanent chain —
+    // an appended violation would brick an append-only ledger forever. verify
+    // re-derives the same rules purely as tamper evidence on hand-edited files.
+    if (
+      MEMORY_MUTATING_TYPES.includes(event.event_type) ||
+      event.event_type === "MEMORY_RECONCILED"
+    ) {
+      const before = foldArtifacts(events);
+      const after = foldArtifacts([...events, event]);
+      const newProblems = after.problems.slice(before.problems.length);
+      invariant(
+        newProblems.length === 0,
+        `memory contract violation refused at append: ${newProblems.join("; ")}`
+      );
+      if (event.event_type === "MEMORY_RECONCILED" && event.clean === true) {
+        const staleNow = [...after.registry.values()].filter(a => a.stale);
+        invariant(
+          staleNow.length === 0,
+          `MEMORY_RECONCILED clean:true refused: ${staleNow.length} stale artifact(s) outstanding (${staleNow.map(a => a.id).join(", ")}) — reconcile them or record clean:false`
+        );
+        invariant(
+          after.problems.length === 0,
+          `MEMORY_RECONCILED clean:true refused: registry defect(s) outstanding: ${after.problems.join("; ")}`
+        );
+      }
+    }
     event.previous_event_hash = previous?.event_hash ?? null;
     event.event_hash = hashEvent(event, event.previous_event_hash);
     appendFileSync(eventsPath(runId), `${JSON.stringify(event)}\n`);
@@ -910,15 +967,20 @@ export function appendEvent(runId, partial) {
 export function foldArtifacts(events) {
   const registry = new Map();
   const problems = [];
-  // Transitive §13 cascade: mark every registered artifact that (directly or
-  // through other artifacts) depends on `identity` as stale.
-  const cascade = (identity, cause) => {
+  // §13 invalidations remember their identity (refutation R2): a registration
+  // that arrives AFTER its upstream was invalidated starts stale — the cascade
+  // is a property of history, not of iteration order.
+  const invalidatedIdentities = new Map(); // identity -> {via, old_identity}
+  // Structured stale cause (refutation R1): revalidation must cite an identity
+  // rooted in THIS upstream and different from the dead one — the kernel knows
+  // both, so "any non-empty string" is no longer a clearing token.
+  const cascade = (upstream, oldIdentity, via) => {
     for (const entry of registry.values()) {
-      if (entry.stale && entry.stale_cause === cause) continue;
-      if ((entry.depends_on ?? []).includes(identity)) {
+      if (entry.stale && entry.stale_cause?.upstream === upstream) continue;
+      if ((entry.depends_on ?? []).includes(upstream)) {
         entry.stale = true;
-        entry.stale_cause = cause;
-        cascade(entry.id, cause); // downstream of the downstream
+        entry.stale_cause = { upstream, old_identity: oldIdentity, via };
+        cascade(entry.id, null, via); // downstream of the downstream
       }
     }
   };
@@ -931,12 +993,13 @@ export function foldArtifacts(events) {
         problems.push(`artifact ${id} registered twice (${event.event_id})`);
         continue;
       }
-      registry.set(id, {
+      const dependsOn = event.artifact.depends_on ?? [];
+      const entry = {
         id,
         uri: event.artifact.uri,
         artifact_type: event.artifact.artifact_type,
         storage_class: event.artifact.storage_class,
-        depends_on: event.artifact.depends_on ?? [],
+        depends_on: dependsOn,
         content_hash: event.artifact.content_hash ?? null,
         lifecycle_state: "REGISTERED",
         producing_scope: event.scope_id,
@@ -948,7 +1011,34 @@ export function foldArtifacts(events) {
         stale: false,
         stale_cause: null,
         revalidated_against: [],
-      });
+      };
+      // R2: depending on an identity that is ALREADY invalidated (or on an
+      // artifact currently stale/superseded/retired) starts life stale.
+      for (const dep of dependsOn) {
+        const dead = invalidatedIdentities.get(dep);
+        const depEntry = registry.get(dep);
+        if (dead) {
+          entry.stale = true;
+          entry.stale_cause = {
+            upstream: dep,
+            old_identity: dead.old_identity,
+            via: dead.via,
+          };
+        } else if (
+          depEntry &&
+          (depEntry.stale ||
+            depEntry.lifecycle_state === "SUPERSEDED" ||
+            depEntry.lifecycle_state === "RETIRED")
+        ) {
+          entry.stale = true;
+          entry.stale_cause = {
+            upstream: dep,
+            old_identity: null,
+            via: depEntry.latest_event,
+          };
+        }
+      }
+      registry.set(id, entry);
       continue;
     }
     if (
@@ -957,11 +1047,13 @@ export function foldArtifacts(events) {
     ) {
       if (type === "DEPENDENCY_INVALIDATED") {
         // Upstream identity went bad (refuted / sha changed / superseded /
-        // deleted / stale / authority changed): cascade to every consumer.
-        cascade(
-          event.upstream,
-          `${event.upstream} invalidated by ${event.event_id}`
-        );
+        // deleted / stale / authority changed): cascade to every consumer,
+        // and REMEMBER the identity for late registrations (R2).
+        invalidatedIdentities.set(event.upstream, {
+          via: event.event_id,
+          old_identity: event.upstream,
+        });
+        cascade(event.upstream, event.upstream, event.event_id);
       }
       continue;
     }
@@ -974,15 +1066,30 @@ export function foldArtifacts(events) {
     }
     entry.latest_event = event.event_id;
     if (type === "ARTIFACT_UPDATED") {
-      const newHash = event.artifact.content_hash ?? null;
-      // §13 "changes SHA/hash": an update whose content hash moved invalidates
-      // every downstream consumer until each revalidates explicitly.
       if (
+        entry.lifecycle_state === "RETIRED" ||
+        entry.lifecycle_state === "SUPERSEDED"
+      ) {
+        // F9: a terminal lifecycle state is never silently resurrected.
+        problems.push(
+          `artifact ${id} updated after ${entry.lifecycle_state.toLowerCase()} (${event.event_id})`
+        );
+        continue;
+      }
+      const newHash = event.artifact.content_hash ?? null;
+      // §13 "changes SHA/hash", fail-CLOSED (refutation R3): an update
+      // invalidates consumers UNLESS both hashes are present and equal —
+      // omitting hashes is no longer a silent opt-out of the cascade.
+      const provablyUnchanged =
         newHash !== null &&
         entry.content_hash !== null &&
-        newHash !== entry.content_hash
-      ) {
-        cascade(entry.id, `${entry.id} content changed at ${event.event_id}`);
+        newHash === entry.content_hash;
+      const oldIdentity =
+        entry.content_hash !== null
+          ? `${entry.id}@${entry.content_hash}`
+          : null;
+      if (!provablyUnchanged) {
+        cascade(entry.id, oldIdentity, event.event_id);
       }
       if (newHash !== null) entry.content_hash = newHash;
       if (event.artifact.uri) entry.uri = event.artifact.uri;
@@ -1014,25 +1121,53 @@ export function foldArtifacts(events) {
       entry.superseded_by = event.artifact.superseded_by;
       if (!registry.has(event.artifact.superseded_by)) {
         problems.push(
-          `artifact ${id} superseded by unregistered ${event.artifact.superseded_by} (${event.event_id})`
+          `artifact ${id} superseded by unregistered ${event.artifact.superseded_by} (${event.event_id}) — register the successor BEFORE the supersession`
         );
       }
       // A superseded input is a §13 invalidation for everything built on it.
-      cascade(entry.id, `${entry.id} superseded at ${event.event_id}`);
+      invalidatedIdentities.set(entry.id, {
+        via: event.event_id,
+        old_identity: entry.id,
+      });
+      cascade(entry.id, entry.id, event.event_id);
     }
     if (type === "ARTIFACT_RETIRED") {
       entry.lifecycle_state = "RETIRED";
-      cascade(entry.id, `${entry.id} retired at ${event.event_id}`);
+      invalidatedIdentities.set(entry.id, {
+        via: event.event_id,
+        old_identity: entry.id,
+      });
+      cascade(entry.id, entry.id, event.event_id);
     }
     if (type === "DEPENDENCY_REVALIDATED") {
-      // Clears THIS consumer only, and only by citing the new upstream
-      // identity — no transitive forgiveness (§13).
-      entry.stale = false;
-      entry.stale_cause = null;
-      entry.revalidated_against.push({
-        upstream_identity: event.upstream_identity,
-        event: event.event_id,
-      });
+      // Clears THIS consumer only (no transitive forgiveness), and ONLY by a
+      // citation the kernel can authenticate against the recorded cause
+      // (refutation R1): the cited identity must be rooted in the upstream
+      // that went stale AND must not be the dead identity itself.
+      if (!entry.stale) {
+        problems.push(
+          `DEPENDENCY_REVALIDATED for ${id} which is not stale (${event.event_id})`
+        );
+      } else {
+        const cause = entry.stale_cause;
+        const cited = event.upstream_identity;
+        const rooted =
+          cited === cause.upstream || cited.startsWith(`${cause.upstream}@`);
+        const isDeadIdentity =
+          cause.old_identity !== null && cited === cause.old_identity;
+        if (!rooted || isDeadIdentity) {
+          problems.push(
+            `DEPENDENCY_REVALIDATED for ${id} cites "${cited}" which does not authenticate against its stale cause (upstream ${cause.upstream}${cause.old_identity ? `, dead identity ${cause.old_identity}` : ""}) (${event.event_id})`
+          );
+        } else {
+          entry.stale = false;
+          entry.stale_cause = null;
+          entry.revalidated_against.push({
+            upstream_identity: cited,
+            event: event.event_id,
+          });
+        }
+      }
     }
   }
   return { registry, problems };
@@ -1041,6 +1176,66 @@ export function foldArtifacts(events) {
 export function deriveArtifacts(runId) {
   const { registry, problems } = foldArtifacts(readEvents(runId));
   const artifacts = [...registry.values()];
+  // Refutation R7 — manifest fidelity: derived ≠ true, so where the bytes are
+  // offline-checkable the kernel checks them. committed-class URIs must exist
+  // inside the repo (and their content_hash, when declared, must match the
+  // actual sha256); external URIs that resolve inside the run directory must
+  // exist there (same hash rule). URIs outside both roots stay a documented
+  // trust boundary. Live (non-retired/superseded) artifacts must not share a
+  // URI — a fresh id on the same bytes is how a stale artifact gets relaunched.
+  const fidelityDefects = [];
+  const live = artifacts.filter(
+    a => !["RETIRED", "SUPERSEDED"].includes(a.lifecycle_state)
+  );
+  const checkFile = (artifact, root, resolved) => {
+    if (!existsSync(resolved)) {
+      fidelityDefects.push(
+        `${artifact.id}: uri "${artifact.uri}" does not exist under its ${artifact.storage_class} root`
+      );
+      return;
+    }
+    // Only sha256-shaped declarations are checkable against bytes; other hash
+    // formats (short ids, non-sha digests) remain a trust boundary.
+    if (artifact.content_hash && /^[0-9a-f]{64}$/.test(artifact.content_hash)) {
+      const actual = createHash("sha256")
+        .update(readFileSync(resolved))
+        .digest("hex");
+      if (actual !== artifact.content_hash) {
+        fidelityDefects.push(
+          `${artifact.id}: declared content_hash ${artifact.content_hash.slice(0, 12)}… does not match actual ${actual.slice(0, 12)}… for "${artifact.uri}"`
+        );
+      }
+    }
+  };
+  for (const artifact of live) {
+    if (artifact.storage_class === "committed") {
+      const resolved = resolvePath(REPO_ROOT, artifact.uri);
+      if (!isContained(REPO_ROOT, resolved)) {
+        fidelityDefects.push(
+          `${artifact.id}: committed uri "${artifact.uri}" resolves outside the repo`
+        );
+      } else {
+        checkFile(artifact, REPO_ROOT, resolved);
+      }
+    } else if (artifact.storage_class === "external") {
+      const root = runDir(runId);
+      const resolved = resolvePath(root, artifact.uri);
+      if (isContained(root, resolved)) checkFile(artifact, root, resolved);
+    }
+  }
+  const uriOwners = new Map();
+  for (const artifact of live) {
+    const owners = uriOwners.get(artifact.uri) ?? [];
+    owners.push(artifact.id);
+    uriOwners.set(artifact.uri, owners);
+  }
+  for (const [uri, owners] of uriOwners) {
+    if (owners.length > 1) {
+      fidelityDefects.push(
+        `uri "${uri}" is claimed by ${owners.length} live artifacts (${owners.join(", ")}) — one canonical location, one identity`
+      );
+    }
+  }
   return {
     run_id: runId,
     artifacts_total: artifacts.length,
@@ -1063,6 +1258,7 @@ export function deriveArtifacts(runId) {
         a => a.storage_class === "ephemeral" && a.lifecycle_state !== "RETIRED"
       )
       .map(a => a.id),
+    fidelity_defects: fidelityDefects,
     problems,
     artifacts,
   };
@@ -1191,6 +1387,21 @@ export function deriveInteractionGraph(runId) {
 // Honest boundary (README): this observes what the orchestrator reports, not
 // raw agent behavior — it upgrades stall detection from purely self-reported
 // to stream-derived, and no further. Signature = the action's stable identity.
+// Refutation R6 (progress-wash): context/plan/read-class events resolve
+// unknowns, so their FIRST occurrence per (type, scope) is progress — but
+// repeating them cheaply must not keep resetting the stall clock or shielding
+// a loop. WEAK progress counts once per (type, scope); STRONG always counts.
+const WEAK_PROGRESS_TYPES = new Set([
+  "RUN_STARTED",
+  "RUN_RESUMED",
+  "CONTEXT_RESTORED",
+  "CONTEXT_VERIFIED",
+  "AUTHORITY_VERIFIED",
+  "PLAN_CREATED",
+  "PLAN_REVIEWED",
+  "SCOPE_DISCOVERED",
+  "NOTION_READ_VERIFIED",
+]);
 const PROGRESS_TYPES = new Set([
   // resolving an unknown IS progress (§10 "previously unknown fact resolved");
   // dispatching work is not — only its result is.
@@ -1290,6 +1501,18 @@ export function deriveProgress(runId) {
         .sort()
         .join("|"),
     ].join("~");
+  // Per-event progress classification (R6): WEAK types count only on their
+  // first occurrence per (type, scope); STRONG types always count. Everything
+  // else is a dispatch/signal, never progress.
+  const seenWeak = new Set();
+  const isProgress = events.map(event => {
+    if (!PROGRESS_TYPES.has(event.event_type)) return false;
+    if (!WEAK_PROGRESS_TYPES.has(event.event_type)) return true;
+    const key = `${event.event_type}~${event.scope_id}`;
+    if (seenWeak.has(key)) return false;
+    seenWeak.add(key);
+    return true;
+  });
   // Loop candidates: the same signature recurring >= threshold times with NO
   // progress-class event between its first and last occurrence.
   const occurrences = new Map();
@@ -1300,27 +1523,31 @@ export function deriveProgress(runId) {
   const loopCandidates = [];
   for (const [signature, indexes] of occurrences) {
     if (indexes.length < loopThreshold) continue;
-    const between = events.slice(indexes[0] + 1, indexes[indexes.length - 1]);
-    const progressBetween = between.some(
-      e => PROGRESS_TYPES.has(e.event_type) && signatureOf(e) !== signature
-    );
+    const first = indexes[0];
+    const last = indexes[indexes.length - 1];
+    const progressBetween = events
+      .slice(first + 1, last)
+      .some(
+        (e, offset) =>
+          isProgress[first + 1 + offset] && signatureOf(e) !== signature
+      );
     if (!progressBetween) {
       loopCandidates.push({
         signature,
         repetitions: indexes.length,
-        first_event: events[indexes[0]].event_id,
-        last_event: events[indexes[indexes.length - 1]].event_id,
+        first_event: events[first].event_id,
+        last_event: events[last].event_id,
         threshold: `loop_threshold_repeated_action_signature=${loopThreshold}`,
       });
     }
   }
-  // Stall streak: longest run of consecutive events none of which is
-  // progress-class.
+  // Stall streak: longest run of consecutive events none of which counts as
+  // progress under the weak/strong rule.
   let streak = 0;
   let longest = { length: 0, from: null, to: null };
   let streakStart = null;
-  events.forEach(event => {
-    if (PROGRESS_TYPES.has(event.event_type)) {
+  events.forEach((event, index) => {
+    if (isProgress[index]) {
       streak = 0;
       streakStart = null;
       return;

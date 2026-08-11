@@ -204,5 +204,47 @@ tested). v4 adds, enforced at append/verify/closeout:
   (`RUN_BLOCKING`/`PROGRAM_OPEN`/`SEQUENCED`/`STANDING`); closeout emits the census by state
   and class with exact gate ids under `denominators.owner_gate_census`.
 
-`scripts/one-shot/memory.test.ts` proves each of these controls can fail (26-test battery
+`scripts/one-shot/memory.test.ts` proves each of these controls can fail (45-test battery
 alongside the ledger/closeout suites).
+
+### v4.1 (refutation-driven hardening)
+
+A standing refutation agent reproduced six laundering paths against the v4 memory layer;
+v4.1 closes them:
+
+- **Authenticated revalidation (R1).** `DEPENDENCY_REVALIDATED` clears staleness only when
+  its cited `upstream_identity` is rooted in the upstream recorded in the artifact's
+  structured `stale_cause` AND differs from the dead identity. Revalidating a non-stale
+  artifact is refused.
+- **Invalidation has memory (R2).** Registering an artifact whose `depends_on` names an
+  already-invalidated identity — or a currently stale/superseded/retired artifact — starts
+  life STALE.
+- **Fail-closed change cascade (R3).** An `ARTIFACT_UPDATED` invalidates consumers UNLESS
+  both old and new `content_hash` are present and equal — omitting hashes is no longer an
+  opt-out.
+- **Refuse-before-record (review F4/F5).** Memory-contract violations (unregistered
+  references, double registration, consume-after-retire, update-after-terminal,
+  supersede-before-successor, unauthenticated revalidation, false `clean:true`) are refused
+  at APPEND — they never enter the append-only chain, where they would block verify forever.
+  verify re-derives the same rules purely as tamper evidence against hand-edited files.
+  Consequence: register a successor BEFORE superseding into it.
+- **Evidence-backed composition (R4).** Every `COMPOSITION_EVALUATED` must attach evidence —
+  a bare `NO_GAP` cannot launder a prior gap. Manifests may declare
+  `required_compositions`: each listed boundary must reach a terminal `NO_GAP` (R5's
+  bypass-by-omission stays real for UNdeclared boundaries — that is now an explicit
+  boundary, not an implication of safety).
+- **Manifest fidelity (R7).** Where bytes are offline-checkable the kernel checks them at
+  closeout: committed-class URIs must exist inside the repo; external URIs resolving inside
+  the run directory must exist; sha256-shaped `content_hash` declarations must match the
+  actual bytes; live artifacts must not share a URI. URIs outside both roots and
+  non-sha256 hash formats remain a trust boundary.
+- **Poisoned consumption blocks (R8).** A consumption recorded `while_stale` blocks
+  COMPLETE until the SAME scope re-consumes the artifact after revalidation.
+- **Progress-wash resistance (R6, partial).** Context/plan/read-class events count as
+  progress only on their FIRST occurrence per (type, scope); repeats no longer reset the
+  stall clock or shield loops. Residual honest boundary: an agent that fabricates varied
+  STRONG-class events (e.g. artifact updates, which now at least trigger cascades) can
+  still wash the derived detector — stream-derived detection bounds, but does not replace,
+  orchestrator duty and human review.
+- **Forged-version refusal (review F7).** Memory-typed events stamped `schema_version < 4`
+  are refused as definitionally forged (the vocabulary did not exist earlier).
