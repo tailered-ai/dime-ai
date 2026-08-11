@@ -53,16 +53,35 @@ acting) · `missing_pr` · `stale_sha` (observation for a superseded head) · `c
 
 ## Modes
 
-- **fixture** (the only executable mode today): `node scripts/tailered-os/lifecycle.mjs
-  {fold|plan|apply} --fixture <path> [--task <id>]` over `{ task_id, events: [...] }`.
-  The mutation plan always carries `executed: false, reason: "fixture mode — no live
-  authority"`.
-- **api**: fails CLOSED (`notion-write-unauthorized`) while
-  `safety.notionWriteOperationsAuthorized` is `false` in the control-plane manifest —
-  and even an authorized manifest hits `api-write-unimplemented` until the live writer
-  is built and tested under a separate owner-gated activation by PREZ. The engine
-  mutating the control plane that governs its own approval state is exactly the loop
-  the fail-closed default exists to prevent.
+- **fixture**: `node scripts/tailered-os/lifecycle.mjs {fold|plan|apply} --fixture
+  <path> [--task <id>]` over `{ task_id, events: [...] }`. The mutation plan always
+  carries `executed: false, reason: "fixture mode — no live authority"`. The CLI is
+  fixture-only permanently (`cli-live-unsupported`): it holds no transport, so it can
+  never bypass the writer's gates.
+- **live** (OG-006 activation, 2026-08-11): the ONLY sanctioned write path is the
+  policy-separated writer, `scripts/tailered-os/lifecycle-writer.mjs`. Contract:
+  **observed fact → event schema → pure kernel → mutation plan (`deriveWrites`) →
+  policy/authority validation (`authorizeWrite`, 16 pre-write gates) → injected
+  transport write → reread → compare → attestation (`executeMutation`)**. The writer
+  executes prevalidated plans only; it never invents transitions, never reinterprets
+  evidence, never expands its own scope.
+  - **Allowlist** (`WRITE_ALLOWLIST`, frozen): four properties — Execution State
+    (closed vocabulary), Work Link (https URL), Proof / Result (https URL),
+    Why It's Blocked (text) — on Tasks in data source
+    `06a44772-1ae8-4d9d-be70-30741b334b85` whose Scope ID is `TOS-*` and that belong
+    to the canonical Tailered OS project. Anything else refuses (`permission_denial`).
+  - **Authority**: `safety.notionWriteOperationsAuthorized` must be `true` AND carry
+    the owner grant `safety.notionWriteAuthorization` (decision URL, grantedBy PREZ,
+    actor AI-10) — the manifest loader refuses a bare `true` as a self-grant, and
+    refuses a dormant grant while the flag is `false`. Registry actor: AI-10
+    (AI Systems Registry), approved by PREZ 2026-08-11 conditional on qualification.
+  - **No optimistic success**: reread mismatch ⇒ `applied: "partial"` ⇒ the kernel
+    freezes the task (`mutation_result` applied=partial) until a human-visible
+    `write_reverified`. A write whose outcome is unreadable is partial, never assumed.
+  - **Kill switch / rollback**: set the manifest flag back to `false` (owner-reviewed
+    PR) — `authorizeWrite` refuses every plan (fresh manifest read per write), the
+    engine's `assertLiveNotionAuthority` throws `notion-write-unauthorized`, and all
+    ledger/attestation history is preserved append-only.
 
 ## What stays human, permanently
 
@@ -78,4 +97,6 @@ any mismatch into a visible `replay_divergence`. Duplicate `event_key`s are no-o
 no second record.
 
 Tests: `scripts/tailered-os/lifecycle.test.ts` (21-test §36/§37 battery — every failure
-class proven to fire).
+class proven to fire) + `scripts/tailered-os/lifecycle-writer.test.ts` (30-test OG-006
+writer battery — every pre-write gate, transport failure class, partial-write freeze,
+and authority spoof proven to refuse).
