@@ -1,6 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", ":semanticCommits"],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "platform/tailered-os/**"
+  ],
   "timezone": "America/Los_Angeles",
   "schedule": ["before 6am on monday"],
   "minimumReleaseAge": "14 days",

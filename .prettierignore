@@ -152,3 +152,8 @@ server/stripe/paymentLinkGuard.test.ts
 server/wc2026/espnLogger.ts
 server/wc2026/fifaLiveScraper.ts
 server/wc2026/wc2026Ingester.ts
+
+# Tailered OS (platform/tailered-os): independent app with its own toolchain and
+# vendored/upstream-styled sources; root prettier must not restyle it, and
+# `pnpm format` must never rewrite the cloudflare-os submodule working tree.
+platform/tailered-os/

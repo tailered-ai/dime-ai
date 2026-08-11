@@ -1,0 +1,61 @@
+{
+  "workshop": {
+    "topLevelKeys": [
+      "$schema",
+      "browser",
+      "build",
+      "compatibility_date",
+      "compatibility_flags",
+      "kv_namespaces",
+      "main",
+      "migrations",
+      "name",
+      "observability",
+      "r2_buckets",
+      "worker_loaders"
+    ],
+    "replaced": {
+      "vars": "absent",
+      "ai": "absent",
+      "services": "absent",
+      "kv_namespaces": [
+        [
+          "binding",
+          "preview_id"
+        ],
+        [
+          "binding",
+          "preview_id"
+        ]
+      ],
+      "r2_buckets": [
+        [
+          "binding",
+          "bucket_name"
+        ]
+      ],
+      "assets": "absent"
+    }
+  },
+  "context": {
+    "topLevelKeys": [
+      "$schema",
+      "build",
+      "compatibility_date",
+      "compatibility_flags",
+      "kv_namespaces",
+      "main",
+      "migrations",
+      "name",
+      "observability"
+    ],
+    "replaced": {
+      "kv_namespaces": [
+        [
+          "binding",
+          "preview_id"
+        ]
+      ]
+    }
+  }
+}

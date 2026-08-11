@@ -17,6 +17,7 @@ description = "Named false positives only — keep this list narrow"
 # Paths that structurally cannot hold live secrets but trip entropy rules.
 paths = [
   '''^pnpm-lock\.yaml$''',            # dependency integrity hashes (high entropy)
+  '''^platform/tailered-os/pnpm-lock\.yaml$''',  # same category: the embedded Tailered OS app's lockfile
   '''^drizzle/meta/.*\.json$''',      # migration snapshot ids (high entropy)
   '''^client/public/.*\.(svg|png|ico|woff2?)$''',  # binary/vector assets
 
