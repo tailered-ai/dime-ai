@@ -3495,6 +3495,41 @@
       "severity": "HIGH",
       "status": "OPEN",
       "title": "VERIFIER FIDELITY: contract extractor drops workflow-level env: blocks (records job?.env only), so EXPECTED_CLOUDFLARE_OS_PIN never reaches the detector step — a correct candidate pin (b2a51b54) is reported as detector FAIL. Blast radius bounded to this one gate: 03-semgrep/05-workflow-security use their workflow-level vars in provisioning steps already satisfied by governed tools"
+    },
+    {
+      "affected_gate": ".github/workflows/gitleaks.yml#gitleaks",
+      "blast_radius": "1 required gate red on the candidate; no real secret involved",
+      "closed_at": null,
+      "corrective_action": null,
+      "detected_by": "P06 serial rebind roster @ candidate 7e86ad23, gitleaks gate + ASSURANCE CONTROL_NOT_GREEN",
+      "evidence": [
+        {
+          "bytes": 2442,
+          "path": "docs/verification/evidence/p06/T17-def059-gitleaks-pin-fp.md",
+          "sha256": "5bdc9e0c55eeefcb9738186a13742088bc8a4c233f13a804ee411c018eb83c63"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-11T10:11:14.090Z",
+          "flags": {
+            "blast_radius": "1 required gate red on the candidate; no real secret involved",
+            "evidence": [
+              "docs/verification/evidence/p06/T17-def059-gitleaks-pin-fp.md"
+            ],
+            "root_cause": "gitleaks cloudflare-api-key rule matches keyword+quoted 40-hex; JSON form of the contract env embed matches, YAML workflow form does not"
+          }
+        }
+      ],
+      "id": "DEF-059",
+      "opened_at": "2026-08-11T10:11:14.012Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "gitleaks cloudflare-api-key rule matches keyword+quoted 40-hex; JSON form of the contract env embed matches, YAML workflow form does not",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "title": "CANDIDATE FINDING introduced by DEF-058 remediation: embedding workflow-level env in contract.frozen.json juxtaposes CLOUDFLARE keyword with the 40-hex submodule pin in quoted-JSON form, tripping gitleaks cloudflare-api-key. The value is the public immutable cloudflare-os commit SHA (present in .gitmodules and tailered-os.yml), not a credential"
     }
   ],
   "gate_results": [],

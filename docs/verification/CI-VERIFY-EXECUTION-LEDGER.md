@@ -733,6 +733,7 @@
 | `DEF-056` | `P06/P07 fresh-base checks` | MEDIUM | `OPEN` | STRUCTURAL: origin/main advances faster than a full P06+P07 verification cycle completes, so a strictly-current-base acceptance may never converge on an active day |
 | `DEF-057` | `P06 roster at base 43a33c84` | MEDIUM | `CLOSED` | candidate materialization gap: P01 worktree candidates leave the new cloudflare-os gitlink EMPTY, so the tailered-os gate's detector failed on 'git -C cloudflare-os rev-parse HEAD' — a provisioning gap surfacing as a false detector FAIL (the DEF-031 class) |
 | `DEF-058` | `P06 serial roster @43a33c84, tailered-os.yml#test step journal` | HIGH | `OPEN` | VERIFIER FIDELITY: contract extractor drops workflow-level env: blocks (records job?.env only), so EXPECTED_CLOUDFLARE_OS_PIN never reaches the detector step — a correct candidate pin (b2a51b54) is reported as detector FAIL. Blast radius bounded to this one gate: 03-semgrep/05-workflow-security use their workflow-level vars in provisioning steps already satisfied by governed tools |
+| `DEF-059` | `P06 serial rebind roster @ candidate 7e86ad23, gitleaks gate + ASSURANCE CONTROL_NOT_GREEN` | HIGH | `OPEN` | CANDIDATE FINDING introduced by DEF-058 remediation: embedding workflow-level env in contract.frozen.json juxtaposes CLOUDFLARE keyword with the 40-hex submodule pin in quoted-JSON form, tripping gitleaks cloudflare-api-key. The value is the public immutable cloudflare-os commit SHA (present in .gitmodules and tailered-os.yml), not a credential |
 
 ## Checkpoints
 

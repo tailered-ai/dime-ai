@@ -63,6 +63,13 @@ regexes = [
   '''^9216db5781bf21249d130ec9da846c4624c16137$''', # Qwen/Qwen3-32B revision
   '''^95a6d26c4bfb886c58daf9d3f7332c857cb27b43$''', # Mistral-Small-3.2-24B-Instruct revision
 
+  # Public cloudflare-os submodule pin (root .gitmodules, tailered-os.yml
+  # EXPECTED_CLOUDFLARE_OS_PIN). Same class as the revisions above: a git
+  # commit SHA, not a credential. The cloudflare-api-key rule fires on its
+  # quoted-JSON form in scripts/ci/contract.frozen.json (DEF-059). Replace
+  # this literal in the same reviewed commit that advances the pin.
+  '''^b2a51b5426398c8353d9d4dd984bd525121ab5f2$''', # cloudflare-os submodule pin
+
   # Public AWS KMS KeySpec enum used by the signer infrastructure contract.
   '''^ECC_NIST_EDWARDS25519$''',
 ]
