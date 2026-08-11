@@ -1,0 +1,5 @@
+## Purpose and scope
+No notion section at all.
+
+## Tests
+- none
