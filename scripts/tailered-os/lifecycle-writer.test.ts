@@ -20,29 +20,20 @@ import { loadControlPlaneManifest } from "../tailered-os-control-plane.mjs";
 const TASK = "3b89673313e7815aafcaeaebc32ea8ff";
 const HEAD = "a".repeat(40);
 const MERGE = "b".repeat(40);
-const NOW = 1_700_000_000_000;
 
+// Authority is loaded from DISK by the writer, never passed in, so "armed" is
+// simply the committed manifest and the other states are in-repo fixtures
+// (only a code-reviewed file can ever grant write authority).
 const manifest = loadControlPlaneManifest();
-const armed = () => {
-  const m = structuredClone(manifest);
-  m.safety.notionWriteOperationsAuthorized = true;
-  m.safety.notionWriteAuthorization = m.safety.notionWriteAuthorization ?? {
-    decision: "https://app.notion.com/p/3b99673313e781229b85f35a0b9f2966",
-    grantedBy: "PREZ",
-    grantedOn: "2026-08-11",
-    actor: "AI-10",
-    scope: "test",
-  };
-  return m;
+const DISARMED = {
+  manifest_path: "scripts/tailered-os/fixtures/control-plane-disarmed.v1.json",
 };
-const disarmed = () => {
-  const m = structuredClone(manifest);
-  m.safety.notionWriteOperationsAuthorized = false;
-  delete m.safety.notionWriteAuthorization;
-  return m;
+const SELF_GRANTED = {
+  manifest_path: "scripts/tailered-os/fixtures/control-plane-selfgrant.v1.json",
 };
 
 const PROJECT_ID = manifest.notion.taileredOsProject.id;
+const fresh = () => Date.now() - 1_000;
 
 const ev = (type: string, evidence: any = {}, extra: any = {}) => ({
   event_key: extra.event_key ?? `${type}-k`,
@@ -76,7 +67,7 @@ function snapshotFor(plan: any, over: any = {}) {
     project_ids: [PROJECT_ID],
     execution_state: plan.expected_from_state,
     pending_partial_write: false,
-    fetched_at: NOW - 1_000,
+    fetched_at: fresh(),
     properties: {
       "Execution State": plan.expected_from_state,
       "Work Link": "",
@@ -88,15 +79,7 @@ function snapshotFor(plan: any, over: any = {}) {
 }
 
 function authorize(plan: any, over: any = {}, opts: any = {}) {
-  return authorizeWrite(
-    plan,
-    snapshotFor(plan, over),
-    opts.manifest ?? armed(),
-    {
-      now: NOW,
-      ...opts,
-    }
-  );
+  return authorizeWrite(plan, snapshotFor(plan, over), opts);
 }
 
 // A well-behaved fake transport backed by a mutable record.
@@ -111,7 +94,7 @@ function fakeTransport(initial: any) {
     },
     async fetchTask(_pageId: string) {
       this.calls.fetch += 1;
-      return { properties: { ...record }, fetched_at: NOW };
+      return { properties: { ...record }, fetched_at: Date.now() };
     },
   };
 }
@@ -200,7 +183,7 @@ describe("writer AUTHORIZE — the sixteen pre-write gates fail closed", () => {
   });
 
   it("kill switch: manifest flag false refuses every write (rollback path)", () => {
-    const result: any = authorize(planFor(), {}, { manifest: disarmed() });
+    const result: any = authorize(planFor(), {}, DISARMED);
     assert.equal(result.ok, false);
     assert.equal(result.failure_class, "permission_denial");
     assert.match(result.detail, /notion-write-unauthorized/);
@@ -223,7 +206,7 @@ describe("writer AUTHORIZE — the sixteen pre-write gates fail closed", () => {
 
   it("stale snapshot age refuses (reread before acting)", () => {
     const result: any = authorize(planFor(), {
-      fetched_at: NOW - MAX_SNAPSHOT_AGE_MS - 1,
+      fetched_at: Date.now() - MAX_SNAPSHOT_AGE_MS - 5_000,
     });
     assert.equal(result.ok, false);
     assert.equal(result.failure_class, "stale_task");
@@ -602,9 +585,12 @@ describe("writer v1.1 — adversarial regressions", () => {
     };
     rehydrated.writes["Owner"] = "attacker";
     const transport = fakeTransport({ "Execution State": "Ready" });
+    // Since v1.2 this is caught even earlier: a rehydrated plan is not the
+    // registered capability, so authenticity fails before the tamper check
+    // (which remains as belt-and-braces for a mutated capability).
     await assert.rejects(
       () => executeMutation(rehydrated, transport),
-      /writer-plan-tampered/
+      /writer-unauthorized-plan|writer-plan-tampered/
     );
     assert.equal(transport.calls.update, 0, "nothing may be sent");
   });
@@ -629,25 +615,28 @@ describe("writer v1.1 — adversarial regressions", () => {
     }
   });
 
-  it("FIND-OG6-0003: the writer validates the manifest itself — a self-granted manifest the loader rejects is refused here too", () => {
+  it("FIND-OG6-0003 / NEW-OG6-0007: authority comes from DISK — a caller cannot assert its own permission", () => {
     const plan = planFor();
-    const selfGranted: any = {
-      safety: { notionWriteOperationsAuthorized: true },
-      notion: { taileredOsProject: { id: PROJECT_ID } },
-    };
-    const result: any = authorize(plan, {}, { manifest: selfGranted });
-    assert.equal(result.ok, false);
-    assert.equal(result.failure_class, "permission_denial");
+    // There is no manifest parameter at all: the writer loads and validates the
+    // control-plane manifest itself on every write. A self-granted file (bare
+    // true, no owner grant) is refused because the loader rejects it.
+    const selfGrant: any = authorize(plan, {}, SELF_GRANTED);
+    assert.equal(selfGrant.ok, false);
+    assert.equal(selfGrant.failure_class, "permission_denial");
+    assert.match(selfGrant.detail, /failed validation/);
 
-    // A grant naming the wrong grantor or actor is not authority either.
-    const wrongActor = armed();
-    wrongActor.safety.notionWriteAuthorization = {
-      ...wrongActor.safety.notionWriteAuthorization,
-      actor: "AI-99",
-    };
-    const result2: any = authorize(plan, {}, { manifest: wrongActor });
-    assert.equal(result2.ok, false);
-    assert.equal(result2.failure_class, "permission_denial");
+    // Authority may only come from an in-repo, code-reviewed file: a path that
+    // escapes the repository is refused before anything is read.
+    const escaped: any = authorize(
+      plan,
+      {},
+      {
+        manifest_path: "../../../tmp/forged-manifest.json",
+      }
+    );
+    assert.equal(escaped.ok, false);
+    assert.equal(escaped.failure_class, "permission_denial");
+    assert.match(escaped.detail, /outside the repository/);
   });
 
   it("FIND-OG6-0004: the undo plan AUTHORIZES and executes through the same contract (reversibility is real)", async () => {
@@ -676,17 +665,294 @@ describe("writer v1.1 — adversarial regressions", () => {
         project_ids: [PROJECT_ID],
         execution_state: "Executing", // the state the forward write produced
         pending_partial_write: false,
-        fetched_at: NOW - 10,
+        fetched_at: fresh(),
         properties: { ...transport.record },
       },
-      armed(),
-      { now: NOW }
+      { undo_of: forward.authorized_plan }
     );
     assert.equal(undoAuth.ok, true, JSON.stringify(undoAuth));
     const undone = await executeMutation(undoAuth.authorized_plan, transport);
     assert.equal(undone.applied, "full");
     assert.equal(transport.record["Execution State"], "Ready");
     assert.equal(transport.record["Work Link"], "");
+  });
+
+  it("undo must be BOUND to a real prior authorization — write_reverified cannot launder arbitrary state", () => {
+    const plan = planFor();
+    const forward: any = authorize(plan);
+    const liveSnapshot = {
+      page_id: TASK,
+      data_source_id: WRITE_ALLOWLIST.data_source_id,
+      scope_id: "TOS-TEST",
+      project_ids: [PROJECT_ID],
+      execution_state: "Executing",
+      pending_partial_write: false,
+      fetched_at: fresh(),
+      properties: {
+        "Execution State": "Executing",
+        "Work Link": "https://github.com/tailered-ai/dime-ai/tree/feat/x",
+      },
+    };
+
+    // (a) An unbound undo — no opts.undo_of — refuses.
+    const undo: any = buildUndoPlan(forward.authorized_plan);
+    const unbound: any = authorizeWrite(undo.plan, liveSnapshot, {});
+    assert.equal(unbound.ok, false);
+    assert.equal(unbound.failure_class, "permission_denial");
+
+    // (b) A FORGED write_reverified that jumps the record straight to
+    //     "Verified" — the sequencing-laundering attack — refuses even when it
+    //     names a real prior authorization.
+    const forged = {
+      ...undo.plan,
+      writes: { "Execution State": "Verified" },
+    };
+    const laundering: any = authorizeWrite(forged, liveSnapshot, {
+      undo_of: forward.authorized_plan,
+    });
+    assert.equal(laundering.ok, false);
+    assert.equal(laundering.failure_class, "permission_denial");
+    assert.match(laundering.detail, /restore EXACTLY the prior values/);
+
+    // (c) A write_reverified that is not an undo at all refuses.
+    const notAnUndo: any = authorizeWrite(
+      { ...undo.plan, plan_id: "plan:sneaky" },
+      liveSnapshot,
+      { undo_of: forward.authorized_plan }
+    );
+    assert.equal(notAnUndo.ok, false);
+
+    // (d) The genuine bound undo still authorizes.
+    const bound: any = authorizeWrite(undo.plan, liveSnapshot, {
+      undo_of: forward.authorized_plan,
+    });
+    assert.equal(bound.ok, true, JSON.stringify(bound));
+  });
+});
+
+// Second independent-verification round (verdict FAIL) found the CLASS behind
+// the HIGH was still open. These regressions cover its findings; each fails
+// against the module the verifier attacked.
+describe("writer v1.2 — independent-verification regressions", () => {
+  const planFor = (events = START) => {
+    const { state, record } = recordFor(events);
+    const derived: any = deriveWrites(record, state);
+    assert.equal(derived.ok, true);
+    return derived.plan;
+  };
+
+  it("NEW-OG6-0005: a FORGED capability cannot execute — authenticity is registry membership, not object shape", async () => {
+    const transport = fakeTransport({ "Execution State": "Ready" });
+    // The exact shape the old check accepted: any object with a `prior` key.
+    const forged = {
+      schema_version: 1,
+      plan_id: "plan:forged",
+      event_key: "forged",
+      task_id: TASK,
+      trigger: "post_merge_verified",
+      authority: "machine",
+      actor: "machine",
+      evidence: {},
+      expected_from_state: "Merged",
+      writes: {
+        "Execution State": "Verified",
+        "Proof / Result": "https://attacker.example/fake-proof",
+      },
+      prior: {},
+      target: {
+        data_source_id: WRITE_ALLOWLIST.data_source_id,
+        page_id: "SOME-OTHER-PAGE",
+      },
+    };
+    await assert.rejects(
+      () => executeMutation(forged as any, transport),
+      /writer-unauthorized-plan/
+    );
+    assert.equal(transport.calls.update, 0, "no byte may be sent");
+    // A structural clone of a REAL capability is also not the capability.
+    const real: any = authorize(planFor());
+    const cloned = JSON.parse(JSON.stringify(real.authorized_plan));
+    await assert.rejects(
+      () => executeMutation(cloned, transport),
+      /writer-unauthorized-plan/
+    );
+    assert.equal(transport.calls.update, 0);
+  });
+
+  it("NEW-OG6-0006: a getter/Proxy write map is read ONCE — it cannot show the validator one thing and the transport another", async () => {
+    const plan = planFor();
+    let reads = 0;
+    const twoFaced: any = {};
+    Object.defineProperty(twoFaced, "Execution State", {
+      enumerable: true,
+      get() {
+        reads += 1;
+        return reads === 1 ? "Executing" : "Verified";
+      },
+    });
+    const result: any = authorize({ ...plan, writes: twoFaced });
+    // Whatever the verdict, the capability must hold the value that was
+    // validated — never a second, unvalidated read.
+    if (result.ok) {
+      assert.equal(
+        result.authorized_plan.writes["Execution State"],
+        "Executing"
+      );
+      const transport = fakeTransport({ "Execution State": "Ready" });
+      const sent: any[] = [];
+      const inner = transport.updatePage.bind(transport);
+      transport.updatePage = async (pageId: string, props: any) => {
+        sent.push({ ...props });
+        await inner(pageId, props);
+      };
+      await executeMutation(result.authorized_plan, transport);
+      assert.equal(sent[0]["Execution State"], "Executing");
+    } else {
+      assert.equal(result.failure_class, "permission_denial");
+    }
+
+    // A Proxy that adds a key only on the second ownKeys() cannot smuggle it.
+    const sneaky = new Proxy(
+      { "Execution State": "Executing" },
+      {
+        ownKeys(target) {
+          reads += 1;
+          return reads > 2
+            ? [...Reflect.ownKeys(target), "Owner"]
+            : Reflect.ownKeys(target);
+        },
+        getOwnPropertyDescriptor(target, key) {
+          return key === "Owner"
+            ? { value: "attacker", enumerable: true, configurable: true }
+            : Reflect.getOwnPropertyDescriptor(target, key);
+        },
+        get(target, key) {
+          return key === "Owner" ? "attacker" : (target as any)[key];
+        },
+      }
+    );
+    const proxied: any = authorize({ ...plan, writes: sneaky });
+    if (proxied.ok) {
+      assert.equal(
+        Object.hasOwn(proxied.authorized_plan.writes, "Owner"),
+        false,
+        "a late-appearing key must never reach the capability"
+      );
+      const transport2 = fakeTransport({ "Execution State": "Ready" });
+      const sent2: any[] = [];
+      const inner2 = transport2.updatePage.bind(transport2);
+      transport2.updatePage = async (pageId: string, props: any) => {
+        sent2.push({ ...props });
+        await inner2(pageId, props);
+      };
+      await executeMutation(proxied.authorized_plan, transport2);
+      assert.equal(Object.hasOwn(sent2[0], "Owner"), false);
+    }
+  });
+
+  it("NEW-OG6-0008: write_reverified is not a general write primitive — it cannot launder a record to Merged or Verified", () => {
+    const plan = planFor();
+    const forward: any = authorize(plan);
+    for (const target of ["Verified", "Merged", "Approval"]) {
+      const laundering = {
+        ...plan,
+        plan_id: "undo:plan:laundering",
+        trigger: "write_reverified",
+        authority: "machine",
+        actor: "machine",
+        evidence: { verification_ref: "x" },
+        expected_from_state: "Ready",
+        writes: { "Execution State": target },
+      };
+      const result: any = authorize(
+        laundering,
+        {},
+        {
+          undo_of: forward.authorized_plan,
+        }
+      );
+      assert.equal(result.ok, false, `${target} must refuse`);
+    }
+  });
+
+  it("NEW-OG6-0009: deepFreeze survives cycles and never freezes caller-owned graphs", () => {
+    const plan = planFor();
+    const shared: any = { keepMutable: true };
+    shared.self = shared; // cycle
+    const result: any = authorize({
+      ...plan,
+      evidence: { ...plan.evidence, shared },
+    });
+    assert.equal(result.ok, true);
+    // No stack overflow, and the caller's object stays mutable.
+    shared.keepMutable = false;
+    assert.equal(shared.keepMutable, false);
+    assert.equal(Object.isFrozen(shared), false);
+  });
+
+  it("NEW-OG6-0010: symbol-keyed writes are refused outright", () => {
+    const plan = planFor();
+    const withSymbol: any = { ...plan.writes };
+    withSymbol[Symbol("Owner")] = "attacker";
+    const result: any = authorize({ ...plan, writes: withSymbol });
+    assert.equal(result.ok, false);
+    assert.equal(result.failure_class, "malformed_input");
+    assert.match(result.detail, /symbol-keyed/);
+  });
+
+  it("NEW-OG6-0011: an undo can restore a previously EMPTY select value", async () => {
+    const plan = planFor();
+    // Live record whose Execution State is empty (a fresh row).
+    const emptySnapshot = {
+      page_id: TASK,
+      data_source_id: WRITE_ALLOWLIST.data_source_id,
+      scope_id: "TOS-TEST",
+      project_ids: [PROJECT_ID],
+      execution_state: "Ready",
+      pending_partial_write: false,
+      fetched_at: fresh(),
+      properties: { "Execution State": "", "Work Link": "" },
+    };
+    const forward: any = authorizeWrite(plan, emptySnapshot, {});
+    assert.equal(forward.ok, true, JSON.stringify(forward));
+    assert.equal(forward.authorized_plan.prior["Execution State"], "");
+    const undo: any = buildUndoPlan(forward.authorized_plan);
+    const undoAuth: any = authorizeWrite(
+      undo.plan,
+      {
+        ...emptySnapshot,
+        execution_state: "Executing",
+        fetched_at: fresh(),
+        properties: {
+          "Execution State": "Executing",
+          "Work Link": plan.writes["Work Link"],
+        },
+      },
+      { undo_of: forward.authorized_plan }
+    );
+    assert.equal(undoAuth.ok, true, JSON.stringify(undoAuth));
+    assert.equal(undoAuth.authorized_plan.writes["Execution State"], "");
+  });
+
+  it("NEW-OG6-0012: the freshness bound cannot be widened by the caller, and attested keys must be a real Set", () => {
+    const plan = planFor();
+    const ancient: any = authorize(
+      plan,
+      { fetched_at: 0 },
+      { max_snapshot_age_ms: Number.MAX_SAFE_INTEGER }
+    );
+    assert.equal(ancient.ok, false);
+    assert.equal(ancient.failure_class, "stale_task");
+
+    const duckTyped: any = authorize(
+      plan,
+      {},
+      {
+        attested_event_keys: { has: () => false },
+      }
+    );
+    assert.equal(duckTyped.ok, false);
+    assert.equal(duckTyped.failure_class, "malformed_input");
   });
 });
 
@@ -747,11 +1013,10 @@ describe("writer + kernel — replay and freeze compose", () => {
         project_ids: [PROJECT_ID],
         execution_state: "Ready",
         pending_partial_write: true,
-        fetched_at: NOW - 5,
+        fetched_at: fresh(),
         properties: { "Execution State": "Ready", "Work Link": "" },
       },
-      armed(),
-      { now: NOW }
+      {}
     );
     assert.equal(auth.ok, false);
     assert.equal(auth.failure_class, "partial_write");

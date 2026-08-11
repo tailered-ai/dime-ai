@@ -70,11 +70,25 @@ acting) · `missing_pr` · `stale_sha` (observation for a superseded head) · `c
     Why It's Blocked (text) — on Tasks in data source
     `06a44772-1ae8-4d9d-be70-30741b334b85` whose Scope ID is `TOS-*` and that belong
     to the canonical Tailered OS project. Anything else refuses (`permission_denial`).
-  - **Authority**: `safety.notionWriteOperationsAuthorized` must be `true` AND carry
+  - **Authority comes from disk, not from the caller**: `authorizeWrite` loads and
+    validates the control-plane manifest itself on **every** write, so the kill switch
+    is a real switch. `safety.notionWriteOperationsAuthorized` must be `true` AND carry
     the owner grant `safety.notionWriteAuthorization` (decision URL, grantedBy PREZ,
-    actor AI-10) — the manifest loader refuses a bare `true` as a self-grant, and
-    refuses a dormant grant while the flag is `false`. Registry actor: AI-10
-    (AI Systems Registry), approved by PREZ 2026-08-11 conditional on qualification.
+    actor AI-10) — the loader refuses a bare `true` as a self-grant, and refuses a
+    dormant grant while the flag is `false`. A `manifest_path` override must resolve
+    inside the repository, so authority can only ever come from a code-reviewed file.
+    Registry actor: AI-10, approved by PREZ 2026-08-11 conditional on qualification.
+  - **Capabilities are unforgeable**: the object `authorizeWrite` returns is registered
+    in a module-private `WeakSet`; `executeMutation` refuses anything not in it. Object
+    shape is not authenticity — a JSON round-trip of a real capability is refused.
+  - **Copy, then validate, then send the copy**: the write map is read from caller
+    memory exactly once; a getter or Proxy cannot show the validator one set of keys
+    and the transport another. Symbol-keyed writes are refused outright.
+  - **`write_reverified` is not a write primitive**: it carries a live write only as an
+    undo bound to a capability this writer authorized, restoring exactly that
+    capability's captured priors — so it cannot launder a record to `Merged`,
+    `Approval`, or `Verified`. Undoing a human-authority write itself requires an
+    observed human act.
   - **No optimistic success**: reread mismatch ⇒ `applied: "partial"` ⇒ the kernel
     freezes the task (`mutation_result` applied=partial) until a human-visible
     `write_reverified`. A write whose outcome is unreadable is partial, never assumed.
@@ -97,9 +111,10 @@ any mismatch into a visible `replay_divergence`. Duplicate `event_key`s are no-o
 no second record.
 
 Tests: `scripts/tailered-os/lifecycle.test.ts` (21-test §36/§37 battery — every failure
-class proven to fire) + `scripts/tailered-os/lifecycle-writer.test.ts` (35-test OG-006
+class proven to fire) + `scripts/tailered-os/lifecycle-writer.test.ts` (43-test OG-006
 writer battery — every pre-write gate, transport failure class, partial-write freeze,
-and authority spoof proven to refuse, plus five adversarial regressions that each
-FAILED against the pre-remediation writer: deep-frozen capability, trust-boundary
-re-validation, own-property allowlist lookup, independent manifest-grant enforcement,
-and an undo that actually authorizes).
+and authority spoof proven to refuse, plus twelve regressions from two independent
+adversarial rounds: deep-frozen capability, trust-boundary re-validation, own-property
+allowlist lookup, on-disk authority, unforgeable capabilities, single-read write maps,
+undo binding, cycle-safe freezing, symbol rejection, empty-select restoration, and a
+freshness bound the caller cannot widen).
