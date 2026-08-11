@@ -85,6 +85,34 @@ history — it replaces neither. Run artifacts are committed here because the re
 is committed evidence bundles. `os/ledger/` is the separate token-cost ledger (ISSUE-008);
 the two are unrelated.
 
+## Envelope contract v2 (delivery semantics)
+
+Appends stamp `schema_version: 2`; version-1 events in historical runs stay valid under
+their original rules (backward verification is a hard requirement, tested against the real
+Campaign One run). v2 adds, enforced at append:
+
+- **SCOPE_COMPLETED carries the delivery contract**: `delivered: true | "gated" |
+  "not_applicable" | "superseded"`, `authority_plane` (candidate/main/staging/production/
+  live-canonical/design), `dod_ref`, and for `delivered: true` a `proof {type, ref}` the
+  closeout resolves (repo path, run artifact, event id, or system-of-record URL) — dead
+  links block completion. Non-delivery counts as terminal ONLY with a `decision_ref` to a
+  canonical owner Decision record: a campaign never reclassifies its own definition of done.
+- **Exact PR identity**: PR_OPENED/PR_UPDATED/PR_READY/CI_STATE_CHANGED require `pr` +
+  40-hex `head_sha`; PR_MERGED additionally requires `merge_sha`.
+- **Lifecycle completeness**: COMPLETED events (scope, gstack, subagent) require their
+  STARTED counterpart earlier in the run.
+- **Append-time idempotency**: a duplicate `idempotency_key` is refused before the effect
+  is recorded, not flagged after.
+- **Structured gstack accounting**: GSTACK_* events carry a `workflow` field; required-
+  workflow accounting is exact-match (never substring); `GSTACK_UNAVAILABLE` requires a
+  `reason` proving genuine uninvocability — a skill not invoked by choice is OMITTED.
+- **DoD divergence detection**: when `directive.md` is pinned into a run directory, every
+  manifest `definition_of_done` line must appear in it verbatim, or closeout blocks.
+
+`closeout` additionally emits a machine-readable `claims` index (PR identities, terminal
+scopes with delivery class + proof, owner gates, legacy v1 terminalizations surfaced
+separately) that the final handoff must reference.
+
 ## Event vocabulary
 
 The controlled vocabulary lives in `scripts/one-shot/ledger.mjs` (`EVENT_TYPES`). Two repo

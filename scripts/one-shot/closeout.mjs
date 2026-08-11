@@ -3,8 +3,16 @@
 // closeout exits 0 only when the run can honestly emit COMPLETE; otherwise it
 // prints exactly which conditions block, exits 1, and the campaign ends with
 // the Owner-Gate Queue instead of a false COMPLETE.
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadManifest, readEvents, verifyRun } from "./ledger.mjs";
+import {
+  loadManifest,
+  readEvents,
+  resolveProofRef,
+  runDir,
+  verifyRun,
+} from "./ledger.mjs";
 
 export function deriveMetrics(runId) {
   const events = readEvents(runId);
@@ -96,12 +104,72 @@ export function closeout(runId) {
   const requiredScopes = manifest.scopes.filter(scope =>
     /^TOS-\d{3}$/.test(scope)
   );
-  const completed = new Set(
-    events.filter(e => e.event_type === "SCOPE_COMPLETED").map(e => e.scope_id)
+  // Delivery contract (audit C1): terminality is decided by the delivered
+  // field, never by the mere existence of a SCOPE_COMPLETED event. v1 events
+  // (historical runs) are grandfathered but surfaced, never silently blended.
+  const lastCompletion = new Map();
+  for (const event of events) {
+    if (event.event_type === "SCOPE_COMPLETED")
+      lastCompletion.set(event.scope_id, event);
+  }
+  const legacyTerminalizations = [];
+  const terminalScopes = [];
+  for (const scope of requiredScopes) {
+    const completion = lastCompletion.get(scope);
+    if (!completion) continue;
+    if ((completion.schema_version ?? 1) < 2) {
+      legacyTerminalizations.push(scope);
+      terminalScopes.push(scope);
+      continue;
+    }
+    if (completion.delivered === true) {
+      if (!resolveProofRef(completion.proof, runId, events)) {
+        blockers.push(
+          `scope ${scope} claims delivered:true but its proof (${completion.proof?.type}:${completion.proof?.ref}) does not resolve — dead proof links block completion`
+        );
+        continue;
+      }
+      terminalScopes.push(scope);
+    } else {
+      // gated / not_applicable / superseded: an owner Decision record must be
+      // referenced — a campaign never reclassifies a definition of done itself.
+      if (
+        typeof completion.decision_ref === "string" &&
+        completion.decision_ref.length > 0
+      ) {
+        terminalScopes.push(scope);
+      } else {
+        blockers.push(
+          `scope ${scope} terminalized as "${completion.delivered}" without a decision_ref — non-delivery counts as terminal only when a canonical owner Decision record ratifies it`
+        );
+      }
+    }
+  }
+  const nonTerminal = requiredScopes.filter(
+    scope => !terminalScopes.includes(scope)
   );
-  const nonTerminal = requiredScopes.filter(scope => !completed.has(scope));
-  if (nonTerminal.length > 0) {
-    blockers.push(`required scopes not terminal: ${nonTerminal.join(", ")}`);
+  const nonTerminalUnblocked = nonTerminal.filter(
+    scope => !blockers.some(blocker => blocker.startsWith(`scope ${scope} `))
+  );
+  if (nonTerminalUnblocked.length > 0) {
+    blockers.push(
+      `required scopes not terminal: ${nonTerminalUnblocked.join(", ")}`
+    );
+  }
+  // DoD divergence (audit C1): when the governing directive is pinned into the
+  // run, every definition_of_done line must appear in it verbatim — a manifest
+  // may never legislate its own weaker done-condition.
+  const directivePath = join(runDir(runId), "directive.md");
+  if (existsSync(directivePath)) {
+    const directiveText = readFileSync(directivePath, "utf8");
+    const divergentDod = manifest.definition_of_done.filter(
+      line => !directiveText.includes(line)
+    );
+    if (divergentDod.length > 0) {
+      blockers.push(
+        `manifest definition_of_done diverges from the pinned directive (no owner decision_ref): ${divergentDod.map(line => JSON.stringify(line.slice(0, 60))).join("; ")}`
+      );
+    }
   }
   // Required gates (gstack-review HIGH): every manifest-required gate needs a
   // terminal evaluation, and its LAST recorded state must be PASS or
@@ -127,16 +195,32 @@ export function closeout(runId) {
       `required gates not terminal-PASS: ${failedGates.map(gate => `${gate}=${gateState.get(gate)}`).join(", ")}`
     );
   }
-  // Required gstack workflows: each must be accounted for by a completed run
-  // or an explicit unavailability record — never silently skipped.
-  const gstackText = events
-    .filter(event =>
-      ["GSTACK_COMPLETED", "GSTACK_UNAVAILABLE"].includes(event.event_type)
+  // Required gstack workflows (audit M1): exact-match on the structured
+  // workflow field of v2 events. v1 events (which cannot carry the field) fall
+  // back to summary substring — a path that exists only for historical events,
+  // since every new append is v2.
+  const accountedWorkflows = new Set(
+    events
+      .filter(
+        event =>
+          ["GSTACK_COMPLETED", "GSTACK_UNAVAILABLE"].includes(
+            event.event_type
+          ) && (event.schema_version ?? 1) >= 2
+      )
+      .map(event => event.workflow)
+  );
+  const legacyGstackText = events
+    .filter(
+      event =>
+        ["GSTACK_COMPLETED", "GSTACK_UNAVAILABLE"].includes(event.event_type) &&
+        (event.schema_version ?? 1) < 2
     )
     .map(event => event.summary.toLowerCase())
     .join("\n");
   const unaccountedGstack = manifest.required_gstack.filter(
-    name => !gstackText.includes(name.toLowerCase())
+    name =>
+      !accountedWorkflows.has(name) &&
+      !legacyGstackText.includes(name.toLowerCase())
   );
   if (unaccountedGstack.length > 0) {
     blockers.push(
@@ -166,11 +250,46 @@ export function closeout(runId) {
     )
   );
   const last = events[events.length - 1] ?? null;
+  // Claims index (§53: handoff claim tracing): the machine-readable set of
+  // claims the final handoff must reference — PR identities with exact SHAs,
+  // terminal scopes with their delivery class and proof, owner-gate states.
+  const prClaims = {};
+  for (const event of events) {
+    if (event.pr == null) continue;
+    const claim = (prClaims[event.pr] ??= {
+      head_shas: [],
+      merge_sha: null,
+      last_event: null,
+    });
+    if (event.head_sha && !claim.head_shas.includes(event.head_sha))
+      claim.head_shas.push(event.head_sha);
+    if (event.merge_sha) claim.merge_sha = event.merge_sha;
+    claim.last_event = event.event_type;
+  }
+  const claims = {
+    prs: prClaims,
+    terminal_scopes: terminalScopes.map(scope => {
+      const completion = lastCompletion.get(scope);
+      return {
+        scope,
+        delivered:
+          (completion.schema_version ?? 1) < 2
+            ? "legacy-v1"
+            : completion.delivered,
+        authority_plane: completion.authority_plane ?? null,
+        proof: completion.proof ?? null,
+        decision_ref: completion.decision_ref ?? null,
+      };
+    }),
+    owner_gates: metrics.owner_gates,
+    legacy_terminalizations: legacyTerminalizations,
+  };
   return {
     run_id: runId,
     complete: blockers.length === 0 && terminalRunEvent,
     terminal_run_event_recorded: terminalRunEvent,
     blockers,
+    claims,
     // External tail anchor (FIND-LANE0-0002): verify proves chain linearity but
     // cannot detect deletion of the FINAL lines. Quote these two values in the
     // PR body / final handoff; any later tail truncation then contradicts an

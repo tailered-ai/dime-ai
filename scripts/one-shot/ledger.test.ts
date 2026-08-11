@@ -236,18 +236,34 @@ describe("one-shot ledger", () => {
     );
   });
 
-  it("duplicate idempotency keys are detected at verify time", () => {
+  it("duplicate idempotency keys: rejected at append; still detected at verify for hand-written files", () => {
     initTestRun();
     ledger.appendEvent(BASE_MANIFEST.run_id, {
       ...EVENT,
       idempotency_key: "github:pr:496:opened",
     });
-    ledger.appendEvent(BASE_MANIFEST.run_id, {
-      ...EVENT,
-      event_type: "CONTEXT_VERIFIED",
-      summary: "dup",
-      idempotency_key: "github:pr:496:opened",
-    });
+    // v2 (audit M2): the duplicate is refused BEFORE the effect is recorded.
+    assert.throws(
+      () =>
+        ledger.appendEvent(BASE_MANIFEST.run_id, {
+          ...EVENT,
+          event_type: "CONTEXT_VERIFIED",
+          summary: "dup",
+          idempotency_key: "github:pr:496:opened",
+        }),
+      /already recorded/
+    );
+    // Verify-time detection still exists for files written outside appendEvent.
+    const { events } = paths();
+    const line = JSON.parse(readFileSync(events, "utf8").trim().split("\n")[0]);
+    const dup = { ...line, event_id: "evt_00002", sequence: 2 };
+    dup.previous_event_hash = line.event_hash;
+    delete dup.event_hash;
+    dup.event_hash = ledger.hashEvent(dup, dup.previous_event_hash);
+    writeFileSync(
+      events,
+      JSON.stringify(line) + "\n" + JSON.stringify(dup) + "\n"
+    );
     assert.match(
       ledger.verifyRun(BASE_MANIFEST.run_id).errors.join("\n"),
       /duplicate idempotency_key/

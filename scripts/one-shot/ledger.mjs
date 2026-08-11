@@ -163,6 +163,43 @@ export const OWNER_GATE_STATES = Object.freeze([
 ]);
 export const ACTOR_TYPES = Object.freeze(["agent", "human", "system"]);
 
+// Envelope contract v2 (Campaign Two, audit findings C1/H1/H4/M1/M2): appends
+// stamp version 2 and carry the delivery contract; version-1 events in
+// committed historical runs stay valid under their original rules — backward
+// verification of v1 runs is a hard requirement.
+export const EVENT_SCHEMA_VERSION = 2;
+// "Delivered is a field, not a vibe": true means delivered-with-proof; every
+// other value is an explicit non-delivery that needs an owner decision_ref to
+// count as terminal.
+export const DELIVERED_VALUES = Object.freeze([
+  true,
+  "gated",
+  "not_applicable",
+  "superseded",
+]);
+// Six facts never collapse — every capability claim names its plane.
+export const AUTHORITY_PLANES = Object.freeze([
+  "candidate",
+  "main",
+  "staging",
+  "production",
+  "live-canonical",
+  "design",
+]);
+export const PROOF_TYPES = Object.freeze([
+  "repo",
+  "url",
+  "event",
+  "run-artifact",
+]);
+const GIT_SHA = /^[0-9a-f]{40}$/;
+const PR_IDENTITY_EVENTS = Object.freeze([
+  "PR_OPENED",
+  "PR_UPDATED",
+  "PR_READY",
+  "CI_STATE_CHANGED",
+]);
+
 // Fixed-width, no fractional seconds: lexicographic order == temporal order.
 // (gstack-review: optional fractions made string comparison unsound.)
 const ISO_TS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
@@ -275,7 +312,10 @@ export function validateManifest(manifest) {
 
 export function validateEvent(event, manifest) {
   invariant(event && typeof event === "object", "event must be an object");
-  invariant(event.schema_version === 1, "event.schema_version must be 1");
+  invariant(
+    event.schema_version === 1 || event.schema_version === 2,
+    "event.schema_version must be 1 (historical) or 2"
+  );
   invariant(
     EVENT_ID.test(event.event_id ?? ""),
     `event_id must match evt_NNNNN (got ${event.event_id})`
@@ -379,11 +419,91 @@ export function validateEvent(event, manifest) {
       );
     }
   }
+  // ---- v2 contract (audit C1/H1/H4/M1): applies to events appended by the
+  // upgraded kernel; version-1 events in historical runs keep their rules. ----
+  if (event.schema_version >= 2) {
+    if (event.event_type === "SCOPE_COMPLETED") {
+      invariant(
+        DELIVERED_VALUES.includes(event.delivered),
+        'SCOPE_COMPLETED requires delivered: true | "gated" | "not_applicable" | "superseded" — delivered is a field, not a vibe'
+      );
+      invariant(
+        AUTHORITY_PLANES.includes(event.authority_plane),
+        `SCOPE_COMPLETED requires authority_plane in ${AUTHORITY_PLANES.join("|")}`
+      );
+      invariant(
+        typeof event.dod_ref === "string" && event.dod_ref.length > 0,
+        "SCOPE_COMPLETED requires dod_ref naming the definition-of-done it satisfies"
+      );
+      if (event.delivered === true) {
+        invariant(
+          event.proof &&
+            PROOF_TYPES.includes(event.proof.type) &&
+            typeof event.proof.ref === "string" &&
+            event.proof.ref.length > 0,
+          "SCOPE_COMPLETED with delivered:true requires a resolvable proof {type, ref}"
+        );
+      }
+    }
+    if (PR_IDENTITY_EVENTS.includes(event.event_type)) {
+      invariant(
+        Number.isInteger(event.pr) && event.pr > 0,
+        `${event.event_type} requires an integer pr number`
+      );
+      invariant(
+        GIT_SHA.test(event.head_sha ?? ""),
+        `${event.event_type} requires head_sha as an exact 40-hex commit sha`
+      );
+    }
+    if (event.event_type === "PR_MERGED") {
+      invariant(
+        Number.isInteger(event.pr) && event.pr > 0,
+        "PR_MERGED requires an integer pr number"
+      );
+      invariant(
+        GIT_SHA.test(event.head_sha ?? ""),
+        "PR_MERGED requires head_sha as an exact 40-hex commit sha"
+      );
+      invariant(
+        GIT_SHA.test(event.merge_sha ?? ""),
+        "PR_MERGED requires merge_sha as an exact 40-hex commit sha"
+      );
+    }
+    if (event.event_type.startsWith("GSTACK_")) {
+      invariant(
+        typeof event.workflow === "string" && event.workflow.length > 0,
+        "GSTACK_* events require a structured workflow field (accounting is exact-match, never substring)"
+      );
+      if (event.event_type === "GSTACK_UNAVAILABLE") {
+        invariant(
+          typeof event.reason === "string" && event.reason.length > 0,
+          "GSTACK_UNAVAILABLE requires a reason proving the workflow was genuinely uninvocable — a skill not invoked by choice is OMITTED, never UNAVAILABLE"
+        );
+      }
+    }
+  }
   invariant(
     !SECRETISH.test(JSON.stringify(event)),
     "event contains a credential-shaped value — secrets never enter the ledger"
   );
   return event;
+}
+
+// Resolve a proof reference (§53: terminal-task proof). Offline-deterministic:
+// repo paths and run artifacts must exist, event refs must exist in the run,
+// URLs must be well-formed against the systems of record.
+export function resolveProofRef(proof, runId, events) {
+  if (!proof || !PROOF_TYPES.includes(proof.type)) return false;
+  if (proof.type === "repo") return existsSync(join(REPO_ROOT, proof.ref));
+  if (proof.type === "run-artifact")
+    return existsSync(join(runDir(runId), proof.ref));
+  if (proof.type === "event")
+    return events.some(event => event.event_id === proof.ref);
+  if (proof.type === "url")
+    return /^https:\/\/(github\.com|app\.notion\.com|www\.notion\.so)\/\S+$/.test(
+      proof.ref
+    );
+  return false;
 }
 
 export function loadManifest(runId) {
@@ -457,6 +577,16 @@ export function appendEvent(runId, partial) {
   }
   try {
     const events = readEvents(runId);
+    // Append-time idempotency (audit M2): a duplicated external effect must be
+    // refused BEFORE it is recorded, not flagged after.
+    if (partial.idempotency_key != null) {
+      invariant(
+        !events.some(
+          existing => existing.idempotency_key === partial.idempotency_key
+        ),
+        `idempotency_key "${partial.idempotency_key}" already recorded — the operation this event describes has already happened`
+      );
+    }
     const previous = events[events.length - 1] ?? null;
     const sequence = (previous?.sequence ?? 0) + 1;
     // JSON round-trip so the hash covers exactly what the file stores —
@@ -464,7 +594,7 @@ export function appendEvent(runId, partial) {
     // and permanently poison verify (gstack-review).
     const event = JSON.parse(
       JSON.stringify({
-        schema_version: 1,
+        schema_version: EVENT_SCHEMA_VERSION,
         event_id: `evt_${String(sequence).padStart(5, "0")}`,
         run_id: runId,
         sequence,
@@ -500,6 +630,10 @@ export function verifyRun(runId) {
   const seenIdempotency = new Set();
   const openOwnerGates = new Map();
   const openFindings = new Map();
+  const startedScopes = new Set();
+  const startedGstack = new Set();
+  const startedSubagents = new Set();
+  let legacyGstackStarted = false;
   let previousHash = null;
   let previousTimestamp = null;
   events.forEach((event, index) => {
@@ -571,6 +705,42 @@ export function verifyRun(runId) {
       if (event.event_type === "FINDING_CLOSED")
         openFindings.delete(event.finding);
     }
+    // Lifecycle completeness (audit H4), v2 events only — v1 historical runs
+    // predate the rule and stay valid.
+    if (event.schema_version >= 2) {
+      if (
+        event.event_type === "SCOPE_COMPLETED" &&
+        !startedScopes.has(event.scope_id)
+      ) {
+        errors.push(
+          `${at}: SCOPE_COMPLETED for ${event.scope_id} without a prior SCOPE_STARTED`
+        );
+      }
+      if (
+        event.event_type === "GSTACK_COMPLETED" &&
+        !startedGstack.has(event.workflow) &&
+        !legacyGstackStarted
+      ) {
+        errors.push(
+          `${at}: GSTACK_COMPLETED for workflow "${event.workflow}" without a prior GSTACK_STARTED naming it`
+        );
+      }
+      if (
+        event.event_type === "SUBAGENT_COMPLETED" &&
+        !startedSubagents.has(event.actor?.name)
+      ) {
+        errors.push(
+          `${at}: SUBAGENT_COMPLETED for "${event.actor?.name}" without a prior SUBAGENT_STARTED`
+        );
+      }
+    }
+    if (event.event_type === "SCOPE_STARTED") startedScopes.add(event.scope_id);
+    if (event.event_type === "GSTACK_STARTED") {
+      if (event.schema_version >= 2) startedGstack.add(event.workflow);
+      else legacyGstackStarted = true;
+    }
+    if (event.event_type === "SUBAGENT_STARTED")
+      startedSubagents.add(event.actor?.name);
   });
   const stats = {
     run_id: runId,
