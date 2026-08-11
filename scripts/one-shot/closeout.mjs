@@ -140,6 +140,16 @@ export function closeout(runId) {
       continue;
     }
     if (completion.delivered === true) {
+      // A url proof is shape-checked, not liveness-checked (refutation attack 2):
+      // a well-formed but dead URL must not manufacture COMPLETE. delivered:true
+      // therefore requires an EXISTENCE-checked proof (repo/run-artifact/event);
+      // a url may accompany but never suffices on its own.
+      if (completion.proof?.type === "url") {
+        blockers.push(
+          `scope ${scope} claims delivered:true on a url-only proof — url proofs are shape-checked, not liveness-checked; terminal delivery needs an existence-checked repo/run-artifact/event proof`
+        );
+        continue;
+      }
       if (!resolveProofRef(completion.proof, runId, events)) {
         blockers.push(
           `scope ${scope} claims delivered:true but its proof (${completion.proof?.type}:${completion.proof?.ref}) does not resolve — dead proof links block completion`
@@ -263,23 +273,43 @@ export function closeout(runId) {
       `dangling subagent dispatch(es) with no terminal event: ${integrity.stats.dangling_subagents.join(", ")} — each must reach SUBAGENT_COMPLETED/FAILED/CANCELLED/ABORTED/SUPERSEDED`
     );
   }
-  // Law 14: an open REFUTED claim blocks its scope until a later correlated
-  // event corrects it.
+  // Law 14: an open REFUTED claim blocks until a later correlated event that is
+  // ITSELF a strong claim (PROVEN/SUPPORTED) corrects it — an INFERRED/UNKNOWN
+  // "correction" does not lift a refutation (refutation caveat B).
   const refutedOpen = [];
-  const correctedRefutations = new Set(
-    events.filter(e => e.correlation_id).map(e => e.correlation_id)
+  const strongCorrections = new Set(
+    events
+      .filter(
+        e =>
+          e.correlation_id && (e.label === "PROVEN" || e.label === "SUPPORTED")
+      )
+      .map(e => e.correlation_id)
   );
   for (const event of events) {
-    if (
-      event.label === "REFUTED" &&
-      !correctedRefutations.has(event.event_id)
-    ) {
+    if (event.label === "REFUTED" && !strongCorrections.has(event.event_id)) {
       refutedOpen.push(event.event_id);
     }
   }
   if (refutedOpen.length > 0) {
     blockers.push(
-      `open REFUTED claim(s) with no correcting event: ${refutedOpen.join(", ")} (Law 14)`
+      `open REFUTED claim(s) with no PROVEN/SUPPORTED correcting event: ${refutedOpen.join(", ")} (Law 14)`
+    );
+  }
+  // Law 18: DERIVE conflicts, not only accept self-reports (refutation attack 5).
+  // Two subagent dispatches declaring the SAME write scope is a conflict the
+  // kernel flags even if no agent volunteered a CONFLICT event.
+  const scopeToAgents = {};
+  for (const event of events) {
+    if (event.event_type === "SUBAGENT_STARTED" && event.scope_declaration) {
+      (scopeToAgents[event.scope_declaration] ??= []).push(event.actor?.name);
+    }
+  }
+  const derivedConflicts = Object.entries(scopeToAgents).filter(
+    ([, agents]) => new Set(agents).size > 1
+  );
+  if (derivedConflicts.length > 0) {
+    blockers.push(
+      `derived write conflict(s): ${derivedConflicts.map(([scope, agents]) => `"${scope}" declared by ${[...new Set(agents)].join(" & ")}`).join("; ")} — one implementation owner per artifact (Law 18)`
     );
   }
   if (metrics.notion_writes_committed > metrics.notion_writes_verified) {

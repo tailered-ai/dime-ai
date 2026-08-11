@@ -897,3 +897,97 @@ describe("assurance layer (v3) — falsification battery", () => {
     assert.equal(ledger.verifyRun(RUN).ok, true);
   });
 });
+
+// Refutation-driven fixes (Campaign Three v3.1): close the three fixable gaps
+// the standing Refutation agent found; the two genuinely-offline boundaries
+// (stall/drift self-report) are documented, not falsely "fixed".
+describe("assurance layer v3.1 — refutation fixes", () => {
+  it("delivered:true on a url-only proof blocks (attack 2: url is shape not liveness)", () => {
+    add({ scope_id: "TOS-PROGRAM", event_type: "RUN_STARTED", summary: "s" });
+    add({ scope_id: "TOS-006", event_type: "SCOPE_STARTED", summary: "s" });
+    add({
+      scope_id: "TOS-006",
+      event_type: "SCOPE_COMPLETED",
+      summary: "url-only proof",
+      delivered: true,
+      authority_plane: "main",
+      dod_ref: "x",
+      proof: {
+        type: "url",
+        ref: "https://github.com/tailered-ai/dime-ai/pull/999999",
+      },
+    });
+    add({ scope_id: "TOS-PROGRAM", event_type: "RUN_COMPLETED", summary: "t" });
+    const result = closeout(RUN);
+    assert.equal(result.complete, false);
+    assert.match(result.blockers.join("\n"), /url-only proof/);
+  });
+
+  it("delivered:true with an existence-checked proof still passes", () => {
+    completeHappyRun(); // uses proof {type:event, ref:evt_00001}
+    assert.equal(closeout(RUN).complete, true);
+  });
+
+  it("two subagents declaring the SAME write scope => derived conflict blocks (attack 5)", () => {
+    completeHappyRun();
+    add({
+      scope_id: "LANE-0",
+      event_type: "SUBAGENT_STARTED",
+      actor: { type: "agent", name: "a1", role: "implementation-owner" },
+      scope_declaration: "wt-x/server/foo.ts",
+      summary: "d1",
+    });
+    add({
+      scope_id: "LANE-0",
+      event_type: "SUBAGENT_STARTED",
+      actor: { type: "agent", name: "a2", role: "implementation-owner" },
+      scope_declaration: "wt-x/server/foo.ts",
+      summary: "d2",
+    });
+    // terminate both so the dangling check doesn't mask the conflict blocker
+    add({
+      scope_id: "LANE-0",
+      event_type: "SUBAGENT_COMPLETED",
+      actor: { type: "agent", name: "a1", role: "implementation-owner" },
+      summary: "t1",
+    });
+    add({
+      scope_id: "LANE-0",
+      event_type: "SUBAGENT_COMPLETED",
+      actor: { type: "agent", name: "a2", role: "implementation-owner" },
+      summary: "t2",
+    });
+    const result = closeout(RUN);
+    assert.equal(result.complete, false);
+    assert.match(result.blockers.join("\n"), /derived write conflict/);
+  });
+
+  it("REFUTED is cleared ONLY by a PROVEN/SUPPORTED correction, not INFERRED (caveat B)", () => {
+    completeHappyRun();
+    const r = add({
+      scope_id: "LANE-0",
+      event_type: "SUBAGENT_FINDING",
+      actor: { type: "agent", name: "ref", role: "reviewer" },
+      summary: "false claim",
+      label: "REFUTED",
+    });
+    // An INFERRED correlated event must NOT lift the block.
+    add({
+      scope_id: "LANE-0",
+      event_type: "DECISION_RECORDED",
+      correlation_id: r.event_id,
+      summary: "weak correction",
+      label: "INFERRED",
+    });
+    assert.match(closeout(RUN).blockers.join("\n"), /open REFUTED/);
+    // A SUPPORTED correlated event clears it.
+    add({
+      scope_id: "LANE-0",
+      event_type: "DECISION_RECORDED",
+      correlation_id: r.event_id,
+      summary: "strong correction: re-checked, restated",
+      label: "SUPPORTED",
+    });
+    assert.ok(!closeout(RUN).blockers.join("\n").includes("open REFUTED"));
+  });
+});

@@ -134,3 +134,28 @@ The controlled vocabulary lives in `scripts/one-shot/ledger.mjs` (`EVENT_TYPES`)
 extensions beyond the campaign-contract minimum: `GATE_EVALUATED` (structured G0–G10 gate
 ledger) and `DECISION_RECORDED` (storage/strategy decisions). Do not add synonyms of existing
 types; extend the frozen list deliberately and document why.
+
+## Assurance-layer honest boundaries (Campaign Three, refutation-driven)
+
+The v3 kernel machine-checks **reported** progress-claims for structural completeness,
+chain integrity, and — for `repo`/`run-artifact`/`event` proofs — existence. It does NOT
+derive progress-truth from raw agent behavior. Specifically:
+
+- **Stall / loop / DRIFT are orchestrator-self-reported, not kernel-derived.** The kernel
+  guarantees a `STALL_SUSPECTED` / `DRIFT` event is well-formed (names its threshold /
+  digest) *if emitted*; it cannot guarantee one is emitted when a stall or drift occurs. A
+  silently-stalled agent that never emits the signal passes. Thresholds live in the manifest
+  as declared intent, evaluated by the orchestrator.
+- **CONFLICT is partly derived.** Closeout now flags two dispatches that declare the SAME
+  write scope even with no self-reported CONFLICT (Law 18 derivation); a self-reported
+  CONFLICT remains available for cases the string-equality derivation misses (aliased paths).
+- **`url` proofs are shape-checked, not liveness-checked.** A well-formed github/notion URL
+  to a nonexistent target resolves as shape-valid — so `delivered:true` now REQUIRES an
+  existence-checked `repo`/`run-artifact`/`event` proof; a `url` may accompany but never
+  suffices. URL-backed *context* is trust, not proof.
+- **A REFUTED claim is cleared only by a PROVEN/SUPPORTED correlated correction**, never by
+  an INFERRED/UNKNOWN one.
+
+The honest one-line guarantee: *"machine-verified structure, chain integrity, and
+existence-checked non-URL proofs for what the orchestrator reports"* — not "machine-verified
+progress-truth."
