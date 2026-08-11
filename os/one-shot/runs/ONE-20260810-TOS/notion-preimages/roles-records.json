@@ -1,0 +1,11 @@
+{
+  "captured_at": "2026-08-10 (notion-query-data-sources SQL over collection://3299f155-e329-4768-9089-ed03538c2c4e)",
+  "note": "Property pre-image of the 4 role records. Mutation is body-append only (3 boundary lines each); no property changes. Page-body pre-images captured separately as role-*.md before each append.",
+  "records": [
+    {"url": "https://app.notion.com/3b59673313e781d7b069ccc9901b33a4", "Name": "Chief Executive Officer (CEO)", "Updated_pre": "2026-08-08 00:53:11Z"},
+    {"url": "https://app.notion.com/3b59673313e781e992fdd3bf977d5803", "Name": "Growth and Marketing Lead", "Updated_pre": "2026-08-08 00:53:15Z"},
+    {"url": "https://app.notion.com/3b59673313e78172a275c70045a5cf42", "Name": "Director of Sports Data, Modeling, and Analytics", "Updated_pre": "2026-08-08 00:53:20Z"},
+    {"url": "https://app.notion.com/3b59673313e781079fe6edca8857a651", "Name": "Head of Community and Customer Support", "Updated_pre": "2026-08-08 00:53:23Z"}
+  ],
+  "responsibility_target": {"url": "https://app.notion.com/3b59673313e781f7a55fdde054f156cc", "Name": "Company strategy and commercial final authority", "data_source": "collection://60ab4072-3f47-4a95-8596-cfe2562ab3f8"}
+}

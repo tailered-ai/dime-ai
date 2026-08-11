@@ -1,0 +1,77 @@
+# 13-tos-notion-context — TOS-006: the GitHub↔Notion PR contract.
+#
+# Every Tailered-OS-scoped PR must bind itself to its canonical Notion Project +
+# Task (structured "## Notion context" block: Project, Task, Scope ID, Human
+# owner, Decision class, Deployment consequence). Identifiers derive ONLY from
+# config/tailered-os-control-plane.v1.json. Static and offline: no Notion API
+# call, no bot, no auto-relation (the Notion GitHub Sync integration is archived
+# and org-wide sync mode stays disabled). Runs on ALL PRs and no-ops in-job for
+# non-Tailered-OS changes, so it is safe to mark Required in branch protection
+# without stranding Dime PRs.
+#
+# `types` includes `edited` because the failure this gate catches lives in the
+# PR BODY — the fix is editing the description, which must re-trigger the check.
+#
+# Security: the PR body is author-controlled input. It reaches the runner ONLY
+# through `env:` (never `${{ }}` inside `run:` — template-injection class) and
+# is parsed by a node script, not by the shell.
+name: 13-tos-notion-context
+
+# merge_group: required checks must report on merge-queue refs or the queue
+# stalls (audit M5). The PR body does not exist there, so the contract steps
+# run only on pull_request; the queue run re-verifies committed ledgers and
+# reports pass — the body contract was already enforced at PR stage.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tos-context-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  tos-notion-context:
+    name: 13-tos-notion-context
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: "[STEP] Merge queue — contract already enforced at PR stage"
+        if: github.event_name == 'merge_group'
+        run: echo "merge_group ref — the Notion-context body contract ran on the pull_request events; ledger integrity re-verifies below."
+
+      - name: "[STEP] Changed files — offline, from git (no API)"
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # --no-renames: a rename prints only its destination, so a pure
+          # `git mv` out of the TOS tree would otherwise dodge the scope
+          # predicate entirely (gstack-review finding).
+          git diff --name-only --no-renames "$(git merge-base "$BASE_SHA" "$HEAD_SHA")" "$HEAD_SHA" > changed-files.txt
+          echo "changed files: $(wc -l < changed-files.txt)"
+
+      - name: "[STEP] Notion-context contract (body via env only; scope decided in-job)"
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s' "$PR_BODY" > pr-body.txt
+          node scripts/ci/tos-notion-context.mjs --body-file pr-body.txt --changed-files changed-files.txt
+
+      - name: "[STEP] Committed one-shot ledger integrity (hash-chain re-derivation)"
+        run: node scripts/ci/tos-ledger-verify.mjs

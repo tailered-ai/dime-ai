@@ -1,0 +1,8 @@
+## Notion context
+
+- Project: https://www.notion.so/tailered/Tailered-OS-3b89673313e7814da8a4ccfa9a21c969?pvs=4
+- Task: https://www.notion.so/tailered/TOS-006-Task-abcdef01-2345-6789-abcd-ef0123456789
+- Scope ID: TOS-006
+- Human owner: Miller
+- Decision class: material
+- Deployment consequence: tailered-os-runtime

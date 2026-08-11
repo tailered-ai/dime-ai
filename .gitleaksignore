@@ -59,3 +59,12 @@ c63bb85031c2a3404ae2a4a049dfb02e39777c2d:ml/dime-1.0/evidence/benchmarks/base-mo
 # immutable history. Same class as the SEC-006 entries above: a constructed
 # fixture ABOUT credential detection, not a credential. Exact fingerprint only.
 1904f3ab0ed286712744176ccd66641ff0a93c79:scripts/tailered-os-control-plane.test.ts:stripe-access-token:99
+
+# PR #496 Tailered OS pin gate. The cloudflare-api-key detector matched the
+# EXPECTED_CLOUDFLARE_OS_PIN env value in the Tailered OS CI workflow — a 40-hex
+# string adjacent to the word "cloudflare". It is the public cloudflare/cloudflare-os
+# git commit SHA (b2a51b54…) that the workflow deliberately duplicates from the
+# submodule gitlink so an accidental pin move fails CI (see
+# platform/tailered-os/docs/UPSTREAM.md). A commit SHA is not a credential. This
+# exact fingerprint does not suppress the rule, the file, or hex strings elsewhere.
+5823da63238c38b46dfc23d8a12c27e0c6a6b93c:.github/workflows/tailered-os.yml:cloudflare-api-key:28

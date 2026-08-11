@@ -1,0 +1,8 @@
+## Notion context
+
+- Project: 3b89673313e7814da8a4ccfa9a21c969 [open](https://app.notion.com/p/deadbeefdeadbeefdeadbeefdeadbeef)
+- Task: https://app.notion.com/p/abcdef0123456789abcdef0123456789
+- Scope ID: TOS-006
+- Human owner: PREZ
+- Decision class: routine
+- Deployment consequence: none
