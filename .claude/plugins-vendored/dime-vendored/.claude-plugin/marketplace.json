@@ -1,6 +1,6 @@
 {
   "name": "dime-vendored",
-  "description": "Vendored Anthropic-marketplace plugins (superpowers, mcp-server-dev, figma). The upstream marketplace names are reserved for GitHub anthropics sources, so they are rehosted here to rehydrate offline.",
+  "description": "Vendored Anthropic-marketplace plugins (superpowers, mcp-server-dev). The upstream marketplace names are reserved for GitHub anthropics sources, so they are rehosted here to rehydrate offline.",
   "owner": {
     "name": "Dime AI"
   },
@@ -22,14 +22,6 @@
       "category": "development",
       "homepage": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/mcp-server-dev",
       "source": "./plugins/mcp-server-dev"
-    },
-    {
-      "name": "figma",
-      "displayName": "Figma",
-      "description": "Figma design platform integration. Access design files, extract component information, read design tokens, and translate designs into code. Bridge the gap between design and development workflows.",
-      "category": "design",
-      "homepage": "https://github.com/figma/mcp-server-guide",
-      "source": "./plugins/figma"
     }
   ]
 }
