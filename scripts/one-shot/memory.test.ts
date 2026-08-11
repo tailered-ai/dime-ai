@@ -1293,6 +1293,38 @@ describe("v4.3 CSO hardening", () => {
       /exceeds the \d+-byte fidelity-hash cap/
     );
   });
+
+  it("retired staleness is moot: MEMORY_RECONCILED clean:true accepts a run whose only stale artifact is RETIRED", () => {
+    happyBase();
+    register("ART-src", { content_hash: "aaa" });
+    register("ART-draft", { depends_on: ["ART-src"] });
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_UPDATED",
+      summary: "src changed",
+      artifact: { id: "ART-src", content_hash: "bbb" },
+    });
+    // ART-draft is now stale. Retiring it takes it out of service — retired
+    // artifacts cannot integrate (consumption is refused), so their staleness
+    // must not block reconciliation or closeout (C4 evt_00185 shape).
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_RETIRED",
+      summary: "retire the stale draft",
+      artifact: { id: "ART-draft" },
+    });
+    assert.deepEqual(ledger.deriveArtifacts(RUN).stale, []);
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "reconciled",
+      clean: true,
+    });
+    terminal();
+    assert.equal(ledger.verifyRun(RUN).ok, true);
+    const result = closeout(RUN);
+    assert.doesNotMatch(result.blockers.join("\n"), /ART-draft/);
+  });
 });
 
 describe("owner-gate census (§24)", () => {
