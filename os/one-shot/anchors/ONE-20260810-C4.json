@@ -1,0 +1,43 @@
+{
+  "run_id": "ONE-20260810-C4",
+  "program": "Tailered OS",
+  "campaign": "Four — universal execution memory + agent observatory + production qualification + generalization",
+  "artifacts_location": "out-of-git: ~/.gstack/projects/tailered-ai-dime-ai/one-shot-runs/ONE-20260810-C4 (§8 storage hierarchy)",
+  "events_total": 188,
+  "final_event_hash": "dbd3c4e09e4d9aeb32228d52d594e33e0e08f2f9f45fe05e6203403a430f1bc4",
+  "directive_pin_sha256": "76d38176d704a7877b1fd3b38fa37366f8a96ee6a66019fc3507cae78e8f0c72",
+  "directive_provenance": "in-session directive, harness-TRUNCATED at 50k chars mid-§70; pin covers the section map + verbatim §61 + verbatim §64",
+  "terminal_event": "RUN_PAUSED_EXTERNAL",
+  "complete": false,
+  "closeout_blockers": [
+    "FIND-PR496-0001 open (merged #496 traceability Task — Notion-connector-blocked)",
+    "G8 BLOCKED (Notion canonical reconciliation — connector down)",
+    "G9 BLOCKED (Tailered OS Cloudflare half — OG-004 inputs)",
+    "OG-004 OPEN (Cloudflare deployment inputs)",
+    "OG-014 OPEN (§25 ruleset PUT — harness-classifier-denied, owner packet ready)"
+  ],
+  "denominators": {
+    "scopes_terminal_of_required": "11 of 11",
+    "gates_pass_of_required": "9 of 11",
+    "gstack_accounted_of_required": "8 of 8",
+    "findings_open_of_total": "1 of 17",
+    "artifacts_stale_of_total": "0 of 13",
+    "composition_no_gap_of_evaluated": "1 of 1",
+    "owner_gate_census": {
+      "RUN_BLOCKING": ["OG-004", "OG-014"],
+      "RESOLVED": ["OG-003"],
+      "TOTAL_MINTED": ["OG-003", "OG-004", "OG-014"]
+    }
+  },
+  "kernel_version": "v4.3 (universal execution memory + observatory; refutation-hardened v4.1/v4.2; CSO-hardened v4.3)",
+  "merges_verified": {
+    "pr_496": { "merge_sha": "ac5d4ef902c735a85e270b9f97e7dfb40cce8971", "merged_at": "2026-08-11T06:14:56Z", "by": "PREZ" },
+    "pr_506": { "merge_sha": "43a33c847fec3bd9e805659e5f1ec4e276062992", "merged_at": "2026-08-11T07:05:59Z", "by": "PREZ" }
+  },
+  "production_validated": "live /health 200 naming 43a33c84 (post-#506 main), db CLOSED, schema ok",
+  "prior_anchors_unchanged": {
+    "ONE-20260810-TOS": { "events_total": 102, "final_event_hash": "7efad216ae715b522ca5400578d790a39f61c2b533f57a7e26863a8c5a624831" },
+    "ONE-20260810-C2": { "events_total": 67, "final_event_hash": "5656f59d834963a9a77f6978cb1dd85b58ba1a07a7ab48d58db2c5468a2988ca" },
+    "ONE-20260810-C3": { "events_total": 64, "final_event_hash": "8d66a4185812c699c6affa49dd086c240fe8fa243676c1cd80fcad9979e58fd4" }
+  }
+}
