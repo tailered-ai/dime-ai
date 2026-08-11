@@ -586,7 +586,7 @@ describe("falsification re-battery — audited v1 bypasses now fail closed", () 
     );
     assert.match(
       text,
-      /GSTACK_COMPLETED for workflow "health" without a prior/
+      /GSTACK_COMPLETED for workflow "health" with no GSTACK_STARTED naming it anywhere/
     );
     assert.match(text, /SUBAGENT_COMPLETED for "ghost-agent" without a prior/);
   });
