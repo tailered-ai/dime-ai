@@ -748,7 +748,17 @@ export function verifyRun(runId) {
   const events = readEvents(runId);
   const seenIds = new Set();
   const seenIdempotency = new Set();
+  // Gate lifecycle is order-INDEPENDENT within a run: an UPDATE/RESOLVE is valid
+  // as long as the id is CREATED somewhere in the run (a prior-run gate carried
+  // forward must be re-created, state and all, not silently updated). Pre-scan
+  // the created ids so a CREATE appended after its UPDATE still validates.
+  const createdOwnerGateIds = new Set(
+    events
+      .filter(event => event.event_type === "OWNER_GATE_CREATED")
+      .map(event => event.owner_gate?.id)
+  );
   const openOwnerGates = new Map();
+  const seenCreatedGateIds = new Set();
   const openFindings = new Map();
   const startedScopes = new Set();
   const startedGstack = new Set();
@@ -796,17 +806,21 @@ export function verifyRun(runId) {
       );
     previousHash = event.event_hash;
     if (event.event_type === "OWNER_GATE_CREATED") {
-      if (openOwnerGates.has(event.owner_gate.id))
+      // Double-create is tracked by actual CREATE events only — an UPDATE/RESOLVE
+      // processed earlier (order-independent lifecycle) must not look like a
+      // prior creation.
+      if (seenCreatedGateIds.has(event.owner_gate.id))
         errors.push(`${at}: owner gate ${event.owner_gate.id} created twice`);
+      seenCreatedGateIds.add(event.owner_gate.id);
       openOwnerGates.set(event.owner_gate.id, event.owner_gate.state);
     }
     if (
       event.event_type === "OWNER_GATE_UPDATED" ||
       event.event_type === "OWNER_GATE_RESOLVED"
     ) {
-      if (!openOwnerGates.has(event.owner_gate.id)) {
+      if (!createdOwnerGateIds.has(event.owner_gate.id)) {
         errors.push(
-          `${at}: ${event.event_type} references owner gate ${event.owner_gate.id} that was never created`
+          `${at}: ${event.event_type} references owner gate ${event.owner_gate.id} that is never created in this run`
         );
       } else {
         openOwnerGates.set(event.owner_gate.id, event.owner_gate.state);

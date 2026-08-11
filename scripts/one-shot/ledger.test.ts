@@ -184,7 +184,7 @@ describe("one-shot ledger", () => {
     });
     assert.match(
       ledger.verifyRun(BASE_MANIFEST.run_id).errors.join("\n"),
-      /OG-007 that was never created/
+      /OG-007 that is never created in this run/
     );
   });
 
