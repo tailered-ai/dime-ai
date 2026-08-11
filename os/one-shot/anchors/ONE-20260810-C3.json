@@ -1,0 +1,27 @@
+{
+  "run_id": "ONE-20260810-C3",
+  "program": "Tailered OS",
+  "campaign": "Three — assurance & learning layer + program closure",
+  "artifacts_location": "out-of-git: ~/.gstack/projects/tailered-ai-dime-ai/one-shot-runs/ONE-20260810-C3 (Law 8)",
+  "events_total": 64,
+  "final_event_hash": "8d66a4185812c699c6affa49dd086c240fe8fa243676c1cd80fcad9979e58fd4",
+  "directive_sha256": "222c54e4ba696c7841380cf645f139ac2bfe0143fb30f93987508b60e19bbbcc",
+  "terminal_event": "RUN_PAUSED_EXTERNAL",
+  "complete": false,
+  "closeout_blockers": [
+    "required scopes not terminal (owner-gated at merge/ratification)",
+    "G9 BLOCKED (owner-held releases)",
+    "2 owner gates OPEN (OG-004 deployment inputs, OG-006 TOS-009 DoD)"
+  ],
+  "kernel_version": "v3.1 (assurance layer Laws 14-18 + refutation fixes)",
+  "prior_anchors_unchanged": {
+    "ONE-20260810-TOS": {
+      "events_total": 102,
+      "final_event_hash": "7efad216ae715b522ca5400578d790a39f61c2b533f57a7e26863a8c5a624831"
+    },
+    "ONE-20260810-C2": {
+      "events_total": 67,
+      "final_event_hash": "5656f59d834963a9a77f6978cb1dd85b58ba1a07a7ab48d58db2c5468a2988ca"
+    }
+  }
+}
