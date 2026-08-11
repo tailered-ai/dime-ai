@@ -41,7 +41,6 @@ and the embedded runtimes. Auth law: LLM.md "Auth model: subscription-first".
 | Design orchestration                     | `.claude/skills/design-federation/`                                                                               | Thin UI-work router over the design federation (entry `/ui-loop`): one declared aesthetic Lead per surface, brand-law reading order (pages override → MASTER.md, THREE-COLOR-LAW wins where they disagree), the brief → build → rendered-proof → audit loop, and the evidence-bundle contract. references/: routing, brief template, evidence bundle, registry (pins/licenses/scopes)                                                                                                                             |
 | Engineering orchestration                | `.claude/skills/engineering-federation/`                                                                          | Backend/infra sibling of design-federation (entry `/eng-loop`): vendored Production-Grade Engineering Reference Architecture (v1.0, 2026-08-05) as control standard; classify → baseline → build → gate → evidence-record loop with terminal outcomes; routes design method to architect-backend-systems; hard conditionals for schema (db-push law), backfills, new infra (earn-its-existence), traffic control. references/: the standard, dime-mapping (controls → repo gates), routing (invocation surfaces — the architect skills are Read-path, not Skill-invocable), record-template.yaml (copy → fill → paste into the PR body — owner-ruled 2026-08-07, DR-014 Ruling 2)  |
 | Design operations (pinned ae5e951)       | `.claude/skills/impeccable/`                                                                                      | pbakaus/impeccable v4.0.4 (Apache-2.0, vendored — provenance in its `VENDOR.md`): 23 `/impeccable` workflow commands (init/shape/critique/audit/polish/…), 59-rule deterministic detector (`npx impeccable@3.5.0 detect --json`), 4 `impeccable-*` subagents in `.claude/agents/`. Edit-time hooks deliberately NOT wired (owner opt-in via settings.local.json)                                                                                                                                                  |
-| Design handoff                           | plugin `figma@knowledge-work-plugins`                                                                             | figma/mcp-server-guide (pinned 07316dd) — read design files, components, and tokens; translate Figma designs into code                                                                                                                                                                                                                                                                                                                                                                                            |
 | Deployment                               | plugin `railway@railway-skills`                                                                                   | railwayapp/railway-skills — `use-railway` skill + hosted MCP server for services, environments, deployments, logs, and troubleshooting. Pair with `references/railway-deploy.md` (deploy law below)                                                                                                                                                                                                                                                                                                               |
 | Secondary harness                        | `.pi/` + global `@earendil-works/pi-coding-agent`; embedded runtime `server/_core/piAgent.ts`                     | pi coding agent wired to this repo: loads `AGENTS.md` + all skill trees + `.claude/commands/` as templates via `.pi/settings.json`; dime-guard extension, dime theme, model policy. pi-agent-core embeds the same stack in-process (createPiAgent/runPiChat/runPiAgent, gateway-routed). Runbook: `references/pi-harness.md`                                                                                                                                                                                      |
 | Multiplayer orchestration                | `~/src/qm` reference clone (yc-software/qm)                                                                       | QM — Slack + web org workspaces driving Pi/Claude Code; this repo feeds it as a skill pack and sandbox checkout; deployment owner-gated (docker/fly/aws). Runbook: `references/qm-harness.md`                                                                                                                                                                                                                                                                                                                     |
@@ -56,7 +55,7 @@ not install them. Remote/cloud sessions have started with an empty
 `~/.claude/plugins/installed_plugins.json` and only the `claude-plugins-official` marketplace
 cloned — every plugin skill silently missing, with no error. The vendored `.claude/skills/` and
 `.agents/skills/` trees always load, so the loss is easy to miss: superpowers, mcp-server-dev, the
-55 `*@pm-skills`, figma, and railway just aren't there (the `/sp-*` and `/pm-*` commands still
+55 `*@pm-skills`, and railway just aren't there (the `/sp-*` and `/pm-*` commands still
 work — they are local files in `.claude/commands/`).
 
 **This is now self-healing.** A `SessionStart` hook (`startup|resume|clear`, timeout 300s) runs
@@ -114,7 +113,7 @@ deployment, Railway mutation, provider execution, Hugging Face publication,
 RunPod compute, model download, training, tracing, route activation, shadow
 traffic, or Research Alpha.
 
-**All six marketplaces are vendored (`.claude/plugins-vendored/`, 18M) — bootstrap is fully
+**All six marketplaces are vendored (`.claude/plugins-vendored/`, 15M) — bootstrap is fully
 offline.** `extraKnownMarketplaces` points at them with
 `{"source": "directory", "path": "./.claude/plugins-vendored/<name>"}`; no GitHub source remains.
 
@@ -122,17 +121,19 @@ offline.** `extraKnownMarketplaces` points at them with
 | --------------------- | ---- | ------------------------------------------------------------------ |
 | `pm-skills`           | 2.6M | all 70 plugin payloads, 55 enabled                                 |
 | `ui-ux-pro-max-skill` | 8.5M | v2.11.0, the 7 skills it ships (5.5M is `ui-styling/canvas-fonts`) |
-| `dime-vendored`       | 4.5M | superpowers, mcp-server-dev, figma                                 |
+| `dime-vendored`       | 2.1M | superpowers, mcp-server-dev                                        |
 | `taste-skill`         | 1.9M | taste-skill                                                        |
 | `railway-skills`      | 672K | railway                                                            |
 
 **Why `dime-vendored` exists.** `claude-plugins-official` and `knowledge-work-plugins` are
 _reserved names_ — the CLI accepts them only from GitHub `anthropics` sources and rejects a
 directory source outright ("The name '…' is reserved for official Anthropic marketplaces"). So
-superpowers, mcp-server-dev, and figma are rehosted under a non-reserved marketplace name and keyed
+superpowers and mcp-server-dev are rehosted under a non-reserved marketplace name and keyed
 as `<plugin>@dime-vendored` in `enabledPlugins`. Skill IDs are namespaced by _plugin_, not
-marketplace, so `superpowers:brainstorming`, `mcp-server-dev:build-mcp-server`, and `figma:figma-use`
-are unchanged.
+marketplace, so `superpowers:brainstorming` and `mcp-server-dev:build-mcp-server` are unchanged.
+(A third plugin, `figma`, was vendored here until 2026-08-11; it was removed — unused, and its
+bundled MCP server sat permanently unauthenticated. Recover from `figma/mcp-server-guide` if
+Figma is ever adopted.)
 
 Three things that are easy to get wrong here:
 
