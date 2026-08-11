@@ -22,6 +22,7 @@
 //   - mode "api" fails CLOSED: headless sessions hold no live Notion write
 //     authority (manifest safety.notionWriteOperationsAuthorized === false).
 import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { loadControlPlaneManifest } from "../tailered-os-control-plane.mjs";
 
 export const LIFECYCLE_SCHEMA_VERSION = 1;
@@ -777,8 +778,12 @@ function loadFixture(path) {
   return parsed;
 }
 
+// fileURLToPath (not string concatenation): a URL-encoding path or symlinked
+// invocation would otherwise make this comparison fail and the CLI silently
+// import-and-exit-0 — a silent no-op in an engine whose law is that refusals
+// are visible (health-review catch).
 const invokedDirectly =
-  process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
+  process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (invokedDirectly) {
   const args = process.argv.slice(2);
   const command = args[0];

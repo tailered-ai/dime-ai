@@ -204,7 +204,7 @@ tested). v4 adds, enforced at append/verify/closeout:
   (`RUN_BLOCKING`/`PROGRAM_OPEN`/`SEQUENCED`/`STANDING`); closeout emits the census by state
   and class with exact gate ids under `denominators.owner_gate_census`.
 
-`scripts/one-shot/memory.test.ts` proves each of these controls can fail (45-test battery
+`scripts/one-shot/memory.test.ts` proves each of these controls can fail (52-test battery
 alongside the ledger/closeout suites).
 
 ### v4.1 (refutation-driven hardening)
@@ -248,3 +248,14 @@ v4.1 closes them:
   orchestrator duty and human review.
 - **Forged-version refusal (review F7).** Memory-typed events stamped `schema_version < 4`
   are refused as definitionally forged (the vocabulary did not exist earlier).
+
+### v4.3 (CSO hardening)
+
+- **Physical containment.** `isContained` re-checks realpaths when the target exists — a
+  symlink planted inside the repo or run directory can no longer satisfy repo/run-artifact
+  proofs or fidelity checks while pointing outside the root; an external URI that looks
+  inside the run dir but physically escapes is flagged as a fidelity defect, never
+  silently skipped.
+- **Bounded fidelity hashing.** sha256 fidelity checks refuse files above
+  `FIDELITY_HASH_MAX_BYTES` (32 MiB) with a visible defect instead of slurping them —
+  evidence artifacts are documents, not datasets.

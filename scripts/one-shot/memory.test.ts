@@ -1230,6 +1230,103 @@ describe("v4.2 verifier-hardening regressions", () => {
   });
 });
 
+describe("v4.3 CSO hardening", () => {
+  it("a symlink inside the run dir pointing outside is a fidelity defect, not an oracle", async () => {
+    const { symlinkSync } = await import("node:fs");
+    happyBase();
+    // Plant a target OUTSIDE the run dir and a contained-looking symlink to it.
+    const outside = join(tmpRoot, "outside-secret.txt");
+    writeFileSync(outside, "bytes outside the run dir\n");
+    mkdirSync(join(tmpRoot, RUN, "reports"), { recursive: true });
+    symlinkSync(outside, join(tmpRoot, RUN, "reports", "escape.md"));
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_REGISTERED",
+      summary: "artifact through a symlink",
+      artifact: {
+        id: "ART-escape",
+        uri: "reports/escape.md",
+        artifact_type: "report",
+        storage_class: "external",
+        content_hash: "0".repeat(64),
+      },
+    });
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "reconciled",
+      clean: true,
+    });
+    terminal();
+    const blockers = closeout(RUN).blockers.join("\n");
+    assert.match(blockers, /escapes the run directory through a symlink/);
+    // And crucially: NO hash comparison happened (no equality oracle).
+    assert.doesNotMatch(blockers, /does not match actual/);
+  });
+
+  it("fidelity hashing refuses oversized files visibly instead of slurping them", () => {
+    happyBase();
+    const big = join(tmpRoot, RUN, "reports", "huge.md");
+    mkdirSync(join(tmpRoot, RUN, "reports"), { recursive: true });
+    writeFileSync(big, Buffer.alloc(ledger.FIDELITY_HASH_MAX_BYTES + 1));
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_REGISTERED",
+      summary: "oversized artifact",
+      artifact: {
+        id: "ART-huge",
+        uri: "reports/huge.md",
+        artifact_type: "report",
+        storage_class: "external",
+        content_hash: "0".repeat(64),
+      },
+    });
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "reconciled",
+      clean: true,
+    });
+    terminal();
+    assert.match(
+      closeout(RUN).blockers.join("\n"),
+      /exceeds the \d+-byte fidelity-hash cap/
+    );
+  });
+
+  it("retired staleness is moot: MEMORY_RECONCILED clean:true accepts a run whose only stale artifact is RETIRED", () => {
+    happyBase();
+    register("ART-src", { content_hash: "aaa" });
+    register("ART-draft", { depends_on: ["ART-src"] });
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_UPDATED",
+      summary: "src changed",
+      artifact: { id: "ART-src", content_hash: "bbb" },
+    });
+    // ART-draft is now stale. Retiring it takes it out of service — retired
+    // artifacts cannot integrate (consumption is refused), so their staleness
+    // must not block reconciliation or closeout (C4 evt_00185 shape).
+    add({
+      scope_id: "TOS-006",
+      event_type: "ARTIFACT_RETIRED",
+      summary: "retire the stale draft",
+      artifact: { id: "ART-draft" },
+    });
+    assert.deepEqual(ledger.deriveArtifacts(RUN).stale, []);
+    add({
+      scope_id: "TOS-PROGRAM",
+      event_type: "MEMORY_RECONCILED",
+      summary: "reconciled",
+      clean: true,
+    });
+    terminal();
+    assert.equal(ledger.verifyRun(RUN).ok, true);
+    const result = closeout(RUN);
+    assert.doesNotMatch(result.blockers.join("\n"), /ART-draft/);
+  });
+});
+
 describe("owner-gate census (§24)", () => {
   it("classification vocabulary is controlled", () => {
     assert.throws(
