@@ -1,0 +1,16 @@
+{
+  "captured_at": "2026-08-10T20:02Z (notion-fetch of database 3b89673313e7816f8112d39b2d53aa62)",
+  "database": "View of Tasks (embedded on Command Center 3b89673313e78114b9afd915c61d78a5)",
+  "views_verbatim": [
+    {
+      "url": "view://3b896733-13e7-81ad-90d7-000c6fb7ece5",
+      "advancedFilter": {"filters": [], "operator": "and", "type": "group"},
+      "dataSourceUrl": "collection://06a44772-1ae8-4d9d-be70-30741b334b85",
+      "displayProperties": ["Scope ID", "Name", "Owner", "Execution Mode", "AI Executor", "Priority", "Status", "Execution State", "Work Tracked In", "Work Link", "Waiting On", "Proof / Result", "Updated"],
+      "name": "Tailered OS Execution Ledger",
+      "sorts": [{"direction": "ascending", "property": "Priority"}],
+      "type": "table"
+    }
+  ],
+  "note": "This is the ONLY view on the embedded database before mutation. Filter is EMPTY (shows whole company Tasks db)."
+}

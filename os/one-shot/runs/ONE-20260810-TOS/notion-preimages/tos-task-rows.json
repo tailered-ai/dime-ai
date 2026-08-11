@@ -1,0 +1,16 @@
+{
+  "captured_at": "2026-08-10 (SQL over collection://06a44772-1ae8-4d9d-be70-30741b334b85, Scope ID LIKE 'TOS-%')",
+  "purpose": "Pre-image of TOS task property values before delta-6 (Execution State option add) and delta-7 (TOS-003 Work Link). Used to verify no Execution State value is orphaned by the DDL.",
+  "rows": [
+    {"scope": "TOS-001", "url": "https://app.notion.com/3b89673313e781eb8382e16d156d0ced", "Status": "In progress", "Execution State": "Executing", "Priority": "P0", "Work Link": "https://github.com/tailered-ai/dime-ai/pull/500"},
+    {"scope": "TOS-002", "url": "https://app.notion.com/3b89673313e781a4be63de4a46c4cd73", "Status": "In progress", "Execution State": "Executing", "Priority": "P0", "Work Link": "https://app.notion.com/p/3b89673313e78114b9afd915c61d78a5"},
+    {"scope": "TOS-003", "url": "https://app.notion.com/3b89673313e781a0b259e6b7ec7b5509", "Status": "Not started", "Execution State": "Ready", "Priority": "P0", "Work Link": null},
+    {"scope": "TOS-004", "url": "https://app.notion.com/3b89673313e781bc982ae651c0b80747", "Status": "In progress", "Execution State": "Executing", "Priority": "P0", "Work Link": "https://app.notion.com/p/96228d0d4aca436e8527053a27f7472c"},
+    {"scope": "TOS-005", "url": "https://app.notion.com/3b89673313e781ae9516e95866a127a6", "Status": "Not started", "Execution State": "Ready", "Priority": "P1", "Work Link": null},
+    {"scope": "TOS-006", "url": "https://app.notion.com/3b89673313e781e9a2e5c5e703cba8d3", "Status": "Not started", "Execution State": "Ready", "Priority": "P0", "Work Link": "https://github.com/tailered-ai/dime-ai"},
+    {"scope": "TOS-007", "url": "https://app.notion.com/3b89673313e7813a99f6c53abd449bc3", "Status": "Not started", "Execution State": "Ready", "Priority": "P0", "Work Link": "https://github.com/tailered-ai/dime-ai"},
+    {"scope": "TOS-008", "url": "https://app.notion.com/3b89673313e7817bb99cc19133130e4c", "Status": "Not started", "Execution State": "Ready", "Priority": "P0", "Work Link": "https://app.notion.com/p/8673b8ac6f424acebc53b6cbf0698251"},
+    {"scope": "TOS-009", "url": "https://app.notion.com/3b89673313e7815aafcaeaebc32ea8dd", "Status": "Not started", "Execution State": "Ready", "Priority": "P1", "Work Link": "https://github.com/tailered-ai/dime-ai"},
+    {"scope": "TOS-010", "url": "https://app.notion.com/3b89673313e781abb3a5dd9ff9b9002c", "Status": "Not started", "Execution State": "Ready", "Priority": "P1", "Work Link": "https://github.com/tailered-ai/dime-ai/pull/496"}
+  ]
+}
