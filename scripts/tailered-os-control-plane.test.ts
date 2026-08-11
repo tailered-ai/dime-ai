@@ -33,7 +33,12 @@ describe("tailered-os control-plane manifest", () => {
       manifest.notion.databases.aiSystemsRegistry.id,
       CANONICAL.aiSystemsRegistry
     );
+    // OG-006: the committed manifest ships DISARMED. Three independent
+    // verification rounds failed the writer, so no live write authority is
+    // granted; the loader's evidence law (a bare true is a self-grant, a
+    // dormant grant is refused) is what makes a future arming reviewable.
     assert.equal(manifest.safety.notionWriteOperationsAuthorized, false);
+    assert.equal(manifest.safety.notionWriteAuthorization, undefined);
   });
 
   it("the four 2026-08-06 database ids are connector-verified with provenance", () => {
@@ -133,12 +138,77 @@ describe("tailered-os control-plane manifest", () => {
     );
   });
 
-  it("rejects a manifest that grants itself write authority", () => {
+  it("rejects a manifest that grants itself write authority (bare true, no owner grant)", () => {
     const bad = clone();
     bad.safety.notionWriteOperationsAuthorized = true;
+    delete bad.safety.notionWriteAuthorization;
+    assert.throws(() => validateControlPlaneManifest(bad), /self-grant/);
+  });
+
+  it("rejects malformed owner grants — wrong grantor, wrong actor, non-canonical decision, truthy non-boolean", () => {
+    const wrongGrantor = clone();
+    wrongGrantor.safety.notionWriteOperationsAuthorized = true;
+    wrongGrantor.safety.notionWriteAuthorization = {
+      decision: "https://app.notion.com/p/3b99673313e781229b85f35a0b9f2966",
+      grantedBy: "Fable 5",
+      grantedOn: "2026-08-11",
+      actor: "AI-10",
+      scope: "x",
+    };
     assert.throws(
-      () => validateControlPlaneManifest(bad),
-      /notionWriteOperationsAuthorized/
+      () => validateControlPlaneManifest(wrongGrantor),
+      /grantedBy must be PREZ/
+    );
+
+    const wrongActor = clone();
+    wrongActor.safety.notionWriteOperationsAuthorized = true;
+    wrongActor.safety.notionWriteAuthorization = {
+      decision: "https://app.notion.com/p/3b99673313e781229b85f35a0b9f2966",
+      grantedBy: "PREZ",
+      grantedOn: "2026-08-11",
+      actor: "AI-99",
+      scope: "x",
+    };
+    assert.throws(
+      () => validateControlPlaneManifest(wrongActor),
+      /actor must be AI-10/
+    );
+
+    const badDecision = clone();
+    badDecision.safety.notionWriteOperationsAuthorized = true;
+    badDecision.safety.notionWriteAuthorization = {
+      decision: "https://evil.example.com/fake",
+      grantedBy: "PREZ",
+      grantedOn: "2026-08-11",
+      actor: "AI-10",
+      scope: "x",
+    };
+    assert.throws(
+      () => validateControlPlaneManifest(badDecision),
+      /canonical Notion decision URL/
+    );
+
+    const truthy = clone();
+    (truthy.safety as any).notionWriteOperationsAuthorized = 1;
+    assert.throws(
+      () => validateControlPlaneManifest(truthy),
+      /strictly boolean/
+    );
+  });
+
+  it("rejects a dormant grant riding along while authority is false", () => {
+    const dormant = clone();
+    dormant.safety.notionWriteOperationsAuthorized = false;
+    dormant.safety.notionWriteAuthorization = {
+      decision: "https://app.notion.com/p/3b99673313e781229b85f35a0b9f2966",
+      grantedBy: "PREZ",
+      grantedOn: "2026-08-11",
+      actor: "AI-10",
+      scope: "x",
+    };
+    assert.throws(
+      () => validateControlPlaneManifest(dormant),
+      /no dormant grants/
     );
   });
 

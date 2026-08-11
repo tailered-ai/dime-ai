@@ -48,7 +48,7 @@ const ISO_DATE = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 // Cheap tripwire against credential-shaped values ever landing in the manifest.
 // Includes passworded connection URIs — the class .gitleaks.toml documents the
 // default rules missing — plus test/restricted key prefixes and JWT shape.
-const SECRETISH =
+export const SECRETISH =
   /(sk_live_|sk_test_|rk_live_|sk-ant-|ghp_[A-Za-z0-9]|github_pat_|xox[bpc]-|xapp-|AKIA[0-9A-Z]{16}|eyJ[A-Za-z0-9_-]{10,}|-----BEGIN|[a-z][a-z0-9+.-]*:\/\/[^/\s:@]+:[^@\s/]+@)/;
 
 function invariant(condition, message) {
@@ -262,15 +262,59 @@ export function validateControlPlaneManifest(manifest) {
     safety,
     [
       "notionWriteOperationsAuthorized",
+      "notionWriteAuthorization",
       "secretMaterialAllowed",
       "manualGithubMirroringAllowed",
     ],
     "safety"
   );
+  // OG-006 (2026-08-11): write authority is no longer const-false, but a bare
+  // `true` is still a SELF-grant and is refused — `true` is lawful only when
+  // accompanied by the owner's decision record, pinned here so the grant is
+  // evidence, not configuration. `false` must carry NO dormant grant.
   invariant(
-    safety.notionWriteOperationsAuthorized === false,
-    "safety.notionWriteOperationsAuthorized must be false"
+    typeof safety.notionWriteOperationsAuthorized === "boolean",
+    "safety.notionWriteOperationsAuthorized must be strictly boolean"
   );
+  if (safety.notionWriteOperationsAuthorized === true) {
+    const grant = safety.notionWriteAuthorization;
+    invariant(
+      grant && typeof grant === "object" && !Array.isArray(grant),
+      "safety.notionWriteOperationsAuthorized is true without safety.notionWriteAuthorization — a bare true is a self-grant and is refused"
+    );
+    assertOnlyKeys(
+      grant,
+      ["decision", "grantedBy", "grantedOn", "actor", "scope"],
+      "safety.notionWriteAuthorization"
+    );
+    invariant(
+      /^https:\/\/app\.notion\.com\/p\/[0-9a-f]{32}$/.test(
+        String(grant.decision)
+      ),
+      "safety.notionWriteAuthorization.decision must be a canonical Notion decision URL"
+    );
+    invariant(
+      grant.grantedBy === "PREZ",
+      "safety.notionWriteAuthorization.grantedBy must be PREZ"
+    );
+    invariant(
+      ISO_DATE.test(String(grant.grantedOn)),
+      "safety.notionWriteAuthorization.grantedOn must be a calendar date"
+    );
+    invariant(
+      grant.actor === "AI-10",
+      "safety.notionWriteAuthorization.actor must be AI-10 (the only approved writer actor)"
+    );
+    invariant(
+      typeof grant.scope === "string" && grant.scope.length > 0,
+      "safety.notionWriteAuthorization.scope must state the approved write scope"
+    );
+  } else {
+    invariant(
+      safety.notionWriteAuthorization === undefined,
+      "safety.notionWriteAuthorization must be absent while write authority is false — no dormant grants"
+    );
+  }
   invariant(
     safety.secretMaterialAllowed === false,
     "safety.secretMaterialAllowed must be false"

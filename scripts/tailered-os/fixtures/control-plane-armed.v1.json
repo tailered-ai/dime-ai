@@ -1,0 +1,118 @@
+{
+  "$schema": "./tailered-os-control-plane.schema.json",
+  "schemaVersion": 1,
+  "kind": "tailered-os-control-plane",
+  "authorityBoundaries": {
+    "notion": "Organizational control plane: goals, initiatives, projects, tasks, ownership, decision authority, decisions, risks, releases narrative, knowledge, AI-system governance metadata, learning, next actions.",
+    "github": "Source code, branches, commits, issues, pull requests, diffs, reviews, CI and test evidence, implementation history, code-level rollback state.",
+    "railway": "Live Dime runtime and deployment truth. Merging dime-ai main has production consequences.",
+    "stripe": "Billing and payment truth.",
+    "credentialBrokers": "1Password + approved device-only brokers own secrets. Secrets never enter Notion, GitHub docs, logs, PR bodies, evidence, or AI context."
+  },
+  "notion": {
+    "pageUrlTemplate": "https://app.notion.com/p/{id}",
+    "workspaceRootPage": {
+      "name": "Tailered Team Home",
+      "id": "3b49673313e781569b59ff6f9ea0e4f1",
+      "verified": true,
+      "verifiedOn": "2026-08-10",
+      "source": "owner"
+    },
+    "taileredOsProject": {
+      "name": "Tailered OS (canonical project)",
+      "id": "3b89673313e7814da8a4ccfa9a21c969",
+      "verified": true,
+      "verifiedOn": "2026-08-10",
+      "source": "owner"
+    },
+    "commandCenter": {
+      "name": "Tailered OS Command Center",
+      "id": "3b89673313e78114b9afd915c61d78a5",
+      "verified": true,
+      "verifiedOn": "2026-08-10",
+      "source": "owner"
+    },
+    "communicationStandard": {
+      "name": "Tailered OS Communication and Comprehension Standard",
+      "id": "3b89673313e78126896ae70b5f756795",
+      "verified": true,
+      "verifiedOn": "2026-08-10",
+      "source": "owner"
+    },
+    "executionContract": {
+      "name": "Tailered OS Claude Code Execution Contract",
+      "id": "3b89673313e78145bcb8fc9552bd727e",
+      "verified": true,
+      "verifiedOn": "2026-08-10",
+      "source": "owner"
+    },
+    "databases": {
+      "tasks": {
+        "name": "Tasks",
+        "id": "96228d0d4aca436e8527053a27f7472c",
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "owner"
+      },
+      "projects": {
+        "name": "Projects",
+        "id": "888202aaf938497a91075121646e4cb4",
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "owner"
+      },
+      "aiSystemsRegistry": {
+        "name": "AI Systems Registry",
+        "id": "8673b8ac6f424acebc53b6cbf0698251",
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "owner"
+      },
+      "decisions": {
+        "name": "Decisions",
+        "id": "46ec53110ccc496296a7438203324d21",
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "Notion connector, 2026-08-10 (notion-fetch of the '07. Company Databases' index): database page id confirmed live. This manifest pins DATABASE PAGE ids; the same database's data-source id is e987f7e3-59bd-4c36-9a1d-253c6840b4d9 (use it for query-data-sources)."
+      },
+      "risks": {
+        "name": "Risks",
+        "id": "a4a37320164d408c8f0df5dfe7cb2ba1",
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "Notion connector, 2026-08-10 (notion-fetch of the '07. Company Databases' index): database page id confirmed live. This manifest pins DATABASE PAGE ids; the same database's data-source id is e6538397-ee1b-407e-bd7e-5a9e80d9b529 (use it for query-data-sources)."
+      },
+      "releases": {
+        "name": "Releases",
+        "id": "f86c2987ec7e43dfa71b2dce14664467",
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "Notion connector, 2026-08-10 (notion-fetch of the '07. Company Databases' index): database page id confirmed live. This manifest pins DATABASE PAGE ids; the same database's data-source id is 1eebcf06-a0c3-4aba-9bb8-d550ad37961d (use it for query-data-sources)."
+      },
+      "knowledge": {
+        "name": "Knowledge",
+        "id": "694ec08d2e544cc797157a24824bbd1d",
+        "verified": true,
+        "verifiedOn": "2026-08-10",
+        "source": "Notion connector, 2026-08-10 (notion-fetch of the '07. Company Databases' index): database page id confirmed live. This manifest pins DATABASE PAGE ids; the same database's data-source id is 456f7bbc-8f8a-4648-95ca-b561ac68bd11 (use it for query-data-sources)."
+      }
+    }
+  },
+  "github": {
+    "repository": "tailered-ai/dime-ai",
+    "taileredOsBoundary": "platform/tailered-os/",
+    "foundationPullRequest": 496
+  },
+  "safety": {
+    "notionWriteOperationsAuthorized": true,
+    "notionWriteAuthorization": {
+      "decision": "https://app.notion.com/p/3b99673313e781229b85f35a0b9f2966",
+      "grantedBy": "PREZ",
+      "grantedOn": "2026-08-11",
+      "actor": "AI-10",
+      "scope": "TEST FIXTURE ONLY \u2014 exercises the writer's armed path in vitest. The canonical manifest is DISARMED; arming it is a separate owner-reviewed PR that must first remove the manifest_path test seam."
+    },
+    "secretMaterialAllowed": false,
+    "manualGithubMirroringAllowed": false
+  }
+}
