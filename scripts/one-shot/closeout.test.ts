@@ -50,8 +50,8 @@ beforeEach(() => {
   );
 });
 
-const add = (partial: object) =>
-  ledger.appendEvent(RUN, { actor: ACTOR, ...partial });
+const add = (partial: any) =>
+  ledger.appendEvent(RUN, { actor: ACTOR, label: "SUPPORTED", ...partial });
 
 const DELIVERED_OK = {
   delivered: true,
@@ -716,5 +716,184 @@ describe("falsification re-battery — audited v1 bypasses now fail closed", () 
     } finally {
       process.env.ONE_SHOT_RUNS_ROOT = saved;
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ASSURANCE-LAYER FALSIFICATION BATTERY (Campaign Three, Laws 14-18).
+// Each attack proves an assurance control fails closed; permanent regressions.
+// ---------------------------------------------------------------------------
+describe("assurance layer (v3) — falsification battery", () => {
+  it("Law 14: an event without an epistemic label is refused at append", () => {
+    assert.throws(
+      () =>
+        ledger.appendEvent(RUN, {
+          actor: ACTOR,
+          scope_id: "LANE-0",
+          event_type: "RUN_STARTED",
+          summary: "no label",
+        }),
+      /require exactly one epistemic label/
+    );
+  });
+
+  it("Law 14: a PROVEN label with an unresolvable proof reference is refused at verify", () => {
+    add({
+      scope_id: "LANE-0",
+      event_type: "RUN_STARTED",
+      summary: "bogus proof",
+      label: "PROVEN",
+      evidence: [{ type: "repo", ref: "does/not/exist/anywhere.md" }],
+    });
+    const result = ledger.verifyRun(RUN);
+    assert.equal(result.ok, false);
+    assert.match(
+      result.errors.join("\n"),
+      /PROVEN claim attaches an unresolvable repo reference/
+    );
+  });
+
+  it("Law 18: a SUBAGENT_STARTED without a scope_declaration is refused", () => {
+    assert.throws(
+      () =>
+        add({
+          scope_id: "LANE-0",
+          event_type: "SUBAGENT_STARTED",
+          actor: { type: "agent", name: "ghost", role: "reviewer" },
+          summary: "no scope",
+        }),
+      /must declare a worktree\/file scope_declaration/
+    );
+  });
+
+  it("Law 16: STALL_SUSPECTED requires a named threshold; INTERVENTION requires a declared choice", () => {
+    assert.throws(
+      () =>
+        add({
+          scope_id: "LANE-0",
+          event_type: "STALL_SUSPECTED",
+          summary: "stall",
+        }),
+      /must name the breached threshold/
+    );
+    assert.throws(
+      () =>
+        add({
+          scope_id: "LANE-0",
+          event_type: "INTERVENTION",
+          intervention: "vibe",
+          summary: "bad choice",
+        }),
+      /one of the declared choices/
+    );
+  });
+
+  it("Law 17: DRIFT requires the mismatched instruction_digest", () => {
+    assert.throws(
+      () =>
+        add({
+          scope_id: "LANE-0",
+          event_type: "DRIFT",
+          summary: "drift with no digest",
+        }),
+      /must carry the mismatched instruction_digest/
+    );
+  });
+
+  it("Law 18: CONFLICT requires the overlapping conflict_scope", () => {
+    assert.throws(
+      () =>
+        add({
+          scope_id: "LANE-0",
+          event_type: "CONFLICT",
+          summary: "conflict with no scope",
+        }),
+      /must name the overlapping conflict_scope/
+    );
+  });
+
+  it("Law 3: a dangling SUBAGENT_STARTED (no terminal) blocks closeout; a terminal clears it", () => {
+    completeHappyRun();
+    add({
+      scope_id: "LANE-0",
+      event_type: "SUBAGENT_STARTED",
+      actor: { type: "agent", name: "worker-1", role: "implementation-owner" },
+      scope_declaration: "wt-x/scripts/**",
+      summary: "dispatched",
+    });
+    let result = closeout(RUN);
+    assert.equal(result.complete, false);
+    assert.match(result.blockers.join("\n"), /dangling subagent dispatch/);
+    add({
+      scope_id: "LANE-0",
+      event_type: "SUBAGENT_ABORTED",
+      actor: { type: "agent", name: "worker-1", role: "implementation-owner" },
+      summary: "died on session limit; main loop took over",
+    });
+    result = closeout(RUN);
+    assert.ok(!result.blockers.join("\n").includes("dangling subagent"));
+    assert.equal(
+      result.claims.interaction_graph["worker-1"].terminal,
+      "SUBAGENT_ABORTED"
+    );
+    assert.equal(
+      result.claims.interaction_graph["worker-1"].scope,
+      "wt-x/scripts/**"
+    );
+  });
+
+  it("Law 14: an open REFUTED claim blocks; a correlated correction clears it", () => {
+    completeHappyRun();
+    const refuted = add({
+      scope_id: "LANE-0",
+      event_type: "SUBAGENT_FINDING",
+      actor: { type: "agent", name: "refuter", role: "reviewer" },
+      summary: "claimed X but it is false",
+      label: "REFUTED",
+    });
+    let result = closeout(RUN);
+    assert.equal(result.complete, false);
+    assert.match(result.blockers.join("\n"), /open REFUTED claim/);
+    add({
+      scope_id: "LANE-0",
+      event_type: "CONTEXT_VERIFIED",
+      correlation_id: refuted.event_id,
+      summary: "corrected: the claim was re-checked and restated true",
+      label: "SUPPORTED",
+    });
+    result = closeout(RUN);
+    assert.ok(!result.blockers.join("\n").includes("open REFUTED"));
+  });
+
+  it("Law 12: closeout emits denominators (not prose)", () => {
+    completeHappyRun();
+    const result = closeout(RUN);
+    assert.match(
+      result.denominators.scopes_terminal_of_required,
+      /^\d+ of \d+$/
+    );
+    assert.match(result.denominators.gates_pass_of_required, /^\d+ of \d+$/);
+    assert.equal(typeof result.denominators.owner_gates_open, "number");
+  });
+
+  it("backward compatibility: both v1 and v2 events still verify (no label required below v3)", () => {
+    // v2-shaped event: appendEvent now stamps v3, but a hand-written v2 event
+    // (no label) must still pass verify for historical runs.
+    const dir = join(tmpRoot, RUN);
+    const e1 = {
+      schema_version: 2,
+      event_id: "evt_00001",
+      run_id: RUN,
+      sequence: 1,
+      timestamp: "2099-01-01T00:00:00Z",
+      scope_id: "TOS-PROGRAM",
+      event_type: "RUN_STARTED",
+      actor: ACTOR,
+      summary: "v2 no label",
+      previous_event_hash: null,
+    } as any;
+    e1.event_hash = ledger.hashEvent(e1, null);
+    writeFileSync(join(dir, "events.jsonl"), JSON.stringify(e1) + "\n");
+    assert.equal(ledger.verifyRun(RUN).ok, true);
   });
 });

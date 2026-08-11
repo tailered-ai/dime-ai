@@ -77,6 +77,17 @@ export const EVENT_TYPES = Object.freeze([
   "SUBAGENT_FINDING",
   "SUBAGENT_COMPLETED",
   "SUBAGENT_DISAGREEMENT",
+  // subagent terminal vocabulary (Campaign Three, Law 3 / 2R v2.1): a dispatch
+  // that did not COMPLETE ends in exactly one of these, never silently dangles.
+  "SUBAGENT_FAILED",
+  "SUBAGENT_CANCELLED",
+  "SUBAGENT_ABORTED",
+  "SUBAGENT_SUPERSEDED",
+  // assurance layer (Campaign Three, Laws 16-18)
+  "STALL_SUSPECTED",
+  "INTERVENTION",
+  "DRIFT",
+  "CONFLICT",
   // implementation
   "CHANGE_STARTED",
   "CHANGE_APPLIED",
@@ -173,7 +184,25 @@ export const ACTOR_TYPES = Object.freeze(["agent", "human", "system"]);
 // stamp version 2 and carry the delivery contract; version-1 events in
 // committed historical runs stay valid under their original rules — backward
 // verification of v1 runs is a hard requirement.
-export const EVENT_SCHEMA_VERSION = 2;
+export const EVENT_SCHEMA_VERSION = 3;
+// Epistemic labels (Campaign Three, Law 14): every v3 event carries exactly one.
+// A PROVEN label must attach a resolvable proof; a REFUTED label blocks its scope.
+export const EPISTEMIC_LABELS = Object.freeze([
+  "PROVEN",
+  "SUPPORTED",
+  "INFERRED",
+  "UNKNOWN",
+  "BLOCKED",
+  "REFUTED",
+]);
+// Subagent dispatches must reach exactly one terminal (Law 3).
+export const SUBAGENT_TERMINALS = Object.freeze([
+  "SUBAGENT_COMPLETED",
+  "SUBAGENT_FAILED",
+  "SUBAGENT_CANCELLED",
+  "SUBAGENT_ABORTED",
+  "SUBAGENT_SUPERSEDED",
+]);
 // "Delivered is a field, not a vibe": true means delivered-with-proof; every
 // other value is an explicit non-delivery that needs an owner decision_ref to
 // count as terminal.
@@ -332,8 +361,8 @@ export function validateManifest(manifest) {
 export function validateEvent(event, manifest) {
   invariant(event && typeof event === "object", "event must be an object");
   invariant(
-    event.schema_version === 1 || event.schema_version === 2,
-    "event.schema_version must be 1 (historical) or 2"
+    [1, 2, 3].includes(event.schema_version),
+    "event.schema_version must be 1 (historical), 2, or 3"
   );
   invariant(
     EVENT_ID.test(event.event_id ?? ""),
@@ -501,6 +530,64 @@ export function validateEvent(event, manifest) {
       }
     }
   }
+  // ---- v3 assurance contract (Campaign Three, Laws 14-18) ----
+  if (event.schema_version >= 3) {
+    invariant(
+      EPISTEMIC_LABELS.includes(event.label),
+      `v3 events require exactly one epistemic label in ${EPISTEMIC_LABELS.join("|")} (Law 14)`
+    );
+    if (event.label === "PROVEN") {
+      invariant(
+        Array.isArray(event.evidence) && event.evidence.length > 0,
+        "a PROVEN claim must attach at least one evidence reference (Law 14)"
+      );
+    }
+    // Law 18: every dispatch declares its worktree/file scope so the kernel can
+    // derive the interaction graph and flag write conflicts.
+    if (event.event_type === "SUBAGENT_STARTED") {
+      invariant(
+        typeof event.scope_declaration === "string" &&
+          event.scope_declaration.length > 0,
+        "SUBAGENT_STARTED must declare a worktree/file scope_declaration (Law 18)"
+      );
+    }
+    // Law 16: a stall/loop signal names which threshold it breached.
+    if (event.event_type === "STALL_SUSPECTED") {
+      invariant(
+        typeof event.threshold === "string" && event.threshold.length > 0,
+        "STALL_SUSPECTED must name the breached threshold (Law 16)"
+      );
+    }
+    if (event.event_type === "INTERVENTION") {
+      invariant(
+        [
+          "continue",
+          "stop",
+          "retry",
+          "transfer-context",
+          "reassign",
+          "yield-ownership",
+        ].includes(event.intervention),
+        "INTERVENTION must record one of the declared choices (Law 16)"
+      );
+    }
+    // Law 17: a DRIFT names the pinned digest that mismatched.
+    if (event.event_type === "DRIFT") {
+      invariant(
+        typeof event.instruction_digest === "string" &&
+          event.instruction_digest.length > 0,
+        "DRIFT must carry the mismatched instruction_digest (Law 17)"
+      );
+    }
+    // Law 18: a CONFLICT names the overlapping scope.
+    if (event.event_type === "CONFLICT") {
+      invariant(
+        typeof event.conflict_scope === "string" &&
+          event.conflict_scope.length > 0,
+        "CONFLICT must name the overlapping conflict_scope (Law 18)"
+      );
+    }
+  }
   invariant(
     !SECRETISH.test(JSON.stringify(event)),
     "event contains a credential-shaped value — secrets never enter the ledger"
@@ -666,6 +753,7 @@ export function verifyRun(runId) {
   const startedScopes = new Set();
   const startedGstack = new Set();
   const startedSubagents = new Set();
+  const terminatedSubagents = new Set();
   let legacyGstackStarted = false;
   let previousHash = null;
   let previousTimestamp = null;
@@ -774,6 +862,22 @@ export function verifyRun(runId) {
     }
     if (event.event_type === "SUBAGENT_STARTED")
       startedSubagents.add(event.actor?.name);
+    if (SUBAGENT_TERMINALS.includes(event.event_type))
+      terminatedSubagents.add(event.actor?.name);
+    // Law 14: a PROVEN claim whose proof-typed evidence does not resolve is
+    // refused — the label is only as strong as its attached reference.
+    if (event.schema_version >= 3 && event.label === "PROVEN") {
+      for (const item of event.evidence ?? []) {
+        if (
+          PROOF_TYPES.includes(item.type) &&
+          !resolveProofRef(item, runId, events)
+        ) {
+          errors.push(
+            `${at}: PROVEN claim attaches an unresolvable ${item.type} reference "${item.ref}"`
+          );
+        }
+      }
+    }
   });
   const stats = {
     run_id: runId,
@@ -785,6 +889,9 @@ export function verifyRun(runId) {
       id,
       severity,
     })),
+    dangling_subagents: [...startedSubagents].filter(
+      name => !terminatedSubagents.has(name)
+    ),
   };
   return { ok: errors.length === 0, errors, stats };
 }

@@ -57,6 +57,7 @@ const EVENT = {
   event_type: "RUN_STARTED" as const,
   actor: { type: "agent", name: "Fable 5", role: "integration-owner" },
   summary: "Campaign started.",
+  label: "SUPPORTED" as const,
 };
 
 describe("one-shot ledger", () => {

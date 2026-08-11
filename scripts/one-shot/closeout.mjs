@@ -256,6 +256,32 @@ export function closeout(runId) {
         )} — external-blocking is a valid terminal condition ONLY when everything else is done`
     );
   }
+  // Law 3 / 2R v2.1: a subagent dispatched and never terminated is a dangling
+  // execution — closeout blocks until it reaches a terminal event.
+  if ((integrity.stats?.dangling_subagents ?? []).length > 0) {
+    blockers.push(
+      `dangling subagent dispatch(es) with no terminal event: ${integrity.stats.dangling_subagents.join(", ")} — each must reach SUBAGENT_COMPLETED/FAILED/CANCELLED/ABORTED/SUPERSEDED`
+    );
+  }
+  // Law 14: an open REFUTED claim blocks its scope until a later correlated
+  // event corrects it.
+  const refutedOpen = [];
+  const correctedRefutations = new Set(
+    events.filter(e => e.correlation_id).map(e => e.correlation_id)
+  );
+  for (const event of events) {
+    if (
+      event.label === "REFUTED" &&
+      !correctedRefutations.has(event.event_id)
+    ) {
+      refutedOpen.push(event.event_id);
+    }
+  }
+  if (refutedOpen.length > 0) {
+    blockers.push(
+      `open REFUTED claim(s) with no correcting event: ${refutedOpen.join(", ")} (Law 14)`
+    );
+  }
   if (metrics.notion_writes_committed > metrics.notion_writes_verified) {
     blockers.push(
       `${metrics.notion_writes_committed - metrics.notion_writes_verified} Notion write(s) committed without a recorded re-read verification`
@@ -283,6 +309,34 @@ export function closeout(runId) {
     if (event.merge_sha) claim.merge_sha = event.merge_sha;
     claim.last_event = event.event_type;
   }
+  // Law 14: epistemic-label census across the whole run.
+  const labelCounts = {};
+  for (const event of events) {
+    if (event.label)
+      labelCounts[event.label] = (labelCounts[event.label] ?? 0) + 1;
+  }
+  // Law 18: the agent-interaction graph — each dispatch, its declared scope,
+  // its terminal, and any CONFLICT flags raised.
+  const subagentTerminals = new Set([
+    "SUBAGENT_COMPLETED",
+    "SUBAGENT_FAILED",
+    "SUBAGENT_CANCELLED",
+    "SUBAGENT_ABORTED",
+    "SUBAGENT_SUPERSEDED",
+  ]);
+  const interactionGraph = {};
+  for (const event of events) {
+    const name = event.actor?.name;
+    if (event.event_type === "SUBAGENT_STARTED") {
+      interactionGraph[name] = {
+        scope: event.scope_declaration ?? null,
+        terminal: null,
+      };
+    }
+    if (subagentTerminals.has(event.event_type) && interactionGraph[name]) {
+      interactionGraph[name].terminal = event.event_type;
+    }
+  }
   const claims = {
     prs: prClaims,
     terminal_scopes: terminalScopes.map(scope => {
@@ -296,16 +350,35 @@ export function closeout(runId) {
         authority_plane: completion.authority_plane ?? null,
         proof: completion.proof ?? null,
         decision_ref: completion.decision_ref ?? null,
+        label: completion.label ?? null,
       };
     }),
     owner_gates: metrics.owner_gates,
     legacy_terminalizations: legacyTerminalizations,
+    epistemic_labels: labelCounts,
+    interaction_graph: interactionGraph,
+    conflicts: events
+      .filter(e => e.event_type === "CONFLICT")
+      .map(e => e.conflict_scope),
+    interventions: events
+      .filter(e => e.event_type === "INTERVENTION")
+      .map(e => ({ choice: e.intervention, summary: e.summary })),
+  };
+  // Law 12: denominators emitted, never prosed.
+  const requiredTos = requiredScopes.length;
+  const denominators = {
+    scopes_terminal_of_required: `${terminalScopes.length} of ${requiredTos}`,
+    gates_pass_of_required: `${manifest.required_gates.filter(g => gateState.get(g) === "PASS" || gateState.get(g) === "NOT_APPLICABLE").length} of ${manifest.required_gates.length}`,
+    gstack_accounted_of_required: `${manifest.required_gstack.length - unaccountedGstack.length} of ${manifest.required_gstack.length}`,
+    owner_gates_open: metrics.owner_gates_open,
+    findings_open_of_total: `${metrics.findings_open} of ${metrics.findings_total}`,
   };
   return {
     run_id: runId,
     complete: blockers.length === 0 && terminalRunEvent,
     terminal_run_event_recorded: terminalRunEvent,
     blockers,
+    denominators,
     claims,
     // External tail anchor (FIND-LANE0-0002): verify proves chain linearity but
     // cannot detect deletion of the FINAL lines. Quote these two values in the
