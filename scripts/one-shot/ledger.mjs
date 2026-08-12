@@ -12,9 +12,13 @@
 import { createHash } from "node:crypto";
 import {
   appendFileSync,
+  closeSync,
   existsSync,
+  fstatSync,
   mkdirSync,
+  openSync,
   readFileSync,
+  realpathSync,
   rmdirSync,
   writeFileSync,
 } from "node:fs";
@@ -799,8 +803,31 @@ export function validateEvent(event, manifest) {
 // file INSIDE the repo, not any path the process can stat.
 function isContained(parent, child) {
   const rel = relative(parent, child);
-  return rel.length > 0 && !rel.startsWith("..") && !isAbsolute(rel);
+  if (rel.length === 0 || rel.startsWith("..") || isAbsolute(rel)) return false;
+  // Lexical containment can be defeated by a symlink planted inside the tree
+  // (CSO MEDIUM-1): when the target exists, re-check against physical paths so
+  // a contained-looking link cannot read or attest bytes outside the root.
+  if (existsSync(child)) {
+    try {
+      const realChild = realpathSync(child);
+      const realParent = existsSync(parent) ? realpathSync(parent) : parent;
+      const realRel = relative(realParent, realChild);
+      if (
+        realRel.length === 0 ||
+        realRel.startsWith("..") ||
+        isAbsolute(realRel)
+      )
+        return false;
+    } catch {
+      return false; // unresolvable link chain: fail closed
+    }
+  }
+  return true;
 }
+
+// CSO MEDIUM-2: fidelity hashing slurps the file — cap it so a huge target
+// cannot OOM the evidence CLI. Evidence artifacts are documents, not datasets.
+export const FIDELITY_HASH_MAX_BYTES = 32 * 1024 * 1024;
 
 export function resolveProofRef(proof, runId, events) {
   if (!proof || !PROOF_TYPES.includes(proof.type)) return false;
@@ -939,7 +966,9 @@ export function appendEvent(runId, partial) {
         `memory contract violation refused at append: ${newProblems.join("; ")}`
       );
       if (event.event_type === "MEMORY_RECONCILED" && event.clean === true) {
-        const staleNow = [...after.registry.values()].filter(a => a.stale);
+        const staleNow = [...after.registry.values()].filter(
+          a => a.stale && !["RETIRED", "SUPERSEDED"].includes(a.lifecycle_state)
+        );
         invariant(
           staleNow.length === 0,
           `MEMORY_RECONCILED clean:true refused: ${staleNow.length} stale artifact(s) outstanding (${staleNow.map(a => a.id).join(", ")}) — reconcile them or record clean:false`
@@ -1221,23 +1250,42 @@ export function deriveArtifacts(runId) {
     a => !["RETIRED", "SUPERSEDED"].includes(a.lifecycle_state)
   );
   const checkFile = (artifact, root, resolved) => {
-    if (!existsSync(resolved)) {
+    // Existence, size cap, and hash all read through ONE open descriptor so
+    // the bytes cannot be swapped between check and use (js/file-system-race).
+    let fd;
+    try {
+      fd = openSync(resolved, "r");
+    } catch {
       fidelityDefects.push(
         `${artifact.id}: uri "${artifact.uri}" does not exist under its ${artifact.storage_class} root`
       );
       return;
     }
-    // Only sha256-shaped declarations are checkable against bytes; other hash
-    // formats (short ids, non-sha digests) remain a trust boundary.
-    if (artifact.content_hash && /^[0-9a-f]{64}$/.test(artifact.content_hash)) {
-      const actual = createHash("sha256")
-        .update(readFileSync(resolved))
-        .digest("hex");
-      if (actual !== artifact.content_hash) {
-        fidelityDefects.push(
-          `${artifact.id}: declared content_hash ${artifact.content_hash.slice(0, 12)}… does not match actual ${actual.slice(0, 12)}… for "${artifact.uri}"`
-        );
+    try {
+      // Only sha256-shaped declarations are checkable against bytes; other
+      // hash formats (short ids, non-sha digests) remain a trust boundary.
+      if (
+        artifact.content_hash &&
+        /^[0-9a-f]{64}$/.test(artifact.content_hash)
+      ) {
+        const size = fstatSync(fd).size;
+        if (size > FIDELITY_HASH_MAX_BYTES) {
+          fidelityDefects.push(
+            `${artifact.id}: uri "${artifact.uri}" is ${size} bytes — exceeds the ${FIDELITY_HASH_MAX_BYTES}-byte fidelity-hash cap (CSO MEDIUM-2); evidence artifacts are documents, not datasets`
+          );
+          return;
+        }
+        const actual = createHash("sha256")
+          .update(readFileSync(fd))
+          .digest("hex");
+        if (actual !== artifact.content_hash) {
+          fidelityDefects.push(
+            `${artifact.id}: declared content_hash ${artifact.content_hash.slice(0, 12)}… does not match actual ${actual.slice(0, 12)}… for "${artifact.uri}"`
+          );
+        }
       }
+    } finally {
+      closeSync(fd);
     }
   };
   for (const artifact of live) {
@@ -1253,7 +1301,20 @@ export function deriveArtifacts(runId) {
     } else if (artifact.storage_class === "external") {
       const root = runDir(runId);
       const resolved = resolvePath(root, artifact.uri);
-      if (isContained(root, resolved)) checkFile(artifact, root, resolved);
+      const lexicalRel = relative(root, resolved);
+      const lexicallyInside =
+        lexicalRel.length > 0 &&
+        !lexicalRel.startsWith("..") &&
+        !isAbsolute(lexicalRel);
+      if (lexicallyInside && !isContained(root, resolved)) {
+        // Looks inside the run dir but physically escapes through a symlink —
+        // flagged, never silently skipped (CSO MEDIUM-1).
+        fidelityDefects.push(
+          `${artifact.id}: uri "${artifact.uri}" escapes the run directory through a symlink`
+        );
+      } else if (lexicallyInside) {
+        checkFile(artifact, root, resolved);
+      }
     }
   }
   const uriOwners = new Map();
@@ -1276,8 +1337,13 @@ export function deriveArtifacts(runId) {
       acc[a.lifecycle_state] = (acc[a.lifecycle_state] ?? 0) + 1;
       return acc;
     }, {}),
+    // RETIRED/SUPERSEDED artifacts are out of service — they cannot integrate
+    // (consumption after retirement is refused), so their staleness is moot
+    // and must not block a run that correctly retired them.
     stale: artifacts
-      .filter(a => a.stale)
+      .filter(
+        a => a.stale && !["RETIRED", "SUPERSEDED"].includes(a.lifecycle_state)
+      )
       .map(a => ({ id: a.id, cause: a.stale_cause })),
     stale_consumptions: artifacts.flatMap(a =>
       a.consumers
@@ -1793,7 +1859,9 @@ export function verifyRun(runId) {
     ) {
       const upToHere = events.slice(0, index + 1);
       const { registry, problems } = foldArtifacts(upToHere);
-      const staleNow = [...registry.values()].filter(a => a.stale);
+      const staleNow = [...registry.values()].filter(
+        a => a.stale && !["RETIRED", "SUPERSEDED"].includes(a.lifecycle_state)
+      );
       if (staleNow.length > 0) {
         errors.push(
           `${at}: MEMORY_RECONCILED claims clean:true with ${staleNow.length} stale artifact(s) outstanding: ${staleNow.map(a => a.id).join(", ")}`

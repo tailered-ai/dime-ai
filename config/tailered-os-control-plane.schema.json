@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://aisportsbettingmodels.com/schemas/tailered-os-control-plane.v1.json",
   "title": "Tailered OS control plane v1",
-  "description": "Stable identifiers and authority metadata for the Tailered OS organizational control plane. Documentation schema in the style of dime-agent-access.schema.json — real enforcement is scripts/tailered-os-control-plane.mjs plus its vitest suite. Contains identifiers only, never dynamic company data and never secrets.",
+  "description": "Stable identifiers and authority metadata for the Tailered OS organizational control plane. Documentation schema in the style of dime-agent-access.schema.json \u2014 real enforcement is scripts/tailered-os-control-plane.mjs plus its vitest suite. Contains identifiers only, never dynamic company data and never secrets.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -15,9 +15,15 @@
     "safety"
   ],
   "properties": {
-    "$schema": { "const": "./tailered-os-control-plane.schema.json" },
-    "schemaVersion": { "const": 1 },
-    "kind": { "const": "tailered-os-control-plane" },
+    "$schema": {
+      "const": "./tailered-os-control-plane.schema.json"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "tailered-os-control-plane"
+    },
     "authorityBoundaries": {
       "type": "object",
       "additionalProperties": false,
@@ -29,11 +35,26 @@
         "credentialBrokers"
       ],
       "properties": {
-        "notion": { "type": "string", "minLength": 1 },
-        "github": { "type": "string", "minLength": 1 },
-        "railway": { "type": "string", "minLength": 1 },
-        "stripe": { "type": "string", "minLength": 1 },
-        "credentialBrokers": { "type": "string", "minLength": 1 }
+        "notion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "github": {
+          "type": "string",
+          "minLength": 1
+        },
+        "railway": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stripe": {
+          "type": "string",
+          "minLength": 1
+        },
+        "credentialBrokers": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "notion": {
@@ -49,12 +70,24 @@
         "databases"
       ],
       "properties": {
-        "pageUrlTemplate": { "const": "https://app.notion.com/p/{id}" },
-        "workspaceRootPage": { "$ref": "#/$defs/notionNode" },
-        "taileredOsProject": { "$ref": "#/$defs/notionNode" },
-        "commandCenter": { "$ref": "#/$defs/notionNode" },
-        "communicationStandard": { "$ref": "#/$defs/notionNode" },
-        "executionContract": { "$ref": "#/$defs/notionNode" },
+        "pageUrlTemplate": {
+          "const": "https://app.notion.com/p/{id}"
+        },
+        "workspaceRootPage": {
+          "$ref": "#/$defs/notionNode"
+        },
+        "taileredOsProject": {
+          "$ref": "#/$defs/notionNode"
+        },
+        "commandCenter": {
+          "$ref": "#/$defs/notionNode"
+        },
+        "communicationStandard": {
+          "$ref": "#/$defs/notionNode"
+        },
+        "executionContract": {
+          "$ref": "#/$defs/notionNode"
+        },
         "databases": {
           "type": "object",
           "additionalProperties": false,
@@ -68,13 +101,27 @@
             "knowledge"
           ],
           "properties": {
-            "tasks": { "$ref": "#/$defs/notionNode" },
-            "projects": { "$ref": "#/$defs/notionNode" },
-            "aiSystemsRegistry": { "$ref": "#/$defs/notionNode" },
-            "decisions": { "$ref": "#/$defs/notionNode" },
-            "risks": { "$ref": "#/$defs/notionNode" },
-            "releases": { "$ref": "#/$defs/notionNode" },
-            "knowledge": { "$ref": "#/$defs/notionNode" }
+            "tasks": {
+              "$ref": "#/$defs/notionNode"
+            },
+            "projects": {
+              "$ref": "#/$defs/notionNode"
+            },
+            "aiSystemsRegistry": {
+              "$ref": "#/$defs/notionNode"
+            },
+            "decisions": {
+              "$ref": "#/$defs/notionNode"
+            },
+            "risks": {
+              "$ref": "#/$defs/notionNode"
+            },
+            "releases": {
+              "$ref": "#/$defs/notionNode"
+            },
+            "knowledge": {
+              "$ref": "#/$defs/notionNode"
+            }
           }
         }
       }
@@ -84,9 +131,15 @@
       "additionalProperties": false,
       "required": ["repository", "taileredOsBoundary", "foundationPullRequest"],
       "properties": {
-        "repository": { "const": "tailered-ai/dime-ai" },
-        "taileredOsBoundary": { "const": "platform/tailered-os/" },
-        "foundationPullRequest": { "const": 496 }
+        "repository": {
+          "const": "tailered-ai/dime-ai"
+        },
+        "taileredOsBoundary": {
+          "const": "platform/tailered-os/"
+        },
+        "foundationPullRequest": {
+          "const": 496
+        }
       }
     },
     "safety": {
@@ -98,9 +151,52 @@
         "manualGithubMirroringAllowed"
       ],
       "properties": {
-        "notionWriteOperationsAuthorized": { "const": false },
-        "secretMaterialAllowed": { "const": false },
-        "manualGithubMirroringAllowed": { "const": false }
+        "notionWriteOperationsAuthorized": {
+          "type": "boolean"
+        },
+        "notionWriteAuthorization": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "decision",
+            "grantedBy",
+            "grantedOn",
+            "actor",
+            "scope",
+            "activationPullRequest"
+          ],
+          "properties": {
+            "decision": {
+              "type": "string",
+              "pattern": "^https://app\\.notion\\.com/p/[0-9a-f]{32}$"
+            },
+            "grantedBy": {
+              "const": "PREZ"
+            },
+            "grantedOn": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "actor": {
+              "const": "AI-10"
+            },
+            "scope": {
+              "type": "string",
+              "minLength": 1
+            },
+            "activationPullRequest": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "PR number whose reviewed merge introduced this grant. The authority adapter authenticates that merge against GitHub before any write; a grant with no activation PR is a self-grant."
+            }
+          }
+        },
+        "secretMaterialAllowed": {
+          "const": false
+        },
+        "manualGithubMirroringAllowed": {
+          "const": false
+        }
       }
     }
   },
@@ -110,11 +206,25 @@
       "additionalProperties": false,
       "required": ["name", "id", "verified", "source"],
       "properties": {
-        "name": { "type": "string", "minLength": 1 },
-        "id": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
-        "verified": { "type": "boolean" },
-        "verifiedOn": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
-        "source": { "type": "string", "minLength": 1 }
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "verifiedOn": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     }
   }

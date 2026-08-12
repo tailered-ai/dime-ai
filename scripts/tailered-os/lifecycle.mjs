@@ -10,7 +10,10 @@
 //
 // Laws this file enforces (Campaign Four directive §35–§37):
 //   - controlled transition table; authority "human" transitions require an
-//     observed human fact, never a machine-initiated event;
+//     observed human fact, never a machine-initiated event — approval, merge,
+//     unblock AND the deploy decision (deploy_consequence_recorded), which
+//     round-2 independent verification caught declared as "machine" while this
+//     header and the runbook called it permanently human;
 //   - idempotent + replay-safe: duplicate event_keys are visible no-ops,
 //     out-of-order events refuse loudly naming the expected from-state, and
 //     foldLifecycle(events) is deterministic (record.at comes from the event,
@@ -22,6 +25,7 @@
 //   - mode "api" fails CLOSED: headless sessions hold no live Notion write
 //     authority (manifest safety.notionWriteOperationsAuthorized === false).
 import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { loadControlPlaneManifest } from "../tailered-os-control-plane.mjs";
 
 export const LIFECYCLE_SCHEMA_VERSION = 1;
@@ -131,13 +135,21 @@ export const TRANSITIONS = Object.freeze(
       authority: "human",
     },
     {
-      // Deploy/No-Deploy CONSEQUENCE of the human merge, observed post-fact
-      // (merging dime-ai main IS a production deploy — deploy law).
+      // Deploy/No-Deploy DECISION, observed post-fact (merging dime-ai main IS
+      // a production deploy — deploy law). Independent verification round 2
+      // (NEW2-OG6-0018) caught this row declaring "machine" while the runbook
+      // and this file's own header call the deploy decision permanently human:
+      // the enforcing table must say what the law says, so it is a human row
+      // requiring an observed act.
       from: "Merged",
       to: "Merged",
       trigger_event_type: "deploy_consequence_recorded",
-      required_evidence_fields: ["deploy_decision", "consequence_ref"],
-      authority: "machine",
+      required_evidence_fields: [
+        "deploy_decision",
+        "consequence_ref",
+        "observed_via",
+      ],
+      authority: "human",
     },
     {
       from: "Merged",
@@ -731,21 +743,23 @@ export function planMutation(state, manifest, mode = "fixture") {
 
 // api mode fails CLOSED with the missing authority named — the same law as
 // context.mjs apiSource(): credential presence is governed, not discovered.
+// OG-006 (2026-08-11): with the owner grant recorded in the manifest, an
+// authorized manifest now RETURNS the grant descriptor instead of throwing
+// api-write-unimplemented — the sanctioned live path is the policy-separated
+// writer (scripts/tailered-os/lifecycle-writer.mjs), never this engine.
 export function assertLiveNotionAuthority(manifest) {
   if (manifest.safety.notionWriteOperationsAuthorized !== true)
     throw new LifecycleError(
       "notion-write-unauthorized",
-      "mode 'api' requested, but Notion write access is unavailable in headless sessions (manifest safety.notionWriteOperationsAuthorized is false).",
+      "live Notion write authority is not granted (manifest safety.notionWriteOperationsAuthorized is false).",
       "the lifecycle engine mutates the organizational control plane; an unauthorized write path would let an agent move its own approval state.",
-      "run with --fixture <path> (the engine emits mutation plans, executed: false); live Notion wiring is a separate owner-gated activation by PREZ, recorded in config/tailered-os-control-plane.v1.json."
+      "run with --fixture <path> (the engine emits mutation plans, executed: false); flipping the flag is an owner-reviewed PR carrying the decision grant (safety.notionWriteAuthorization)."
     );
-  // Even a future authorized manifest still needs the credential itself.
-  throw new LifecycleError(
-    "api-write-unimplemented",
-    "the live Notion write path is not implemented.",
-    "shipping an untested writer would produce confidently wrong control-plane records.",
-    "implement + live-test the writer under the owner-gated activation; until then use --fixture."
-  );
+  return Object.freeze({
+    authorized: true,
+    grant: manifest.safety.notionWriteAuthorization,
+    write_path: "scripts/tailered-os/lifecycle-writer.mjs",
+  });
 }
 
 function loadFixture(path) {
@@ -777,8 +791,12 @@ function loadFixture(path) {
   return parsed;
 }
 
+// fileURLToPath (not string concatenation): a URL-encoding path or symlinked
+// invocation would otherwise make this comparison fail and the CLI silently
+// import-and-exit-0 — a silent no-op in an engine whose law is that refusals
+// are visible (health-review catch).
 const invokedDirectly =
-  process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
+  process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (invokedDirectly) {
   const args = process.argv.slice(2);
   const command = args[0];
@@ -795,7 +813,18 @@ if (invokedDirectly) {
     }
     const fixturePath = argOf("--fixture");
     const manifest = loadControlPlaneManifest();
-    if (!fixturePath) assertLiveNotionAuthority(manifest); // always throws today
+    if (!fixturePath) {
+      assertLiveNotionAuthority(manifest); // throws while the kill switch is engaged
+      // Authority alone does not make the CLI a write surface: live mutation
+      // runs through the writer contract (plan → authorize → write → reread →
+      // attest) with an injected transport the CLI does not hold.
+      throw new LifecycleError(
+        "cli-live-unsupported",
+        "the CLI folds fixtures only; it holds no live transport.",
+        "a CLI write path would bypass the writer's pre-write gates and attestation contract.",
+        "use --fixture <path> here; live mutations go through scripts/tailered-os/lifecycle-writer.mjs (see references/tailered-os-lifecycle.md)."
+      );
+    }
     const fixture = loadFixture(fixturePath);
     const taskArg = argOf("--task");
     if (taskArg && fixture.task_id && taskArg !== fixture.task_id)

@@ -64,10 +64,17 @@ const HAPPY: any[] = [
     { merge_sha: MERGE, observed_via: "gh pr view 496" },
     { actor: "human" }
   ),
-  ev("deploy_consequence_recorded", {
-    deploy_decision: "no-deploy",
-    consequence_ref: "railway-image-excludes-platform",
-  }),
+  // The deploy decision is a HUMAN act the engine only records (round-2
+  // verification NEW2-OG6-0018 made the table say what the law says).
+  ev(
+    "deploy_consequence_recorded",
+    {
+      deploy_decision: "no-deploy",
+      consequence_ref: "railway-image-excludes-platform",
+      observed_via: "owner decision recorded in the release thread",
+    },
+    { actor: "human" }
+  ),
   ev("post_merge_verified", { evidence_ref: "post-merge-report-1" }),
   ev("learning_captured", { learning_ref: "learning-1" }),
 ];
@@ -401,13 +408,44 @@ describe("TOS-009 §37 — every failure class fires visibly", () => {
 });
 
 describe("TOS-009 authority + mutation plan — fail closed, plan only", () => {
-  it("api mode fails closed naming the missing authority", () => {
+  it("api mode fails closed while the kill switch is engaged, and returns the owner grant when authorized", () => {
     const manifest = loadControlPlaneManifest();
+    // Kill-switch state: flag false MUST refuse regardless of what the repo
+    // manifest currently says — this is the rollback/disable path.
+    const disarmed = structuredClone(manifest);
+    disarmed.safety.notionWriteOperationsAuthorized = false;
+    delete disarmed.safety.notionWriteAuthorization;
     assert.throws(
-      () => assertLiveNotionAuthority(manifest),
+      () => assertLiveNotionAuthority(disarmed),
       (error: any) =>
         error instanceof LifecycleError &&
         error.code === "notion-write-unauthorized"
+    );
+    // Authorized state: authority is returned as the owner's grant descriptor
+    // naming the sanctioned write path — never a bare silent true.
+    const armed = structuredClone(manifest);
+    armed.safety.notionWriteOperationsAuthorized = true;
+    armed.safety.notionWriteAuthorization = manifest.safety
+      .notionWriteAuthorization ?? {
+      decision: "https://app.notion.com/p/3b99673313e781229b85f35a0b9f2966",
+      grantedBy: "PREZ",
+      grantedOn: "2026-08-11",
+      actor: "AI-10",
+      scope: "test",
+    };
+    const authority = assertLiveNotionAuthority(armed);
+    assert.equal(authority.authorized, true);
+    assert.equal(
+      authority.write_path,
+      "scripts/tailered-os/lifecycle-writer.mjs"
+    );
+    // Fully anchored: an unanchored host pattern would accept
+    // https://evil.test/app.notion.com/... (CodeQL js/regex/missing-regexp-anchor,
+    // alert #453 — a true positive even in a test, since it is the assertion
+    // that is supposed to pin the canonical decision URL).
+    assert.match(
+      String(authority.grant.decision),
+      /^https:\/\/app\.notion\.com\/p\/[0-9a-f]{32}$/
     );
   });
 
