@@ -3808,6 +3808,42 @@
       "severity": "MEDIUM",
       "status": "CLOSED",
       "title": "VERIFIER ENVIRONMENT (structural, terminates the DEF-060/061 class): vitest runs 8 workers on this 8-core host (no cap in vitest.config) while CI's ubuntu-latest exposes 4 vCPUs — per-worker CPU starvation local-only; three distinct subprocess-heavy tests tripped the 15s testTimeout across consecutive rosters while green in CI and isolated"
+    },
+    {
+      "affected_gate": "P08 runtime profile B — graceful shutdown",
+      "blast_radius": "production deploy behavior (hard-kill instead of drain) — invisible in CI because no gate ever asserted shutdown until P08 profile B",
+      "closed_at": null,
+      "corrective_action": "graceful shutdown handler at the entrypoint: server.close + closeIdleConnections + closeDbPool + exit 0, 15s unref deadline exiting 1; new closeDbPool() in server/db.ts",
+      "detected_by": "P08.T07 profile B (cleanroom runtime), first full-mode run",
+      "evidence": [
+        {
+          "bytes": 4822,
+          "path": "docs/verification/evidence/p08/P08-ENTRY.json",
+          "sha256": "7d97850035380ab64cb40366c4e59b98cec1302956041f1302e921988ff32ddf"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-12T08:51:58.313Z",
+          "flags": {
+            "blast_radius": "production deploy behavior (hard-kill instead of drain) — invisible in CI because no gate ever asserted shutdown until P08 profile B",
+            "corrective_action": "graceful shutdown handler at the entrypoint: server.close + closeIdleConnections + closeDbPool + exit 0, 15s unref deadline exiting 1; new closeDbPool() in server/db.ts",
+            "evidence": [
+              "docs/verification/evidence/p08/P08-ENTRY.json"
+            ],
+            "root_cause": "node-as-PID-1 signal semantics + zero process.on(SIGTERM) handlers anywhere in server/"
+          }
+        }
+      ],
+      "id": "DEF-063",
+      "opened_at": "2026-08-12T08:51:58.255Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "node-as-PID-1 signal semantics + zero process.on(SIGTERM) handlers anywhere in server/",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "title": "CANDIDATE FINDING: the production container has NO SIGTERM handler while node runs as PID 1 (CMD [node, dist/index.js]) — PID 1 ignores default signal dispositions, so every platform SIGTERM (each Railway deploy, docker stop) is silently ignored until SIGKILL: exit 137 observed on both cleanroom profiles, in-flight work dropped, DB connections severed on every deploy since inception"
     }
   ],
   "gate_results": [],

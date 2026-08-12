@@ -66,6 +66,7 @@ import {
   getCacheHealthStats,
   getAvailableDates,
   forceInvalidateGamesCache,
+  closeDbPool,
 } from "../db";
 import { ensureDebugLogsTable } from "./debugLogger";
 import { registerAnalyticsIngestRoute } from "../analytics/ingestRoute";
@@ -652,6 +653,49 @@ async function startServer() {
   const server = createServer(app);
   installFatalErrorHandler({ server });
   console.log(`[SERVER_STARTUP] HTTP server created`);
+
+  // ─── Graceful shutdown (DEF-063) ─────────────────────────────────────────
+  // node runs as PID 1 in the production container (CMD ["node", …]), and
+  // PID 1 IGNORES default signal dispositions — so before this handler every
+  // SIGTERM (each Railway deploy, every `docker stop`) was silently ignored
+  // until the platform's SIGKILL: in-flight requests dropped, DB connections
+  // severed. Found by the P08 cleanroom profile B, which requires SIGTERM →
+  // exit 0 with connections drained.
+  let shuttingDown = false;
+  const gracefulShutdown = (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(
+      `[SHUTDOWN] ${signal} received — closing listener, draining connections`
+    );
+    // Hard deadline: if draining hangs, exit nonzero rather than waiting for
+    // the platform's SIGKILL. unref() so this timer never holds the loop open.
+    const deadline = setTimeout(() => {
+      console.error("[SHUTDOWN] drain deadline (15s) expired — forcing exit");
+      process.exit(1);
+    }, 15_000);
+    deadline.unref();
+    server.close(err => {
+      if (err) {
+        console.error("[SHUTDOWN] server.close failed:", err);
+        process.exit(1);
+      }
+      closeDbPool()
+        .then(() => {
+          console.log("[SHUTDOWN] ✓ listener closed, pool drained — exit 0");
+          process.exit(0);
+        })
+        .catch(poolErr => {
+          console.error("[SHUTDOWN] pool close failed:", poolErr);
+          process.exit(1);
+        });
+    });
+    // In-flight keep-alive sockets would hold server.close open past the
+    // deadline; ask them to finish current responses then close.
+    server.closeIdleConnections?.();
+  };
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
   // ─── Server-level error handlers ─────────────────────────────────────────
   // Catch binding errors (EADDRINUSE, EACCES) and connection-level errors
