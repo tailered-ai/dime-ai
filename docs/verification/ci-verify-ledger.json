@@ -3668,6 +3668,41 @@
       "severity": "MEDIUM",
       "status": "OPEN",
       "title": "CANDIDATE TEST-QUALITY (DEF-060 class): dime-authentication-closure.test.ts runs bundle-generation subprocesses with a declared 30s execFile budget inside the 15s default testTimeout — inner allowance exceeds outer bound, so the test times out under full-suite parallelism (now +305 TOS-009 tests) while passing isolated in 2.5s and green on main CI"
+    },
+    {
+      "affected_gate": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": "shared step-driver injects VITEST_MAX_FORKS=4 / VITEST_MAX_THREADS=4 into detector env (both phases) — environment normalization to CI's own profile; contract command text verbatim; contract-declared env supersedes; no timeout widened, no test excluded",
+      "detected_by": "P06 roster @ 249bf314 candidate (second attempt), proof step journal",
+      "evidence": [
+        {
+          "bytes": 2490,
+          "path": "docs/verification/evidence/p06/T21-def062-worker-parity.md",
+          "sha256": "d2afad92d684757824bbf0595d35e2e77129a10152a7a631db39f52cb41d392d"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-12T06:40:10.789Z",
+          "flags": {
+            "corrective_action": "shared step-driver injects VITEST_MAX_FORKS=4 / VITEST_MAX_THREADS=4 into detector env (both phases) — environment normalization to CI's own profile; contract command text verbatim; contract-declared env supersedes; no timeout widened, no test excluded",
+            "evidence": [
+              "docs/verification/evidence/p06/T21-def062-worker-parity.md"
+            ],
+            "root_cause": "local worker oversubscription: vitest defaults to one worker per host core, sharing cores with the verifier harness itself; CI never runs >4 workers on dedicated vCPUs"
+          }
+        }
+      ],
+      "id": "DEF-062",
+      "opened_at": "2026-08-12T06:40:10.448Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "local worker oversubscription: vitest defaults to one worker per host core, sharing cores with the verifier harness itself; CI never runs >4 workers on dedicated vCPUs",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "VERIFIER ENVIRONMENT (structural, terminates the DEF-060/061 class): vitest runs 8 workers on this 8-core host (no cap in vitest.config) while CI's ubuntu-latest exposes 4 vCPUs — per-worker CPU starvation local-only; three distinct subprocess-heavy tests tripped the 15s testTimeout across consecutive rosters while green in CI and isolated"
     }
   ],
   "gate_results": [],
