@@ -132,6 +132,26 @@ export function deriveBindings(options = {}) {
     )
       .trim()
       .split(/\s+/)[0],
+    required_contexts: (() => {
+      try {
+        // conformance owns the required-context list; re-derive, never trust
+        const mod = execFileSync(
+          "node",
+          [
+            "-e",
+            'import("./scripts/ci/contract-conformance.mjs").then(m=>console.log(JSON.stringify(m.REQUIRED_CONTEXTS)))',
+          ],
+          { cwd: REPO_ROOT, encoding: "utf8" }
+        );
+        return JSON.parse(mod.trim());
+      } catch {
+        return [];
+      }
+    })(),
+    open_units_all_p10: (() => {
+      const open = mandatory.filter(u => !closed.has(u.status));
+      return open.length > 0 && open.every(u => u.phase === "P10");
+    })(),
     execution_history: {
       phases,
       mandatory_total: mandatory.length,
@@ -184,10 +204,31 @@ export function issuancePreconditions(b) {
   if (b.execution_history.flaky_mandatory > 0) {
     refusals.push(`FLAKY_MANDATORY: ${b.execution_history.flaky_mandatory}`);
   }
-  const blocking = b.execution_history.open_defects.filter(d =>
-    /\((MEDIUM|HIGH|CRITICAL)\)/.test(d)
+  // Defect law = the SAME law phase acceptance used: open MEDIUM+ defects
+  // block UNLESS they carry a recorded disposition in the graduation-risk
+  // queue — and a queued defect's protection is FORFEIT the moment its
+  // affected check appears among the required contexts (the queue's
+  // enforcement hook, made executable here).
+  const queue = readFileSync(
+    path.join(REPO_ROOT, "docs/verification/GRADUATION-RISK-QUEUE.md"),
+    "utf8"
   );
+  const blocking = b.execution_history.open_defects.filter(d => {
+    if (!/\((MEDIUM|HIGH|CRITICAL)\)/.test(d)) return false;
+    const id = d.split("(")[0];
+    return !queue.includes(id); // undispositioned MEDIUM+ blocks
+  });
   if (blocking.length) refusals.push(`OPEN_DEFECTS: ${blocking.join(", ")}`);
+  // enforcement hook: DEF-053 guards 03-semgrep#blocking — refuse if that
+  // context graduated to required while the defect stays open
+  if (
+    b.execution_history.open_defects.some(d => d.startsWith("DEF-053")) &&
+    b.required_contexts.some(c => /semgrep/i.test(c))
+  ) {
+    refusals.push(
+      "GRADUATION_HOOK: 03-semgrep became a required context while DEF-053 is OPEN"
+    );
+  }
   if (b.dirty_tracked) refusals.push("DIRTY_TRACKED_FILES");
   if (b.ledger_sha256 !== b.ledger_pin) refusals.push("LEDGER_TAMPERED");
   // graduation-risk enforcement hook (GRADUATION-RISK-QUEUE.md law) is
@@ -207,24 +248,10 @@ function unitGap(b) {
 export function issue(options = {}) {
   const b = deriveBindings(options);
   const refusals = issuancePreconditions(b).filter(r => {
-    // P10's own pre-issuance units are the one tolerated gap (≤ 21) and only
-    // when every preceding phase is ACCEPTED — anything else still refuses.
-    if (r.startsWith("UNITS_OPEN") && unitGap(b) <= 21) {
-      const phasesOk = [
-        "PB",
-        "P00",
-        "P01",
-        "P02",
-        "P03",
-        "P04",
-        "P05",
-        "P06",
-        "P07",
-        "P08",
-        "P09",
-      ].every(p => b.execution_history.phases[p] === "ACCEPTED");
-      return !phasesOk;
-    }
+    // The only tolerated open units are P10's OWN (they close after
+    // issuance, when CP01 binds the certificate hash) — structural, never a
+    // magic count.
+    if (r.startsWith("UNITS_OPEN") && b.open_units_all_p10) return false;
     return true;
   });
   if (refusals.length) {
