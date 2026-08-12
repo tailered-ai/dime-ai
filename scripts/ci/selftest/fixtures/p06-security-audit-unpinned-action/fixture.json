@@ -1,0 +1,24 @@
+{
+  "schema_version": "p06-1.0.0",
+  "fixture_id": "p06-security-audit-unpinned-action",
+  "expected_gate": ".github/workflows/ci.yml#security-audit",
+  "poison_mode": "patch",
+  "expected_status": "FAIL",
+  "expected_failed_step": 2,
+  "expected_reason": [
+    {
+      "source": "step_stdout",
+      "regex": "zz-p06-assurance-poison\\.yml:\\d+: action is not pinned to a commit"
+    },
+    {
+      "source": "result_reason",
+      "regex": "DETECTOR_FAILED: step 2"
+    }
+  ],
+  "control_expectation": {
+    "status": "PASS"
+  },
+  "expected_changed_paths": [".github/workflows/zz-p06-assurance-poison.yml"],
+  "timeout_ms": 600000,
+  "allowed_execution_artifacts": ["osv-report.json", "osv-scanner"]
+}

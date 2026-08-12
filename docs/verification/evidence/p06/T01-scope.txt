@@ -1,0 +1,44 @@
+[p06-scope] contract 400cc0391547435d
+[p06-scope] registry entries: 47
+[p06-scope] ownership: {"P06":16,"CI_ONLY":20,"P07":4,"OPERATIONAL":7}
+[p06-scope] P06 gates: 16 (executable 13, required 7, required+executable 6)
+
+         EXECUTABLE              .github/workflows/01-pr-proof-contract.yml#format-check
+REQ      EXECUTABLE              .github/workflows/01-pr-proof-contract.yml#proof
+         EXECUTABLE              .github/workflows/03-semgrep.yml#advisory
+    GRAD EXECUTABLE              .github/workflows/03-semgrep.yml#blocking
+REQ      EXECUTABLE              .github/workflows/05-workflow-security.yml#zizmor
+REQ      EXECUTABLE              .github/workflows/08-contract-and-data-integrity.yml#contracts
+    GRAD NOT_LOCALLY_EXECUTABLE  .github/workflows/09-artifact-build-and-smoke.yml#artifact
+         reason: required tool(s) unavailable: docker, trivy
+REQ      EXECUTABLE              .github/workflows/10-ai-eval-critical.yml#deterministic
+         NOT_LOCALLY_EXECUTABLE  .github/workflows/12-nightly-verification.yml#full-container-scan
+         reason: required tool(s) unavailable: docker, trivy
+         EXECUTABLE              .github/workflows/12-nightly-verification.yml#full-osv
+         EXECUTABLE              .github/workflows/ci.yml#build
+REQ      EXECUTABLE              .github/workflows/ci.yml#security-audit
+REQ      EXECUTABLE              .github/workflows/ci.yml#typecheck
+         EXECUTABLE              .github/workflows/dime-llm-validation.yml#validate
+         EXECUTABLE              .github/workflows/edge-arming-gate.yml#validate
+REQ      NO_RUN_STEPS            .github/workflows/gitleaks.yml#gitleaks
+         reason: the contract job has no `run:` step; its verdict comes from a marketplace action, so local execution needs a P06 adapter
+
+[p06-scope] NOT owned by P06:
+  P07          .github/workflows/07-coverage-patch.yml#coverage
+  OPERATIONAL  .github/workflows/12-nightly-verification.yml#dependency-release-age
+               queries the live npm registry for release ages; network-dependent
+  P07          .github/workflows/12-nightly-verification.yml#mutation-diff
+  P07          .github/workflows/ci.yml#db-tests
+  P07          .github/workflows/ci.yml#test
+  OPERATIONAL  .github/workflows/edge-arming-gate.yml#enforce
+               reads live production edge arming state; the offline contract half is the candidate-verifiable one
+  OPERATIONAL  .github/workflows/os-ledger-append.yml#append
+               appends to the operations ledger; mutates state, not a verification gate
+  OPERATIONAL  .github/workflows/os-observe-crons.yml#observe
+               observes live cron state; not a property of the candidate
+  OPERATIONAL  .github/workflows/p0-feed-verify.yml#verify
+               probes live production feed data; not a property of the candidate
+  OPERATIONAL  .github/workflows/railway-p0-control.yml#health
+               probes live production health; not a property of the candidate
+  OPERATIONAL  .github/workflows/refresh-cf-cidrs.yml#check
+               fetches live Cloudflare CIDR ranges; network-dependent, not candidate state

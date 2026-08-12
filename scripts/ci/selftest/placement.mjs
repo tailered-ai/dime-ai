@@ -51,6 +51,13 @@ export const APPROVED_FIXTURE_ROOTS = [
 export const INERT_FIXTURE_FILES = new Set([
   "poison.patch",
   "expect.json",
+  // P06 fixtures carry their expectation as `fixture.json` rather than P05's
+  // `expect.json`. It is the same class of artifact — a declarative manifest
+  // read by the ASSURANCE harness, never executed and never applied to a
+  // sensitive root — so it is inert on the same grounds. Omitting it made the
+  // containment audit undercount inert files (9 against 12 fixtures) and fail
+  // for a naming difference rather than for any live poison.
+  "fixture.json",
   "README.md",
 ]);
 
@@ -61,6 +68,13 @@ export const INERT_FIXTURE_FILES = new Set([
  */
 export const POISON_SIGNATURES = [
   { id: "p05-marker", re: /p05[-_]poison/i },
+  // P06 fixtures mark their poison with a p06 prefix (p06Poison…,
+  // p06-…-assurance-poison, "P06 ASSURANCE poison"). Without this signature
+  // the containment audit could not SEE most P06 poison at all: it classifies
+  // only signature-matching files, so P06 material was passing through
+  // unexamined rather than being proven inert. That is the exact hole this
+  // audit exists to close, so the family is registered here.
+  { id: "p06-marker", re: /p06[-_]?poison|P06 ASSURANCE poison/i },
   {
     id: "template-injection",
     re: /\$\{\{\s*github\.event\.(issue|pull_request|comment|review)\./,

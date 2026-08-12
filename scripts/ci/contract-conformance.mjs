@@ -341,6 +341,46 @@ export const YAML_ALLOWLIST = [
       "P05.AUD02's isolation table must NAME the YAML-parsing patterns it " +
       "forbids P05 from using. It parses no YAML.",
   },
+  {
+    file: "scripts/ci/p06/tools.mjs",
+    reason:
+      "P06's single declared workflow-byte boundary: extracts governed tool " +
+      "identity pins the frozen contract does not carry (workflow-level env " +
+      "versions such as SEMGREP_VERSION/ZIZMOR_VERSION, the setup-node pin) " +
+      "via regex over BYTES — never YAML parsing — with each derivation " +
+      "chain recorded in the tool provenance evidence (DEF-031/033 remediation).",
+  },
+  {
+    file: "scripts/ci/p06/scope.mjs",
+    reason:
+      "Names contract check IDs verbatim (they begin '.github/workflows/'). " +
+      "Opens no workflow file; every property it uses comes from the frozen " +
+      "contract and PARITY registry.",
+  },
+  {
+    file: "scripts/ci/p06/run-gates.mjs",
+    reason:
+      "Names contract check IDs verbatim for per-gate timeouts, tool " +
+      "bindings, and adaptations. Opens no workflow file; all step text " +
+      "comes from the frozen contract.",
+  },
+  {
+    file: "scripts/ci/p06/classify.mjs",
+    reason:
+      "Names contract check IDs verbatim to bind governed tools and " +
+      "marketplace-action dispositions while projecting the §6 classification " +
+      "and §14 nonlocal audit. Opens no workflow file; every property it " +
+      "reports comes from the frozen contract, measured capability, and " +
+      "recorded results.",
+  },
+  {
+    file: "scripts/ci/p07/run-p07.mjs",
+    reason:
+      "Names the four P07-owned contract check IDs verbatim (ci#test, " +
+      "ci#db-tests, coverage, mutation-diff). Opens no workflow file; the DB " +
+      "suite list, collection floor, and service definition are all read from " +
+      "the frozen contract.",
+  },
 ];
 
 export const YAML_PATTERNS = [

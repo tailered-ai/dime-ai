@@ -1,0 +1,12 @@
+diff --git a/server/p06SemgrepAssurancePoison.ts b/server/p06SemgrepAssurancePoison.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..cccccccccccccccccccccccccccccccccccccccc
+--- /dev/null
++++ b/server/p06SemgrepAssurancePoison.ts
+@@ -0,0 +1,6 @@
++// P06 ASSURANCE poison — a hardcoded fallback for APP_SESSION_SECRET, which
++// the blocking Semgrep rule dime-session-secret-fallback rejects at ERROR
++// severity. Inert patch bytes; applied only inside a candidate worktree.
++export function p06SessionSecret(): string {
++  return process.env.APP_SESSION_SECRET || "unset";
++}

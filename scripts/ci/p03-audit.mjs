@@ -185,6 +185,44 @@ export const YAML_READER_ALLOWLIST = [
       "P05.AUD02's isolation table must NAME the YAML-parsing patterns it " +
       "forbids P05 from using. It parses no YAML.",
   },
+  {
+    file: "scripts/ci/p06/tools.mjs",
+    reason:
+      "P06's single declared workflow-byte boundary: extracts governed tool " +
+      "identity pins the frozen contract does not carry (workflow-level env " +
+      "values such as SEMGREP_VERSION/ZIZMOR_VERSION and the setup-node pin) " +
+      "by regex over BYTES. It never parses YAML, and each derivation chain " +
+      "is recorded in the tool provenance evidence.",
+  },
+  {
+    file: "scripts/ci/p06/scope.mjs",
+    reason:
+      "Names contract check IDs verbatim; those IDs begin with the workflows " +
+      "directory. Opens no workflow file — every property comes from the " +
+      "frozen contract and the PARITY registry.",
+  },
+  {
+    file: "scripts/ci/p06/run-gates.mjs",
+    reason:
+      "Names contract check IDs verbatim to bind per-gate timeouts, governed " +
+      "tools, and recorded adaptations. Opens no workflow file; all step text " +
+      "comes from the frozen contract.",
+  },
+  {
+    file: "scripts/ci/p06/classify.mjs",
+    reason:
+      "Names contract check IDs verbatim while projecting the P06 " +
+      "classification and the nonlocal audit. Opens no workflow file; every " +
+      "reported property comes from the frozen contract, measured capability, " +
+      "and recorded execution results.",
+  },
+  {
+    file: "scripts/ci/p07/run-p07.mjs",
+    reason:
+      "Names the four P07-owned contract check IDs verbatim. Opens no " +
+      "workflow file; the DB suite list, collection floor, and service " +
+      "definition are all read from the frozen contract.",
+  },
 ];
 
 export const YAML_PATTERNS = [

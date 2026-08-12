@@ -539,6 +539,45 @@
       ],
       "phase": "P07",
       "recorded_at": "2026-08-10T19:28:40.241Z"
+    },
+    {
+      "decision": "ACCEPT — seven-term predicate TRUE at base 249bf314, integration 61369e77, remediations 114052b3+77594d5a, contract b594ebd9 (byte-identical across the base move): 29/29 mandatory units closed; roster blocking 0 with #proof PASS; ASSURANCE 8/8 PROVEN coverage 6/6; regression green (negatives 56/56, scripts suite, prettier, ledger verify, conformance+3 audits, tsc); open defects all non-blocking advisories (DEF-045 LOW, DEF-046 LOW, DEF-053 non-attributed); freshness barrier PASS at the acceptance record (FINAL_MAIN_SHA == FROZEN_BASE_SHA == 249bf314)",
+      "evidence": [
+        {
+          "bytes": 3479,
+          "path": "docs/verification/evidence/p06/T22-acceptance-249bf314.md",
+          "sha256": "569c4c0f76a6258f36d52a955df5ecef02b06c53014b456c85939444e8301321"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        },
+        {
+          "bytes": 1505,
+          "path": "docs/verification/evidence/freeze/FREEZE-249bf314.md",
+          "sha256": "239f7adf27112426845c4c0d0783d78f5b36bd38564828673826057ecc6b4b83"
+        }
+      ],
+      "phase": "P06",
+      "recorded_at": "2026-08-12T07:30:04.789Z"
+    },
+    {
+      "decision": "ACCEPT — seven-term predicate TRUE at base 249bf314: 24/24 mandatory units closed; P07 3/3 PASS at this base (test 214.3s, coverage 163.7s, db-tests 26.8s = 10 files/92 tests, MySQL 8.4.11 digest-bound, zero residue); DB surface byte-identical from 43a33c84 through 249bf314 so the TEST03 same-SHA demonstration and REG01 three-run series remain valid and db-tests reproduced 10/92 again; zero open defects attributed to P07; freshness barrier PASS at the acceptance record",
+      "evidence": [
+        {
+          "bytes": 524,
+          "path": "docs/verification/evidence/p07/T22-acceptance-p07.log",
+          "sha256": "0b40d19bc23c67d9a22cc8e62f5bca884e8de1d4ce41b218a37c6e874ff0c590"
+        },
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ],
+      "phase": "P07",
+      "recorded_at": "2026-08-12T07:30:04.832Z"
     }
   ],
   "decisions": [
@@ -3402,14 +3441,14 @@
     {
       "affected_gate": "P01/acceptance model",
       "blast_radius": null,
-      "closed_at": "2026-08-12T05:53:26.892Z",
-      "corrective_action": "Bounded reversible freeze: a coordinated human merge hold (governance requires human merges — ruleset 18701573 has zero bypass actors, allow_auto_merge=false); FROZEN_BASE_SHA pinned 43a33c84; nothing weakened, nothing to restore",
+      "closed_at": "2026-08-12T07:30:04.709Z",
+      "corrective_action": "Second bounded freeze window: coordinated human merge hold at FROZEN_BASE_SHA 249bf314; nothing weakened; the first window's break was handled exactly as designed (barrier refused, nothing accepted stale)",
       "detected_by": "P06/P07 fresh-base checks",
       "evidence": [
         {
-          "bytes": 1945,
-          "path": "docs/verification/evidence/freeze/FREEZE-43a33c84.md",
-          "sha256": "2d656bc8d40bc6c9524c58412f09a5d84e632dc43bd0c72e4b46444fb160a70d"
+          "bytes": 1505,
+          "path": "docs/verification/evidence/freeze/FREEZE-249bf314.md",
+          "sha256": "239f7adf27112426845c4c0d0783d78f5b36bd38564828673826057ecc6b4b83"
         }
       ],
       "history": [
@@ -3441,15 +3480,26 @@
             "note": "REOPENED: the first freeze window (43a33c84) broke between the post-chain barrier PASS and the acceptance-recording barrier — origin/main advanced to 249bf314 (PRs #509/#510, the concurrent session's TOS-009 work) and the acceptance act was refused per the barrier law. The prior closure evidence documents that window truthfully but acceptance was not recorded inside it. Re-closure requires a window that holds through the acceptance record itself.",
             "status": "OPEN"
           }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-12T07:30:04.701Z",
+          "flags": {
+            "corrective_action": "Second bounded freeze window: coordinated human merge hold at FROZEN_BASE_SHA 249bf314; nothing weakened; the first window's break was handled exactly as designed (barrier refused, nothing accepted stale)",
+            "evidence": [
+              "docs/verification/evidence/freeze/FREEZE-249bf314.md"
+            ],
+            "retest_result": "PASS: main held at 249bf314 from pinning through the acceptance record itself — full chain green at this base (roster blocking 0, ASSURANCE 8/8, P07 3/3), regression green, barrier PASS at the moment of acceptance"
+          }
         }
       ],
       "id": "DEF-056",
       "opened_at": "2026-08-10T21:46:18.058Z",
       "regression_test_id": null,
-      "retest_result": "PASS: main held at 43a33c84 from pinning through the freshness barrier; the complete final cycle (roster + ASSURANCE + P07 at candidate b81f6a47, plus full cross-phase regression) bound to that single base; barrier FINAL_MAIN_SHA == FROZEN_BASE_SHA",
+      "retest_result": "PASS: main held at 249bf314 from pinning through the acceptance record itself — full chain green at this base (roster blocking 0, ASSURANCE 8/8, P07 3/3), regression green, barrier PASS at the moment of acceptance",
       "root_cause": "The frozen governing principle forbids reusing any proof, gate result, classification, or ASSURANCE artifact across a base change, and section 29/31 require a fresh-base check immediately before each phase acceptance. A complete cycle — P06 roster over 16 gates including a Docker image build, the full ASSURANCE set over 8 fixtures each running three legs of the 5,090-test proof gate, and P07 including migration replay and the DB suite — takes roughly 40-50 minutes on this host. origin/main moved THREE times inside this single turn: 7fa4b3fe -> 29a4a97e -> a85fd95f -> fdb4bfee, roughly hourly, driven by dependabot merges and active feature PRs. Each move invalidates the base binding of evidence that was still being produced",
       "severity": "MEDIUM",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "STRUCTURAL: origin/main advances faster than a full P06+P07 verification cycle completes, so a strictly-current-base acceptance may never converge on an active day"
     },
     {
@@ -3637,7 +3687,7 @@
     {
       "affected_gate": ".github/workflows/01-pr-proof-contract.yml#proof",
       "blast_radius": null,
-      "closed_at": null,
+      "closed_at": "2026-08-12T07:26:41.057Z",
       "corrective_action": "explicit 120_000 vitest timeout on the two tests with this profile (lines 362, 479), consistent with their own declared subprocess budgets; assertions unchanged; global testTimeout untouched",
       "detected_by": "P06 roster @ 249bf314 candidate, proof gate step journal",
       "evidence": [
@@ -3658,21 +3708,31 @@
             ],
             "root_cause": "heavyweight subprocess work (copy node binary + spawn generation with timeout:30_000) bounded by the 15s default; the bound measures host capacity, not determinism/closure"
           }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-12T07:26:41.053Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p06/T20-def061-closure-test-timeout.md"
+            ],
+            "retest_result": "PASS: #proof PASS in the clean roster @249bf314 candidate (T22-acceptance-roster.log) — the closure tests completed within their explicit budgets; also PASS on the intervening roster attempt"
+          }
         }
       ],
       "id": "DEF-061",
       "opened_at": "2026-08-12T06:20:53.666Z",
       "regression_test_id": null,
-      "retest_result": null,
+      "retest_result": "PASS: #proof PASS in the clean roster @249bf314 candidate (T22-acceptance-roster.log) — the closure tests completed within their explicit budgets; also PASS on the intervening roster attempt",
       "root_cause": "heavyweight subprocess work (copy node binary + spawn generation with timeout:30_000) bounded by the 15s default; the bound measures host capacity, not determinism/closure",
       "severity": "MEDIUM",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "CANDIDATE TEST-QUALITY (DEF-060 class): dime-authentication-closure.test.ts runs bundle-generation subprocesses with a declared 30s execFile budget inside the 15s default testTimeout — inner allowance exceeds outer bound, so the test times out under full-suite parallelism (now +305 TOS-009 tests) while passing isolated in 2.5s and green on main CI"
     },
     {
       "affected_gate": ".github/workflows/01-pr-proof-contract.yml#proof",
       "blast_radius": null,
-      "closed_at": null,
+      "closed_at": "2026-08-12T07:26:41.127Z",
       "corrective_action": "shared step-driver injects VITEST_MAX_FORKS=4 / VITEST_MAX_THREADS=4 into detector env (both phases) — environment normalization to CI's own profile; contract command text verbatim; contract-declared env supersedes; no timeout widened, no test excluded",
       "detected_by": "P06 roster @ 249bf314 candidate (second attempt), proof step journal",
       "evidence": [
@@ -3680,6 +3740,11 @@
           "bytes": 2490,
           "path": "docs/verification/evidence/p06/T21-def062-worker-parity.md",
           "sha256": "d2afad92d684757824bbf0595d35e2e77129a10152a7a631db39f52cb41d392d"
+        },
+        {
+          "bytes": 3479,
+          "path": "docs/verification/evidence/p06/T22-acceptance-249bf314.md",
+          "sha256": "569c4c0f76a6258f36d52a955df5ecef02b06c53014b456c85939444e8301321"
         }
       ],
       "history": [
@@ -3693,15 +3758,35 @@
             ],
             "root_cause": "local worker oversubscription: vitest defaults to one worker per host core, sharing cores with the verifier harness itself; CI never runs >4 workers on dedicated vCPUs"
           }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-12T07:26:41.124Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p06/T21-def062-worker-parity.md"
+            ],
+            "retest_result": "PASS: with VITEST_MAX_FORKS=4/VITEST_MAX_THREADS=4 injected by the shared driver, the full chain went green at 249bf314 — roster blocking 0 with #proof PASS, ASSURANCE 8/8 PROVEN including the 3x-full-suite proof fixture, P07 3/3 PASS. Zero timeout-class failures in the entire chain"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-12T07:26:54.404Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p06/T21-def062-worker-parity.md",
+              "docs/verification/evidence/p06/T22-acceptance-249bf314.md"
+            ]
+          }
         }
       ],
       "id": "DEF-062",
       "opened_at": "2026-08-12T06:40:10.448Z",
       "regression_test_id": null,
-      "retest_result": null,
+      "retest_result": "PASS: with VITEST_MAX_FORKS=4/VITEST_MAX_THREADS=4 injected by the shared driver, the full chain went green at 249bf314 — roster blocking 0 with #proof PASS, ASSURANCE 8/8 PROVEN including the 3x-full-suite proof fixture, P07 3/3 PASS. Zero timeout-class failures in the entire chain",
       "root_cause": "local worker oversubscription: vitest defaults to one worker per host core, sharing cores with the verifier harness itself; CI never runs >4 workers on dedicated vCPUs",
       "severity": "MEDIUM",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "VERIFIER ENVIRONMENT (structural, terminates the DEF-060/061 class): vitest runs 8 workers on this 8-core host (no cap in vitest.config) while CI's ubuntu-latest exposes 4 vCPUs — per-worker CPU starvation local-only; three distinct subprocess-heavy tests tripped the 15s testTimeout across consecutive rosters while green in CI and isolated"
     }
   ],
@@ -4137,7 +4222,7 @@
         "P06.CP01 recorded"
       ],
       "id": "P06",
-      "state": "BLOCKED",
+      "state": "ACCEPTED",
       "state_history": [
         {
           "at": "2026-08-10T14:22:27.935Z",
@@ -4148,6 +4233,11 @@
           "at": "2026-08-10T14:22:28.019Z",
           "from": "IN_PROGRESS",
           "to": "BLOCKED"
+        },
+        {
+          "at": "2026-08-12T07:30:04.879Z",
+          "from": "BLOCKED",
+          "to": "ACCEPTED"
         }
       ],
       "title": "PARITY — static, security, supply chain"
@@ -4172,7 +4262,7 @@
         "P07.CP01 recorded"
       ],
       "id": "P07",
-      "state": "BLOCKED",
+      "state": "ACCEPTED",
       "state_history": [
         {
           "at": "2026-08-10T14:22:28.074Z",
@@ -4183,6 +4273,11 @@
           "at": "2026-08-10T14:22:28.151Z",
           "from": "IN_PROGRESS",
           "to": "BLOCKED"
+        },
+        {
+          "at": "2026-08-12T07:30:04.924Z",
+          "from": "BLOCKED",
+          "to": "ACCEPTED"
         }
       ],
       "title": "PARITY — test and data"

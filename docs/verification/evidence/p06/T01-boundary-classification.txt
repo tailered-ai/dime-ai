@@ -1,0 +1,27 @@
+provisioning satisfaction (measured): {"node-deps":true,"playwright-install":true,"uv-sync":true,"pip-install":true}
+
+    LOCAL                                            01-pr-proof-contract.yml#format-check
+REQ LOCAL+TOOL                                       01-pr-proof-contract.yml#proof
+    LOCAL+TOOL                                       03-semgrep.yml#advisory
+    LOCAL+TOOL                                       03-semgrep.yml#blocking
+REQ LOCAL+TOOL                                       05-workflow-security.yml#zizmor
+REQ LOCAL                                            08-contract-and-data-integrity.yml#contracts
+    NOT_LOCALLY_EXECUTABLE(RUNTIME_UNAVAILABLE)      09-artifact-build-and-smoke.yml#artifact
+REQ LOCAL                                            10-ai-eval-critical.yml#deterministic
+    NOT_LOCALLY_EXECUTABLE(RUNTIME_UNAVAILABLE)      12-nightly-verification.yml#full-container-scan
+    NOT_LOCALLY_EXECUTABLE(ACTION_SEMANTICS_UNREPRODUCED) 12-nightly-verification.yml#full-osv
+    LOCAL                                            ci.yml#build
+REQ LOCAL+TOOL                                       ci.yml#security-audit
+REQ LOCAL                                            ci.yml#typecheck
+    LOCAL                                            dime-llm-validation.yml#validate  [cwd ml/dime-1.0]
+    LOCAL                                            edge-arming-gate.yml#validate
+REQ NOT_LOCALLY_EXECUTABLE(SECRET_BOUND)             gitleaks.yml#gitleaks
+
+counts: {
+ "LOCAL": 7,
+ "LOCAL+TOOL": 5,
+ "NOT_LOCALLY_EXECUTABLE(RUNTIME_UNAVAILABLE)": 2,
+ "NOT_LOCALLY_EXECUTABLE(ACTION_SEMANTICS_UNREPRODUCED)": 1,
+ "NOT_LOCALLY_EXECUTABLE(SECRET_BOUND)": 1
+}
+required: 7 | locally executable: 6 | nonlocal: 1

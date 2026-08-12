@@ -1,0 +1,35 @@
+{
+  "schema_version": "p06-1.0.0",
+  "fixture_id": "p06-proof-failing-test",
+  "expected_gate": ".github/workflows/01-pr-proof-contract.yml#proof",
+  "poison_mode": "patch",
+  "expected_status": "FAIL",
+  "expected_failed_step": 6,
+  "expected_reason": [
+    {
+      "source": "step_stderr",
+      "regex": "ci-failure: server/p06ProofAssurancePoison\\.test\\.ts"
+    },
+    {
+      "source": "step_stdout",
+      "regex": "\\[env-gate\\] FAIL"
+    },
+    {
+      "source": "result_reason",
+      "regex": "DETECTOR_FAILED: step 6"
+    }
+  ],
+  "control_expectation": {
+    "status": "PASS"
+  },
+  "expected_changed_paths": ["server/p06ProofAssurancePoison.test.ts"],
+  "timeout_ms": 2400000,
+  "allowed_execution_artifacts": [
+    "vitest-results.json",
+    "proof-contract.json",
+    "env-gate-report.json",
+    "typecheck-report.txt",
+    "test-report.txt",
+    "dist"
+  ]
+}

@@ -30,8 +30,8 @@
 | `P03` | Registries, taxonomy, reporter, ledger integration | `ACCEPTED` | 24 / 24 | 0 | 0 |
 | `P04` | Executor core | `ACCEPTED` | 30 / 30 | 0 | 0 |
 | `P05` | ASSURANCE — the self-test framework | `ACCEPTED` | 27 / 27 | 0 | 0 |
-| `P06` | PARITY — static, security, supply chain | `BLOCKED` | 29 / 29 | 0 | 0 |
-| `P07` | PARITY — test and data | `BLOCKED` | 24 / 24 | 0 | 0 |
+| `P06` | PARITY — static, security, supply chain | `ACCEPTED` | 29 / 29 | 0 | 0 |
+| `P07` | PARITY — test and data | `ACCEPTED` | 24 / 24 | 0 | 0 |
 | `P08` | CLEANROOM — image identity, container build, dual runtime proof | `NOT_STARTED` | 0 / 23 | 0 | 0 |
 | `P09` | HARDENING | `NOT_STARTED` | 0 / 17 | 0 | 0 |
 | `P10` | Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR | `NOT_STARTED` | 0 / 22 | 0 | 0 |
@@ -392,7 +392,7 @@
 
 ## P06 — PARITY — static, security, supply chain
 
-**State:** `BLOCKED`
+**State:** `ACCEPTED`
 
 **Assurance property:** Every locally reproducible static and supply-chain requirement of the merge contract is executed verbatim, with pinned tools.
 
@@ -448,7 +448,7 @@
 
 ## P07 — PARITY — test and data
 
-**State:** `BLOCKED`
+**State:** `ACCEPTED`
 
 **Assurance property:** The full test contract runs with CI's partitioning, with no impact selection, and DB-lane exclusion is proven deterministically.
 
@@ -730,13 +730,13 @@
 | `DEF-053` | `P06 re-proof of DEF-044` | HIGH | `OPEN` | CANDIDATE FINDING, escalates DEF-044: TWO ERROR-severity Semgrep rules fail to PARSE, so semgrep-core silently drops them and the blocking gate still exits 0 — the gate reports success while carrying invalid detectors |
 | `DEF-054` | `negative proof of my own DEF-052 remediation` | MEDIUM | `CLOSED` | the first version of my production-bcrypt-cost assertion was itself vacuous: the pathspec 'server/**/*.ts' silently excludes files directly under server/, so the poisoned site was never scanned and the test passed |
 | `DEF-055` | `P06 full-regression surface (P05.AUD01)` | HIGH | `CLOSED` | the P06 fixtures were INVISIBLE to P05's poison-containment audit: its signature list knew only the p05 marker, so most P06 poison passed through unexamined rather than being proven inert |
-| `DEF-056` | `P06/P07 fresh-base checks` | MEDIUM | `OPEN` | STRUCTURAL: origin/main advances faster than a full P06+P07 verification cycle completes, so a strictly-current-base acceptance may never converge on an active day |
+| `DEF-056` | `P06/P07 fresh-base checks` | MEDIUM | `CLOSED` | STRUCTURAL: origin/main advances faster than a full P06+P07 verification cycle completes, so a strictly-current-base acceptance may never converge on an active day |
 | `DEF-057` | `P06 roster at base 43a33c84` | MEDIUM | `CLOSED` | candidate materialization gap: P01 worktree candidates leave the new cloudflare-os gitlink EMPTY, so the tailered-os gate's detector failed on 'git -C cloudflare-os rev-parse HEAD' — a provisioning gap surfacing as a false detector FAIL (the DEF-031 class) |
 | `DEF-058` | `P06 serial roster @43a33c84, tailered-os.yml#test step journal` | HIGH | `CLOSED` | VERIFIER FIDELITY: contract extractor drops workflow-level env: blocks (records job?.env only), so EXPECTED_CLOUDFLARE_OS_PIN never reaches the detector step — a correct candidate pin (b2a51b54) is reported as detector FAIL. Blast radius bounded to this one gate: 03-semgrep/05-workflow-security use their workflow-level vars in provisioning steps already satisfied by governed tools |
 | `DEF-059` | `P06 serial rebind roster @ candidate 7e86ad23, gitleaks gate + ASSURANCE CONTROL_NOT_GREEN` | HIGH | `CLOSED` | CANDIDATE FINDING introduced by DEF-058 remediation: embedding workflow-level env in contract.frozen.json juxtaposes CLOUDFLARE keyword with the 40-hex submodule pin in quoted-JSON form, tripping gitleaks cloudflare-api-key. The value is the public immutable cloudflare-os commit SHA (present in .gitmodules and tailered-os.yml), not a credential |
 | `DEF-060` | `P07 coverage gate @ e672bb11 (serial chain), single test failure under v8 instrumentation at host load 18/8-cores` | MEDIUM | `CLOSED` | CANDIDATE TEST-QUALITY (DEF-047 Cause-C class): strikeoutProps.test.ts loaded the entire app-router graph via await import inside the 15s testTimeout; under coverage instrumentation + load the bound measures CPU availability, not router existence. Same test PASSed ci#test in the same chain; coverage gate PASSed the two prior candidates; content delta was toml/docs only |
-| `DEF-061` | `P06 roster @ 249bf314 candidate, proof gate step journal` | MEDIUM | `OPEN` | CANDIDATE TEST-QUALITY (DEF-060 class): dime-authentication-closure.test.ts runs bundle-generation subprocesses with a declared 30s execFile budget inside the 15s default testTimeout — inner allowance exceeds outer bound, so the test times out under full-suite parallelism (now +305 TOS-009 tests) while passing isolated in 2.5s and green on main CI |
-| `DEF-062` | `P06 roster @ 249bf314 candidate (second attempt), proof step journal` | MEDIUM | `OPEN` | VERIFIER ENVIRONMENT (structural, terminates the DEF-060/061 class): vitest runs 8 workers on this 8-core host (no cap in vitest.config) while CI's ubuntu-latest exposes 4 vCPUs — per-worker CPU starvation local-only; three distinct subprocess-heavy tests tripped the 15s testTimeout across consecutive rosters while green in CI and isolated |
+| `DEF-061` | `P06 roster @ 249bf314 candidate, proof gate step journal` | MEDIUM | `CLOSED` | CANDIDATE TEST-QUALITY (DEF-060 class): dime-authentication-closure.test.ts runs bundle-generation subprocesses with a declared 30s execFile budget inside the 15s default testTimeout — inner allowance exceeds outer bound, so the test times out under full-suite parallelism (now +305 TOS-009 tests) while passing isolated in 2.5s and green on main CI |
+| `DEF-062` | `P06 roster @ 249bf314 candidate (second attempt), proof step journal` | MEDIUM | `CLOSED` | VERIFIER ENVIRONMENT (structural, terminates the DEF-060/061 class): vitest runs 8 workers on this 8-core host (no cap in vitest.config) while CI's ubuntu-latest exposes 4 vCPUs — per-worker CPU starvation local-only; three distinct subprocess-heavy tests tripped the 15s testTimeout across consecutive rosters while green in CI and isolated |
 
 ## Checkpoints
 
@@ -762,3 +762,5 @@
 | `P07` | **DO NOT PROCEED — blocking: DEF-047 (shared test-surface instability prevents asserting zero_flaky_mandatory). DB parity itself PROVEN: digest-bound mysql 8.4.11, migration replay to 0134, 10 files/92 tests, zero residue; DEF-034 CLOSED** | 2026-08-10T18:37:18.174Z | `f01e7bf16e52` `e688f054502d` |
 | `P06` | **DO NOT PROCEED — blocking: DEF-050 (no candidate: origin/main advanced to 29a4a97e and conflicts on pnpm-lock.yaml), DEF-047 (root cause established and remediated via DEF-049, but the 5-run determinism campaign requires the blocked candidate)** | 2026-08-10T19:28:40.157Z | `71abf520c025` |
 | `P07` | **DO NOT PROCEED — blocking: DEF-050, DEF-047. DB parity evidence is real but now stale-based: it binds to 7fa4b3fe and origin/main has moved to 29a4a97e** | 2026-08-10T19:28:40.241Z | `9d23daccdf9b` |
+| `P06` | **ACCEPT — seven-term predicate TRUE at base 249bf314, integration 61369e77, remediations 114052b3+77594d5a, contract b594ebd9 (byte-identical across the base move): 29/29 mandatory units closed; roster blocking 0 with #proof PASS; ASSURANCE 8/8 PROVEN coverage 6/6; regression green (negatives 56/56, scripts suite, prettier, ledger verify, conformance+3 audits, tsc); open defects all non-blocking advisories (DEF-045 LOW, DEF-046 LOW, DEF-053 non-attributed); freshness barrier PASS at the acceptance record (FINAL_MAIN_SHA == FROZEN_BASE_SHA == 249bf314)** | 2026-08-12T07:30:04.789Z | `569c4c0f76a6` `d09ed6edf0b2` `239f7adf2711` |
+| `P07` | **ACCEPT — seven-term predicate TRUE at base 249bf314: 24/24 mandatory units closed; P07 3/3 PASS at this base (test 214.3s, coverage 163.7s, db-tests 26.8s = 10 files/92 tests, MySQL 8.4.11 digest-bound, zero residue); DB surface byte-identical from 43a33c84 through 249bf314 so the TEST03 same-SHA demonstration and REG01 three-run series remain valid and db-tests reproduced 10/92 again; zero open defects attributed to P07; freshness barrier PASS at the acceptance record** | 2026-08-12T07:30:04.832Z | `0b40d19bc23c` `d884ee630a6a` |
