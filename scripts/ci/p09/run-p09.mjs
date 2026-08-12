@@ -237,8 +237,7 @@ export function knipGate({ worktree }) {
         // without DATABASE_URL; a syntactically-valid stub keeps the config
         // side-effect-free and the gate hermetic (no DB is ever contacted)
         DATABASE_URL:
-          process.env.DATABASE_URL ??
-          "mysql://stub:stub@127.0.0.1:3306/stub",
+          process.env.DATABASE_URL ?? "mysql://stub:stub@127.0.0.1:3306/stub",
       },
       maxBuffer: 32 * 1024 * 1024,
     }
@@ -366,9 +365,13 @@ export function neg01SyntheticMigration(worktree, baseSha) {
   git(["add", "drizzle/9999_p09_neg01_synthetic.sql"], worktree);
   git(
     [
-      "-c", "user.email=ci-verify@local",
-      "-c", "user.name=ci-verify",
-      "commit", "-qm", "p09 NEG01 synthetic migration (disposable)",
+      "-c",
+      "user.email=ci-verify@local",
+      "-c",
+      "user.name=ci-verify",
+      "commit",
+      "-qm",
+      "p09 NEG01 synthetic migration (disposable)",
     ],
     worktree
   );
@@ -497,10 +500,17 @@ async function main() {
       );
     }
     if (mode === "all" || mode === "negatives") {
-      results.gates.neg01 = neg01SyntheticMigration(worktree, identity.base_sha);
-      console.log(`[p09] NEG01 synthetic migration reddens: ${results.gates.neg01.ok}`);
+      results.gates.neg01 = neg01SyntheticMigration(
+        worktree,
+        identity.base_sha
+      );
+      console.log(
+        `[p09] NEG01 synthetic migration reddens: ${results.gates.neg01.ok}`
+      );
       results.gates.neg02 = neg02TypeMismatch(worktree);
-      console.log(`[p09] NEG02 type mismatch reddens: ${results.gates.neg02.ok}`);
+      console.log(
+        `[p09] NEG02 type mismatch reddens: ${results.gates.neg02.ok}`
+      );
       results.gates.neg03 = neg03DeadExport(worktree);
       console.log(`[p09] NEG03 dead export reddens: ${results.gates.neg03.ok}`);
       if (!existsSync(path.join(worktree, "dist/public/index.html"))) {

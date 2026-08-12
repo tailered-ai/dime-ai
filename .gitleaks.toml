@@ -44,6 +44,7 @@ regexes = [
   '''^(test|mock|dummy|fake|example)[_-]''',   # e.g. test_jwt_secret_32_bytes_minimum_x
   '''^password$''',                            # the literal docs placeholder mysql://user:password@host
   '''^pass$''',                                # same placeholder, short form mysql://user:pass@host
+  '''^stub$''',                                # ci-verify hermetic stub: mysql://stub:stub@127.0.0.1/stub (knip config-load, no DB contacted)
   '''^abc123def456$''',                        # dummy Discord invite code in discordInvite.test.ts
 
   # Fixtures inside the vendored plugin marketplaces (.claude/plugins-vendored/,

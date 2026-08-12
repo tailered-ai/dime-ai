@@ -26,6 +26,12 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+// P01 is the SOLE identity authority (DEF-025/DEF-051 law): head, base, and
+// prospective merge tree come from snapshot.mjs — never resolved here. The
+// provenance audit anchored in snapshot.test.ts enforces this, and caught
+// this module's first draft doing it directly (rehearsal run 3).
+import { resolveBase, resolveHead, writeMergeTree } from "../snapshot.mjs";
+
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
 const CERT_DIR = path.join(REPO_ROOT, ".ci-verify", "certificate");
@@ -40,9 +46,14 @@ function git(args, cwd = REPO_ROOT) {
 // Bindings — every value re-derivable from disk (P10.T01/T02).
 // ---------------------------------------------------------------------------
 export function deriveBindings(options = {}) {
-  const headSha = git(["rev-parse", "HEAD"]);
-  const originMain = options.originMain ?? git(["rev-parse", "origin/main"]);
-  const mergeTree = git(["merge-tree", "--write-tree", originMain, headSha]);
+  const headSha = resolveHead(REPO_ROOT);
+  const originMain =
+    options.originMain ?? resolveBase(REPO_ROOT, { fetch: false }).base_sha;
+  const mergeTree = writeMergeTree(
+    REPO_ROOT,
+    originMain,
+    headSha
+  ).merge_tree_sha;
   const dirtyTracked = git(["status", "--porcelain", "--untracked-files=no"]);
 
   // verifier identity: content hash over every tracked file under scripts/ci
@@ -299,7 +310,8 @@ export function verify(options = {}) {
   // staleness FIRST and CHEAPLY: a moved base is NOT a parity mismatch
   // (P10.NEG02) — and deriving a merge tree against a moved/unknown base
   // must never be attempted (found when NEG02 crashed the first draft)
-  const currentBase = options.originMain ?? git(["rev-parse", "origin/main"]);
+  const currentBase =
+    options.originMain ?? resolveBase(REPO_ROOT, { fetch: false }).base_sha;
   if (currentBase !== c.base_sha) {
     return {
       status: "NOT_COMPARABLE",
@@ -353,11 +365,19 @@ export function verify(options = {}) {
 // explicit developer action (AUTH01 covers availability, not activation).
 // ---------------------------------------------------------------------------
 export function installHook() {
-  const hookPath = path.join(
-    git(["rev-parse", "--git-dir"]),
-    "hooks",
-    "pre-push"
-  );
+  // path lookup without rev-parse (identity commands are P01's alone): the
+  // primary checkout's .git is a directory; a linked worktree's is a gitfile
+  // pointing at its private dir. Hooks live under the COMMON dir's hooks/.
+  const dotGit = path.join(REPO_ROOT, ".git");
+  let gitDir = dotGit;
+  try {
+    const content = readFileSync(dotGit, "utf8");
+    const m = content.match(/^gitdir:\s*(.+)$/m);
+    if (m) gitDir = path.resolve(REPO_ROOT, m[1].trim());
+  } catch {
+    // EISDIR — the normal primary-checkout case
+  }
+  const hookPath = path.join(gitDir, "hooks", "pre-push");
   if (existsSync(hookPath)) {
     return {
       status: "REFUSED",

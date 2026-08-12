@@ -177,3 +177,7 @@ server/wc2026/wc2026Ingester.ts
 # vendored/upstream-styled sources; root prettier must not restyle it, and
 # `pnpm format` must never rewrite the cloudflare-os submodule working tree.
 platform/tailered-os/
+
+# P09 vendored accessibility engine (axe-core, sha256-pinned in vendor/VENDOR.md):
+# restyling a hash-pinned vendored file would break its provenance pin.
+scripts/ci/p09/vendor/
