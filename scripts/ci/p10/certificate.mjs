@@ -296,9 +296,20 @@ export function verify(options = {}) {
   }
   const cert = JSON.parse(bytes.toString("utf8"));
   const c = cert.bindings;
+  // staleness FIRST and CHEAPLY: a moved base is NOT a parity mismatch
+  // (P10.NEG02) — and deriving a merge tree against a moved/unknown base
+  // must never be attempted (found when NEG02 crashed the first draft)
+  const currentBase = options.originMain ?? git(["rev-parse", "origin/main"]);
+  if (currentBase !== c.base_sha) {
+    return {
+      status: "NOT_COMPARABLE",
+      reason: "STALE_BASE",
+      certified: c.base_sha,
+      current: currentBase,
+    };
+  }
   const f = deriveBindings(options);
 
-  // staleness first: a moved base is NOT a parity mismatch (P10.NEG02)
   if (f.base_sha !== c.base_sha) {
     return {
       status: "NOT_COMPARABLE",
@@ -310,11 +321,13 @@ export function verify(options = {}) {
   if (f.dirty_tracked)
     return { status: "VOID", field: "head_sha", reason: "DIRTY_TRACKED_FILES" };
   const FIELDS = [
+    // verifier identity FIRST: a verifier change is the more specific void
+    // (any commit also moves head_sha, which would otherwise shadow it)
+    "verifier_hash",
     "head_sha",
     "merge_tree_sha",
     "lockfile_sha256",
     "contract_sha256",
-    "verifier_hash",
     "assurance_sha256",
     "ledger_sha256",
   ];
