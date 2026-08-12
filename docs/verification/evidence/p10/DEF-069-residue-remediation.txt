@@ -1,0 +1,62 @@
+=== post-remediation inventory 2026-08-12T13:43:11Z ===
+--- git worktree list (full) ---
+/Users/danielwalker/src/ai-sports-betting-dime-ai                                                                                        1a3335ff8 [feat/ci-verify-control-plane]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/2ab52971-c699-45e5-8fbe-ad2055149fb7/scratchpad/gstack-wt      91b13daa1 [chore/gstack-global-bootstrap]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/5d9ce9d5-1e18-4c39-9094-32afb1636471/scratchpad/dryrun1        705c9898e (detached HEAD)
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/869ea261-a8ba-47a8-9dc9-fd2a31ec2a52/scratchpad/wt-closeout    b61578285 [closure/session2-nfl-db-integrity]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/869ea261-a8ba-47a8-9dc9-fd2a31ec2a52/scratchpad/wt-terminal    1caddb40c [closure/session2-nfl-db-terminal]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/95fa9e12-83cd-4739-93af-9abbc5c7021b/scratchpad/fals2          9020f5c37 (detached HEAD)
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/a3b8a9e1-0ee4-43e1-aab1-4132a63cd8d1/scratchpad/wt-figma       c01dca443 [chore/remove-figma-plugin]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ba0c4cae-5be0-48dc-93e1-7685ef44bb2f/scratchpad/wt-m203        5ea575dff [feat/m203-dry-run-harness]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/cd9fc09a-e877-42ba-acc2-09292e9fa5c4/scratchpad/closeout       4d68c4224 [harden/schema-closeout]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/cd9fc09a-e877-42ba-acc2-09292e9fa5c4/scratchpad/fixclaim       85527604b [fix/retract-false-screenshots-finding]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/cd9fc09a-e877-42ba-acc2-09292e9fa5c4/scratchpad/osbacklog      a7f774057 [docs/dr014-premise-check-and-bundle-gap]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ee8261a0-b4a7-4423-b564-cf57b9ff5795/scratchpad/wt-c4          6c12e291a [feat/tos-c4-assurance]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ee8261a0-b4a7-4423-b564-cf57b9ff5795/scratchpad/wt-embed       aaffe958d [chore/embed-tailered-os]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ee8261a0-b4a7-4423-b564-cf57b9ff5795/scratchpad/wt-flips       7ee54a440 [chore/tos-001-verified-flips]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ee8261a0-b4a7-4423-b564-cf57b9ff5795/scratchpad/wt-ledger      32de57477 [feat/tos-oneshot-ledger]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ee8261a0-b4a7-4423-b564-cf57b9ff5795/scratchpad/wt-og6         c05fa67cb [feat/tos-009-og6-activation]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ee8261a0-b4a7-4423-b564-cf57b9ff5795/scratchpad/wt-og6r2       759000a92 [feat/tos-009-og6-r2-authority]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ee8261a0-b4a7-4423-b564-cf57b9ff5795/scratchpad/wt-tos001      4858395a5 [feat/tos-001-authority-manifest]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ee8261a0-b4a7-4423-b564-cf57b9ff5795/scratchpad/wt-tos006      a1c245acf [feat/tos-006-pr-contract]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ee8261a0-b4a7-4423-b564-cf57b9ff5795/scratchpad/wt-tos007      8fa40243f [feat/tos-007-context-resolver]
+/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/ee8261a0-b4a7-4423-b564-cf57b9ff5795/scratchpad/wt-tosdeploy   249bf314c (detached HEAD)
+/Users/danielwalker/Documents/Codex/2026-07-24/deep-research-do-a-deep-research-2/work/ai-sports-betting-dime-ai-foundation-v1-ownership 54711bf33 [agent/foundation-v1-ownership-approval]
+/Users/danielwalker/src/ai-sports-betting-dime-ai-baseline-eval                                                                          ecf0adbab (detached HEAD)
+/Users/danielwalker/src/ai-sports-betting-dime-ai-dk03110-eval                                                                           ecf0adbab (detached HEAD)
+/Users/danielwalker/src/ai-sports-betting-dime-ai-foundation-reviewer-authority-readiness                                                4f2fafc65 [agent/foundation-reviewer-authority-readiness]
+/Users/danielwalker/src/ai-sports-betting-dime-ai-perf-fix                                                                               b26a027b7 [codex/fix-perf-harness-control]
+/Users/danielwalker/src/ai-sports-betting-dime-ai-pr200                                                                                  075af53bf [agent/restore-dime-1-0-llama31-foundation]
+/Users/danielwalker/src/ai-sports-betting-dime-ai-rc4-eval                                                                               ecf0adbab (detached HEAD)
+/Users/danielwalker/src/ai-sports-betting-dime-ai/.claude/worktrees/feat+feed-desktop-refine                                             1864e26e0 [feat/feed-desktop-refine]
+/Users/danielwalker/src/dime-avenue-toggle                                                                                               eca27be03 [feat/chat-avenue-toggle]
+/Users/danielwalker/src/dime-cli                                                                                                         fab41eda7 [test/bet-tracker-display-helpers]
+/Users/danielwalker/src/dime-e2e                                                                                                         1b2806b75 [chore/gate-and-alarm-verification]
+/Users/danielwalker/src/dime-fix                                                                                                         cfdeb729d [fix/parlay-grading-coverage]
+/Users/danielwalker/src/dime-fix2                                                                                                        f4688241e [fix/parlay-payout-and-autograde]
+/Users/danielwalker/src/dime-int                                                                                                         73d0d4040 [feat/bet-tracker-integration]
+/Users/danielwalker/src/dime-nfl                                                                                                         f55902f6e [feat/grading-sport-coverage]
+/Users/danielwalker/src/dime-poll                                                                                                        fe4838873 [fix/parlay-poller-coverage]
+/Users/danielwalker/src/dime-prd                                                                                                         cfe272a8f [feat/tracker-scale]
+/Users/danielwalker/src/dime-pre                                                                                                         5ff7c35cf [feat/tracker-parlays-wire]
+/Users/danielwalker/src/dime-qm-integration                                                                                              2f4ce1fe0 [feat/sitewide-font-law]
+/Users/danielwalker/src/dime-remediation-wt                                                                                              fbc4b2e69 [closure/session5-gate-manifest]
+/Users/danielwalker/src/dime-ui                                                                                                          6c801fe6e [feat/parlay-entry-ui]
+/Users/danielwalker/src/dime-ui2                                                                                                         d452e0779 [fix/parlay-entry-ux]
+/Users/danielwalker/src/dime-units                                                                                                       a343cf718 [fix/parlay-towin-units]
+/Users/danielwalker/src/dime-units2                                                                                                      d478e39e8 [feat/units-only-for-subscribers]
+--- .ci-verify/runs contents ---
+total 0
+drwxr-xr-x@  9 danielwalker  staff  288 Aug 12 04:44 .
+drwxr-xr-x@ 28 danielwalker  staff  896 Aug 12 02:41 ..
+drwxr-xr-x@  4 danielwalker  staff  128 Aug 12 06:37 2026-08-12T06-07-11-118Z-76505-0
+drwxr-xr-x@  4 danielwalker  staff  128 Aug 12 06:37 2026-08-12T06-21-16-368Z-11882-0
+drwxr-xr-x@  4 danielwalker  staff  128 Aug 12 06:37 2026-08-12T06-28-42-159Z-39569-0
+drwxr-xr-x@  4 danielwalker  staff  128 Aug 12 06:37 2026-08-12T06-56-18-378Z-97750-0
+drwxr-xr-x@  4 danielwalker  staff  128 Aug 12 06:37 2026-08-12T09-42-20-842Z-23442-0
+drwxr-xr-x@  4 danielwalker  staff  128 Aug 12 06:37 2026-08-12T09-46-32-089Z-44293-0
+drwxr-xr-x@  3 danielwalker  staff   96 Aug 12 03:27 2026-08-12T10-26-37-147Z-44889-0
+1.6G
+--- registered ci-verify run worktrees ---
+0
+0

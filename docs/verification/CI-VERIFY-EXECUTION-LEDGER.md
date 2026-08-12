@@ -626,13 +626,13 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P10.T01` | TASK | MANDATORY | `PASS` | 1 | `9b4dc68f23a2` `041f00f78261` | Certificate binding set: head, base, merge_tree, merge_commit, lockfile, contract, verifier, images, env profile, hermetic mode, assurance hash, results by class |
-| `P10.T02` | TASK | MANDATORY | `PASS` | 1 | `9b4dc68f23a2` `1723c8e40cb2` | verify/void logic — recompute every binding from disk |
+| `P10.T01` | TASK | MANDATORY | `PASS` | 1 | `ce96dd2b4341` `041f00f78261` | Certificate binding set: head, base, merge_tree, merge_commit, lockfile, contract, verifier, images, env profile, hermetic mode, assurance hash, results by class |
+| `P10.T02` | TASK | MANDATORY | `PASS` | 1 | `ce96dd2b4341` `1723c8e40cb2` | verify/void logic — recompute every binding from disk |
 | `P10.T03` | TASK | MANDATORY | `PASS` | 1 | `041f00f78261` | Execution-history binding: ledger state at issuance (P00-P09 ACCEPTED plus P10 units through GATE01) |
 | `P10.T04` | TASK | MANDATORY | `PASS` | 1 | `03fc481ddef7` | REMOTE reconciliation against the live ruleset AND classic protection |
 | `P10.T05` | TASK | MANDATORY | `PASS` | 1 | `03fc481ddef7` | CI proof reconciliation guarded by {head, base, merge_tree, contract_hash} — compares merge_tree_sha, never merge_commit_sha |
-| `P10.T06` | TASK | MANDATORY | `PASS` | 1 | `9b4dc68f23a2` `041f00f78261` | Issuance rule |
-| `P10.T07` | TASK | MANDATORY | `PASS` | 1 | `9b4dc68f23a2` `041f00f78261` | Opt-in pre-push hook |
+| `P10.T06` | TASK | MANDATORY | `PASS` | 1 | `ce96dd2b4341` `041f00f78261` | Issuance rule |
+| `P10.T07` | TASK | MANDATORY | `PASS` | 1 | `ce96dd2b4341` `041f00f78261` | Opt-in pre-push hook |
 | `P10.T08` | TASK | MANDATORY | `PASS` | 1 | `041f00f78261` | File evidence into the /eng-loop evidence record |
 | `P10.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | A fully green run issues a certificate that verify accepts |
 | `P10.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `03fc481ddef7` | One real PR reconciles field-for-field against CI's proof artifact |
@@ -741,6 +741,9 @@
 | `DEF-064` | `P09.T05 a11y gate, first control run` | LOW | `OPEN` | CANDIDATE FINDING: .state-pill--pass on the landing page fails WCAG AA color contrast (serious, 1 node) — found by the vendored-axe gate against the BUILT client; baselined under the documented ratchet (recorded, never hidden), fix deferred to UI brand-law work |
 | `DEF-065` | `P10.T04 remote reconciliation` | LOW | `OPEN` | REMOTE DRIFT: the live ruleset added 13-tos-notion-context as a 10th required context mid-program (TOS-009), while the program contract snapshot records 9. The added check is credential-bound (locally NOT_LOCALLY_EXECUTABLE, T13 nonlocal class — same as dependency-review), so local-parity verdicts are unaffected; PRs additionally need it green in CI. Snapshot refresh rides the next contract re-derivation |
 | `DEF-066` | `ci:verify:pr rehearsal attempt 4, proof suite (P05.TEST04 + VER01)` | MEDIUM | `CLOSED` | TWO rehearsal findings: (a) self-test fixture cycles ran git fetch inside the parallel proof suite and collided on git's lock — INFRA-FAIL(BASE_FETCH_FAILED) surfacing as a test failure; (b) the round-2 fix commit modified run-p09.mjs/certificate.mjs/knip.json without reevidencing the P09/P10 units that cite them — VER01 (our own anchor) caught the stale hashes in the committed ledger |
+| `DEF-067` | `closure-audit CI-VERIFY-AUDIT-20260812T131456Z (D9/M-benchmark Q5)` | LOW | `CLOSED` | report.json carries no identity binding: the verify-pr report cannot prove which commit it describes |
+| `DEF-068` | `closure-audit scenario E2: tampered required_contexts + re-pin verified VALID pre-repair (live reproduction)` | HIGH | `CLOSED` | certificate verify compared only 7 hashes: stored display bindings (required_contexts, toolchain, cleanroom, execution_history, verifier_file_count, open_units_all_p10) were never compared |
+| `DEF-069` | `closure-audit E0 preflight inventory` | LOW | `CLOSED` | stale run-dir residue: 7 .ci-verify/runs dirs with 9 registered git worktrees (9.5G) persisted while a zero-worktree-residue claim was reported |
 
 ## Checkpoints
 

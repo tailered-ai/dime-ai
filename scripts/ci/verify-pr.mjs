@@ -16,6 +16,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveBase, resolveHead } from "./snapshot.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..");
@@ -48,6 +49,7 @@ const STAGES = [
       "scripts/ci/p06/p06.test.ts",
       "scripts/ci/p07/p07.test.ts",
       "scripts/ci/selftest/timeout-consistency.test.ts",
+      "scripts/ci/selftest/certificate-binding.test.ts",
     ],
     env: { VITEST_MAX_FORKS: "4", VITEST_MAX_THREADS: "4" },
   },
@@ -56,6 +58,15 @@ const STAGES = [
     cmd: ["node", "scripts/ci/p10/certificate.mjs", "issue"],
   },
 ];
+
+// DEF-067 — the report must prove BY ITSELF which commit it describes;
+// identity comes from P01 (snapshot.mjs), never from raw git here.
+export function identityBindings() {
+  return {
+    head_sha: resolveHead(REPO_ROOT),
+    base_sha: resolveBase(REPO_ROOT, { fetch: false }).base_sha,
+  };
+}
 
 function preflight() {
   const problems = [];
@@ -102,6 +113,8 @@ function main() {
     return;
   }
 
+  Object.assign(report, identityBindings());
+
   for (const stage of STAGES) {
     const started = Date.now();
     const loadBefore = os.loadavg()[0];
@@ -144,6 +157,7 @@ function main() {
     .slice(0, 3)
     .map(s => `${s.id}:${s.wall_s}s`);
   report.verdict ??= "LOCAL_READY_FOR_PR";
+  report.finished_at = new Date().toISOString();
   writeFileSync(
     path.join(OUT, "report.json"),
     JSON.stringify(report, null, 2) + "\n"

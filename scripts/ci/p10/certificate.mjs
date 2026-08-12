@@ -290,6 +290,55 @@ export function issue(options = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// DEF-068 — binding comparison. The ordered hash list voids with the most
+// specific field first; the exhaustive tail closes the class "a stored
+// binding nobody compares": ANY divergence between the stored bindings and
+// the fresh derivation voids with the key name, so a re-pinned certificate
+// with a tampered display binding (required_contexts, toolchain, cleanroom,
+// execution_history, …) can never verify VALID. base_sha (staleness →
+// NOT_COMPARABLE) and dirty_tracked (live-state check) are handled by
+// verify() before this comparison and stay excluded here.
+// ---------------------------------------------------------------------------
+function sortKeysDeep(v) {
+  if (Array.isArray(v)) return v.map(sortKeysDeep);
+  if (v && typeof v === "object")
+    return Object.fromEntries(
+      Object.keys(v)
+        .sort()
+        .map(k => [k, sortKeysDeep(v[k])])
+    );
+  return v;
+}
+
+export function compareBindings(c, f) {
+  const ORDERED = [
+    // verifier identity FIRST: a verifier change is the more specific void
+    // (any commit also moves head_sha, which would otherwise shadow it)
+    "verifier_hash",
+    "head_sha",
+    "merge_tree_sha",
+    "lockfile_sha256",
+    "contract_sha256",
+    "assurance_sha256",
+    "ledger_sha256",
+  ];
+  for (const field of ORDERED) {
+    if (f[field] !== c[field]) return { ok: false, field };
+  }
+  const handled = new Set([...ORDERED, "base_sha", "dirty_tracked"]);
+  const keys = [...new Set([...Object.keys(c), ...Object.keys(f)])].sort();
+  for (const key of keys) {
+    if (handled.has(key)) continue;
+    if (
+      JSON.stringify(sortKeysDeep(c[key])) !==
+      JSON.stringify(sortKeysDeep(f[key]))
+    )
+      return { ok: false, field: key };
+  }
+  return { ok: true };
+}
+
+// ---------------------------------------------------------------------------
 // verify — a SEPARATE process re-derives everything from disk (P10.T02/TEST03).
 // ---------------------------------------------------------------------------
 export function verify(options = {}) {
@@ -332,20 +381,8 @@ export function verify(options = {}) {
   }
   if (f.dirty_tracked)
     return { status: "VOID", field: "head_sha", reason: "DIRTY_TRACKED_FILES" };
-  const FIELDS = [
-    // verifier identity FIRST: a verifier change is the more specific void
-    // (any commit also moves head_sha, which would otherwise shadow it)
-    "verifier_hash",
-    "head_sha",
-    "merge_tree_sha",
-    "lockfile_sha256",
-    "contract_sha256",
-    "assurance_sha256",
-    "ledger_sha256",
-  ];
-  for (const field of FIELDS) {
-    if (f[field] !== c[field]) return { status: "VOID", field };
-  }
+  const cmp = compareBindings(c, f);
+  if (!cmp.ok) return { status: "VOID", field: cmp.field };
   if (f.ledger_sha256 !== f.ledger_pin) {
     return {
       status: "VOID",

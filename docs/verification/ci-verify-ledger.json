@@ -3989,6 +3989,138 @@
       "severity": "MEDIUM",
       "status": "CLOSED",
       "title": "TWO rehearsal findings: (a) self-test fixture cycles ran git fetch inside the parallel proof suite and collided on git's lock — INFRA-FAIL(BASE_FETCH_FAILED) surfacing as a test failure; (b) the round-2 fix commit modified run-p09.mjs/certificate.mjs/knip.json without reevidencing the P09/P10 units that cite them — VER01 (our own anchor) caught the stale hashes in the committed ledger"
+    },
+    {
+      "affected_gate": "ci:verify:pr report artifact",
+      "blast_radius": "artifact interpretation only; no gate verdict was derived from the report",
+      "closed_at": "2026-08-12T13:45:23.664Z",
+      "corrective_action": "verify-pr.mjs stamps head_sha/base_sha via P01 (snapshot.mjs) after preflight and finished_at at write time",
+      "detected_by": "closure-audit CI-VERIFY-AUDIT-20260812T131456Z (D9/M-benchmark Q5)",
+      "evidence": [
+        {
+          "bytes": 720,
+          "path": "docs/verification/evidence/p10/DEF-067-068-retest.log",
+          "sha256": "5d762822a1eaa737628606bfbc571d2664edbd55fe58d490420287932950e16b"
+        },
+        {
+          "bytes": 3877,
+          "path": "scripts/ci/selftest/certificate-binding.test.ts",
+          "sha256": "f7a0aa7d88e859eb8c8236376296e09349934bf7ea4cf9f9e8f61b95c61b9abf"
+        }
+      ],
+      "history": [
+        {
+          "action": "close",
+          "at": "2026-08-12T13:45:23.663Z",
+          "flags": {
+            "blast_radius": "artifact interpretation only; no gate verdict was derived from the report",
+            "corrective_action": "verify-pr.mjs stamps head_sha/base_sha via P01 (snapshot.mjs) after preflight and finished_at at write time",
+            "evidence": [
+              "docs/verification/evidence/p10/DEF-067-068-retest.log",
+              "scripts/ci/selftest/certificate-binding.test.ts"
+            ],
+            "regression_test_id": "P10.RPT01-02 in scripts/ci/selftest/certificate-binding.test.ts",
+            "retest_result": "PASS 9/9 anchors (RPT01 identity equals P01; RPT02 source anchor)",
+            "root_cause": "report assembled from stage results only; no head/base identity was derived or stamped"
+          }
+        }
+      ],
+      "id": "DEF-067",
+      "opened_at": "2026-08-12T13:45:23.590Z",
+      "regression_test_id": "P10.RPT01-02 in scripts/ci/selftest/certificate-binding.test.ts",
+      "retest_result": "PASS 9/9 anchors (RPT01 identity equals P01; RPT02 source anchor)",
+      "root_cause": "report assembled from stage results only; no head/base identity was derived or stamped",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "report.json carries no identity binding: the verify-pr report cannot prove which commit it describes"
+    },
+    {
+      "affected_gate": "scripts/ci/p10/certificate.mjs verify",
+      "blast_radius": "certificate consumers reading stored bindings; issuance path unaffected",
+      "closed_at": "2026-08-12T13:45:23.746Z",
+      "corrective_action": "compareBindings(): ordered hash list first for specific voids, then exhaustive canonical-form (sorted-keys) comparison of every remaining stored binding key; any divergence voids with the key name",
+      "detected_by": "closure-audit scenario E2: tampered required_contexts + re-pin verified VALID pre-repair (live reproduction)",
+      "evidence": [
+        {
+          "bytes": 720,
+          "path": "docs/verification/evidence/p10/DEF-067-068-retest.log",
+          "sha256": "5d762822a1eaa737628606bfbc571d2664edbd55fe58d490420287932950e16b"
+        },
+        {
+          "bytes": 3877,
+          "path": "scripts/ci/selftest/certificate-binding.test.ts",
+          "sha256": "f7a0aa7d88e859eb8c8236376296e09349934bf7ea4cf9f9e8f61b95c61b9abf"
+        }
+      ],
+      "history": [
+        {
+          "action": "close",
+          "at": "2026-08-12T13:45:23.745Z",
+          "flags": {
+            "blast_radius": "certificate consumers reading stored bindings; issuance path unaffected",
+            "corrective_action": "compareBindings(): ordered hash list first for specific voids, then exhaustive canonical-form (sorted-keys) comparison of every remaining stored binding key; any divergence voids with the key name",
+            "evidence": [
+              "docs/verification/evidence/p10/DEF-067-068-retest.log",
+              "scripts/ci/selftest/certificate-binding.test.ts"
+            ],
+            "regression_test_id": "P10.BIND01-07 in scripts/ci/selftest/certificate-binding.test.ts",
+            "retest_result": "PASS — BIND03 reproduces the exact E2 tamper and voids field=required_contexts; real verify path remains fail-closed pre-commit (VOID DIRTY_TRACKED_FILES)",
+            "root_cause": "verify used a fixed FIELDS list of 7 hashes; every other stored binding was display data a tamper could rewrite without voiding"
+          }
+        }
+      ],
+      "id": "DEF-068",
+      "opened_at": "2026-08-12T13:45:23.702Z",
+      "regression_test_id": "P10.BIND01-07 in scripts/ci/selftest/certificate-binding.test.ts",
+      "retest_result": "PASS — BIND03 reproduces the exact E2 tamper and voids field=required_contexts; real verify path remains fail-closed pre-commit (VOID DIRTY_TRACKED_FILES)",
+      "root_cause": "verify used a fixed FIELDS list of 7 hashes; every other stored binding was display data a tamper could rewrite without voiding",
+      "severity": "HIGH",
+      "status": "CLOSED",
+      "title": "certificate verify compared only 7 hashes: stored display bindings (required_contexts, toolchain, cleanroom, execution_history, verifier_file_count, open_units_all_p10) were never compared"
+    },
+    {
+      "affected_gate": "P01 snapshot run-dir lifecycle",
+      "blast_radius": "disk + git worktree namespace; no gate verdict affected",
+      "closed_at": "2026-08-12T13:45:23.830Z",
+      "corrective_action": "manual remediation: run metadata preserved to audit evidence, all 9 stale worktree registrations removed, git worktree prune run; narrative corrected in the audit master report; stale-run-dir reaper with liveness check recorded as automation candidate AUT-13",
+      "detected_by": "closure-audit E0 preflight inventory",
+      "evidence": [
+        {
+          "bytes": 721,
+          "path": "docs/verification/evidence/p10/DEF-069-residue-before.txt",
+          "sha256": "78bb077116f85ac8772f4ad14c657b0d06705120c0afa418d898c8b1fa775343"
+        },
+        {
+          "bytes": 8820,
+          "path": "docs/verification/evidence/p10/DEF-069-residue-remediation.txt",
+          "sha256": "72d7051a0d146352a4c52320f0b34559786dc10e4e4c83fa4e71db162626e11e"
+        }
+      ],
+      "history": [
+        {
+          "action": "close",
+          "at": "2026-08-12T13:45:23.829Z",
+          "flags": {
+            "blast_radius": "disk + git worktree namespace; no gate verdict affected",
+            "corrective_action": "manual remediation: run metadata preserved to audit evidence, all 9 stale worktree registrations removed, git worktree prune run; narrative corrected in the audit master report; stale-run-dir reaper with liveness check recorded as automation candidate AUT-13",
+            "evidence": [
+              "docs/verification/evidence/p10/DEF-069-residue-before.txt",
+              "docs/verification/evidence/p10/DEF-069-residue-remediation.txt"
+            ],
+            "regression_test_id": "inventory evidence only (no code change)",
+            "retest_result": "PASS — zero .ci-verify worktree registrations; .ci-verify 9.5G -> 1.6G",
+            "root_cause": "run-dir cleanup runs in process exit handlers: hard-killed runs skip them, and keepRunDir fixture runs retain full worktrees; the prior zero-residue narrative did not measure the worktree class"
+          }
+        }
+      ],
+      "id": "DEF-069",
+      "opened_at": "2026-08-12T13:45:23.789Z",
+      "regression_test_id": "inventory evidence only (no code change)",
+      "retest_result": "PASS — zero .ci-verify worktree registrations; .ci-verify 9.5G -> 1.6G",
+      "root_cause": "run-dir cleanup runs in process exit handlers: hard-killed runs skip them, and keepRunDir fixture runs retain full worktrees; the prior zero-residue narrative did not measure the worktree class",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "stale run-dir residue: 7 .ci-verify/runs dirs with 9 registered git worktrees (9.5G) persisted while a zero-worktree-residue claim was reported"
     }
   ],
   "gate_results": [],
@@ -12740,9 +12872,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 15098,
+          "bytes": 16604,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "9b4dc68f23a2c7a188789a87508de3806393a724546e8bc330e71571546b80de"
+          "sha256": "ce96dd2b4341057dc24715cd351b60cdd8b7a2ff539c9fdf859be319aca244c4"
         },
         {
           "bytes": 3774,
@@ -12757,7 +12889,8 @@
       "kind": "TASK",
       "negative_validation": null,
       "notes": [
-        "REEVIDENCE 2026-08-12T10:24:50.754Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
+        "REEVIDENCE 2026-08-12T10:24:50.754Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261",
+        "REEVIDENCE 2026-08-12T13:45:39.185Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
       ],
       "phase": "P10",
       "remediation": null,
@@ -12775,9 +12908,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 15098,
+          "bytes": 16604,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "9b4dc68f23a2c7a188789a87508de3806393a724546e8bc330e71571546b80de"
+          "sha256": "ce96dd2b4341057dc24715cd351b60cdd8b7a2ff539c9fdf859be319aca244c4"
         },
         {
           "bytes": 280,
@@ -12792,7 +12925,8 @@
       "kind": "TASK",
       "negative_validation": null,
       "notes": [
-        "REEVIDENCE 2026-08-12T10:24:50.796Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-negatives.log@1723c8e40cb2"
+        "REEVIDENCE 2026-08-12T10:24:50.796Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-negatives.log@1723c8e40cb2",
+        "REEVIDENCE 2026-08-12T13:45:39.253Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-negatives.log@1723c8e40cb2"
       ],
       "phase": "P10",
       "remediation": null,
@@ -12894,9 +13028,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 15098,
+          "bytes": 16604,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "9b4dc68f23a2c7a188789a87508de3806393a724546e8bc330e71571546b80de"
+          "sha256": "ce96dd2b4341057dc24715cd351b60cdd8b7a2ff539c9fdf859be319aca244c4"
         },
         {
           "bytes": 3774,
@@ -12911,7 +13045,8 @@
       "kind": "TASK",
       "negative_validation": null,
       "notes": [
-        "REEVIDENCE 2026-08-12T10:24:50.840Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
+        "REEVIDENCE 2026-08-12T10:24:50.840Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261",
+        "REEVIDENCE 2026-08-12T13:45:39.295Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
       ],
       "phase": "P10",
       "remediation": null,
@@ -12929,9 +13064,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 15098,
+          "bytes": 16604,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "9b4dc68f23a2c7a188789a87508de3806393a724546e8bc330e71571546b80de"
+          "sha256": "ce96dd2b4341057dc24715cd351b60cdd8b7a2ff539c9fdf859be319aca244c4"
         },
         {
           "bytes": 3774,
@@ -12946,7 +13081,8 @@
       "kind": "TASK",
       "negative_validation": null,
       "notes": [
-        "REEVIDENCE 2026-08-12T10:24:50.887Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
+        "REEVIDENCE 2026-08-12T10:24:50.887Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261",
+        "REEVIDENCE 2026-08-12T13:45:39.339Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
       ],
       "phase": "P10",
       "remediation": null,
