@@ -32,7 +32,7 @@
 | `P05` | ASSURANCE — the self-test framework | `ACCEPTED` | 27 / 27 | 0 | 0 |
 | `P06` | PARITY — static, security, supply chain | `ACCEPTED` | 29 / 29 | 0 | 0 |
 | `P07` | PARITY — test and data | `ACCEPTED` | 24 / 24 | 0 | 0 |
-| `P08` | CLEANROOM — image identity, container build, dual runtime proof | `NOT_STARTED` | 0 / 23 | 0 | 0 |
+| `P08` | CLEANROOM — image identity, container build, dual runtime proof | `IN_PROGRESS` | 0 / 23 | 0 | 0 |
 | `P09` | HARDENING | `NOT_STARTED` | 0 / 17 | 0 | 0 |
 | `P10` | Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR | `NOT_STARTED` | 0 / 22 | 0 | 0 |
 
@@ -429,7 +429,7 @@
 | `P06.T11` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | Gate: ai-eval set with env -u DATABASE_URL |
 | `P06.T12` | TASK | MANDATORY | `PASS` | 1 | `bf67f9dcfd4f` | CI-ONLY registration with explicit reasons |
 | `P06.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | All implemented gates green on a clean snapshot |
-| `P06.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `e19d24fa6014` `d09ed6edf0b2` | Executed command is byte-for-byte identical to the frozen contract |
+| `P06.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `2757b2258efd` `d09ed6edf0b2` | Executed command is byte-for-byte identical to the frozen contract |
 | `P06.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the typecheck gate for its own reason |
 | `P06.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `SKIPPED_DECLARED` | 1 | — | Poison fixture reddens the format gate for its own reason |
 | `P06.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the semgrep gate for its own reason |
@@ -440,8 +440,8 @@
 | `P06.NEG08` | NEGATIVE_VALIDATION | MANDATORY | `SKIPPED_DECLARED` | 1 | — | Poison fixture reddens the federation-docs gate for its own reason |
 | `P06.NEG09` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the migration-hygiene gate for its own reason |
 | `P06.NEG10` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the ai-eval gate for its own reason |
-| `P06.NEG11` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `e19d24fa6014` `f6276830197b` | Missing tool yields BLOCKED, never green |
-| `P06.NEG12` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `e19d24fa6014` `ebf314113563` | Tool version differing from the contract pin yields CONTRACT-DRIFT |
+| `P06.NEG11` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `2757b2258efd` `f6276830197b` | Missing tool yields BLOCKED, never green |
+| `P06.NEG12` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `2757b2258efd` `ebf314113563` | Tool version differing from the contract pin yields CONTRACT-DRIFT |
 | `P06.AUD01` | AUDIT | MANDATORY | `PASS` | 1 | `bf67f9dcfd4f` `7cec2751f4db` | Audit: network is permitted only in P06.T01 |
 | `P06.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `d09ed6edf0b2` `807e44769298` | Self-test coverage for this phase is 100 percent |
 | `P06.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `71abf520c025` `d09ed6edf0b2` | P06 checkpoint recorded |
@@ -476,22 +476,22 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | `P07.T01` | TASK | MANDATORY | `PASS` | 1 | `e688f054502d` `f9a0bb53e8a9` | MySQL fixture pinned by image digest |
 | `P07.T02` | TASK | MANDATORY | `PASS` | 1 | `e688f054502d` `d884ee630a6a` | Reconciled migration replay on the fresh database |
-| `P07.T03` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `ee00e1e92bc0` | DB-suite discovery via the SKIP_DB_IN_CI marker |
-| `P07.T04` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `ee00e1e92bc0` | Cross-check discovery against ci.yml's hardcoded suite list |
+| `P07.T03` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `4ddb0099b9c1` | DB-suite discovery via the SKIP_DB_IN_CI marker |
+| `P07.T04` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `4ddb0099b9c1` | Cross-check discovery against ci.yml's hardcoded suite list |
 | `P07.T05` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `d884ee630a6a` | Non-DB parallel phase |
 | `P07.T06` | TASK | MANDATORY | `PASS` | 1 | `e688f054502d` `f9a0bb53e8a9` | DB serial phase using the P04.T10 lane sentinel |
-| `P07.T07` | TASK | MANDATORY | `PASS` | 1 | `cb3bab798c93` `ee00e1e92bc0` | Environment-failure gate integration |
-| `P07.T08` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `ee00e1e92bc0` | Collection-collapse floor enforcement |
+| `P07.T07` | TASK | MANDATORY | `PASS` | 1 | `cb3bab798c93` `4ddb0099b9c1` | Environment-failure gate integration |
+| `P07.T08` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `4ddb0099b9c1` | Collection-collapse floor enforcement |
 | `P07.T09` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `9d02e78f27a4` | Report merge into a single result document |
-| `P07.T10` | TASK | MANDATORY | `PASS` | 1 | `9d23daccdf9b` `ee00e1e92bc0` | Diff-aware gates read the base SHA from snapshot.json |
+| `P07.T10` | TASK | MANDATORY | `PASS` | 1 | `9d23daccdf9b` `4ddb0099b9c1` | Diff-aware gates read the base SHA from snapshot.json |
 | `P07.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `d884ee630a6a` | Full suite green on a clean snapshot |
 | `P07.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `e688f054502d` `d884ee630a6a` | DB phase ordering matches CI |
 | `P07.TEST03` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `d884ee630a6a` `e688f054502d` | Local results match a CI db-tests run on the same SHA |
-| `P07.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `ee00e1e92bc0` | Suite removed from ci.yml's list yields CONTRACT-DRIFT |
-| `P07.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `ee00e1e92bc0` | Forced collection error is never excusable and yields FAIL |
-| `P07.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `ee00e1e92bc0` `e688f054502d` | Two DB-partitioned gates in one run record disjoint lane intervals, zero sentinel violations, and are serialized rather than rejected |
-| `P07.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `ee00e1e92bc0` | Impact-based test selection attempted in PARITY is refused |
-| `P07.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `89e487fe0c20` `ee00e1e92bc0` | Dirty tree plus a diff-aware coverage gate yields BLOCKED |
+| `P07.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `4ddb0099b9c1` | Suite removed from ci.yml's list yields CONTRACT-DRIFT |
+| `P07.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `4ddb0099b9c1` | Forced collection error is never excusable and yields FAIL |
+| `P07.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `4ddb0099b9c1` `e688f054502d` | Two DB-partitioned gates in one run record disjoint lane intervals, zero sentinel violations, and are serialized rather than rejected |
+| `P07.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `4ddb0099b9c1` | Impact-based test selection attempted in PARITY is refused |
+| `P07.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `89e487fe0c20` `4ddb0099b9c1` | Dirty tree plus a diff-aware coverage gate yields BLOCKED |
 | `P07.REG01` | REGRESSION | MANDATORY | `PASS` | 1 | `d884ee630a6a` `f9a0bb53e8a9` | Three consecutive runs produce identical results |
 | `P07.AUD01` | AUDIT | ADVISORY | `NOT_STARTED` | 0 | — | ADVISORY: optional reproduction of the historical Incident 42 race — never an acceptance input |
 | `P07.EV01` | EVIDENCE | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `d884ee630a6a` | Evidence: merged vitest results |
@@ -502,7 +502,7 @@
 
 ## P08 — CLEANROOM — image identity, container build, dual runtime proof
 
-**State:** `NOT_STARTED`
+**State:** `IN_PROGRESS`
 
 **Assurance property:** The repository's container build contract reproduces, and the built artifact is proven on both the failure path and the healthy path.
 
@@ -666,7 +666,7 @@
 
 | ID | Required by | Allowed values | Status | Value |
 | --- | --- | --- | --- | --- |
-| `DEC-001` | `P08.AUTH01` | PIN_BY_DIGEST \| RECORD_ONLY | `PENDING` | — |
+| `DEC-001` | `P08.AUTH01` | PIN_BY_DIGEST \| RECORD_ONLY | `RECORDED` | `RECORD_ONLY` |
 | `DEC-002` | `P09.AUTH01` | BLOCKING \| ADVISORY | `PENDING` | — |
 | `DEC-003` | `DEF-002` | DOCUMENT_LIVE_STATE \| RESTORE_CLASSIC_PROTECTION | `RECORDED` | `DOCUMENT_LIVE_STATE` |
 | `DEC-004` | `DEF-003` | PINNED_DEV_DEPENDENCY \| P06_CLASS_PINNED_TOOL \| DEPENDENCY_FREE_SCANNER | `RECORDED` | `PINNED_DEV_DEPENDENCY` |

@@ -48,6 +48,7 @@ import {
   PROVISIONING_PATTERNS,
 } from "./boundary.mjs";
 import { measureCapabilities, provisionCandidate } from "./capability.mjs";
+import { hostLoadPreflight } from "./preflight.mjs";
 import { bootstrapTools } from "./tools.mjs";
 import { buildGitleaksAdapterStep } from "./adapters.mjs";
 
@@ -113,6 +114,28 @@ const NETWORK_GATES = new Set([
 ]);
 
 /** Resolve GHA expressions strictly from P01 candidate identity. */
+/**
+ * Gate PATH construction — a NEVER-REGRESS invariant (regression anchors in
+ * p06.test.ts ENV01/ENV02): governed downloaded tools first (so e.g. host
+ * gitleaks 8.30.1 can never shadow the governed 8.24.3), then the
+ * orchestrator's own node (the measured 22.x matching CI's setup-node pin —
+ * /usr/local/bin holds a stale node 24 that must never shadow it), then GNU
+ * tar (ubuntu-runner parity for `tar --sort=name`, which bsdtar rejects),
+ * then repo/user bins, and only after ALL of those the inherited PATH.
+ * Shared by the P07 runner — one source of truth for tool identity order.
+ */
+export const GNU_TAR_DIR = "/opt/homebrew/opt/gnu-tar/libexec/gnubin";
+export function buildGatePathEnv(governedDirs = []) {
+  return [
+    ...governedDirs,
+    path.dirname(process.execPath),
+    GNU_TAR_DIR,
+    path.join(REPO_ROOT, "node_modules", ".bin"),
+    `${process.env.HOME}/.local/bin`,
+    process.env.PATH,
+  ].join(":");
+}
+
 export function resolveExpressions(text, ctx) {
   if (typeof text !== "string") return text;
   return text
@@ -476,22 +499,11 @@ export async function runOneGate({
   };
   writeFileSync(specPath, JSON.stringify(driverSpec, null, 2) + "\n");
 
-  // PATH: governed downloaded tools first (so e.g. host gitleaks 8.30.1 can
-  // never shadow the governed 8.24.3), then the orchestrator's own node (the
-  // measured 22.x matching CI's setup-node pin — /usr/local/bin holds a stale
-  // node 24 that must never shadow it), then GNU tar (ubuntu-runner parity
-  // for `tar --sort=name`, which bsdtar rejects), then repo/user bins.
-  const governedDirs = (GATE_TOOL_IDS[gateId] ?? [])
-    .map(id => tools.resolved[id]?.path_dir)
-    .filter(Boolean);
-  const pathEnv = [
-    ...governedDirs,
-    path.dirname(process.execPath),
-    "/opt/homebrew/opt/gnu-tar/libexec/gnubin",
-    path.join(REPO_ROOT, "node_modules", ".bin"),
-    `${process.env.HOME}/.local/bin`,
-    process.env.PATH,
-  ].join(":");
+  const pathEnv = buildGatePathEnv(
+    (GATE_TOOL_IDS[gateId] ?? [])
+      .map(id => tools.resolved[id]?.path_dir)
+      .filter(Boolean)
+  );
 
   const run = new ExecutorRun({
     specs: [
@@ -549,6 +561,24 @@ export async function runP06Gates(options = {}) {
   mkdirSync(outDir, { recursive: true });
 
   // Governed tools + measured capability BEFORE any candidate exists.
+  // DEF-049 anchor: refuse to start a roster on a host carrying orphaned
+  // synthetic load generators — an INFRA refusal, never a verdict. Plain
+  // high load is recorded only (concurrent legitimate work is normal; the
+  // DEF-062 worker profile absorbs it).
+  const preflight = hostLoadPreflight();
+  console.log(
+    `[p06] preflight: load ${preflight.loadavg["1m"].toFixed(1)}/${preflight.cores} cores, orphans ${preflight.orphans.length}`
+  );
+  if (preflight.refuse) {
+    throw new Error(
+      `HOST_PREFLIGHT_REFUSED: orphaned load generators detected — ` +
+        preflight.orphans
+          .map(o => `pid=${o.pid} ${o.comm} ${o.pcpu}% ${o.etime}`)
+          .join(", ") +
+        ` (DEF-049 class; kill them or investigate before any campaign)`
+    );
+  }
+
   const tools = bootstrapTools();
   const handle = runSnapshot({ mode: "committed", keepRunDir: true });
   const worktree = handle.paths.worktree;

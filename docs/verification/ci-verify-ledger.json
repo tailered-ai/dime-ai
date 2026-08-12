@@ -196,6 +196,19 @@
       "superseded_blueprint_sha256": "8200d81f2645d7f26a870889581a02175c4cfec5d0b53f8720a7e921db55caed",
       "superseded_ledger_impl_sha256": "bfc19fe6d0ab8bd669367e9c292e1ddc753f4239b2bad677f934bbb149f98e49",
       "superseded_source": "AMD-009"
+    },
+    {
+      "at": "2026-08-12T08:16:47.618Z",
+      "defect": "DEF-062",
+      "evidence": [],
+      "genesis_corrections": [],
+      "id": "AMD-011",
+      "new_blueprint_sha256": "deb2d0635810f381f12d97c3e208f1e814e8c852f40d63573b1826834cb32c61",
+      "new_ledger_impl_sha256": "ca477c52ab9c27ed5a73620eef2e3f608487596de18212bf5e823fca39c6d247",
+      "reason": "Add the narrow reevidence command: re-collect evidence hashes for a unit already at PASS when a cited living file legitimately evolves (test files gaining never-regress anchors). Status can never change; prior hashes are preserved in unit notes; a reason is mandatory. Needed because three P06 units cite p06.test.ts, which gained the ENV/CAP anchor groups",
+      "superseded_blueprint_sha256": "deb2d0635810f381f12d97c3e208f1e814e8c852f40d63573b1826834cb32c61",
+      "superseded_ledger_impl_sha256": "bfc19fe6d0ab8bd669367e9c292e1ddc753f4239b2bad677f934bbb149f98e49",
+      "superseded_source": "AMD-010"
     }
   ],
   "blueprint_version": "1.0.0",
@@ -586,12 +599,19 @@
         "PIN_BY_DIGEST",
         "RECORD_ONLY"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3645,
+          "path": "docs/verification/evidence/COMBINED-P06-P07-HANDOFF.md",
+          "sha256": "62fd7910eac1c32bdc3ef139f0c0bbc50945ba256fe98dfd9333e43c5f315e3c"
+        }
+      ],
       "id": "DEC-001",
+      "recorded_at": "2026-08-12T07:47:50.808Z",
       "required_by": "P08.AUTH01",
-      "status": "PENDING",
+      "status": "RECORDED",
       "title": "Dockerfile base image: pin by digest, or record only",
-      "value": null
+      "value": "RECORD_ONLY"
     },
     {
       "allowed_values": [
@@ -4304,8 +4324,14 @@
         "P08.CP01 recorded"
       ],
       "id": "P08",
-      "state": "NOT_STARTED",
-      "state_history": [],
+      "state": "IN_PROGRESS",
+      "state_history": [
+        {
+          "at": "2026-08-12T07:47:50.868Z",
+          "from": "NOT_STARTED",
+          "to": "IN_PROGRESS"
+        }
+      ],
       "title": "CLEANROOM — image identity, container build, dual runtime proof"
     },
     {
@@ -9506,9 +9532,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 24678,
+          "bytes": 34916,
           "path": "scripts/ci/p06/p06.test.ts",
-          "sha256": "e19d24fa601400297c7e22f95278e91681668abf69e201585ac686d6e00ad1fc"
+          "sha256": "2757b2258efd0ec84831dd7553a761b7efcd840490c6cd3d960e2912022e3c72"
         },
         {
           "bytes": 2680,
@@ -9523,7 +9549,10 @@
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
       "notes": [
-        "missing/failed tool provisioning maps to BLOCKED, never a verdict: p06.test.ts DRV05/DRV06 + TOOL03; observed live as the exit-32 refusal in every roster"
+        "missing/failed tool provisioning maps to BLOCKED, never a verdict: p06.test.ts DRV05/DRV06 + TOOL03; observed live as the exit-32 refusal in every roster",
+        "REEVIDENCE 2026-08-12T08:16:05.651Z: p06.test.ts gained the P06.ENV/P06.CAP never-regress anchor groups (2026-08-12 regression-anchor program); the tests these units cite are unchanged and still pass (45/45) | superseded: scripts/ci/p06/p06.test.ts@e19d24fa6014, docs/verification/evidence/p06/T19-acceptance-roster.log@f6276830197b",
+        "REEVIDENCE 2026-08-12T08:22:02.630Z: p06.test.ts finalized with ENV/CAP/PRE anchor groups (15/15 defect classes anchored) | superseded: scripts/ci/p06/p06.test.ts@5a4d2467d537, docs/verification/evidence/p06/T19-acceptance-roster.log@f6276830197b",
+        "REEVIDENCE 2026-08-12T08:23:05.745Z: final: prettier normalization of the anchor groups (last mutation of this file tonight) | superseded: scripts/ci/p06/p06.test.ts@630d7f9c4135, docs/verification/evidence/p06/T19-acceptance-roster.log@f6276830197b"
       ],
       "phase": "P06",
       "remediation": null,
@@ -9541,9 +9570,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 24678,
+          "bytes": 34916,
           "path": "scripts/ci/p06/p06.test.ts",
-          "sha256": "e19d24fa601400297c7e22f95278e91681668abf69e201585ac686d6e00ad1fc"
+          "sha256": "2757b2258efd0ec84831dd7553a761b7efcd840490c6cd3d960e2912022e3c72"
         },
         {
           "bytes": 3653,
@@ -9558,7 +9587,10 @@
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
       "notes": [
-        "version-pin mismatch surfaces as CONTRACT_DRIFT: governed tool identities derive from contract pins (TOOL01/TOOL02); live drift detection fired during T00 integration when main's workflows changed"
+        "version-pin mismatch surfaces as CONTRACT_DRIFT: governed tool identities derive from contract pins (TOOL01/TOOL02); live drift detection fired during T00 integration when main's workflows changed",
+        "REEVIDENCE 2026-08-12T08:16:06.118Z: p06.test.ts gained the P06.ENV/P06.CAP never-regress anchor groups (2026-08-12 regression-anchor program); the tests these units cite are unchanged and still pass (45/45) | superseded: scripts/ci/p06/p06.test.ts@e19d24fa6014, docs/verification/evidence/p06/T00-integration.md@ebf314113563",
+        "REEVIDENCE 2026-08-12T08:22:02.803Z: p06.test.ts finalized with ENV/CAP/PRE anchor groups (15/15 defect classes anchored) | superseded: scripts/ci/p06/p06.test.ts@5a4d2467d537, docs/verification/evidence/p06/T00-integration.md@ebf314113563",
+        "REEVIDENCE 2026-08-12T08:23:05.871Z: final: prettier normalization of the anchor groups (last mutation of this file tonight) | superseded: scripts/ci/p06/p06.test.ts@630d7f9c4135, docs/verification/evidence/p06/T00-integration.md@ebf314113563"
       ],
       "phase": "P06",
       "remediation": null,
@@ -10004,9 +10036,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 24678,
+          "bytes": 34916,
           "path": "scripts/ci/p06/p06.test.ts",
-          "sha256": "e19d24fa601400297c7e22f95278e91681668abf69e201585ac686d6e00ad1fc"
+          "sha256": "2757b2258efd0ec84831dd7553a761b7efcd840490c6cd3d960e2912022e3c72"
         },
         {
           "bytes": 3472,
@@ -10021,7 +10053,10 @@
       "kind": "POSITIVE_VALIDATION",
       "negative_validation": null,
       "notes": [
-        "SPEC01 proves every contract run-step appears in the driver spec exactly once, verbatim"
+        "SPEC01 proves every contract run-step appears in the driver spec exactly once, verbatim",
+        "REEVIDENCE 2026-08-12T08:16:06.193Z: p06.test.ts gained the P06.ENV/P06.CAP never-regress anchor groups (2026-08-12 regression-anchor program); the tests these units cite are unchanged and still pass (45/45) | superseded: scripts/ci/p06/p06.test.ts@e19d24fa6014, docs/verification/evidence/p06/T19-acceptance.md@d09ed6edf0b2",
+        "REEVIDENCE 2026-08-12T08:22:02.852Z: p06.test.ts finalized with ENV/CAP/PRE anchor groups (15/15 defect classes anchored) | superseded: scripts/ci/p06/p06.test.ts@5a4d2467d537, docs/verification/evidence/p06/T19-acceptance.md@d09ed6edf0b2",
+        "REEVIDENCE 2026-08-12T08:23:05.917Z: final: prettier normalization of the anchor groups (last mutation of this file tonight) | superseded: scripts/ci/p06/p06.test.ts@630d7f9c4135, docs/verification/evidence/p06/T19-acceptance.md@d09ed6edf0b2"
       ],
       "phase": "P06",
       "remediation": null,
@@ -10227,7 +10262,7 @@
         {
           "bytes": 12003,
           "path": "scripts/ci/p07/p07.test.ts",
-          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+          "sha256": "4ddb0099b9c1e9b6cc8a57d973283bafc8d1f1f323ff482f35c40439ddfd3ec2"
         }
       ],
       "exit_requirement": null,
@@ -10236,7 +10271,9 @@
       "inputs": [],
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T08:22:48.252Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: scripts/ci/p07/p07.test.ts@ee00e1e92bc0"
+      ],
       "phase": "P07",
       "remediation": null,
       "started_at": "2026-08-12T06:02:44.946Z",
@@ -10255,7 +10292,7 @@
         {
           "bytes": 12003,
           "path": "scripts/ci/p07/p07.test.ts",
-          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+          "sha256": "4ddb0099b9c1e9b6cc8a57d973283bafc8d1f1f323ff482f35c40439ddfd3ec2"
         }
       ],
       "exit_requirement": null,
@@ -10264,7 +10301,9 @@
       "inputs": [],
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T08:22:48.453Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: scripts/ci/p07/p07.test.ts@ee00e1e92bc0"
+      ],
       "phase": "P07",
       "remediation": null,
       "started_at": "2026-08-12T06:02:45.042Z",
@@ -10283,7 +10322,7 @@
         {
           "bytes": 12003,
           "path": "scripts/ci/p07/p07.test.ts",
-          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+          "sha256": "4ddb0099b9c1e9b6cc8a57d973283bafc8d1f1f323ff482f35c40439ddfd3ec2"
         },
         {
           "bytes": 3069,
@@ -10297,7 +10336,9 @@
       "inputs": [],
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T08:22:48.499Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: scripts/ci/p07/p07.test.ts@ee00e1e92bc0, docs/verification/evidence/p07/T02-db-parity.md@e688f054502d"
+      ],
       "phase": "P07",
       "remediation": null,
       "started_at": "2026-08-12T06:02:45.139Z",
@@ -10316,7 +10357,7 @@
         {
           "bytes": 12003,
           "path": "scripts/ci/p07/p07.test.ts",
-          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+          "sha256": "4ddb0099b9c1e9b6cc8a57d973283bafc8d1f1f323ff482f35c40439ddfd3ec2"
         }
       ],
       "exit_requirement": null,
@@ -10325,7 +10366,9 @@
       "inputs": [],
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T08:22:48.559Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: scripts/ci/p07/p07.test.ts@ee00e1e92bc0"
+      ],
       "phase": "P07",
       "remediation": null,
       "started_at": "2026-08-12T06:02:45.235Z",
@@ -10349,7 +10392,7 @@
         {
           "bytes": 12003,
           "path": "scripts/ci/p07/p07.test.ts",
-          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+          "sha256": "4ddb0099b9c1e9b6cc8a57d973283bafc8d1f1f323ff482f35c40439ddfd3ec2"
         }
       ],
       "exit_requirement": null,
@@ -10359,7 +10402,8 @@
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
       "notes": [
-        "dirty-tree refusal is P01.NEG02, exercised live at the snapshot layer (snapshot.test.ts); committed-mode candidates make diff-aware gates structurally immune to working-tree dirt; the equivalent verdict-safety refusal (evidence base != candidate base) is directly tested as p07 NEG08"
+        "dirty-tree refusal is P01.NEG02, exercised live at the snapshot layer (snapshot.test.ts); committed-mode candidates make diff-aware gates structurally immune to working-tree dirt; the equivalent verdict-safety refusal (evidence base != candidate base) is directly tested as p07 NEG08",
+        "REEVIDENCE 2026-08-12T08:22:48.604Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: scripts/ci/snapshot.test.ts@89e487fe0c20, scripts/ci/p07/p07.test.ts@ee00e1e92bc0"
       ],
       "phase": "P07",
       "remediation": null,
@@ -10489,7 +10533,7 @@
         {
           "bytes": 12003,
           "path": "scripts/ci/p07/p07.test.ts",
-          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+          "sha256": "4ddb0099b9c1e9b6cc8a57d973283bafc8d1f1f323ff482f35c40439ddfd3ec2"
         }
       ],
       "exit_requirement": null,
@@ -10498,7 +10542,9 @@
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T08:22:48.652Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: docs/verification/evidence/p07/T19-acceptance-p07.log@f9a0bb53e8a9, scripts/ci/p07/p07.test.ts@ee00e1e92bc0"
+      ],
       "phase": "P07",
       "remediation": null,
       "started_at": "2026-08-12T06:02:43.862Z",
@@ -10524,7 +10570,7 @@
         {
           "bytes": 12003,
           "path": "scripts/ci/p07/p07.test.ts",
-          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+          "sha256": "4ddb0099b9c1e9b6cc8a57d973283bafc8d1f1f323ff482f35c40439ddfd3ec2"
         }
       ],
       "exit_requirement": null,
@@ -10533,7 +10579,9 @@
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T08:22:48.699Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: docs/verification/evidence/p07/T19-acceptance-p07.log@f9a0bb53e8a9, scripts/ci/p07/p07.test.ts@ee00e1e92bc0"
+      ],
       "phase": "P07",
       "remediation": null,
       "started_at": "2026-08-12T06:02:43.952Z",
@@ -10628,7 +10676,7 @@
         {
           "bytes": 12003,
           "path": "scripts/ci/p07/p07.test.ts",
-          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+          "sha256": "4ddb0099b9c1e9b6cc8a57d973283bafc8d1f1f323ff482f35c40439ddfd3ec2"
         }
       ],
       "exit_requirement": null,
@@ -10638,7 +10686,8 @@
       "kind": "TASK",
       "negative_validation": null,
       "notes": [
-        "the env-failure gate demonstrably fired in production use: it caught the DEF-060 coverage failure with '[env-gate] ci-failure: ... CI tolerates zero test failures'"
+        "the env-failure gate demonstrably fired in production use: it caught the DEF-060 coverage failure with '[env-gate] ci-failure: ... CI tolerates zero test failures'",
+        "REEVIDENCE 2026-08-12T08:22:48.750Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: docs/verification/evidence/p07/T18-def060-coverage-import-timeout.md@cb3bab798c93, scripts/ci/p07/p07.test.ts@ee00e1e92bc0"
       ],
       "phase": "P07",
       "remediation": null,
@@ -10663,7 +10712,7 @@
         {
           "bytes": 12003,
           "path": "scripts/ci/p07/p07.test.ts",
-          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+          "sha256": "4ddb0099b9c1e9b6cc8a57d973283bafc8d1f1f323ff482f35c40439ddfd3ec2"
         }
       ],
       "exit_requirement": null,
@@ -10672,7 +10721,9 @@
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T08:22:48.797Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: docs/verification/evidence/p07/T19-acceptance-p07.log@f9a0bb53e8a9, scripts/ci/p07/p07.test.ts@ee00e1e92bc0"
+      ],
       "phase": "P07",
       "remediation": null,
       "started_at": "2026-08-12T06:02:44.319Z",
@@ -10733,7 +10784,7 @@
         {
           "bytes": 12003,
           "path": "scripts/ci/p07/p07.test.ts",
-          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+          "sha256": "4ddb0099b9c1e9b6cc8a57d973283bafc8d1f1f323ff482f35c40439ddfd3ec2"
         }
       ],
       "exit_requirement": null,
@@ -10743,7 +10794,8 @@
       "kind": "TASK",
       "negative_validation": null,
       "notes": [
-        "diff-aware gates read base only from the P01 snapshot; assertFreshBase compares recorded vs fresh candidate base with no ref resolution (DEF-051 remediation)"
+        "diff-aware gates read base only from the P01 snapshot; assertFreshBase compares recorded vs fresh candidate base with no ref resolution (DEF-051 remediation)",
+        "REEVIDENCE 2026-08-12T08:22:48.851Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: docs/verification/evidence/p07/CP04-checkpoint.md@9d23daccdf9b, scripts/ci/p07/p07.test.ts@ee00e1e92bc0"
       ],
       "phase": "P07",
       "remediation": null,

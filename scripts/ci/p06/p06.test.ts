@@ -78,7 +78,7 @@ function runDriver(
   const child = spawnSync("node", [DRIVER, specPath], {
     encoding: "utf8",
     env: { ...process.env, CI_VERIFY_STEP_DIR: stepDir },
-    timeout: 60_000,
+    timeout: 15_000,
   });
   const journalPath = path.join(stepDir, "steps.json");
   const journal = existsSync(journalPath)
@@ -756,5 +756,275 @@ describe("P06.SPEC spec-construction totality (§13.18 partial-subcheck law)", (
     expect(analyzeMixed("pnpm install --frozen-lockfile", ["node-deps"])).toBe(
       false
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// P06.ENV / P06.CAP — never-regress anchors for the environment-fidelity
+// defect classes found across P06-P08 (2026-08-12 regression-anchor audit).
+// Each test exists so that REVERTING a specific fix turns the suite red:
+//   ENV01 node-version shadowing        (stale /usr/local/bin node)
+//   ENV02 macOS bsdtar vs GNU tar       (ubuntu-runner parity)
+//   ENV03 AF_UNIX short TMPDIR + DEF-062 vitest worker profile
+//   ENV04 contract-declared env still supersedes the DEF-062 injection
+//   CAP01 physical in-candidate pnpm install, exact argv (DEF-031/033)
+//   CAP02 submodule materialization      (DEF-057)
+// ---------------------------------------------------------------------------
+// @ts-expect-error — plain .mjs module without type declarations
+import { buildGatePathEnv, GNU_TAR_DIR } from "./run-gates.mjs";
+// @ts-expect-error — plain .mjs module without type declarations
+import { provisionCandidate } from "./capability.mjs";
+
+const CAPABILITY = path.join(HERE, "capability.mjs");
+
+describe("P06.ENV environment-fidelity anchors", () => {
+  it("ENV01: the orchestrator's own node dir precedes EVERY inherited PATH segment — /usr/local/bin can never shadow it", () => {
+    const saved = process.env.PATH;
+    process.env.PATH = "/usr/local/bin:/usr/bin:/bin";
+    try {
+      const segs = buildGatePathEnv(["/governed/tool/bin"]).split(":");
+      const nodeDir = path.dirname(process.execPath);
+      expect(segs[0]).toBe("/governed/tool/bin"); // governed tools outrank all
+      expect(segs.indexOf(nodeDir)).toBe(1); // node immediately after
+      expect(segs.indexOf(nodeDir)).toBeLessThan(
+        segs.indexOf("/usr/local/bin")
+      );
+      expect(segs.indexOf(nodeDir)).toBeLessThan(segs.indexOf("/usr/bin"));
+    } finally {
+      process.env.PATH = saved;
+    }
+  });
+
+  it("ENV02: GNU tar's gnubin precedes the inherited PATH (and resolves GNU tar when installed)", () => {
+    const saved = process.env.PATH;
+    process.env.PATH = "/usr/bin:/bin";
+    try {
+      const segs = buildGatePathEnv().split(":");
+      expect(segs.indexOf(GNU_TAR_DIR)).toBeGreaterThan(-1);
+      expect(segs.indexOf(GNU_TAR_DIR)).toBeLessThan(segs.indexOf("/usr/bin"));
+    } finally {
+      process.env.PATH = saved;
+    }
+    // live identity probe on hosts that carry the gnubin (darwin dev machines)
+    if (existsSync(path.join(GNU_TAR_DIR, "tar"))) {
+      const probe = spawnSync("tar", ["--version"], {
+        encoding: "utf8",
+        env: { ...process.env, PATH: buildGatePathEnv() },
+      });
+      expect(probe.stdout).toContain("GNU tar");
+    }
+  });
+
+  it("ENV03: the driver injects a short AF_UNIX-safe TMPDIR and the DEF-062 CI worker profile — even against a hostile parent env", () => {
+    const { worktree, stepDir, specPath } = scratchWorktree();
+    const spec = {
+      gate_id: "env03#anchor",
+      worktree,
+      steps: [
+        step({
+          run: 'echo "T=$TMPDIR F=$VITEST_MAX_FORKS H=$VITEST_MAX_THREADS"',
+        }),
+      ],
+    };
+    writeFileSync(specPath, JSON.stringify(spec, null, 2));
+    const child = spawnSync("node", [DRIVER, specPath], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        CI_VERIFY_STEP_DIR: stepDir,
+        // a parent trying to widen the worker profile must lose
+        VITEST_MAX_FORKS: "9",
+        VITEST_MAX_THREADS: "9",
+        // a parent's long TMPDIR (the AF_UNIX failure mode) must lose too
+        TMPDIR: path.join(
+          SCRATCH,
+          "a-very-long-tmpdir-path-that-would-break-af-unix-sun-path-limits-on-darwin"
+        ),
+      },
+      timeout: 15_000,
+    });
+    expect(child.status).toBe(0);
+    const out = readFileSync(path.join(stepDir, "step-0.stdout"), "utf8");
+    const tmp = out.match(/T=(\S+)/)?.[1] ?? "";
+    expect(tmp).toMatch(/^\/tmp\/cv-[0-9a-f]{10}$/);
+    expect(out).toMatch(/F=4\b/);
+    expect(out).toMatch(/H=4\b/);
+    const journal = JSON.parse(
+      readFileSync(path.join(stepDir, "steps.json"), "utf8")
+    );
+    expect(journal.short_tmpdir).toBe(tmp);
+  });
+
+  it("ENV04: a contract-declared step env supersedes the DEF-062 injection (documented precedence)", () => {
+    const { worktree, stepDir, specPath } = scratchWorktree();
+    const res = runDriver(
+      {
+        gate_id: "env04#anchor",
+        worktree,
+        steps: [
+          step({
+            env: { VITEST_MAX_FORKS: "2" },
+            run: 'echo "F=$VITEST_MAX_FORKS"',
+          }),
+        ],
+      },
+      stepDir,
+      specPath
+    );
+    expect(res.exit).toBe(0);
+    expect(readFileSync(path.join(stepDir, "step-0.stdout"), "utf8")).toMatch(
+      /F=2\b/
+    );
+  });
+});
+
+describe("P06.CAP candidate-materialization anchors", () => {
+  function shimmedProvision(
+    worktree: string,
+    extraEnv: Record<string, string> = {}
+  ): {
+    result: Record<string, unknown>;
+    record: string[];
+  } {
+    const shimDir = path.join(SCRATCH, `shim-${(seq += 1)}`);
+    mkdirSync(shimDir, { recursive: true });
+    const record = path.join(shimDir, "record.txt");
+    writeFileSync(
+      path.join(shimDir, "pnpm"),
+      `#!/bin/sh\npwd > "${record}"\nprintf '%s\\n' "$@" >> "${record}"\nexit 0\n`,
+      { mode: 0o755 }
+    );
+    const child = spawnSync(
+      "node",
+      [
+        "--input-type=module",
+        "-e",
+        `import { provisionCandidate } from ${JSON.stringify(CAPABILITY)}; process.stdout.write(JSON.stringify(provisionCandidate(${JSON.stringify(worktree)})));`,
+      ],
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          PATH: `${shimDir}:${process.env.PATH}`,
+          ...extraEnv,
+        },
+        timeout: 15_000,
+      }
+    );
+    expect(child.status).toBe(0);
+    return {
+      result: JSON.parse(child.stdout),
+      record: existsSync(record)
+        ? readFileSync(record, "utf8").trim().split("\n")
+        : [],
+    };
+  }
+
+  it("CAP01: provisioning is PHYSICAL and IN-candidate — exact pnpm argv, no --offline, cwd is the worktree (DEF-031/033)", () => {
+    const { worktree } = scratchWorktree();
+    const { result, record } = shimmedProvision(worktree);
+    expect(result.ok).toBe(true);
+    // line 1 = pwd, rest = argv
+    expect(record[0]).toBe(
+      readFileSync !== null
+        ? require("node:fs").realpathSync(worktree)
+        : worktree
+    );
+    expect(record.slice(1)).toEqual([
+      "install",
+      "--frozen-lockfile",
+      "--ignore-scripts",
+    ]);
+    expect(record.join("\n")).not.toContain("--offline");
+    expect((result as { submodules: { present: boolean } }).submodules).toEqual(
+      { present: false }
+    );
+  });
+
+  it("CAP02: a candidate carrying .gitmodules gets its submodules materialized (DEF-057)", () => {
+    const root = path.join(SCRATCH, `subm-${(seq += 1)}`);
+    const sub = path.join(root, "sub");
+    const superRepo = path.join(root, "super");
+    const wt = path.join(root, "wt");
+    mkdirSync(sub, { recursive: true });
+    mkdirSync(superRepo, { recursive: true });
+    const git = (cwd: string, ...args: string[]) => {
+      const res = spawnSync("git", args, { cwd, encoding: "utf8" });
+      expect(res.status, `git ${args.join(" ")}: ${res.stderr}`).toBe(0);
+      return res.stdout.trim();
+    };
+    const idFlags = ["-c", "user.email=t@t", "-c", "user.name=t"];
+    git(sub, "init", "-q");
+    writeFileSync(path.join(sub, "marker.txt"), "materialized\n");
+    git(sub, "add", "marker.txt");
+    git(sub, ...idFlags, "commit", "-qm", "sub");
+    git(superRepo, "init", "-q");
+    git(superRepo, "config", "protocol.file.allow", "always");
+    git(
+      superRepo,
+      ...idFlags,
+      "-c",
+      "protocol.file.allow=always",
+      "submodule",
+      "add",
+      sub,
+      "vendor/sub"
+    );
+    git(superRepo, ...idFlags, "commit", "-qm", "super");
+    git(superRepo, "worktree", "add", "--detach", wt, "HEAD");
+
+    // file-protocol submodules are blocked by default since git 2.38.1;
+    // allow them for THIS child only via environment-level config, which the
+    // internal `git clone` subprocess inherits (repo-config placement does
+    // not reach it from a linked worktree).
+    const { result } = shimmedProvision(wt, {
+      GIT_CONFIG_COUNT: "1",
+      GIT_CONFIG_KEY_0: "protocol.file.allow",
+      GIT_CONFIG_VALUE_0: "always",
+    });
+    expect(
+      (result as { submodules: Record<string, unknown> }).submodules
+    ).toEqual({ present: true, initialized: true });
+    expect(existsSync(path.join(wt, "vendor/sub/marker.txt"))).toBe(true);
+  });
+});
+
+// @ts-expect-error — plain .mjs module without type declarations
+import { parseOrphanLoad, etimeToMinutes } from "./preflight.mjs";
+
+describe("P06.PRE host preflight anchors (DEF-049)", () => {
+  const PS = [
+    // the DEF-049 shape: sh busy-loop, reparented to launchd, days old
+    "  4242     1  99.3 2-23:41:07 /bin/sh",
+    // parented worker at high cpu — someone's legitimate vitest, ignored
+    "  5001  4999  97.0   05:12 node",
+    // orphaned but idle — a login shell, ignored
+    "  6001     1   0.0 10-00:00:00 /bin/zsh",
+    // orphaned, hot, but too young — transient spike, ignored
+    "  7001     1  95.0   01:12 node",
+    // orphaned hot python generator, hours old — flagged
+    "  8001     1  88.5 03:22:41 python3.12",
+    // orphaned hot NON-interpreter (a browser) — ignored
+    "  9001     1  92.0 05:00:00 /Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  ].join("\n");
+
+  it("PRE01: flags exactly the orphaned, hot, long-lived interpreter processes", () => {
+    const orphans = parseOrphanLoad(PS);
+    expect(orphans.map(o => o.pid)).toEqual([4242, 8001]);
+  });
+
+  it("PRE02: etime parsing covers dd-hh:mm:ss, hh:mm:ss, and mm:ss", () => {
+    expect(etimeToMinutes("2-23:41:07")).toBe(2 * 1440 + 23 * 60 + 41);
+    expect(etimeToMinutes("03:22:41")).toBe(3 * 60 + 22);
+    expect(etimeToMinutes("01:12")).toBe(1);
+  });
+
+  it("PRE03: thresholds are honored — a cooler or younger orphan is not flagged", () => {
+    expect(parseOrphanLoad(PS, { cpuThreshold: 100 })).toEqual([]);
+    expect(
+      parseOrphanLoad("  4242     1  99.3 04:59 /bin/sh", {
+        minEtimeMinutes: 5,
+      })
+    ).toEqual([]);
   });
 });

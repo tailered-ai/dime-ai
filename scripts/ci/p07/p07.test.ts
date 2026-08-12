@@ -65,7 +65,7 @@ function runFloorFragment(numPassedTests: number, dir: string): number {
   const child = spawnSync(
     "/bin/bash",
     ["--noprofile", "--norc", "-e", "-o", "pipefail", "-c", fragment],
-    { cwd: dir, encoding: "utf8", timeout: 30_000 }
+    { cwd: dir, encoding: "utf8", timeout: 15_000 }
   );
   return child.status ?? -1;
 }
@@ -86,7 +86,7 @@ function runEnvGate(results: unknown, profile: string, dir: string) {
       "--actor=ci-verify-local",
       `--report=${path.join(dir, "report.json")}`,
     ],
-    { cwd: REPO_ROOT, encoding: "utf8", timeout: 60_000 }
+    { cwd: REPO_ROOT, encoding: "utf8", timeout: 15_000 }
   );
 }
 
@@ -277,7 +277,7 @@ describe("P07.NEG the fifteen-case negative program (§27)", () => {
       {
         encoding: "utf8",
         env: { ...process.env, CI_VERIFY_STEP_DIR: stepDir },
-        timeout: 30_000,
+        timeout: 15_000,
       }
     );
     expect(child.status).toBe(20);

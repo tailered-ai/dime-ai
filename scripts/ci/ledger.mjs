@@ -1029,6 +1029,34 @@ function main(argv) {
     return console.log(`[ledger] ${rest[0]} -> IN_PROGRESS`);
   }
 
+  // Re-collect evidence hashes for a unit that already PASSed, when a cited
+  // file legitimately evolved (the recurring case: unit evidence bound to a
+  // living test file that later gained MORE tests). Append-only in spirit:
+  // the prior hashes are pushed into the unit's notes before rebinding, a
+  // reason is mandatory, and the status itself never changes — this can
+  // never convert a FAIL into anything.
+  if (command === "reevidence") {
+    const ledger = loadLedger();
+    const unit = ledger.units[rest[0]];
+    if (!unit) throw new Error(`UNKNOWN_UNIT_ID: ${rest[0]}`);
+    if (unit.status !== "PASS") {
+      throw new Error(`REEVIDENCE_REQUIRES_PASS: ${rest[0]} is ${unit.status}`);
+    }
+    if (!flags.reason) throw new Error("REEVIDENCE_REASON_REQUIRED");
+    if (!flags.evidence?.length) {
+      throw new Error(`EVIDENCE_REQUIRED: ${rest[0]} reevidence needs paths`);
+    }
+    unit.notes.push(
+      `REEVIDENCE ${new Date().toISOString()}: ${flags.reason} | superseded: ` +
+        unit.evidence.map(e => `${e.path}@${e.sha256.slice(0, 12)}`).join(", ")
+    );
+    unit.evidence = collectEvidence(flags.evidence);
+    persist(ledger);
+    return console.log(
+      `[ledger] ${unit.id} reevidenced (${unit.evidence.length} item(s))`
+    );
+  }
+
   if (command === "set") {
     const ledger = loadLedger();
     setStatus(ledger, rest[0], rest[1], {

@@ -515,3 +515,100 @@ describe("PB.NEG03 — each acceptance term is independently load-bearing", () =
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// P03.VER — never-regress anchors for evidence supersession: the verify
+// half of the append-only model. These run the REAL ledger CLI against a
+// COPIED docs/verification tree in a temp root (LEDGER_PATH is
+// module-relative, so a copied scripts/ci resolves its own copied ledger),
+// proving LEDGER_TAMPERED / STALE_EVIDENCE / DEFECT_ID_REUSED can each
+// actually fire. Deleting any of those checks turns this red.
+// ---------------------------------------------------------------------------
+describe("P03.VER ledger verify anchors (evidence supersession)", () => {
+  const { mkdtempSync, cpSync, writeFileSync: wf, appendFileSync } =
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("node:fs") as typeof import("node:fs");
+  const { tmpdir } = require("node:os") as typeof import("node:os");
+  const { spawnSync } =
+    require("node:child_process") as typeof import("node:child_process");
+  const REPO = path.resolve(HERE, "..", "..");
+
+  function sandbox(): string {
+    // realpath: /var/folders is a symlink; the CLI's main-module guard
+    // compares argv[1] against the resolved import.meta.url, so a symlinked
+    // invocation path silently skips main().
+    const { realpathSync } = require("node:fs") as typeof import("node:fs");
+    const root = realpathSync(mkdtempSync(path.join(tmpdir(), "ledger-ver-")));
+    cpSync(path.join(REPO, "scripts/ci"), path.join(root, "scripts/ci"), {
+      recursive: true,
+    });
+    cpSync(
+      path.join(REPO, "docs/verification"),
+      path.join(root, "docs/verification"),
+      { recursive: true }
+    );
+    return root;
+  }
+  function verify(root: string) {
+    return spawnSync(
+      "node",
+      [path.join(root, "scripts/ci/ledger.mjs"), "verify"],
+      {
+        encoding: "utf8",
+        timeout: 15_000,
+      }
+    );
+  }
+
+  it("VER01: the copied live ledger verifies OK — the baseline is honest", () => {
+    const root = sandbox();
+    const res = verify(root);
+    expect(res.status).toBe(0);
+    expect(res.stdout + res.stderr).toContain("VERIFY OK");
+  });
+
+  it("VER02: hand-editing the ledger JSON fires LEDGER_TAMPERED", () => {
+    const root = sandbox();
+    const lp = path.join(root, "docs/verification/ci-verify-ledger.json");
+    appendFileSync(lp, "\n");
+    const res = verify(root);
+    expect(res.status).not.toBe(0);
+    expect(res.stdout + res.stderr).toContain("LEDGER_TAMPERED");
+  });
+
+  it("VER03: mutating a hashed evidence file fires STALE_EVIDENCE", () => {
+    const root = sandbox();
+    const ledger = JSON.parse(
+      readFileSync(
+        path.join(root, "docs/verification/ci-verify-ledger.json"),
+        "utf8"
+      )
+    );
+    const withEvidence = Object.values(
+      ledger.units as Record<string, { evidence: { path: string }[] }>
+    ).find(u => u.evidence?.length);
+    expect(withEvidence).toBeTruthy();
+    appendFileSync(path.join(root, withEvidence!.evidence[0].path), "tamper\n");
+    const res = verify(root);
+    expect(res.status).not.toBe(0);
+    expect(res.stdout + res.stderr).toContain("STALE_EVIDENCE");
+  });
+
+  it("VER04: reopening an existing defect id is refused (append-only history)", () => {
+    const root = sandbox();
+    const res = spawnSync(
+      "node",
+      [
+        path.join(root, "scripts/ci/ledger.mjs"),
+        "defect",
+        "open",
+        "DEF-045",
+        "--title",
+        "duplicate",
+      ],
+      { encoding: "utf8", timeout: 15_000 }
+    );
+    expect(res.status).not.toBe(0);
+    expect(res.stdout + res.stderr).toContain("DEFECT_ID_REUSED");
+  });
+});

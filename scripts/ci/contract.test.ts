@@ -30,6 +30,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import {
   CONSTRUCT_ALLOWLIST,
   ContractStop,
+  buildChecks,
   buildContract,
   canonicalize,
   canonicalJson,
@@ -587,5 +588,71 @@ describe("P02.AUD01 — runtime YAML isolation", () => {
 
     rmSync(path.join(scan, "bypass.mjs"));
     expect(auditYamlIsolation({ root, scanDir: "scripts/ci" }).ok).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// P02.ENV — never-regress anchor for DEF-058: workflow-level `env:` blocks
+// must fold into every check's env (workflow ∪ job, job wins). Reverting
+// buildChecks to `env: job?.env ?? null` turns these red.
+// ---------------------------------------------------------------------------
+describe("P02.ENV workflow-level env extraction (DEF-058 anchor)", () => {
+  it("folds workflow-level env into checks, with job-level keys winning", () => {
+    const root = fixtureRoot();
+    writeFileSync(
+      path.join(root, ".github/workflows/zz-env-fold-fixture.yml"),
+      [
+        "name: env-fold-fixture",
+        "on: [push]",
+        "env:",
+        "  WF_ONLY: from-workflow",
+        "  SHARED: workflow-loses",
+        "jobs:",
+        "  alpha:",
+        "    runs-on: ubuntu-latest",
+        "    env:",
+        "      SHARED: job-wins",
+        "    steps:",
+        "      - run: echo alpha",
+        "  beta:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - run: echo beta",
+        "",
+      ].join("\n")
+    );
+    const census = censusCorpus(root, { toolchainRoot: REPO });
+    const checks = buildChecks(census, root);
+    const alpha = checks.find(
+      c => c.check_id === ".github/workflows/zz-env-fold-fixture.yml#alpha"
+    );
+    const beta = checks.find(
+      c => c.check_id === ".github/workflows/zz-env-fold-fixture.yml#beta"
+    );
+    expect(alpha?.env).toEqual({
+      WF_ONLY: "from-workflow",
+      SHARED: "job-wins",
+    });
+    expect(beta?.env).toEqual({
+      WF_ONLY: "from-workflow",
+      SHARED: "workflow-loses",
+    });
+  });
+
+  it("the real corpus carries the three known workflow-level envs into their checks", () => {
+    const census = censusCorpus(REPO, { toolchainRoot: REPO });
+    const checks = buildChecks(census, REPO);
+    const byId = (id: string) => checks.find(c => c.check_id === id);
+    expect(
+      byId(".github/workflows/tailered-os.yml#test")?.env
+        ?.EXPECTED_CLOUDFLARE_OS_PIN
+    ).toMatch(/^[0-9a-f]{40}$/);
+    expect(
+      byId(".github/workflows/03-semgrep.yml#blocking")?.env?.SEMGREP_VERSION
+    ).toBeTruthy();
+    expect(
+      byId(".github/workflows/05-workflow-security.yml#zizmor")?.env
+        ?.ZIZMOR_VERSION
+    ).toBeTruthy();
   });
 });

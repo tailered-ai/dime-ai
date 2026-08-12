@@ -37,6 +37,7 @@ import { JsonlReporter, summarize } from "../reporter.mjs";
 import { ExecutorRun } from "../executor.mjs";
 import {
   buildDriverSteps,
+  buildGatePathEnv,
   liftVerdict,
   resolveExpressions,
 } from "../p06/run-gates.mjs";
@@ -258,12 +259,9 @@ async function runGateThroughDriver({
       2
     ) + "\n"
   );
-  const pathEnv = [
-    path.dirname(process.execPath),
-    path.join(REPO_ROOT, "node_modules", ".bin"),
-    `${process.env.HOME}/.local/bin`,
-    process.env.PATH,
-  ].join(":");
+  // Shared with P06 — the node-first/gnu-tar PATH law is a never-regress
+  // invariant with its own anchors (p06.test.ts ENV01/ENV02).
+  const pathEnv = buildGatePathEnv();
   const run = new ExecutorRun({
     specs: [
       {
