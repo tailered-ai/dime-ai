@@ -227,7 +227,15 @@ export async function runFixtureCycle(fixture, ctx) {
   }
 
   // 1-2. Fresh disposable candidate via the P01-owned machinery.
-  const handle = runSnapshot({ mode: "committed", keepRunDir: true });
+  // fetch:false — self-test cycles verify FIXTURE machinery against a
+  // hermetic snapshot; base freshness is P01/issuance business. With the
+  // default fetch, parallel suite files fetch concurrently and collide on
+  // git's lock (INFRA-FAIL(BASE_FETCH_FAILED) inside P05.TEST04 — DEF-066).
+  const handle = runSnapshot({
+    mode: "committed",
+    keepRunDir: true,
+    fetch: false,
+  });
   const worktree = handle.paths.worktree;
   // Every gate execution in this cycle binds to THIS cycle's candidate.
   ctx = { ...ctx, candidate: handle.snapshot.identity };

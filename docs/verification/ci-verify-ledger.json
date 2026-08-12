@@ -3946,6 +3946,33 @@
       "severity": "LOW",
       "status": "OPEN",
       "title": "REMOTE DRIFT: the live ruleset added 13-tos-notion-context as a 10th required context mid-program (TOS-009), while the program contract snapshot records 9. The added check is credential-bound (locally NOT_LOCALLY_EXECUTABLE, T13 nonlocal class — same as dependency-review), so local-parity verdicts are unaffected; PRs additionally need it green in CI. Snapshot refresh rides the next contract re-derivation"
+    },
+    {
+      "affected_gate": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": "(a) selftest cycles now pass fetch:false (base freshness stays the runners+issuance concern); (b) reevidence P09.T02/T03/T04 + P10.T01/T02/T06/T07 under the standing amendment",
+      "detected_by": "ci:verify:pr rehearsal attempt 4, proof suite (P05.TEST04 + VER01)",
+      "evidence": [],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-12T10:24:50.562Z",
+          "flags": {
+            "corrective_action": "(a) selftest cycles now pass fetch:false (base freshness stays the runners+issuance concern); (b) reevidence P09.T02/T03/T04 + P10.T01/T02/T06/T07 under the standing amendment",
+            "evidence": [],
+            "root_cause": "(a) runSnapshot defaults fetch:true — hermetic self-test cycles never needed freshness; (b) evidence-citing files edited after unit recording, the exact class the reevidence command exists for"
+          }
+        }
+      ],
+      "id": "DEF-066",
+      "opened_at": "2026-08-12T10:24:50.511Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "(a) runSnapshot defaults fetch:true — hermetic self-test cycles never needed freshness; (b) evidence-citing files edited after unit recording, the exact class the reevidence command exists for",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "TWO rehearsal findings: (a) self-test fixture cycles ran git fetch inside the parallel proof suite and collided on git's lock — INFRA-FAIL(BASE_FETCH_FAILED) surfacing as a test failure; (b) the round-2 fix commit modified run-p09.mjs/certificate.mjs/knip.json without reevidencing the P09/P10 units that cite them — VER01 (our own anchor) caught the stale hashes in the committed ledger"
     }
   ],
   "gate_results": [],
@@ -12125,9 +12152,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 19828,
+          "bytes": 19898,
           "path": "scripts/ci/p09/run-p09.mjs",
-          "sha256": "99da11dcd2878acba22b5891b494fac9d85dd3114f78962c68deab53fa98f4d7"
+          "sha256": "7dc0c4cc548ac6a0dd757fca51d643c9c3181aa335311be340832e9815285843"
         },
         {
           "bytes": 401,
@@ -12141,7 +12168,9 @@
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T10:24:50.628Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p09/run-p09.mjs@99da11dcd287, docs/verification/evidence/p09/T24-final-run.log@0e36381a205f"
+      ],
       "phase": "P09",
       "remediation": null,
       "started_at": "2026-08-12T09:28:36.610Z",
@@ -12158,9 +12187,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 19828,
+          "bytes": 19898,
           "path": "scripts/ci/p09/run-p09.mjs",
-          "sha256": "99da11dcd2878acba22b5891b494fac9d85dd3114f78962c68deab53fa98f4d7"
+          "sha256": "7dc0c4cc548ac6a0dd757fca51d643c9c3181aa335311be340832e9815285843"
         },
         {
           "bytes": 401,
@@ -12174,7 +12203,9 @@
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T10:24:50.673Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p09/run-p09.mjs@99da11dcd287, docs/verification/evidence/p09/T24-final-run.log@0e36381a205f"
+      ],
       "phase": "P09",
       "remediation": null,
       "started_at": "2026-08-12T09:28:36.692Z",
@@ -12191,9 +12222,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 633,
+          "bytes": 594,
           "path": "scripts/ci/p09/knip.json",
-          "sha256": "ed4cf6256a9b3fde3ad394bb351217a565a78a5e02eda2ef0d9a75b0f3421332"
+          "sha256": "404ba92bc9d22715163598028ce0e6b2a842f2739ed00b81f3fa0c5bbd4fe841"
         },
         {
           "bytes": 401,
@@ -12207,7 +12238,9 @@
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T10:24:50.713Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p09/knip.json@ed4cf6256a9b, docs/verification/evidence/p09/T24-final-run.log@0e36381a205f"
+      ],
       "phase": "P09",
       "remediation": null,
       "started_at": "2026-08-12T09:28:36.773Z",
@@ -12691,9 +12724,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 14176,
+          "bytes": 15098,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "ce9b3eb28a8df9c005df5779d9b3c9e5487dc6baf94c892d3738ee938533e22d"
+          "sha256": "9b4dc68f23a2c7a188789a87508de3806393a724546e8bc330e71571546b80de"
         },
         {
           "bytes": 3774,
@@ -12707,7 +12740,9 @@
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T10:24:50.754Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
+      ],
       "phase": "P10",
       "remediation": null,
       "started_at": "2026-08-12T09:39:39.635Z",
@@ -12724,9 +12759,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 14176,
+          "bytes": 15098,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "ce9b3eb28a8df9c005df5779d9b3c9e5487dc6baf94c892d3738ee938533e22d"
+          "sha256": "9b4dc68f23a2c7a188789a87508de3806393a724546e8bc330e71571546b80de"
         },
         {
           "bytes": 280,
@@ -12740,7 +12775,9 @@
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T10:24:50.796Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-negatives.log@1723c8e40cb2"
+      ],
       "phase": "P10",
       "remediation": null,
       "started_at": "2026-08-12T09:39:39.728Z",
@@ -12841,9 +12878,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 14176,
+          "bytes": 15098,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "ce9b3eb28a8df9c005df5779d9b3c9e5487dc6baf94c892d3738ee938533e22d"
+          "sha256": "9b4dc68f23a2c7a188789a87508de3806393a724546e8bc330e71571546b80de"
         },
         {
           "bytes": 3774,
@@ -12857,7 +12894,9 @@
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T10:24:50.840Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
+      ],
       "phase": "P10",
       "remediation": null,
       "started_at": "2026-08-12T09:39:40.112Z",
@@ -12874,9 +12913,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 14176,
+          "bytes": 15098,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "ce9b3eb28a8df9c005df5779d9b3c9e5487dc6baf94c892d3738ee938533e22d"
+          "sha256": "9b4dc68f23a2c7a188789a87508de3806393a724546e8bc330e71571546b80de"
         },
         {
           "bytes": 3774,
@@ -12890,7 +12929,9 @@
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "REEVIDENCE 2026-08-12T10:24:50.887Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
+      ],
       "phase": "P10",
       "remediation": null,
       "started_at": "2026-08-12T09:39:40.197Z",

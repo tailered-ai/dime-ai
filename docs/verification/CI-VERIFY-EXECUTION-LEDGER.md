@@ -582,9 +582,9 @@
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
 | `P09.T01` | TASK | MANDATORY | `PASS` | 1 | `7299cac149f1` | Populate the HARDENING registry |
-| `P09.T02` | TASK | MANDATORY | `PASS` | 1 | `99da11dcd287` `0e36381a205f` | Deploy-order gate — new drizzle/*.sql requires db-push.yml first |
-| `P09.T03` | TASK | MANDATORY | `PASS` | 1 | `99da11dcd287` `0e36381a205f` | Schema type-drift gate — drizzle column types versus migration SQL |
-| `P09.T04` | TASK | MANDATORY | `PASS` | 1 | `ed4cf6256a9b` `0e36381a205f` | knip — dead exports and dependencies |
+| `P09.T02` | TASK | MANDATORY | `PASS` | 1 | `7dc0c4cc548a` `0e36381a205f` | Deploy-order gate — new drizzle/*.sql requires db-push.yml first |
+| `P09.T03` | TASK | MANDATORY | `PASS` | 1 | `7dc0c4cc548a` `0e36381a205f` | Schema type-drift gate — drizzle column types versus migration SQL |
+| `P09.T04` | TASK | MANDATORY | `PASS` | 1 | `404ba92bc9d2` `0e36381a205f` | knip — dead exports and dependencies |
 | `P09.T05` | TASK | MANDATORY | `PASS` | 1 | `f05ff15929e6` `0e36381a205f` | Accessibility gate on the built client |
 | `P09.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` | Deploy-order gate green on a clean snapshot |
 | `P09.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` | Schema type-drift gate green on a clean snapshot |
@@ -626,13 +626,13 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P10.T01` | TASK | MANDATORY | `PASS` | 1 | `ce9b3eb28a8d` `041f00f78261` | Certificate binding set: head, base, merge_tree, merge_commit, lockfile, contract, verifier, images, env profile, hermetic mode, assurance hash, results by class |
-| `P10.T02` | TASK | MANDATORY | `PASS` | 1 | `ce9b3eb28a8d` `1723c8e40cb2` | verify/void logic — recompute every binding from disk |
+| `P10.T01` | TASK | MANDATORY | `PASS` | 1 | `9b4dc68f23a2` `041f00f78261` | Certificate binding set: head, base, merge_tree, merge_commit, lockfile, contract, verifier, images, env profile, hermetic mode, assurance hash, results by class |
+| `P10.T02` | TASK | MANDATORY | `PASS` | 1 | `9b4dc68f23a2` `1723c8e40cb2` | verify/void logic — recompute every binding from disk |
 | `P10.T03` | TASK | MANDATORY | `PASS` | 1 | `041f00f78261` | Execution-history binding: ledger state at issuance (P00-P09 ACCEPTED plus P10 units through GATE01) |
 | `P10.T04` | TASK | MANDATORY | `PASS` | 1 | `03fc481ddef7` | REMOTE reconciliation against the live ruleset AND classic protection |
 | `P10.T05` | TASK | MANDATORY | `PASS` | 1 | `03fc481ddef7` | CI proof reconciliation guarded by {head, base, merge_tree, contract_hash} — compares merge_tree_sha, never merge_commit_sha |
-| `P10.T06` | TASK | MANDATORY | `PASS` | 1 | `ce9b3eb28a8d` `041f00f78261` | Issuance rule |
-| `P10.T07` | TASK | MANDATORY | `PASS` | 1 | `ce9b3eb28a8d` `041f00f78261` | Opt-in pre-push hook |
+| `P10.T06` | TASK | MANDATORY | `PASS` | 1 | `9b4dc68f23a2` `041f00f78261` | Issuance rule |
+| `P10.T07` | TASK | MANDATORY | `PASS` | 1 | `9b4dc68f23a2` `041f00f78261` | Opt-in pre-push hook |
 | `P10.T08` | TASK | MANDATORY | `PASS` | 1 | `041f00f78261` | File evidence into the /eng-loop evidence record |
 | `P10.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | A fully green run issues a certificate that verify accepts |
 | `P10.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `03fc481ddef7` | One real PR reconciles field-for-field against CI's proof artifact |
@@ -740,6 +740,7 @@
 | `DEF-063` | `P08.T07 profile B (cleanroom runtime), first full-mode run` | HIGH | `CLOSED` | CANDIDATE FINDING: the production container has NO SIGTERM handler while node runs as PID 1 (CMD [node, dist/index.js]) — PID 1 ignores default signal dispositions, so every platform SIGTERM (each Railway deploy, docker stop) is silently ignored until SIGKILL: exit 137 observed on both cleanroom profiles, in-flight work dropped, DB connections severed on every deploy since inception |
 | `DEF-064` | `P09.T05 a11y gate, first control run` | LOW | `OPEN` | CANDIDATE FINDING: .state-pill--pass on the landing page fails WCAG AA color contrast (serious, 1 node) — found by the vendored-axe gate against the BUILT client; baselined under the documented ratchet (recorded, never hidden), fix deferred to UI brand-law work |
 | `DEF-065` | `P10.T04 remote reconciliation` | LOW | `OPEN` | REMOTE DRIFT: the live ruleset added 13-tos-notion-context as a 10th required context mid-program (TOS-009), while the program contract snapshot records 9. The added check is credential-bound (locally NOT_LOCALLY_EXECUTABLE, T13 nonlocal class — same as dependency-review), so local-parity verdicts are unaffected; PRs additionally need it green in CI. Snapshot refresh rides the next contract re-derivation |
+| `DEF-066` | `ci:verify:pr rehearsal attempt 4, proof suite (P05.TEST04 + VER01)` | MEDIUM | `OPEN` | TWO rehearsal findings: (a) self-test fixture cycles ran git fetch inside the parallel proof suite and collided on git's lock — INFRA-FAIL(BASE_FETCH_FAILED) surfacing as a test failure; (b) the round-2 fix commit modified run-p09.mjs/certificate.mjs/knip.json without reevidencing the P09/P10 units that cite them — VER01 (our own anchor) caught the stale hashes in the committed ledger |
 
 ## Checkpoints
 
