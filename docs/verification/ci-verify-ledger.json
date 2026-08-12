@@ -625,6 +625,23 @@
       ],
       "phase": "P09",
       "recorded_at": "2026-08-12T09:28:55.465Z"
+    },
+    {
+      "decision": "ACCEPT — certificate machine proven both directions: ISSUED baf628a2e256 at 3b493236e with independent fresh-process verify VALID (TEST03); 8/8 negatives produce their exact verdicts (VOID head_sha/verifier_hash, NOT_COMPARABLE(STALE_BASE) never a parity mismatch, REFUSED on flaky/incomplete/non-accepted-phase-with-name/tampered); TEST02 field-for-field vs real PR #510 (merge_tree e67d0af39842 exact match); T04 remote reconciliation caught genuine drift (DEF-065: 10th required context added mid-program, credential-bound, local parity unaffected); barrier holds",
+      "evidence": [
+        {
+          "bytes": 302,
+          "path": "docs/verification/evidence/p10/T25-certificate-hash.txt",
+          "sha256": "7b9447f9eb9dc7547719ff22594ce9b0d68cd8f0ae2c6c9376e4626fb9730ec2"
+        },
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
+      "phase": "P10",
+      "recorded_at": "2026-08-12T09:40:30.634Z"
     }
   ],
   "decisions": [
@@ -4508,8 +4525,14 @@
         "P10.CP01 recorded, binding the certificate hash"
       ],
       "id": "P10",
-      "state": "NOT_STARTED",
-      "state_history": [],
+      "state": "ACCEPTED",
+      "state_history": [
+        {
+          "at": "2026-08-12T09:40:30.803Z",
+          "from": "NOT_STARTED",
+          "to": "ACCEPTED"
+        }
+      ],
       "title": "Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR"
     }
   ],
@@ -12372,16 +12395,27 @@
       "validation": null
     },
     "P10.CP01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:40:30.729Z",
       "defects": [],
       "depends_on": [
         "P10.GATE01",
         "P10.AUTH01"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 302,
+          "path": "docs/verification/evidence/p10/T25-certificate-hash.txt",
+          "sha256": "7b9447f9eb9dc7547719ff22594ce9b0d68cd8f0ae2c6c9376e4626fb9730ec2"
+        },
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.CP01",
@@ -12391,8 +12425,8 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:40:30.684Z",
+      "status": "PASS",
       "title": "P10 checkpoint recorded, binding the issued certificate hash",
       "validation": null
     },

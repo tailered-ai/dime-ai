@@ -34,7 +34,7 @@
 | `P07` | PARITY — test and data | `ACCEPTED` | 24 / 24 | 0 | 0 |
 | `P08` | CLEANROOM — image identity, container build, dual runtime proof | `ACCEPTED` | 23 / 23 | 0 | 0 |
 | `P09` | HARDENING | `ACCEPTED` | 17 / 17 | 0 | 0 |
-| `P10` | Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR | `NOT_STARTED` | 21 / 22 | 0 | 0 |
+| `P10` | Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR | `ACCEPTED` | 22 / 22 | 0 | 0 |
 
 ## PB — Control-plane bootstrap
 
@@ -601,13 +601,13 @@
 
 ## P10 — Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR
 
-**State:** `NOT_STARTED`
+**State:** `ACCEPTED`
 
 **Assurance property:** A certificate is issued only when the whole execution history is closed, and it is void the instant any bound input changes.
 
 **Depends on:** `P09`
 
-**Progress (MANDATORY):** 21 / 22
+**Progress (MANDATORY):** 22 / 22
 
 **Entry checklist**
 
@@ -647,7 +647,7 @@
 | `P10.NEG08` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | Issuance attempted with a preceding phase not ACCEPTED is refused, naming that phase |
 | `P10.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `041f00f78261` | Issuance closure list: 10 of 10 PRECEDING phases ACCEPTED (P00..P09), all mandatory units closed, all mandatory gates negatively proven, zero unresolved defects, zero unexplained skips, zero flaky mandatory gates, zero infrastructure uncertainty, zero contract drift, zero broken gates, zero stale evidence, zero dirty bound inputs, zero ledger tampering |
 | `P10.AUTH01` | AUTHORIZATION | MANDATORY | `PASS` | 1 | `041f00f78261` | Owner authorization to enable the opt-in pre-push hook |
-| `P10.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P10 checkpoint recorded, binding the issued certificate hash |
+| `P10.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `7b9447f9eb9d` `041f00f78261` | P10 checkpoint recorded, binding the issued certificate hash |
 
 ## Gate results by class (P03)
 
@@ -769,3 +769,4 @@
 | `P07` | **ACCEPT — seven-term predicate TRUE at base 249bf314: 24/24 mandatory units closed; P07 3/3 PASS at this base (test 214.3s, coverage 163.7s, db-tests 26.8s = 10 files/92 tests, MySQL 8.4.11 digest-bound, zero residue); DB surface byte-identical from 43a33c84 through 249bf314 so the TEST03 same-SHA demonstration and REG01 three-run series remain valid and db-tests reproduced 10/92 again; zero open defects attributed to P07; freshness barrier PASS at the acceptance record** | 2026-08-12T07:30:04.832Z | `0b40d19bc23c` `d884ee630a6a` |
 | `P08` | **ACCEPT — all 24 mandatory units closed at base 249bf314, candidate e35cd5841c9e (DEF-063 fix aboard): build+trivy+SBOM green; profiles A and B green including graceful shutdown and drained connections; NEG01-03 each demonstrably reject their exact defect; GATE01 3/3 consecutive clean rounds; CLN01 zero residue every run; DEF-063 (PID-1 SIGTERM ignored — every production deploy hard-killed the app) found by this phase, fixed, and retested; build-variance recorded honestly (image id is run-scoped; candidate commit is the binding identity); freshness barrier holds at the acceptance record** | 2026-08-12T09:10:19.901Z | `19b3743c5608` `7d9785003538` |
 | `P09` | **ACCEPT — 17/17 mandatory units closed at base 249bf314, candidate 6aabf13c8fb7: all four HARDENING gates green in one final run AND all four negatives redden for their exact defect (deploy-order/#370 class BLOCKING per DEC-002; schema-type-drift/0134 class via drizzle-kit no-op oracle; knip ratchet over the verifier tree; a11y over the BUILT client with vendored sha256-pinned axe). Bring-up caught its own vacuous drift PASS (NEG02), the knip TS-7 peer break, and a REAL pre-existing WCAG miss (DEF-064, baselined recorded-never-hidden). HARDENING never merges into PARITY (AUD01). Barrier holds at the record** | 2026-08-12T09:28:55.465Z | `71fe5005d868` `7299cac149f1` |
+| `P10` | **ACCEPT — certificate machine proven both directions: ISSUED baf628a2e256 at 3b493236e with independent fresh-process verify VALID (TEST03); 8/8 negatives produce their exact verdicts (VOID head_sha/verifier_hash, NOT_COMPARABLE(STALE_BASE) never a parity mismatch, REFUSED on flaky/incomplete/non-accepted-phase-with-name/tampered); TEST02 field-for-field vs real PR #510 (merge_tree e67d0af39842 exact match); T04 remote reconciliation caught genuine drift (DEF-065: 10th required context added mid-program, credential-bound, local parity unaffected); barrier holds** | 2026-08-12T09:40:30.634Z | `7b9447f9eb9d` `041f00f78261` |
