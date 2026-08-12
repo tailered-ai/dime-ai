@@ -1,0 +1,26 @@
+### RUN 1 START 2026-08-10T20:07:16Z
+###   load={ 2.94 5.24 7.31 }
+###   synthetic_loaders=0
+### RUN 1 EXIT=0
+### RUN 1 VERDICT=[p06] PASS       .github/workflows/01-pr-proof-contract.yml#proof  (143.4s, driver exit 0, detector)
+### RUN 2 START 2026-08-10T20:10:10Z
+###   load={ 8.73 7.11 7.72 }
+###   synthetic_loaders=0
+### RUN 2 EXIT=0
+### RUN 2 VERDICT=[p06] PASS       .github/workflows/01-pr-proof-contract.yml#proof  (212.6s, driver exit 0, detector)
+### RUN 3 START 2026-08-10T20:14:10Z
+###   load={ 12.55 10.83 9.31 }
+###   synthetic_loaders=0
+### RUN 3 EXIT=0
+### RUN 3 VERDICT=[p06] PASS       .github/workflows/01-pr-proof-contract.yml#proof  (204.4s, driver exit 0, detector)
+### RUN 4 START 2026-08-10T20:18:00Z
+###   load={ 9.30 10.12 9.39 }
+###   synthetic_loaders=0
+### RUN 4 EXIT=0
+### RUN 4 VERDICT=[p06] PASS       .github/workflows/01-pr-proof-contract.yml#proof  (145.8s, driver exit 0, detector)
+### RUN 5 START 2026-08-10T20:20:48Z
+###   load={ 9.74 9.90 9.42 }
+###   synthetic_loaders=0
+### RUN 5 EXIT=0
+### RUN 5 VERDICT=[p06] PASS       .github/workflows/01-pr-proof-contract.yml#proof  (157.9s, driver exit 0, detector)
+### CAMPAIGN COMPLETE 5/5 2026-08-10T20:23:59Z
