@@ -21,6 +21,18 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..");
 const OUT = path.join(REPO_ROOT, ".ci-verify", "verify-pr");
 
+// When invoked AS a pnpm script, children inherit pnpm-run's corepack
+// strictness — and a packageManager-pin/machine-pnpm mismatch then fails
+// every child `pnpm` call ("pnpm missing") even though direct invocation
+// works. Found by this rehearsal's own first run. Strip the run-context so
+// children resolve the shell toolchain exactly as a direct `node` launch
+// does; nothing else about the environment changes.
+const CLEAN_ENV = Object.fromEntries(
+  Object.entries(process.env).filter(
+    ([k]) => !/^(npm_|COREPACK_|PNPM_)/i.test(k)
+  )
+);
+
 const STAGES = [
   { id: "p06-roster", cmd: ["node", "scripts/ci/p06/run-gates.mjs"] },
   { id: "p06-assurance", cmd: ["node", "scripts/ci/p06/assurance.mjs"] },
@@ -49,7 +61,11 @@ function preflight() {
   const problems = [];
   const probe = (cmd, args) => {
     try {
-      execFileSync(cmd, args, { encoding: "utf8", timeout: 15_000 });
+      execFileSync(cmd, args, {
+        encoding: "utf8",
+        timeout: 15_000,
+        env: CLEAN_ENV,
+      });
       return true;
     } catch {
       return false;
@@ -96,7 +112,7 @@ function main() {
       encoding: "utf8",
       timeout: 3_600_000,
       maxBuffer: 128 * 1024 * 1024,
-      env: { ...process.env, ...(stage.env ?? {}) },
+      env: { ...CLEAN_ENV, ...(stage.env ?? {}) },
     });
     const wall = Date.now() - started;
     const rssMatch = (res.stderr ?? "").match(
