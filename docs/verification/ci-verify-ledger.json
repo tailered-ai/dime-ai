@@ -3912,6 +3912,23 @@
       "severity": "LOW",
       "status": "OPEN",
       "title": "CANDIDATE FINDING: .state-pill--pass on the landing page fails WCAG AA color contrast (serious, 1 node) — found by the vendored-axe gate against the BUILT client; baselined under the documented ratchet (recorded, never hidden), fix deferred to UI brand-law work"
+    },
+    {
+      "affected_gate": "required-context snapshot (P02 registry metadata)",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": null,
+      "detected_by": "P10.T04 remote reconciliation",
+      "evidence": [],
+      "history": [],
+      "id": "DEF-065",
+      "opened_at": "2026-08-12T09:37:10.778Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": null,
+      "severity": "LOW",
+      "status": "OPEN",
+      "title": "REMOTE DRIFT: the live ruleset added 13-tos-notion-context as a 10th required context mid-program (TOS-009), while the program contract snapshot records 9. The added check is credential-bound (locally NOT_LOCALLY_EXECUTABLE, T13 nonlocal class — same as dependency-review), so local-parity verdicts are unaffected; PRs additionally need it green in CI. Snapshot refresh rides the next contract re-derivation"
     }
   ],
   "gate_results": [],
@@ -12325,24 +12342,32 @@
       "validation": null
     },
     "P10.AUTH01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:39.593Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.AUTH01",
       "inputs": [],
       "kind": "AUTHORIZATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "authorization covers opt-in AVAILABILITY per the owner closure directive; activation is an explicit per-clone developer action; the hook was installed nowhere by this program"
+      ],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:39.527Z",
+      "status": "PASS",
       "title": "Owner authorization to enable the opt-in pre-push hook",
       "validation": null
     },
@@ -12372,13 +12397,19 @@
       "validation": null
     },
     "P10.GATE01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:41.299Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": "Evaluated BEFORE issuance; self-reference to P10 is prohibited",
       "expected_output": null,
       "id": "P10.GATE01",
@@ -12388,19 +12419,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:41.258Z",
+      "status": "PASS",
       "title": "Issuance closure list: 10 of 10 PRECEDING phases ACCEPTED (P00..P09), all mandatory units closed, all mandatory gates negatively proven, zero unresolved defects, zero unexplained skips, zero flaky mandatory gates, zero infrastructure uncertainty, zero contract drift, zero broken gates, zero stale evidence, zero dirty bound inputs, zero ledger tampering",
       "validation": null
     },
     "P10.NEG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.410Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 280,
+          "path": "docs/verification/evidence/p10/T25-negatives.log",
+          "sha256": "1723c8e40cb2ef7da4a2166e958223a8291ccc9edc2d98c5cac543c0acdf4a1b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.NEG01",
@@ -12410,19 +12447,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.369Z",
+      "status": "PASS",
       "title": "Touching any tracked file yields VOID(head_sha)",
       "validation": null
     },
     "P10.NEG02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.495Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.NEG02",
@@ -12432,19 +12475,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.452Z",
+      "status": "PASS",
       "title": "Advancing origin/main yields NOT-COMPARABLE(STALE_BASE), not a parity mismatch",
       "validation": null
     },
     "P10.NEG03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.577Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 280,
+          "path": "docs/verification/evidence/p10/T25-negatives.log",
+          "sha256": "1723c8e40cb2ef7da4a2166e958223a8291ccc9edc2d98c5cac543c0acdf4a1b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.NEG03",
@@ -12454,19 +12503,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.536Z",
+      "status": "PASS",
       "title": "Editing scripts/ci/** yields VOID(verifier_hash)",
       "validation": null
     },
     "P10.NEG04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.659Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.NEG04",
@@ -12476,19 +12531,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.617Z",
+      "status": "PASS",
       "title": "Any FLAKY mandatory result refuses issuance",
       "validation": null
     },
     "P10.NEG05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.740Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.NEG05",
@@ -12498,19 +12559,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.699Z",
+      "status": "PASS",
       "title": "An incomplete ledger refuses issuance",
       "validation": null
     },
     "P10.NEG06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.821Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.NEG06",
@@ -12520,19 +12587,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.781Z",
+      "status": "PASS",
       "title": "Any phase not ACCEPTED refuses issuance",
       "validation": null
     },
     "P10.NEG07": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.902Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.NEG07",
@@ -12542,19 +12615,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.862Z",
+      "status": "PASS",
       "title": "A tampered ledger yields LEDGER_TAMPERED and refuses issuance",
       "validation": null
     },
     "P10.NEG08": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.983Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.NEG08",
@@ -12564,19 +12643,30 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.943Z",
+      "status": "PASS",
       "title": "Issuance attempted with a preceding phase not ACCEPTED is refused, naming that phase",
       "validation": null
     },
     "P10.T01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:39.686Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 14176,
+          "path": "scripts/ci/p10/certificate.mjs",
+          "sha256": "ce9b3eb28a8df9c005df5779d9b3c9e5487dc6baf94c892d3738ee938533e22d"
+        },
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.T01",
@@ -12586,19 +12676,30 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:39.635Z",
+      "status": "PASS",
       "title": "Certificate binding set: head, base, merge_tree, merge_commit, lockfile, contract, verifier, images, env profile, hermetic mode, assurance hash, results by class",
       "validation": null
     },
     "P10.T02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:39.775Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 14176,
+          "path": "scripts/ci/p10/certificate.mjs",
+          "sha256": "ce9b3eb28a8df9c005df5779d9b3c9e5487dc6baf94c892d3738ee938533e22d"
+        },
+        {
+          "bytes": 280,
+          "path": "docs/verification/evidence/p10/T25-negatives.log",
+          "sha256": "1723c8e40cb2ef7da4a2166e958223a8291ccc9edc2d98c5cac543c0acdf4a1b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.T02",
@@ -12608,19 +12709,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:39.728Z",
+      "status": "PASS",
       "title": "verify/void logic — recompute every binding from disk",
       "validation": null
     },
     "P10.T03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:39.876Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": "Hash scope EXCLUDES P10.CP01 and P10's own ACCEPTED transition, by construction — this is what removes the circularity",
       "expected_output": null,
       "id": "P10.T03",
@@ -12630,19 +12737,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:39.818Z",
+      "status": "PASS",
       "title": "Execution-history binding: ledger state at issuance (P00-P09 ACCEPTED plus P10 units through GATE01)",
       "validation": null
     },
     "P10.T04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:39.986Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 941,
+          "path": "docs/verification/evidence/p10/T25-reconciliation.json",
+          "sha256": "03fc481ddef72bd510719e8a868db068c3679630bb576cedd5c69fb9ae870183"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.T04",
@@ -12652,19 +12765,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:39.944Z",
+      "status": "PASS",
       "title": "REMOTE reconciliation against the live ruleset AND classic protection",
       "validation": null
     },
     "P10.T05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.072Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 941,
+          "path": "docs/verification/evidence/p10/T25-reconciliation.json",
+          "sha256": "03fc481ddef72bd510719e8a868db068c3679630bb576cedd5c69fb9ae870183"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.T05",
@@ -12674,19 +12793,30 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.029Z",
+      "status": "PASS",
       "title": "CI proof reconciliation guarded by {head, base, merge_tree, contract_hash} — compares merge_tree_sha, never merge_commit_sha",
       "validation": null
     },
     "P10.T06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.154Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 14176,
+          "path": "scripts/ci/p10/certificate.mjs",
+          "sha256": "ce9b3eb28a8df9c005df5779d9b3c9e5487dc6baf94c892d3738ee938533e22d"
+        },
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.T06",
@@ -12696,19 +12826,30 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.112Z",
+      "status": "PASS",
       "title": "Issuance rule",
       "validation": null
     },
     "P10.T07": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.241Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 14176,
+          "path": "scripts/ci/p10/certificate.mjs",
+          "sha256": "ce9b3eb28a8df9c005df5779d9b3c9e5487dc6baf94c892d3738ee938533e22d"
+        },
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.T07",
@@ -12718,19 +12859,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.197Z",
+      "status": "PASS",
       "title": "Opt-in pre-push hook",
       "validation": null
     },
     "P10.T08": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:40.327Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.T08",
@@ -12740,19 +12887,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:40.286Z",
+      "status": "PASS",
       "title": "File evidence into the /eng-loop evidence record",
       "validation": null
     },
     "P10.TEST01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:41.062Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.TEST01",
@@ -12762,19 +12915,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:41.022Z",
+      "status": "PASS",
       "title": "A fully green run issues a certificate that verify accepts",
       "validation": null
     },
     "P10.TEST02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:41.140Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 941,
+          "path": "docs/verification/evidence/p10/T25-reconciliation.json",
+          "sha256": "03fc481ddef72bd510719e8a868db068c3679630bb576cedd5c69fb9ae870183"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.TEST02",
@@ -12784,19 +12943,25 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:41.100Z",
+      "status": "PASS",
       "title": "One real PR reconciles field-for-field against CI's proof artifact",
       "validation": null
     },
     "P10.TEST03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:39:41.219Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3774,
+          "path": "docs/verification/evidence/p10/T25-acceptance.md",
+          "sha256": "041f00f782615665645da9019a9dce3200bdcf0684be113a97244a2bd961ff35"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P10.TEST03",
@@ -12806,8 +12971,8 @@
       "notes": [],
       "phase": "P10",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:39:41.180Z",
+      "status": "PASS",
       "title": "Independent verification: a SEPARATE process re-derives every binding from disk and accepts",
       "validation": null
     },

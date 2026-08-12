@@ -34,7 +34,7 @@
 | `P07` | PARITY — test and data | `ACCEPTED` | 24 / 24 | 0 | 0 |
 | `P08` | CLEANROOM — image identity, container build, dual runtime proof | `ACCEPTED` | 23 / 23 | 0 | 0 |
 | `P09` | HARDENING | `ACCEPTED` | 17 / 17 | 0 | 0 |
-| `P10` | Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR | `NOT_STARTED` | 0 / 22 | 0 | 0 |
+| `P10` | Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR | `NOT_STARTED` | 21 / 22 | 0 | 0 |
 
 ## PB — Control-plane bootstrap
 
@@ -607,7 +607,7 @@
 
 **Depends on:** `P09`
 
-**Progress (MANDATORY):** 0 / 22
+**Progress (MANDATORY):** 21 / 22
 
 **Entry checklist**
 
@@ -626,27 +626,27 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P10.T01` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Certificate binding set: head, base, merge_tree, merge_commit, lockfile, contract, verifier, images, env profile, hermetic mode, assurance hash, results by class |
-| `P10.T02` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | verify/void logic — recompute every binding from disk |
-| `P10.T03` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Execution-history binding: ledger state at issuance (P00-P09 ACCEPTED plus P10 units through GATE01) |
-| `P10.T04` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | REMOTE reconciliation against the live ruleset AND classic protection |
-| `P10.T05` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | CI proof reconciliation guarded by {head, base, merge_tree, contract_hash} — compares merge_tree_sha, never merge_commit_sha |
-| `P10.T06` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Issuance rule |
-| `P10.T07` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Opt-in pre-push hook |
-| `P10.T08` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | File evidence into the /eng-loop evidence record |
-| `P10.TEST01` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | A fully green run issues a certificate that verify accepts |
-| `P10.TEST02` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | One real PR reconciles field-for-field against CI's proof artifact |
-| `P10.TEST03` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Independent verification: a SEPARATE process re-derives every binding from disk and accepts |
-| `P10.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Touching any tracked file yields VOID(head_sha) |
-| `P10.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Advancing origin/main yields NOT-COMPARABLE(STALE_BASE), not a parity mismatch |
-| `P10.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Editing scripts/ci/** yields VOID(verifier_hash) |
-| `P10.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Any FLAKY mandatory result refuses issuance |
-| `P10.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | An incomplete ledger refuses issuance |
-| `P10.NEG06` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Any phase not ACCEPTED refuses issuance |
-| `P10.NEG07` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | A tampered ledger yields LEDGER_TAMPERED and refuses issuance |
-| `P10.NEG08` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Issuance attempted with a preceding phase not ACCEPTED is refused, naming that phase |
-| `P10.GATE01` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | Issuance closure list: 10 of 10 PRECEDING phases ACCEPTED (P00..P09), all mandatory units closed, all mandatory gates negatively proven, zero unresolved defects, zero unexplained skips, zero flaky mandatory gates, zero infrastructure uncertainty, zero contract drift, zero broken gates, zero stale evidence, zero dirty bound inputs, zero ledger tampering |
-| `P10.AUTH01` | AUTHORIZATION | MANDATORY | `NOT_STARTED` | 0 | — | Owner authorization to enable the opt-in pre-push hook |
+| `P10.T01` | TASK | MANDATORY | `PASS` | 1 | `ce9b3eb28a8d` `041f00f78261` | Certificate binding set: head, base, merge_tree, merge_commit, lockfile, contract, verifier, images, env profile, hermetic mode, assurance hash, results by class |
+| `P10.T02` | TASK | MANDATORY | `PASS` | 1 | `ce9b3eb28a8d` `1723c8e40cb2` | verify/void logic — recompute every binding from disk |
+| `P10.T03` | TASK | MANDATORY | `PASS` | 1 | `041f00f78261` | Execution-history binding: ledger state at issuance (P00-P09 ACCEPTED plus P10 units through GATE01) |
+| `P10.T04` | TASK | MANDATORY | `PASS` | 1 | `03fc481ddef7` | REMOTE reconciliation against the live ruleset AND classic protection |
+| `P10.T05` | TASK | MANDATORY | `PASS` | 1 | `03fc481ddef7` | CI proof reconciliation guarded by {head, base, merge_tree, contract_hash} — compares merge_tree_sha, never merge_commit_sha |
+| `P10.T06` | TASK | MANDATORY | `PASS` | 1 | `ce9b3eb28a8d` `041f00f78261` | Issuance rule |
+| `P10.T07` | TASK | MANDATORY | `PASS` | 1 | `ce9b3eb28a8d` `041f00f78261` | Opt-in pre-push hook |
+| `P10.T08` | TASK | MANDATORY | `PASS` | 1 | `041f00f78261` | File evidence into the /eng-loop evidence record |
+| `P10.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | A fully green run issues a certificate that verify accepts |
+| `P10.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `03fc481ddef7` | One real PR reconciles field-for-field against CI's proof artifact |
+| `P10.TEST03` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | Independent verification: a SEPARATE process re-derives every binding from disk and accepts |
+| `P10.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `1723c8e40cb2` | Touching any tracked file yields VOID(head_sha) |
+| `P10.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | Advancing origin/main yields NOT-COMPARABLE(STALE_BASE), not a parity mismatch |
+| `P10.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `1723c8e40cb2` | Editing scripts/ci/** yields VOID(verifier_hash) |
+| `P10.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | Any FLAKY mandatory result refuses issuance |
+| `P10.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | An incomplete ledger refuses issuance |
+| `P10.NEG06` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | Any phase not ACCEPTED refuses issuance |
+| `P10.NEG07` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | A tampered ledger yields LEDGER_TAMPERED and refuses issuance |
+| `P10.NEG08` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | Issuance attempted with a preceding phase not ACCEPTED is refused, naming that phase |
+| `P10.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `041f00f78261` | Issuance closure list: 10 of 10 PRECEDING phases ACCEPTED (P00..P09), all mandatory units closed, all mandatory gates negatively proven, zero unresolved defects, zero unexplained skips, zero flaky mandatory gates, zero infrastructure uncertainty, zero contract drift, zero broken gates, zero stale evidence, zero dirty bound inputs, zero ledger tampering |
+| `P10.AUTH01` | AUTHORIZATION | MANDATORY | `PASS` | 1 | `041f00f78261` | Owner authorization to enable the opt-in pre-push hook |
 | `P10.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P10 checkpoint recorded, binding the issued certificate hash |
 
 ## Gate results by class (P03)
@@ -739,6 +739,7 @@
 | `DEF-062` | `P06 roster @ 249bf314 candidate (second attempt), proof step journal` | MEDIUM | `CLOSED` | VERIFIER ENVIRONMENT (structural, terminates the DEF-060/061 class): vitest runs 8 workers on this 8-core host (no cap in vitest.config) while CI's ubuntu-latest exposes 4 vCPUs — per-worker CPU starvation local-only; three distinct subprocess-heavy tests tripped the 15s testTimeout across consecutive rosters while green in CI and isolated |
 | `DEF-063` | `P08.T07 profile B (cleanroom runtime), first full-mode run` | HIGH | `CLOSED` | CANDIDATE FINDING: the production container has NO SIGTERM handler while node runs as PID 1 (CMD [node, dist/index.js]) — PID 1 ignores default signal dispositions, so every platform SIGTERM (each Railway deploy, docker stop) is silently ignored until SIGKILL: exit 137 observed on both cleanroom profiles, in-flight work dropped, DB connections severed on every deploy since inception |
 | `DEF-064` | `P09.T05 a11y gate, first control run` | LOW | `OPEN` | CANDIDATE FINDING: .state-pill--pass on the landing page fails WCAG AA color contrast (serious, 1 node) — found by the vendored-axe gate against the BUILT client; baselined under the documented ratchet (recorded, never hidden), fix deferred to UI brand-law work |
+| `DEF-065` | `P10.T04 remote reconciliation` | LOW | `OPEN` | REMOTE DRIFT: the live ruleset added 13-tos-notion-context as a 10th required context mid-program (TOS-009), while the program contract snapshot records 9. The added check is credential-bound (locally NOT_LOCALLY_EXECUTABLE, T13 nonlocal class — same as dependency-review), so local-parity verdicts are unaffected; PRs additionally need it green in CI. Snapshot refresh rides the next contract re-derivation |
 
 ## Checkpoints
 
