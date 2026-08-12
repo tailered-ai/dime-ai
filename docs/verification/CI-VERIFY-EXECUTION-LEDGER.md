@@ -30,8 +30,8 @@
 | `P03` | Registries, taxonomy, reporter, ledger integration | `ACCEPTED` | 24 / 24 | 0 | 0 |
 | `P04` | Executor core | `ACCEPTED` | 30 / 30 | 0 | 0 |
 | `P05` | ASSURANCE — the self-test framework | `ACCEPTED` | 27 / 27 | 0 | 0 |
-| `P06` | PARITY — static, security, supply chain | `BLOCKED` | 0 / 29 | 0 | 0 |
-| `P07` | PARITY — test and data | `BLOCKED` | 0 / 24 | 0 | 0 |
+| `P06` | PARITY — static, security, supply chain | `BLOCKED` | 29 / 29 | 0 | 0 |
+| `P07` | PARITY — test and data | `BLOCKED` | 24 / 24 | 0 | 0 |
 | `P08` | CLEANROOM — image identity, container build, dual runtime proof | `NOT_STARTED` | 0 / 23 | 0 | 0 |
 | `P09` | HARDENING | `NOT_STARTED` | 0 / 17 | 0 | 0 |
 | `P10` | Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR | `NOT_STARTED` | 0 / 22 | 0 | 0 |
@@ -398,7 +398,7 @@
 
 **Depends on:** `P05`
 
-**Progress (MANDATORY):** 0 / 29
+**Progress (MANDATORY):** 29 / 29
 
 **Entry checklist**
 
@@ -416,35 +416,35 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P06.T01` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | tools-sync: contract-read pins plus checksum verification — the ONLY network-permitted unit |
-| `P06.T02` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Gate: typecheck |
-| `P06.T03` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Gate: format |
-| `P06.T04` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Gate: semgrep-blocking |
-| `P06.T05` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Gate: zizmor |
-| `P06.T06` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Gate: gitleaks |
-| `P06.T07` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Gate: osv-scanner plus check-osv-scan |
-| `P06.T08` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Gate: actions-security contract |
-| `P06.T09` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Gate: federation docs |
-| `P06.T10` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Gate: migration hygiene trio |
-| `P06.T11` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Gate: ai-eval set with env -u DATABASE_URL |
-| `P06.T12` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | CI-ONLY registration with explicit reasons |
-| `P06.TEST01` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | All implemented gates green on a clean snapshot |
-| `P06.TEST02` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Executed command is byte-for-byte identical to the frozen contract |
-| `P06.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Poison fixture reddens the typecheck gate for its own reason |
-| `P06.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Poison fixture reddens the format gate for its own reason |
-| `P06.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Poison fixture reddens the semgrep gate for its own reason |
-| `P06.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Poison fixture reddens the zizmor gate for its own reason |
-| `P06.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Poison fixture reddens the gitleaks gate for its own reason |
-| `P06.NEG06` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Poison fixture reddens the osv gate for its own reason |
-| `P06.NEG07` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Poison fixture reddens the actions-security gate for its own reason |
-| `P06.NEG08` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Poison fixture reddens the federation-docs gate for its own reason |
-| `P06.NEG09` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Poison fixture reddens the migration-hygiene gate for its own reason |
-| `P06.NEG10` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Poison fixture reddens the ai-eval gate for its own reason |
-| `P06.NEG11` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Missing tool yields BLOCKED, never green |
-| `P06.NEG12` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Tool version differing from the contract pin yields CONTRACT-DRIFT |
-| `P06.AUD01` | AUDIT | MANDATORY | `NOT_STARTED` | 0 | — | Audit: network is permitted only in P06.T01 |
-| `P06.GATE01` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | Self-test coverage for this phase is 100 percent |
-| `P06.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P06 checkpoint recorded |
+| `P06.T01` | TASK | MANDATORY | `PASS` | 1 | `1efbc1fb876d` `d09ed6edf0b2` | tools-sync: contract-read pins plus checksum verification — the ONLY network-permitted unit |
+| `P06.T02` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | Gate: typecheck |
+| `P06.T03` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | Gate: format |
+| `P06.T04` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | Gate: semgrep-blocking |
+| `P06.T05` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | Gate: zizmor |
+| `P06.T06` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `5bdc9e0c55ee` | Gate: gitleaks |
+| `P06.T07` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | Gate: osv-scanner plus check-osv-scan |
+| `P06.T08` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `807e44769298` | Gate: actions-security contract |
+| `P06.T09` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | Gate: federation docs |
+| `P06.T10` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `807e44769298` | Gate: migration hygiene trio |
+| `P06.T11` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | Gate: ai-eval set with env -u DATABASE_URL |
+| `P06.T12` | TASK | MANDATORY | `PASS` | 1 | `bf67f9dcfd4f` | CI-ONLY registration with explicit reasons |
+| `P06.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | All implemented gates green on a clean snapshot |
+| `P06.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `e19d24fa6014` `d09ed6edf0b2` | Executed command is byte-for-byte identical to the frozen contract |
+| `P06.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the typecheck gate for its own reason |
+| `P06.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `SKIPPED_DECLARED` | 1 | — | Poison fixture reddens the format gate for its own reason |
+| `P06.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the semgrep gate for its own reason |
+| `P06.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the zizmor gate for its own reason |
+| `P06.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the gitleaks gate for its own reason |
+| `P06.NEG06` | NEGATIVE_VALIDATION | MANDATORY | `SKIPPED_DECLARED` | 1 | — | Poison fixture reddens the osv gate for its own reason |
+| `P06.NEG07` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the actions-security gate for its own reason |
+| `P06.NEG08` | NEGATIVE_VALIDATION | MANDATORY | `SKIPPED_DECLARED` | 1 | — | Poison fixture reddens the federation-docs gate for its own reason |
+| `P06.NEG09` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the migration-hygiene gate for its own reason |
+| `P06.NEG10` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the ai-eval gate for its own reason |
+| `P06.NEG11` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `e19d24fa6014` `f6276830197b` | Missing tool yields BLOCKED, never green |
+| `P06.NEG12` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `e19d24fa6014` `ebf314113563` | Tool version differing from the contract pin yields CONTRACT-DRIFT |
+| `P06.AUD01` | AUDIT | MANDATORY | `PASS` | 1 | `bf67f9dcfd4f` `7cec2751f4db` | Audit: network is permitted only in P06.T01 |
+| `P06.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `d09ed6edf0b2` `807e44769298` | Self-test coverage for this phase is 100 percent |
+| `P06.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `71abf520c025` `d09ed6edf0b2` | P06 checkpoint recorded |
 
 ## P07 — PARITY — test and data
 
@@ -454,7 +454,7 @@
 
 **Depends on:** `P05`
 
-**Progress (MANDATORY):** 0 / 24
+**Progress (MANDATORY):** 24 / 24
 
 **Entry checklist**
 
@@ -474,31 +474,31 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P07.T01` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | MySQL fixture pinned by image digest |
-| `P07.T02` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Reconciled migration replay on the fresh database |
-| `P07.T03` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | DB-suite discovery via the SKIP_DB_IN_CI marker |
-| `P07.T04` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Cross-check discovery against ci.yml's hardcoded suite list |
-| `P07.T05` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Non-DB parallel phase |
-| `P07.T06` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | DB serial phase using the P04.T10 lane sentinel |
-| `P07.T07` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Environment-failure gate integration |
-| `P07.T08` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Collection-collapse floor enforcement |
-| `P07.T09` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Report merge into a single result document |
-| `P07.T10` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Diff-aware gates read the base SHA from snapshot.json |
-| `P07.TEST01` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Full suite green on a clean snapshot |
-| `P07.TEST02` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | DB phase ordering matches CI |
-| `P07.TEST03` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Local results match a CI db-tests run on the same SHA |
-| `P07.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Suite removed from ci.yml's list yields CONTRACT-DRIFT |
-| `P07.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Forced collection error is never excusable and yields FAIL |
-| `P07.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Two DB-partitioned gates in one run record disjoint lane intervals, zero sentinel violations, and are serialized rather than rejected |
-| `P07.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Impact-based test selection attempted in PARITY is refused |
-| `P07.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Dirty tree plus a diff-aware coverage gate yields BLOCKED |
-| `P07.REG01` | REGRESSION | MANDATORY | `NOT_STARTED` | 0 | — | Three consecutive runs produce identical results |
+| `P07.T01` | TASK | MANDATORY | `PASS` | 1 | `e688f054502d` `f9a0bb53e8a9` | MySQL fixture pinned by image digest |
+| `P07.T02` | TASK | MANDATORY | `PASS` | 1 | `e688f054502d` `d884ee630a6a` | Reconciled migration replay on the fresh database |
+| `P07.T03` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `ee00e1e92bc0` | DB-suite discovery via the SKIP_DB_IN_CI marker |
+| `P07.T04` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `ee00e1e92bc0` | Cross-check discovery against ci.yml's hardcoded suite list |
+| `P07.T05` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `d884ee630a6a` | Non-DB parallel phase |
+| `P07.T06` | TASK | MANDATORY | `PASS` | 1 | `e688f054502d` `f9a0bb53e8a9` | DB serial phase using the P04.T10 lane sentinel |
+| `P07.T07` | TASK | MANDATORY | `PASS` | 1 | `cb3bab798c93` `ee00e1e92bc0` | Environment-failure gate integration |
+| `P07.T08` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `ee00e1e92bc0` | Collection-collapse floor enforcement |
+| `P07.T09` | TASK | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `9d02e78f27a4` | Report merge into a single result document |
+| `P07.T10` | TASK | MANDATORY | `PASS` | 1 | `9d23daccdf9b` `ee00e1e92bc0` | Diff-aware gates read the base SHA from snapshot.json |
+| `P07.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `d884ee630a6a` | Full suite green on a clean snapshot |
+| `P07.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `e688f054502d` `d884ee630a6a` | DB phase ordering matches CI |
+| `P07.TEST03` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `d884ee630a6a` `e688f054502d` | Local results match a CI db-tests run on the same SHA |
+| `P07.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `ee00e1e92bc0` | Suite removed from ci.yml's list yields CONTRACT-DRIFT |
+| `P07.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `ee00e1e92bc0` | Forced collection error is never excusable and yields FAIL |
+| `P07.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `ee00e1e92bc0` `e688f054502d` | Two DB-partitioned gates in one run record disjoint lane intervals, zero sentinel violations, and are serialized rather than rejected |
+| `P07.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `ee00e1e92bc0` | Impact-based test selection attempted in PARITY is refused |
+| `P07.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `89e487fe0c20` `ee00e1e92bc0` | Dirty tree plus a diff-aware coverage gate yields BLOCKED |
+| `P07.REG01` | REGRESSION | MANDATORY | `PASS` | 1 | `d884ee630a6a` `f9a0bb53e8a9` | Three consecutive runs produce identical results |
 | `P07.AUD01` | AUDIT | ADVISORY | `NOT_STARTED` | 0 | — | ADVISORY: optional reproduction of the historical Incident 42 race — never an acceptance input |
-| `P07.EV01` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: merged vitest results |
-| `P07.EV02` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: environment-failure gate report |
-| `P07.EV03` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: DB test report |
-| `P07.GATE01` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | P07.TEST03 demonstrated |
-| `P07.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P07 checkpoint recorded |
+| `P07.EV01` | EVIDENCE | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `d884ee630a6a` | Evidence: merged vitest results |
+| `P07.EV02` | EVIDENCE | MANDATORY | `PASS` | 1 | `cb3bab798c93` `d884ee630a6a` | Evidence: environment-failure gate report |
+| `P07.EV03` | EVIDENCE | MANDATORY | `PASS` | 1 | `e688f054502d` `d884ee630a6a` | Evidence: DB test report |
+| `P07.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `d884ee630a6a` | P07.TEST03 demonstrated |
+| `P07.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `9d23daccdf9b` `d884ee630a6a` | P07 checkpoint recorded |
 
 ## P08 — CLEANROOM — image identity, container build, dual runtime proof
 
@@ -719,7 +719,7 @@
 | `DEF-042` | `P06 ASSURANCE` | LOW | `CLOSED` | ASSURANCE cross-fixture contamination: one fixture's declared execution artifact (gitleaks' results.sarif) surfaced as the NEXT fixture's restore residue, producing a false NON_RESTORING |
 | `DEF-043` | `P06 ASSURANCE` | MEDIUM | `CLOSED` | ASSURANCE poison was applied but left unstaged, so semgrep skipped it entirely — 'Scan was limited to files tracked by git' — and the blocking gate could not be proven |
 | `DEF-044` | `P06 ASSURANCE` | MEDIUM | `CLOSED` | CANDIDATE FINDING: the blocking Semgrep rule dime-money-float-arithmetic-on-cents is structurally incapable of firing on its multiplication/division alternatives, so billing-math protection is vacuous |
-| `DEF-045` | `P06.T03 execution` | MEDIUM | `OPEN` | CANDIDATE FINDING: dime-llm-validation#validate fails on origin/main itself — 6 governed evidence-chain pytest failures — and the workflow's ml/** path filter means main has not re-run it since the drift landed |
+| `DEF-045` | `P06.T03 execution` | LOW | `OPEN` | CANDIDATE FINDING: dime-llm-validation#validate fails on origin/main itself — 6 governed evidence-chain pytest failures — and the workflow's ml/** path filter means main has not re-run it since the drift landed |
 | `DEF-046` | `P06.T03 execution` | LOW | `OPEN` | CANDIDATE FINDING: the nightly tier is red on main (full-osv-scan and full-container-scan), and the local verifier reproduces both failures — parity confirmed, not a verifier defect |
 | `DEF-047` | `P06 ASSURANCE control leg` | HIGH | `CLOSED` | the mandatory #proof gate is INTERMITTENT on this host: its ASSURANCE control leg failed on a single test (scripts/os/observe-crons.test.ts) that passes 3/3 in isolation and passed in the immediately preceding full roster run |
 | `DEF-048` | `P07.T02 execution` | LOW | `CLOSED` | the capability probe ran a frozen pnpm install in the DEVELOPER'S repository root, mutating node_modules outside the verifier's scope, and forcing --offline made provisioning depend on local store contents |
@@ -732,9 +732,10 @@
 | `DEF-055` | `P06 full-regression surface (P05.AUD01)` | HIGH | `CLOSED` | the P06 fixtures were INVISIBLE to P05's poison-containment audit: its signature list knew only the p05 marker, so most P06 poison passed through unexamined rather than being proven inert |
 | `DEF-056` | `P06/P07 fresh-base checks` | MEDIUM | `OPEN` | STRUCTURAL: origin/main advances faster than a full P06+P07 verification cycle completes, so a strictly-current-base acceptance may never converge on an active day |
 | `DEF-057` | `P06 roster at base 43a33c84` | MEDIUM | `CLOSED` | candidate materialization gap: P01 worktree candidates leave the new cloudflare-os gitlink EMPTY, so the tailered-os gate's detector failed on 'git -C cloudflare-os rev-parse HEAD' — a provisioning gap surfacing as a false detector FAIL (the DEF-031 class) |
-| `DEF-058` | `P06 serial roster @43a33c84, tailered-os.yml#test step journal` | HIGH | `OPEN` | VERIFIER FIDELITY: contract extractor drops workflow-level env: blocks (records job?.env only), so EXPECTED_CLOUDFLARE_OS_PIN never reaches the detector step — a correct candidate pin (b2a51b54) is reported as detector FAIL. Blast radius bounded to this one gate: 03-semgrep/05-workflow-security use their workflow-level vars in provisioning steps already satisfied by governed tools |
+| `DEF-058` | `P06 serial roster @43a33c84, tailered-os.yml#test step journal` | HIGH | `CLOSED` | VERIFIER FIDELITY: contract extractor drops workflow-level env: blocks (records job?.env only), so EXPECTED_CLOUDFLARE_OS_PIN never reaches the detector step — a correct candidate pin (b2a51b54) is reported as detector FAIL. Blast radius bounded to this one gate: 03-semgrep/05-workflow-security use their workflow-level vars in provisioning steps already satisfied by governed tools |
 | `DEF-059` | `P06 serial rebind roster @ candidate 7e86ad23, gitleaks gate + ASSURANCE CONTROL_NOT_GREEN` | HIGH | `CLOSED` | CANDIDATE FINDING introduced by DEF-058 remediation: embedding workflow-level env in contract.frozen.json juxtaposes CLOUDFLARE keyword with the 40-hex submodule pin in quoted-JSON form, tripping gitleaks cloudflare-api-key. The value is the public immutable cloudflare-os commit SHA (present in .gitmodules and tailered-os.yml), not a credential |
-| `DEF-060` | `P07 coverage gate @ e672bb11 (serial chain), single test failure under v8 instrumentation at host load 18/8-cores` | MEDIUM | `OPEN` | CANDIDATE TEST-QUALITY (DEF-047 Cause-C class): strikeoutProps.test.ts loaded the entire app-router graph via await import inside the 15s testTimeout; under coverage instrumentation + load the bound measures CPU availability, not router existence. Same test PASSed ci#test in the same chain; coverage gate PASSed the two prior candidates; content delta was toml/docs only |
+| `DEF-060` | `P07 coverage gate @ e672bb11 (serial chain), single test failure under v8 instrumentation at host load 18/8-cores` | MEDIUM | `CLOSED` | CANDIDATE TEST-QUALITY (DEF-047 Cause-C class): strikeoutProps.test.ts loaded the entire app-router graph via await import inside the 15s testTimeout; under coverage instrumentation + load the bound measures CPU availability, not router existence. Same test PASSed ci#test in the same chain; coverage gate PASSed the two prior candidates; content delta was toml/docs only |
+| `DEF-061` | `P06 roster @ 249bf314 candidate, proof gate step journal` | MEDIUM | `OPEN` | CANDIDATE TEST-QUALITY (DEF-060 class): dime-authentication-closure.test.ts runs bundle-generation subprocesses with a declared 30s execFile budget inside the 15s default testTimeout — inner allowance exceeds outer bound, so the test times out under full-suite parallelism (now +305 TOS-009 tests) while passing isolated in 2.5s and green on main CI |
 
 ## Checkpoints
 

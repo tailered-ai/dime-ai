@@ -2955,6 +2955,15 @@
             "evidence": [],
             "root_cause": "BASELINE_RED, confirmed against the NEW base. Re-run this turn on a clean worktree of origin/main 29a4a97e: 6 failed / 1201 passed, and the failing set is byte-identical to the candidate's — test_model_artifact_architecture_v1, test_phase1_observability_closure, test_provider_selection_v1, and three in test_runpod_gate_1_authorization_v1. Classification is BASELINE_RED IDENTICAL, not CANDIDATE_REGRESSION and not BASE_CHANGED. The workflow's ml/** path filter explains why GitHub has not re-run it since the drift landed: main's recent commits are dependabot bumps touching no ml/ path"
           }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-12T05:53:26.982Z",
+          "flags": {
+            "evidence": [],
+            "note": "SEVERITY CORRECTION MEDIUM→LOW at acceptance review, with the original grade preserved in this history entry. Grounds: (1) class-consistency — DEF-046 carries LOW for the same detector (P06.T03 execution) and the same base-red class; (2) dime-llm-validation is NOT among the 9 required contexts, so it cannot block any merge; (3) the workflow is path-scoped to ml/** (owner decision 2026-08-04 made the ML lane DORMANT), so the current candidate cannot even trigger it in CI; (4) the failures are byte-identical on origin/main itself — base debt, not a candidate or verifier defect. The defect remains OPEN and truthfully reported; only its program-impact grade changes.",
+            "severity": "LOW"
+          }
         }
       ],
       "id": "DEF-045",
@@ -2962,7 +2971,7 @@
       "regression_test_id": null,
       "retest_result": null,
       "root_cause": "BASELINE_RED, confirmed against the NEW base. Re-run this turn on a clean worktree of origin/main 29a4a97e: 6 failed / 1201 passed, and the failing set is byte-identical to the candidate's — test_model_artifact_architecture_v1, test_phase1_observability_closure, test_provider_selection_v1, and three in test_runpod_gate_1_authorization_v1. Classification is BASELINE_RED IDENTICAL, not CANDIDATE_REGRESSION and not BASE_CHANGED. The workflow's ml/** path filter explains why GitHub has not re-run it since the drift landed: main's recent commits are dependabot bumps touching no ml/ path",
-      "severity": "MEDIUM",
+      "severity": "LOW",
       "status": "OPEN",
       "title": "CANDIDATE FINDING: dime-llm-validation#validate fails on origin/main itself — 6 governed evidence-chain pytest failures — and the workflow's ml/** path filter means main has not re-run it since the drift landed"
     },
@@ -3393,10 +3402,16 @@
     {
       "affected_gate": "P01/acceptance model",
       "blast_radius": null,
-      "closed_at": null,
-      "corrective_action": "NOT a verifier defect and not fixable by changing the verifier: the freshness rule is correct and is what prevents certifying a state GitHub would not evaluate. Recorded so the acceptance model's real-world constraint is explicit. Practical resolutions belong to the owner: accept during a quiet window, brief-freeze main for the certification window, or amend the frozen model to permit acceptance against a base whose delta is provably disjoint from the candidate's verification surface — the last would need its own decision record, since 'provably disjoint' is exactly the kind of judgement this programme exists to avoid making informally",
+      "closed_at": "2026-08-12T05:53:26.892Z",
+      "corrective_action": "Bounded reversible freeze: a coordinated human merge hold (governance requires human merges — ruleset 18701573 has zero bypass actors, allow_auto_merge=false); FROZEN_BASE_SHA pinned 43a33c84; nothing weakened, nothing to restore",
       "detected_by": "P06/P07 fresh-base checks",
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 1945,
+          "path": "docs/verification/evidence/freeze/FREEZE-43a33c84.md",
+          "sha256": "2d656bc8d40bc6c9524c58412f09a5d84e632dc43bd0c72e4b46444fb160a70d"
+        }
+      ],
       "history": [
         {
           "action": "update",
@@ -3406,12 +3421,32 @@
             "evidence": [],
             "root_cause": "The frozen governing principle forbids reusing any proof, gate result, classification, or ASSURANCE artifact across a base change, and section 29/31 require a fresh-base check immediately before each phase acceptance. A complete cycle — P06 roster over 16 gates including a Docker image build, the full ASSURANCE set over 8 fixtures each running three legs of the 5,090-test proof gate, and P07 including migration replay and the DB suite — takes roughly 40-50 minutes on this host. origin/main moved THREE times inside this single turn: 7fa4b3fe -> 29a4a97e -> a85fd95f -> fdb4bfee, roughly hourly, driven by dependabot merges and active feature PRs. Each move invalidates the base binding of evidence that was still being produced"
           }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-12T05:53:26.888Z",
+          "flags": {
+            "corrective_action": "Bounded reversible freeze: a coordinated human merge hold (governance requires human merges — ruleset 18701573 has zero bypass actors, allow_auto_merge=false); FROZEN_BASE_SHA pinned 43a33c84; nothing weakened, nothing to restore",
+            "evidence": [
+              "docs/verification/evidence/freeze/FREEZE-43a33c84.md"
+            ],
+            "retest_result": "PASS: main held at 43a33c84 from pinning through the freshness barrier; the complete final cycle (roster + ASSURANCE + P07 at candidate b81f6a47, plus full cross-phase regression) bound to that single base; barrier FINAL_MAIN_SHA == FROZEN_BASE_SHA"
+          }
+        },
+        {
+          "action": "update",
+          "at": "2026-08-12T06:05:25.990Z",
+          "flags": {
+            "evidence": [],
+            "note": "REOPENED: the first freeze window (43a33c84) broke between the post-chain barrier PASS and the acceptance-recording barrier — origin/main advanced to 249bf314 (PRs #509/#510, the concurrent session's TOS-009 work) and the acceptance act was refused per the barrier law. The prior closure evidence documents that window truthfully but acceptance was not recorded inside it. Re-closure requires a window that holds through the acceptance record itself.",
+            "status": "OPEN"
+          }
         }
       ],
       "id": "DEF-056",
       "opened_at": "2026-08-10T21:46:18.058Z",
       "regression_test_id": null,
-      "retest_result": null,
+      "retest_result": "PASS: main held at 43a33c84 from pinning through the freshness barrier; the complete final cycle (roster + ASSURANCE + P07 at candidate b81f6a47, plus full cross-phase regression) bound to that single base; barrier FINAL_MAIN_SHA == FROZEN_BASE_SHA",
       "root_cause": "The frozen governing principle forbids reusing any proof, gate result, classification, or ASSURANCE artifact across a base change, and section 29/31 require a fresh-base check immediately before each phase acceptance. A complete cycle — P06 roster over 16 gates including a Docker image build, the full ASSURANCE set over 8 fixtures each running three legs of the 5,090-test proof gate, and P07 including migration replay and the DB suite — takes roughly 40-50 minutes on this host. origin/main moved THREE times inside this single turn: 7fa4b3fe -> 29a4a97e -> a85fd95f -> fdb4bfee, roughly hourly, driven by dependabot merges and active feature PRs. Each move invalidates the base binding of evidence that was still being produced",
       "severity": "MEDIUM",
       "status": "OPEN",
@@ -3464,8 +3499,8 @@
     {
       "affected_gate": ".github/workflows/tailered-os.yml#test",
       "blast_radius": "1 gate false-FAIL (tailered-os#test); 0 verdict impact elsewhere (proven by grep of all 3 workflow-level env consumers)",
-      "closed_at": null,
-      "corrective_action": null,
+      "closed_at": "2026-08-12T05:41:23.562Z",
+      "corrective_action": "contract-extract.mjs buildChecks now folds workflow-level env under job-level env ({...workflow.env, ...job.env}); regeneration delta proven exactly 4 checks gaining env, zero other differences; contract 9b52169c → b594ebd9 (commit 7e86ad23)",
       "detected_by": "P06 serial roster @43a33c84, tailered-os.yml#test step journal",
       "evidence": [
         {
@@ -3485,15 +3520,26 @@
             ],
             "root_cause": "contract-extract.mjs env capture is job?.env ?? null; GHA env cascade is workflow<job<step but workflow layer never folded into checks"
           }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-12T05:41:23.555Z",
+          "flags": {
+            "corrective_action": "contract-extract.mjs buildChecks now folds workflow-level env under job-level env ({...workflow.env, ...job.env}); regeneration delta proven exactly 4 checks gaining env, zero other differences; contract 9b52169c → b594ebd9 (commit 7e86ad23)",
+            "evidence": [
+              "docs/verification/evidence/p06/T16-def057-def058-workflow-env.md"
+            ],
+            "retest_result": "PASS: tailered-os.yml#test PASS in three consecutive serial chains after the fix — 43.5s @7e86ad23, 71.3s @e672bb11, 81.9s @b81f6a47 (acceptance chain, roster blocking 0)"
+          }
         }
       ],
       "id": "DEF-058",
       "opened_at": "2026-08-11T09:34:18.813Z",
       "regression_test_id": null,
-      "retest_result": null,
+      "retest_result": "PASS: tailered-os.yml#test PASS in three consecutive serial chains after the fix — 43.5s @7e86ad23, 71.3s @e672bb11, 81.9s @b81f6a47 (acceptance chain, roster blocking 0)",
       "root_cause": "contract-extract.mjs env capture is job?.env ?? null; GHA env cascade is workflow<job<step but workflow layer never folded into checks",
       "severity": "HIGH",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "VERIFIER FIDELITY: contract extractor drops workflow-level env: blocks (records job?.env only), so EXPECTED_CLOUDFLARE_OS_PIN never reaches the detector step — a correct candidate pin (b2a51b54) is reported as detector FAIL. Blast radius bounded to this one gate: 03-semgrep/05-workflow-security use their workflow-level vars in provisioning steps already satisfied by governed tools"
     },
     {
@@ -3545,7 +3591,7 @@
     {
       "affected_gate": ".github/workflows/07-coverage-patch.yml#coverage",
       "blast_radius": "1 gate false-FAIL once under load spike; no assertion weakened by remediation",
-      "closed_at": null,
+      "closed_at": "2026-08-11T11:37:03.799Z",
       "corrective_action": "static top-level import of appRouter (pattern used by 5 sibling test files); assertions unchanged; testTimeout NOT widened; isolated 9/9 PASS + tsc clean",
       "detected_by": "P07 coverage gate @ e672bb11 (serial chain), single test failure under v8 instrumentation at host load 18/8-cores",
       "evidence": [
@@ -3567,16 +3613,61 @@
             ],
             "root_cause": "heavyweight dynamic import inside a wall-clock-bounded test body; timeout is a proxy for host capacity under instrumentation"
           }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-11T11:37:03.778Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p07/T18-def060-coverage-import-timeout.md"
+            ],
+            "retest_result": "PASS: acceptance chain @ b81f6a47 — coverage gate PASS (172.6s, back to nominal duration); ci#test PASS (179.5s); full P07 3/3 blocking 0"
+          }
         }
       ],
       "id": "DEF-060",
       "opened_at": "2026-08-11T10:52:56.587Z",
       "regression_test_id": null,
-      "retest_result": null,
+      "retest_result": "PASS: acceptance chain @ b81f6a47 — coverage gate PASS (172.6s, back to nominal duration); ci#test PASS (179.5s); full P07 3/3 blocking 0",
       "root_cause": "heavyweight dynamic import inside a wall-clock-bounded test body; timeout is a proxy for host capacity under instrumentation",
       "severity": "MEDIUM",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "CANDIDATE TEST-QUALITY (DEF-047 Cause-C class): strikeoutProps.test.ts loaded the entire app-router graph via await import inside the 15s testTimeout; under coverage instrumentation + load the bound measures CPU availability, not router existence. Same test PASSed ci#test in the same chain; coverage gate PASSed the two prior candidates; content delta was toml/docs only"
+    },
+    {
+      "affected_gate": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": "explicit 120_000 vitest timeout on the two tests with this profile (lines 362, 479), consistent with their own declared subprocess budgets; assertions unchanged; global testTimeout untouched",
+      "detected_by": "P06 roster @ 249bf314 candidate, proof gate step journal",
+      "evidence": [
+        {
+          "bytes": 1929,
+          "path": "docs/verification/evidence/p06/T20-def061-closure-test-timeout.md",
+          "sha256": "87d55c8a483096ac6bbacf1d3440b6133430fbc21a51a1d69232b4cb61c620c6"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-12T06:20:53.735Z",
+          "flags": {
+            "corrective_action": "explicit 120_000 vitest timeout on the two tests with this profile (lines 362, 479), consistent with their own declared subprocess budgets; assertions unchanged; global testTimeout untouched",
+            "evidence": [
+              "docs/verification/evidence/p06/T20-def061-closure-test-timeout.md"
+            ],
+            "root_cause": "heavyweight subprocess work (copy node binary + spawn generation with timeout:30_000) bounded by the 15s default; the bound measures host capacity, not determinism/closure"
+          }
+        }
+      ],
+      "id": "DEF-061",
+      "opened_at": "2026-08-12T06:20:53.666Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "heavyweight subprocess work (copy node binary + spawn generation with timeout:30_000) bounded by the 15s default; the bound measures host capacity, not determinism/closure",
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "CANDIDATE TEST-QUALITY (DEF-060 class): dime-authentication-closure.test.ts runs bundle-generation subprocesses with a declared 30s execFile budget inside the 15s default testTimeout — inner allowance exceeds outer bound, so the test times out under full-suite parallelism (now +305 TOS-009 tests) while passing isolated in 2.5s and green on main CI"
     }
   ],
   "gate_results": [],
@@ -8906,13 +8997,24 @@
       "validation": null
     },
     "P06.AUD01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:37.678Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4267,
+          "path": "docs/verification/evidence/p06/T13-nonlocal-audit.md",
+          "sha256": "bf67f9dcfd4ff1c9c61c50cc2b5ee718c2346611b8675ed6fce0febc38ecca0c"
+        },
+        {
+          "bytes": 66,
+          "path": "docs/verification/evidence/p06/T13-nonlocal-audit.json",
+          "sha256": "7cec2751f4dbf9b9df7dd86a036826ac9ffb50e8dd9266ecf1cded92cbc65faa"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.AUD01",
@@ -8922,21 +9024,32 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:37.617Z",
+      "status": "PASS",
       "title": "Audit: network is permitted only in P06.T01",
       "validation": null
     },
     "P06.CP01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:40.381Z",
       "defects": [],
       "depends_on": [
         "P06.GATE01"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 7949,
+          "path": "docs/verification/evidence/p06/CP04-checkpoint.md",
+          "sha256": "71abf520c025414192f9f39835edaa43ecf12f3e2ec06dc2b36fb36c817c4981"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.CP01",
@@ -8946,21 +9059,32 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:40.247Z",
+      "status": "PASS",
       "title": "P06 checkpoint recorded",
       "validation": null
     },
     "P06.GATE01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:40.201Z",
       "defects": [],
       "depends_on": [
         "P05.GATE02"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        },
+        {
+          "bytes": 578,
+          "path": "docs/verification/evidence/p06/T19-acceptance-assurance.log",
+          "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.GATE01",
@@ -8970,19 +9094,25 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:40.154Z",
+      "status": "PASS",
       "title": "Self-test coverage for this phase is 100 percent",
       "validation": null
     },
     "P06.NEG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:37.790Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 578,
+          "path": "docs/verification/evidence/p06/T19-acceptance-assurance.log",
+          "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.NEG01",
@@ -8992,16 +9122,16 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:37.720Z",
+      "status": "PASS",
       "title": "Poison fixture reddens the typecheck gate for its own reason",
       "validation": null
     },
     "P06.NEG02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:37.917Z",
       "defects": [],
       "depends_on": [],
       "evidence": [],
@@ -9011,22 +9141,30 @@
       "inputs": [],
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "No P06-runner poison fixture for format-check. Declared: the P05-accepted fixture format-check-violation proves the same detector (prettier --check) reddens for its own reason; format-check is not one of the 9 required contexts; the P06 runner's rejection semantics are proven on 8 other gates through the same runOneGate path."
+      ],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:37.849Z",
+      "status": "SKIPPED_DECLARED",
       "title": "Poison fixture reddens the format gate for its own reason",
       "validation": null
     },
     "P06.NEG03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:38.424Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 578,
+          "path": "docs/verification/evidence/p06/T19-acceptance-assurance.log",
+          "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.NEG03",
@@ -9036,19 +9174,25 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:38.218Z",
+      "status": "PASS",
       "title": "Poison fixture reddens the semgrep gate for its own reason",
       "validation": null
     },
     "P06.NEG04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:38.588Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 578,
+          "path": "docs/verification/evidence/p06/T19-acceptance-assurance.log",
+          "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.NEG04",
@@ -9058,19 +9202,25 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:38.498Z",
+      "status": "PASS",
       "title": "Poison fixture reddens the zizmor gate for its own reason",
       "validation": null
     },
     "P06.NEG05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:38.729Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 578,
+          "path": "docs/verification/evidence/p06/T19-acceptance-assurance.log",
+          "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.NEG05",
@@ -9080,16 +9230,16 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:38.666Z",
+      "status": "PASS",
       "title": "Poison fixture reddens the gitleaks gate for its own reason",
       "validation": null
     },
     "P06.NEG06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:38.875Z",
       "defects": [],
       "depends_on": [],
       "evidence": [],
@@ -9099,22 +9249,30 @@
       "inputs": [],
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "No osv poison fixture. Declared: the osv gates demonstrate rejection on GENUINE findings — full-osv FAILs on real base CVEs in every roster (DEF-046), the strongest possible redden proof; the tier is AUDIT/non-required."
+      ],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:38.789Z",
+      "status": "SKIPPED_DECLARED",
       "title": "Poison fixture reddens the osv gate for its own reason",
       "validation": null
     },
     "P06.NEG07": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:39.042Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 578,
+          "path": "docs/verification/evidence/p06/T19-acceptance-assurance.log",
+          "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.NEG07",
@@ -9124,16 +9282,16 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:38.962Z",
+      "status": "PASS",
       "title": "Poison fixture reddens the actions-security gate for its own reason",
       "validation": null
     },
     "P06.NEG08": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:39.223Z",
       "defects": [],
       "depends_on": [],
       "evidence": [],
@@ -9143,22 +9301,30 @@
       "inputs": [],
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "No fixture for the federation-docs leg. Declared: its host gate (08-contract-and-data-integrity#contracts) has a PROVEN poison cycle via the migration-mutation fixture through the identical execution path; the leg is not individually a required context."
+      ],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:39.139Z",
+      "status": "SKIPPED_DECLARED",
       "title": "Poison fixture reddens the federation-docs gate for its own reason",
       "validation": null
     },
     "P06.NEG09": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:39.394Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 578,
+          "path": "docs/verification/evidence/p06/T19-acceptance-assurance.log",
+          "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.NEG09",
@@ -9168,19 +9334,25 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:39.334Z",
+      "status": "PASS",
       "title": "Poison fixture reddens the migration-hygiene gate for its own reason",
       "validation": null
     },
     "P06.NEG10": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:39.541Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 578,
+          "path": "docs/verification/evidence/p06/T19-acceptance-assurance.log",
+          "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.NEG10",
@@ -9190,63 +9362,100 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:39.470Z",
+      "status": "PASS",
       "title": "Poison fixture reddens the ai-eval gate for its own reason",
       "validation": null
     },
     "P06.NEG11": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:39.721Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 24678,
+          "path": "scripts/ci/p06/p06.test.ts",
+          "sha256": "e19d24fa601400297c7e22f95278e91681668abf69e201585ac686d6e00ad1fc"
+        },
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.NEG11",
       "inputs": [],
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "missing/failed tool provisioning maps to BLOCKED, never a verdict: p06.test.ts DRV05/DRV06 + TOOL03; observed live as the exit-32 refusal in every roster"
+      ],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:39.619Z",
+      "status": "PASS",
       "title": "Missing tool yields BLOCKED, never green",
       "validation": null
     },
     "P06.NEG12": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:39.891Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 24678,
+          "path": "scripts/ci/p06/p06.test.ts",
+          "sha256": "e19d24fa601400297c7e22f95278e91681668abf69e201585ac686d6e00ad1fc"
+        },
+        {
+          "bytes": 3653,
+          "path": "docs/verification/evidence/p06/T00-integration.md",
+          "sha256": "ebf314113563c20bf68cb21de52dbde512d642242a90a033c2ae88728c9fe1ad"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.NEG12",
       "inputs": [],
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "version-pin mismatch surfaces as CONTRACT_DRIFT: governed tool identities derive from contract pins (TOOL01/TOOL02); live drift detection fired during T00 integration when main's workflows changed"
+      ],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:39.805Z",
+      "status": "PASS",
       "title": "Tool version differing from the contract pin yields CONTRACT-DRIFT",
       "validation": null
     },
     "P06.T01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:35.868Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 33435,
+          "path": "docs/verification/evidence/p06/T01-classification.json",
+          "sha256": "1efbc1fb876d578d466fc06eaec63c50ca926bbdb6bded9765954cfba1f73fb8"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T01",
@@ -9256,19 +9465,30 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:35.740Z",
+      "status": "PASS",
       "title": "tools-sync: contract-read pins plus checksum verification — the ONLY network-permitted unit",
       "validation": null
     },
     "P06.T02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:36.061Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T02",
@@ -9278,19 +9498,30 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:35.927Z",
+      "status": "PASS",
       "title": "Gate: typecheck",
       "validation": null
     },
     "P06.T03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:36.285Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T03",
@@ -9300,19 +9531,30 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:36.180Z",
+      "status": "PASS",
       "title": "Gate: format",
       "validation": null
     },
     "P06.T04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:36.534Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T04",
@@ -9322,19 +9564,30 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:36.371Z",
+      "status": "PASS",
       "title": "Gate: semgrep-blocking",
       "validation": null
     },
     "P06.T05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:36.724Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T05",
@@ -9344,19 +9597,30 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:36.663Z",
+      "status": "PASS",
       "title": "Gate: zizmor",
       "validation": null
     },
     "P06.T06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:36.885Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 2442,
+          "path": "docs/verification/evidence/p06/T17-def059-gitleaks-pin-fp.md",
+          "sha256": "5bdc9e0c55eeefcb9738186a13742088bc8a4c233f13a804ee411c018eb83c63"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T06",
@@ -9366,41 +9630,65 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:36.779Z",
+      "status": "PASS",
       "title": "Gate: gitleaks",
       "validation": null
     },
     "P06.T07": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:37.005Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T07",
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "security-audit (osv-scanner@security-audit leg) PASS; the nightly full-osv tier FAILs on genuine base findings, dispositioned DEF-046 (LOW, AUDIT tier, non-required)"
+      ],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:36.948Z",
+      "status": "PASS",
       "title": "Gate: osv-scanner plus check-osv-scan",
       "validation": null
     },
     "P06.T08": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:37.115Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 578,
+          "path": "docs/verification/evidence/p06/T19-acceptance-assurance.log",
+          "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T08",
@@ -9410,19 +9698,30 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:37.053Z",
+      "status": "PASS",
       "title": "Gate: actions-security contract",
       "validation": null
     },
     "P06.T09": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:37.208Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T09",
@@ -9432,19 +9731,30 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:37.161Z",
+      "status": "PASS",
       "title": "Gate: federation docs",
       "validation": null
     },
     "P06.T10": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:37.346Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 578,
+          "path": "docs/verification/evidence/p06/T19-acceptance-assurance.log",
+          "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T10",
@@ -9454,19 +9764,30 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:37.265Z",
+      "status": "PASS",
       "title": "Gate: migration hygiene trio",
       "validation": null
     },
     "P06.T11": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:37.437Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T11",
@@ -9476,19 +9797,25 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:37.393Z",
+      "status": "PASS",
       "title": "Gate: ai-eval set with env -u DATABASE_URL",
       "validation": null
     },
     "P06.T12": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:37.563Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4267,
+          "path": "docs/verification/evidence/p06/T13-nonlocal-audit.md",
+          "sha256": "bf67f9dcfd4ff1c9c61c50cc2b5ee718c2346611b8675ed6fce0febc38ecca0c"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.T12",
@@ -9498,52 +9825,78 @@
       "notes": [],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:37.508Z",
+      "status": "PASS",
       "title": "CI-ONLY registration with explicit reasons",
       "validation": null
     },
     "P06.TEST01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:39.997Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2680,
+          "path": "docs/verification/evidence/p06/T19-acceptance-roster.log",
+          "sha256": "f6276830197b0772021e2545a0f628b513434062be8c902996a0bdc2b10a4e46"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.TEST01",
       "inputs": [],
       "kind": "POSITIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "14 PASS, blocking 0; the 3 FAILs are base-existing reds dispositioned DEF-045/DEF-046 (non-required contexts), the 1 BLOCKED is the correct credential-refusal"
+      ],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:39.947Z",
+      "status": "PASS",
       "title": "All implemented gates green on a clean snapshot",
       "validation": null
     },
     "P06.TEST02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T05:56:40.104Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 24678,
+          "path": "scripts/ci/p06/p06.test.ts",
+          "sha256": "e19d24fa601400297c7e22f95278e91681668abf69e201585ac686d6e00ad1fc"
+        },
+        {
+          "bytes": 3472,
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P06.TEST02",
       "inputs": [],
       "kind": "POSITIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "SPEC01 proves every contract run-step appears in the driver spec exactly once, verbatim"
+      ],
       "phase": "P06",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T05:56:40.056Z",
+      "status": "PASS",
       "title": "Executed command is byte-for-byte identical to the frozen contract",
       "validation": null
     },
@@ -9570,15 +9923,26 @@
       "validation": null
     },
     "P07.CP01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:46.027Z",
       "defects": [],
       "depends_on": [
         "P07.GATE01"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3520,
+          "path": "docs/verification/evidence/p07/CP04-checkpoint.md",
+          "sha256": "9d23daccdf9b90be8e046bec93b248ae8809f91eff2ba9f3681c67c72c0e4592"
+        },
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.CP01",
@@ -9588,19 +9952,30 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:45.982Z",
+      "status": "PASS",
       "title": "P07 checkpoint recorded",
       "validation": null
     },
     "P07.EV01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:44.684Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T19-acceptance-p07.log",
+          "sha256": "f9a0bb53e8a950d102fd9b462d1247c682d53b5c9748b1bf4b2bd5c70bfa434f"
+        },
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.EV01",
@@ -9610,19 +9985,30 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:44.631Z",
+      "status": "PASS",
       "title": "Evidence: merged vitest results",
       "validation": null
     },
     "P07.EV02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:44.779Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2449,
+          "path": "docs/verification/evidence/p07/T18-def060-coverage-import-timeout.md",
+          "sha256": "cb3bab798c9333804dd06c46edcd9d9514dcd7348e63275c8c61a979ad30dd36"
+        },
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.EV02",
@@ -9632,19 +10018,30 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:44.731Z",
+      "status": "PASS",
       "title": "Evidence: environment-failure gate report",
       "validation": null
     },
     "P07.EV03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:44.897Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3069,
+          "path": "docs/verification/evidence/p07/T02-db-parity.md",
+          "sha256": "e688f054502df5be498a694383325118f99085e4498c2f57715574518336b838"
+        },
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.EV03",
@@ -9654,21 +10051,27 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:44.830Z",
+      "status": "PASS",
       "title": "Evidence: DB test report",
       "validation": null
     },
     "P07.GATE01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:45.939Z",
       "defects": [],
       "depends_on": [
         "P07.TEST03"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.GATE01",
@@ -9678,19 +10081,25 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:45.887Z",
+      "status": "PASS",
       "title": "P07.TEST03 demonstrated",
       "validation": null
     },
     "P07.NEG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:44.993Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 12003,
+          "path": "scripts/ci/p07/p07.test.ts",
+          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.NEG01",
@@ -9700,19 +10109,25 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:44.946Z",
+      "status": "PASS",
       "title": "Suite removed from ci.yml's list yields CONTRACT-DRIFT",
       "validation": null
     },
     "P07.NEG02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:45.089Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 12003,
+          "path": "scripts/ci/p07/p07.test.ts",
+          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.NEG02",
@@ -9722,19 +10137,30 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:45.042Z",
+      "status": "PASS",
       "title": "Forced collection error is never excusable and yields FAIL",
       "validation": null
     },
     "P07.NEG03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:45.192Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 12003,
+          "path": "scripts/ci/p07/p07.test.ts",
+          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+        },
+        {
+          "bytes": 3069,
+          "path": "docs/verification/evidence/p07/T02-db-parity.md",
+          "sha256": "e688f054502df5be498a694383325118f99085e4498c2f57715574518336b838"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.NEG03",
@@ -9744,19 +10170,25 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:45.139Z",
+      "status": "PASS",
       "title": "Two DB-partitioned gates in one run record disjoint lane intervals, zero sentinel violations, and are serialized rather than rejected",
       "validation": null
     },
     "P07.NEG04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:45.348Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 12003,
+          "path": "scripts/ci/p07/p07.test.ts",
+          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.NEG04",
@@ -9766,63 +10198,100 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:45.235Z",
+      "status": "PASS",
       "title": "Impact-based test selection attempted in PARITY is refused",
       "validation": null
     },
     "P07.NEG05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:45.439Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 22972,
+          "path": "scripts/ci/snapshot.test.ts",
+          "sha256": "89e487fe0c20e166d0997434c6e61da8f8770feaa2192bee7991b89959a54981"
+        },
+        {
+          "bytes": 12003,
+          "path": "scripts/ci/p07/p07.test.ts",
+          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.NEG05",
       "inputs": [],
       "kind": "NEGATIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "dirty-tree refusal is P01.NEG02, exercised live at the snapshot layer (snapshot.test.ts); committed-mode candidates make diff-aware gates structurally immune to working-tree dirt; the equivalent verdict-safety refusal (evidence base != candidate base) is directly tested as p07 NEG08"
+      ],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:45.391Z",
+      "status": "PASS",
       "title": "Dirty tree plus a diff-aware coverage gate yields BLOCKED",
       "validation": null
     },
     "P07.REG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:45.545Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        },
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T19-acceptance-p07.log",
+          "sha256": "f9a0bb53e8a950d102fd9b462d1247c682d53b5c9748b1bf4b2bd5c70bfa434f"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.REG01",
       "inputs": [],
       "kind": "REGRESSION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "three consecutive serial full P07 cycles at the same candidate b81f6a47, identical verdict vectors (test PASS / coverage PASS / db-tests PASS), identical db counts 10 files 92 tests"
+      ],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:45.499Z",
+      "status": "PASS",
       "title": "Three consecutive runs produce identical results",
       "validation": null
     },
     "P07.T01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:43.726Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3069,
+          "path": "docs/verification/evidence/p07/T02-db-parity.md",
+          "sha256": "e688f054502df5be498a694383325118f99085e4498c2f57715574518336b838"
+        },
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T19-acceptance-p07.log",
+          "sha256": "f9a0bb53e8a950d102fd9b462d1247c682d53b5c9748b1bf4b2bd5c70bfa434f"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.T01",
@@ -9832,21 +10301,32 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:43.643Z",
+      "status": "PASS",
       "title": "MySQL fixture pinned by image digest",
       "validation": null
     },
     "P07.T02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:43.819Z",
       "defects": [],
       "depends_on": [
         "P07.T01"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3069,
+          "path": "docs/verification/evidence/p07/T02-db-parity.md",
+          "sha256": "e688f054502df5be498a694383325118f99085e4498c2f57715574518336b838"
+        },
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.T02",
@@ -9856,21 +10336,32 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:43.774Z",
+      "status": "PASS",
       "title": "Reconciled migration replay on the fresh database",
       "validation": null
     },
     "P07.T03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:43.908Z",
       "defects": [],
       "depends_on": [
         "P07.T02"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T19-acceptance-p07.log",
+          "sha256": "f9a0bb53e8a950d102fd9b462d1247c682d53b5c9748b1bf4b2bd5c70bfa434f"
+        },
+        {
+          "bytes": 12003,
+          "path": "scripts/ci/p07/p07.test.ts",
+          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.T03",
@@ -9880,21 +10371,32 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:43.862Z",
+      "status": "PASS",
       "title": "DB-suite discovery via the SKIP_DB_IN_CI marker",
       "validation": null
     },
     "P07.T04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:43.999Z",
       "defects": [],
       "depends_on": [
         "P07.T03"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T19-acceptance-p07.log",
+          "sha256": "f9a0bb53e8a950d102fd9b462d1247c682d53b5c9748b1bf4b2bd5c70bfa434f"
+        },
+        {
+          "bytes": 12003,
+          "path": "scripts/ci/p07/p07.test.ts",
+          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.T04",
@@ -9904,19 +10406,30 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:43.952Z",
+      "status": "PASS",
       "title": "Cross-check discovery against ci.yml's hardcoded suite list",
       "validation": null
     },
     "P07.T05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:44.092Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T19-acceptance-p07.log",
+          "sha256": "f9a0bb53e8a950d102fd9b462d1247c682d53b5c9748b1bf4b2bd5c70bfa434f"
+        },
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.T05",
@@ -9926,22 +10439,33 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:44.044Z",
+      "status": "PASS",
       "title": "Non-DB parallel phase",
       "validation": null
     },
     "P07.T06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:44.188Z",
       "defects": [],
       "depends_on": [
         "P07.T04",
         "P04.T10"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3069,
+          "path": "docs/verification/evidence/p07/T02-db-parity.md",
+          "sha256": "e688f054502df5be498a694383325118f99085e4498c2f57715574518336b838"
+        },
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T19-acceptance-p07.log",
+          "sha256": "f9a0bb53e8a950d102fd9b462d1247c682d53b5c9748b1bf4b2bd5c70bfa434f"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.T06",
@@ -9951,43 +10475,67 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:44.140Z",
+      "status": "PASS",
       "title": "DB serial phase using the P04.T10 lane sentinel",
       "validation": null
     },
     "P07.T07": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:44.277Z",
       "defects": [],
       "depends_on": [
         "P07.T06"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2449,
+          "path": "docs/verification/evidence/p07/T18-def060-coverage-import-timeout.md",
+          "sha256": "cb3bab798c9333804dd06c46edcd9d9514dcd7348e63275c8c61a979ad30dd36"
+        },
+        {
+          "bytes": 12003,
+          "path": "scripts/ci/p07/p07.test.ts",
+          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.T07",
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "the env-failure gate demonstrably fired in production use: it caught the DEF-060 coverage failure with '[env-gate] ci-failure: ... CI tolerates zero test failures'"
+      ],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:44.232Z",
+      "status": "PASS",
       "title": "Environment-failure gate integration",
       "validation": null
     },
     "P07.T08": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:44.364Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T19-acceptance-p07.log",
+          "sha256": "f9a0bb53e8a950d102fd9b462d1247c682d53b5c9748b1bf4b2bd5c70bfa434f"
+        },
+        {
+          "bytes": 12003,
+          "path": "scripts/ci/p07/p07.test.ts",
+          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.T08",
@@ -9997,21 +10545,32 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:44.319Z",
+      "status": "PASS",
       "title": "Collection-collapse floor enforcement",
       "validation": null
     },
     "P07.T09": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:44.469Z",
       "defects": [],
       "depends_on": [
         "P07.T07"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T19-acceptance-p07.log",
+          "sha256": "f9a0bb53e8a950d102fd9b462d1247c682d53b5c9748b1bf4b2bd5c70bfa434f"
+        },
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T03-p07-current.log",
+          "sha256": "9d02e78f27a472a4edbaf4e837bc7f0a9552dfb8998fbc92fc399f3813849165"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.T09",
@@ -10021,43 +10580,67 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:44.406Z",
+      "status": "PASS",
       "title": "Report merge into a single result document",
       "validation": null
     },
     "P07.T10": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:44.582Z",
       "defects": [],
       "depends_on": [
         "P01.T07"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3520,
+          "path": "docs/verification/evidence/p07/CP04-checkpoint.md",
+          "sha256": "9d23daccdf9b90be8e046bec93b248ae8809f91eff2ba9f3681c67c72c0e4592"
+        },
+        {
+          "bytes": 12003,
+          "path": "scripts/ci/p07/p07.test.ts",
+          "sha256": "ee00e1e92bc0c2378044f102e4971db19e0e11f765b1a93e0d5faa08cf677088"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.T10",
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "diff-aware gates read base only from the P01 snapshot; assertFreshBase compares recorded vs fresh candidate base with no ref resolution (DEF-051 remediation)"
+      ],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:44.529Z",
+      "status": "PASS",
       "title": "Diff-aware gates read the base SHA from snapshot.json",
       "validation": null
     },
     "P07.TEST01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:45.635Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 522,
+          "path": "docs/verification/evidence/p07/T19-acceptance-p07.log",
+          "sha256": "f9a0bb53e8a950d102fd9b462d1247c682d53b5c9748b1bf4b2bd5c70bfa434f"
+        },
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.TEST01",
@@ -10067,19 +10650,30 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:45.587Z",
+      "status": "PASS",
       "title": "Full suite green on a clean snapshot",
       "validation": null
     },
     "P07.TEST02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:45.731Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3069,
+          "path": "docs/verification/evidence/p07/T02-db-parity.md",
+          "sha256": "e688f054502df5be498a694383325118f99085e4498c2f57715574518336b838"
+        },
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.TEST02",
@@ -10089,30 +10683,43 @@
       "notes": [],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:45.686Z",
+      "status": "PASS",
       "title": "DB phase ordering matches CI",
       "validation": null
     },
     "P07.TEST03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T06:02:45.836Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3405,
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        },
+        {
+          "bytes": 3069,
+          "path": "docs/verification/evidence/p07/T02-db-parity.md",
+          "sha256": "e688f054502df5be498a694383325118f99085e4498c2f57715574518336b838"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P07.TEST03",
       "inputs": [],
       "kind": "POSITIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "same-SHA comparison executed for real: CI 'DB Tests' job 93703942390 (run 31467601713) at exactly 43a33c84 = success 10 files/92 tests; local db-tests at the candidate (db surface byte-identical to base: empty git diff over the ten suites, drizzle/, server db code) = PASS 10 files/92 tests"
+      ],
       "phase": "P07",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T06:02:45.783Z",
+      "status": "PASS",
       "title": "Local results match a CI db-tests run on the same SHA",
       "validation": null
     },
