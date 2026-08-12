@@ -134,12 +134,36 @@ export function recordImageIdentities() {
 export function buildCandidate(worktree, tag) {
   requireDaemon();
   const started = Date.now();
-  const res = spawnSync("docker", ["build", "-t", tag, "."], {
-    cwd: worktree,
-    encoding: "utf8",
-    timeout: 1_800_000,
-    maxBuffer: 64 * 1024 * 1024,
-  });
+  // --progress=plain so a slow stage is diagnosable from the log; 45min
+  // budget because a COLD buildkit cache legitimately takes ~30min on this
+  // image (measured 2026-08-12; warm rebuilds are minutes).
+  const res = spawnSync(
+    "docker",
+    ["build", "--progress=plain", "-t", tag, "."],
+    {
+      cwd: worktree,
+      encoding: "utf8",
+      timeout: 2_700_000,
+      maxBuffer: 64 * 1024 * 1024,
+    }
+  );
+  mkdirSync(OUT, { recursive: true });
+  writeFileSync(
+    path.join(OUT, "build.log"),
+    `${res.stdout ?? ""}\n${res.stderr ?? ""}`.slice(-200_000)
+  );
+  // A verifier-imposed timeout (or any signal kill) is an INFRA condition,
+  // never a candidate verdict — the DEF-031 boundary law. Only a clean
+  // nonzero exit from docker build itself is a candidate build failure.
+  if (res.signal || res.error) {
+    const err = new Error(
+      `BUILD_INTERRUPTED_BY_VERIFIER: signal=${res.signal ?? ""} ` +
+        `error=${res.error?.code ?? ""} after ${Date.now() - started}ms — ` +
+        `INFRA, not a candidate verdict`
+    );
+    err.code = "INFRA";
+    throw err;
+  }
   const ok = res.status === 0;
   const imageId = ok
     ? docker(["image", "inspect", tag, "--format", "{{.Id}}"])

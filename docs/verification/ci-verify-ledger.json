@@ -591,6 +591,23 @@
       ],
       "phase": "P07",
       "recorded_at": "2026-08-12T07:30:04.832Z"
+    },
+    {
+      "decision": "ACCEPT — all 24 mandatory units closed at base 249bf314, candidate e35cd5841c9e (DEF-063 fix aboard): build+trivy+SBOM green; profiles A and B green including graceful shutdown and drained connections; NEG01-03 each demonstrably reject their exact defect; GATE01 3/3 consecutive clean rounds; CLN01 zero residue every run; DEF-063 (PID-1 SIGTERM ignored — every production deploy hard-killed the app) found by this phase, fixed, and retested; build-variance recorded honestly (image id is run-scoped; candidate commit is the binding identity); freshness barrier holds at the acceptance record",
+      "evidence": [
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        },
+        {
+          "bytes": 4822,
+          "path": "docs/verification/evidence/p08/P08-ENTRY.json",
+          "sha256": "7d97850035380ab64cb40366c4e59b98cec1302956041f1302e921988ff32ddf"
+        }
+      ],
+      "phase": "P08",
+      "recorded_at": "2026-08-12T09:10:19.901Z"
     }
   ],
   "decisions": [
@@ -3812,14 +3829,14 @@
     {
       "affected_gate": "P08 runtime profile B — graceful shutdown",
       "blast_radius": "production deploy behavior (hard-kill instead of drain) — invisible in CI because no gate ever asserted shutdown until P08 profile B",
-      "closed_at": null,
+      "closed_at": "2026-08-12T09:10:04.370Z",
       "corrective_action": "graceful shutdown handler at the entrypoint: server.close + closeIdleConnections + closeDbPool + exit 0, 15s unref deadline exiting 1; new closeDbPool() in server/db.ts",
       "detected_by": "P08.T07 profile B (cleanroom runtime), first full-mode run",
       "evidence": [
         {
-          "bytes": 4822,
-          "path": "docs/verification/evidence/p08/P08-ENTRY.json",
-          "sha256": "7d97850035380ab64cb40366c4e59b98cec1302956041f1302e921988ff32ddf"
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
         }
       ],
       "history": [
@@ -3834,15 +3851,25 @@
             ],
             "root_cause": "node-as-PID-1 signal semantics + zero process.on(SIGTERM) handlers anywhere in server/"
           }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-12T09:10:04.368Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p08/T23-acceptance.md"
+            ],
+            "retest_result": "PASS: with the graceful-shutdown handler, profile A exits 0 on SIGTERM even against a dead DB, and profile B passes every leg (stopped within grace, graceful exit 0, DB connections drained to zero) across FOUR total clean rounds (all-run + GATE01 3x). NEG02 independently proves the identity check still rejects; zero residue every run"
+          }
         }
       ],
       "id": "DEF-063",
       "opened_at": "2026-08-12T08:51:58.255Z",
       "regression_test_id": null,
-      "retest_result": null,
+      "retest_result": "PASS: with the graceful-shutdown handler, profile A exits 0 on SIGTERM even against a dead DB, and profile B passes every leg (stopped within grace, graceful exit 0, DB connections drained to zero) across FOUR total clean rounds (all-run + GATE01 3x). NEG02 independently proves the identity check still rejects; zero residue every run",
       "root_cause": "node-as-PID-1 signal semantics + zero process.on(SIGTERM) handlers anywhere in server/",
       "severity": "HIGH",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "CANDIDATE FINDING: the production container has NO SIGTERM handler while node runs as PID 1 (CMD [node, dist/index.js]) — PID 1 ignores default signal dispositions, so every platform SIGTERM (each Railway deploy, docker stop) is silently ignored until SIGKILL: exit 137 observed on both cleanroom profiles, in-flight work dropped, DB connections severed on every deploy since inception"
     }
   ],
@@ -4360,12 +4387,17 @@
         "P08.CP01 recorded"
       ],
       "id": "P08",
-      "state": "IN_PROGRESS",
+      "state": "ACCEPTED",
       "state_history": [
         {
           "at": "2026-08-12T07:47:50.868Z",
           "from": "NOT_STARTED",
           "to": "IN_PROGRESS"
+        },
+        {
+          "at": "2026-08-12T09:10:19.950Z",
+          "from": "IN_PROGRESS",
+          "to": "ACCEPTED"
         }
       ],
       "title": "CLEANROOM — image identity, container build, dual runtime proof"
@@ -10942,13 +10974,19 @@
       "validation": null
     },
     "P08.AUD01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "ADVISORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.843Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.AUD01",
@@ -10958,19 +10996,30 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.801Z",
+      "status": "PASS",
       "title": "ADVISORY: build variance recorded across clean rebuilds, never blocking",
       "validation": null
     },
     "P08.AUTH01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.060Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4822,
+          "path": "docs/verification/evidence/p08/P08-ENTRY.json",
+          "sha256": "7d97850035380ab64cb40366c4e59b98cec1302956041f1302e921988ff32ddf"
+        },
+        {
+          "bytes": 675,
+          "path": "docs/verification/evidence/p08/images.pinned.json",
+          "sha256": "7894bbd0285dbfccb6cd77dcea5bebcc863301300e1de1b34dca386aac96f9c4"
+        }
+      ],
       "exit_requirement": "DEC-001 exists with a value in {PIN_BY_DIGEST, RECORD_ONLY}; the verifier never edits the production Dockerfile on its own authority",
       "expected_output": null,
       "id": "P08.AUTH01",
@@ -10980,19 +11029,30 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:49.994Z",
+      "status": "PASS",
       "title": "Owner decision DEC-001 RECORDED: PIN_BY_DIGEST or RECORD_ONLY — both satisfy this authorization",
       "validation": null
     },
     "P08.CLN01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.502Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2024,
+          "path": "docs/verification/evidence/p08/T23-all-run.log",
+          "sha256": "399a6244b525fc5bafde0b3badbedcb3f793f55556a235a15062370ccd54b7ca"
+        },
+        {
+          "bytes": 4979,
+          "path": "docs/verification/evidence/p08/T23-gate-run.log",
+          "sha256": "b1804ebebe8118de432427e756ac67663afd8bd1ce7e36a32f82d9ce9b56953d"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.CLN01",
@@ -11002,22 +11062,33 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.460Z",
+      "status": "PASS",
       "title": "Zero residual containers after every run",
       "validation": null
     },
     "P08.CP01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:52.017Z",
       "defects": [],
       "depends_on": [
         "P08.GATE01",
         "P08.AUTH01"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        },
+        {
+          "bytes": 4822,
+          "path": "docs/verification/evidence/p08/P08-ENTRY.json",
+          "sha256": "7d97850035380ab64cb40366c4e59b98cec1302956041f1302e921988ff32ddf"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.CP01",
@@ -11027,19 +11098,25 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.975Z",
+      "status": "PASS",
       "title": "P08 checkpoint recorded",
       "validation": null
     },
     "P08.EV01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.588Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 100,
+          "path": "docs/verification/evidence/p08/image-id.txt",
+          "sha256": "7eeacfbbd309048c97e60c133b34f8510a6f863cbdb9f5faeb0c6d6dabc97811"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.EV01",
@@ -11049,19 +11126,25 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.544Z",
+      "status": "PASS",
       "title": "Evidence: image-id.txt",
       "validation": null
     },
     "P08.EV02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.672Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 436914,
+          "path": "docs/verification/evidence/p08/trivy.table",
+          "sha256": "fb70414f6d53cf661da0393fea872c4c85d2a3eb55290e72f05ccb269ea4e22d"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.EV02",
@@ -11071,41 +11154,55 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.630Z",
+      "status": "PASS",
       "title": "Evidence: trivy.table",
       "validation": null
     },
     "P08.EV03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.757Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.EV03",
       "inputs": [],
       "kind": "EVIDENCE",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "EV03 bound via T23 (sha256 + package count); the 29.8MB artifact itself lives at .ci-verify/p08/sbom.spdx.json"
+      ],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.713Z",
+      "status": "PASS",
       "title": "Evidence: sbom.spdx.json",
       "validation": null
     },
     "P08.EV04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.844Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 20270,
+          "path": "docs/verification/evidence/p08/T23-profile-a.log",
+          "sha256": "7508825e92a9c94f9fd213ef25b47f04166e3fb6bcd8444984ad65b28c3814eb"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.EV04",
@@ -11115,19 +11212,25 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.799Z",
+      "status": "PASS",
       "title": "Evidence: runtime profile A log",
       "validation": null
     },
     "P08.EV05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.932Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 20292,
+          "path": "docs/verification/evidence/p08/T23-profile-b.log",
+          "sha256": "e8a6a082fdb58781dc0562c07cbab8504d89d67ed250d18ef8a34d58e2abf864"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.EV05",
@@ -11137,22 +11240,33 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.890Z",
+      "status": "PASS",
       "title": "Evidence: runtime profile B log",
       "validation": null
     },
     "P08.GATE01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.419Z",
       "defects": [],
       "depends_on": [
         "P08.TEST01",
         "P08.TEST02"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 4979,
+          "path": "docs/verification/evidence/p08/T23-gate-run.log",
+          "sha256": "b1804ebebe8118de432427e756ac67663afd8bd1ce7e36a32f82d9ce9b56953d"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.GATE01",
@@ -11162,19 +11276,30 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.376Z",
+      "status": "PASS",
       "title": "Three consecutive clean runs of profiles A and B",
       "validation": null
     },
     "P08.NEG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.928Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2024,
+          "path": "docs/verification/evidence/p08/T23-all-run.log",
+          "sha256": "399a6244b525fc5bafde0b3badbedcb3f793f55556a235a15062370ccd54b7ca"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.NEG01",
@@ -11184,19 +11309,30 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.884Z",
+      "status": "PASS",
       "title": "Broken Dockerfile fails the build before any runtime gate executes",
       "validation": null
     },
     "P08.NEG02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.010Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2024,
+          "path": "docs/verification/evidence/p08/T23-all-run.log",
+          "sha256": "399a6244b525fc5bafde0b3badbedcb3f793f55556a235a15062370ccd54b7ca"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.NEG02",
@@ -11206,19 +11342,30 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.969Z",
+      "status": "PASS",
       "title": "Wrong EXPECTED_COMMIT fails profile B on build identity",
       "validation": null
     },
     "P08.NEG03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.092Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2024,
+          "path": "docs/verification/evidence/p08/T23-all-run.log",
+          "sha256": "399a6244b525fc5bafde0b3badbedcb3f793f55556a235a15062370ccd54b7ca"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.NEG03",
@@ -11228,19 +11375,30 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.051Z",
+      "status": "PASS",
       "title": "MySQL killed mid-run yields INFRA-FAIL, not FAIL",
       "validation": null
     },
     "P08.T01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.149Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 675,
+          "path": "docs/verification/evidence/p08/images.pinned.json",
+          "sha256": "7894bbd0285dbfccb6cd77dcea5bebcc863301300e1de1b34dca386aac96f9c4"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.T01",
@@ -11250,41 +11408,60 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.104Z",
+      "status": "PASS",
       "title": "images.pinned.json — verifier-controlled images pinned by digest",
       "validation": null
     },
     "P08.T02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.235Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 675,
+          "path": "docs/verification/evidence/p08/images.pinned.json",
+          "sha256": "7894bbd0285dbfccb6cd77dcea5bebcc863301300e1de1b34dca386aac96f9c4"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.T02",
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "RECORD_ONLY per DEC-001: FROM digests resolved and recorded; Dockerfile never edited"
+      ],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.193Z",
+      "status": "PASS",
       "title": "RECORD the Dockerfile base digest without editing FROM",
       "validation": null
     },
     "P08.T03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.316Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2024,
+          "path": "docs/verification/evidence/p08/T23-all-run.log",
+          "sha256": "399a6244b525fc5bafde0b3badbedcb3f793f55556a235a15062370ccd54b7ca"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.T03",
@@ -11294,19 +11471,30 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.275Z",
+      "status": "PASS",
       "title": "Container build reproducing the repository's build contract",
       "validation": null
     },
     "P08.T04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.409Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 436914,
+          "path": "docs/verification/evidence/p08/trivy.table",
+          "sha256": "fb70414f6d53cf661da0393fea872c4c85d2a3eb55290e72f05ccb269ea4e22d"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.T04",
@@ -11316,41 +11504,60 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.362Z",
+      "status": "PASS",
       "title": "Trivy CRITICAL fixable-only blocking gate",
       "validation": null
     },
     "P08.T05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.495Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.T05",
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "sbom.spdx.json is 29.8MB — bound by sha256 in T23 rather than committed; 1191 packages"
+      ],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.449Z",
+      "status": "PASS",
       "title": "SBOM generation",
       "validation": null
     },
     "P08.T06": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.581Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 20270,
+          "path": "docs/verification/evidence/p08/T23-profile-a.log",
+          "sha256": "7508825e92a9c94f9fd213ef25b47f04166e3fb6bcd8444984ad65b28c3814eb"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.T06",
@@ -11360,19 +11567,30 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.536Z",
+      "status": "PASS",
       "title": "Runtime profile A — dead DB: crash-guard, /health, structured 401, listen line",
       "validation": null
     },
     "P08.T07": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.673Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 20292,
+          "path": "docs/verification/evidence/p08/T23-profile-b.log",
+          "sha256": "e8a6a082fdb58781dc0562c07cbab8504d89d67ed250d18ef8a34d58e2abf864"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.T07",
@@ -11382,41 +11600,60 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.627Z",
+      "status": "PASS",
       "title": "Runtime profile B — healthy DB: commit identity, schema compatibility, auth-independent paths, background-job gating, graceful SIGTERM shutdown",
       "validation": null
     },
     "P08.T08": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:50.759Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.T08",
       "inputs": [],
       "kind": "TASK",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "variance observation recorded in T23: warm rebuilds at the SAME candidate produce DIFFERING image ids (buildkit attestations/timestamps) — image id is run-scoped; the binding identity is the candidate commit via EXPECTED_COMMIT; ADVISORY output"
+      ],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:50.717Z",
+      "status": "PASS",
       "title": "Build-variance recorder (AUDIT class, non-blocking)",
       "validation": null
     },
     "P08.TEST01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.172Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 20270,
+          "path": "docs/verification/evidence/p08/T23-profile-a.log",
+          "sha256": "7508825e92a9c94f9fd213ef25b47f04166e3fb6bcd8444984ad65b28c3814eb"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.TEST01",
@@ -11426,19 +11663,30 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.131Z",
+      "status": "PASS",
       "title": "Runtime profile A green",
       "validation": null
     },
     "P08.TEST02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.255Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 20292,
+          "path": "docs/verification/evidence/p08/T23-profile-b.log",
+          "sha256": "e8a6a082fdb58781dc0562c07cbab8504d89d67ed250d18ef8a34d58e2abf864"
+        },
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.TEST02",
@@ -11448,19 +11696,25 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.213Z",
+      "status": "PASS",
       "title": "Runtime profile B green including graceful shutdown",
       "validation": null
     },
     "P08.TEST03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:09:51.336Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2988,
+          "path": "docs/verification/evidence/p08/T23-acceptance.md",
+          "sha256": "19b3743c56082ea8f249e7a7086e283de3422c607d384e0ce94315c0ef8bb2a7"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P08.TEST03",
@@ -11470,8 +11724,8 @@
       "notes": [],
       "phase": "P08",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:09:51.295Z",
+      "status": "PASS",
       "title": "SBOM is non-empty",
       "validation": null
     },

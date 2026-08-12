@@ -32,7 +32,7 @@
 | `P05` | ASSURANCE — the self-test framework | `ACCEPTED` | 27 / 27 | 0 | 0 |
 | `P06` | PARITY — static, security, supply chain | `ACCEPTED` | 29 / 29 | 0 | 0 |
 | `P07` | PARITY — test and data | `ACCEPTED` | 24 / 24 | 0 | 0 |
-| `P08` | CLEANROOM — image identity, container build, dual runtime proof | `IN_PROGRESS` | 0 / 23 | 0 | 0 |
+| `P08` | CLEANROOM — image identity, container build, dual runtime proof | `ACCEPTED` | 23 / 23 | 0 | 0 |
 | `P09` | HARDENING | `NOT_STARTED` | 0 / 17 | 0 | 0 |
 | `P10` | Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR | `NOT_STARTED` | 0 / 22 | 0 | 0 |
 
@@ -502,13 +502,13 @@
 
 ## P08 — CLEANROOM — image identity, container build, dual runtime proof
 
-**State:** `IN_PROGRESS`
+**State:** `ACCEPTED`
 
 **Assurance property:** The repository's container build contract reproduces, and the built artifact is proven on both the failure path and the healthy path.
 
 **Depends on:** `P06`, `P07`
 
-**Progress (MANDATORY):** 0 / 23
+**Progress (MANDATORY):** 23 / 23
 
 **Entry checklist**
 
@@ -529,30 +529,30 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P08.T01` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | images.pinned.json — verifier-controlled images pinned by digest |
-| `P08.T02` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | RECORD the Dockerfile base digest without editing FROM |
-| `P08.T03` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Container build reproducing the repository's build contract |
-| `P08.T04` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Trivy CRITICAL fixable-only blocking gate |
-| `P08.T05` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | SBOM generation |
-| `P08.T06` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Runtime profile A — dead DB: crash-guard, /health, structured 401, listen line |
-| `P08.T07` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Runtime profile B — healthy DB: commit identity, schema compatibility, auth-independent paths, background-job gating, graceful SIGTERM shutdown |
-| `P08.T08` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Build-variance recorder (AUDIT class, non-blocking) |
-| `P08.TEST01` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Runtime profile A green |
-| `P08.TEST02` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Runtime profile B green including graceful shutdown |
-| `P08.TEST03` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | SBOM is non-empty |
-| `P08.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Broken Dockerfile fails the build before any runtime gate executes |
-| `P08.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Wrong EXPECTED_COMMIT fails profile B on build identity |
-| `P08.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | MySQL killed mid-run yields INFRA-FAIL, not FAIL |
-| `P08.CLN01` | CLEANUP | MANDATORY | `NOT_STARTED` | 0 | — | Zero residual containers after every run |
-| `P08.AUD01` | AUDIT | ADVISORY | `NOT_STARTED` | 0 | — | ADVISORY: build variance recorded across clean rebuilds, never blocking |
-| `P08.EV01` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: image-id.txt |
-| `P08.EV02` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: trivy.table |
-| `P08.EV03` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: sbom.spdx.json |
-| `P08.EV04` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: runtime profile A log |
-| `P08.EV05` | EVIDENCE | MANDATORY | `NOT_STARTED` | 0 | — | Evidence: runtime profile B log |
-| `P08.GATE01` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | Three consecutive clean runs of profiles A and B |
-| `P08.AUTH01` | AUTHORIZATION | MANDATORY | `NOT_STARTED` | 0 | — | Owner decision DEC-001 RECORDED: PIN_BY_DIGEST or RECORD_ONLY — both satisfy this authorization |
-| `P08.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P08 checkpoint recorded |
+| `P08.T01` | TASK | MANDATORY | `PASS` | 1 | `7894bbd0285d` `19b3743c5608` | images.pinned.json — verifier-controlled images pinned by digest |
+| `P08.T02` | TASK | MANDATORY | `PASS` | 1 | `7894bbd0285d` | RECORD the Dockerfile base digest without editing FROM |
+| `P08.T03` | TASK | MANDATORY | `PASS` | 1 | `399a6244b525` `19b3743c5608` | Container build reproducing the repository's build contract |
+| `P08.T04` | TASK | MANDATORY | `PASS` | 1 | `fb70414f6d53` `19b3743c5608` | Trivy CRITICAL fixable-only blocking gate |
+| `P08.T05` | TASK | MANDATORY | `PASS` | 1 | `19b3743c5608` | SBOM generation |
+| `P08.T06` | TASK | MANDATORY | `PASS` | 1 | `7508825e92a9` `19b3743c5608` | Runtime profile A — dead DB: crash-guard, /health, structured 401, listen line |
+| `P08.T07` | TASK | MANDATORY | `PASS` | 1 | `e8a6a082fdb5` `19b3743c5608` | Runtime profile B — healthy DB: commit identity, schema compatibility, auth-independent paths, background-job gating, graceful SIGTERM shutdown |
+| `P08.T08` | TASK | MANDATORY | `PASS` | 1 | `19b3743c5608` | Build-variance recorder (AUDIT class, non-blocking) |
+| `P08.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `7508825e92a9` `19b3743c5608` | Runtime profile A green |
+| `P08.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `e8a6a082fdb5` `19b3743c5608` | Runtime profile B green including graceful shutdown |
+| `P08.TEST03` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `19b3743c5608` | SBOM is non-empty |
+| `P08.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `399a6244b525` `19b3743c5608` | Broken Dockerfile fails the build before any runtime gate executes |
+| `P08.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `399a6244b525` `19b3743c5608` | Wrong EXPECTED_COMMIT fails profile B on build identity |
+| `P08.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `399a6244b525` `19b3743c5608` | MySQL killed mid-run yields INFRA-FAIL, not FAIL |
+| `P08.CLN01` | CLEANUP | MANDATORY | `PASS` | 1 | `399a6244b525` `b1804ebebe81` | Zero residual containers after every run |
+| `P08.AUD01` | AUDIT | ADVISORY | `PASS` | 1 | `19b3743c5608` | ADVISORY: build variance recorded across clean rebuilds, never blocking |
+| `P08.EV01` | EVIDENCE | MANDATORY | `PASS` | 1 | `7eeacfbbd309` | Evidence: image-id.txt |
+| `P08.EV02` | EVIDENCE | MANDATORY | `PASS` | 1 | `fb70414f6d53` | Evidence: trivy.table |
+| `P08.EV03` | EVIDENCE | MANDATORY | `PASS` | 1 | `19b3743c5608` | Evidence: sbom.spdx.json |
+| `P08.EV04` | EVIDENCE | MANDATORY | `PASS` | 1 | `7508825e92a9` | Evidence: runtime profile A log |
+| `P08.EV05` | EVIDENCE | MANDATORY | `PASS` | 1 | `e8a6a082fdb5` | Evidence: runtime profile B log |
+| `P08.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `b1804ebebe81` `19b3743c5608` | Three consecutive clean runs of profiles A and B |
+| `P08.AUTH01` | AUTHORIZATION | MANDATORY | `PASS` | 1 | `7d9785003538` `7894bbd0285d` | Owner decision DEC-001 RECORDED: PIN_BY_DIGEST or RECORD_ONLY — both satisfy this authorization |
+| `P08.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `19b3743c5608` `7d9785003538` | P08 checkpoint recorded |
 
 ## P09 — HARDENING
 
@@ -737,7 +737,7 @@
 | `DEF-060` | `P07 coverage gate @ e672bb11 (serial chain), single test failure under v8 instrumentation at host load 18/8-cores` | MEDIUM | `CLOSED` | CANDIDATE TEST-QUALITY (DEF-047 Cause-C class): strikeoutProps.test.ts loaded the entire app-router graph via await import inside the 15s testTimeout; under coverage instrumentation + load the bound measures CPU availability, not router existence. Same test PASSed ci#test in the same chain; coverage gate PASSed the two prior candidates; content delta was toml/docs only |
 | `DEF-061` | `P06 roster @ 249bf314 candidate, proof gate step journal` | MEDIUM | `CLOSED` | CANDIDATE TEST-QUALITY (DEF-060 class): dime-authentication-closure.test.ts runs bundle-generation subprocesses with a declared 30s execFile budget inside the 15s default testTimeout — inner allowance exceeds outer bound, so the test times out under full-suite parallelism (now +305 TOS-009 tests) while passing isolated in 2.5s and green on main CI |
 | `DEF-062` | `P06 roster @ 249bf314 candidate (second attempt), proof step journal` | MEDIUM | `CLOSED` | VERIFIER ENVIRONMENT (structural, terminates the DEF-060/061 class): vitest runs 8 workers on this 8-core host (no cap in vitest.config) while CI's ubuntu-latest exposes 4 vCPUs — per-worker CPU starvation local-only; three distinct subprocess-heavy tests tripped the 15s testTimeout across consecutive rosters while green in CI and isolated |
-| `DEF-063` | `P08.T07 profile B (cleanroom runtime), first full-mode run` | HIGH | `OPEN` | CANDIDATE FINDING: the production container has NO SIGTERM handler while node runs as PID 1 (CMD [node, dist/index.js]) — PID 1 ignores default signal dispositions, so every platform SIGTERM (each Railway deploy, docker stop) is silently ignored until SIGKILL: exit 137 observed on both cleanroom profiles, in-flight work dropped, DB connections severed on every deploy since inception |
+| `DEF-063` | `P08.T07 profile B (cleanroom runtime), first full-mode run` | HIGH | `CLOSED` | CANDIDATE FINDING: the production container has NO SIGTERM handler while node runs as PID 1 (CMD [node, dist/index.js]) — PID 1 ignores default signal dispositions, so every platform SIGTERM (each Railway deploy, docker stop) is silently ignored until SIGKILL: exit 137 observed on both cleanroom profiles, in-flight work dropped, DB connections severed on every deploy since inception |
 
 ## Checkpoints
 
@@ -765,3 +765,4 @@
 | `P07` | **DO NOT PROCEED — blocking: DEF-050, DEF-047. DB parity evidence is real but now stale-based: it binds to 7fa4b3fe and origin/main has moved to 29a4a97e** | 2026-08-10T19:28:40.241Z | `9d23daccdf9b` |
 | `P06` | **ACCEPT — seven-term predicate TRUE at base 249bf314, integration 61369e77, remediations 114052b3+77594d5a, contract b594ebd9 (byte-identical across the base move): 29/29 mandatory units closed; roster blocking 0 with #proof PASS; ASSURANCE 8/8 PROVEN coverage 6/6; regression green (negatives 56/56, scripts suite, prettier, ledger verify, conformance+3 audits, tsc); open defects all non-blocking advisories (DEF-045 LOW, DEF-046 LOW, DEF-053 non-attributed); freshness barrier PASS at the acceptance record (FINAL_MAIN_SHA == FROZEN_BASE_SHA == 249bf314)** | 2026-08-12T07:30:04.789Z | `569c4c0f76a6` `d09ed6edf0b2` `239f7adf2711` |
 | `P07` | **ACCEPT — seven-term predicate TRUE at base 249bf314: 24/24 mandatory units closed; P07 3/3 PASS at this base (test 214.3s, coverage 163.7s, db-tests 26.8s = 10 files/92 tests, MySQL 8.4.11 digest-bound, zero residue); DB surface byte-identical from 43a33c84 through 249bf314 so the TEST03 same-SHA demonstration and REG01 three-run series remain valid and db-tests reproduced 10/92 again; zero open defects attributed to P07; freshness barrier PASS at the acceptance record** | 2026-08-12T07:30:04.832Z | `0b40d19bc23c` `d884ee630a6a` |
+| `P08` | **ACCEPT — all 24 mandatory units closed at base 249bf314, candidate e35cd5841c9e (DEF-063 fix aboard): build+trivy+SBOM green; profiles A and B green including graceful shutdown and drained connections; NEG01-03 each demonstrably reject their exact defect; GATE01 3/3 consecutive clean rounds; CLN01 zero residue every run; DEF-063 (PID-1 SIGTERM ignored — every production deploy hard-killed the app) found by this phase, fixed, and retested; build-variance recorded honestly (image id is run-scoped; candidate commit is the binding identity); freshness barrier holds at the acceptance record** | 2026-08-12T09:10:19.901Z | `19b3743c5608` `7d9785003538` |
