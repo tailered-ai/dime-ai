@@ -3950,10 +3950,16 @@
     {
       "affected_gate": ".github/workflows/01-pr-proof-contract.yml#proof",
       "blast_radius": null,
-      "closed_at": null,
+      "closed_at": "2026-08-12T11:09:53.366Z",
       "corrective_action": "(a) selftest cycles now pass fetch:false (base freshness stays the runners+issuance concern); (b) reevidence P09.T02/T03/T04 + P10.T01/T02/T06/T07 under the standing amendment",
       "detected_by": "ci:verify:pr rehearsal attempt 4, proof suite (P05.TEST04 + VER01)",
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 1129,
+          "path": "docs/verification/evidence/p10/T26-rehearsal-attempt5.log",
+          "sha256": "c27996122292799861e1137c08e1dcd35ada38560123e2a31fe65e253c262e9c"
+        }
+      ],
       "history": [
         {
           "action": "update",
@@ -3963,15 +3969,25 @@
             "evidence": [],
             "root_cause": "(a) runSnapshot defaults fetch:true — hermetic self-test cycles never needed freshness; (b) evidence-citing files edited after unit recording, the exact class the reevidence command exists for"
           }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-12T11:09:53.331Z",
+          "flags": {
+            "evidence": [
+              "docs/verification/evidence/p10/T26-rehearsal-attempt5.log"
+            ],
+            "retest_result": "PASS: rehearsal attempt 5 ran the full pipeline with both fixes aboard — stage 1 #proof GREEN including P05.TEST04 (hermetic cycles, no fetch collision) and VER01 (evidence hashes current); all six verification stages passed (roster 595.7s, assurance 686.5s 8/8, p07 3/3, p08 694s all gates+negatives, p09 4/4, negative suites); the certificate stage then correctly REFUSED issuance solely because this defect was still open — the defect law enforcing itself"
+          }
         }
       ],
       "id": "DEF-066",
       "opened_at": "2026-08-12T10:24:50.511Z",
       "regression_test_id": null,
-      "retest_result": null,
+      "retest_result": "PASS: rehearsal attempt 5 ran the full pipeline with both fixes aboard — stage 1 #proof GREEN including P05.TEST04 (hermetic cycles, no fetch collision) and VER01 (evidence hashes current); all six verification stages passed (roster 595.7s, assurance 686.5s 8/8, p07 3/3, p08 694s all gates+negatives, p09 4/4, negative suites); the certificate stage then correctly REFUSED issuance solely because this defect was still open — the defect law enforcing itself",
       "root_cause": "(a) runSnapshot defaults fetch:true — hermetic self-test cycles never needed freshness; (b) evidence-citing files edited after unit recording, the exact class the reevidence command exists for",
       "severity": "MEDIUM",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "TWO rehearsal findings: (a) self-test fixture cycles ran git fetch inside the parallel proof suite and collided on git's lock — INFRA-FAIL(BASE_FETCH_FAILED) surfacing as a test failure; (b) the round-2 fix commit modified run-p09.mjs/certificate.mjs/knip.json without reevidencing the P09/P10 units that cite them — VER01 (our own anchor) caught the stale hashes in the committed ledger"
     }
   ],
