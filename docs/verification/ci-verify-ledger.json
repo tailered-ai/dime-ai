@@ -608,6 +608,23 @@
       ],
       "phase": "P08",
       "recorded_at": "2026-08-12T09:10:19.901Z"
+    },
+    {
+      "decision": "ACCEPT — 17/17 mandatory units closed at base 249bf314, candidate 6aabf13c8fb7: all four HARDENING gates green in one final run AND all four negatives redden for their exact defect (deploy-order/#370 class BLOCKING per DEC-002; schema-type-drift/0134 class via drizzle-kit no-op oracle; knip ratchet over the verifier tree; a11y over the BUILT client with vendored sha256-pinned axe). Bring-up caught its own vacuous drift PASS (NEG02), the knip TS-7 peer break, and a REAL pre-existing WCAG miss (DEF-064, baselined recorded-never-hidden). HARDENING never merges into PARITY (AUD01). Barrier holds at the record",
+      "evidence": [
+        {
+          "bytes": 3035,
+          "path": "docs/verification/evidence/p09/T24-acceptance.md",
+          "sha256": "71fe5005d868aad0765f5afbb435ce78cf90c16adc11cd86dcfef95fd24b0e02"
+        },
+        {
+          "bytes": 1578,
+          "path": "scripts/ci/p09/hardening-registry.json",
+          "sha256": "7299cac149f18e1411e852cd1a26b3565b21f7b476c54ae95b87500e9de9a5da"
+        }
+      ],
+      "phase": "P09",
+      "recorded_at": "2026-08-12T09:28:55.465Z"
     }
   ],
   "decisions": [
@@ -635,12 +652,19 @@
         "BLOCKING",
         "ADVISORY"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 2509,
+          "path": "docs/verification/GRADUATION-RISK-QUEUE.md",
+          "sha256": "c7276039703386fb51ad8e3489e1f6e662ac7e966c24908e9efa26966aa98c54"
+        }
+      ],
       "id": "DEC-002",
+      "recorded_at": "2026-08-12T09:12:37.193Z",
       "required_by": "P09.AUTH01",
-      "status": "PENDING",
+      "status": "RECORDED",
       "title": "Deploy-order gate blocking semantics",
-      "value": null
+      "value": "BLOCKING"
     },
     {
       "allowed_values": [
@@ -3871,6 +3895,23 @@
       "severity": "HIGH",
       "status": "CLOSED",
       "title": "CANDIDATE FINDING: the production container has NO SIGTERM handler while node runs as PID 1 (CMD [node, dist/index.js]) — PID 1 ignores default signal dispositions, so every platform SIGTERM (each Railway deploy, docker stop) is silently ignored until SIGKILL: exit 137 observed on both cleanroom profiles, in-flight work dropped, DB connections severed on every deploy since inception"
+    },
+    {
+      "affected_gate": "P09 a11y (HARDENING)",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": null,
+      "detected_by": "P09.T05 a11y gate, first control run",
+      "evidence": [],
+      "history": [],
+      "id": "DEF-064",
+      "opened_at": "2026-08-12T09:22:49.132Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": null,
+      "severity": "LOW",
+      "status": "OPEN",
+      "title": "CANDIDATE FINDING: .state-pill--pass on the landing page fails WCAG AA color contrast (serious, 1 node) — found by the vendored-axe gate against the BUILT client; baselined under the documented ratchet (recorded, never hidden), fix deferred to UI brand-law work"
     }
   ],
   "gate_results": [],
@@ -4421,8 +4462,14 @@
         "P09.CP01 recorded"
       ],
       "id": "P09",
-      "state": "NOT_STARTED",
-      "state_history": [],
+      "state": "ACCEPTED",
+      "state_history": [
+        {
+          "at": "2026-08-12T09:28:55.506Z",
+          "from": "NOT_STARTED",
+          "to": "ACCEPTED"
+        }
+      ],
       "title": "HARDENING"
     },
     {
@@ -11730,13 +11777,24 @@
       "validation": null
     },
     "P09.AUD01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:36.983Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 1578,
+          "path": "scripts/ci/p09/hardening-registry.json",
+          "sha256": "7299cac149f18e1411e852cd1a26b3565b21f7b476c54ae95b87500e9de9a5da"
+        },
+        {
+          "bytes": 3035,
+          "path": "docs/verification/evidence/p09/T24-acceptance.md",
+          "sha256": "71fe5005d868aad0765f5afbb435ce78cf90c16adc11cd86dcfef95fd24b0e02"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.AUD01",
@@ -11746,19 +11804,30 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:36.942Z",
+      "status": "PASS",
       "title": "Audit: HARDENING results are never merged into the PARITY verdict",
       "validation": null
     },
     "P09.AUTH01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:36.478Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 1578,
+          "path": "scripts/ci/p09/hardening-registry.json",
+          "sha256": "7299cac149f18e1411e852cd1a26b3565b21f7b476c54ae95b87500e9de9a5da"
+        },
+        {
+          "bytes": 3035,
+          "path": "docs/verification/evidence/p09/T24-acceptance.md",
+          "sha256": "71fe5005d868aad0765f5afbb435ce78cf90c16adc11cd86dcfef95fd24b0e02"
+        }
+      ],
       "exit_requirement": "DEC-002 exists with a value in {BLOCKING, ADVISORY}",
       "expected_output": null,
       "id": "P09.AUTH01",
@@ -11768,22 +11837,33 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:36.425Z",
+      "status": "PASS",
       "title": "Owner decision DEC-002 RECORDED: BLOCKING or ADVISORY for the deploy-order gate — both satisfy this authorization",
       "validation": null
     },
     "P09.CP01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:37.807Z",
       "defects": [],
       "depends_on": [
         "P09.GATE01",
         "P09.AUTH01"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 3035,
+          "path": "docs/verification/evidence/p09/T24-acceptance.md",
+          "sha256": "71fe5005d868aad0765f5afbb435ce78cf90c16adc11cd86dcfef95fd24b0e02"
+        },
+        {
+          "bytes": 1578,
+          "path": "scripts/ci/p09/hardening-registry.json",
+          "sha256": "7299cac149f18e1411e852cd1a26b3565b21f7b476c54ae95b87500e9de9a5da"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.CP01",
@@ -11793,16 +11873,16 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:37.763Z",
+      "status": "PASS",
       "title": "P09 checkpoint recorded",
       "validation": null
     },
     "P09.GATE01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:37.721Z",
       "defects": [],
       "depends_on": [
         "P09.TEST01",
@@ -11810,7 +11890,18 @@
         "P09.NEG01",
         "P09.NEG02"
       ],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        },
+        {
+          "bytes": 3035,
+          "path": "docs/verification/evidence/p09/T24-acceptance.md",
+          "sha256": "71fe5005d868aad0765f5afbb435ce78cf90c16adc11cd86dcfef95fd24b0e02"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.GATE01",
@@ -11820,19 +11911,30 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:37.678Z",
+      "status": "PASS",
       "title": "P09.T02 and P09.T03 green with their fixtures",
       "validation": null
     },
     "P09.NEG01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:37.064Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        },
+        {
+          "bytes": 3035,
+          "path": "docs/verification/evidence/p09/T24-acceptance.md",
+          "sha256": "71fe5005d868aad0765f5afbb435ce78cf90c16adc11cd86dcfef95fd24b0e02"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.NEG01",
@@ -11842,19 +11944,30 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:37.022Z",
+      "status": "PASS",
       "title": "Synthetic drizzle/*.sql inside the worktree reddens the deploy-order gate",
       "validation": null
     },
     "P09.NEG02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:37.147Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        },
+        {
+          "bytes": 3035,
+          "path": "docs/verification/evidence/p09/T24-acceptance.md",
+          "sha256": "71fe5005d868aad0765f5afbb435ce78cf90c16adc11cd86dcfef95fd24b0e02"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.NEG02",
@@ -11864,19 +11977,30 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:37.105Z",
+      "status": "PASS",
       "title": "Injected type mismatch reddens the schema type-drift gate",
       "validation": null
     },
     "P09.NEG03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:37.228Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        },
+        {
+          "bytes": 3035,
+          "path": "docs/verification/evidence/p09/T24-acceptance.md",
+          "sha256": "71fe5005d868aad0765f5afbb435ce78cf90c16adc11cd86dcfef95fd24b0e02"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.NEG03",
@@ -11886,19 +12010,30 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:37.187Z",
+      "status": "PASS",
       "title": "knip fixture reddens the knip gate",
       "validation": null
     },
     "P09.NEG04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:37.310Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        },
+        {
+          "bytes": 3035,
+          "path": "docs/verification/evidence/p09/T24-acceptance.md",
+          "sha256": "71fe5005d868aad0765f5afbb435ce78cf90c16adc11cd86dcfef95fd24b0e02"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.NEG04",
@@ -11908,19 +12043,25 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:37.269Z",
+      "status": "PASS",
       "title": "Accessibility fixture reddens the a11y gate",
       "validation": null
     },
     "P09.T01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:36.568Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 1578,
+          "path": "scripts/ci/p09/hardening-registry.json",
+          "sha256": "7299cac149f18e1411e852cd1a26b3565b21f7b476c54ae95b87500e9de9a5da"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.T01",
@@ -11930,19 +12071,30 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:36.526Z",
+      "status": "PASS",
       "title": "Populate the HARDENING registry",
       "validation": null
     },
     "P09.T02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:36.652Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 19828,
+          "path": "scripts/ci/p09/run-p09.mjs",
+          "sha256": "99da11dcd2878acba22b5891b494fac9d85dd3114f78962c68deab53fa98f4d7"
+        },
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.T02",
@@ -11952,19 +12104,30 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:36.610Z",
+      "status": "PASS",
       "title": "Deploy-order gate — new drizzle/*.sql requires db-push.yml first",
       "validation": null
     },
     "P09.T03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:36.733Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 19828,
+          "path": "scripts/ci/p09/run-p09.mjs",
+          "sha256": "99da11dcd2878acba22b5891b494fac9d85dd3114f78962c68deab53fa98f4d7"
+        },
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.T03",
@@ -11974,19 +12137,30 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:36.692Z",
+      "status": "PASS",
       "title": "Schema type-drift gate — drizzle column types versus migration SQL",
       "validation": null
     },
     "P09.T04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:36.818Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 633,
+          "path": "scripts/ci/p09/knip.json",
+          "sha256": "ed4cf6256a9b3fde3ad394bb351217a565a78a5e02eda2ef0d9a75b0f3421332"
+        },
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.T04",
@@ -11996,19 +12170,30 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:36.773Z",
+      "status": "PASS",
       "title": "knip — dead exports and dependencies",
       "validation": null
     },
     "P09.T05": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:36.902Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 401,
+          "path": "scripts/ci/p09/a11y-baseline.json",
+          "sha256": "f05ff15929e6034072b32652e17bbf417bace754d91b766a7e17e813728e59fd"
+        },
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.T05",
@@ -12018,19 +12203,25 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:36.860Z",
+      "status": "PASS",
       "title": "Accessibility gate on the built client",
       "validation": null
     },
     "P09.TEST01": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:37.392Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.TEST01",
@@ -12040,19 +12231,25 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:37.350Z",
+      "status": "PASS",
       "title": "Deploy-order gate green on a clean snapshot",
       "validation": null
     },
     "P09.TEST02": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:37.473Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.TEST02",
@@ -12062,52 +12259,68 @@
       "notes": [],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:37.432Z",
+      "status": "PASS",
       "title": "Schema type-drift gate green on a clean snapshot",
       "validation": null
     },
     "P09.TEST03": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:37.556Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.TEST03",
       "inputs": [],
       "kind": "POSITIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "green under the checked-in scope (scripts/ci/**) — the ratchet's starting surface, documented in the registry"
+      ],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:37.515Z",
+      "status": "PASS",
       "title": "knip green on a clean snapshot",
       "validation": null
     },
     "P09.TEST04": {
-      "attempts": 0,
+      "attempts": 1,
       "blocker": null,
       "class": "MANDATORY",
-      "completed_at": null,
+      "completed_at": "2026-08-12T09:28:37.637Z",
       "defects": [],
       "depends_on": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "bytes": 401,
+          "path": "docs/verification/evidence/p09/T24-final-run.log",
+          "sha256": "0e36381a205f72d7ffd0be92becc54944de4596b9c9f7248b2a0ea38ab48e1f9"
+        }
+      ],
       "exit_requirement": null,
       "expected_output": null,
       "id": "P09.TEST04",
       "inputs": [],
       "kind": "POSITIVE_VALIDATION",
       "negative_validation": null,
-      "notes": [],
+      "notes": [
+        "0 fresh serious/critical; DEF-064 baselined (recorded, never hidden)"
+      ],
       "phase": "P09",
       "remediation": null,
-      "started_at": null,
-      "status": "NOT_STARTED",
+      "started_at": "2026-08-12T09:28:37.596Z",
+      "status": "PASS",
       "title": "Accessibility gate green on a clean snapshot",
       "validation": null
     },

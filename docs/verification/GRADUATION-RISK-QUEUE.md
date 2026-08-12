@@ -15,6 +15,18 @@ must be CLOSED and the gate's rejection capability ASSURANCE-proven.**
 | Target phase/date | before semgrep graduation — fix is DESIGNED AND SANDBOX-PROVEN (3 findings vs three-branch fixture, 0 FP vs clean), a small `.semgrep/` PR | on ml/ reactivation | routine dependency maintenance; re-measure each P10 certificate |
 | Required remediation | apply the proven rule rewrites; add an ASSURANCE cycle per repaired rule; re-run `03-semgrep#blocking` control/poison | fix the 6 governed evals or re-baseline them under owner authority | bump vulnerable images/deps until `full-osv`/`full-container-scan` green |
 
+## Ratchet-baselined findings (same law: recorded, never hidden)
+
+| Field | DEF-064 |
+| --- | --- |
+| Current severity | LOW |
+| What it is | `.state-pill--pass` on the landing page fails WCAG AA color contrast (serious, 1 node) — found by the P09 a11y gate's first run against the BUILT client |
+| Why non-blocking today | baselined under the documented ratchet (`scripts/ci/p09/a11y-baseline.json`); any NEW violation still reds the gate |
+| What would make it blocking | the baseline entry being removed without the fix, or an a11y policy change requiring zero baselined findings |
+| Owner | UI work under brand law (`design-system/dime-ai/MASTER.md` — one-accent mint, contrast fixes must not violate THREE-COLOR-LAW) |
+| Target phase/date | next UI-loop touching the landing page |
+| Required remediation | raise the pill's contrast to ≥4.5:1, delete the baseline entry, re-run the a11y control |
+
 ## Enforcement hook
 
 `P10`'s certificate run must re-read this queue: if any listed check has become

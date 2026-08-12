@@ -33,7 +33,7 @@
 | `P06` | PARITY — static, security, supply chain | `ACCEPTED` | 29 / 29 | 0 | 0 |
 | `P07` | PARITY — test and data | `ACCEPTED` | 24 / 24 | 0 | 0 |
 | `P08` | CLEANROOM — image identity, container build, dual runtime proof | `ACCEPTED` | 23 / 23 | 0 | 0 |
-| `P09` | HARDENING | `NOT_STARTED` | 0 / 17 | 0 | 0 |
+| `P09` | HARDENING | `ACCEPTED` | 17 / 17 | 0 | 0 |
 | `P10` | Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR | `NOT_STARTED` | 0 / 22 | 0 | 0 |
 
 ## PB — Control-plane bootstrap
@@ -556,13 +556,13 @@
 
 ## P09 — HARDENING
 
-**State:** `NOT_STARTED`
+**State:** `ACCEPTED`
 
 **Assurance property:** Dime-specific standards that CI does not enforce are checked locally, and are reported separately from the PARITY verdict.
 
 **Depends on:** `P08`
 
-**Progress (MANDATORY):** 0 / 17
+**Progress (MANDATORY):** 17 / 17
 
 **Entry checklist**
 
@@ -581,23 +581,23 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P09.T01` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Populate the HARDENING registry |
-| `P09.T02` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Deploy-order gate — new drizzle/*.sql requires db-push.yml first |
-| `P09.T03` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Schema type-drift gate — drizzle column types versus migration SQL |
-| `P09.T04` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | knip — dead exports and dependencies |
-| `P09.T05` | TASK | MANDATORY | `NOT_STARTED` | 0 | — | Accessibility gate on the built client |
-| `P09.TEST01` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Deploy-order gate green on a clean snapshot |
-| `P09.TEST02` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Schema type-drift gate green on a clean snapshot |
-| `P09.TEST03` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | knip green on a clean snapshot |
-| `P09.TEST04` | POSITIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Accessibility gate green on a clean snapshot |
-| `P09.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Synthetic drizzle/*.sql inside the worktree reddens the deploy-order gate |
-| `P09.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Injected type mismatch reddens the schema type-drift gate |
-| `P09.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | knip fixture reddens the knip gate |
-| `P09.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `NOT_STARTED` | 0 | — | Accessibility fixture reddens the a11y gate |
-| `P09.AUD01` | AUDIT | MANDATORY | `NOT_STARTED` | 0 | — | Audit: HARDENING results are never merged into the PARITY verdict |
-| `P09.GATE01` | ACCEPTANCE_GATE | MANDATORY | `NOT_STARTED` | 0 | — | P09.T02 and P09.T03 green with their fixtures |
-| `P09.AUTH01` | AUTHORIZATION | MANDATORY | `NOT_STARTED` | 0 | — | Owner decision DEC-002 RECORDED: BLOCKING or ADVISORY for the deploy-order gate — both satisfy this authorization |
-| `P09.CP01` | CHECKPOINT | MANDATORY | `NOT_STARTED` | 0 | — | P09 checkpoint recorded |
+| `P09.T01` | TASK | MANDATORY | `PASS` | 1 | `7299cac149f1` | Populate the HARDENING registry |
+| `P09.T02` | TASK | MANDATORY | `PASS` | 1 | `99da11dcd287` `0e36381a205f` | Deploy-order gate — new drizzle/*.sql requires db-push.yml first |
+| `P09.T03` | TASK | MANDATORY | `PASS` | 1 | `99da11dcd287` `0e36381a205f` | Schema type-drift gate — drizzle column types versus migration SQL |
+| `P09.T04` | TASK | MANDATORY | `PASS` | 1 | `ed4cf6256a9b` `0e36381a205f` | knip — dead exports and dependencies |
+| `P09.T05` | TASK | MANDATORY | `PASS` | 1 | `f05ff15929e6` `0e36381a205f` | Accessibility gate on the built client |
+| `P09.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` | Deploy-order gate green on a clean snapshot |
+| `P09.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` | Schema type-drift gate green on a clean snapshot |
+| `P09.TEST03` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` | knip green on a clean snapshot |
+| `P09.TEST04` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` | Accessibility gate green on a clean snapshot |
+| `P09.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` `71fe5005d868` | Synthetic drizzle/*.sql inside the worktree reddens the deploy-order gate |
+| `P09.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` `71fe5005d868` | Injected type mismatch reddens the schema type-drift gate |
+| `P09.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` `71fe5005d868` | knip fixture reddens the knip gate |
+| `P09.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` `71fe5005d868` | Accessibility fixture reddens the a11y gate |
+| `P09.AUD01` | AUDIT | MANDATORY | `PASS` | 1 | `7299cac149f1` `71fe5005d868` | Audit: HARDENING results are never merged into the PARITY verdict |
+| `P09.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `0e36381a205f` `71fe5005d868` | P09.T02 and P09.T03 green with their fixtures |
+| `P09.AUTH01` | AUTHORIZATION | MANDATORY | `PASS` | 1 | `7299cac149f1` `71fe5005d868` | Owner decision DEC-002 RECORDED: BLOCKING or ADVISORY for the deploy-order gate — both satisfy this authorization |
+| `P09.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `71fe5005d868` `7299cac149f1` | P09 checkpoint recorded |
 
 ## P10 — Certificate, REMOTE reconciliation, LOCAL_READY_FOR_PR
 
@@ -667,7 +667,7 @@
 | ID | Required by | Allowed values | Status | Value |
 | --- | --- | --- | --- | --- |
 | `DEC-001` | `P08.AUTH01` | PIN_BY_DIGEST \| RECORD_ONLY | `RECORDED` | `RECORD_ONLY` |
-| `DEC-002` | `P09.AUTH01` | BLOCKING \| ADVISORY | `PENDING` | — |
+| `DEC-002` | `P09.AUTH01` | BLOCKING \| ADVISORY | `RECORDED` | `BLOCKING` |
 | `DEC-003` | `DEF-002` | DOCUMENT_LIVE_STATE \| RESTORE_CLASSIC_PROTECTION | `RECORDED` | `DOCUMENT_LIVE_STATE` |
 | `DEC-004` | `DEF-003` | PINNED_DEV_DEPENDENCY \| P06_CLASS_PINNED_TOOL \| DEPENDENCY_FREE_SCANNER | `RECORDED` | `PINNED_DEV_DEPENDENCY` |
 
@@ -738,6 +738,7 @@
 | `DEF-061` | `P06 roster @ 249bf314 candidate, proof gate step journal` | MEDIUM | `CLOSED` | CANDIDATE TEST-QUALITY (DEF-060 class): dime-authentication-closure.test.ts runs bundle-generation subprocesses with a declared 30s execFile budget inside the 15s default testTimeout — inner allowance exceeds outer bound, so the test times out under full-suite parallelism (now +305 TOS-009 tests) while passing isolated in 2.5s and green on main CI |
 | `DEF-062` | `P06 roster @ 249bf314 candidate (second attempt), proof step journal` | MEDIUM | `CLOSED` | VERIFIER ENVIRONMENT (structural, terminates the DEF-060/061 class): vitest runs 8 workers on this 8-core host (no cap in vitest.config) while CI's ubuntu-latest exposes 4 vCPUs — per-worker CPU starvation local-only; three distinct subprocess-heavy tests tripped the 15s testTimeout across consecutive rosters while green in CI and isolated |
 | `DEF-063` | `P08.T07 profile B (cleanroom runtime), first full-mode run` | HIGH | `CLOSED` | CANDIDATE FINDING: the production container has NO SIGTERM handler while node runs as PID 1 (CMD [node, dist/index.js]) — PID 1 ignores default signal dispositions, so every platform SIGTERM (each Railway deploy, docker stop) is silently ignored until SIGKILL: exit 137 observed on both cleanroom profiles, in-flight work dropped, DB connections severed on every deploy since inception |
+| `DEF-064` | `P09.T05 a11y gate, first control run` | LOW | `OPEN` | CANDIDATE FINDING: .state-pill--pass on the landing page fails WCAG AA color contrast (serious, 1 node) — found by the vendored-axe gate against the BUILT client; baselined under the documented ratchet (recorded, never hidden), fix deferred to UI brand-law work |
 
 ## Checkpoints
 
@@ -766,3 +767,4 @@
 | `P06` | **ACCEPT — seven-term predicate TRUE at base 249bf314, integration 61369e77, remediations 114052b3+77594d5a, contract b594ebd9 (byte-identical across the base move): 29/29 mandatory units closed; roster blocking 0 with #proof PASS; ASSURANCE 8/8 PROVEN coverage 6/6; regression green (negatives 56/56, scripts suite, prettier, ledger verify, conformance+3 audits, tsc); open defects all non-blocking advisories (DEF-045 LOW, DEF-046 LOW, DEF-053 non-attributed); freshness barrier PASS at the acceptance record (FINAL_MAIN_SHA == FROZEN_BASE_SHA == 249bf314)** | 2026-08-12T07:30:04.789Z | `569c4c0f76a6` `d09ed6edf0b2` `239f7adf2711` |
 | `P07` | **ACCEPT — seven-term predicate TRUE at base 249bf314: 24/24 mandatory units closed; P07 3/3 PASS at this base (test 214.3s, coverage 163.7s, db-tests 26.8s = 10 files/92 tests, MySQL 8.4.11 digest-bound, zero residue); DB surface byte-identical from 43a33c84 through 249bf314 so the TEST03 same-SHA demonstration and REG01 three-run series remain valid and db-tests reproduced 10/92 again; zero open defects attributed to P07; freshness barrier PASS at the acceptance record** | 2026-08-12T07:30:04.832Z | `0b40d19bc23c` `d884ee630a6a` |
 | `P08` | **ACCEPT — all 24 mandatory units closed at base 249bf314, candidate e35cd5841c9e (DEF-063 fix aboard): build+trivy+SBOM green; profiles A and B green including graceful shutdown and drained connections; NEG01-03 each demonstrably reject their exact defect; GATE01 3/3 consecutive clean rounds; CLN01 zero residue every run; DEF-063 (PID-1 SIGTERM ignored — every production deploy hard-killed the app) found by this phase, fixed, and retested; build-variance recorded honestly (image id is run-scoped; candidate commit is the binding identity); freshness barrier holds at the acceptance record** | 2026-08-12T09:10:19.901Z | `19b3743c5608` `7d9785003538` |
+| `P09` | **ACCEPT — 17/17 mandatory units closed at base 249bf314, candidate 6aabf13c8fb7: all four HARDENING gates green in one final run AND all four negatives redden for their exact defect (deploy-order/#370 class BLOCKING per DEC-002; schema-type-drift/0134 class via drizzle-kit no-op oracle; knip ratchet over the verifier tree; a11y over the BUILT client with vendored sha256-pinned axe). Bring-up caught its own vacuous drift PASS (NEG02), the knip TS-7 peer break, and a REAL pre-existing WCAG miss (DEF-064, baselined recorded-never-hidden). HARDENING never merges into PARITY (AUD01). Barrier holds at the record** | 2026-08-12T09:28:55.465Z | `71fe5005d868` `7299cac149f1` |

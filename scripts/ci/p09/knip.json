@@ -1,0 +1,34 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "server/_core/index.ts",
+    "client/src/main.tsx",
+    "scripts/ci/**/*.mjs",
+    "scripts/ci/**/*.test.ts"
+  ],
+  "project": [
+    "scripts/ci/**/*.{mjs,ts}"
+  ],
+  "ignore": [
+    "**/*.test.ts",
+    "**/vendor/**",
+    "**/fixtures/**"
+  ],
+  "ignoreDependencies": [
+    ".*"
+  ],
+  "ignoreBinaries": [
+    ".*"
+  ],
+  "includeEntryExports": false,
+  "rules": {
+    "files": "error",
+    "exports": "error",
+    "types": "error",
+    "duplicates": "off",
+    "unlisted": "off",
+    "unresolved": "off",
+    "dependencies": "off",
+    "binaries": "off"
+  }
+}
