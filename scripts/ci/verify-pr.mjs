@@ -79,8 +79,9 @@ function main() {
 
   const missing = preflight();
   if (missing.length) {
-    console.error("[ci:verify:pr] PRECONDITIONS MISSING:");
-    for (const m of missing) console.error(`  - ${m}`);
+    // stdout, one line each, grep-safe: a refusal nobody can see is a trap
+    for (const m of missing)
+      console.log(`[ci:verify:pr] PRECONDITION MISSING: ${m}`);
     process.exitCode = 4;
     return;
   }
@@ -137,4 +138,9 @@ function main() {
   process.exitCode = report.verdict === "LOCAL_READY_FOR_PR" ? 0 : 1;
 }
 
-main();
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+) {
+  main();
+}
