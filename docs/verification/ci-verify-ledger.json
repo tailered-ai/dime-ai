@@ -4225,19 +4225,40 @@
     },
     {
       "affected_gate": "scripts/ci/deploy/lib.mjs run()",
-      "blast_radius": null,
-      "closed_at": null,
-      "corrective_action": null,
+      "blast_radius": "scripts/ci/deploy children only",
+      "closed_at": "2026-08-13T09:24:59.612Z",
+      "corrective_action": "cleanEnv() strips the run context for every deploy child, mirroring verify-pr's CLEAN_ENV; migration evidence records stderr tail",
       "detected_by": "P7 rehearsal attempt 1 (first honest run): migration replay exited 1 with empty stdout",
-      "evidence": [],
-      "history": [],
+      "evidence": [
+        {
+          "bytes": 3605,
+          "path": "docs/verification/evidence/deploy/rehearsal-f1ec886a9-REHEARSED.json",
+          "sha256": "e7ed8fe312d78cdd32f21995888b556c4821d9a1ec27d5aa1ba8054e5ea15be4"
+        }
+      ],
+      "history": [
+        {
+          "action": "close",
+          "at": "2026-08-13T09:24:59.611Z",
+          "flags": {
+            "blast_radius": "scripts/ci/deploy children only",
+            "corrective_action": "cleanEnv() strips the run context for every deploy child, mirroring verify-pr's CLEAN_ENV; migration evidence records stderr tail",
+            "evidence": [
+              "docs/verification/evidence/deploy/rehearsal-f1ec886a9-REHEARSED.json"
+            ],
+            "regression_test_id": "rehearsal migrations step (135-migration replay) inside pnpm ci:verify:deploy:rehearse",
+            "retest_result": "PASS — attempt 4 verdict REHEARSED at f1ec886a9: migrations ok, prior/candidate/rollback deployments verified by /health commit, smoke true exit 0, candidate graceful shutdown exit 0, zero residue",
+            "root_cause": "lib.run() defaulted to process.env: under pnpm ci:verify:deploy:* the inherited npm_/COREPACK_/PNPM_ context made the child pnpm fail the packageManager pin (DEF-062 class in new code)"
+          }
+        }
+      ],
       "id": "DEF-072",
       "opened_at": "2026-08-13T08:53:57.926Z",
-      "regression_test_id": null,
-      "retest_result": null,
-      "root_cause": null,
+      "regression_test_id": "rehearsal migrations step (135-migration replay) inside pnpm ci:verify:deploy:rehearse",
+      "retest_result": "PASS — attempt 4 verdict REHEARSED at f1ec886a9: migrations ok, prior/candidate/rollback deployments verified by /health commit, smoke true exit 0, candidate graceful shutdown exit 0, zero residue",
+      "root_cause": "lib.run() defaulted to process.env: under pnpm ci:verify:deploy:* the inherited npm_/COREPACK_/PNPM_ context made the child pnpm fail the packageManager pin (DEF-062 class in new code)",
       "severity": "LOW",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "deploy lib.run() inherited the pnpm-run corepack context: child pnpm failed the packageManager pin inside ci:verify:deploy:* (DEF-062 class recurrence in new code)"
     }
   ],

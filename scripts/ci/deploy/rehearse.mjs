@@ -451,9 +451,10 @@ async function main() {
     };
     record.finished_at = new Date().toISOString();
     record.verdict = verdict;
-    writeJson(REHEARSAL_PATH, record);
-    // Failed evidence is never overwritten: every attempt also lands in an
-    // append-only per-attempt archive.
+    // The canonical FULL record is what issuance binds; a negative run must
+    // never clobber it. Every attempt (any mode) also lands in an
+    // append-only per-attempt archive so failed evidence is never lost.
+    if (!negWrongCommit) writeJson(REHEARSAL_PATH, record);
     writeJson(
       path.join(
         OUT_DIR,
