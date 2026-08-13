@@ -1,0 +1,120 @@
+{
+  "note": "All 23 Sol v1.0 bypasses as permanent negative fixtures. Mechanisms preserved; scaffold adapted to the live dime-ai contract where the v1.1 contract legitimately differs (recorded per fixture and in the change ledger). No fixture passes silently.",
+  "fixtures": {
+    "C01": {
+      "fixture": "commit/C01.txt",
+      "sha256": "9bf213051ecbeb3c001364158c08e7074bc5ca837f0c9ecae6abac8640cb6db4",
+      "mechanism": "missing all mandatory governed trailers"
+    },
+    "C02": {
+      "fixture": "commit/C02.txt",
+      "sha256": "31e039f5c581cc293ce603c6ebd281da35c626f5c482216f6b729e0cfb62f21f",
+      "mechanism": "empty and malformed governed trailers"
+    },
+    "C03": {
+      "fixture": "commit/C03.txt",
+      "sha256": "3043fd8a3f0a70ea3b5699693653816f96f9b528070db351adc067e41cf90329",
+      "mechanism": "generated-prefix mood bypass"
+    },
+    "C04": {
+      "fixture": "commit/C04.txt",
+      "sha256": "3b549341a10bcc9edbfd8e37b730c1eb32863dd986456fa1ead537238e670a96",
+      "mechanism": "imperative-prefix grammar bypass"
+    },
+    "C05": {
+      "fixture": "commit/C05.txt",
+      "sha256": "f4044c2f70d1fd31834afd228465975b476ad29f0388e56f1018bfcaf8fb4afe",
+      "mechanism": "trailer-key wrap bypass"
+    },
+    "C06": {
+      "fixture": "commit/C06.txt",
+      "sha256": "17b5397ed53c20ae07fa04e19aa72e7ef7927d9f06e2a09d220dcf3cf5788884",
+      "mechanism": "URL wrap bypass"
+    },
+    "C07": {
+      "fixture": "commit/C07.txt",
+      "sha256": "aeb29434ce387ced2a3f23a7e1afc9a34afec022df5370600ad467b03220e597",
+      "mechanism": "unclosed fence"
+    },
+    "C08": {
+      "fixture": "commit/C08.txt",
+      "sha256": "75904d33000f9bdcb54b4c0e99e02b86967e08b2b90e0e94c6902605d9324b61",
+      "mechanism": "two blank separator lines"
+    },
+    "C09": {
+      "fixture": "commit/C09.txt",
+      "sha256": "758ed3ff14f33f618e471268f1afeeef68866ddc0828fb84168be192e76e552f",
+      "mechanism": "overlong/invalid trailer value"
+    },
+    "C10": {
+      "fixture": "commit/C10.txt",
+      "sha256": "7ea758ecf950bde324f146a5fd9c6596deeb00526ae864529bd2f7bb118f5d3f",
+      "mechanism": "indicative sentence with allowed opener"
+    },
+    "B01": {
+      "fixture": "body/B01.md",
+      "sha256": "ab1f87d6c53adfa544a52c3ac5ec5173f5ba7dc5f5577abc7ba50ae0719fae4f",
+      "mechanism": "junk capsule values and duplicate key"
+    },
+    "B02": {
+      "fixture": "body/B02.md",
+      "sha256": "b5fafdbeca76b81b668bbc56f61e5066716fd800260a345bce026f84ea8db45d",
+      "mechanism": "prose before capsule"
+    },
+    "B03": {
+      "fixture": "body/B03.md",
+      "sha256": "affd282f4157d4cde4964a8a02b7c2e8a35a7d4ef3bf554c74d6aff3fed8df43",
+      "mechanism": "empty required sections"
+    },
+    "B04": {
+      "fixture": "body/B04.md",
+      "sha256": "8cf1befb766e18c23340983c185884e068e1387a48fe9bc27b0a7a83c7a8c93b",
+      "mechanism": "duplicate required section"
+    },
+    "B05": {
+      "fixture": "body/B05.md",
+      "sha256": "0dca0d3b197244c020f740d13a74af040c5bc0fe512416785b399a9a3acf4a65",
+      "mechanism": "Unicode bullet"
+    },
+    "B06": {
+      "fixture": "body/B06.md",
+      "sha256": "d62536d2fe92e65a01aab4c9731e32f82f823c3779af4a7130203dd0a4ae4456",
+      "mechanism": "blockquoted list"
+    },
+    "B07": {
+      "fixture": "body/B07.md",
+      "sha256": "c1a3443e1963a07258c9000db7a4f5c5443dfee6d293edcb8d30163387ffb924",
+      "mechanism": "HTML list"
+    },
+    "B08": {
+      "fixture": "body/B08.md",
+      "sha256": "d67f70daeb7d1fa90525d2235469d569d8b8f3fb634280301b743ce1580202e0",
+      "mechanism": "entity-encoded em dash"
+    },
+    "B09": {
+      "fixture": "body/B09.md",
+      "sha256": "6acdc66ed377ce095315cb3b4b6b406337e3c76eb9040682a069fd0d23381095",
+      "mechanism": "violations hidden in a fence"
+    },
+    "B10": {
+      "fixture": "body/B10.md",
+      "sha256": "e955c96cf904b6d5673648d3ed4f18e15c42aeeeaafd20270ab74993e0f0ae19",
+      "mechanism": "contract hidden in HTML comment"
+    },
+    "B11": {
+      "fixture": "body/B11.md",
+      "sha256": "86ef410afc11a525b25690eb24a194f8fafa3d14b5477bdefa20f5c20200d520",
+      "mechanism": "narrative inside the capsule"
+    },
+    "B12": {
+      "fixture": "body/B12.md",
+      "sha256": "992de33489e6fa151cb08df77e24205dd1e7240f2afef0eb197190e0109423db",
+      "mechanism": "placeholder scope"
+    },
+    "B13": {
+      "fixture": "body/B13.md",
+      "sha256": "96b4be16423807a22be7726c157d14cd83f546b3320fc78df282cd5490f145f0",
+      "mechanism": "arbitrary extra heading"
+    }
+  }
+}

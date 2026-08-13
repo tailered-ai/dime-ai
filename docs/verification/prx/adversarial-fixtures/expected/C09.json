@@ -1,0 +1,12 @@
+{
+  "fixture": "commit/C09.txt",
+  "mechanism": "overlong/invalid trailer value",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-GOV",
+    "error:PRX-C-GOV",
+    "error:PRX-C-GOV",
+    "error:PRX-C-PREFIX"
+  ],
+  "adaptation_notes": "Evidence value grammar bounds depth and length"
+}

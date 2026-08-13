@@ -1,0 +1,16 @@
+{
+  "fixture": "commit/C02.txt",
+  "mechanism": "empty and malformed governed trailers",
+  "options": {
+    "governed": true
+  },
+  "expected_findings": [
+    "error:PRX-C-GOV",
+    "error:PRX-C-GOV",
+    "error:PRX-C-GOV",
+    "error:PRX-C-PREFIX",
+    "error:PRX-C-TRAILER",
+    "error:PRX-C-TRAILER"
+  ],
+  "adaptation_notes": "empty-value trailer lines parse as trailers so the governed grammar judges them"
+}

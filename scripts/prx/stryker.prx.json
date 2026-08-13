@@ -1,0 +1,50 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-js/master/packages/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "plugins": ["@stryker-mutator/vitest-runner"],
+  "mutate": [
+    "scripts/prx/commit-check.mjs",
+    "scripts/prx/body-check.mjs",
+    "scripts/prx/modes.mjs",
+    "scripts/prx/policy-source.mjs",
+    "scripts/prx/rules.mjs"
+  ],
+  "vitest": {
+    "configFile": "scripts/prx/vitest.prx.config.ts"
+  },
+  "thresholds": {
+    "high": 90,
+    "low": 75,
+    "break": null
+  },
+  "concurrency": 4,
+  "reporters": ["clear-text", "progress", "json"],
+  "jsonReporter": {
+    "fileName": "reports/prx-mutation.json"
+  },
+  "tempDirName": ".stryker-tmp-prx",
+  "incremental": false,
+  "ignorePatterns": [
+    "/tsconfig.json",
+    "/tsconfig.*.json",
+    "/client",
+    "/server",
+    "/perf",
+    "/os",
+    "/ml",
+    "/platform",
+    "/dime-ai",
+    "/design",
+    "/design-system",
+    "/attached_assets",
+    "/platform_knowledge",
+    "/drizzle",
+    "/docs/audits",
+    "/scripts/data",
+    "/.claude",
+    "/.agents",
+    "/.pi",
+    "/reports",
+    "/.stryker-tmp-prx"
+  ]
+}

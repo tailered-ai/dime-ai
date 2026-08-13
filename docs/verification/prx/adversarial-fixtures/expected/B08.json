@@ -1,0 +1,9 @@
+{
+  "fixture": "body/B08.md",
+  "mechanism": "entity-encoded em dash",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-B-STRUCTURE"
+  ],
+  "adaptation_notes": "entities decode before token checks; detection reported as advisory"
+}

@@ -1,0 +1,9 @@
+{
+  "fixture": "body/B05.md",
+  "mechanism": "Unicode bullet",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-B-STRUCTURE"
+  ],
+  "adaptation_notes": "prose-only blocking scopes are removed after repository integration (live template requires structure), so this proves library-level detection per the Appendix C scope rule; advisory finding"
+}

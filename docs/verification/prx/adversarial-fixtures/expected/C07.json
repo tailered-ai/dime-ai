@@ -1,0 +1,10 @@
+{
+  "fixture": "commit/C07.txt",
+  "mechanism": "unclosed fence",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-FENCE",
+    "error:PRX-C-PREFIX"
+  ],
+  "adaptation_notes": "error, not warning (v1.0 warned)"
+}

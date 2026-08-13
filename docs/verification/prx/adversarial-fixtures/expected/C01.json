@@ -1,0 +1,14 @@
+{
+  "fixture": "commit/C01.txt",
+  "mechanism": "missing all mandatory governed trailers",
+  "options": {
+    "governed": true
+  },
+  "expected_findings": [
+    "error:PRX-C-GOV",
+    "error:PRX-C-GOV",
+    "error:PRX-C-GOV",
+    "error:PRX-C-PREFIX"
+  ],
+  "adaptation_notes": "governed context fixed via options.governed=true per Appendix B fixture rules"
+}

@@ -1,0 +1,9 @@
+{
+  "fixture": "body/B12.md",
+  "mechanism": "placeholder scope",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-CAPSULE"
+  ],
+  "adaptation_notes": "TODO rejected by placeholder rule"
+}

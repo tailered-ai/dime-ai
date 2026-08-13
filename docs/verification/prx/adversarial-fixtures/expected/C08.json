@@ -1,0 +1,10 @@
+{
+  "fixture": "commit/C08.txt",
+  "mechanism": "two blank separator lines",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-PREFIX",
+    "error:PRX-C-SEPARATOR"
+  ],
+  "adaptation_notes": "exact separator rule: exactly one blank line"
+}

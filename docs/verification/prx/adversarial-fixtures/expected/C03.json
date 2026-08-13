@@ -1,0 +1,10 @@
+{
+  "fixture": "commit/C03.txt",
+  "mechanism": "generated-prefix mood bypass",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-C-MOOD",
+    "error:PRX-C-PREFIX"
+  ],
+  "adaptation_notes": "Merge prefix grants no exemption; exemptions need topology/metadata; repo conventional-prefix rule also fires"
+}

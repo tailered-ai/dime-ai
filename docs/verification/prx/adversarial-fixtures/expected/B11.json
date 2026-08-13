@@ -1,0 +1,9 @@
+{
+  "fixture": "body/B11.md",
+  "mechanism": "narrative inside the capsule",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-CAPSULE"
+  ],
+  "adaptation_notes": "non-key line in capsule is an error"
+}
