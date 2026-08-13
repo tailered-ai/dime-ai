@@ -1,0 +1,5 @@
+feat(prx): add the communication-profile audit lane
+
+Explain the why in wrapped prose that stays inside seventy two columns.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>

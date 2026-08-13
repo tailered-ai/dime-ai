@@ -1,0 +1,7 @@
+feat(prx): land the governed lane fixture
+
+The governed trailers below carry the run identity and evidence path.
+
+Run-Id: ONE-20260812-PRX
+Evidence: run/ONE-20260812-PRX/evidence/summary.json
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>

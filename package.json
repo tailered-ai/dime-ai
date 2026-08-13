@@ -52,7 +52,10 @@
     "pi:json": "pi --mode json -a",
     "pi:audit": "tsx scripts/pi-harness-audit.ts",
     "qm:pack:verify": "tsx scripts/qm-pack-verify.ts",
-    "postinstall": "if [ -f requirements.txt ] && command -v pip3 >/dev/null 2>&1; then pip3 install -r requirements.txt -q; else echo '[postinstall] skipping python deps: pip3 unavailable or requirements.txt missing (expected on Railway, which installs via apt in Dockerfile)'; fi"
+    "postinstall": "if [ -f requirements.txt ] && command -v pip3 >/dev/null 2>&1; then pip3 install -r requirements.txt -q; else echo '[postinstall] skipping python deps: pip3 unavailable or requirements.txt missing (expected on Railway, which installs via apt in Dockerfile)'; fi",
+    "prx:commit": "node scripts/prx/check-commit.mjs",
+    "prx:body": "node scripts/prx/check-body.mjs",
+    "prx:test": "vitest run scripts/prx/"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.3.220",
@@ -161,6 +164,7 @@
     "drizzle-kit": "^0.31.10",
     "esbuild": "^0.28.1",
     "fast-check": "^4.9.0",
+    "mdast-util-from-markdown": "2.0.2",
     "pnpm": "^11.19.0",
     "postcss": "^8.5.25",
     "prettier": "^3.9.6",

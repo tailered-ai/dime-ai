@@ -1,0 +1,1 @@
+fix(feed): close the popover on outside tap
