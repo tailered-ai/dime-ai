@@ -1,0 +1,26 @@
+=== P1a narrow: osv scan on remediated lockfile ===
+scan_exit=0 (0=no findings; 1=findings)
+gate_check_true_exit=0
+[STATE] 0 non-blocking finding(s) (MODERATE/LOW, or below the severity threshold), 0 blocking (HIGH/CRITICAL/UNKNOWN).
+[OUTPUT] PASS — no new HIGH or CRITICAL vulnerabilities found.
+=== P1b base audit: origin/main lockfile ===
+base_scan_exit=1
+base findings: ['GHSA-jmr9-qjv8-65gv']
+=== P1c negative: a DIFFERENT HIGH advisory must still redden (same policy file) ===
+fixture_scan_exit=1
+fixture_gate_true_exit=1 (expect 1)
+[STATE] 3 non-blocking finding(s) (MODERATE/LOW, or below the severity threshold), 2 blocking (HIGH/CRITICAL/UNKNOWN).
+[OUTPUT] FAIL — new HIGH/CRITICAL or unrateable vulnerability not covered by osv-scanner.toml's ignore list:
+  [FLAGGED] lodash@4.17.20 (HIGH) — GHSA-35jh-r3h4-6jhm
+  [FLAGGED] lodash@4.17.20 (HIGH) — GHSA-r5fr-rjxr-66jc
+=== P1d real gate retest: p06 security-audit ===
+gate_true_exit=1
+CLASS       TOTAL  PASS  FAIL FLAKY   T/O  BLKD  SKIP CIONL   N/A INFRA DRIFT BROKN INCON  BLOCKING
+totals: 1 result(s); reconciles=true; blocking classes: PARITY
+  PARITY: .github/workflows/ci.yml#security-audit: FAIL
+[p06] mandatory gates: 1; blocking: 1 -> .github/workflows/ci.yml#security-audit=FAIL
+=== P1d attempt 2 (post-commit c40410af) ===
+gate_true_exit=0
+CLASS       TOTAL  PASS  FAIL FLAKY   T/O  BLKD  SKIP CIONL   N/A INFRA DRIFT BROKN INCON  BLOCKING
+totals: 1 result(s); reconciles=true; blocking classes: none
+[p06] mandatory gates: 1; blocking: 0

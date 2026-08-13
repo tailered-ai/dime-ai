@@ -4124,19 +4124,40 @@
     },
     {
       "affected_gate": ".github/workflows/ci.yml#security-audit",
-      "blast_radius": null,
-      "closed_at": null,
-      "corrective_action": null,
+      "blast_radius": "dependency tree only; zero source imports existed; production image shrinks",
+      "closed_at": "2026-08-13T08:09:16.179Z",
+      "corrective_action": "REMOVAL, first option of the Section-8 remediation order: 3 manifest entries + pnpm.onlyBuiltDependencies entry removed; lockfile settled with 1045 pure deletions and zero additions; osv-scanner.toml UNTOUCHED (no exception needed)",
       "detected_by": "closure-audit E13 attempt 2 (gate FAIL, reproduced 2x in isolation at 2.1s)",
-      "evidence": [],
-      "history": [],
+      "evidence": [
+        {
+          "bytes": 1519,
+          "path": "docs/verification/evidence/p10/DEF-070-retest.log",
+          "sha256": "c0aebd24463584cbb6d782a583871b42b94bcca285bc6ced8828734e23552b5e"
+        }
+      ],
+      "history": [
+        {
+          "action": "close",
+          "at": "2026-08-13T08:09:16.159Z",
+          "flags": {
+            "blast_radius": "dependency tree only; zero source imports existed; production image shrinks",
+            "corrective_action": "REMOVAL, first option of the Section-8 remediation order: 3 manifest entries + pnpm.onlyBuiltDependencies entry removed; lockfile settled with 1045 pure deletions and zero additions; osv-scanner.toml UNTOUCHED (no exception needed)",
+            "evidence": [
+              "docs/verification/evidence/p10/DEF-070-retest.log"
+            ],
+            "regression_test_id": "different-HIGH fixture (lodash@4.17.20) reddens the unchanged policy: gate true exit 1 with 2 HIGH flagged",
+            "retest_result": "PASS — narrow scan 0 blocking; real p06 security-audit gate true exit 0 / blocking 0 at c40410af; base lockfile still reds on exactly GHSA-jmr9-qjv8-65gv (classification ENVIRONMENT)",
+            "root_cause": "GHSA-jmr9-qjv8-65gv modified 2026-08-12T19:30Z to cover extract-zip<=2.0.1 (no patched release); the package entered the tree solely via an UNUSED puppeteer chain (puppeteer dev; puppeteer-extra/-stealth prod), and pnpm peer-materialization put it inside the production image (trivy evidence)"
+          }
+        }
+      ],
       "id": "DEF-070",
       "opened_at": "2026-08-13T06:14:42.863Z",
-      "regression_test_id": null,
-      "retest_result": null,
-      "root_cause": null,
+      "regression_test_id": "different-HIGH fixture (lodash@4.17.20) reddens the unchanged policy: gate true exit 1 with 2 HIGH flagged",
+      "retest_result": "PASS — narrow scan 0 blocking; real p06 security-audit gate true exit 0 / blocking 0 at c40410af; base lockfile still reds on exactly GHSA-jmr9-qjv8-65gv (classification ENVIRONMENT)",
+      "root_cause": "GHSA-jmr9-qjv8-65gv modified 2026-08-12T19:30Z to cover extract-zip<=2.0.1 (no patched release); the package entered the tree solely via an UNUSED puppeteer chain (puppeteer dev; puppeteer-extra/-stealth prod), and pnpm peer-materialization put it inside the production image (trivy evidence)",
       "severity": "LOW",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "ENVIRONMENT: Security Audit red repo-wide — GHSA-jmr9-qjv8-65gv (extract-zip <=2.0.1, HIGH) modified 2026-08-12T19:30:12Z with no patched release; via @puppeteer/browsers@2.13.0 (dev tooling); same class as DEF-045/046; blocks LOCAL_READY_FOR_PR until owner dispositions the advisory (osv-scanner.toml entry or dependency removal — outside audit authority)"
     }
   ],
