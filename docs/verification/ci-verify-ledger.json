@@ -4121,6 +4121,23 @@
       "severity": "LOW",
       "status": "CLOSED",
       "title": "stale run-dir residue: 7 .ci-verify/runs dirs with 9 registered git worktrees (9.5G) persisted while a zero-worktree-residue claim was reported"
+    },
+    {
+      "affected_gate": ".github/workflows/ci.yml#security-audit",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": null,
+      "detected_by": "closure-audit E13 attempt 2 (gate FAIL, reproduced 2x in isolation at 2.1s)",
+      "evidence": [],
+      "history": [],
+      "id": "DEF-070",
+      "opened_at": "2026-08-13T06:14:42.863Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": null,
+      "severity": "LOW",
+      "status": "OPEN",
+      "title": "ENVIRONMENT: Security Audit red repo-wide — GHSA-jmr9-qjv8-65gv (extract-zip <=2.0.1, HIGH) modified 2026-08-12T19:30:12Z with no patched release; via @puppeteer/browsers@2.13.0 (dev tooling); same class as DEF-045/046; blocks LOCAL_READY_FOR_PR until owner dispositions the advisory (osv-scanner.toml entry or dependency removal — outside audit authority)"
     }
   ],
   "gate_results": [],
