@@ -4222,6 +4222,23 @@
       "severity": "MEDIUM",
       "status": "CLOSED",
       "title": "canonical ledger writer loses concurrent updates: load-mutate-persist had no pre-write exclusion and no atomic settlement; corruption was detectable only AFTER the fact"
+    },
+    {
+      "affected_gate": "scripts/ci/deploy/lib.mjs run()",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": null,
+      "detected_by": "P7 rehearsal attempt 1 (first honest run): migration replay exited 1 with empty stdout",
+      "evidence": [],
+      "history": [],
+      "id": "DEF-072",
+      "opened_at": "2026-08-13T08:53:57.926Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": null,
+      "severity": "LOW",
+      "status": "OPEN",
+      "title": "deploy lib.run() inherited the pnpm-run corepack context: child pnpm failed the packageManager pin inside ci:verify:deploy:* (DEF-062 class recurrence in new code)"
     }
   ],
   "gate_results": [],

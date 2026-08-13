@@ -23,6 +23,7 @@ import { buildCandidate } from "../p08/run-p08.mjs";
 import { startOwnedMysql } from "../p07/mysql.mjs";
 import { resolveHead } from "../snapshot.mjs";
 import {
+  cleanEnv,
   OUT_DIR,
   PLAN_PATH,
   REHEARSAL_PATH,
@@ -182,14 +183,14 @@ async function main() {
     mysql = await startOwnedMysql(marker);
     const replay = run("pnpm", ["db:migrate:reconciled"], {
       timeout: 300_000,
-      env: {
-        ...process.env,
+      env: cleanEnv({
         DATABASE_URL: "mysql://root@127.0.0.1:3306/dime_test",
-      },
+      }),
     });
     record.steps.migrations = {
       ok: replay.status === 0,
       tail: replay.stdout.split("\n").filter(Boolean).slice(-3),
+      stderr_tail: replay.stderr.split("\n").filter(Boolean).slice(-3),
     };
     if (replay.status !== 0) throw new Error("MIGRATION_REPLAY_FAILED");
     const dbUrl = "mysql://root@host.docker.internal:3306/dime_test";
@@ -294,7 +295,7 @@ async function main() {
     const smoke = run(
       "node",
       ["scripts/smoke-deploy.mjs", `http://127.0.0.1:${PORTS.candidate}`],
-      { timeout: 300_000, env: { ...process.env, EXPECTED_COMMIT: expected } }
+      { timeout: 300_000, env: cleanEnv({ EXPECTED_COMMIT: expected }) }
     );
     if (negWrongCommit) {
       record.steps.smoke_negative = {

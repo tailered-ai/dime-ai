@@ -87,13 +87,28 @@ export function identity() {
   return { head_sha, base_sha, merge_tree_sha, dirty_tracked: dirty };
 }
 
+// Children must resolve the shell toolchain, not this process's pnpm-run
+// context: under `pnpm ci:verify:deploy:*` the inherited npm_/COREPACK_/PNPM_
+// vars make every child `pnpm` fail on the packageManager pin (the DEF-062
+// class verify-pr already strips; DEF-072 reproduced it here).
+export function cleanEnv(extra = {}) {
+  return {
+    ...Object.fromEntries(
+      Object.entries(process.env).filter(
+        ([k]) => !/^(npm_|COREPACK_|PNPM_)/i.test(k)
+      )
+    ),
+    ...extra,
+  };
+}
+
 /** True-exit subprocess wrapper. Never derives a verdict through a pipe. */
 export function run(cmd, args, options = {}) {
   const res = spawnSync(cmd, args, {
     encoding: "utf8",
     timeout: options.timeout ?? 120_000,
     cwd: options.cwd ?? REPO_ROOT,
-    env: options.env ?? process.env,
+    env: options.env ?? cleanEnv(),
     maxBuffer: 64 * 1024 * 1024,
   });
   return {
