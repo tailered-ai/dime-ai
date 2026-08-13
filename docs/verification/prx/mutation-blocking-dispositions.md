@@ -71,12 +71,12 @@ blocker from a future owner decision; the mode stays audit and the
 required-check set is untouched.
 ## Final focused result
 
-- Mutants generated: 1580 (of which 74 ignored by the explicit diagnostic-text annotations)
-- Killed: 1257  |  Timeout (counts as detected): 139
-- Survived (Stryker view): 86  |  No coverage (Stryker view): 24
-- Of those 110: 35 are replay-KILLED-IN-REALITY (Stryker activation artifacts, each hand-verified), and the rest carry individual equivalence proofs or exact no-coverage explanations below
-- Mutation score (detected / valid, Stryker view): 92.70%
-- Effective detection including replay-verified kills: 1431/1506 = 95.02%
+- Mutants generated: 1605 (of which 74 ignored by the explicit diagnostic-text annotations)
+- Killed: 1269  |  Timeout (counts as detected): 153
+- Survived (Stryker view): 85  |  No coverage (Stryker view): 24
+- Of those 109: 35 are replay-KILLED-IN-REALITY (Stryker activation artifacts, each hand-verified), and the rest carry individual equivalence proofs or exact no-coverage explanations below
+- Mutation score (detected / valid, Stryker view): 92.88%
+- Effective detection including replay-verified kills: 1457/1531 = 95.17%
 - Unreviewed survivors: 0  |  Unexplained no-coverage: 0
 
 ### scripts/prx/body-check.mjs
@@ -90,7 +90,6 @@ required-check set is untouched.
 | 180 | OptionalChaining | `capsule.position.start` | Survived | EQUIVALENT | capsule = capsules[0] is drawn from visible = filtered tree.children — parser-produced nodes always carrying position; identical evaluation everywhere. |
 | 246 | ConditionalExpression | `true` | Survived | EQUIVALENT | `n.type === "heading"` conjunct -> true in the heading filter: the predicate becomes n.depth === 2, and in mdast `depth` exists only on heading nodes — every non-heading evaluates undefined === 2 === false and still fails the filter, while headings evaluate exactly the original right operand. Same equivalence class as the section-scan twin, executed against a paragraph-only body: findings identical. |
 | 250 | OptionalChaining | `n.position.start` | Survived | EQUIVALENT | n is a depth-2 heading filtered from visible — parser-produced, position always present. |
-| 298 | EqualityOperator | `i <= orderIndexes.length` | Survived | EQUIVALENT | < -> <=: the extra iteration evaluates orderIndexes[length] < orderIndexes[length-1], i.e. undefined < number, which is false — no finding is pushed and the loop then exits; output identical for every input. |
 | 314 | MethodExpression | `EXTENSION_ALLOWLIST_PREFIXES.every(p => ` | Survived | EQUIVALENT | some -> every: the receiver is a frozen module constant of length exactly 1 ("Evidence record") that nothing mutates; for a one-element array some(f) === every(f); divergence needs length 0 or >= 2, which cannot occur. |
 | 341 | OptionalChaining | `node.position.start` | Survived | EQUIVALENT | walk/loop visits only nodes from the parsed tree (visible and their descendants); every parser-produced node carries position, so the optional chain never short-circuits (applies identically at the Unicode-bullet, blockquoted-list, raw-HTML-list, and FENCE emit sites). |
 | 348 | ArrayDeclaration | `["Stryker was here"]` | NoCoverage | NO-COVERAGE (explained) | `node.children ?? []` fallback in the blockquoted-list check: the right operand evaluates only for blockquote nodes, and every parser-produced blockquote carries a children array (probed: bare `>` -> children: []). The fallback arm is unreachable. |

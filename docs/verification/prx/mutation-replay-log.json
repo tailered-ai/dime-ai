@@ -120,16 +120,6 @@
   "replayKilled": false
  },
  {
-  "id": "213",
-  "file": "scripts/prx/body-check.mjs",
-  "line": 246,
-  "mutator": "ConditionalExpression",
-  "status": "Survived",
-  "replacement": "true",
-  "originalSpan": "n.type === \"heading\"",
-  "replayKilled": false
- },
- {
   "id": "280",
   "file": "scripts/prx/body-check.mjs",
   "line": 314,
@@ -137,16 +127,6 @@
   "status": "Survived",
   "replacement": "EXTENSION_ALLOWLIST_PREFIXES.every(p => h.text.startsWith(p))",
   "originalSpan": "EXTENSION_ALLOWLIST_PREFIXES.some(p =>\n      h.text.startsWi",
-  "replayKilled": false
- },
- {
-  "id": "266",
-  "file": "scripts/prx/body-check.mjs",
-  "line": 298,
-  "mutator": "EqualityOperator",
-  "status": "Survived",
-  "replacement": "i <= orderIndexes.length",
-  "originalSpan": "i < orderIndexes.length",
   "replayKilled": false
  },
  {
@@ -200,16 +180,6 @@
   "replayKilled": false
  },
  {
-  "id": "467",
-  "file": "scripts/prx/body-check.mjs",
-  "line": 512,
-  "mutator": "ConditionalExpression",
-  "status": "Survived",
-  "replacement": "case \"code\":",
-  "originalSpan": "case \"code\":\n      // A populated structured block (evidence",
-  "replayKilled": false
- },
- {
   "id": "462",
   "file": "scripts/prx/body-check.mjs",
   "line": 508,
@@ -227,6 +197,16 @@
   "status": "Survived",
   "replacement": "\"\"",
   "originalSpan": "\"definition\"",
+  "replayKilled": false
+ },
+ {
+  "id": "467",
+  "file": "scripts/prx/body-check.mjs",
+  "line": 512,
+  "mutator": "ConditionalExpression",
+  "status": "Survived",
+  "replacement": "case \"code\":",
+  "originalSpan": "case \"code\":\n      // A populated structured block (evidence",
   "replayKilled": false
  },
  {
@@ -270,7 +250,7 @@
   "replayKilled": false
  },
  {
-  "id": "531",
+  "id": "523",
   "file": "scripts/prx/body-check.mjs",
   "line": 544,
   "mutator": "MethodExpression",
@@ -280,7 +260,7 @@
   "replayKilled": false
  },
  {
-  "id": "534",
+  "id": "526",
   "file": "scripts/prx/body-check.mjs",
   "line": 544,
   "mutator": "ConditionalExpression",
@@ -290,7 +270,7 @@
   "replayKilled": false
  },
  {
-  "id": "537",
+  "id": "529",
   "file": "scripts/prx/body-check.mjs",
   "line": 544,
   "mutator": "MethodExpression",
@@ -300,7 +280,17 @@
   "replayKilled": false
  },
  {
-  "id": "540",
+  "id": "530",
+  "file": "scripts/prx/body-check.mjs",
+  "line": 544,
+  "mutator": "StringLiteral",
+  "status": "Survived",
+  "replacement": "\"Stryker was here!\"",
+  "originalSpan": "\"\"",
+  "replayKilled": false
+ },
+ {
+  "id": "532",
   "file": "scripts/prx/body-check.mjs",
   "line": 545,
   "mutator": "ConditionalExpression",
@@ -310,17 +300,7 @@
   "replayKilled": false
  },
  {
-  "id": "538",
-  "file": "scripts/prx/body-check.mjs",
-  "line": 544,
-  "mutator": "StringLiteral",
-  "status": "Survived",
-  "replacement": "\"Stryker was here!\"",
-  "originalSpan": "\"\"",
-  "replayKilled": false
- },
- {
-  "id": "562",
+  "id": "554",
   "file": "scripts/prx/body-check.mjs",
   "line": 548,
   "mutator": "MethodExpression",
@@ -330,7 +310,27 @@
   "replayKilled": false
  },
  {
-  "id": "604",
+  "id": "598",
+  "file": "scripts/prx/body-check.mjs",
+  "line": 581,
+  "mutator": "ArithmeticOperator",
+  "status": "Survived",
+  "replacement": "i - 4",
+  "originalSpan": "i + 4",
+  "replayKilled": false
+ },
+ {
+  "id": "599",
+  "file": "scripts/prx/body-check.mjs",
+  "line": 582,
+  "mutator": "ConditionalExpression",
+  "status": "Survived",
+  "replacement": "true",
+  "originalSpan": "end === -1",
+  "replayKilled": false
+ },
+ {
+  "id": "629",
   "file": "scripts/prx/check-body.mjs",
   "line": 23,
   "mutator": "MethodExpression",
@@ -340,7 +340,7 @@
   "replayKilled": true
  },
  {
-  "id": "644",
+  "id": "669",
   "file": "scripts/prx/check-body.mjs",
   "line": 51,
   "mutator": "StringLiteral",
@@ -350,7 +350,7 @@
   "replayKilled": true
  },
  {
-  "id": "680",
+  "id": "705",
   "file": "scripts/prx/check-body.mjs",
   "line": 85,
   "mutator": "BlockStatement",
@@ -360,7 +360,7 @@
   "replayKilled": true
  },
  {
-  "id": "603",
+  "id": "628",
   "file": "scripts/prx/check-body.mjs",
   "line": 19,
   "mutator": "StringLiteral",
@@ -370,7 +370,7 @@
   "replayKilled": false
  },
  {
-  "id": "641",
+  "id": "666",
   "file": "scripts/prx/check-body.mjs",
   "line": 50,
   "mutator": "ConditionalExpression",
@@ -380,7 +380,7 @@
   "replayKilled": true
  },
  {
-  "id": "643",
+  "id": "668",
   "file": "scripts/prx/check-body.mjs",
   "line": 50,
   "mutator": "StringLiteral",
@@ -390,7 +390,7 @@
   "replayKilled": true
  },
  {
-  "id": "676",
+  "id": "701",
   "file": "scripts/prx/check-body.mjs",
   "line": 83,
   "mutator": "ConditionalExpression",
@@ -400,7 +400,7 @@
   "replayKilled": true
  },
  {
-  "id": "707",
+  "id": "732",
   "file": "scripts/prx/check-commit.mjs",
   "line": 43,
   "mutator": "BlockStatement",
@@ -410,7 +410,7 @@
   "replayKilled": false
  },
  {
-  "id": "708",
+  "id": "733",
   "file": "scripts/prx/check-commit.mjs",
   "line": 45,
   "mutator": "StringLiteral",
@@ -420,7 +420,7 @@
   "replayKilled": false
  },
  {
-  "id": "709",
+  "id": "734",
   "file": "scripts/prx/check-commit.mjs",
   "line": 46,
   "mutator": "StringLiteral",
@@ -430,7 +430,7 @@
   "replayKilled": false
  },
  {
-  "id": "731",
+  "id": "756",
   "file": "scripts/prx/check-commit.mjs",
   "line": 77,
   "mutator": "MethodExpression",
@@ -440,7 +440,7 @@
   "replayKilled": true
  },
  {
-  "id": "800",
+  "id": "825",
   "file": "scripts/prx/check-commit.mjs",
   "line": 103,
   "mutator": "StringLiteral",
@@ -450,7 +450,7 @@
   "replayKilled": false
  },
  {
-  "id": "818",
+  "id": "843",
   "file": "scripts/prx/check-commit.mjs",
   "line": 126,
   "mutator": "StringLiteral",
@@ -460,7 +460,7 @@
   "replayKilled": true
  },
  {
-  "id": "858",
+  "id": "883",
   "file": "scripts/prx/check-commit.mjs",
   "line": 178,
   "mutator": "BlockStatement",
@@ -470,7 +470,7 @@
   "replayKilled": true
  },
  {
-  "id": "683",
+  "id": "708",
   "file": "scripts/prx/check-commit.mjs",
   "line": 23,
   "mutator": "StringLiteral",
@@ -480,7 +480,7 @@
   "replayKilled": false
  },
  {
-  "id": "704",
+  "id": "729",
   "file": "scripts/prx/check-commit.mjs",
   "line": 43,
   "mutator": "ConditionalExpression",
@@ -490,17 +490,7 @@
   "replayKilled": false
  },
  {
-  "id": "717",
-  "file": "scripts/prx/check-commit.mjs",
-  "line": 53,
-  "mutator": "MethodExpression",
-  "status": "Survived",
-  "replacement": "parents.trim().split(/\\s+/)",
-  "originalSpan": "parents.trim().split(/\\s+/).filter(Boolean)",
-  "replayKilled": false
- },
- {
-  "id": "718",
+  "id": "743",
   "file": "scripts/prx/check-commit.mjs",
   "line": 53,
   "mutator": "MethodExpression",
@@ -510,7 +500,17 @@
   "replayKilled": false
  },
  {
-  "id": "719",
+  "id": "742",
+  "file": "scripts/prx/check-commit.mjs",
+  "line": 53,
+  "mutator": "MethodExpression",
+  "status": "Survived",
+  "replacement": "parents.trim().split(/\\s+/)",
+  "originalSpan": "parents.trim().split(/\\s+/).filter(Boolean)",
+  "replayKilled": false
+ },
+ {
+  "id": "744",
   "file": "scripts/prx/check-commit.mjs",
   "line": 53,
   "mutator": "Regex",
@@ -520,7 +520,7 @@
   "replayKilled": false
  },
  {
-  "id": "734",
+  "id": "759",
   "file": "scripts/prx/check-commit.mjs",
   "line": 79,
   "mutator": "ObjectLiteral",
@@ -530,7 +530,7 @@
   "replayKilled": false
  },
  {
-  "id": "739",
+  "id": "764",
   "file": "scripts/prx/check-commit.mjs",
   "line": 82,
   "mutator": "StringLiteral",
@@ -540,7 +540,7 @@
   "replayKilled": false
  },
  {
-  "id": "815",
+  "id": "840",
   "file": "scripts/prx/check-commit.mjs",
   "line": 125,
   "mutator": "ConditionalExpression",
@@ -550,7 +550,7 @@
   "replayKilled": true
  },
  {
-  "id": "817",
+  "id": "842",
   "file": "scripts/prx/check-commit.mjs",
   "line": 125,
   "mutator": "StringLiteral",
@@ -560,7 +560,7 @@
   "replayKilled": true
  },
  {
-  "id": "854",
+  "id": "879",
   "file": "scripts/prx/check-commit.mjs",
   "line": 176,
   "mutator": "ConditionalExpression",
@@ -570,7 +570,7 @@
   "replayKilled": true
  },
  {
-  "id": "918",
+  "id": "943",
   "file": "scripts/prx/commit-check.mjs",
   "line": 54,
   "mutator": "StringLiteral",
@@ -580,7 +580,7 @@
   "replayKilled": false
  },
  {
-  "id": "937",
+  "id": "962",
   "file": "scripts/prx/commit-check.mjs",
   "line": 68,
   "mutator": "StringLiteral",
@@ -590,7 +590,7 @@
   "replayKilled": false
  },
  {
-  "id": "957",
+  "id": "982",
   "file": "scripts/prx/commit-check.mjs",
   "line": 92,
   "mutator": "ConditionalExpression",
@@ -600,7 +600,7 @@
   "replayKilled": false
  },
  {
-  "id": "961",
+  "id": "986",
   "file": "scripts/prx/commit-check.mjs",
   "line": 92,
   "mutator": "ConditionalExpression",
@@ -610,7 +610,7 @@
   "replayKilled": false
  },
  {
-  "id": "962",
+  "id": "987",
   "file": "scripts/prx/commit-check.mjs",
   "line": 92,
   "mutator": "EqualityOperator",
@@ -620,7 +620,7 @@
   "replayKilled": false
  },
  {
-  "id": "959",
+  "id": "984",
   "file": "scripts/prx/commit-check.mjs",
   "line": 92,
   "mutator": "LogicalOperator",
@@ -630,7 +630,7 @@
   "replayKilled": false
  },
  {
-  "id": "968",
+  "id": "993",
   "file": "scripts/prx/commit-check.mjs",
   "line": 94,
   "mutator": "ConditionalExpression",
@@ -640,7 +640,7 @@
   "replayKilled": false
  },
  {
-  "id": "969",
+  "id": "994",
   "file": "scripts/prx/commit-check.mjs",
   "line": 94,
   "mutator": "EqualityOperator",
@@ -650,7 +650,7 @@
   "replayKilled": false
  },
  {
-  "id": "987",
+  "id": "1012",
   "file": "scripts/prx/commit-check.mjs",
   "line": 98,
   "mutator": "ConditionalExpression",
@@ -660,7 +660,7 @@
   "replayKilled": false
  },
  {
-  "id": "989",
+  "id": "1014",
   "file": "scripts/prx/commit-check.mjs",
   "line": 98,
   "mutator": "LogicalOperator",
@@ -670,7 +670,7 @@
   "replayKilled": false
  },
  {
-  "id": "990",
+  "id": "1015",
   "file": "scripts/prx/commit-check.mjs",
   "line": 98,
   "mutator": "ConditionalExpression",
@@ -680,7 +680,7 @@
   "replayKilled": false
  },
  {
-  "id": "993",
+  "id": "1018",
   "file": "scripts/prx/commit-check.mjs",
   "line": 98,
   "mutator": "ConditionalExpression",
@@ -690,7 +690,7 @@
   "replayKilled": false
  },
  {
-  "id": "1020",
+  "id": "1045",
   "file": "scripts/prx/commit-check.mjs",
   "line": 113,
   "mutator": "ConditionalExpression",
@@ -700,7 +700,7 @@
   "replayKilled": false
  },
  {
-  "id": "1022",
+  "id": "1047",
   "file": "scripts/prx/commit-check.mjs",
   "line": 113,
   "mutator": "EqualityOperator",
@@ -710,7 +710,7 @@
   "replayKilled": false
  },
  {
-  "id": "1034",
+  "id": "1059",
   "file": "scripts/prx/commit-check.mjs",
   "line": 132,
   "mutator": "ArrayDeclaration",
@@ -720,7 +720,7 @@
   "replayKilled": false
  },
  {
-  "id": "1051",
+  "id": "1076",
   "file": "scripts/prx/commit-check.mjs",
   "line": 147,
   "mutator": "ConditionalExpression",
@@ -730,7 +730,7 @@
   "replayKilled": false
  },
  {
-  "id": "1054",
+  "id": "1079",
   "file": "scripts/prx/commit-check.mjs",
   "line": 147,
   "mutator": "MethodExpression",
@@ -740,7 +740,7 @@
   "replayKilled": false
  },
  {
-  "id": "1221",
+  "id": "1246",
   "file": "scripts/prx/commit-check.mjs",
   "line": 322,
   "mutator": "ArrayDeclaration",
@@ -750,17 +750,7 @@
   "replayKilled": false
  },
  {
-  "id": "1268",
-  "file": "scripts/prx/commit-check.mjs",
-  "line": 384,
-  "mutator": "LogicalOperator",
-  "status": "Survived",
-  "replacement": "subject.replace(PREFIX_STRIP_RE, \"\").trim() && subject",
-  "originalSpan": "subject.replace(PREFIX_STRIP_RE, \"\").trim() || subject",
-  "replayKilled": false
- },
- {
-  "id": "1269",
+  "id": "1294",
   "file": "scripts/prx/commit-check.mjs",
   "line": 384,
   "mutator": "MethodExpression",
@@ -770,7 +760,17 @@
   "replayKilled": false
  },
  {
-  "id": "874",
+  "id": "1293",
+  "file": "scripts/prx/commit-check.mjs",
+  "line": 384,
+  "mutator": "LogicalOperator",
+  "status": "Survived",
+  "replacement": "subject.replace(PREFIX_STRIP_RE, \"\").trim() && subject",
+  "originalSpan": "subject.replace(PREFIX_STRIP_RE, \"\").trim() || subject",
+  "replayKilled": false
+ },
+ {
+  "id": "899",
   "file": "scripts/prx/commit-check.mjs",
   "line": 36,
   "mutator": "StringLiteral",
@@ -780,7 +780,7 @@
   "replayKilled": false
  },
  {
-  "id": "875",
+  "id": "900",
   "file": "scripts/prx/commit-check.mjs",
   "line": 36,
   "mutator": "StringLiteral",
@@ -790,7 +790,7 @@
   "replayKilled": false
  },
  {
-  "id": "877",
+  "id": "902",
   "file": "scripts/prx/commit-check.mjs",
   "line": 42,
   "mutator": "Regex",
@@ -800,7 +800,7 @@
   "replayKilled": false
  },
  {
-  "id": "1319",
+  "id": "1344",
   "file": "scripts/prx/modes.mjs",
   "line": 32,
   "mutator": "BlockStatement",
@@ -810,7 +810,7 @@
   "replayKilled": false
  },
  {
-  "id": "1320",
+  "id": "1345",
   "file": "scripts/prx/modes.mjs",
   "line": 34,
   "mutator": "StringLiteral",
@@ -820,7 +820,7 @@
   "replayKilled": false
  },
  {
-  "id": "1333",
+  "id": "1358",
   "file": "scripts/prx/modes.mjs",
   "line": 49,
   "mutator": "OptionalChaining",
@@ -830,7 +830,7 @@
   "replayKilled": false
  },
  {
-  "id": "1300",
+  "id": "1325",
   "file": "scripts/prx/modes.mjs",
   "line": 17,
   "mutator": "StringLiteral",
@@ -840,7 +840,7 @@
   "replayKilled": true
  },
  {
-  "id": "1301",
+  "id": "1326",
   "file": "scripts/prx/modes.mjs",
   "line": 18,
   "mutator": "StringLiteral",
@@ -850,7 +850,7 @@
   "replayKilled": true
  },
  {
-  "id": "1302",
+  "id": "1327",
   "file": "scripts/prx/modes.mjs",
   "line": 19,
   "mutator": "StringLiteral",
@@ -860,7 +860,7 @@
   "replayKilled": true
  },
  {
-  "id": "1303",
+  "id": "1328",
   "file": "scripts/prx/modes.mjs",
   "line": 20,
   "mutator": "StringLiteral",
@@ -870,7 +870,7 @@
   "replayKilled": true
  },
  {
-  "id": "1304",
+  "id": "1329",
   "file": "scripts/prx/modes.mjs",
   "line": 21,
   "mutator": "StringLiteral",
@@ -880,7 +880,7 @@
   "replayKilled": true
  },
  {
-  "id": "1305",
+  "id": "1330",
   "file": "scripts/prx/modes.mjs",
   "line": 22,
   "mutator": "StringLiteral",
@@ -890,7 +890,7 @@
   "replayKilled": true
  },
  {
-  "id": "1306",
+  "id": "1331",
   "file": "scripts/prx/modes.mjs",
   "line": 23,
   "mutator": "StringLiteral",
@@ -900,7 +900,7 @@
   "replayKilled": true
  },
  {
-  "id": "1307",
+  "id": "1332",
   "file": "scripts/prx/modes.mjs",
   "line": 24,
   "mutator": "StringLiteral",
@@ -910,87 +910,7 @@
   "replayKilled": true
  },
  {
-  "id": "1308",
-  "file": "scripts/prx/modes.mjs",
-  "line": 25,
-  "mutator": "StringLiteral",
-  "status": "Survived",
-  "replacement": "\"\"",
-  "originalSpan": "\"PRX-B-SIZE\"",
-  "replayKilled": true
- },
- {
-  "id": "1309",
-  "file": "scripts/prx/modes.mjs",
-  "line": 26,
-  "mutator": "StringLiteral",
-  "status": "Survived",
-  "replacement": "\"\"",
-  "originalSpan": "\"PRX-B-VISIBLE\"",
-  "replayKilled": true
- },
- {
-  "id": "1310",
-  "file": "scripts/prx/modes.mjs",
-  "line": 27,
-  "mutator": "StringLiteral",
-  "status": "Survived",
-  "replacement": "\"\"",
-  "originalSpan": "\"PRX-B-SECTION-MISSING\"",
-  "replayKilled": true
- },
- {
-  "id": "1311",
-  "file": "scripts/prx/modes.mjs",
-  "line": 28,
-  "mutator": "StringLiteral",
-  "status": "Survived",
-  "replacement": "\"\"",
-  "originalSpan": "\"PRX-B-SECTION-DUP\"",
-  "replayKilled": true
- },
- {
-  "id": "1312",
-  "file": "scripts/prx/modes.mjs",
-  "line": 29,
-  "mutator": "StringLiteral",
-  "status": "Survived",
-  "replacement": "\"\"",
-  "originalSpan": "\"PRX-B-SECTION-EMPTY\"",
-  "replayKilled": true
- },
- {
-  "id": "1313",
-  "file": "scripts/prx/modes.mjs",
-  "line": 30,
-  "mutator": "StringLiteral",
-  "status": "Survived",
-  "replacement": "\"\"",
-  "originalSpan": "\"PRX-B-CAPSULE\"",
-  "replayKilled": true
- },
- {
-  "id": "1315",
-  "file": "scripts/prx/modes.mjs",
-  "line": 32,
-  "mutator": "ConditionalExpression",
-  "status": "Survived",
-  "replacement": "true",
-  "originalSpan": "ruleClass(id) !== \"deterministic\"",
-  "replayKilled": true
- },
- {
-  "id": "1317",
-  "file": "scripts/prx/modes.mjs",
-  "line": 32,
-  "mutator": "EqualityOperator",
-  "status": "Survived",
-  "replacement": "ruleClass(id) === \"deterministic\"",
-  "originalSpan": "ruleClass(id) !== \"deterministic\"",
-  "replayKilled": true
- },
- {
-  "id": "1298",
+  "id": "1323",
   "file": "scripts/prx/modes.mjs",
   "line": 16,
   "mutator": "MethodExpression",
@@ -1000,7 +920,87 @@
   "replayKilled": false
  },
  {
-  "id": "1318",
+  "id": "1333",
+  "file": "scripts/prx/modes.mjs",
+  "line": 25,
+  "mutator": "StringLiteral",
+  "status": "Survived",
+  "replacement": "\"\"",
+  "originalSpan": "\"PRX-B-SIZE\"",
+  "replayKilled": true
+ },
+ {
+  "id": "1334",
+  "file": "scripts/prx/modes.mjs",
+  "line": 26,
+  "mutator": "StringLiteral",
+  "status": "Survived",
+  "replacement": "\"\"",
+  "originalSpan": "\"PRX-B-VISIBLE\"",
+  "replayKilled": true
+ },
+ {
+  "id": "1336",
+  "file": "scripts/prx/modes.mjs",
+  "line": 28,
+  "mutator": "StringLiteral",
+  "status": "Survived",
+  "replacement": "\"\"",
+  "originalSpan": "\"PRX-B-SECTION-DUP\"",
+  "replayKilled": true
+ },
+ {
+  "id": "1335",
+  "file": "scripts/prx/modes.mjs",
+  "line": 27,
+  "mutator": "StringLiteral",
+  "status": "Survived",
+  "replacement": "\"\"",
+  "originalSpan": "\"PRX-B-SECTION-MISSING\"",
+  "replayKilled": true
+ },
+ {
+  "id": "1337",
+  "file": "scripts/prx/modes.mjs",
+  "line": 29,
+  "mutator": "StringLiteral",
+  "status": "Survived",
+  "replacement": "\"\"",
+  "originalSpan": "\"PRX-B-SECTION-EMPTY\"",
+  "replayKilled": true
+ },
+ {
+  "id": "1338",
+  "file": "scripts/prx/modes.mjs",
+  "line": 30,
+  "mutator": "StringLiteral",
+  "status": "Survived",
+  "replacement": "\"\"",
+  "originalSpan": "\"PRX-B-CAPSULE\"",
+  "replayKilled": true
+ },
+ {
+  "id": "1340",
+  "file": "scripts/prx/modes.mjs",
+  "line": 32,
+  "mutator": "ConditionalExpression",
+  "status": "Survived",
+  "replacement": "true",
+  "originalSpan": "ruleClass(id) !== \"deterministic\"",
+  "replayKilled": true
+ },
+ {
+  "id": "1342",
+  "file": "scripts/prx/modes.mjs",
+  "line": 32,
+  "mutator": "EqualityOperator",
+  "status": "Survived",
+  "replacement": "ruleClass(id) === \"deterministic\"",
+  "originalSpan": "ruleClass(id) !== \"deterministic\"",
+  "replayKilled": true
+ },
+ {
+  "id": "1343",
   "file": "scripts/prx/modes.mjs",
   "line": 32,
   "mutator": "StringLiteral",
@@ -1010,7 +1010,7 @@
   "replayKilled": true
  },
  {
-  "id": "1316",
+  "id": "1341",
   "file": "scripts/prx/modes.mjs",
   "line": 32,
   "mutator": "ConditionalExpression",
@@ -1020,7 +1020,7 @@
   "replayKilled": false
  },
  {
-  "id": "1442",
+  "id": "1467",
   "file": "scripts/prx/resolve-range.mjs",
   "line": 74,
   "mutator": "MethodExpression",
@@ -1030,7 +1030,7 @@
   "replayKilled": true
  },
  {
-  "id": "1485",
+  "id": "1510",
   "file": "scripts/prx/resolve-range.mjs",
   "line": 108,
   "mutator": "BlockStatement",
@@ -1040,7 +1040,7 @@
   "replayKilled": true
  },
  {
-  "id": "1388",
+  "id": "1413",
   "file": "scripts/prx/resolve-range.mjs",
   "line": 16,
   "mutator": "ArrayDeclaration",
@@ -1050,7 +1050,7 @@
   "replayKilled": false
  },
  {
-  "id": "1389",
+  "id": "1414",
   "file": "scripts/prx/resolve-range.mjs",
   "line": 16,
   "mutator": "StringLiteral",
@@ -1060,7 +1060,7 @@
   "replayKilled": false
  },
  {
-  "id": "1390",
+  "id": "1415",
   "file": "scripts/prx/resolve-range.mjs",
   "line": 16,
   "mutator": "StringLiteral",
@@ -1070,7 +1070,7 @@
   "replayKilled": false
  },
  {
-  "id": "1391",
+  "id": "1416",
   "file": "scripts/prx/resolve-range.mjs",
   "line": 16,
   "mutator": "StringLiteral",
@@ -1080,7 +1080,7 @@
   "replayKilled": false
  },
  {
-  "id": "1433",
+  "id": "1458",
   "file": "scripts/prx/resolve-range.mjs",
   "line": 59,
   "mutator": "MethodExpression",
@@ -1090,7 +1090,7 @@
   "replayKilled": false
  },
  {
-  "id": "1481",
+  "id": "1506",
   "file": "scripts/prx/resolve-range.mjs",
   "line": 106,
   "mutator": "ConditionalExpression",

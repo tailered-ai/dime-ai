@@ -533,7 +533,7 @@ function visibleInlineText(node) {
     return node.alt ?? "";
   }
   if (node.type === "html") {
-    return node.value.replace(/<!--[\s\S]*?-->/g, "").replace(/<[^>]*>/g, "");
+    return htmlVisibleText(node.value);
   }
   if (node.value !== undefined) return node.value;
   if (!node.children) return "";
@@ -564,6 +564,33 @@ function walk(nodes, visit) {
       }
     }
   }
+}
+
+// Text a reader sees inside a raw-HTML value: a single forward scan that
+// skips comments and tags and keeps everything else. This is a VISIBILITY
+// heuristic (the result is compared against "" and never rendered), but it
+// deliberately avoids replace-based stripping — repeated regex deletion
+// can leave `<!--`/`<script` residue, the incomplete-multi-character-
+// sanitization class. Unclosed comments and tags swallow the rest of the
+// value, exactly as an HTML parser treats an unterminated construct.
+function htmlVisibleText(value) {
+  let out = "";
+  let i = 0;
+  while (i < value.length) {
+    if (value.startsWith("<!--", i)) {
+      const end = value.indexOf("-->", i + 4);
+      if (end === -1) return out;
+      i = end + 3;
+    } else if (value[i] === "<") {
+      const end = value.indexOf(">", i + 1);
+      if (end === -1) return out;
+      i = end + 1;
+    } else {
+      out += value[i];
+      i += 1;
+    }
+  }
+  return out;
 }
 
 function truncate(s) {

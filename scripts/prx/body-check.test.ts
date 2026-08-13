@@ -604,3 +604,64 @@ describe("focused-review fixes (capsule labeling + hard breaks)", () => {
     expect(f.some(x => x.rule === "PRX-B-STRUCTURE")).toBe(true);
   });
 });
+
+describe("HTML visibility scanning leaves no partial-token residue (CodeQL)", () => {
+  it("an unclosed comment swallows the rest of the block, like a browser", () => {
+    const body = healthy.replace(
+      "## Bundle impact\n\nnone",
+      "## Bundle impact\n\n<div><!-- never closed"
+    );
+    expect(rules(checkBody(body))).toEqual(["PRX-B-SECTION-EMPTY"]);
+  });
+
+  it("text after a CLOSED comment stays visible", () => {
+    // Forcing the unclosed-comment early-return on closed comments would
+    // wrongly report this section empty.
+    const body = healthy.replace(
+      "## Bundle impact\n\nnone",
+      "## Bundle impact\n\n<div><!-- note -->tail</div>"
+    );
+    expect(
+      checkBody(body).filter(x => x.rule === "PRX-B-SECTION-EMPTY")
+    ).toEqual([]);
+  });
+
+  it("the comment terminator is searched only past the opener", () => {
+    // "<!-->" is treated as an unterminated comment by the scanner (the
+    // "-->" search starts after the 4-char opener), so the tail is
+    // swallowed; a backwards search offset would see the overlapping
+    // "-->" and leak the tail as visible text.
+    const body = healthy.replace(
+      "## Bundle impact\n\nnone",
+      "## Bundle impact\n\n<div><!-->tail"
+    );
+    expect(rules(checkBody(body))).toEqual(["PRX-B-SECTION-EMPTY"]);
+  });
+
+  it("an unclosed tag swallows the rest of the block", () => {
+    const body = healthy.replace(
+      "## Bundle impact\n\nnone",
+      "## Bundle impact\n\n<div>visible</div><br class="
+    );
+    expect(
+      checkBody(body).filter(x => x.rule === "PRX-B-SECTION-EMPTY")
+    ).toEqual([]);
+    const swallowed = healthy.replace(
+      "## Bundle impact\n\nnone",
+      "## Bundle impact\n\n<div><br class="
+    );
+    expect(rules(checkBody(swallowed))).toEqual(["PRX-B-SECTION-EMPTY"]);
+  });
+
+  it("nested partial tokens cannot smuggle visible markup", () => {
+    const body = healthy.replace(
+      "## Bundle impact\n\nnone",
+      "## Bundle impact\n\n<scr<!---->ipt>alert(1)</script>"
+    );
+    // The rendered residue is the literal text alert(1) — visible, and
+    // never treated as markup by anything downstream.
+    expect(
+      checkBody(body).filter(x => x.rule === "PRX-B-SECTION-EMPTY")
+    ).toEqual([]);
+  });
+});
