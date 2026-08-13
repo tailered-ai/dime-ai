@@ -1,0 +1,15 @@
+# Unsupported vagueness only. The PRX uncertainty grammar (standard §6)
+# PERMITS evidence-backed probability, confidence intervals, assumptions,
+# and risk statements; UNKNOWN is for missing facts, not all uncertainty
+# (SOL-PRX-015).
+extends: existence
+message: "Vague hedge '%s': state the verified fact, an evidence-backed probability, or UNKNOWN."
+level: error
+ignorecase: true
+tokens:
+  - should work
+  - should be fine
+  - seems to
+  - probably fine
+  - might work
+  - i assume

@@ -1,0 +1,9 @@
+extends: existence
+message: "Filler word '%s' adds no information."
+level: warning
+ignorecase: true
+tokens:
+  - actually
+  - basically
+  - obviously
+  - of course

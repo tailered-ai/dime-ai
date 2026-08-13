@@ -1,0 +1,163 @@
+# 14-prx-communication — PRX v1.1 commit-and-PR communication profile.
+#
+# AUDIT MODE ONLY (scripts/prx/prx-mode.json, read from the TRUSTED policy
+# tree): this lane reports and never blocks. It is NOT in the required-check
+# list; graduation follows docs/verification/ROLLOUT.md and is an owner
+# ruleset action after independent review.
+#
+# Trusted boundary (SOL-PRX-004, threat model at
+# docs/verification/prx/threat-model.md): policy code that produces the
+# verdict is checked out from the event's BASE SHA into ./base and executed
+# from there. The head checkout is DATA (commit messages, body, title) only.
+# Bootstrap honesty: until PRX lands on main, ./base has no policy and the
+# lane runs the head copy explicitly labeled UNTRUSTED, still audit-only.
+# pull_request_target is never used. Event text reaches shells only via env.
+name: 14-prx-communication
+
+on:
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prx-${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prx-audit:
+    name: 14-prx-communication
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: "[DATA] Checkout head (untrusted: judged, never executed)"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+        with:
+          path: head
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: "[POLICY] Checkout the event base SHA (trusted)"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+        with:
+          path: base
+          ref: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: "[BOUNDARY] Select policy source (bootstrap-aware)"
+        id: policy
+        run: |
+          if [ -f base/scripts/prx/check-commit.mjs ]; then
+            echo "dir=base" >> "$GITHUB_OUTPUT"
+            echo "TRUST=trusted (base ref)" >> "$GITHUB_ENV"
+          else
+            echo "dir=head" >> "$GITHUB_OUTPUT"
+            echo "TRUST=UNTRUSTED (bootstrap: policy absent on base)" >> "$GITHUB_ENV"
+            echo "::notice::PRX bootstrap mode: policy is not on the base ref yet; running the head copy UNTRUSTED, audit-only."
+          fi
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v4
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ${{ steps.policy.outputs.dir }}/pnpm-lock.yaml
+
+      - name: "[POLICY] Frozen install against the policy tree's own lockfile"
+        env:
+          POLICY: ${{ steps.policy.outputs.dir }}
+        run: pnpm -C "$POLICY" install --frozen-lockfile
+
+      - name: "[CANARY] Healthy fixture passes; broken control FAILS in enforcing mode"
+        env:
+          POLICY: ${{ steps.policy.outputs.dir }}
+        run: |
+          node "$POLICY/scripts/prx/check-commit.mjs" \
+            "$POLICY/scripts/prx/fixtures/commit/healthy-basic.txt" --mode=enforcing
+          if node "$POLICY/scripts/prx/check-commit.mjs" \
+            "$POLICY/docs/verification/prx/adversarial-fixtures/commit/C08.txt" \
+            --mode=enforcing >/dev/null 2>&1; then
+            echo "::error::negative control C08 did not fail — the gate cannot fail; failing closed"
+            exit 1
+          fi
+
+      - name: "[AUDIT] Commit range (exact event SHAs, explicit merge base)"
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        env:
+          POLICY: ${{ steps.policy.outputs.dir }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+        run: |
+          MERGE_BASE=$(git -C head merge-base "$BASE_SHA" "$HEAD_SHA" || echo "$BASE_SHA")
+          {
+            echo "## PRX commit audit ($TRUST)"
+            echo '```'
+            node "$POLICY/scripts/prx/check-commit.mjs" \
+              --range "$MERGE_BASE..$HEAD_SHA" --repo head
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: "[AUDIT] PR title (single-line subject rules)"
+        if: github.event_name == 'pull_request'
+        env:
+          POLICY: ${{ steps.policy.outputs.dir }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          {
+            echo "## PRX title audit ($TRUST)"
+            echo '```'
+            printf '%s\n' "$PR_TITLE" | node "$POLICY/scripts/prx/check-commit.mjs" -
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: "[AUDIT] PR body (live-template schema) + prose extraction"
+        if: github.event_name == 'pull_request'
+        env:
+          POLICY: ${{ steps.policy.outputs.dir }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s' "$PR_BODY" > pr-body.md
+          {
+            echo "## PRX body audit ($TRUST)"
+            echo '```'
+            node "$POLICY/scripts/prx/check-body.mjs" pr-body.md \
+              --extract-prose pr-prose.md
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: "[STYLE] Vale (pinned + checksum-verified from the trusted lock; advisory)"
+        if: github.event_name == 'pull_request'
+        env:
+          POLICY: ${{ steps.policy.outputs.dir }}
+        run: |
+          LOCK="$POLICY/docs/verification/prx/vale-lock.json"
+          URL=$(jq -r '.assets.linux_64.url' "$LOCK")
+          SHA=$(jq -r '.assets.linux_64.sha256' "$LOCK")
+          VERSION=$(jq -r '.version' "$LOCK")
+          curl -sSfL -o vale.tgz "$URL"
+          echo "$SHA  vale.tgz" | sha256sum -c -
+          tar xzf vale.tgz vale
+          echo "vale $VERSION ($SHA) verified" | tee -a "$GITHUB_STEP_SUMMARY"
+          # Findings are advisory in every mode (style layer never blocks);
+          # a scanner CRASH still fails the job — vale exits 2 on internal
+          # error, 1 on error-level alerts (cf. the 05-workflow-security
+          # DEF-023 lesson: never let the reporting form eat the verdict).
+          set +e
+          VALE_OUT=$(./vale --config "$POLICY/scripts/prx/vale/.vale.ini" \
+            --output=line pr-prose.md 2>&1)
+          VALE_EXIT=$?
+          set -e
+          {
+            echo "## PRX style audit (STE-inspired subset; advisory in every mode)"
+            echo '```'
+            printf '%s\n' "$VALE_OUT"
+            echo "vale exit=$VALE_EXIT (0/1 tolerated in audit; >=2 is a crash)"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$VALE_EXIT" -ge 2 ]; then exit "$VALE_EXIT"; fi

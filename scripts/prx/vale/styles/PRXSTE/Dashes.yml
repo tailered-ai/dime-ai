@@ -1,0 +1,12 @@
+# Suggestion-level ONLY: em dashes are measured dime-ai house style
+# (21/50 sampled commit subjects; the governing docs themselves). The
+# conflict with the unverified "17-field writing system" is recorded as
+# PROPOSED in docs/verification/prx/Tailered-law-registry.csv; the owner
+# decides at graduation.
+extends: existence
+message: "Dash '%s': house style allows it; a comma, colon, or parentheses may read plainer."
+level: suggestion
+nonword: true
+tokens:
+  - —
+  - –

@@ -1,0 +1,11 @@
+extends: substitution
+message: "Prefer the plain form: use '%s' instead of '%s'."
+level: error
+ignorecase: true
+swap:
+  utilize: use
+  utilizes: uses
+  utilized: used
+  prior to: before
+  in order to: to
+  commence: start

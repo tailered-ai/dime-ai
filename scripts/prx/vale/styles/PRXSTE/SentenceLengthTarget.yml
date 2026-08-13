@@ -1,0 +1,7 @@
+extends: occurrence
+message: "Sentence exceeds the 20-word STE-inspired target."
+level: suggestion
+scope: sentence
+ignorecase: false
+max: 20
+token: '\b[\w''-]+\b'
