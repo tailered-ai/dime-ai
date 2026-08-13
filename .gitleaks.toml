@@ -34,6 +34,15 @@ paths = [
   # before they are ever written (CodeQL caught 278 of them heading for a public
   # repo). Suppressing an entropy rule is not a licence to publish personal data.
   '''^docs/audits/2026-07-27-nfl-db-forensic/ledger/.*\.jsonl$''',
+
+  # Machine-generated deployment-rehearsal evidence (scripts/ci/deploy/
+  # rehearse.mjs). Same class as the audit ledgers above: the writer's law
+  # forbids secret values (variable NAMES only; the rehearsal itself asserts
+  # no secret leaks into logs), but the records carry derived sha256 values —
+  # idempotency_key = sha256 of {target, head, contract-hash} — beside the
+  # token "key", which trips generic-api-key on every rehearsal (DEF-073).
+  # Scoped to exactly the rehearsal-record filenames, never docs/ at large.
+  '''^docs/verification/evidence/deploy/rehearsal-.*\.json$''',
 ]
 
 # Secret-value patterns that are unambiguously fixtures. regexTarget=secret

@@ -4260,6 +4260,44 @@
       "severity": "LOW",
       "status": "CLOSED",
       "title": "deploy lib.run() inherited the pnpm-run corepack context: child pnpm failed the packageManager pin inside ci:verify:deploy:* (DEF-062 class recurrence in new code)"
+    },
+    {
+      "affected_gate": ".github/workflows/gitleaks.yml#gitleaks",
+      "blast_radius": "one evidence filename pattern; all default rules stay active repo-wide",
+      "closed_at": "2026-08-13T09:49:19.795Z",
+      "corrective_action": "path allowlist scoped to exactly docs/verification/evidence/deploy/rehearsal-*.json, following the documented machine-generated-ledger precedent; writer law already forbids secret values and the rehearsal asserts no secret leakage",
+      "detected_by": "P8 attempt 1: p06-roster gitleaks parity gate FAIL on the committed rehearsal evidence",
+      "evidence": [
+        {
+          "bytes": 1519,
+          "path": "docs/verification/evidence/p10/DEF-070-retest.log",
+          "sha256": "c0aebd24463584cbb6d782a583871b42b94bcca285bc6ced8828734e23552b5e"
+        }
+      ],
+      "history": [
+        {
+          "action": "close",
+          "at": "2026-08-13T09:49:19.793Z",
+          "flags": {
+            "blast_radius": "one evidence filename pattern; all default rules stay active repo-wide",
+            "corrective_action": "path allowlist scoped to exactly docs/verification/evidence/deploy/rehearsal-*.json, following the documented machine-generated-ledger precedent; writer law already forbids secret values and the rehearsal asserts no secret leakage",
+            "evidence": [
+              "docs/verification/evidence/p10/DEF-070-retest.log"
+            ],
+            "regression_test_id": "negative: sk_live-shaped key outside the allowlisted path still exits 1",
+            "retest_result": "PASS — branch-range gitleaks scan exits 0 with the allowlist; real-key negative still reddens",
+            "root_cause": "rehearsal records carry idempotency_key = sha256({target, head, contract_hash}) beside the token 'key'; generic-api-key flags the pair; a literal allowlist would re-trip on every future head"
+          }
+        }
+      ],
+      "id": "DEF-073",
+      "opened_at": "2026-08-13T09:49:19.702Z",
+      "regression_test_id": "negative: sk_live-shaped key outside the allowlisted path still exits 1",
+      "retest_result": "PASS — branch-range gitleaks scan exits 0 with the allowlist; real-key negative still reddens",
+      "root_cause": "rehearsal records carry idempotency_key = sha256({target, head, contract_hash}) beside the token 'key'; generic-api-key flags the pair; a literal allowlist would re-trip on every future head",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "generic-api-key false positive: rehearsal evidence idempotency_key (derived sha256 of public identifiers) trips the entropy rule on every rehearsal record"
     }
   ],
   "gate_results": [],
