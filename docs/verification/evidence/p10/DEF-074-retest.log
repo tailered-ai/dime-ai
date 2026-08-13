@@ -1,0 +1,26 @@
+DEF-074 direct retest — PR #512 CI board at head be49c21c3 (attempt 4), 2026-08-13T12:21:07Z
+
+01-pr-proof-contract	pass	4m40s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957669/job/94443146728	
+02-codeql (javascript-typescript)	pass	3m7s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957756/job/94443146996	
+02-codeql (python)	pass	1m52s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957756/job/94443147299	
+03-semgrep-advisory	pass	1m47s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957870/job/94443147453	
+03-semgrep-blocking	pass	50s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957870/job/94443147446	
+05-workflow-security	pass	21s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957801/job/94443147059	
+06-dependency-review	pass	9s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957695/job/94443146893	
+07-coverage-patch	pass	3m40s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957720/job/94443146598	
+08-contract-and-data-integrity	pass	46s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957754/job/94443146994	
+09-artifact-build-and-smoke	pass	3m42s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957767/job/94443147147	
+10-ai-eval-critical	pass	51s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957812/job/94443147023	
+11-artifact-attestation	pass	1m40s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957715/job/94443146974	
+13-tos-notion-context	pass	15s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957694/job/94443146898	
+Build & Preview Gate	pass	58s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957788/job/94443544974	
+CodeQL	pass	3s	https://github.com/tailered-ai/dime-ai/runs/94443579271	
+DB Tests	pass	1m40s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957788/job/94443544830	
+Secret Scan (gitleaks)	pass	17s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957766/job/94443147055	
+Security Audit	pass	9s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957788/job/94443221528	
+Trivy	pass	5s	https://github.com/tailered-ai/dime-ai/runs/94443811083	
+TypeScript Check	pass	1m6s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957788/job/94443269054	
+Vitest	pass	3m30s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957788/job/94443544904	
+format-check	pass	58s	https://github.com/tailered-ai/dime-ai/actions/runs/31698957669/job/94443146641	
+zizmor	pass	2s	https://github.com/tailered-ai/dime-ai/runs/94443204122	
+Auto-merge Dependabot patch PRs	skipping	0	https://github.com/tailered-ai/dime-ai/actions/runs/31698957739/job/94443147834	

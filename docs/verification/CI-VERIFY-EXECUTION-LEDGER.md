@@ -748,7 +748,7 @@
 | `DEF-071` | `closure-audit scenario H2 (sandbox): 20 concurrent writers -> 1 survivor; duplicate-id guard TOCTOU race` | MEDIUM | `CLOSED` | canonical ledger writer loses concurrent updates: load-mutate-persist had no pre-write exclusion and no atomic settlement; corruption was detectable only AFTER the fact |
 | `DEF-072` | `P7 rehearsal attempt 1 (first honest run): migration replay exited 1 with empty stdout` | LOW | `CLOSED` | deploy lib.run() inherited the pnpm-run corepack context: child pnpm failed the packageManager pin inside ci:verify:deploy:* (DEF-062 class recurrence in new code) |
 | `DEF-073` | `P8 attempt 1: p06-roster gitleaks parity gate FAIL on the committed rehearsal evidence` | LOW | `CLOSED` | generic-api-key false positive: rehearsal evidence idempotency_key (derived sha256 of public identifiers) trips the entropy rule on every rehearsal record |
-| `DEF-074` | `PR #512 CI attempt 1 (first-ever GitHub execution of the branch): 12+5 test failures across 01/07/Vitest + CodeQL new-alert check` | MEDIUM | `OPEN` | verifier self-tests and jobs assumed the dev host: shallow checkout without origin/main, missing pinned zizmor on suite runners, sudo that fails locally but succeeds on runners, macOS-only ps -E in teardown, predictable tmpdirs in new suites |
+| `DEF-074` | `PR #512 CI attempt 1 (first-ever GitHub execution of the branch): 12+5 test failures across 01/07/Vitest + CodeQL new-alert check` | MEDIUM | `CLOSED` | verifier self-tests and jobs assumed the dev host: shallow checkout without origin/main, missing pinned zizmor on suite runners, sudo that fails locally but succeeds on runners, macOS-only ps -E in teardown, predictable tmpdirs in new suites |
 
 ## Checkpoints
 

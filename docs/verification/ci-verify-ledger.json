@@ -4314,19 +4314,40 @@
     },
     {
       "affected_gate": "01-pr-proof-contract / 07-coverage-patch / ci.yml Vitest / CodeQL",
-      "blast_radius": null,
-      "closed_at": null,
-      "corrective_action": null,
+      "blast_radius": "verifier self-tests, three workflow jobs, scanner internals; zero app behavior",
+      "closed_at": "2026-08-13T12:21:08.775Z",
+      "corrective_action": "fetch-depth 0 + pinned zizmor provisioning in the three suite jobs; hermetic DRV06 fixture; /proc-based linux ownership reads; mkdtemp + direct-read probes + wx-exclusive creation + contained server paths; contract re-frozen; one by-design medium dismissed on record (alert 468)",
       "detected_by": "PR #512 CI attempt 1 (first-ever GitHub execution of the branch): 12+5 test failures across 01/07/Vitest + CodeQL new-alert check",
-      "evidence": [],
-      "history": [],
+      "evidence": [
+        {
+          "bytes": 2655,
+          "path": "docs/verification/evidence/p10/DEF-074-retest.log",
+          "sha256": "fa953bf8ebef69550c0ff5d71a5df184095fdd9f94397fce3573369632c9e8c5"
+        }
+      ],
+      "history": [
+        {
+          "action": "close",
+          "at": "2026-08-13T12:21:08.768Z",
+          "flags": {
+            "blast_radius": "verifier self-tests, three workflow jobs, scanner internals; zero app behavior",
+            "corrective_action": "fetch-depth 0 + pinned zizmor provisioning in the three suite jobs; hermetic DRV06 fixture; /proc-based linux ownership reads; mkdtemp + direct-read probes + wx-exclusive creation + contained server paths; contract re-frozen; one by-design medium dismissed on record (alert 468)",
+            "evidence": [
+              "docs/verification/evidence/p10/DEF-074-retest.log"
+            ],
+            "regression_test_id": "the CI board itself: 01/07/Vitest/CodeQL green at be49c21c3",
+            "retest_result": "PASS — 23 SUCCESS / 0 FAILURE at be49c21c3 (attempts 1-3 each reduced the failure set: 4 -> 1 -> 1 -> 0)",
+            "root_cause": "first-ever GitHub execution of the verifier: shallow checkouts lacked origin/main (BASE_UNRESOLVED cascade), suite runners lacked pinned zizmor (exit-127 misclassification), sudo succeeds on runners (DRV06 inversion), teardown used BSD-only ps -E (silent ownership failure), new suites used predictable tmpdirs and stat-then-read pairs (CodeQL)"
+          }
+        }
+      ],
       "id": "DEF-074",
       "opened_at": "2026-08-13T11:46:25.264Z",
-      "regression_test_id": null,
-      "retest_result": null,
-      "root_cause": null,
+      "regression_test_id": "the CI board itself: 01/07/Vitest/CodeQL green at be49c21c3",
+      "retest_result": "PASS — 23 SUCCESS / 0 FAILURE at be49c21c3 (attempts 1-3 each reduced the failure set: 4 -> 1 -> 1 -> 0)",
+      "root_cause": "first-ever GitHub execution of the verifier: shallow checkouts lacked origin/main (BASE_UNRESOLVED cascade), suite runners lacked pinned zizmor (exit-127 misclassification), sudo succeeds on runners (DRV06 inversion), teardown used BSD-only ps -E (silent ownership failure), new suites used predictable tmpdirs and stat-then-read pairs (CodeQL)",
       "severity": "MEDIUM",
-      "status": "OPEN",
+      "status": "CLOSED",
       "title": "verifier self-tests and jobs assumed the dev host: shallow checkout without origin/main, missing pinned zizmor on suite runners, sudo that fails locally but succeeds on runners, macOS-only ps -E in teardown, predictable tmpdirs in new suites"
     }
   ],
