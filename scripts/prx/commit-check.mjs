@@ -4,7 +4,13 @@
 // body paragraphs, fences, URLs, and a formal trailer block are distinct
 // structures, and exemption spans are narrow (the URL token itself, the
 // parsed trailer block itself).
-import { GOVERNED_TRAILER_KEYS, makeFinding } from "./rules.mjs";
+import {
+  GOVERNED_TRAILER_KEYS,
+  makeFinding,
+  REF_MAX_LENGTH,
+  REF_RE,
+  RUN_ID_RE,
+} from "./rules.mjs";
 
 const SIZE_LIMIT = 1024 * 1024;
 const CONVENTIONAL_TYPES = [
@@ -23,6 +29,12 @@ const CONVENTIONAL_TYPES = [
 const CONVENTIONAL_RE = new RegExp(
   `^(${CONVENTIONAL_TYPES.join("|")})(\\([A-Za-z0-9][A-Za-z0-9._/-]*\\))?!?: \\S`
 );
+// Strip variant for the mood heuristic: identical prefix shape but it must
+// NOT consume the first description character (review finding: a copula as
+// the first description word was silently missed).
+const PREFIX_STRIP_RE = new RegExp(
+  `^(${CONVENTIONAL_TYPES.join("|")})(\\([A-Za-z0-9][A-Za-z0-9._/-]*\\))?!?: `
+);
 // A trailer line is "Key:" followed by an optional value. The empty-value
 // form MUST parse as a trailer line so that "Run-Id:" is judged as an empty
 // governed value instead of silently degrading the whole block to prose
@@ -31,12 +43,8 @@ const TRAILER_LINE_RE = /^([A-Za-z][A-Za-z0-9-]*):[ \t]*(.*)$/;
 const TRAILER_CONTINUATION_RE = /^[ \t]+\S/;
 const URL_RE = /https?:\/\/[^\s<>]+/g;
 const FENCE_RE = /^(`{3,}|~{3,})/;
-const RUN_ID_RE = /^ONE-[0-9]{8}-[A-Z0-9]+$/;
-// Evidence points at a run artifact or a docs path: bounded depth and
-// length so free prose cannot pass as a reference (Sol case C09).
-const EVIDENCE_RE =
-  /^(UNKNOWN|run\/ONE-[0-9]{8}-[A-Z0-9]+(\/[A-Za-z0-9._-]+){1,5}|docs\/[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+){0,5})$/;
-const EVIDENCE_MAX_LENGTH = 120;
+// Evidence grammar (REF_RE) and its length cap are shared with the body
+// checker via rules.mjs so the two surfaces cannot drift (Sol case C09).
 const CO_AUTHOR_RE = /^[^<>]+ <[^<>@\s]+@[^<>@\s]+\.[A-Za-z]{2,}>$/;
 const COPULA_RE = /(^|\s)(is|are|was|were)(\s|$)/;
 
@@ -106,7 +114,11 @@ export function parseCommitMessage(raw) {
             parsed[parsed.length - 1].value += ` ${l.text.trim()}`;
           }
         }
-        trailers = { entries: parsed, startLine: block[0].line };
+        trailers = {
+          entries: parsed,
+          startLine: block[0].line,
+          blockLines: block.map(l => l.line),
+        };
       }
     }
   }
@@ -115,10 +127,9 @@ export function parseCommitMessage(raw) {
 }
 
 function trailerLines(parsed) {
-  if (!parsed.trailers) return new Set();
-  const set = new Set();
-  for (const e of parsed.trailers.entries) set.add(e.line);
-  return set;
+  // The whole parsed trailer block is the exemption span, continuation
+  // lines included (the standard's wording is the contract here).
+  return new Set(parsed.trailers?.blockLines ?? []);
 }
 
 export function checkCommit(raw, opts = {}) {
@@ -303,7 +314,7 @@ export function checkCommit(raw, opts = {}) {
       );
     } else {
       const v = evidences[0].value;
-      if (v.length > EVIDENCE_MAX_LENGTH || !EVIDENCE_RE.test(v)) {
+      if (v.length > REF_MAX_LENGTH || !REF_RE.test(v)) {
         findings.push(
           makeFinding(
             "PRX-C-GOV",
@@ -339,7 +350,7 @@ export function checkCommit(raw, opts = {}) {
   // PRX-C-MOOD (heuristic, declared) — a copula in the subject description
   // suggests indicative narration. This is the ONLY machine mood check;
   // imperative mood in general is a reviewer rule (SOL-PRX-007 honesty).
-  const description = subject.replace(CONVENTIONAL_RE, "").trim() || subject;
+  const description = subject.replace(PREFIX_STRIP_RE, "").trim() || subject;
   if (COPULA_RE.test(description)) {
     findings.push(
       makeFinding(

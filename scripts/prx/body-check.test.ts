@@ -162,3 +162,46 @@ describe("mutation-hardening (targeted survivor kills)", () => {
     expect(extractProse(atBound)).toContain("words here");
   });
 });
+
+describe("entity-dash alternatives (gstack completeness pass)", () => {
+  for (const entity of [
+    "&ndash;",
+    "&#8212;",
+    "&#8211;",
+    "&#x2014;",
+    "&#x2013;",
+  ]) {
+    it(`detects ${entity}`, () => {
+      const f = checkBody(`${healthy}\nAn encoded ${entity} dash.\n`);
+      expect(f.some(x => x.rule === "PRX-B-STRUCTURE")).toBe(true);
+    });
+  }
+});
+
+describe("review-pass regressions", () => {
+  it("deep blockquote nesting yields a finding, never a crash", () => {
+    const f = checkBody(">".repeat(20000));
+    expect(Array.isArray(f)).toBe(true);
+    expect(f.length).toBeGreaterThan(0);
+  });
+
+  it("extractProse survives deep nesting", () => {
+    expect(typeof extractProse(">".repeat(20000))).toBe("string");
+  });
+
+  it("capsule Evidence over the shared length cap fails even if shaped", () => {
+    const long = `docs/${"a/".repeat(2)}${"b".repeat(120)}`;
+    const body = healthy.replace("Evidence: UNKNOWN", `Evidence: ${long}`);
+    const f = checkBody(body);
+    expect(f.some(x => x.rule === "PRX-B-CAPSULE")).toBe(true);
+  });
+
+  it("REQUIRED_SECTIONS matches the live PR template exactly (drift guard)", () => {
+    const template = readFileSync(
+      join(HERE, "../../.github/pull_request_template.md"),
+      "utf8"
+    );
+    const headings = [...template.matchAll(/^## (.+)$/gm)].map(m => m[1]);
+    expect(headings).toEqual([...REQUIRED_SECTIONS]);
+  });
+});

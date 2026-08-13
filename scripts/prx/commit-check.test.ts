@@ -178,3 +178,21 @@ describe("mutation-hardening (targeted survivor kills)", () => {
     expect(f.some(x => x.rule === "PRX-C-GOV")).toBe(true);
   });
 });
+
+describe("review-pass regressions", () => {
+  it("catches a copula that is the FIRST description word", () => {
+    for (const s of ["feat(x): is broken on main", "fix: is now stricter"]) {
+      const f = checkCommit(`${s}\n`, {});
+      expect(f.some(x => x.rule === "PRX-C-MOOD")).toBe(true);
+    }
+  });
+
+  it("trailer continuation lines share the wrap exemption", () => {
+    const msg =
+      "feat(x): s\n\nWhy.\n\nRun-Id: ONE-20260812-PRX\nEvidence: UNKNOWN\nCo-Authored-By: A B <a@b.co>\n  " +
+      "x".repeat(90) +
+      "\n";
+    const f = checkCommit(msg, {});
+    expect(f.filter(x => x.rule === "PRX-C-WRAP")).toEqual([]);
+  });
+});

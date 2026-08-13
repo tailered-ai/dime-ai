@@ -61,8 +61,8 @@ export const RULES = Object.freeze({
     class: "deterministic",
     surface: "commit",
     title:
-      "governed commits carry Run-Id, Evidence, Co-Authored-By exactly " +
-      "once each with validated values",
+      "governed commits carry Run-Id and Evidence exactly once and at " +
+      "least one Co-Authored-By, all with validated values",
   },
   "PRX-C-FIXUP": {
     class: "deterministic",
@@ -143,6 +143,16 @@ export const GOVERNED_TRAILER_KEYS = Object.freeze([
   "Evidence",
   "Co-Authored-By",
 ]);
+
+// Shared value grammars — single source for both checkers so the commit
+// and body surfaces cannot drift apart (review finding: the Evidence
+// length cap existed only on the commit side).
+export const RUN_ID_RE = /^ONE-[0-9]{8}-[A-Z0-9]+$/;
+export const SHA40_RE = /^[0-9a-f]{40}$/;
+export const SCOPE_RE = /^TOS-[0-9]+$/;
+export const REF_RE =
+  /^(UNKNOWN|run\/ONE-[0-9]{8}-[A-Z0-9]+(\/[A-Za-z0-9._-]+){1,5}|docs\/[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+){0,5})$/;
+export const REF_MAX_LENGTH = 120;
 
 export function ruleClass(id) {
   const rule = RULES[id];

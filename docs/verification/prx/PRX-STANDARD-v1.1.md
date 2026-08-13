@@ -47,7 +47,7 @@ reviewer rules; the machine emits at most declared heuristics about them.
 | PRX-C-WRAP | advisory | body line over 72 columns after narrow exemptions: the URL token itself, fence content, table rows, the parsed trailer block itself |
 | PRX-C-FENCE | deterministic | an unclosed fence is an error |
 | PRX-C-TRAILER | deterministic | formal trailer block grammar: the final all-trailer-shaped block parses as trailers; empty values and duplicate governed keys are errors |
-| PRX-C-GOV | deterministic | governed commits carry `Run-Id` (ONE-YYYYMMDD-TOKEN), `Evidence` (bounded `run/` or `docs/` reference, or UNKNOWN), and `Co-Authored-By` (`Name <email>`), each validated |
+| PRX-C-GOV | deterministic | governed commits carry `Run-Id` (ONE-YYYYMMDD-TOKEN) and `Evidence` (bounded `run/` or `docs/` reference, or UNKNOWN) exactly once, and at least one `Co-Authored-By` (`Name <email>`), all validated |
 | PRX-C-FIXUP | deterministic | `fixup!`/`squash!` must not reach a mainline range |
 | PRX-C-MOOD | heuristic | a copula in the subject description reads as indicative; everything beyond this pattern is a reviewer rule |
 

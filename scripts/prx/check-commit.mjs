@@ -25,18 +25,29 @@ export function defaultMode() {
 }
 
 export function listCommits(repoDir, range) {
+  // NUL-terminated records (-z): git forbids NUL in commit messages, so it
+  // is the ONLY safe record delimiter. The v1.0-style 0x1e delimiter was an
+  // audit bypass — a literal RS byte in a message truncated the record and
+  // silently hid everything after it from the checker (review finding,
+  // reproduced). The first four fields cannot contain newlines, so they
+  // ride newline-separated ahead of the message.
   const raw = execFileSync(
     "git",
-    ["-C", repoDir, "log", "--format=%H%x00%P%x00%an%x00%ae%x00%B%x1e", range],
+    ["-C", repoDir, "log", "-z", "--format=%H%n%P%n%an%n%ae%n%B", range],
     { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }
   );
   const commits = [];
-  for (const rec of raw.split("\x1e")) {
-    if (rec.trim() === "") continue;
-    const [sha, parents, authorName, authorEmail, message] = rec
-      .replace(/^\n/, "")
-      .split("\x00");
-    if (message === undefined) continue;
+  for (const rec of raw.split("\0")) {
+    if (rec === "") continue;
+    const firstLines = rec.split("\n");
+    if (firstLines.length < 5) {
+      throw new Error(
+        `malformed git log record (${firstLines.length} fields); refusing ` +
+          "to audit a stream this parser cannot account for"
+      );
+    }
+    const [sha, parents, authorName, authorEmail] = firstLines;
+    const message = firstLines.slice(4).join("\n");
     commits.push({
       sha,
       isMerge: parents.trim().split(/\s+/).filter(Boolean).length > 1,

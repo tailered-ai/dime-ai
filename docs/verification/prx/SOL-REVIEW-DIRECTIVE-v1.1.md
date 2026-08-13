@@ -15,6 +15,14 @@ required corrections stated as requirements. Rollout beyond audit remains
 owner-gated regardless of verdict; nothing in this candidate changes the
 ruleset, the required checks, or production.
 
+## Internal review pass
+
+The final diff went through a four-dimension adversarially-verified review
+plus the repo's pre-landing checklist before submission; 17 confirmed
+findings (2 high) were all fixed with regression tests. The register is in
+the change ledger's "v1.1 internal review pass" section — read it first,
+it names the exact defect classes that were caught and closed.
+
 ## What changed (one paragraph)
 
 v1.1 is a rebuild, not a patch: the schema is the live dime-ai PR template
@@ -36,8 +44,9 @@ From a checkout of the branch head SHA recorded below, with Node 22 and
 pnpm 10.33.0 (`corepack` honors the packageManager pin):
 
 1. `pnpm install --frozen-lockfile`
-2. `npx vitest run scripts/prx/` — the PRX suites (unit, modes, CLI,
-   trusted boundary, 23 adversarial fixtures).
+2. `npx vitest run scripts/prx/` — the PRX suites (7 files, 128 tests:
+   unit, modes, CLI, trusted boundary, fixture-manifest integrity, and the
+   23 adversarial fixtures).
 3. `npx tsc --noEmit` (repo strict gate; NODE_OPTIONS=--max-old-space-size=6144).
 4. `npx prettier --check scripts/prx .github/workflows/14-prx-communication.yml package.json`
 5. `node scripts/check-github-actions-security.mjs`
@@ -56,6 +65,16 @@ finding, or an empty result fails. To run one case by hand:
 `node scripts/prx/check-commit.mjs docs/verification/prx/adversarial-fixtures/commit/C08.txt --mode=enforcing`
 (exits 1). Scaffold adaptations are recorded per fixture and in the change
 ledger's adaptation section.
+
+## Measured coverage and mutation state
+
+Vitest (V8, in-process) on the pure libraries: body-check.mjs 90.07% branch
+at 81 tests, raised by the mutation-hardening round; commit-check.mjs
+93.91% branch; modes.mjs 92.85%; final numbers for the shipped test count
+are in the bundle's `test-output/coverage-prx.txt`. The CLI wrappers show
+low in-process numbers BY DESIGN: they are exercised as subprocesses in
+`cli.test.ts` (register 6 above). Mutation: 64.49% total (730/371/32),
+classes and proofs in `mutation-results.json`.
 
 ## UNKNOWN / BLOCKED register
 

@@ -21,19 +21,29 @@
       "survived": 371,
       "no_coverage": 32,
       "errors": 0
+    },
+    {
+      "round": 3,
+      "note": "after the internal review-fix pass (NUL-record listCommits, iterative walk + crash-to-finding, shared grammars, mood strip fix, continuation exemption, template drift guard, fixture-manifest integrity suite; 128 tests)",
+      "score_total": 65.47,
+      "killed": 745,
+      "timeout": 4,
+      "survived": 367,
+      "no_coverage": 28,
+      "errors": 0
     }
   ],
   "per_file_final": {
     "body-check.mjs": {
-      "NoCoverage": 14,
-      "Killed": 317,
-      "Survived": 155,
-      "Timeout": 1
+      "NoCoverage": 18,
+      "Killed": 323,
+      "Survived": 141,
+      "Timeout": 3
     },
     "commit-check.mjs": {
-      "NoCoverage": 15,
-      "Killed": 302,
-      "Survived": 130,
+      "NoCoverage": 7,
+      "Killed": 290,
+      "Survived": 133,
       "Timeout": 1
     },
     "modes.mjs": {
@@ -43,8 +53,8 @@
     },
     "rules.mjs": {
       "NoCoverage": 1,
-      "Survived": 73,
-      "Killed": 40
+      "Survived": 80,
+      "Killed": 61
     },
     "policy-source.mjs": {
       "Killed": 20,
@@ -53,9 +63,9 @@
   },
   "load_bearing_property": "Every deterministic rule (the only class that can ever block) has at least one adversarial fixture pinned to an EXACT finding multiset, so a mutation that disables that rule's guard changes the multiset and is killed. Verified survivor-by-survivor: no surviving mutant disables a deterministic rule end to end; survivors fall into the classes below.",
   "survivor_classes_final": {
-    "diagnostic-text": 169,
-    "residual-logic": 144,
-    "regex-secondary-alternative": 70,
+    "diagnostic-text": 174,
+    "residual-logic": 150,
+    "regex-secondary-alternative": 51,
     "location-metadata": 12,
     "registry-metadata": 8
   },

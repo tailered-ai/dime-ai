@@ -7,7 +7,14 @@
 // generic seven. The identifier capsule is OPTIONAL (0/10 sampled live PRs
 // carry one); when present it is validated strictly.
 import { fromMarkdown } from "mdast-util-from-markdown";
-import { makeFinding } from "./rules.mjs";
+import {
+  makeFinding,
+  REF_MAX_LENGTH,
+  REF_RE,
+  RUN_ID_RE,
+  SCOPE_RE,
+  SHA40_RE,
+} from "./rules.mjs";
 
 const SIZE_LIMIT = 1024 * 1024;
 
@@ -41,11 +48,6 @@ const CAPSULE_KEYS = Object.freeze([
 ]);
 const CAPSULE_LINE_RE = /^([A-Za-z][A-Za-z0-9-]*):[ \t]*(.*)$/;
 const PLACEHOLDERS = new Set(["TODO", "TBD", "FIXME", "XXX"]);
-const SHA_RE = /^[0-9a-f]{40}$/;
-const RUN_ID_RE = /^ONE-[0-9]{8}-[A-Z0-9]+$/;
-const SCOPE_RE = /^TOS-[0-9]+$/;
-const REF_RE =
-  /^(UNKNOWN|run\/ONE-[0-9]{8}-[A-Z0-9]+(\/[A-Za-z0-9._-]+){1,5}|docs\/[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+){0,5})$/;
 const ENTITY_DASH_RE = /&(mdash|ndash|#8212|#8211|#x2014|#x2013);/i;
 const UNICODE_BULLET_RE = /^[•‣▪◦]\s/m;
 
@@ -84,7 +86,20 @@ export function checkBody(raw, opts = {}) {
     findings.push(makeFinding("PRX-B-SIZE", "PR body exceeds the 1 MiB bound"));
     return findings;
   }
-  const { top, visible, comments } = parseBody(raw);
+  let parsed;
+  try {
+    parsed = parseBody(raw);
+  } catch {
+    findings.push(
+      makeFinding(
+        "PRX-B-SIZE",
+        "PR body could not be parsed within resource bounds (pathological " +
+          "structure); simplify the document"
+      )
+    );
+    return findings;
+  }
+  const { top, visible, comments } = parsed;
 
   // PRX-B-VISIBLE — an all-comment (or empty) body renders as nothing.
   if (visible.length === 0) {
@@ -339,7 +354,12 @@ export function checkBody(raw, opts = {}) {
 // non-code content, with entities already decoded by the parser.
 export function extractProse(raw) {
   if (typeof raw !== "string" || raw.length > SIZE_LIMIT) return "";
-  const { visible } = parseBody(raw);
+  let visible;
+  try {
+    ({ visible } = parseBody(raw));
+  } catch {
+    return "";
+  }
   const out = [];
   walk(visible, node => {
     if (node.type === "paragraph") out.push(inlineText(node));
@@ -360,12 +380,12 @@ function capsuleValueError(key, value) {
             "ONE-YYYYMMDD-TOKEN";
     case "Base":
     case "Head":
-      return SHA_RE.test(value)
+      return SHA40_RE.test(value)
         ? null
         : `capsule ${key} "${truncate(value)}" is not a 40-hex commit SHA`;
     case "Ledger":
     case "Evidence":
-      return REF_RE.test(value)
+      return value.length <= REF_MAX_LENGTH && REF_RE.test(value)
         ? null
         : `capsule ${key} "${truncate(value)}" is not a bounded run/ or ` +
             "docs/ reference (or UNKNOWN)";
@@ -396,9 +416,18 @@ function looksNarrative(value) {
 }
 
 function walk(nodes, visit) {
-  for (const n of nodes) {
+  // Iterative on an explicit stack: attacker-controlled nesting depth must
+  // not translate into JS call-stack depth (review finding: ~5k nested
+  // blockquotes RangeError'd the recursive form well under the byte cap).
+  const stack = [...nodes].reverse();
+  while (stack.length > 0) {
+    const n = stack.pop();
     visit(n);
-    if (n.children) walk(n.children, visit);
+    if (n.children) {
+      for (let i = n.children.length - 1; i >= 0; i -= 1) {
+        stack.push(n.children[i]);
+      }
+    }
   }
 }
 

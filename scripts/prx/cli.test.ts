@@ -127,3 +127,45 @@ describe("range mode with real topology", () => {
     expect(r.code).toBe(1);
   });
 });
+
+describe("RS-byte truncation regression (review finding, high)", () => {
+  const repo = mkdtempSync(join(tmpdir(), "prx-rs-"));
+  afterAll(() => rmSync(repo, { recursive: true, force: true }));
+  const git = (...args: string[]) =>
+    execFileSync("git", ["-C", repo, ...args], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        GIT_AUTHOR_NAME: "T",
+        GIT_AUTHOR_EMAIL: "t@example.com",
+        GIT_COMMITTER_NAME: "T",
+        GIT_COMMITTER_EMAIL: "t@example.com",
+      },
+    });
+
+  it("a 0x1e byte in a message hides nothing from the audit", async () => {
+    git("init", "-b", "main");
+    writeFileSync(join(repo, "a.txt"), "a\n");
+    git("add", ".");
+    git("commit", "-m", "feat(x): base");
+    const base = git("rev-parse", "HEAD").trim();
+    writeFileSync(join(repo, "b.txt"), "b\n");
+    git("add", ".");
+    const msg = join(repo, ".msg");
+    writeFileSync(
+      msg,
+      "feat(x): visible subject\n\nvisible body.\n\x1ehidden after RS\n\n```\nunclosed fence hidden here\n"
+    );
+    git("commit", "-F", ".msg");
+    const head = git("rev-parse", "HEAD").trim();
+
+    const { listCommits } = await import("./check-commit.mjs");
+    const { checkCommit } = await import("./commit-check.mjs");
+    const commits = listCommits(repo, `${base}..${head}`);
+    expect(commits.length).toBe(1);
+    expect(commits[0].message).toContain("hidden after RS");
+    expect(commits[0].message).toContain("unclosed fence hidden here");
+    const findings = checkCommit(commits[0].message, {});
+    expect(findings.some(f => f.rule === "PRX-C-FENCE")).toBe(true);
+  });
+});

@@ -241,3 +241,6 @@ dime-ai/design-bundle/**/uploads/
 # skill directory (.claude/skills/<name>/ or .agents/skills/<name>/); never track.
 .claude/skill-zips/
 .gstack/
+
+# Stryker mutation reports (generated; PRX lane and future scoped runs)
+/reports/

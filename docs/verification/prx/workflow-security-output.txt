@@ -1,7 +1,7 @@
-PRX v1.1 workflow-security evidence — generated 2026-08-13T02:43:59Z
-Worktree: feat/prx-v1.1-communication-profile @ 249bf314c131e0f34aa0f1aae393411e4e8c8d55 (origin/main base)
+PRX v1.1 workflow-security evidence — regenerated 2026-08-13T03:16:13Z after the review-fix pass
+Worktree: feat/prx-v1.1-communication-profile (origin/main base 249bf314c131e0f34aa0f1aae393411e4e8c8d55)
 
-== 1. scripts/check-github-actions-security.mjs (the repo's own pinning/permissions/secret-ref gate, run exactly as ci.yml runs it) ==
+== 1. scripts/check-github-actions-security.mjs (as ci.yml runs it) ==
 $ node scripts/check-github-actions-security.mjs
 {"status":"PASS","workflowsChecked":43,"compositesChecked":0,"actionReferences":128,"productionSecretReferences":25,"failures":[]}
 exit=0
@@ -14,37 +14,12 @@ $ uvx zizmor==1.29.0 --min-severity high --format plain .github/workflows/14-prx
 No findings to report. Good job!
 exit=0
 
-== 3. zizmor 1.29.0 on the full workflow tree (this branch) ==
-$ uvx zizmor==1.29.0 --min-severity high --format plain .github/workflows/
- INFO audit: zizmor: 🌈 completed .github/workflows/refresh-cf-cidrs.yml
- INFO audit: zizmor: 🌈 completed .github/workflows/security-audit-weekly.yml
- INFO audit: zizmor: 🌈 completed .github/workflows/seed-cfb.yml
- INFO audit: zizmor: 🌈 completed .github/workflows/seed-nfl.yml
- INFO audit: zizmor: 🌈 completed .github/workflows/stripe-e2e.yml
- INFO audit: zizmor: 🌈 completed .github/workflows/tailered-os.yml
-error[bot-conditions]: spoofable bot actor check
-  --> .github/workflows/auto-merge-dependabot.yml:27:9
-   |
-22 |     name: Auto-merge Dependabot patch PRs
-   |     ------------------------------------- this job
-...
-27 |     if: github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'
-   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ actor context may be spoofable
-   |
-   = note: audit confidence → Medium
-   = note: this finding has an auto-fix
-   = help: audit documentation → https://docs.zizmor.sh/audits/#bot-conditions
-
-102 findings (48 ignored, 53 suppressed, 1 safe fixes): 0 informational, 0 low, 0 medium, 1 high
-exit=14 (findings at/above threshold present)
-
-== 4. Interpretation (measured) ==
-The single high finding (bot-conditions) is in auto-merge-dependabot.yml
-byte-identical to origin/main (verified by running zizmor on the
-origin/main copy directly: same finding, exit 14). It PRE-EXISTS this
-branch; this PR does not touch that file (no opportunistic edits,
-OPERATING-RULES.md rule 10). The new 14-prx-communication.yml adds ZERO
-zizmor findings. The 05-workflow-security required check is green on
-recent CI runs of the same base tree; the local-vs-CI adjudication of
-the pre-existing finding is recorded as UNKNOWN cause (local run is
-offline-mode) and is out of PRX scope.
+== 3. Interpretation (measured) ==
+The patched workflow (package_json_file fix, explicit bash pipefail
+shell, boundary-mirror note) adds ZERO zizmor findings and the repo
+pinning/permissions/secret-ref gate passes over all 43 workflows.
+The one repo-wide zizmor high (bot-conditions in
+auto-merge-dependabot.yml) is byte-identical to origin/main, pre-dates
+this branch, and is untouched here (no opportunistic edits,
+OPERATING-RULES.md rule 10); its local-vs-CI adjudication difference is
+recorded as UNKNOWN cause (local run is offline-mode).
