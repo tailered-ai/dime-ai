@@ -148,7 +148,9 @@ export function issue() {
         verdict: rehearsal.verdict,
         health: rehearsal.steps.candidate_health.ok,
         smoke: rehearsal.steps.smoke.ok,
-        shutdown_graceful: rehearsal.steps.prior_shutdown.exit_code === 0,
+        shutdown_graceful: rehearsal.steps.candidate_shutdown.exit_code === 0,
+        prior_shutdown_contract_met:
+          rehearsal.steps.prior_shutdown.contract_met,
         rollback: rehearsal.steps.rollback.ok,
         zero_residue: rehearsal.steps.teardown.zero_residue,
         deployment_ids: rehearsal.deployments.map(d => d.deployment_id),
