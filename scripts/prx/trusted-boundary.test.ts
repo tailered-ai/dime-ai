@@ -72,6 +72,25 @@ describe("trusted policy selection", () => {
     expect(pick.trusted).toBe(false);
     expect(pick.dir).toBe(head);
     expect(pick.reason).toContain("UNTRUSTED");
+    expect(pick.reason).toContain("bootstrap");
+  });
+
+  it("the trusted reason names the base ref (R8)", () => {
+    const trusted = makeTree("base4");
+    const head = makeTree("head4");
+    const pick = selectPolicySource({ trustedDir: trusted, headDir: head });
+    expect(pick.reason).toContain("trusted base ref");
+  });
+
+  it("a scripts/prx DIRECTORY without the checker is NOT trusted policy (R8)", () => {
+    // The marker is the checker FILE; a partial tree (directory present,
+    // checker absent) must fall back to the explicit bootstrap.
+    const partial = join(root, "partial-base");
+    mkdirSync(join(partial, "scripts", "prx"), { recursive: true });
+    const head = makeTree("head5");
+    const pick = selectPolicySource({ trustedDir: partial, headDir: head });
+    expect(pick.trusted).toBe(false);
+    expect(pick.dir).toBe(head);
   });
 });
 

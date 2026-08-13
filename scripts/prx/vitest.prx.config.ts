@@ -1,6 +1,9 @@
-// PRX-only vitest scope: used by scripts/prx/stryker.prx.json so mutation
-// runs never touch the DB-bound suites. The main repo suite still picks the
-// PRX tests up through the root vitest.config.ts include.
+// Standalone PRX-only vitest scope. NOT wired into any script or gate:
+// `pnpm prx:test` runs `vitest run scripts/prx/` through the ROOT vitest
+// config, and both Stryker configurations use
+// vitest.prx.mutation.config.ts (same include minus the pnpm-spawning
+// bootstrap suite). Kept as a convenience for isolated runs:
+//   npx vitest run -c scripts/prx/vitest.prx.config.ts
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({

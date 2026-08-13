@@ -24,6 +24,16 @@ describe("mode state", () => {
     expect(() => parseModeState("not json")).toThrow();
   });
 
+  it("names the exact failure: invalid JSON vs invalid shape (R8)", () => {
+    expect(() => parseModeState("not json")).toThrow(/not valid JSON/);
+    // JSON null must hit the shape error, not a TypeError on property
+    // access — this is what the optional chaining is for.
+    expect(() => parseModeState("null")).toThrow(/prx-mode\.json must be/);
+    expect(() => parseModeState('{"version":2,"mode":"audit"}')).toThrow(
+      /prx-mode\.json must be/
+    );
+  });
+
   it("exposes exactly the three contract modes", () => {
     expect(MODES).toEqual(["audit", "advisory", "enforcing"]);
   });
@@ -51,8 +61,23 @@ describe("verdicts", () => {
     expect(resolveVerdict("enforcing", [heuristicFinding]).exitCode).toBe(0);
   });
 
-  it("rejects unknown modes", () => {
-    expect(() => resolveVerdict("blocking", [])).toThrow();
+  it("rejects unknown modes with a named error", () => {
+    expect(() => resolveVerdict("blocking", [])).toThrow(/unknown PRX mode/);
+  });
+
+  it("blocks only findings that are BOTH error-level AND approved (R8)", () => {
+    // Synthetic findings probe the conjunction directly: makeFinding can
+    // never produce these shapes, but resolveVerdict's contract is the
+    // pair (level, approved rule), not trust in its callers.
+    const errorLevelUnapproved = { rule: "PRX-C-WRAP", level: "error" };
+    const advisoryLevelApproved = { rule: "PRX-C-SUBJECT", level: "advisory" };
+    expect(resolveVerdict("enforcing", [errorLevelUnapproved]).exitCode).toBe(
+      0
+    );
+    expect(resolveVerdict("enforcing", [advisoryLevelApproved]).exitCode).toBe(
+      0
+    );
+    expect(resolveVerdict("enforcing", []).exitCode).toBe(0);
   });
 });
 

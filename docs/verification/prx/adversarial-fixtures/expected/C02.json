@@ -7,10 +7,10 @@
   "expected_findings": [
     "error:PRX-C-GOV",
     "error:PRX-C-GOV",
-    "error:PRX-C-GOV",
     "error:PRX-C-PREFIX",
+    "error:PRX-C-TRAILER",
     "error:PRX-C-TRAILER",
     "error:PRX-C-TRAILER"
   ],
-  "adaptation_notes": "empty-value trailer lines parse as trailers so the governed grammar judges them"
+  "adaptation_notes": "empty-value trailer lines parse as trailers so the governed grammar judges them. R3: the malformed Co-Authored-By is a PRX-C-TRAILER grammar error (validated wherever the trailer appears); PRX-C-GOV carries the invalid Run-Id and Evidence values once governed scope is self-declared by their presence"
 }

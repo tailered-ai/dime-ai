@@ -9,7 +9,6 @@
     "scripts/prx/policy-source.mjs",
     "scripts/prx/resolve-range.mjs",
     "scripts/prx/rules.mjs",
-    "scripts/prx/rule-metadata.mjs",
     "scripts/prx/check-commit.mjs",
     "scripts/prx/check-body.mjs"
   ],
@@ -17,14 +16,14 @@
     "configFile": "scripts/prx/vitest.prx.mutation.config.ts"
   },
   "thresholds": {
-    "high": 90,
-    "low": 75,
+    "high": 98,
+    "low": 90,
     "break": null
   },
   "concurrency": 4,
   "reporters": ["clear-text", "progress", "json"],
   "jsonReporter": {
-    "fileName": "reports/prx-mutation.json"
+    "fileName": "reports/prx-mutation-blocking.json"
   },
   "tempDirName": ".stryker-tmp-prx",
   "incremental": false,

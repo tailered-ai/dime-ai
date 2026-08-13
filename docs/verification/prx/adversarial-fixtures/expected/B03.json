@@ -3,20 +3,20 @@
   "mechanism": "empty required sections",
   "options": {},
   "expected_findings": [
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION",
-    "error:PRX-B-SECTION"
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY"
   ],
-  "adaptation_notes": "adapted scaffold: the LIVE 14-section dime-ai template (v1.0's 7 generic sections do not exist in the live contract); one empty-section error per section"
+  "adaptation_notes": "adapted scaffold: the LIVE 14-section dime-ai template (v1.0's 7 generic sections do not exist in the live contract); one empty-section error per section. R5 subcodes: emptiness has its own id so a missing guard cannot hide behind the broad section rule"
 }
