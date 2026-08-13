@@ -46,8 +46,8 @@ reviewer rules; the machine emits at most declared heuristics about them.
 | PRX-C-LENGTH | advisory | subject over 72 characters; measured median is 76.5, so this stays advisory until the owner recalibrates |
 | PRX-C-WRAP | advisory | body line over 72 columns after narrow exemptions: the URL token itself, fence content, table rows, the parsed trailer block itself |
 | PRX-C-FENCE | deterministic | an unclosed fence is an error |
-| PRX-C-TRAILER | deterministic | formal trailer block grammar: the final all-trailer-shaped block parses as trailers; empty values and duplicate governed keys are errors |
-| PRX-C-GOV | deterministic | governed commits carry `Run-Id` (ONE-YYYYMMDD-TOKEN) and `Evidence` (bounded `run/` or `docs/` reference, or UNKNOWN) exactly once, and at least one `Co-Authored-By` (`Name <email>`), all validated |
+| PRX-C-TRAILER | deterministic | formal trailer block grammar: the final all-trailer-shaped block parses as trailers; empty values and duplicate governed keys are errors; a `Co-Authored-By` value is validated against `Name <email>` wherever the trailer appears — a malformed lone `Co-Authored-By` is a trailer error and does not activate the governed requirements |
+| PRX-C-GOV | deterministic | once governed scope is explicitly established: `Run-Id` (ONE-YYYYMMDD-TOKEN) and `Evidence` (bounded `run/` or `docs/` reference, or UNKNOWN) exactly once with validated values, and at least one `Co-Authored-By` present |
 | PRX-C-FIXUP | deterministic | `fixup!`/`squash!` must not reach a mainline range |
 | PRX-C-MOOD | heuristic | a copula in the subject description reads as indicative; everything beyond this pattern is a reviewer rule |
 
@@ -57,6 +57,15 @@ declares itself governed by carrying a `Run-Id` or `Evidence` trailer.
 Whether a commit OUGHT to carry the governed trailers is a reviewer rule;
 0/50 sampled main commits carry them today, so the mandatory-for-all reading
 of v1.0 is rejected as unfit for this repository.
+
+Stated without circularity (R3): PRX validates governed trailer syntax and
+completeness once governed scope is explicitly established. The ordinary CI
+range audit supplies no `--governed` flag and therefore does not
+independently determine that a commit ought to be governed — a commit
+missing every governed trailer is not identified as governed by that audit,
+and the ordinary PR workflow does not claim to prove mandatory
+governed-trailer presence. Mandatory governed-scope classification remains
+a reviewer or future-integration concern.
 
 ## 4. PR-body rules
 
@@ -73,7 +82,9 @@ structured fields. Deeper semantics of the Notion block stay owned by the
 | --- | --- | --- |
 | PRX-B-SIZE | deterministic | 1 MiB cap |
 | PRX-B-VISIBLE | deterministic | the rendered body has visible content; HTML comments count for nothing |
-| PRX-B-SECTION | deterministic | all 14 live sections, exactly once, non-empty |
+| PRX-B-SECTION-MISSING | deterministic | each of the 14 live sections is present (R5 subcode) |
+| PRX-B-SECTION-DUP | deterministic | each live section appears exactly once (R5 subcode) |
+| PRX-B-SECTION-EMPTY | deterministic | each live section carries meaningful visible content: visible prose, the explicit `none`, a non-empty list/checklist/table, a labeled link, alt-texted image evidence, or a populated structured block. Whitespace, empty fences, thematic breaks, comments/empty HTML, alt-less images, label-less links, empty lists/tables, and bare subheadings satisfy nothing (R5) |
 | PRX-B-ORDER | advisory | template order |
 | PRX-B-CAPSULE | deterministic | the identifier capsule is OPTIONAL; when present: exactly one, first visible block, six exact keys once each (`Scope`, `Run-Id`, `Base`, `Head`, `Ledger`, `Evidence`), strict value grammars, no narrative lines, no placeholders |
 | PRX-B-EXT | advisory | unknown depth-2 headings are reported; the engineering-federation evidence record heading is allowlisted |
@@ -117,6 +128,22 @@ calibration criteria (≥ 20 observations, deterministic false-positive rate
 under 5%, one dry-run of the failure mode). Rollback is the reverse edit;
 nothing else depends on the mode file.
 
+HARD GRADUATION BLOCKER (R6, an invariant of this standard, not an open
+question): **PRX must not enter enforcing mode and must not become a
+required status check while the pull-request head controls the workflow
+file that orchestrates the verdict.** Graduation therefore requires a
+separately reviewed base-controlled orchestration mechanism first — a
+constrained base workflow, a `workflow_run` design, a GitHub App, or
+another independently protected mechanism. v1.1 deliberately does not
+implement that infrastructure; until it exists and is reviewed, audit and
+advisory are the ceiling.
+
+Trusted-path precondition (R10): before any audit → advisory transition, a
+post-merge pull request must have exercised the `trusted (base ref)` path
+and its workflow summary or check annotation must be preserved as
+evidence. Until then, trusted-path live validation is UNKNOWN — the
+bootstrap run on PR #511 proved only that the workflow is operational.
+
 ## 8. Hook decision
 
 No commit-msg hook ships, and no claim that one exists survives from v1.0
@@ -130,20 +157,33 @@ idempotent installer, verification, and uninstaller.
 
 See `docs/verification/prx/threat-model.md`. Policy code, rules, fixtures,
 Vale configuration, and the Vale binary pins load from the event's base SHA;
-PR title, body, commit messages, and head content are data. Bootstrap
-honesty: this PR's own run cannot be base-trusted (the policy is not on
-`main` yet) and the workflow labels that run UNTRUSTED explicitly. The
-residual workflow-file risk (a same-repo PR can edit the workflow itself on
-`pull_request` events) is documented as A4 with its bounds; it is one of the
-open questions for the graduation decision.
+PR title, body, commit messages, and head content are data. The audit range
+is resolved fail-closed by `scripts/prx/resolve-range.mjs` (R2): both
+authenticated event SHAs must exist, the merge base must be a full 40-hex
+SHA and an ancestor of the head, and any failure is a red tool failure —
+never a silently substituted range. Bootstrap honesty: this PR's own run
+cannot be base-trusted (the policy is not on `main` yet); the workflow
+labels that run UNTRUSTED explicitly, and its success is evidence of
+operability only, not evidence that the boundary governed the run (R10).
+The residual workflow-file risk (a same-repo PR can edit the workflow
+itself on `pull_request` events) is documented as A4 and bounded by the §7
+hard graduation blocker: no enforcing mode and no required-check status
+while the head controls the workflow file.
 
 ## 10. Known limits
 
 1. Mood checking is one declared copula heuristic; nothing more is claimed.
-2. Length and wrap rules stay advisory because measured practice diverges;
+2. In range mode the bot exemption keys on the commit's own author
+   fields (`%an`/`%ae`), which the commit author controls — a claimed
+   identity, not authenticated metadata. It can only SUPPRESS the prefix
+   finding, never grant anything, so the worst a forged `[bot]` earns is
+   one silenced advisory-surface finding in audit mode. Before any
+   enforcing use, the exemption should be re-bound to authenticated event
+   metadata (a graduation consideration).
+3. Length and wrap rules stay advisory because measured practice diverges;
    the owner sets thresholds at graduation, with the Phase 0 baselines as
    the evidence.
-3. The style layer measures tokens and sentence length, not meaning.
-4. Audit mode surfaces findings on most current PRs by construction (2/10
+4. The style layer measures tokens and sentence length, not meaning.
+5. Audit mode surfaces findings on most current PRs by construction (2/10
    sampled bodies carry all 14 sections); that visibility is the point of
    the audit phase, and calibration decides what ever blocks.

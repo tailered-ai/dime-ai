@@ -52,13 +52,13 @@ verdict) does not change.
 | A1 | PR replaces `scripts/prx/*` checker code to weaken its own gate | DEFENDED — verdict code comes from `base/` (the event base SHA); head copies are never imported. Regression test: `trusted-boundary.test.ts` |
 | A2 | PR replaces fixtures or expected-finding sets in the same change | DEFENDED for the CI verdict (same mechanism as A1). The vitest suite that runs from the head (01-pr-proof-contract) can be edited by a PR, but it is not the PRX verdict; fixture edits are reviewer-visible diffs on CODEOWNERS-listed paths |
 | A3 | PR edits `.vale.ini`, styles, or `vale-lock.json` to change style policy | DEFENDED — Vale config, styles, and lock are read from `base/`; the binary checksum is verified against the trusted lock before execution |
-| A4 | PR edits `14-prx-communication.yml` itself | RESIDUAL, DOCUMENTED — for `pull_request` events GitHub executes the workflow file from the PR merge ref, so a same-repo PR can alter the lane's own orchestration. Machine-prevention is impossible without `pull_request_target` (rejected: it would execute with elevated context) or an external policy repo (rejected for v1.1: new infrastructure must earn its existence; this lane is audit-only). Bounds: the lane is NOT a required check in this PR; `/.github/` is CODEOWNERS-listed and the diff is reviewer-visible; `merge_group` runs execute the workflow from the queue commit built on protected `main`; graduation to required is an owner ruleset action that should weigh this residual (recorded in SOL-REVIEW-DIRECTIVE-v1.1.md open questions) |
+| A4 | PR edits `14-prx-communication.yml` itself | RESIDUAL, BOUNDED BY A HARD GRADUATION BLOCKER (R6) — for `pull_request` events GitHub executes the workflow file from the PR merge ref, so a same-repo PR can alter the lane's own orchestration. Machine-prevention is impossible without `pull_request_target` (rejected: it would execute with elevated context) or an external policy repo (rejected for v1.1: new infrastructure must earn its existence; this lane is audit-only). Bounds: the lane is NOT a required check; `/.github/` is CODEOWNERS-listed and the diff is reviewer-visible; `merge_group` runs execute the workflow from the queue commit built on protected `main`. **Invariant, not an open question: PRX must not enter enforcing mode and must not become a required status check while the pull-request head controls the workflow file that orchestrates the verdict. Graduation requires a separately reviewed base-controlled orchestration mechanism first — a constrained base workflow, a `workflow_run` design, a GitHub App, or another independently protected mechanism. None of that infrastructure is implemented in v1.1.** |
 | A5 | Malicious PR title/body/commit text escapes into shell or expression context | DEFENDED — event text enters steps only via `env:` bindings consumed as data; no `${{ }}` interpolation of title/body inside `run:` scripts; zizmor (pinned 1.29.0) and `scripts/check-github-actions-security.mjs` both scan the workflow |
-| A6 | Dependency substitution at check time | DEFENDED — `pnpm install --frozen-lockfile` against the TRUSTED base lockfile inside `base/`; the head lockfile is never installed by this lane. The one parser dependency (`mdast-util-from-markdown@2.0.2`) is already pinned in the base lockfile |
+| A6 | Dependency substitution or install-time code execution at check time | DEFENDED, STATED EXACTLY (R7) — the install is `pnpm -C "$POLICY" install --frozen-lockfile --ignore-scripts`. In trusted mode the policy tree is the base checkout, so the trusted base lockfile governs resolution. During the explicitly UNTRUSTED bootstrap the policy tree IS the head, so the head dependency graph is used — for that one mode only — with lifecycle scripts disabled, no secrets in the job, and the result proving operability only; post-merge runs install the trusted base policy dependency graph. Regression: `scripts/prx/bootstrap-install.test.ts` proves a malicious `postinstall` marker is not created under `--ignore-scripts` (and IS created in the negative control). The parser dependencies (`mdast-util-from-markdown@2.0.2`, `mdast-util-gfm@3.1.0`, `micromark-extension-gfm@3.0.0`) are pinned in the lockfile |
 | A7 | Unpinned action or tag-moving upstream | DEFENDED — every action pinned to a full commit SHA with a version comment (repo house pins reused); update path is a deliberate PR through 05-workflow-security |
 | A8 | Resource exhaustion via giant or pathologically nested bodies/messages | BOUNDED — job `timeout-minutes` on every job; inputs byte-capped at 1 MiB (`PRX-C-SIZE`/`PRX-B-SIZE` findings); the AST walk is iterative (attacker nesting depth never becomes JS stack depth) and a parser blow-up degrades to a deterministic `PRX-B-SIZE` finding, not a tool crash. Residual, stated plainly: the byte cap does not bound CommonMark PARSE cost — a near-cap deeply nested body can burn minutes up to the job timeout; a tighter structural pre-cap is a graduation consideration |
 | A9 | Fork PRs | BOUNDED — `pull_request` from forks receives a read-only token and no secrets exist in the lane; base-policy checkout works identically because the base SHA lives in the base repository |
-| A10 | Secrets exfiltration | N/A BY CONSTRUCTION — the lane mounts no secrets, sets `permissions: contents: read`, and prints only checker findings |
+| A10 | Secrets exfiltration | N/A BY CONSTRUCTION — the lane mounts no secrets, sets `permissions: contents: read`, and prints only checker findings. Combined with A6 (R7): even in the untrusted bootstrap, where the head's own dependency graph installs, there is nothing in the job for install-time or check-time code to exfiltrate, and lifecycle scripts are disabled anyway |
 
 ## Bootstrap honesty (this PR)
 
@@ -70,6 +70,17 @@ base-trusted boundary therefore does NOT govern this PR's own run and no such
 claim is made. Two-step activation: (1) this reviewed PR lands the policy on
 `main`; (2) later runs load policy from base and are trusted. This is the
 honest sequencing SOL-PRX-004 demanded.
+
+What PR #511's own successful run proves, exactly (R10): the workflow was
+successfully executed, audit-only, explicitly `UNTRUSTED (bootstrap)`; it is
+evidence that the workflow is OPERATIONAL and nothing more. It is NOT
+evidence that the base-trusted policy boundary governed PR #511.
+
+Future validation requirement (R10): after PRX exists on protected `main`, a
+later pull request must exercise the `trusted (base ref)` path before any
+audit-to-advisory graduation, and the workflow summary or check annotation
+from that later run must be preserved as evidence. Until then, trusted-path
+live validation is `UNKNOWN`.
 
 ## Explicit non-uses
 

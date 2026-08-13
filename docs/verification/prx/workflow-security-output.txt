@@ -1,25 +1,20 @@
-PRX v1.1 workflow-security evidence — regenerated 2026-08-13T03:16:13Z after the review-fix pass
-Worktree: feat/prx-v1.1-communication-profile (origin/main base 249bf314c131e0f34aa0f1aae393411e4e8c8d55)
-
-== 1. scripts/check-github-actions-security.mjs (as ci.yml runs it) ==
-$ node scripts/check-github-actions-security.mjs
-{"status":"PASS","workflowsChecked":43,"compositesChecked":0,"actionReferences":128,"productionSecretReferences":25,"failures":[]}
-exit=0
-
-== 2. zizmor 1.29.0 (repo-pinned version) on the NEW workflow only ==
-$ uvx zizmor==1.29.0 --min-severity high --format plain .github/workflows/14-prx-communication.yml
+=== zizmor 1.29.0 (pinned) on the FINAL workflow bytes — 2026-08-13T08:07:29Z ===
  INFO zizmor: 🌈 zizmor v1.29.0
  WARN audit: zizmor: zizmor is running in offline mode by default; some audits and auto-fixes will not be available. see https://docs.zizmor.sh/usage/#operating-modes for details
  INFO audit: zizmor: 🌈 completed .github/workflows/14-prx-communication.yml
 No findings to report. Good job!
 exit=0
 
-== 3. Interpretation (measured) ==
-The patched workflow (package_json_file fix, explicit bash pipefail
-shell, boundary-mirror note) adds ZERO zizmor findings and the repo
-pinning/permissions/secret-ref gate passes over all 43 workflows.
-The one repo-wide zizmor high (bot-conditions in
-auto-merge-dependabot.yml) is byte-identical to origin/main, pre-dates
-this branch, and is untouched here (no opportunistic edits,
-OPERATING-RULES.md rule 10); its local-vs-CI adjudication difference is
-recorded as UNKNOWN cause (local run is offline-mode).
+=== scripts/check-github-actions-security.mjs — 2026-08-13T08:07:30Z ===
+{"status":"PASS","workflowsChecked":43,"compositesChecked":0,"actionReferences":128,"productionSecretReferences":25,"failures":[]}
+exit=0
+
+=== zizmor repo-wide (context: pre-existing findings on origin/main are out of PRX scope) ===
+27 |     if: github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ actor context may be spoofable
+   |
+   = note: audit confidence → Medium
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#bot-conditions
+
+102 findings (48 ignored, 53 suppressed, 1 safe fixes): 0 informational, 0 low, 0 medium, 1 high
