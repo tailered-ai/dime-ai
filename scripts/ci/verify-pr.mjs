@@ -51,6 +51,7 @@ const STAGES = [
       "scripts/ci/selftest/timeout-consistency.test.ts",
       "scripts/ci/selftest/certificate-binding.test.ts",
       "scripts/ci/ledger-lease.test.ts",
+      "scripts/ci/deploy/deploy.test.ts",
     ],
     env: { VITEST_MAX_FORKS: "4", VITEST_MAX_THREADS: "4" },
   },
