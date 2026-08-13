@@ -1,0 +1,152 @@
+PRX v1.1 actual Vale output — vale 3.17.1 (macOS arm64, sha256 80cacf85ef23f53cfdd77355ec41a6ef99aec136f15dfb3517723482f35593f9, verified against vale-lock.json before execution)
+Generated 2026-08-13T02:46:37Z. Config: scripts/prx/vale/.vale.ini (repo-local STE-inspired subset; no vale sync; no external packages).
+
+== 1. PRX-designated documents (requirement: zero error-class alerts) ==
+$ vale --config scripts/prx/vale/.vale.ini docs/verification/prx/PRX-STANDARD-v1.1.md docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md docs/verification/prx/threat-model.md docs/verification/prx/v1.0-to-v1.1-change-ledger.md
+docs/verification/prx/PRX-STANDARD-v1.1.md:1:12:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:9:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:11:31:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:11:31:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:44:57:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:44:57:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:44:222:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:47:27:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:54:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:54:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:57:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:57:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:63:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:63:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:78:35:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:84:19:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:89:50:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:91:67:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:91:67:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:98:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:98:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:108:30:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:108:30:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:112:65:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:112:65:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:131:46:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:131:46:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:133:61:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:135:68:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:135:68:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:143:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:147:4:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:147:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:1:29:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:3:20:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:10:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:10:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:20:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:20:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:35:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:52:35:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:62:25:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:66:4:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:66:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:70:4:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:70:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:73:4:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:73:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:78:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:86:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:88:33:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:92:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:99:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:101:58:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:101:58:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:110:37:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:1:25:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:10:52:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:38:11:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:38:11:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:47:83:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:48:127:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:48:127:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:49:92:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:50:53:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:50:74:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:50:217:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:50:217:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:50:448:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:50:448:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:51:87:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:51:87:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:51:96:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:52:57:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:53:49:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:53:58:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:54:64:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:55:19:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:55:19:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:55:27:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:56:52:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:60:45:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:60:45:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:9:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:9:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:11:70:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:22:41:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:23:43:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:24:42:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:25:42:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:25:42:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:25:324:PRXSTE.Dashes:Dash '–': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:25:389:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:26:45:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:26:45:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:27:44:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:27:44:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:27:306:PRXSTE.Dashes:Dash '–': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:28:56:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:29:42:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:29:42:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:30:42:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:31:43:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:31:43:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:32:39:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:32:39:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:33:51:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:33:51:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:34:44:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:35:44:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:36:38:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:36:38:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:37:39:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:37:39:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:38:43:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:38:43:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:39:38:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:39:38:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:40:46:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+exit=0 (1 = alerts exist; error-class count below)
+
+== 2. Error-class alerts on the designated documents (must be zero) ==
+0
+(count above; suggestions/warnings are the advisory layer working and are recorded, not suppressed)
+
+== 3. Healthy fixtures ==
+$ vale ... scripts/prx/fixtures/body/*.md scripts/prx/fixtures/commit/*.txt
+exit=0
+
+== 4. Negative controls: one minimal violation per custom rule (each MUST fire) ==
+$ vale ... docs/verification/prx/vale-controls/*.md
+docs/verification/prx/vale-controls/dashes.md:1:10:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/vale-controls/dashes.md:1:26:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/vale-controls/filler.md:1:9:PRXSTE.Filler:Filler word 'basically' adds no information.
+docs/verification/prx/vale-controls/hedging.md:1:12:PRXSTE.Hedging:Vague hedge 'should be fine': state the verified fact, an evidence-backed probability, or UNKNOWN.
+docs/verification/prx/vale-controls/nolitotes.md:1:15:PRXSTE.NoLitotes:Litotes 'not unreasonable' hides the direct claim; state it plainly.
+docs/verification/prx/vale-controls/plainwords.md:1:4:PRXSTE.PlainWords:Prefer the plain form: use 'use' instead of 'utilize'.
+docs/verification/prx/vale-controls/plainwords.md:1:23:PRXSTE.PlainWords:Prefer the plain form: use 'before' instead of 'prior to'.
+docs/verification/prx/vale-controls/plainwords.md:1:43:PRXSTE.PlainWords:Prefer the plain form: use 'to' instead of 'in order to'.
+docs/verification/prx/vale-controls/sentence-limit.md:1:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/vale-controls/sentence-limit.md:1:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/vale-controls/sentence-target.md:1:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+exit=1
+
+== 5. The live PR template (recorded observation; the template is NOT a PRX-designated prose surface — its list fields and comments are the live contract) ==
+$ vale ... .github/pull_request_template.md
+exit=0

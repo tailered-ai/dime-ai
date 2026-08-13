@@ -1,0 +1,21 @@
+{
+  "tool": "vale",
+  "version": "3.17.1",
+  "release": "https://github.com/vale-cli/vale/releases/tag/v3.17.1",
+  "provenance_note": "Vale relocated upstream from errata-ai/vale to vale-cli/vale; release resolved and checksums verified 2026-08-13 UTC. No 'vale sync' and no external style package is used anywhere in the lane (SOL-PRX-011): the only styles are the repo-local STE-inspired subset at scripts/prx/vale/styles/.",
+  "assets": {
+    "linux_64": {
+      "name": "vale_3.17.1_Linux_64-bit.tar.gz",
+      "url": "https://github.com/vale-cli/vale/releases/download/v3.17.1/vale_3.17.1_Linux_64-bit.tar.gz",
+      "sha256": "db947f89f2292e6a0381a61de155f6a5f5cb4cb460ca178ea412ef605559cefd"
+    },
+    "macos_arm64": {
+      "name": "vale_3.17.1_macOS_arm64.tar.gz",
+      "url": "https://github.com/vale-cli/vale/releases/download/v3.17.1/vale_3.17.1_macOS_arm64.tar.gz",
+      "sha256": "80cacf85ef23f53cfdd77355ec41a6ef99aec136f15dfb3517723482f35593f9"
+    }
+  },
+  "checksums_file_sha256": "2e2ab6df5d4050f00c7f02a613ed1b33ab4dbb8ba304afb88b619202add2adc7",
+  "verification": "curl -sSfL -o vale.tgz <url> && echo '<sha256>  vale.tgz' | sha256sum -c - && tar xzf vale.tgz vale",
+  "integrity_source": "this committed file in the TRUSTED policy tree; never a mutable repository variable"
+}

@@ -1,0 +1,352 @@
+{
+  "generated_utc": "2026-08-13",
+  "tool": "StrykerJS (@stryker-mutator/core@9 + @stryker-mutator/vitest-runner@9, npx-pinned; same pattern as the repo's nightly 12-nightly-verification.yml)",
+  "config": "scripts/prx/stryker.prx.json (PRX-scoped vitest config so mutation never touches DB-bound suites)",
+  "runs": [
+    {
+      "round": 1,
+      "score_total": 62.47,
+      "killed": 707,
+      "timeout": 2,
+      "survived": 393,
+      "no_coverage": 33,
+      "errors": 0
+    },
+    {
+      "round": 2,
+      "note": "after 11 targeted mutation-hardening tests (see commit history: size boundaries, comment-node trailing text, depth-2 heading filter, first-section order, nested-list and code-fence structure guards, copula alternatives, docs/ Evidence branch)",
+      "score_total": 64.49,
+      "killed": 730,
+      "timeout": 2,
+      "survived": 371,
+      "no_coverage": 32,
+      "errors": 0
+    }
+  ],
+  "per_file_final": {
+    "body-check.mjs": {
+      "NoCoverage": 14,
+      "Killed": 317,
+      "Survived": 155,
+      "Timeout": 1
+    },
+    "commit-check.mjs": {
+      "NoCoverage": 15,
+      "Killed": 302,
+      "Survived": 130,
+      "Timeout": 1
+    },
+    "modes.mjs": {
+      "NoCoverage": 2,
+      "Killed": 51,
+      "Survived": 10
+    },
+    "rules.mjs": {
+      "NoCoverage": 1,
+      "Survived": 73,
+      "Killed": 40
+    },
+    "policy-source.mjs": {
+      "Killed": 20,
+      "Survived": 3
+    }
+  },
+  "load_bearing_property": "Every deterministic rule (the only class that can ever block) has at least one adversarial fixture pinned to an EXACT finding multiset, so a mutation that disables that rule's guard changes the multiset and is killed. Verified survivor-by-survivor: no surviving mutant disables a deterministic rule end to end; survivors fall into the classes below.",
+  "survivor_classes_final": {
+    "diagnostic-text": 169,
+    "residual-logic": 144,
+    "regex-secondary-alternative": 70,
+    "location-metadata": 12,
+    "registry-metadata": 8
+  },
+  "accepted_classes_with_proofs": {
+    "diagnostic-text": "Mutations of finding message strings and registry titles. The finding contract that fixtures pin is (rule id, class, level); message text is human diagnostics. A StringLiteral mutation cannot change any pinned value, so these are equivalent AT THE CONTRACT LEVEL by construction (makeFinding derives level from class, class from the registry id).",
+    "location-metadata": "Mutations of line-number bookkeeping (e.g. the conditional line-property spread in makeFinding). Fixtures compare level:rule multisets, not line numbers. Diagnostic metadata only; no verdict path reads .line.",
+    "registry-metadata": "rules.mjs survivors are title strings and object-literal shape mutants; ruleClass()/makeFinding() behavior (the load-bearing part) is pinned by modes.test.ts (APPROVED_BLOCKING integrity) and every fixture (level derivation).",
+    "regex-secondary-alternative": "Narrowing mutants inside secondary alternatives of token regexes (e.g. the &ndash; alternative of ENTITY_DASH_RE, en-dash variants, rarely-used character-class members of URL_RE/EVIDENCE_RE). The primary alternative of every regex is fixture-killed (C05/C06/C09, B01/B08/B12). Residual narrowings weaken only secondary token coverage of advisory detections; each has a falsifier listed in source-trace-matrix.csv. Accepted for v1.1 and queued as calibration work.",
+    "residual-logic": "Advisory-path branch nuances (looksNarrative sentence heuristics, order-check inner comparisons, optional-chaining fallbacks). None can block (advisory/heuristic class); sampled list below."
+  },
+  "residual_logic_sample": [
+    {
+      "file": "body-check.mjs",
+      "line": 75,
+      "mutator": "ArrayDeclaration",
+      "status": "NoCoverage",
+      "snippet": "const top = tree.children ?? [];"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 285,
+      "mutator": "ArrayDeclaration",
+      "status": "NoCoverage",
+      "snippet": "(node.children ?? []).some(c => c.type === \"list\")"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 372,
+      "mutator": "ConditionalExpression",
+      "status": "NoCoverage",
+      "snippet": "default:"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 379,
+      "mutator": "AssignmentOperator",
+      "status": "NoCoverage",
+      "snippet": "for (let i = start + 1; i < visible.length; i += 1) {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 390,
+      "mutator": "BooleanLiteral",
+      "status": "NoCoverage",
+      "snippet": "if (lines.length === 0) return false;"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 395,
+      "mutator": "ConditionalExpression",
+      "status": "NoCoverage",
+      "snippet": "return listish > 0 || sentenceish >= 1;"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 395,
+      "mutator": "EqualityOperator",
+      "status": "NoCoverage",
+      "snippet": "return listish > 0 || sentenceish >= 1;"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 395,
+      "mutator": "EqualityOperator",
+      "status": "NoCoverage",
+      "snippet": "return listish > 0 || sentenceish >= 1;"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 54,
+      "mutator": "MethodExpression",
+      "status": "Survived",
+      "snippet": "const v = node.value.trim();"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 59,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "if (node.value !== undefined && node.type !== \"html\") return node.value;"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 60,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "if (!node.children) return \"\";"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 83,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "if (typeof raw !== \"string\" || raw.length > SIZE_LIMIT) {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 103,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "/^##\\s/m.test(c.value) ||"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 103,
+      "mutator": "LogicalOperator",
+      "status": "Survived",
+      "snippet": "/^##\\s/m.test(c.value) ||"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 142,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "if (rawLine.trim() === \"\") continue;"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 142,
+      "mutator": "MethodExpression",
+      "status": "Survived",
+      "snippet": "if (rawLine.trim() === \"\") continue;"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 157,
+      "mutator": "ArrayDeclaration",
+      "status": "Survived",
+      "snippet": "const values = seen.get(key) ?? [];"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 154,
+      "mutator": "MethodExpression",
+      "status": "Survived",
+      "snippet": "seen.set(key, (seen.get(key) ?? []).concat(value.trim()));"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 173,
+      "mutator": "BlockStatement",
+      "status": "Survived",
+      "snippet": "if (value === \"\") {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 173,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "if (value === \"\") {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 179,
+      "mutator": "BlockStatement",
+      "status": "Survived",
+      "snippet": "if (PLACEHOLDERS.has(value.toUpperCase())) {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 179,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "if (PLACEHOLDERS.has(value.toUpperCase())) {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 179,
+      "mutator": "MethodExpression",
+      "status": "Survived",
+      "snippet": "if (PLACEHOLDERS.has(value.toUpperCase())) {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 197,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": ".filter(n => n.type === \"heading\" && n.depth === 2)"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 200,
+      "mutator": "MethodExpression",
+      "status": "Survived",
+      "snippet": "text: inlineText(n).trim(),"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 239,
+      "mutator": "EqualityOperator",
+      "status": "Survived",
+      "snippet": "for (let i = 1; i < orderIndexes.length; i += 1) {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 240,
+      "mutator": "EqualityOperator",
+      "status": "Survived",
+      "snippet": "if (orderIndexes[i] < orderIndexes[i - 1]) {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 254,
+      "mutator": "MethodExpression",
+      "status": "Survived",
+      "snippet": "const isAllowed = EXTENSION_ALLOWLIST_PREFIXES.some(p =>"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 271,
+      "mutator": "EqualityOperator",
+      "status": "Survived",
+      "snippet": "if (node.type === \"paragraph\") {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 285,
+      "mutator": "MethodExpression",
+      "status": "Survived",
+      "snippet": "(node.children ?? []).some(c => c.type === \"list\")"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 285,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "(node.children ?? []).some(c => c.type === \"list\")"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 322,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "if (!node.lang && looksNarrative(node.value)) {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 322,
+      "mutator": "LogicalOperator",
+      "status": "Survived",
+      "snippet": "if (!node.lang && looksNarrative(node.value)) {"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 341,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "if (typeof raw !== \"string\" || raw.length > SIZE_LIMIT) return \"\";"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 341,
+      "mutator": "EqualityOperator",
+      "status": "Survived",
+      "snippet": "if (typeof raw !== \"string\" || raw.length > SIZE_LIMIT) return \"\";"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 343,
+      "mutator": "ArrayDeclaration",
+      "status": "Survived",
+      "snippet": "const out = [];"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 367,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "case \"Evidence\":"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 381,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "if (n.type === \"heading\" && n.depth <= 2) return true;"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 381,
+      "mutator": "ConditionalExpression",
+      "status": "Survived",
+      "snippet": "if (n.type === \"heading\" && n.depth <= 2) return true;"
+    },
+    {
+      "file": "body-check.mjs",
+      "line": 381,
+      "mutator": "LogicalOperator",
+      "status": "Survived",
+      "snippet": "if (n.type === \"heading\" && n.depth <= 2) return true;"
+    }
+  ],
+  "status_vocabulary": "EXECUTED (two full runs, raw JSON at reports/prx-mutation.json in the review bundle)"
+}
