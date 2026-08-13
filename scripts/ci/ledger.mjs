@@ -59,6 +59,7 @@ import {
   reduceResults,
   validateResult,
 } from "./result.mjs";
+import { acquireLease, releaseLease, settle } from "./ledger-lock.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..");
@@ -281,16 +282,21 @@ function loadLedger() {
 /**
  * Persist ledger + integrity pin + rendered markdown together. Writing all
  * three in one place is what keeps `verify` from failing on ordinary work.
+ * Settlement is atomic and lease-guarded (ledger-lock.mjs): temps + fsync +
+ * marker first, then rename ledger -> pin -> md — a writer killed at ANY
+ * point leaves a state the next lease holder settles unambiguously.
  */
 function persist(ledger) {
   mkdirSync(DOCS, { recursive: true });
   const bytes = canonicalJson(ledger);
-  writeFileSync(LEDGER_PATH, bytes);
-  writeFileSync(
-    SHA_PATH,
-    `${sha256Hex(Buffer.from(bytes))}  ci-verify-ledger.json\n`
-  );
-  writeFileSync(MD_PATH, renderMarkdown(ledger));
+  settle([
+    { final: LEDGER_PATH, data: bytes },
+    {
+      final: SHA_PATH,
+      data: `${sha256Hex(Buffer.from(bytes))}  ci-verify-ledger.json\n`,
+    },
+    { final: MD_PATH, data: renderMarkdown(ledger) },
+  ]);
 }
 
 /**
@@ -744,12 +750,29 @@ export function verifyLedger(options = {}) {
   if (!existsSync(LEDGER_PATH))
     return { ok: false, problems: ["LEDGER_MISSING"] };
 
-  const raw = readFileSync(LEDGER_PATH);
-  const ledger = JSON.parse(raw.toString("utf8"));
+  // A concurrent settlement renames ledger -> pin -> md; a reader landing
+  // between renames sees a not-yet-pinned pair for microseconds. Three spaced
+  // re-reads separate that window from real tampering, which is stable.
+  let raw;
+  let ledger;
+  let pinned;
+  let mdBytes;
+  for (let attempt = 0; ; attempt++) {
+    raw = readFileSync(LEDGER_PATH);
+    ledger = JSON.parse(raw.toString("utf8"));
+    pinned = existsSync(SHA_PATH)
+      ? readFileSync(SHA_PATH, "utf8").trim().split(/\s+/)[0]
+      : null;
+    mdBytes = existsSync(MD_PATH) ? readFileSync(MD_PATH, "utf8") : null;
+    const consistent =
+      pinned === sha256Hex(raw) &&
+      (mdBytes === null || mdBytes === renderMarkdown(ledger));
+    if (consistent || attempt >= 2) break;
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 120);
+  }
 
-  if (!existsSync(SHA_PATH)) problems.push("SHA_PIN_MISSING");
+  if (pinned === null) problems.push("SHA_PIN_MISSING");
   else {
-    const pinned = readFileSync(SHA_PATH, "utf8").trim().split(/\s+/)[0];
     const actual = sha256Hex(raw);
     if (pinned !== actual) {
       problems.push(
@@ -765,8 +788,8 @@ export function verifyLedger(options = {}) {
     problems.push(`BLUEPRINT_DRIFT: ${error.message}`);
   }
 
-  if (!existsSync(MD_PATH)) problems.push("RENDER_MISSING");
-  else if (readFileSync(MD_PATH, "utf8") !== renderMarkdown(ledger)) {
+  if (mdBytes === null) problems.push("RENDER_MISSING");
+  else if (mdBytes !== renderMarkdown(ledger)) {
     problems.push("RENDER_DRIFT");
   }
 
@@ -1223,12 +1246,65 @@ function main(argv) {
   throw new Error(`UNKNOWN_COMMAND: ${command ?? "(none)"}`);
 }
 
+// Every command that can write the ledger, pin, or rendered markdown takes
+// the exclusive lease FIRST and re-verifies the pin BEFORE mutating — the
+// duplicate-ID and lost-update races close at the exclusion point, not after
+// corruption. Read-only commands (verify/show/progress) stay lock-free.
+const MUTATING_COMMANDS = new Set([
+  "init",
+  "render",
+  "migrate",
+  "sync",
+  "amend",
+  "accept",
+  "start",
+  "reevidence",
+  "set",
+  "phase",
+  "decision",
+  "supersede-evidence",
+  "defect",
+  "checkpoint",
+]);
+
+function preMutationIntegrityCheck(command) {
+  if (command === "init" && !existsSync(LEDGER_PATH)) return;
+  if (!existsSync(LEDGER_PATH)) return; // command itself reports LEDGER_MISSING
+  const raw = readFileSync(LEDGER_PATH);
+  if (!existsSync(SHA_PATH)) {
+    throw new Error("LEDGER_TAMPERED: pin missing — refusing to mutate");
+  }
+  const pinned = readFileSync(SHA_PATH, "utf8").trim().split(/\s+/)[0];
+  const actual = sha256Hex(raw);
+  if (pinned !== actual) {
+    throw new Error(
+      `LEDGER_TAMPERED: pinned=${pinned.slice(0, 12)} actual=${actual.slice(0, 12)} — refusing to mutate`
+    );
+  }
+  try {
+    JSON.parse(raw.toString("utf8"));
+  } catch {
+    throw new Error("LEDGER_CORRUPT: unparseable JSON — refusing to mutate");
+  }
+}
+
 if (
   process.argv[1] &&
   fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
 ) {
+  const command = process.argv[2];
   try {
-    main(process.argv.slice(2));
+    if (MUTATING_COMMANDS.has(command)) {
+      acquireLease(`cli:${command}`);
+      try {
+        preMutationIntegrityCheck(command);
+        main(process.argv.slice(2));
+      } finally {
+        releaseLease();
+      }
+    } else {
+      main(process.argv.slice(2));
+    }
   } catch (error) {
     console.error(`[ledger] ${error.message}`);
     process.exitCode = 1;

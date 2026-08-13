@@ -209,6 +209,19 @@
       "superseded_blueprint_sha256": "deb2d0635810f381f12d97c3e208f1e814e8c852f40d63573b1826834cb32c61",
       "superseded_ledger_impl_sha256": "bfc19fe6d0ab8bd669367e9c292e1ddc753f4239b2bad677f934bbb149f98e49",
       "superseded_source": "AMD-010"
+    },
+    {
+      "at": "2026-08-13T08:16:40.321Z",
+      "defect": "DEF-071",
+      "evidence": [],
+      "genesis_corrections": [],
+      "id": "AMD-012",
+      "new_blueprint_sha256": "deb2d0635810f381f12d97c3e208f1e814e8c852f40d63573b1826834cb32c61",
+      "new_ledger_impl_sha256": "d772fc4540ec79b28116d96a93b9293d8192daf153625f3dd41062c7cce7c8f2",
+      "reason": "Section-9 concurrency law: pre-write exclusive lease (atomic mkdir + owner binding), staged atomic settlement (marker + temp/fsync/rename for ledger, pin, md), single-winner stale-lease recovery with roll-forward/roll-back from the hash-binding marker, pre-mutation pin verification, and bounded reader retry across the rename window. New module scripts/ci/ledger-lock.mjs carries the mechanism; ledger.mjs wires lease acquisition around every mutating command.",
+      "superseded_blueprint_sha256": "deb2d0635810f381f12d97c3e208f1e814e8c852f40d63573b1826834cb32c61",
+      "superseded_ledger_impl_sha256": "ca477c52ab9c27ed5a73620eef2e3f608487596de18212bf5e823fca39c6d247",
+      "superseded_source": "AMD-011"
     }
   ],
   "blueprint_version": "1.0.0",
@@ -4159,6 +4172,56 @@
       "severity": "LOW",
       "status": "CLOSED",
       "title": "ENVIRONMENT: Security Audit red repo-wide — GHSA-jmr9-qjv8-65gv (extract-zip <=2.0.1, HIGH) modified 2026-08-12T19:30:12Z with no patched release; via @puppeteer/browsers@2.13.0 (dev tooling); same class as DEF-045/046; blocks LOCAL_READY_FOR_PR until owner dispositions the advisory (osv-scanner.toml entry or dependency removal — outside audit authority)"
+    },
+    {
+      "affected_gate": "scripts/ci/ledger.mjs persist path",
+      "blast_radius": "ledger writer only; read paths gain bounded retry; CLI surface unchanged",
+      "closed_at": "2026-08-13T08:19:52.815Z",
+      "corrective_action": "scripts/ci/ledger-lock.mjs: exclusive lease (atomic mkdir + owner binding, TTL, fail-closed timeout), staged atomic settlement (hash-binding marker + temp/fsync/rename for ledger, pin, md), single-winner rename-based recovery with unambiguous roll-forward/roll-back, pre-mutation pin verification, bounded reader retry; authorized by AMD-012",
+      "detected_by": "closure-audit scenario H2 (sandbox): 20 concurrent writers -> 1 survivor; duplicate-id guard TOCTOU race",
+      "evidence": [
+        {
+          "bytes": 1034,
+          "path": "docs/verification/evidence/p10/DEF-071-retest.log",
+          "sha256": "4faab2488d45f9cc1f7ede73f6a4607def4b9748cdfa9d3c40ea0b3f476662d7"
+        },
+        {
+          "bytes": 12064,
+          "path": "scripts/ci/ledger-lease.test.ts",
+          "sha256": "6ac03f6ad23718d39fcbe96435fb7172e1a551a2ca016698052f60113322ee18"
+        },
+        {
+          "bytes": 9261,
+          "path": "scripts/ci/ledger-lock.mjs",
+          "sha256": "95a133f2cd41bac4b421f2c68ceb74acba6935a09d3b3fcbf72e62f0f61a6a69"
+        }
+      ],
+      "history": [
+        {
+          "action": "close",
+          "at": "2026-08-13T08:19:52.807Z",
+          "flags": {
+            "blast_radius": "ledger writer only; read paths gain bounded retry; CLI surface unchanged",
+            "corrective_action": "scripts/ci/ledger-lock.mjs: exclusive lease (atomic mkdir + owner binding, TTL, fail-closed timeout), staged atomic settlement (hash-binding marker + temp/fsync/rename for ledger, pin, md), single-winner rename-based recovery with unambiguous roll-forward/roll-back, pre-mutation pin verification, bounded reader retry; authorized by AMD-012",
+            "evidence": [
+              "docs/verification/evidence/p10/DEF-071-retest.log",
+              "scripts/ci/ledger-lease.test.ts",
+              "scripts/ci/ledger-lock.mjs"
+            ],
+            "regression_test_id": "P03.LEASE01-10 (scripts/ci/ledger-lease.test.ts, 14 tests) wired into the ci:verify:pr negatives stage",
+            "retest_result": "PASS — 20/20 survivors; dup refused pre-mutation; all 5 kill points settle unambiguously; stale/live/unexpired/wrong-repo lease laws hold; read-only FS and corrupt ledger/pin refuse before mutation; 20 readers green across 5 writers; existing suites 95/95",
+            "root_cause": "load-mutate-persist ran with no pre-write exclusion and three naked writeFileSync calls: concurrent writers overwrote each other (19/20 lost in the audit probe) and the duplicate-ID guard raced its own read"
+          }
+        }
+      ],
+      "id": "DEF-071",
+      "opened_at": "2026-08-13T08:16:40.205Z",
+      "regression_test_id": "P03.LEASE01-10 (scripts/ci/ledger-lease.test.ts, 14 tests) wired into the ci:verify:pr negatives stage",
+      "retest_result": "PASS — 20/20 survivors; dup refused pre-mutation; all 5 kill points settle unambiguously; stale/live/unexpired/wrong-repo lease laws hold; read-only FS and corrupt ledger/pin refuse before mutation; 20 readers green across 5 writers; existing suites 95/95",
+      "root_cause": "load-mutate-persist ran with no pre-write exclusion and three naked writeFileSync calls: concurrent writers overwrote each other (19/20 lost in the audit probe) and the duplicate-ID guard raced its own read",
+      "severity": "MEDIUM",
+      "status": "CLOSED",
+      "title": "canonical ledger writer loses concurrent updates: load-mutate-persist had no pre-write exclusion and no atomic settlement; corruption was detectable only AFTER the fact"
     }
   ],
   "gate_results": [],

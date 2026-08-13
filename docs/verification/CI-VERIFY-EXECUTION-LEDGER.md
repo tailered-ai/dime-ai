@@ -745,6 +745,7 @@
 | `DEF-068` | `closure-audit scenario E2: tampered required_contexts + re-pin verified VALID pre-repair (live reproduction)` | HIGH | `CLOSED` | certificate verify compared only 7 hashes: stored display bindings (required_contexts, toolchain, cleanroom, execution_history, verifier_file_count, open_units_all_p10) were never compared |
 | `DEF-069` | `closure-audit E0 preflight inventory` | LOW | `CLOSED` | stale run-dir residue: 7 .ci-verify/runs dirs with 9 registered git worktrees (9.5G) persisted while a zero-worktree-residue claim was reported |
 | `DEF-070` | `closure-audit E13 attempt 2 (gate FAIL, reproduced 2x in isolation at 2.1s)` | LOW | `CLOSED` | ENVIRONMENT: Security Audit red repo-wide — GHSA-jmr9-qjv8-65gv (extract-zip <=2.0.1, HIGH) modified 2026-08-12T19:30:12Z with no patched release; via @puppeteer/browsers@2.13.0 (dev tooling); same class as DEF-045/046; blocks LOCAL_READY_FOR_PR until owner dispositions the advisory (osv-scanner.toml entry or dependency removal — outside audit authority) |
+| `DEF-071` | `closure-audit scenario H2 (sandbox): 20 concurrent writers -> 1 survivor; duplicate-id guard TOCTOU race` | MEDIUM | `CLOSED` | canonical ledger writer loses concurrent updates: load-mutate-persist had no pre-write exclusion and no atomic settlement; corruption was detectable only AFTER the fact |
 
 ## Checkpoints
 

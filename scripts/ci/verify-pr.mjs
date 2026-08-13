@@ -50,6 +50,7 @@ const STAGES = [
       "scripts/ci/p07/p07.test.ts",
       "scripts/ci/selftest/timeout-consistency.test.ts",
       "scripts/ci/selftest/certificate-binding.test.ts",
+      "scripts/ci/ledger-lease.test.ts",
     ],
     env: { VITEST_MAX_FORKS: "4", VITEST_MAX_THREADS: "4" },
   },
