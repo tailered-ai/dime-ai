@@ -9,7 +9,13 @@
  * execution refuses with and without a receipt.
  */
 import { spawnSync } from "node:child_process";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,7 +30,8 @@ import {
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..", "..");
 const READINESS = path.join(HERE, "readiness.mjs");
-const FIX = path.join(os.tmpdir(), `deploy-contract-fix-${process.pid}`);
+// mkdtemp: unpredictable, 0700 — the js/insecure-temporary-file class
+const FIX = mkdtempSync(path.join(os.tmpdir(), "deploy-contract-fix-"));
 
 function contractFixture(mutate: (c: Record<string, unknown>) => void) {
   const c = JSON.parse(

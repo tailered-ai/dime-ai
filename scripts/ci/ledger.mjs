@@ -59,7 +59,12 @@ import {
   reduceResults,
   validateResult,
 } from "./result.mjs";
-import { acquireLease, releaseLease, settle } from "./ledger-lock.mjs";
+import {
+  LOCK_DIR,
+  acquireLease,
+  releaseLease,
+  settle,
+} from "./ledger-lock.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "..", "..");
@@ -751,12 +756,15 @@ export function verifyLedger(options = {}) {
     return { ok: false, problems: ["LEDGER_MISSING"] };
 
   // A concurrent settlement renames ledger -> pin -> md; a reader landing
-  // between renames sees a not-yet-pinned pair for microseconds. Three spaced
-  // re-reads separate that window from real tampering, which is stable.
+  // between renames sees a not-yet-pinned pair. While the writer's lease is
+  // VISIBLY held the reader keeps waiting (bounded); with no lease in sight,
+  // three spaced re-reads separate the residual window from real tampering,
+  // which is stable across reads and has no lease.
   let raw;
   let ledger;
   let pinned;
   let mdBytes;
+  const readDeadline = Date.now() + 30_000;
   for (let attempt = 0; ; attempt++) {
     raw = readFileSync(LEDGER_PATH);
     ledger = JSON.parse(raw.toString("utf8"));
@@ -767,7 +775,13 @@ export function verifyLedger(options = {}) {
     const consistent =
       pinned === sha256Hex(raw) &&
       (mdBytes === null || mdBytes === renderMarkdown(ledger));
-    if (consistent || attempt >= 2) break;
+    if (consistent) break;
+    const settlementVisible = existsSync(LOCK_DIR);
+    if (settlementVisible && Date.now() < readDeadline) {
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200);
+      continue;
+    }
+    if (attempt >= 2) break;
     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 120);
   }
 

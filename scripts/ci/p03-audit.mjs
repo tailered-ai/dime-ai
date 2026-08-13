@@ -36,7 +36,10 @@ export const DEF017_ANCHORS = {
   "TypeScript Check": "LOCAL",
   "08-contract-and-data-integrity": "LOCAL",
   "10-ai-eval-critical": "LOCAL",
-  "07-coverage-patch": "LOCAL",
+  // DEF-074: the job now provisions pinned zizmor for the P05 fixture cycles
+  // its vitest run executes, so LOCAL+TOOL is the TRUE classification — the
+  // gate stays locally reproducible wherever the pinned tool is present.
+  "07-coverage-patch": "LOCAL+TOOL",
 };
 
 /** Gates whose tool requirements DEF-018 restored. Regression anchors. */

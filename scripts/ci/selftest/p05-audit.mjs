@@ -50,6 +50,23 @@ export const CLASSIFIED_CANARIES = [
       "the detector's own signature table — it must contain the patterns it detects",
   },
   {
+    file: ".github/workflows/01-pr-proof-contract.yml",
+    classification: "SAFE_ENV_MEDIATED_REFERENCE",
+    reason:
+      "pre-existing github.event.pull_request references reach the shell ONLY " +
+      "through env: (the template-injection-safe form zizmor enforces); the " +
+      "DEF-074 modification added checkout depth + tool provisioning, not the " +
+      "signature — which predates this initiative",
+  },
+  {
+    file: ".github/workflows/07-coverage-patch.yml",
+    classification: "SAFE_ENV_MEDIATED_REFERENCE",
+    reason:
+      "pre-existing github.event.pull_request references reach the shell ONLY " +
+      "through env:; the DEF-074 modification added tool provisioning, not " +
+      "the signature — which predates this initiative",
+  },
+  {
     file: "scripts/ci/selftest/p05-audit.mjs",
     classification: "TEST_CANARY",
     reason: "imports and reports the signature table; contains no live poison",

@@ -290,7 +290,11 @@ describe("P06.DRV step-driver semantics", () => {
           step({
             kind: "PROVISIONING",
             provisioning_signatures: ["privilege-escalation"],
-            run: "sudo -n /usr/bin/true 2>/dev/null || exit 1",
+            // Hermetic failure (the DRV07 pattern): the driver classifies by
+            // declared kind/signatures, never command text — and a real
+            // `sudo -n` SUCCEEDS on GitHub runners (passwordless), which
+            // inverted this fixture off-host (DEF-074).
+            run: "exit 1",
           }),
         ],
       },

@@ -19,7 +19,14 @@
  * P04.AUD01 enforces that structurally.
  */
 import { execFileSync } from "node:child_process";
-import { existsSync, lstatSync, realpathSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+  rmSync,
+} from "node:fs";
 import path from "node:path";
 
 export class TeardownError extends Error {
@@ -113,6 +120,20 @@ export function pidAlive(pid) {
  */
 export function verifyPidOwnership(pid, runId) {
   if (!pidAlive(pid)) return { alive: false, owned: false, detail: "dead" };
+  // procps-ng has no `-E`; on linux the same-user environment is
+  // /proc/<pid>/environ (unreadable stays AMBIGUOUS, never killed) — DEF-074.
+  if (process.platform === "linux") {
+    const entries = readProcEnviron(pid);
+    if (entries === null) {
+      return { alive: true, owned: false, detail: "env unreadable: AMBIGUOUS" };
+    }
+    const owned = entries.includes(`${OWNER_MARKER}=${runId}`);
+    return {
+      alive: true,
+      owned,
+      detail: owned ? "marker verified" : "marker absent",
+    };
+  }
   let commandLine;
   try {
     commandLine = execFileSync(
@@ -131,11 +152,38 @@ export function verifyPidOwnership(pid, runId) {
   };
 }
 
+function readProcEnviron(pid) {
+  try {
+    return readFileSync(`/proc/${pid}/environ`, "utf8").split("\0");
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Discover live processes carrying this run's marker. DETECTION may scan the
  * process table; DESTRUCTION still re-verifies each candidate individually.
  */
 export function findMarkedProcesses(runId) {
+  if (process.platform === "linux") {
+    const marker = `${OWNER_MARKER}=${runId}`;
+    const found = [];
+    let pids = [];
+    try {
+      pids = readdirSync("/proc").filter(name => /^\d+$/.test(name));
+    } catch {
+      return [];
+    }
+    for (const name of pids) {
+      const pid = Number(name);
+      if (pid === process.pid) continue;
+      const entries = readProcEnviron(pid);
+      if (entries === null || !entries.includes(marker)) continue;
+      const gate = entries.find(e => e.startsWith(`${GATE_MARKER}=`));
+      found.push({ pid, gate_id: gate ? gate.split("=")[1] : null });
+    }
+    return found;
+  }
   let table;
   try {
     table = execFileSync("ps", ["-axwwE", "-o", "pid=,command="], {

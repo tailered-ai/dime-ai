@@ -6,12 +6,12 @@
     "workflow_dir": ".github/workflows",
     "workflow_count": 42,
     "job_count": 53,
-    "step_count": 271,
+    "step_count": 274,
     "workflows": [
       {
         "path": ".github/workflows/01-pr-proof-contract.yml",
-        "raw_sha256": "82d494f62bd738f4bc679880d56f89ed5e45391fb418dfa0e4564f437b6630c3",
-        "canonical_sha256": "ab9895ac3c6fce2042bc3aa6ea241b9e3842d5d428fce5ac684de2e0b3e9325a"
+        "raw_sha256": "59bc73054da4d84d1c3ed728420258374068c93919c5f63bfc77bcbf36456471",
+        "canonical_sha256": "1e6132490faa8ac5b82a48616bb6d48e3846de59e578ad1062d6c940c9636a2a"
       },
       {
         "path": ".github/workflows/02-codeql.yml",
@@ -35,8 +35,8 @@
       },
       {
         "path": ".github/workflows/07-coverage-patch.yml",
-        "raw_sha256": "279534ab67c27b84e501fc2aa1aa77039362dd7e2457b049a3865eb369fdae8a",
-        "canonical_sha256": "e1f4e66474e8453bdca7285c41c6b9401b96c9178a97672f3fb76761777159b6"
+        "raw_sha256": "1195eeaee93c15bc451e965defab2d5bc150398ec19b0f2f33705b2e138e6164",
+        "canonical_sha256": "429745e9518b6bf99cdd1113ad99ddfb6052b2ff20f4217eba20f78764b9b92a"
       },
       {
         "path": ".github/workflows/08-contract-and-data-integrity.yml",
@@ -75,8 +75,8 @@
       },
       {
         "path": ".github/workflows/ci.yml",
-        "raw_sha256": "0cf19f689a4091b74ec213a21cfea58e4a1d9eedc40c6c2666dd9a6004709664",
-        "canonical_sha256": "3f80478fa4661ac3d0963180b0349b1cdab6f7fa9ac51959fea46bb9a8e3c979"
+        "raw_sha256": "44d22ca10ae0986cb79e438a1a1271a8f660ce331ec6ea6e6dc2b7ea8833bf69",
+        "canonical_sha256": "c9aa21dedd92b80fcb6ab200a40a92a8aacee396413e11d47075fd486f72062a"
       },
       {
         "path": ".github/workflows/cron-bet-grade.yml",
@@ -269,7 +269,7 @@
     ],
     "file_count": 42,
     "job_count": 53,
-    "step_count": 271,
+    "step_count": 274,
     "uses_sha_pinned": 124,
     "uses_unpinned": 0,
     "alias_files": [],
@@ -303,13 +303,13 @@
       "timeout-minutes": 26
     },
     "step_keys": {
-      "env": 47,
+      "env": 50,
       "id": 6,
       "if": 37,
-      "name": 195,
-      "run": 147,
+      "name": 198,
+      "run": 150,
       "uses": 124,
-      "with": 67
+      "with": 69
     },
     "shells": {},
     "expression_roots": {
@@ -493,8 +493,8 @@
     "actions/upload-artifact": "GitHub artifact storage"
   },
   "runnability_summary": {
-    "LOCAL": 20,
-    "LOCAL+TOOL": 11,
+    "LOCAL": 19,
+    "LOCAL+TOOL": 12,
     "CI-ONLY": 22
   },
   "checks": [
@@ -593,7 +593,8 @@
       "status_context_template": null,
       "runnability": "LOCAL+TOOL",
       "required_tools": [
-        "playwright-browsers"
+        "playwright-browsers",
+        "zizmor"
       ],
       "non_gating_step_count": 1,
       "non_gating_reasons": [
@@ -603,6 +604,7 @@
         "LOCAL",
         "LOCAL",
         "LOCAL",
+        "LOCAL+TOOL",
         "LOCAL",
         "LOCAL",
         "LOCAL+TOOL",
@@ -623,7 +625,7 @@
       "defaults": null,
       "services": null,
       "strategy": null,
-      "step_count": 10,
+      "step_count": 11,
       "steps": [
         {
           "index": 0,
@@ -631,7 +633,9 @@
           "id": null,
           "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
           "run": null,
-          "with": null,
+          "with": {
+            "fetch-depth": 0
+          },
           "env": null,
           "if": null
         },
@@ -660,6 +664,18 @@
         },
         {
           "index": 3,
+          "name": "[STEP] Pinned zizmor — the P05 fixture cycles execute the real workflow-security detector",
+          "id": null,
+          "uses": null,
+          "run": "pipx install \"zizmor==${ZIZMOR_VERSION}\"",
+          "with": null,
+          "env": {
+            "ZIZMOR_VERSION": "1.29.0"
+          },
+          "if": null
+        },
+        {
+          "index": 4,
           "name": "[STEP] Frozen install — mutable dependency installs are forbidden",
           "id": null,
           "uses": null,
@@ -669,7 +685,7 @@
           "if": null
         },
         {
-          "index": 4,
+          "index": 5,
           "name": "[STEP] Static types (strict)",
           "id": null,
           "uses": null,
@@ -679,7 +695,7 @@
           "if": null
         },
         {
-          "index": 5,
+          "index": 6,
           "name": "[STEP] Playwright chromium — perf/harness.smoke.test.ts runs it (mirrors ci.yml)",
           "id": null,
           "uses": null,
@@ -689,7 +705,7 @@
           "if": null
         },
         {
-          "index": 6,
+          "index": 7,
           "name": "[STEP] Gated vitest — env-gate fails on zero-collected / unexcused skips",
           "id": null,
           "uses": null,
@@ -699,7 +715,7 @@
           "if": null
         },
         {
-          "index": 7,
+          "index": 8,
           "name": "[STEP] Production build + preview-production gate + bundle budget",
           "id": null,
           "uses": null,
@@ -709,7 +725,7 @@
           "if": null
         },
         {
-          "index": 8,
+          "index": 9,
           "name": "[STEP] Emit proof-contract.json",
           "id": null,
           "uses": null,
@@ -721,7 +737,7 @@
           "if": null
         },
         {
-          "index": 9,
+          "index": 10,
           "name": null,
           "id": null,
           "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
@@ -1133,13 +1149,17 @@
       "status_context": "07-coverage-patch",
       "status_context_dynamic": false,
       "status_context_template": null,
-      "runnability": "LOCAL",
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "zizmor"
+      ],
       "non_gating_step_count": 0,
       "non_gating_reasons": [],
       "step_runnability": [
         "LOCAL",
         "LOCAL",
         "LOCAL",
+        "LOCAL+TOOL",
         "LOCAL",
         "LOCAL",
         "LOCAL"
@@ -1156,7 +1176,7 @@
       "defaults": null,
       "services": null,
       "strategy": null,
-      "step_count": 6,
+      "step_count": 7,
       "steps": [
         {
           "index": 0,
@@ -1195,6 +1215,18 @@
         },
         {
           "index": 3,
+          "name": "[STEP] Pinned zizmor — the P05 fixture cycles execute the real workflow-security detector",
+          "id": null,
+          "uses": null,
+          "run": "pipx install \"zizmor==${ZIZMOR_VERSION}\"",
+          "with": null,
+          "env": {
+            "ZIZMOR_VERSION": "1.29.0"
+          },
+          "if": null
+        },
+        {
+          "index": 4,
           "name": null,
           "id": null,
           "uses": null,
@@ -1204,7 +1236,7 @@
           "if": null
         },
         {
-          "index": 4,
+          "index": 5,
           "name": "[STEP] Vitest with v8 coverage (server+shared, DB-free profile)",
           "id": null,
           "uses": null,
@@ -1214,7 +1246,7 @@
           "if": null
         },
         {
-          "index": 5,
+          "index": 6,
           "name": "[GATE] Patch coverage floors",
           "id": null,
           "uses": null,
@@ -2705,7 +2737,8 @@
       "status_context_template": null,
       "runnability": "LOCAL+TOOL",
       "required_tools": [
-        "playwright-browsers"
+        "playwright-browsers",
+        "zizmor"
       ],
       "non_gating_step_count": 1,
       "non_gating_reasons": [
@@ -2716,6 +2749,7 @@
         "LOCAL",
         "LOCAL",
         "LOCAL",
+        "LOCAL+TOOL",
         "LOCAL+TOOL",
         "LOCAL",
         "CI-ONLY"
@@ -2732,7 +2766,7 @@
       "defaults": null,
       "services": null,
       "strategy": null,
-      "step_count": 7,
+      "step_count": 8,
       "steps": [
         {
           "index": 0,
@@ -2740,7 +2774,9 @@
           "id": null,
           "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
           "run": null,
-          "with": null,
+          "with": {
+            "fetch-depth": 0
+          },
           "env": null,
           "if": null
         },
@@ -2779,6 +2815,18 @@
         },
         {
           "index": 4,
+          "name": "[STEP] Pinned zizmor — the P05 fixture cycles execute the real workflow-security detector",
+          "id": null,
+          "uses": null,
+          "run": "pipx install \"zizmor==${ZIZMOR_VERSION}\"",
+          "with": null,
+          "env": {
+            "ZIZMOR_VERSION": "1.29.0"
+          },
+          "if": null
+        },
+        {
+          "index": 5,
           "name": "[STEP] Install Chromium for perf smoke tests",
           "id": null,
           "uses": null,
@@ -2788,7 +2836,7 @@
           "if": null
         },
         {
-          "index": 5,
+          "index": 6,
           "name": "[STEP] Run gated Vitest suite — zero failures, no undeclared skips",
           "id": null,
           "uses": null,
@@ -2798,7 +2846,7 @@
           "if": null
         },
         {
-          "index": 6,
+          "index": 7,
           "name": "[OUTPUT] Upload test + gate reports as artifacts",
           "id": null,
           "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",

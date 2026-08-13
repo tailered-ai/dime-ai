@@ -222,6 +222,19 @@
       "superseded_blueprint_sha256": "deb2d0635810f381f12d97c3e208f1e814e8c852f40d63573b1826834cb32c61",
       "superseded_ledger_impl_sha256": "ca477c52ab9c27ed5a73620eef2e3f608487596de18212bf5e823fca39c6d247",
       "superseded_source": "AMD-011"
+    },
+    {
+      "at": "2026-08-13T11:39:44.548Z",
+      "defect": "DEF-071",
+      "evidence": [],
+      "genesis_corrections": [],
+      "id": "AMD-013",
+      "new_blueprint_sha256": "deb2d0635810f381f12d97c3e208f1e814e8c852f40d63573b1826834cb32c61",
+      "new_ledger_impl_sha256": "e85fc026f3670a295db526969da5aecfc4b290311001961430693fbd513c3834",
+      "reason": "Reader robustness under concurrent settlement: verifyLedger now waits (bounded 30s) while a writer's lease is VISIBLY held before judging an inconsistent snapshot, instead of three fixed re-reads alone — under a saturated host a settlement window can exceed 360ms and a legitimate reader misreported LEDGER_TAMPERED (found by LEASE10 under the 8-suite parallel battery). Real tampering has no lease and stays stable across reads.",
+      "superseded_blueprint_sha256": "deb2d0635810f381f12d97c3e208f1e814e8c852f40d63573b1826834cb32c61",
+      "superseded_ledger_impl_sha256": "d772fc4540ec79b28116d96a93b9293d8192daf153625f3dd41062c7cce7c8f2",
+      "superseded_source": "AMD-012"
     }
   ],
   "blueprint_version": "1.0.0",
@@ -4298,6 +4311,23 @@
       "severity": "LOW",
       "status": "CLOSED",
       "title": "generic-api-key false positive: rehearsal evidence idempotency_key (derived sha256 of public identifiers) trips the entropy rule on every rehearsal record"
+    },
+    {
+      "affected_gate": "01-pr-proof-contract / 07-coverage-patch / ci.yml Vitest / CodeQL",
+      "blast_radius": null,
+      "closed_at": null,
+      "corrective_action": null,
+      "detected_by": "PR #512 CI attempt 1 (first-ever GitHub execution of the branch): 12+5 test failures across 01/07/Vitest + CodeQL new-alert check",
+      "evidence": [],
+      "history": [],
+      "id": "DEF-074",
+      "opened_at": "2026-08-13T11:46:25.264Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": null,
+      "severity": "MEDIUM",
+      "status": "OPEN",
+      "title": "verifier self-tests and jobs assumed the dev host: shallow checkout without origin/main, missing pinned zizmor on suite runners, sudo that fails locally but succeeds on runners, macOS-only ps -E in teardown, predictable tmpdirs in new suites"
     }
   ],
   "gate_results": [],
@@ -10039,9 +10069,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 34916,
+          "bytes": 35163,
           "path": "scripts/ci/p06/p06.test.ts",
-          "sha256": "2757b2258efd0ec84831dd7553a761b7efcd840490c6cd3d960e2912022e3c72"
+          "sha256": "5c33cb0f6c365f31df4450b72a383e273b256ad0e9bce6a06d9555d8434ad6f0"
         },
         {
           "bytes": 2680,
@@ -10059,7 +10089,8 @@
         "missing/failed tool provisioning maps to BLOCKED, never a verdict: p06.test.ts DRV05/DRV06 + TOOL03; observed live as the exit-32 refusal in every roster",
         "REEVIDENCE 2026-08-12T08:16:05.651Z: p06.test.ts gained the P06.ENV/P06.CAP never-regress anchor groups (2026-08-12 regression-anchor program); the tests these units cite are unchanged and still pass (45/45) | superseded: scripts/ci/p06/p06.test.ts@e19d24fa6014, docs/verification/evidence/p06/T19-acceptance-roster.log@f6276830197b",
         "REEVIDENCE 2026-08-12T08:22:02.630Z: p06.test.ts finalized with ENV/CAP/PRE anchor groups (15/15 defect classes anchored) | superseded: scripts/ci/p06/p06.test.ts@5a4d2467d537, docs/verification/evidence/p06/T19-acceptance-roster.log@f6276830197b",
-        "REEVIDENCE 2026-08-12T08:23:05.745Z: final: prettier normalization of the anchor groups (last mutation of this file tonight) | superseded: scripts/ci/p06/p06.test.ts@630d7f9c4135, docs/verification/evidence/p06/T19-acceptance-roster.log@f6276830197b"
+        "REEVIDENCE 2026-08-12T08:23:05.745Z: final: prettier normalization of the anchor groups (last mutation of this file tonight) | superseded: scripts/ci/p06/p06.test.ts@630d7f9c4135, docs/verification/evidence/p06/T19-acceptance-roster.log@f6276830197b",
+        "REEVIDENCE 2026-08-13T11:42:27.937Z: DEF-074 repair: DRV06 fixture made hermetic (exit 1 with declared kind/signatures; real sudo -n succeeds on GitHub runners and inverted the fixture off-host); re-pinned to the corrected suite | superseded: scripts/ci/p06/p06.test.ts@2757b2258efd, docs/verification/evidence/p06/T19-acceptance-roster.log@f6276830197b"
       ],
       "phase": "P06",
       "remediation": null,
@@ -10077,9 +10108,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 34916,
+          "bytes": 35163,
           "path": "scripts/ci/p06/p06.test.ts",
-          "sha256": "2757b2258efd0ec84831dd7553a761b7efcd840490c6cd3d960e2912022e3c72"
+          "sha256": "5c33cb0f6c365f31df4450b72a383e273b256ad0e9bce6a06d9555d8434ad6f0"
         },
         {
           "bytes": 3653,
@@ -10097,7 +10128,8 @@
         "version-pin mismatch surfaces as CONTRACT_DRIFT: governed tool identities derive from contract pins (TOOL01/TOOL02); live drift detection fired during T00 integration when main's workflows changed",
         "REEVIDENCE 2026-08-12T08:16:06.118Z: p06.test.ts gained the P06.ENV/P06.CAP never-regress anchor groups (2026-08-12 regression-anchor program); the tests these units cite are unchanged and still pass (45/45) | superseded: scripts/ci/p06/p06.test.ts@e19d24fa6014, docs/verification/evidence/p06/T00-integration.md@ebf314113563",
         "REEVIDENCE 2026-08-12T08:22:02.803Z: p06.test.ts finalized with ENV/CAP/PRE anchor groups (15/15 defect classes anchored) | superseded: scripts/ci/p06/p06.test.ts@5a4d2467d537, docs/verification/evidence/p06/T00-integration.md@ebf314113563",
-        "REEVIDENCE 2026-08-12T08:23:05.871Z: final: prettier normalization of the anchor groups (last mutation of this file tonight) | superseded: scripts/ci/p06/p06.test.ts@630d7f9c4135, docs/verification/evidence/p06/T00-integration.md@ebf314113563"
+        "REEVIDENCE 2026-08-12T08:23:05.871Z: final: prettier normalization of the anchor groups (last mutation of this file tonight) | superseded: scripts/ci/p06/p06.test.ts@630d7f9c4135, docs/verification/evidence/p06/T00-integration.md@ebf314113563",
+        "REEVIDENCE 2026-08-13T11:42:28.021Z: DEF-074 repair: DRV06 fixture made hermetic (exit 1 with declared kind/signatures; real sudo -n succeeds on GitHub runners and inverted the fixture off-host); re-pinned to the corrected suite | superseded: scripts/ci/p06/p06.test.ts@2757b2258efd, docs/verification/evidence/p06/T00-integration.md@ebf314113563"
       ],
       "phase": "P06",
       "remediation": null,
@@ -10543,9 +10575,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 34916,
+          "bytes": 35163,
           "path": "scripts/ci/p06/p06.test.ts",
-          "sha256": "2757b2258efd0ec84831dd7553a761b7efcd840490c6cd3d960e2912022e3c72"
+          "sha256": "5c33cb0f6c365f31df4450b72a383e273b256ad0e9bce6a06d9555d8434ad6f0"
         },
         {
           "bytes": 3472,
@@ -10563,7 +10595,8 @@
         "SPEC01 proves every contract run-step appears in the driver spec exactly once, verbatim",
         "REEVIDENCE 2026-08-12T08:16:06.193Z: p06.test.ts gained the P06.ENV/P06.CAP never-regress anchor groups (2026-08-12 regression-anchor program); the tests these units cite are unchanged and still pass (45/45) | superseded: scripts/ci/p06/p06.test.ts@e19d24fa6014, docs/verification/evidence/p06/T19-acceptance.md@d09ed6edf0b2",
         "REEVIDENCE 2026-08-12T08:22:02.852Z: p06.test.ts finalized with ENV/CAP/PRE anchor groups (15/15 defect classes anchored) | superseded: scripts/ci/p06/p06.test.ts@5a4d2467d537, docs/verification/evidence/p06/T19-acceptance.md@d09ed6edf0b2",
-        "REEVIDENCE 2026-08-12T08:23:05.917Z: final: prettier normalization of the anchor groups (last mutation of this file tonight) | superseded: scripts/ci/p06/p06.test.ts@630d7f9c4135, docs/verification/evidence/p06/T19-acceptance.md@d09ed6edf0b2"
+        "REEVIDENCE 2026-08-12T08:23:05.917Z: final: prettier normalization of the anchor groups (last mutation of this file tonight) | superseded: scripts/ci/p06/p06.test.ts@630d7f9c4135, docs/verification/evidence/p06/T19-acceptance.md@d09ed6edf0b2",
+        "REEVIDENCE 2026-08-13T11:42:28.102Z: DEF-074 repair: DRV06 fixture made hermetic (exit 1 with declared kind/signatures; real sudo -n succeeds on GitHub runners and inverted the fixture off-host); re-pinned to the corrected suite | superseded: scripts/ci/p06/p06.test.ts@2757b2258efd, docs/verification/evidence/p06/T19-acceptance.md@d09ed6edf0b2"
       ],
       "phase": "P06",
       "remediation": null,

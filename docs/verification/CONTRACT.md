@@ -19,7 +19,7 @@ convention.
 | canonicalizer_version | `1.0.0` |
 | workflows | 42 |
 | jobs / checks | 53 / 53 |
-| steps represented | 271 |
+| steps represented | 274 |
 
 ## Runnability
 
@@ -31,8 +31,8 @@ excluded from the verdict.
 | Class | Count |
 | --- | --- |
 | `CI-ONLY` | 22 |
-| `LOCAL` | 20 |
-| `LOCAL+TOOL` | 11 |
+| `LOCAL` | 19 |
+| `LOCAL+TOOL` | 12 |
 
 ## Required status contexts (enforced today)
 
@@ -40,9 +40,9 @@ excluded from the verdict.
 | --- | --- | --- | --- |
 | `Security Audit` | `.github/workflows/ci.yml#security-audit` | LOCAL+TOOL | osv-scanner |
 | `TypeScript Check` | `.github/workflows/ci.yml#typecheck` | LOCAL | — |
-| `Vitest` | `.github/workflows/ci.yml#test` | LOCAL+TOOL | playwright-browsers |
+| `Vitest` | `.github/workflows/ci.yml#test` | LOCAL+TOOL | playwright-browsers, zizmor |
 | `Secret Scan (gitleaks)` | `.github/workflows/gitleaks.yml#gitleaks` | LOCAL+TOOL | gitleaks |
-| `01-pr-proof-contract` | `.github/workflows/01-pr-proof-contract.yml#proof` | LOCAL+TOOL | playwright-browsers |
+| `01-pr-proof-contract` | `.github/workflows/01-pr-proof-contract.yml#proof` | LOCAL+TOOL | playwright-browsers, zizmor |
 | `05-workflow-security` | `.github/workflows/05-workflow-security.yml#zizmor` | LOCAL+TOOL | zizmor |
 | `06-dependency-review` | `.github/workflows/06-dependency-review.yml#dependency-review` | CI-ONLY | — |
 | `08-contract-and-data-integrity` | `.github/workflows/08-contract-and-data-integrity.yml#contracts` | LOCAL | — |
@@ -54,7 +54,7 @@ excluded from the verdict.
 | --- | --- | --- |
 | `02-codeql` | `.github/workflows/02-codeql.yml#analyze` | CI-ONLY |
 | `03-semgrep-blocking` | `.github/workflows/03-semgrep.yml#blocking` | LOCAL+TOOL |
-| `07-coverage-patch` | `.github/workflows/07-coverage-patch.yml#coverage` | LOCAL |
+| `07-coverage-patch` | `.github/workflows/07-coverage-patch.yml#coverage` | LOCAL+TOOL |
 | `09-artifact-build-and-smoke` | `.github/workflows/09-artifact-build-and-smoke.yml#artifact` | LOCAL+TOOL |
 | `11-artifact-attestation` | `.github/workflows/11-artifact-attestation.yml#attest` | CI-ONLY |
 
@@ -121,12 +121,12 @@ implicit ignored class: an unclassified construct aborts generation with
 
 | Workflow | raw sha256 | canonical sha256 |
 | --- | --- | --- |
-| `01-pr-proof-contract.yml` | `82d494f62bd738f4` | `ab9895ac3c6fce20` |
+| `01-pr-proof-contract.yml` | `59bc73054da4d84d` | `1e6132490faa8ac5` |
 | `02-codeql.yml` | `420935d9e5bdda30` | `6a26a5eefd1e71a3` |
 | `03-semgrep.yml` | `e8f9690f3317c1a3` | `3d24f628dd383fea` |
 | `05-workflow-security.yml` | `8ae009b88cbed2e3` | `16e963daa80edd0e` |
 | `06-dependency-review.yml` | `d07c7dfbf545a3d1` | `99321a8cb286d806` |
-| `07-coverage-patch.yml` | `279534ab67c27b84` | `e1f4e66474e8453b` |
+| `07-coverage-patch.yml` | `1195eeaee93c15bc` | `429745e9518b6bf9` |
 | `08-contract-and-data-integrity.yml` | `3fbb9a310be3d592` | `b602a09c79f266f6` |
 | `09-artifact-build-and-smoke.yml` | `16d6f64cf7663d27` | `184a6d189f04b4e7` |
 | `10-ai-eval-critical.yml` | `3be89dbd7541e6c6` | `ebb8699b3f36eeab` |
@@ -134,7 +134,7 @@ implicit ignored class: an unclassified construct aborts generation with
 | `12-nightly-verification.yml` | `b30d52e0b8408445` | `60a6720a6c3bd7a2` |
 | `13-tos-notion-context.yml` | `9fa213c94feed404` | `04b9661d52b0f3cb` |
 | `auto-merge-dependabot.yml` | `cc1fdaa050d8091e` | `55e151f35d3fa254` |
-| `ci.yml` | `0cf19f689a4091b7` | `3f80478fa4661ac3` |
+| `ci.yml` | `44d22ca10ae0986c` | `c9aa21dedd92b80f` |
 | `cron-bet-grade.yml` | `9eeddca74c8c5c96` | `df0cd7873a40af34` |
 | `cron-mlb-canonical-refresh.yml` | `4a69c95e1b66065f` | `151981f4f5149841` |
 | `cron-mlb-cycle.yml` | `0c6eb0f142de1488` | `c9487082b6ec9834` |

@@ -19,6 +19,7 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
   readdirSync,
   rmSync,
@@ -81,8 +82,8 @@ function hasDefect(id: string) {
 beforeAll(() => {
   SB = realpathSync(
     (() => {
-      const d = path.join(os.tmpdir(), `ledger-lease-${process.pid}`);
-      rmSync(d, { recursive: true, force: true });
+      // mkdtemp: unpredictable, 0700 — the js/insecure-temporary-file class
+      const d = mkdtempSync(path.join(os.tmpdir(), "ledger-lease-"));
       mkdirSync(path.join(d, "scripts"), { recursive: true });
       mkdirSync(path.join(d, "docs"), { recursive: true });
       cpSync(path.join(REPO_ROOT, "scripts/ci"), path.join(d, "scripts/ci"), {
@@ -120,7 +121,16 @@ describe("P03.LEASE — exclusion and settlement", () => {
               "--title",
               `probe ${i + 1}`,
             ],
-            { stdio: "ignore" }
+            {
+              stdio: "ignore",
+              env: {
+                ...process.env,
+                // Assert serialization correctness, not ambient-load latency:
+                // under a saturated host the default 30s lock budget can
+                // expire while earlier writers hold the lease legitimately.
+                CI_VERIFY_LEDGER_LOCK_TIMEOUT_MS: "120000",
+              },
+            }
           );
           c.on("exit", code => resolve(code ?? -1));
         })
@@ -356,7 +366,16 @@ describe("P03.LEASE — exclusion and settlement", () => {
               "--title",
               `rw ${i}`,
             ],
-            { stdio: "ignore" }
+            {
+              stdio: "ignore",
+              env: {
+                ...process.env,
+                // Assert serialization correctness, not ambient-load latency:
+                // under a saturated host the default 30s lock budget can
+                // expire while earlier writers hold the lease legitimately.
+                CI_VERIFY_LEDGER_LOCK_TIMEOUT_MS: "120000",
+              },
+            }
           );
           c.on("exit", code => resolve(code ?? -1));
         })
@@ -365,7 +384,13 @@ describe("P03.LEASE — exclusion and settlement", () => {
       { length: 20 },
       () =>
         new Promise<number>(resolve => {
-          const c = spawn("node", [cli(), "verify"], { stdio: "ignore" });
+          const c = spawn("node", [cli(), "verify"], {
+            stdio: "ignore",
+            env: {
+              ...process.env,
+              CI_VERIFY_LEDGER_LOCK_TIMEOUT_MS: "120000",
+            },
+          });
           c.on("exit", code => resolve(code ?? -1));
         })
     );

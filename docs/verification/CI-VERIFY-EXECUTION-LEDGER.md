@@ -429,7 +429,7 @@
 | `P06.T11` | TASK | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | Gate: ai-eval set with env -u DATABASE_URL |
 | `P06.T12` | TASK | MANDATORY | `PASS` | 1 | `bf67f9dcfd4f` | CI-ONLY registration with explicit reasons |
 | `P06.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `f6276830197b` `d09ed6edf0b2` | All implemented gates green on a clean snapshot |
-| `P06.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `2757b2258efd` `d09ed6edf0b2` | Executed command is byte-for-byte identical to the frozen contract |
+| `P06.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `5c33cb0f6c36` `d09ed6edf0b2` | Executed command is byte-for-byte identical to the frozen contract |
 | `P06.NEG01` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the typecheck gate for its own reason |
 | `P06.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `SKIPPED_DECLARED` | 1 | — | Poison fixture reddens the format gate for its own reason |
 | `P06.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the semgrep gate for its own reason |
@@ -440,8 +440,8 @@
 | `P06.NEG08` | NEGATIVE_VALIDATION | MANDATORY | `SKIPPED_DECLARED` | 1 | — | Poison fixture reddens the federation-docs gate for its own reason |
 | `P06.NEG09` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the migration-hygiene gate for its own reason |
 | `P06.NEG10` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `807e44769298` | Poison fixture reddens the ai-eval gate for its own reason |
-| `P06.NEG11` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `2757b2258efd` `f6276830197b` | Missing tool yields BLOCKED, never green |
-| `P06.NEG12` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `2757b2258efd` `ebf314113563` | Tool version differing from the contract pin yields CONTRACT-DRIFT |
+| `P06.NEG11` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `5c33cb0f6c36` `f6276830197b` | Missing tool yields BLOCKED, never green |
+| `P06.NEG12` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `5c33cb0f6c36` `ebf314113563` | Tool version differing from the contract pin yields CONTRACT-DRIFT |
 | `P06.AUD01` | AUDIT | MANDATORY | `PASS` | 1 | `bf67f9dcfd4f` `7cec2751f4db` | Audit: network is permitted only in P06.T01 |
 | `P06.GATE01` | ACCEPTANCE_GATE | MANDATORY | `PASS` | 1 | `d09ed6edf0b2` `807e44769298` | Self-test coverage for this phase is 100 percent |
 | `P06.CP01` | CHECKPOINT | MANDATORY | `PASS` | 1 | `71abf520c025` `d09ed6edf0b2` | P06 checkpoint recorded |
@@ -748,6 +748,7 @@
 | `DEF-071` | `closure-audit scenario H2 (sandbox): 20 concurrent writers -> 1 survivor; duplicate-id guard TOCTOU race` | MEDIUM | `CLOSED` | canonical ledger writer loses concurrent updates: load-mutate-persist had no pre-write exclusion and no atomic settlement; corruption was detectable only AFTER the fact |
 | `DEF-072` | `P7 rehearsal attempt 1 (first honest run): migration replay exited 1 with empty stdout` | LOW | `CLOSED` | deploy lib.run() inherited the pnpm-run corepack context: child pnpm failed the packageManager pin inside ci:verify:deploy:* (DEF-062 class recurrence in new code) |
 | `DEF-073` | `P8 attempt 1: p06-roster gitleaks parity gate FAIL on the committed rehearsal evidence` | LOW | `CLOSED` | generic-api-key false positive: rehearsal evidence idempotency_key (derived sha256 of public identifiers) trips the entropy rule on every rehearsal record |
+| `DEF-074` | `PR #512 CI attempt 1 (first-ever GitHub execution of the branch): 12+5 test failures across 01/07/Vitest + CodeQL new-alert check` | MEDIUM | `OPEN` | verifier self-tests and jobs assumed the dev host: shallow checkout without origin/main, missing pinned zizmor on suite runners, sudo that fails locally but succeeds on runners, macOS-only ps -E in teardown, predictable tmpdirs in new suites |
 
 ## Checkpoints
 
