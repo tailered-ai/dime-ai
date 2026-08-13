@@ -156,14 +156,15 @@ export function auditPoisonContainment(options = {}) {
   const classified = [];
   for (const rel of files) {
     const abs = path.join(REPO_ROOT, rel);
-    const stat = statSync(abs, { throwIfNoEntry: false });
-    if (!stat || !stat.isFile() || stat.size > 4 * 1024 * 1024) continue;
+    // No check-then-use: the read IS the probe (EISDIR/ENOENT -> skip); the
+    // size cap applies to the bytes actually read.
     let text;
     try {
       text = readFileSync(abs, "utf8");
     } catch {
-      continue; // binary/unreadable — no textual poison to carry
+      continue; // directory, vanished, or unreadable — no textual poison
     }
+    if (text.length > 4 * 1024 * 1024) continue;
     const hits = POISON_SIGNATURES.filter(sig => sig.re.test(text));
     if (hits.length === 0) continue;
     const signatures = hits.map(h => h.id);

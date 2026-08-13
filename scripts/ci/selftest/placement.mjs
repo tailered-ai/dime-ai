@@ -151,13 +151,12 @@ export function scanTreeForLivePoison(paths, options = {}) {
   const classified = [];
   for (const rel of paths) {
     const abs = path.join(repoRoot, rel);
-    const stat = statSync(abs, { throwIfNoEntry: false });
-    if (!stat || stat.isDirectory()) continue;
+    // No check-then-use: the read IS the probe (EISDIR/ENOENT -> skip).
     let text;
     try {
       text = readFileSync(abs, "utf8");
     } catch {
-      continue; // vanished between stat and read — nothing to classify
+      continue; // directory, vanished, or unreadable — nothing to classify
     }
     const hits = POISON_SIGNATURES.filter(sig => sig.re.test(text));
     if (hits.length === 0) continue;

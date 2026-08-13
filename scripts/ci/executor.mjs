@@ -98,17 +98,18 @@ export function mintRunId(now = new Date()) {
 function hashWalk(dir) {
   const files = [];
   const walk = current => {
-    for (const entry of readdirSync(current).sort()) {
-      const abs = path.join(current, entry);
-      const stat = statSync(abs, { throwIfNoEntry: false });
-      if (!stat) continue;
-      if (stat.isDirectory()) walk(abs);
+    const entries = readdirSync(current, { withFileTypes: true }).sort(
+      (a, b) => (a.name < b.name ? -1 : 1)
+    );
+    for (const entry of entries) {
+      const abs = path.join(current, entry.name);
+      if (entry.isDirectory()) walk(abs);
       else {
         let bytes;
         try {
           bytes = readFileSync(abs);
         } catch {
-          continue; // vanished between stat and read
+          continue; // vanished between listing and read
         }
         files.push(`${path.relative(dir, abs)} ${sha256(bytes)}`);
       }
