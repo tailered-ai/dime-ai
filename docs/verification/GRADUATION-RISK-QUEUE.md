@@ -27,6 +27,18 @@ must be CLOSED and the gate's rejection capability ASSURANCE-proven.**
 | Target phase/date | next UI-loop touching the landing page |
 | Required remediation | raise the pill's contrast to ≥4.5:1, delete the baseline entry, re-run the a11y control |
 
+## Production-path findings (same law: recorded, never hidden)
+
+| Field | DEF-075 |
+| --- | --- |
+| Current severity | HIGH |
+| What it is | Railway auto-deploy bypasses the deployment readiness and authorization gate: merging to protected `main` triggers production BEFORE a main-bound readiness certificate or authorization receipt can exist. The control plane attests the path; it does not control the trigger. Full analysis: `docs/verification/evidence/deploy/DEF-075-analysis.md` |
+| Why non-blocking today | Production execution through the control plane is NOT enabled in this qualification (refusal-only by design), and the merge itself stays human-gated (required review + 24 required green checks). Interim safety rails hold: Dockerfile builder provenance proved from live build logs (`railway-builder-proof.md`), runtime identity verifiable via `RAILWAY_GIT_COMMIT_SHA`, SchemaGuard FATAL blocks migration-skipping deploys |
+| What would make it blocking | Enabling control-plane production execution while auto-deploy still bypasses it; or any weakening of branch protection / required checks on `main` |
+| Owner | repo owner — every remediation mutates production infrastructure (disable Railway auto-deploy) or repository protections (deployment-environment approval gate), both outside initiative authority; Railway mutation tools are hard-denied to agents |
+| Target phase/date | before any owner decision to enable control-plane production execution; options ranked in the analysis (preferred: decouple merge from deploy) |
+| Required remediation | no production provider mutation can begin until the exact protected-main HEAD, artifact identity, target identity, current security state, migration plan, rollback target, and owner authorization receipt are verified — proven by a negative (merge without receipt does not reach production) and a positive (valid receipt does) |
+
 ## Enforcement hook
 
 `P10`'s certificate run must re-read this queue: if any listed check has become

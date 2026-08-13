@@ -4349,6 +4349,92 @@
       "severity": "MEDIUM",
       "status": "CLOSED",
       "title": "verifier self-tests and jobs assumed the dev host: shallow checkout without origin/main, missing pinned zizmor on suite runners, sudo that fails locally but succeeds on runners, macOS-only ps -E in teardown, predictable tmpdirs in new suites"
+    },
+    {
+      "affected_gate": "scripts/ci/deploy/readiness.mjs execute (bypassed by push-to-main auto-deploy)",
+      "blast_radius": "any authorized GitHub merge initiates production deployment without passing receipt/lease/freshness enforcement; merge itself remains human-gated (review + 24 required checks); SchemaGuard FATAL and RAILWAY_GIT_COMMIT_SHA identity remain as independent rails",
+      "closed_at": null,
+      "corrective_action": "OWNER-GATED: decouple merge from deploy (preferred), or gate the trigger with a deployment-environment approval bound to a pre-merge merge-tree readiness certificate; dispositioned in GRADUATION-RISK-QUEUE.md; acceptance condition in docs/verification/evidence/deploy/DEF-075-analysis.md",
+      "detected_by": "independent closure review 2026-08-13 (production-path sequencing analysis)",
+      "evidence": [
+        {
+          "bytes": 4532,
+          "path": "docs/verification/evidence/deploy/DEF-075-analysis.md",
+          "sha256": "3cc4bdf01cab3d38cd635d9740189c0f66bcd766da8b6991a81fdb7ece86ec90"
+        },
+        {
+          "bytes": 1841,
+          "path": "docs/verification/evidence/deploy/railway-builder-proof.md",
+          "sha256": "446aae0666b767802e5139c8233f877360e8cf788915ded6f5cb4591a2fd254f"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-13T14:34:42.725Z",
+          "flags": {
+            "blast_radius": "any authorized GitHub merge initiates production deployment without passing receipt/lease/freshness enforcement; merge itself remains human-gated (review + 24 required checks); SchemaGuard FATAL and RAILWAY_GIT_COMMIT_SHA identity remain as independent rails",
+            "corrective_action": "OWNER-GATED: decouple merge from deploy (preferred), or gate the trigger with a deployment-environment approval bound to a pre-merge merge-tree readiness certificate; dispositioned in GRADUATION-RISK-QUEUE.md; acceptance condition in docs/verification/evidence/deploy/DEF-075-analysis.md",
+            "evidence": [
+              "docs/verification/evidence/deploy/DEF-075-analysis.md",
+              "docs/verification/evidence/deploy/railway-builder-proof.md"
+            ],
+            "root_cause": "merge to protected main triggers Railway production deployment before a main-bound readiness certificate or authorization receipt can exist; the control plane attests the path but does not sit on the trigger"
+          }
+        }
+      ],
+      "id": "DEF-075",
+      "opened_at": "2026-08-13T14:34:42.633Z",
+      "regression_test_id": null,
+      "retest_result": null,
+      "root_cause": "merge to protected main triggers Railway production deployment before a main-bound readiness certificate or authorization receipt can exist; the control plane attests the path but does not sit on the trigger",
+      "severity": "HIGH",
+      "status": "OPEN",
+      "title": "Railway auto-deploy bypasses the deployment readiness and authorization gate"
+    },
+    {
+      "affected_gate": "package.json#ci:verify:deploy",
+      "blast_radius": "the declared operator wrapper only; the four ci:verify:deploy:* subcommands are single-level and unaffected; no certificate was ever issued from a failed wrapper run (it fails before plan.mjs)",
+      "closed_at": "2026-08-13T14:36:48.524Z",
+      "corrective_action": "package.json ci:verify:deploy rewritten to invoke the four node entrypoints directly (plan.mjs, rehearse.mjs, readiness.mjs issue, readiness.mjs verify) — no nested pnpm resolution remains, eliminating the corepack class by construction",
+      "detected_by": "terminal P9 reissue at ecffb186b: pnpm ci:verify:deploy failed twice before reaching any tool",
+      "evidence": [
+        {
+          "bytes": 1251,
+          "path": "docs/verification/evidence/p10/DEF-076-retest.log",
+          "sha256": "2c5b818e2b2bb078de54e3db72a8f1dab6800fe80b6f133c2c01637bf2454e5c"
+        }
+      ],
+      "history": [
+        {
+          "action": "update",
+          "at": "2026-08-13T14:34:58.686Z",
+          "flags": {
+            "blast_radius": "the declared operator wrapper only; the four ci:verify:deploy:* subcommands are single-level and unaffected; no certificate was ever issued from a failed wrapper run (it fails before plan.mjs)",
+            "evidence": [],
+            "root_cause": "the serial wrapper invoked pnpm ci:verify:deploy:* from inside pnpm run; in corepack-mediated shells the INNER pnpm re-resolves to the corepack default (observed 11.19.0) which refuses the repository pin 10.33.0 and exits 1 with zero tools executed (DEF-062/DEF-072 class, this time at the operator interface itself)"
+          }
+        },
+        {
+          "action": "close",
+          "at": "2026-08-13T14:36:48.523Z",
+          "flags": {
+            "corrective_action": "package.json ci:verify:deploy rewritten to invoke the four node entrypoints directly (plan.mjs, rehearse.mjs, readiness.mjs issue, readiness.mjs verify) — no nested pnpm resolution remains, eliminating the corepack class by construction",
+            "evidence": [
+              "docs/verification/evidence/p10/DEF-076-retest.log"
+            ],
+            "retest_result": "reproducing background context: wrapper reaches plan.mjs and propagates its honest DIRTY_TRACKED_TREE refusal (true exit 2); pre-fix it exited 1 before any tool ran; positive full-chain retest at the corrective head follows in the P9 record"
+          }
+        }
+      ],
+      "id": "DEF-076",
+      "opened_at": "2026-08-13T14:34:58.612Z",
+      "regression_test_id": null,
+      "retest_result": "reproducing background context: wrapper reaches plan.mjs and propagates its honest DIRTY_TRACKED_TREE refusal (true exit 2); pre-fix it exited 1 before any tool ran; positive full-chain retest at the corrective head follows in the P9 record",
+      "root_cause": "the serial wrapper invoked pnpm ci:verify:deploy:* from inside pnpm run; in corepack-mediated shells the INNER pnpm re-resolves to the corepack default (observed 11.19.0) which refuses the repository pin 10.33.0 and exits 1 with zero tools executed (DEF-062/DEF-072 class, this time at the operator interface itself)",
+      "severity": "LOW",
+      "status": "CLOSED",
+      "title": "ci:verify:deploy wrapper nests pnpm-in-pnpm; corepack re-resolution can refuse the project pin before any tool runs"
     }
   ],
   "gate_results": [],
