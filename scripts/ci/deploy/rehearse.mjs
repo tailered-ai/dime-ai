@@ -97,7 +97,10 @@ function containerState(name) {
 }
 
 function gracefulStop(name) {
-  const stop = docker(["stop", "-t", "25", name], { timeout: 60_000 });
+  // Empirical: this daemon's SIGKILL escalation makes `docker stop -t 25`
+  // take ~51s wall on a SIGTERM-ignoring container — 120s keeps headroom
+  // under load (attempt 3 failed on exactly this margin).
+  const stop = docker(["stop", "-t", "25", name], { timeout: 120_000 });
   const state = containerState(name);
   return { stopped: stop.status === 0, exit_code: state?.exit_code ?? null };
 }
@@ -449,6 +452,15 @@ async function main() {
     record.finished_at = new Date().toISOString();
     record.verdict = verdict;
     writeJson(REHEARSAL_PATH, record);
+    // Failed evidence is never overwritten: every attempt also lands in an
+    // append-only per-attempt archive.
+    writeJson(
+      path.join(
+        OUT_DIR,
+        `rehearsal-${record.started_at.replace(/[:.]/g, "-")}.json`
+      ),
+      record
+    );
     journal({ step: "rehearse-done", verdict, residue });
     releaseDeployLease(TARGET);
   }
