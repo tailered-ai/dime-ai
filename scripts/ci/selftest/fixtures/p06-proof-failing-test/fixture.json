@@ -4,7 +4,7 @@
   "expected_gate": ".github/workflows/01-pr-proof-contract.yml#proof",
   "poison_mode": "patch",
   "expected_status": "FAIL",
-  "expected_failed_step": 6,
+  "expected_failed_step": 7,
   "expected_reason": [
     {
       "source": "step_stderr",
@@ -16,13 +16,15 @@
     },
     {
       "source": "result_reason",
-      "regex": "DETECTOR_FAILED: step 6"
+      "regex": "DETECTOR_FAILED: step 7"
     }
   ],
   "control_expectation": {
     "status": "PASS"
   },
-  "expected_changed_paths": ["server/p06ProofAssurancePoison.test.ts"],
+  "expected_changed_paths": [
+    "server/p06ProofAssurancePoison.test.ts"
+  ],
   "timeout_ms": 2400000,
   "allowed_execution_artifacts": [
     "vitest-results.json",
