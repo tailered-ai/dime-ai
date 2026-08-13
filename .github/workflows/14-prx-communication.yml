@@ -5,6 +5,12 @@
 # list; graduation follows docs/verification/ROLLOUT.md and is an owner
 # ruleset action after independent review.
 #
+# HARD GRADUATION BLOCKER (remediation R6): PRX must not enter enforcing
+# mode and must not become a required status check while the pull-request
+# head controls this workflow file (GitHub runs it from the head on
+# pull_request events). Graduation requires a separately reviewed
+# base-controlled orchestration mechanism first — see threat-model.md A4.
+#
 # Trusted boundary (SOL-PRX-004, threat model at
 # docs/verification/prx/threat-model.md): policy code that produces the
 # verdict is checked out from the event's BASE SHA into ./base and executed
@@ -86,32 +92,56 @@ jobs:
           cache: pnpm
           cache-dependency-path: ${{ steps.policy.outputs.dir }}/pnpm-lock.yaml
 
-      - name: "[POLICY] Frozen install against the policy tree's own lockfile"
+      # --ignore-scripts (remediation R7): during the explicitly UNTRUSTED
+      # bootstrap the policy tree IS the head, so dependency lifecycle
+      # scripts must never execute. Kept on in trusted mode too — the lane
+      # only needs modules resolvable, never install-time code execution.
+      # No secrets exist in this job; the bootstrap result proves
+      # operability only. Regression: scripts/prx/bootstrap-install.test.ts.
+      - name: "[POLICY] Frozen install, lifecycle scripts disabled"
         env:
           POLICY: ${{ steps.policy.outputs.dir }}
-        run: pnpm -C "$POLICY" install --frozen-lockfile
+        run: pnpm -C "$POLICY" install --frozen-lockfile --ignore-scripts
 
+      # The negative control demands exit code EXACTLY 1 (blocked by
+      # enforcement). A crash (exit 2) must NOT satisfy it — a crashing
+      # enforcer is not a working gate (remediation review finding).
       - name: "[CANARY] Healthy fixture passes; broken control FAILS in enforcing mode"
         env:
           POLICY: ${{ steps.policy.outputs.dir }}
         run: |
           node "$POLICY/scripts/prx/check-commit.mjs" \
             "$POLICY/scripts/prx/fixtures/commit/healthy-basic.txt" --mode=enforcing
-          if node "$POLICY/scripts/prx/check-commit.mjs" \
+          set +e
+          node "$POLICY/scripts/prx/check-commit.mjs" \
             "$POLICY/docs/verification/prx/adversarial-fixtures/commit/C08.txt" \
-            --mode=enforcing >/dev/null 2>&1; then
-            echo "::error::negative control C08 did not fail — the gate cannot fail; failing closed"
+            --mode=enforcing >/dev/null 2>&1
+          C08_EXIT=$?
+          set -e
+          if [ "$C08_EXIT" -ne 1 ]; then
+            echo "::error::negative control C08 exited $C08_EXIT (must be exactly 1: blocked by enforcement, not a crash or a pass); failing closed"
             exit 1
           fi
 
-      - name: "[AUDIT] Commit range (exact event SHAs, explicit merge base)"
+      # Merge-base resolution FAILS CLOSED (remediation R2): both
+      # authenticated event SHAs must exist, and resolve-range.mjs (the
+      # tested module, executed directly — not a bash mirror) validates the
+      # merge base is a full 40-hex SHA and an ancestor of HEAD_SHA. Any
+      # failure is a red tool failure; no fallback range is ever used.
+      - name: "[AUDIT] Commit range (exact event SHAs, fail-closed merge base)"
         if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         env:
           POLICY: ${{ steps.policy.outputs.dir }}
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
         run: |
-          MERGE_BASE=$(git -C head merge-base "$BASE_SHA" "$HEAD_SHA" || echo "$BASE_SHA")
+          git -C head cat-file -e "${BASE_SHA}^{commit}"
+          git -C head cat-file -e "${HEAD_SHA}^{commit}"
+          MERGE_BASE=$(node "$POLICY/scripts/prx/resolve-range.mjs" \
+            --repo head --base "$BASE_SHA" --head "$HEAD_SHA") || {
+            echo "::error::Unable to resolve the merge base for the authenticated event SHAs"
+            exit 1
+          }
           {
             echo "## PRX commit audit ($TRUST)"
             echo '```'

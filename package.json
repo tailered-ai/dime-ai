@@ -165,6 +165,8 @@
     "esbuild": "^0.28.1",
     "fast-check": "^4.9.0",
     "mdast-util-from-markdown": "2.0.2",
+    "mdast-util-gfm": "3.1.0",
+    "micromark-extension-gfm": "3.0.0",
     "pnpm": "^11.19.0",
     "postcss": "^8.5.25",
     "prettier": "^3.9.6",

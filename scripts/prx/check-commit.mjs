@@ -51,6 +51,13 @@ export function listCommits(repoDir, range) {
     commits.push({
       sha,
       isMerge: parents.trim().split(/\s+/).filter(Boolean).length > 1,
+      // Honesty bound (remediation review): in range mode the bot signal
+      // comes from the commit's OWN author fields, which the commit
+      // author controls — it is a claimed identity, not authenticated
+      // metadata. Its only power is SUPPRESSING the prefix finding, so a
+      // forged "[bot]" grants nothing; enforcing-mode graduation should
+      // bind this exemption to authenticated event metadata instead
+      // (standard §10).
       authorIsBot: /\[bot\]/i.test(`${authorName} ${authorEmail}`),
       message,
     });
@@ -129,9 +136,23 @@ export function main(argv = process.argv.slice(2)) {
     }
     const all = results.flatMap(r => r.findings);
     const verdict = resolveVerdict(mode, all);
+    // R3 honesty in the diagnostics themselves: the range audit validates
+    // the governed schema only for commits that opt in (--governed) or
+    // self-declare via a Run-Id/Evidence trailer; it does not decide which
+    // commits ought to be governed.
+    const governedScope =
+      "opt-in: governed schema enforced only via --governed or a " +
+      "Run-Id/Evidence trailer; this audit does not classify commits as " +
+      "governed";
     if (flags.json) {
       process.stdout.write(
-        `${JSON.stringify({ results, verdict }, null, 2)}\n`
+        `${JSON.stringify(
+          range !== undefined
+            ? { results, verdict, governedScope }
+            : { results, verdict },
+          null,
+          2
+        )}\n`
       );
     } else {
       for (const r of results) printFindings(` [${r.id}]`, r.findings);
@@ -140,6 +161,9 @@ export function main(argv = process.argv.slice(2)) {
         `PRX commit gate: ${errors} error(s), ${all.length - errors} ` +
           `advisory; mode=${mode}; exit=${verdict.exitCode}\n`
       );
+      if (range !== undefined) {
+        process.stdout.write(`note: governed scope is ${governedScope}\n`);
+      }
     }
     return verdict.exitCode;
   } catch (err) {

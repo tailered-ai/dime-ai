@@ -136,6 +136,7 @@ export function checkCommit(raw, opts = {}) {
   const findings = [];
   if (typeof raw !== "string" || raw.length > SIZE_LIMIT) {
     findings.push(
+      // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
       makeFinding("PRX-C-SIZE", "commit message exceeds the 1 MiB bound")
     );
     return findings;
@@ -147,12 +148,14 @@ export function checkCommit(raw, opts = {}) {
 
   // PRX-C-SUBJECT
   if (subject.trim() === "") {
+    // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
     findings.push(makeFinding("PRX-C-SUBJECT", "subject line is empty", 1));
   } else {
     if (subject !== subject.trim()) {
       findings.push(
         makeFinding(
           "PRX-C-SUBJECT",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "subject has leading or trailing whitespace",
           1
         )
@@ -160,12 +163,14 @@ export function checkCommit(raw, opts = {}) {
     }
     if (/\.\s*$/.test(subject)) {
       findings.push(
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         makeFinding("PRX-C-SUBJECT", "subject ends with a period", 1)
       );
     }
     // eslint-disable-next-line no-control-regex
     if (/[\u0000-\u0008\u000b-\u001f\u007f]/.test(subject)) {
       findings.push(
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         makeFinding("PRX-C-SUBJECT", "subject contains control characters", 1)
       );
     }
@@ -183,7 +188,9 @@ export function checkCommit(raw, opts = {}) {
     findings.push(
       makeFinding(
         "PRX-C-FIXUP",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         "fixup!/squash! commit must be autosquashed before it reaches a " +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "mainline range",
         1
       )
@@ -192,8 +199,11 @@ export function checkCommit(raw, opts = {}) {
     findings.push(
       makeFinding(
         "PRX-C-PREFIX",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         "subject does not match the repository convention " +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           '"type(scope): summary"; merge/bot/revert exemptions require ' +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "topology or authenticated metadata",
         1
       )
@@ -205,7 +215,9 @@ export function checkCommit(raw, opts = {}) {
     findings.push(
       makeFinding(
         "PRX-C-SEPARATOR",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         `exactly one blank line must separate subject and body ` +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           `(found ${separatorBlanks})`,
         2
       )
@@ -217,6 +229,7 @@ export function checkCommit(raw, opts = {}) {
     findings.push(
       makeFinding(
         "PRX-C-LENGTH",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         `subject is ${subject.length} characters (advisory threshold 72)`,
         1
       )
@@ -226,6 +239,7 @@ export function checkCommit(raw, opts = {}) {
   // PRX-C-FENCE
   if (unclosedFence) {
     findings.push(
+      // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
       makeFinding("PRX-C-FENCE", "unclosed code fence in commit body")
     );
   }
@@ -240,7 +254,9 @@ export function checkCommit(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-C-WRAP",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           `body line is ${l.text.length} columns ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             `(${withoutUrls.length} excluding URL tokens; advisory limit 72)`,
           l.line
         )
@@ -260,6 +276,7 @@ export function checkCommit(raw, opts = {}) {
         findings.push(
           makeFinding(
             "PRX-C-TRAILER",
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             `trailer "${e.key}" has an empty value`,
             e.line
           )
@@ -271,8 +288,25 @@ export function checkCommit(raw, opts = {}) {
         findings.push(
           makeFinding(
             "PRX-C-TRAILER",
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             `governed trailer "${key}" appears ${counts.get(key)} times ` +
+              // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
               "(exactly once required)"
+          )
+        );
+      }
+    }
+    // Co-Authored-By value grammar is validated WHEREVER the trailer
+    // appears — a malformed lone Co-Authored-By is a trailer-grammar error
+    // and never activates the governed Run-Id/Evidence requirements (R3).
+    for (const e of trailers.entries) {
+      if (e.key === "Co-Authored-By" && !CO_AUTHOR_RE.test(e.value)) {
+        findings.push(
+          makeFinding(
+            "PRX-C-TRAILER",
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            `Co-Authored-By "${truncate(e.value)}" is not "Name <email>"`,
+            e.line
           )
         );
       }
@@ -291,6 +325,7 @@ export function checkCommit(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-C-GOV",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           `governed commit must carry Run-Id exactly once (found ${runIds.length})`
         )
       );
@@ -298,7 +333,9 @@ export function checkCommit(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-C-GOV",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           `Run-Id "${truncate(runIds[0].value)}" does not match ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             "ONE-YYYYMMDD-TOKEN",
           runIds[0].line
         )
@@ -309,6 +346,7 @@ export function checkCommit(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-C-GOV",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           `governed commit must carry Evidence exactly once (found ${evidences.length})`
         )
       );
@@ -318,32 +356,25 @@ export function checkCommit(raw, opts = {}) {
         findings.push(
           makeFinding(
             "PRX-C-GOV",
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             `Evidence "${truncate(v)}" is not a bounded run/ or docs/ ` +
+              // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
               "reference (or UNKNOWN)",
             evidences[0].line
           )
         );
       }
     }
-    const coAuthors = byKey("Co-Authored-By");
-    if (coAuthors.length === 0) {
+    // Presence only: the value grammar is already enforced by the
+    // always-on PRX-C-TRAILER pass above, governed or not (R3).
+    if (byKey("Co-Authored-By").length === 0) {
       findings.push(
         makeFinding(
           "PRX-C-GOV",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "governed commit must carry at least one Co-Authored-By trailer"
         )
       );
-    }
-    for (const c of coAuthors) {
-      if (!CO_AUTHOR_RE.test(c.value)) {
-        findings.push(
-          makeFinding(
-            "PRX-C-GOV",
-            `Co-Authored-By "${truncate(c.value)}" is not "Name <email>"`,
-            c.line
-          )
-        );
-      }
     }
   }
 
@@ -355,7 +386,9 @@ export function checkCommit(raw, opts = {}) {
     findings.push(
       makeFinding(
         "PRX-C-MOOD",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         "subject reads as indicative (copula heuristic); write the summary " +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "as an instruction",
         1
       )

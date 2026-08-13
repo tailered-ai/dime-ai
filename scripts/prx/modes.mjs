@@ -24,7 +24,9 @@ export const APPROVED_BLOCKING = Object.freeze(
     "PRX-C-FIXUP",
     "PRX-B-SIZE",
     "PRX-B-VISIBLE",
-    "PRX-B-SECTION",
+    "PRX-B-SECTION-MISSING",
+    "PRX-B-SECTION-DUP",
+    "PRX-B-SECTION-EMPTY",
     "PRX-B-CAPSULE",
   ].filter(id => {
     if (ruleClass(id) !== "deterministic") {

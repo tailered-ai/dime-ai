@@ -244,3 +244,4 @@ dime-ai/design-bundle/**/uploads/
 
 # Stryker mutation reports (generated; PRX lane and future scoped runs)
 /reports/
+/.stryker-tmp-prx/

@@ -7,6 +7,13 @@
 // generic seven. The identifier capsule is OPTIONAL (0/10 sampled live PRs
 // carry one); when present it is validated strictly.
 import { fromMarkdown } from "mdast-util-from-markdown";
+// GFM fidelity (remediation R4/R5): GitHub renders PR bodies as GFM, so
+// tables, task-list checkboxes, footnotes, and autolinks must parse as
+// their real node types — without this, table rows land in paragraph nodes
+// and leak into the extracted narrative prose. Both packages were already
+// in the lockfile via remark-gfm (zero new packages).
+import { gfmFromMarkdown } from "mdast-util-gfm";
+import { gfm } from "micromark-extension-gfm";
 import {
   makeFinding,
   REF_MAX_LENGTH,
@@ -58,13 +65,23 @@ function isCommentNode(node) {
 }
 
 function inlineText(node) {
+  // A hard line break renders as a newline; dropping it would let a
+  // Unicode bullet hide behind a break ("line one  \n• two" must still
+  // match the line-anchored bullet detector).
+  if (node.type === "break") return "\n";
   if (node.value !== undefined && node.type !== "html") return node.value;
   if (!node.children) return "";
   return node.children.map(inlineText).join("");
 }
 
 function isCapsuleCandidate(node) {
-  if (node.type !== "code") return false;
+  // The capsule convention is a BARE fence. A language-labeled fence is
+  // never a capsule candidate — otherwise a body that quotes a governed
+  // commit message (Run-Id:/Evidence:/Co-Authored-By: trailers) inside a
+  // ```text fence would be torn apart by the strict capsule validator
+  // (remediation review finding, HIGH). Labeling the fence is also
+  // exactly the escape hatch PRX-B-FENCE's own guidance recommends.
+  if (node.type !== "code" || node.lang) return false;
   const lines = node.value.split("\n");
   return lines.some(l => {
     const m = l.match(CAPSULE_LINE_RE);
@@ -73,7 +90,10 @@ function isCapsuleCandidate(node) {
 }
 
 export function parseBody(raw) {
-  const tree = fromMarkdown(raw);
+  const tree = fromMarkdown(raw, {
+    extensions: [gfm()],
+    mdastExtensions: [gfmFromMarkdown()],
+  });
   const top = tree.children ?? [];
   const visible = top.filter(n => !isCommentNode(n));
   const comments = top.filter(isCommentNode);
@@ -83,6 +103,7 @@ export function parseBody(raw) {
 export function checkBody(raw, opts = {}) {
   const findings = [];
   if (typeof raw !== "string" || raw.length > SIZE_LIMIT) {
+    // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
     findings.push(makeFinding("PRX-B-SIZE", "PR body exceeds the 1 MiB bound"));
     return findings;
   }
@@ -93,7 +114,9 @@ export function checkBody(raw, opts = {}) {
     findings.push(
       makeFinding(
         "PRX-B-SIZE",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         "PR body could not be parsed within resource bounds (pathological " +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "structure); simplify the document"
       )
     );
@@ -106,6 +129,7 @@ export function checkBody(raw, opts = {}) {
     findings.push(
       makeFinding(
         "PRX-B-VISIBLE",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         "PR body has no visible content once HTML comments are removed"
       )
     );
@@ -121,7 +145,9 @@ export function checkBody(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-B-COMMENT",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "contract-shaped content (headings or capsule keys) appears only " +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             "inside an HTML comment",
           c.position?.start.line
         )
@@ -136,6 +162,7 @@ export function checkBody(raw, opts = {}) {
     findings.push(
       makeFinding(
         "PRX-B-CAPSULE",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         `found ${capsules.length} identifier capsules (at most one allowed)`
       )
     );
@@ -146,7 +173,9 @@ export function checkBody(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-B-CAPSULE",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "visible content precedes the identifier capsule (the capsule " +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             "must be the first visible block)",
           capsule.position?.start.line
         )
@@ -160,6 +189,7 @@ export function checkBody(raw, opts = {}) {
         findings.push(
           makeFinding(
             "PRX-B-CAPSULE",
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             `capsule contains a non-key line: "${truncate(rawLine)}"`
           )
         );
@@ -172,6 +202,7 @@ export function checkBody(raw, opts = {}) {
       const values = seen.get(key) ?? [];
       if (values.length === 0) {
         findings.push(
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           makeFinding("PRX-B-CAPSULE", `capsule key "${key}" is missing`)
         );
         continue;
@@ -180,6 +211,7 @@ export function checkBody(raw, opts = {}) {
         findings.push(
           makeFinding(
             "PRX-B-CAPSULE",
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             `capsule key "${key}" appears ${values.length} times`
           )
         );
@@ -187,6 +219,7 @@ export function checkBody(raw, opts = {}) {
       const value = values[0];
       if (value === "") {
         findings.push(
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           makeFinding("PRX-B-CAPSULE", `capsule key "${key}" has no value`)
         );
         continue;
@@ -195,6 +228,7 @@ export function checkBody(raw, opts = {}) {
         findings.push(
           makeFinding(
             "PRX-B-CAPSULE",
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             `capsule key "${key}" carries the placeholder "${value}"`
           )
         );
@@ -223,24 +257,34 @@ export function checkBody(raw, opts = {}) {
     );
     if (matches.length === 0) {
       findings.push(
-        makeFinding("PRX-B-SECTION", `section "${name}" is missing`)
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+        makeFinding("PRX-B-SECTION-MISSING", `section "${name}" is missing`)
       );
     } else if (matches.length > 1) {
       findings.push(
         makeFinding(
-          "PRX-B-SECTION",
+          "PRX-B-SECTION-DUP",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           `section "${name}" appears ${matches.length} times ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             "(exactly once required)",
           matches[1].line
         )
       );
     }
-    if (matches.length >= 1 && sectionIsEmpty(visible, matches[0].node)) {
+    if (
+      matches.length >= 1 &&
+      !hasVisibleSectionContent(visible, matches[0].node)
+    ) {
       findings.push(
         makeFinding(
-          "PRX-B-SECTION",
-          `section "${name}" is empty; the live template requires "none" ` +
-            "to be written explicitly where a section does not apply",
+          "PRX-B-SECTION-EMPTY",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `section "${name}" has no meaningful visible content; the live ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            'template requires "none" to be written explicitly where a ' +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            "section does not apply",
           matches[0].line
         )
       );
@@ -256,6 +300,7 @@ export function checkBody(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-B-ORDER",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "template sections appear out of template order"
         )
       );
@@ -273,7 +318,9 @@ export function checkBody(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-B-EXT",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           `extension heading "${h.text}" is outside the template and its ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             "allowlist",
           h.line
         )
@@ -289,6 +336,7 @@ export function checkBody(raw, opts = {}) {
         findings.push(
           makeFinding(
             "PRX-B-STRUCTURE",
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             "Unicode bullet renders as a list item in narrative",
             node.position?.start.line
           )
@@ -302,6 +350,7 @@ export function checkBody(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-B-STRUCTURE",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "blockquoted list still renders as a list",
           node.position?.start.line
         )
@@ -315,6 +364,7 @@ export function checkBody(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-B-STRUCTURE",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "raw HTML list renders as a list",
           node.position?.start.line
         )
@@ -325,7 +375,9 @@ export function checkBody(raw, opts = {}) {
     findings.push(
       makeFinding(
         "PRX-B-STRUCTURE",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
         "entity-encoded dash decodes to punctuation when rendered; write " +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "the character itself so audits see what readers see"
       )
     );
@@ -338,8 +390,11 @@ export function checkBody(raw, opts = {}) {
       findings.push(
         makeFinding(
           "PRX-B-FENCE",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           "unlabeled fenced block reads as narrative or a list; label the " +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             "fence (e.g. ```text) or move prose out of it — fenced content " +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             "is audited, not exempt",
           node.position?.start.line
         )
@@ -350,8 +405,28 @@ export function checkBody(raw, opts = {}) {
   return findings;
 }
 
-// Narrative text for the style layer: paragraph text of visible,
-// non-code content, with entities already decoded by the parser.
+// Narrative text for the style layer (remediation R4): ONLY designated
+// narrative paragraphs, selected by a parent-aware traversal. A paragraph
+// nested under any structured container — list, listItem, table, tableRow,
+// tableCell, blockquote, code, html, heading, or a definition-like block —
+// is structured content, not narrative, and never reaches Vale. The
+// identifier capsule and evidence-record YAML are code blocks and are
+// excluded the same way; template checkbox fields live inside listItems.
+// Entities in real narrative arrive already decoded by the parser.
+const PROSE_EXCLUDED_ANCESTORS = new Set([
+  "list",
+  "listItem",
+  "table",
+  "tableRow",
+  "tableCell",
+  "blockquote",
+  "code",
+  "html",
+  "heading",
+  "definition",
+  "footnoteDefinition",
+]);
+
 export function extractProse(raw) {
   if (typeof raw !== "string" || raw.length > SIZE_LIMIT) return "";
   let visible;
@@ -361,9 +436,22 @@ export function extractProse(raw) {
     return "";
   }
   const out = [];
-  walk(visible, node => {
-    if (node.type === "paragraph") out.push(inlineText(node));
-  });
+  // Iterative parent-aware traversal: exclusion is inherited from ANY
+  // ancestor, and attacker-controlled nesting depth never becomes JS
+  // call-stack depth.
+  const stack = visible.map(node => ({ node, excluded: false })).reverse();
+  while (stack.length > 0) {
+    const { node, excluded } = stack.pop();
+    const excludedHere = excluded || PROSE_EXCLUDED_ANCESTORS.has(node.type);
+    if (node.type === "paragraph" && !excludedHere) {
+      out.push(inlineText(node));
+    }
+    if (node.children) {
+      for (let i = node.children.length - 1; i >= 0; i -= 1) {
+        stack.push({ node: node.children[i], excluded: excludedHere });
+      }
+    }
+  }
   return out.join("\n\n");
 }
 
@@ -372,11 +460,14 @@ function capsuleValueError(key, value) {
     case "Scope":
       return SCOPE_RE.test(value)
         ? null
-        : `capsule Scope "${truncate(value)}" does not match TOS-<number>`;
+        : // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `capsule Scope "${truncate(value)}" does not match TOS-<number>`;
     case "Run-Id":
       return RUN_ID_RE.test(value)
         ? null
-        : `capsule Run-Id "${truncate(value)}" does not match ` +
+        : // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `capsule Run-Id "${truncate(value)}" does not match ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             "ONE-YYYYMMDD-TOKEN";
     case "Base":
     case "Head":
@@ -387,22 +478,66 @@ function capsuleValueError(key, value) {
     case "Evidence":
       return value.length <= REF_MAX_LENGTH && REF_RE.test(value)
         ? null
-        : `capsule ${key} "${truncate(value)}" is not a bounded run/ or ` +
+        : // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `capsule ${key} "${truncate(value)}" is not a bounded run/ or ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
             "docs/ reference (or UNKNOWN)";
     default:
       return null;
   }
 }
 
-function sectionIsEmpty(visible, headingNode) {
+// Remediation R5: a section is non-empty only when it contains MEANINGFUL
+// rendered text or accepted structured content — node presence is not
+// enough. Rejected as content: whitespace, empty fences, thematic breaks,
+// HTML comments and empty HTML, alt-less images, label-less links, empty
+// lists/tables, and subheadings with nothing under them.
+function hasVisibleSectionContent(visible, headingNode) {
   const start = visible.indexOf(headingNode);
   for (let i = start + 1; i < visible.length; i += 1) {
     const n = visible[i];
-    if (n.type === "heading" && n.depth <= 2) return true;
-    if (n.type === "heading") continue;
-    return false;
+    if (n.type === "heading" && n.depth <= 2) return false;
+    if (nodeHasVisibleContent(n)) return true;
   }
-  return true;
+  return false;
+}
+
+function nodeHasVisibleContent(node) {
+  switch (node.type) {
+    case "heading": // a heading with no following content is not content
+    case "thematicBreak":
+    case "definition": // link-reference definitions never render
+    case "footnoteDefinition": // renders at document bottom, not in-section
+      return false;
+    case "code":
+      // A populated structured block (evidence YAML, capsule) counts; an
+      // empty fence does not.
+      return node.value.trim() !== "";
+    case "html":
+      return visibleInlineText(node).trim() !== "";
+    case "list":
+    case "listItem":
+    case "table":
+    case "tableRow":
+    case "blockquote":
+      return (node.children ?? []).some(nodeHasVisibleContent);
+    default:
+      return visibleInlineText(node).trim() !== "";
+  }
+}
+
+// Text a reader actually sees: image alt text counts (where non-empty),
+// link labels count, HTML comments and bare tags count for nothing.
+function visibleInlineText(node) {
+  if (node.type === "image" || node.type === "imageReference") {
+    return node.alt ?? "";
+  }
+  if (node.type === "html") {
+    return node.value.replace(/<!--[\s\S]*?-->/g, "").replace(/<[^>]*>/g, "");
+  }
+  if (node.value !== undefined) return node.value;
+  if (!node.children) return "";
+  return node.children.map(visibleInlineText).join("");
 }
 
 function looksNarrative(value) {
