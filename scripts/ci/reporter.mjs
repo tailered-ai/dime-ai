@@ -54,12 +54,24 @@ export class JsonlReporter {
   constructor(filePath) {
     this.filePath = filePath;
     this.seen = new Set();
-    if (existsSync(filePath)) {
+    let present = true;
+    try {
+      readFileSync(filePath);
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+      present = false;
+      // wx: create-exclusive — a concurrent creator loses cleanly instead of
+      // truncating (the exists-then-write race CodeQL flags).
+      try {
+        writeFileSync(filePath, "", { flag: "wx" });
+      } catch (createError) {
+        if (createError.code !== "EEXIST") throw createError;
+      }
+    }
+    if (present) {
       for (const record of readResults(filePath).results) {
         this.seen.add(record.gate_id);
       }
-    } else {
-      writeFileSync(filePath, "");
     }
   }
 

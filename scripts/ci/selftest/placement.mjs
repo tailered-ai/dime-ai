@@ -151,8 +151,14 @@ export function scanTreeForLivePoison(paths, options = {}) {
   const classified = [];
   for (const rel of paths) {
     const abs = path.join(repoRoot, rel);
-    if (!existsSync(abs) || statSync(abs).isDirectory()) continue;
-    const text = readFileSync(abs, "utf8");
+    const stat = statSync(abs, { throwIfNoEntry: false });
+    if (!stat || stat.isDirectory()) continue;
+    let text;
+    try {
+      text = readFileSync(abs, "utf8");
+    } catch {
+      continue; // vanished between stat and read — nothing to classify
+    }
     const hits = POISON_SIGNATURES.filter(sig => sig.re.test(text));
     if (hits.length === 0) continue;
     const underApproved = APPROVED_FIXTURE_ROOTS.some(root =>

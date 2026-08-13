@@ -103,8 +103,15 @@ function hashWalk(dir) {
       const stat = statSync(abs, { throwIfNoEntry: false });
       if (!stat) continue;
       if (stat.isDirectory()) walk(abs);
-      else
-        files.push(`${path.relative(dir, abs)} ${sha256(readFileSync(abs))}`);
+      else {
+        let bytes;
+        try {
+          bytes = readFileSync(abs);
+        } catch {
+          continue; // vanished between stat and read
+        }
+        files.push(`${path.relative(dir, abs)} ${sha256(bytes)}`);
+      }
     }
   };
   walk(dir);

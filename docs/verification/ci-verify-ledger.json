@@ -10925,9 +10925,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 22972,
+          "bytes": 22913,
           "path": "scripts/ci/snapshot.test.ts",
-          "sha256": "89e487fe0c20e166d0997434c6e61da8f8770feaa2192bee7991b89959a54981"
+          "sha256": "f1c9f176a046da003a2be4cd26e456c54b503632abb20ddd0e95d9911fadd03f"
         },
         {
           "bytes": 12003,
@@ -10943,7 +10943,8 @@
       "negative_validation": null,
       "notes": [
         "dirty-tree refusal is P01.NEG02, exercised live at the snapshot layer (snapshot.test.ts); committed-mode candidates make diff-aware gates structurally immune to working-tree dirt; the equivalent verdict-safety refusal (evidence base != candidate base) is directly tested as p07 NEG08",
-        "REEVIDENCE 2026-08-12T08:22:48.604Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: scripts/ci/snapshot.test.ts@89e487fe0c20, scripts/ci/p07/p07.test.ts@ee00e1e92bc0"
+        "REEVIDENCE 2026-08-12T08:22:48.604Z: p07.test.ts subprocess budgets equal-bounded to the 15s testTimeout (timeout-consistency program) | superseded: scripts/ci/snapshot.test.ts@89e487fe0c20, scripts/ci/p07/p07.test.ts@ee00e1e92bc0",
+        "REEVIDENCE 2026-08-13T11:58:53.971Z: DEF-074/CodeQL hardening: race-free reads (stat throwIfNoEntry + try/catch), wx-exclusive hook creation, contained static-server paths, readFileSync over cat; re-pinned to the corrected implementation | superseded: scripts/ci/snapshot.test.ts@89e487fe0c20, scripts/ci/p07/p07.test.ts@4ddb0099b9c1"
       ],
       "phase": "P07",
       "remediation": null,
@@ -12510,9 +12511,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 19898,
+          "bytes": 20309,
           "path": "scripts/ci/p09/run-p09.mjs",
-          "sha256": "7dc0c4cc548ac6a0dd757fca51d643c9c3181aa335311be340832e9815285843"
+          "sha256": "f4351a1cfa805d291c20c2d74657bb13c6b36a9d00447e22b7a8d388303ba31c"
         },
         {
           "bytes": 401,
@@ -12527,7 +12528,8 @@
       "kind": "TASK",
       "negative_validation": null,
       "notes": [
-        "REEVIDENCE 2026-08-12T10:24:50.628Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p09/run-p09.mjs@99da11dcd287, docs/verification/evidence/p09/T24-final-run.log@0e36381a205f"
+        "REEVIDENCE 2026-08-12T10:24:50.628Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p09/run-p09.mjs@99da11dcd287, docs/verification/evidence/p09/T24-final-run.log@0e36381a205f",
+        "REEVIDENCE 2026-08-13T11:58:54.127Z: DEF-074/CodeQL hardening: race-free reads (stat throwIfNoEntry + try/catch), wx-exclusive hook creation, contained static-server paths, readFileSync over cat; re-pinned to the corrected implementation | superseded: scripts/ci/p09/run-p09.mjs@7dc0c4cc548a, docs/verification/evidence/p09/T24-final-run.log@0e36381a205f"
       ],
       "phase": "P09",
       "remediation": null,
@@ -12545,9 +12547,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 19898,
+          "bytes": 20309,
           "path": "scripts/ci/p09/run-p09.mjs",
-          "sha256": "7dc0c4cc548ac6a0dd757fca51d643c9c3181aa335311be340832e9815285843"
+          "sha256": "f4351a1cfa805d291c20c2d74657bb13c6b36a9d00447e22b7a8d388303ba31c"
         },
         {
           "bytes": 401,
@@ -12562,7 +12564,8 @@
       "kind": "TASK",
       "negative_validation": null,
       "notes": [
-        "REEVIDENCE 2026-08-12T10:24:50.673Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p09/run-p09.mjs@99da11dcd287, docs/verification/evidence/p09/T24-final-run.log@0e36381a205f"
+        "REEVIDENCE 2026-08-12T10:24:50.673Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p09/run-p09.mjs@99da11dcd287, docs/verification/evidence/p09/T24-final-run.log@0e36381a205f",
+        "REEVIDENCE 2026-08-13T11:58:54.217Z: DEF-074/CodeQL hardening: race-free reads (stat throwIfNoEntry + try/catch), wx-exclusive hook creation, contained static-server paths, readFileSync over cat; re-pinned to the corrected implementation | superseded: scripts/ci/p09/run-p09.mjs@7dc0c4cc548a, docs/verification/evidence/p09/T24-final-run.log@0e36381a205f"
       ],
       "phase": "P09",
       "remediation": null,
@@ -13082,9 +13085,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 16604,
+          "bytes": 16840,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "ce96dd2b4341057dc24715cd351b60cdd8b7a2ff539c9fdf859be319aca244c4"
+          "sha256": "39a826eb1fb380df89a721abe30374a959e15c9fbad1868fbc1d7f8109fed410"
         },
         {
           "bytes": 3774,
@@ -13100,7 +13103,8 @@
       "negative_validation": null,
       "notes": [
         "REEVIDENCE 2026-08-12T10:24:50.754Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261",
-        "REEVIDENCE 2026-08-12T13:45:39.185Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
+        "REEVIDENCE 2026-08-12T13:45:39.185Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261",
+        "REEVIDENCE 2026-08-13T11:58:54.324Z: DEF-074/CodeQL hardening: race-free reads (stat throwIfNoEntry + try/catch), wx-exclusive hook creation, contained static-server paths, readFileSync over cat; re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@ce96dd2b4341, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
       ],
       "phase": "P10",
       "remediation": null,
@@ -13118,9 +13122,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 16604,
+          "bytes": 16840,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "ce96dd2b4341057dc24715cd351b60cdd8b7a2ff539c9fdf859be319aca244c4"
+          "sha256": "39a826eb1fb380df89a721abe30374a959e15c9fbad1868fbc1d7f8109fed410"
         },
         {
           "bytes": 280,
@@ -13136,7 +13140,8 @@
       "negative_validation": null,
       "notes": [
         "REEVIDENCE 2026-08-12T10:24:50.796Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-negatives.log@1723c8e40cb2",
-        "REEVIDENCE 2026-08-12T13:45:39.253Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-negatives.log@1723c8e40cb2"
+        "REEVIDENCE 2026-08-12T13:45:39.253Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-negatives.log@1723c8e40cb2",
+        "REEVIDENCE 2026-08-13T11:58:54.412Z: DEF-074/CodeQL hardening: race-free reads (stat throwIfNoEntry + try/catch), wx-exclusive hook creation, contained static-server paths, readFileSync over cat; re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@ce96dd2b4341, docs/verification/evidence/p10/T25-negatives.log@1723c8e40cb2"
       ],
       "phase": "P10",
       "remediation": null,
@@ -13238,9 +13243,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 16604,
+          "bytes": 16840,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "ce96dd2b4341057dc24715cd351b60cdd8b7a2ff539c9fdf859be319aca244c4"
+          "sha256": "39a826eb1fb380df89a721abe30374a959e15c9fbad1868fbc1d7f8109fed410"
         },
         {
           "bytes": 3774,
@@ -13256,7 +13261,8 @@
       "negative_validation": null,
       "notes": [
         "REEVIDENCE 2026-08-12T10:24:50.840Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261",
-        "REEVIDENCE 2026-08-12T13:45:39.295Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
+        "REEVIDENCE 2026-08-12T13:45:39.295Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261",
+        "REEVIDENCE 2026-08-13T11:58:54.506Z: DEF-074/CodeQL hardening: race-free reads (stat throwIfNoEntry + try/catch), wx-exclusive hook creation, contained static-server paths, readFileSync over cat; re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@ce96dd2b4341, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
       ],
       "phase": "P10",
       "remediation": null,
@@ -13274,9 +13280,9 @@
       "depends_on": [],
       "evidence": [
         {
-          "bytes": 16604,
+          "bytes": 16840,
           "path": "scripts/ci/p10/certificate.mjs",
-          "sha256": "ce96dd2b4341057dc24715cd351b60cdd8b7a2ff539c9fdf859be319aca244c4"
+          "sha256": "39a826eb1fb380df89a721abe30374a959e15c9fbad1868fbc1d7f8109fed410"
         },
         {
           "bytes": 3774,
@@ -13292,7 +13298,8 @@
       "negative_validation": null,
       "notes": [
         "REEVIDENCE 2026-08-12T10:24:50.887Z: round-2 rehearsal fixes edited cited files (P01-identity refactor in certificate.mjs; stub-env + prettier in run-p09.mjs; binaries rule in knip.json); DEF-066(b) | superseded: scripts/ci/p10/certificate.mjs@ce9b3eb28a8d, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261",
-        "REEVIDENCE 2026-08-12T13:45:39.339Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
+        "REEVIDENCE 2026-08-12T13:45:39.339Z: DEF-068 repair: certificate.mjs comparator extended to exhaustive binding comparison; unit re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@9b4dc68f23a2, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261",
+        "REEVIDENCE 2026-08-13T11:58:54.600Z: DEF-074/CodeQL hardening: race-free reads (stat throwIfNoEntry + try/catch), wx-exclusive hook creation, contained static-server paths, readFileSync over cat; re-pinned to the corrected implementation | superseded: scripts/ci/p10/certificate.mjs@ce96dd2b4341, docs/verification/evidence/p10/T25-acceptance.md@041f00f78261"
       ],
       "phase": "P10",
       "remediation": null,

@@ -491,7 +491,7 @@
 | `P07.NEG02` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `4ddb0099b9c1` | Forced collection error is never excusable and yields FAIL |
 | `P07.NEG03` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `4ddb0099b9c1` `e688f054502d` | Two DB-partitioned gates in one run record disjoint lane intervals, zero sentinel violations, and are serialized rather than rejected |
 | `P07.NEG04` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `4ddb0099b9c1` | Impact-based test selection attempted in PARITY is refused |
-| `P07.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `89e487fe0c20` `4ddb0099b9c1` | Dirty tree plus a diff-aware coverage gate yields BLOCKED |
+| `P07.NEG05` | NEGATIVE_VALIDATION | MANDATORY | `PASS` | 1 | `f1c9f176a046` `4ddb0099b9c1` | Dirty tree plus a diff-aware coverage gate yields BLOCKED |
 | `P07.REG01` | REGRESSION | MANDATORY | `PASS` | 1 | `d884ee630a6a` `f9a0bb53e8a9` | Three consecutive runs produce identical results |
 | `P07.AUD01` | AUDIT | ADVISORY | `NOT_STARTED` | 0 | — | ADVISORY: optional reproduction of the historical Incident 42 race — never an acceptance input |
 | `P07.EV01` | EVIDENCE | MANDATORY | `PASS` | 1 | `f9a0bb53e8a9` `d884ee630a6a` | Evidence: merged vitest results |
@@ -582,8 +582,8 @@
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
 | `P09.T01` | TASK | MANDATORY | `PASS` | 1 | `7299cac149f1` | Populate the HARDENING registry |
-| `P09.T02` | TASK | MANDATORY | `PASS` | 1 | `7dc0c4cc548a` `0e36381a205f` | Deploy-order gate — new drizzle/*.sql requires db-push.yml first |
-| `P09.T03` | TASK | MANDATORY | `PASS` | 1 | `7dc0c4cc548a` `0e36381a205f` | Schema type-drift gate — drizzle column types versus migration SQL |
+| `P09.T02` | TASK | MANDATORY | `PASS` | 1 | `f4351a1cfa80` `0e36381a205f` | Deploy-order gate — new drizzle/*.sql requires db-push.yml first |
+| `P09.T03` | TASK | MANDATORY | `PASS` | 1 | `f4351a1cfa80` `0e36381a205f` | Schema type-drift gate — drizzle column types versus migration SQL |
 | `P09.T04` | TASK | MANDATORY | `PASS` | 1 | `404ba92bc9d2` `0e36381a205f` | knip — dead exports and dependencies |
 | `P09.T05` | TASK | MANDATORY | `PASS` | 1 | `f05ff15929e6` `0e36381a205f` | Accessibility gate on the built client |
 | `P09.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `0e36381a205f` | Deploy-order gate green on a clean snapshot |
@@ -626,13 +626,13 @@
 
 | ID | Kind | Class | Status | Attempts | Evidence | Title |
 | --- | --- | --- | --- | --- | --- | --- |
-| `P10.T01` | TASK | MANDATORY | `PASS` | 1 | `ce96dd2b4341` `041f00f78261` | Certificate binding set: head, base, merge_tree, merge_commit, lockfile, contract, verifier, images, env profile, hermetic mode, assurance hash, results by class |
-| `P10.T02` | TASK | MANDATORY | `PASS` | 1 | `ce96dd2b4341` `1723c8e40cb2` | verify/void logic — recompute every binding from disk |
+| `P10.T01` | TASK | MANDATORY | `PASS` | 1 | `39a826eb1fb3` `041f00f78261` | Certificate binding set: head, base, merge_tree, merge_commit, lockfile, contract, verifier, images, env profile, hermetic mode, assurance hash, results by class |
+| `P10.T02` | TASK | MANDATORY | `PASS` | 1 | `39a826eb1fb3` `1723c8e40cb2` | verify/void logic — recompute every binding from disk |
 | `P10.T03` | TASK | MANDATORY | `PASS` | 1 | `041f00f78261` | Execution-history binding: ledger state at issuance (P00-P09 ACCEPTED plus P10 units through GATE01) |
 | `P10.T04` | TASK | MANDATORY | `PASS` | 1 | `03fc481ddef7` | REMOTE reconciliation against the live ruleset AND classic protection |
 | `P10.T05` | TASK | MANDATORY | `PASS` | 1 | `03fc481ddef7` | CI proof reconciliation guarded by {head, base, merge_tree, contract_hash} — compares merge_tree_sha, never merge_commit_sha |
-| `P10.T06` | TASK | MANDATORY | `PASS` | 1 | `ce96dd2b4341` `041f00f78261` | Issuance rule |
-| `P10.T07` | TASK | MANDATORY | `PASS` | 1 | `ce96dd2b4341` `041f00f78261` | Opt-in pre-push hook |
+| `P10.T06` | TASK | MANDATORY | `PASS` | 1 | `39a826eb1fb3` `041f00f78261` | Issuance rule |
+| `P10.T07` | TASK | MANDATORY | `PASS` | 1 | `39a826eb1fb3` `041f00f78261` | Opt-in pre-push hook |
 | `P10.T08` | TASK | MANDATORY | `PASS` | 1 | `041f00f78261` | File evidence into the /eng-loop evidence record |
 | `P10.TEST01` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `041f00f78261` | A fully green run issues a certificate that verify accepts |
 | `P10.TEST02` | POSITIVE_VALIDATION | MANDATORY | `PASS` | 1 | `03fc481ddef7` | One real PR reconciles field-for-field against CI's proof artifact |

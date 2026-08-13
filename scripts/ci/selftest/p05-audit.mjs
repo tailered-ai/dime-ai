@@ -156,9 +156,8 @@ export function auditPoisonContainment(options = {}) {
   const classified = [];
   for (const rel of files) {
     const abs = path.join(REPO_ROOT, rel);
-    if (!existsSync(abs)) continue;
-    const stat = statSync(abs);
-    if (!stat.isFile() || stat.size > 4 * 1024 * 1024) continue;
+    const stat = statSync(abs, { throwIfNoEntry: false });
+    if (!stat || !stat.isFile() || stat.size > 4 * 1024 * 1024) continue;
     let text;
     try {
       text = readFileSync(abs, "utf8");

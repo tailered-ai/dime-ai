@@ -19,7 +19,13 @@
  * developer's working tree.
  */
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -155,9 +161,7 @@ describe("P01.TEST01 — clean feature HEAD ahead of base", () => {
         handle.snapshot.identity.merge_commit_sha
       );
       expect(
-        execFileSync("cat", [path.join(handle.paths.worktree, "feature.txt")], {
-          encoding: "utf8",
-        })
+        readFileSync(path.join(handle.paths.worktree, "feature.txt"), "utf8")
       ).toBe("feature\n");
     } finally {
       disposeSnapshot(handle);
@@ -619,9 +623,7 @@ describe("P01.T03 — dirty-tree policy (fixture half; the live half is P01.NEG0
       expect(handle.snapshot.observational.dirty_working_tree).toBe(true);
       // The unrelated file is NOT part of the candidate and is untouched.
       expect(
-        execFileSync("cat", [path.join(work, "untracked-unrelated.txt")], {
-          encoding: "utf8",
-        })
+        readFileSync(path.join(work, "untracked-unrelated.txt"), "utf8")
       ).toBe("do not touch\n");
       expect(workingTreeState(work).untracked).toContain(
         "untracked-unrelated.txt"

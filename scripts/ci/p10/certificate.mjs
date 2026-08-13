@@ -415,16 +415,23 @@ export function installHook() {
     // EISDIR — the normal primary-checkout case
   }
   const hookPath = path.join(gitDir, "hooks", "pre-push");
-  if (existsSync(hookPath)) {
-    return {
-      status: "REFUSED",
-      reason: `HOOK_EXISTS: ${hookPath} — remove it first`,
-    };
+  try {
+    // wx: create-exclusive — the exists-then-write race collapses into one
+    // atomic refusal path (an existing hook is never touched).
+    writeFileSync(
+      hookPath,
+      `#!/bin/sh\n# ci-verify opt-in pre-push (P10.T07) — installed explicitly, remove freely\nnode scripts/ci/p10/certificate.mjs verify || {\n  echo "ci-verify: certificate not VALID — push anyway with --no-verify" >&2\n  exit 1\n}\n`,
+      { flag: "wx" }
+    );
+  } catch (error) {
+    if (error.code === "EEXIST") {
+      return {
+        status: "REFUSED",
+        reason: `HOOK_EXISTS: ${hookPath} — remove it first`,
+      };
+    }
+    throw error;
   }
-  writeFileSync(
-    hookPath,
-    `#!/bin/sh\n# ci-verify opt-in pre-push (P10.T07) — installed explicitly, remove freely\nnode scripts/ci/p10/certificate.mjs verify || {\n  echo "ci-verify: certificate not VALID — push anyway with --no-verify" >&2\n  exit 1\n}\n`
-  );
   chmodSync(hookPath, 0o755);
   return { status: "INSTALLED", path: hookPath };
 }

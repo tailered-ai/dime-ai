@@ -276,15 +276,27 @@ export async function a11yGate({ distDir, routes = ["/", "/login"] }) {
       reason: `BUILT_CLIENT_MISSING: ${distDir}/index.html`,
     };
   }
+  const fallback = path.join(distDir, "index.html");
   const server = createServer((req, res) => {
     const url = (req.url ?? "/").split("?")[0];
-    let file = path.join(distDir, url === "/" ? "index.html" : url);
-    if (!existsSync(file)) file = path.join(distDir, "index.html"); // SPA
+    // Containment: a request path is attacker-shaped input even on loopback —
+    // normalize and refuse anything that escapes distDir (SPA fallback).
+    const requested = path.normalize(
+      path.join(distDir, url === "/" ? "index.html" : url.replace(/^\/+/, ""))
+    );
+    let file = requested.startsWith(distDir + path.sep) ? requested : fallback;
+    let bytes;
+    try {
+      bytes = readFileSync(file);
+    } catch {
+      file = fallback;
+      bytes = readFileSync(file); // SPA fallback
+    }
     res.setHeader(
       "content-type",
       MIME[path.extname(file)] ?? "application/octet-stream"
     );
-    res.end(readFileSync(file));
+    res.end(bytes);
   });
   await new Promise(r => server.listen(A11Y_PORT, "127.0.0.1", r));
   try {
@@ -398,10 +410,12 @@ export function neg03DeadExport(worktree) {
 export async function neg04A11yPoison(worktree) {
   const dist = path.join(worktree, "dist", "public");
   const index = path.join(dist, "index.html");
-  if (!existsSync(index)) {
+  let original;
+  try {
+    original = readFileSync(index, "utf8");
+  } catch {
     return { ok: false, res: { reason: "BUILT_CLIENT_MISSING_FOR_NEG04" } };
   }
-  const original = readFileSync(index, "utf8");
   writeFileSync(
     index,
     original.replace(
