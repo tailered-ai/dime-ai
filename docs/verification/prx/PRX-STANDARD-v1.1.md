@@ -82,7 +82,7 @@ structured fields. Deeper semantics of the Notion block stay owned by the
 
 | Rule | Class | Behavior |
 | --- | --- | --- |
-| PRX-B-SIZE | deterministic | 1 MiB cap counted in UTF-8 bytes (r2) |
+| PRX-B-SIZE | deterministic | 1 MiB cap counted in UTF-8 bytes (r2); pathological structure degrades to this finding deterministically — a structural pre-cap rejects more than 512 leading blockquote markers on one line before parsing (r2; previously the degrade depended on where the parser's own recursion overflowed) |
 | PRX-B-VISIBLE | deterministic | the rendered body has MEANINGFUL visible text, not merely nodes (r2 BYP-B-01): HTML comments, whitespace, zero-width/format-class code points (raw or entity-encoded), and sanitizer-removed script/style content all count for nothing |
 | PRX-B-SECTION-MISSING | deterministic | each of the 14 live sections is present (R5 subcode) |
 | PRX-B-SECTION-DUP | deterministic | each live section appears exactly once (R5 subcode) |

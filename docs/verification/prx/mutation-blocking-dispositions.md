@@ -95,7 +95,12 @@ tagged "CORRECTED r2".
   reaches the catch in-process (reproduced before any r2 edit). The
   mutant was a WEAK-ORACLE survivor (the r1 test asserted only
   `typeof`); r2 strengthens the assertion to the exact value, which
-  kills it. Row corrected.
+  kills it. Catch reachability additionally became DETERMINISTIC in r2:
+  the original reproduction depended on where the parser's recursion
+  overflowed (it varied with the runtime stack budget — the same input
+  parsed cleanly under Stryker's workers), so a structural pre-cap
+  (blockquote depth 512 per line) now throws before parsing,
+  identically everywhere. Row corrected.
 - **MUT-02** — three replay-artifact rows carried misattributed
   mechanism labels: body-check 113 and 435 blamed the subprocess
   boundary and body-check 116 blamed static module scope (and called

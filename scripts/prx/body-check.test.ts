@@ -296,16 +296,37 @@ describe("review-pass regressions", () => {
   });
 
   it("extractProse survives deep nesting and returns exactly the empty string", () => {
-    // MUT-01 correction: the parser DOES throw in-process on ~20k nested
-    // blockquotes, so the catch arm is reachable and its return value is
-    // an observable oracle — the exact-value assertion (not typeof) is
-    // what kills the sentinel string mutant at the catch site.
+    // MUT-01 correction: the catch arm IS reachable in-process, so its
+    // return value is an observable oracle — the exact-value assertion
+    // (not typeof) is what kills the sentinel string mutant at the catch
+    // site. The r2 structural pre-cap makes reachability deterministic:
+    // the original parser-overflow reproduction varied with the runtime
+    // stack budget.
     expect(extractProse(">".repeat(20000))).toBe("");
   });
 
   it("checkBody degrades the same pathological input to PRX-B-SIZE in-process", () => {
     const f = checkBody(">".repeat(20000));
     expect(f.map(x => x.rule)).toEqual(["PRX-B-SIZE"]);
+  });
+
+  it("the structural pre-cap is exact at the boundary (r2)", () => {
+    const at = `${">".repeat(512)}quoted text\n`;
+    expect(checkBody(at).some(x => x.rule === "PRX-B-SIZE")).toBe(false);
+    const over = `${">".repeat(513)}quoted text\n`;
+    expect(checkBody(over).map(x => x.rule)).toEqual(["PRX-B-SIZE"]);
+  });
+
+  it("a deep tree that SURVIVES the parser never becomes call-stack depth (r2)", () => {
+    // Depth under the pre-cap parses everywhere; every post-parse walker
+    // (visibility, section content, prose, inline text) must traverse
+    // iteratively. Found by the Stryker dry run: the recursive content
+    // predicate crashed on a deep parsed tree.
+    const deep = `${">".repeat(400)}deep text\n`;
+    const f = checkBody(deep);
+    expect(Array.isArray(f)).toBe(true);
+    expect(f.some(x => x.rule === "PRX-B-VISIBLE")).toBe(false);
+    expect(typeof extractProse(deep)).toBe("string");
   });
 
   it("capsule Evidence over the shared length cap fails even if shaped", () => {

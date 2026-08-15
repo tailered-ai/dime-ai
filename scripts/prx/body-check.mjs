@@ -72,14 +72,32 @@ function isCommentNode(node) {
   return v.startsWith("<!--") && v.endsWith("-->");
 }
 
-function inlineText(node) {
+function inlineText(root) {
   // A hard line break renders as a newline; dropping it would let a
   // Unicode bullet hide behind a break ("line one  \n• two" must still
-  // match the line-anchored bullet detector).
-  if (node.type === "break") return "\n";
-  if (node.value !== undefined && node.type !== "html") return node.value;
-  if (!node.children) return "";
-  return node.children.map(inlineText).join("");
+  // match the line-anchored bullet detector). Iterative on an explicit
+  // stack: attacker-controlled nesting depth never becomes JS call-stack
+  // depth (r2: the recursive form crashed on deep trees that survive the
+  // parser).
+  let out = "";
+  const stack = [root];
+  while (stack.length > 0) {
+    const n = stack.pop();
+    if (n.type === "break") {
+      out += "\n";
+      continue;
+    }
+    if (n.value !== undefined && n.type !== "html") {
+      out += n.value;
+      continue;
+    }
+    if (n.children) {
+      for (let i = n.children.length - 1; i >= 0; i -= 1) {
+        stack.push(n.children[i]);
+      }
+    }
+  }
+  return out;
 }
 
 function isCapsuleCandidate(node) {
@@ -97,7 +115,30 @@ function isCapsuleCandidate(node) {
   });
 }
 
+// Deterministic structural pre-cap (r2): the pathological-structure
+// degrade (checkBody -> PRX-B-SIZE, extractProse -> "") previously
+// depended on WHERE the parser's own recursion overflowed, which varies
+// with the runtime stack budget — the same input crashed in one
+// environment and parsed in another. Blockquote nesting is the known
+// recursion driver: more than this many leading `>` markers on one line
+// is rejected before parsing, cheaply and identically everywhere. Other
+// pathological shapes remain bounded by the byte cap and the CI job
+// timeout (threat model A8).
+export const BLOCKQUOTE_DEPTH_CAP = 512;
+
 export function parseBody(raw) {
+  for (const line of raw.split("\n")) {
+    let depth = 0;
+    for (const ch of line) {
+      if (ch === ">") depth += 1;
+      else if (ch !== " " && ch !== "\t") break;
+    }
+    if (depth > BLOCKQUOTE_DEPTH_CAP) {
+      throw new Error(
+        `blockquote nesting exceeds the structural pre-cap (${BLOCKQUOTE_DEPTH_CAP})`
+      );
+    }
+  }
   const tree = fromMarkdown(raw, {
     extensions: [gfm()],
     mdastExtensions: [gfmFromMarkdown()],
@@ -563,25 +604,38 @@ function hasVisibleSectionContent(visible, headingNode) {
 }
 
 function nodeHasVisibleContent(node) {
-  switch (node.type) {
-    case "heading": // a heading with no following content is not content
-    case "thematicBreak":
-    case "definition": // link-reference definitions never render
-    case "footnoteDefinition": // renders at document bottom, not in-section
-      return false;
-    case "code":
-      // A populated structured block (evidence YAML, capsule) counts; an
-      // empty or zero-width-only fence does not.
-      return isMeaningfulText(node.value);
-    case "list":
-    case "listItem":
-    case "table":
-    case "tableRow":
-    case "blockquote":
-      return (node.children ?? []).some(nodeHasVisibleContent);
-    default:
-      return isMeaningfulText(visibleInlineText(node));
+  // Iterative over an explicit stack: container nodes (lists, tables,
+  // blockquotes) can nest to attacker-controlled depth that survives the
+  // parser, and that depth must never become JS call-stack depth (r2:
+  // found by the Stryker dry run — the recursive form crashed on a deep
+  // blockquote chain in environments with smaller stacks).
+  const stack = [node];
+  while (stack.length > 0) {
+    const n = stack.pop();
+    switch (n.type) {
+      case "heading": // a heading with no following content is not content
+      case "thematicBreak":
+      case "definition": // link-reference definitions never render
+      case "footnoteDefinition": // renders at document bottom, not in-section
+        continue;
+      case "code":
+        // A populated structured block (evidence YAML, capsule) counts;
+        // an empty or zero-width-only fence does not.
+        if (isMeaningfulText(n.value)) return true;
+        continue;
+      case "list":
+      case "listItem":
+      case "table":
+      case "tableRow":
+      case "blockquote":
+        for (const c of n.children ?? []) stack.push(c);
+        continue;
+      default:
+        if (isMeaningfulText(visibleInlineText(n))) return true;
+        continue;
+    }
   }
+  return false;
 }
 
 // Text a reader actually sees: image alt text counts (where non-empty),
@@ -603,13 +657,45 @@ function visibleInlineText(node) {
   }
   if (node.value !== undefined) return node.value;
   if (!node.children) return "";
-  const scanner = createSanitizedTextScanner(SANITIZER_REMOVED_ELEMENTS);
+  // Iterative frames, one sanitized-text scanner per sibling list (the
+  // parser splits inline HTML into sibling nodes, so a removed element
+  // opened in one html child drops its text siblings up to the close);
+  // nesting depth never becomes JS call-stack depth (r2).
   let out = "";
-  for (const child of node.children) {
+  const frames = [
+    {
+      nodes: node.children,
+      i: 0,
+      scanner: createSanitizedTextScanner(SANITIZER_REMOVED_ELEMENTS),
+    },
+  ];
+  while (frames.length > 0) {
+    const frame = frames[frames.length - 1];
+    if (frame.i >= frame.nodes.length) {
+      frames.pop();
+      continue;
+    }
+    const child = frame.nodes[frame.i];
+    frame.i += 1;
     if (child.type === "html") {
-      out += decodeHtmlEntities(scanner.feed(child.value));
-    } else if (!scanner.isInside()) {
-      out += visibleInlineText(child);
+      out += decodeHtmlEntities(frame.scanner.feed(child.value));
+      continue;
+    }
+    if (frame.scanner.isInside()) continue;
+    if (child.type === "image" || child.type === "imageReference") {
+      out += child.alt ?? "";
+      continue;
+    }
+    if (child.value !== undefined) {
+      out += child.value;
+      continue;
+    }
+    if (child.children) {
+      frames.push({
+        nodes: child.children,
+        i: 0,
+        scanner: createSanitizedTextScanner(SANITIZER_REMOVED_ELEMENTS),
+      });
     }
   }
   return out;

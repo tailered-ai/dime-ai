@@ -1,0 +1,87 @@
+# 15-prx-mutation — label-gated focused mutation testing for the PRX lane.
+#
+# NOT a required check and NOT part of the ordinary PR pipeline: local
+# full mutation runs are blocked on the r2 development machine (memory
+# exhaustion at Stryker concurrency 8-12 on 8 GB), so the r2 contract
+# moves the focused run here. workflow_dispatch cannot fire from a
+# non-default branch, so the trigger is `pull_request, types: [labeled]`
+# with a label guard: add the `prx-mutation` label to a PR to run one
+# Stryker job per changed decision-path module (matrix below, derived
+# from the r2 diff); remove and re-add the label to re-run.
+#
+# No secrets are read anywhere in this workflow; the token stays
+# contents: read. Stryker and its vitest runner are exact-pinned
+# devDependencies (9.6.1) resolved from the frozen lockfile with
+# lifecycle scripts disabled.
+name: 15-prx-mutation
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: prx-mutation-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  mutate:
+    name: "stryker: ${{ matrix.module }}"
+    if: github.event.label.name == 'prx-mutation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - scripts/prx/lib/canonical.mjs
+          - scripts/prx/commit-check.mjs
+          - scripts/prx/body-check.mjs
+          - scripts/prx/check-commit.mjs
+          - scripts/prx/rules.mjs
+          - scripts/prx/modes.mjs
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v4
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Frozen install, lifecycle scripts disabled
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: "Focused mutation run (concurrency 2)"
+        env:
+          MODULE: ${{ matrix.module }}
+        run: |
+          npx stryker run scripts/prx/stryker.blocking.prx.json \
+            --mutate "$MODULE" --concurrency 2 \
+            | tee stryker-run.log
+
+      - name: Collect report
+        env:
+          MODULE: ${{ matrix.module }}
+        run: |
+          SAFE=$(printf '%s' "$MODULE" | tr '/.' '__')
+          mkdir -p mutation-out
+          cp reports/prx-mutation-blocking.json "mutation-out/${SAFE}.json"
+          cp stryker-run.log "mutation-out/${SAFE}.log"
+
+      - name: Upload per-module report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: prx-mutation-${{ strategy.job-index }}
+          path: mutation-out/
+          retention-days: 30
