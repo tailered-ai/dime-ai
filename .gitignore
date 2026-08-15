@@ -160,6 +160,10 @@ __pycache__/
 # Ad-hoc workflow export; canonical workflows live in .github/workflows/
 /github-workflows.zip
 
+# PRX review-candidate archives (build artifacts, regenerate via build-archive)
+/pr-x-*.zip
+/pr-x-*.zip.sha256
+
 # Isolated agent workspaces (superpowers:using-git-worktrees)
 .worktrees/
 .claude/worktrees/
