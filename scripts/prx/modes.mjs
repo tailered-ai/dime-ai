@@ -22,6 +22,7 @@ export const APPROVED_BLOCKING = Object.freeze(
     "PRX-C-TRAILER",
     "PRX-C-GOV",
     "PRX-C-FIXUP",
+    "PRX-C-CONTROL",
     "PRX-B-SIZE",
     "PRX-B-VISIBLE",
     "PRX-B-SECTION-MISSING",

@@ -66,6 +66,22 @@ export const RULE_METADATA = Object.freeze({
       "subject looks indicative (copula heuristic); imperative mood beyond " +
       "this pattern is a reviewer rule, not a machine rule",
   },
+  "PRX-C-CONTROL": {
+    surface: "commit",
+    title:
+      "context-sensitive control-character policy over the body: ordinary " +
+      "body text rejects control (Cc) code points except TAB plus " +
+      "U+2028/U+2029; fenced and valid indented code content rejects only " +
+      "NUL; the same policy runs in file, stdin, and range input modes " +
+      "(subjects report under PRX-C-SUBJECT)",
+  },
+  "PRX-C-CONTEXT-UNVERIFIED": {
+    surface: "commit",
+    title:
+      "an exemption was claimed only by unverified context (revert-shaped " +
+      "message text or a claimed bot identity); the ordinary prefix result " +
+      "stands and this advisory explains why no exemption was granted",
+  },
 
   // PR-body rules
   "PRX-B-SIZE": {

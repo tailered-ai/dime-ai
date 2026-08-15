@@ -7,9 +7,8 @@
 import {
   GOVERNED_TRAILER_KEYS,
   makeFinding,
-  REF_MAX_LENGTH,
-  REF_RE,
   RUN_ID_RE,
+  validateEvidenceRef,
 } from "./rules.mjs";
 
 const SIZE_LIMIT = 1024 * 1024;
@@ -43,8 +42,9 @@ const TRAILER_LINE_RE = /^([A-Za-z][A-Za-z0-9-]*):[ \t]*(.*)$/;
 const TRAILER_CONTINUATION_RE = /^[ \t]+\S/;
 const URL_RE = /https?:\/\/[^\s<>]+/g;
 const FENCE_RE = /^(`{3,}|~{3,})/;
-// Evidence grammar (REF_RE) and its length cap are shared with the body
-// checker via rules.mjs so the two surfaces cannot drift (Sol case C09).
+// The Evidence reference policy (validateEvidenceRef) is shared with the
+// body checker via rules.mjs so the two surfaces cannot drift (Sol case
+// C09); r2 replaced the regex grammar with structured segment validation.
 const CO_AUTHOR_RE = /^[^<>]+ <[^<>@\s]+@[^<>@\s]+\.[A-Za-z]{2,}>$/;
 const COPULA_RE = /(^|\s)(is|are|was|were)(\s|$)/;
 
@@ -352,7 +352,7 @@ export function checkCommit(raw, opts = {}) {
       );
     } else {
       const v = evidences[0].value;
-      if (v.length > REF_MAX_LENGTH || !REF_RE.test(v)) {
+      if (!validateEvidenceRef(v).valid) {
         findings.push(
           makeFinding(
             "PRX-C-GOV",

@@ -16,11 +16,10 @@ import { gfmFromMarkdown } from "mdast-util-gfm";
 import { gfm } from "micromark-extension-gfm";
 import {
   makeFinding,
-  REF_MAX_LENGTH,
-  REF_RE,
   RUN_ID_RE,
   SCOPE_RE,
   SHA40_RE,
+  validateEvidenceRef,
 } from "./rules.mjs";
 
 const SIZE_LIMIT = 1024 * 1024;
@@ -476,7 +475,7 @@ function capsuleValueError(key, value) {
         : `capsule ${key} "${truncate(value)}" is not a 40-hex commit SHA`;
     case "Ledger":
     case "Evidence":
-      return value.length <= REF_MAX_LENGTH && REF_RE.test(value)
+      return validateEvidenceRef(value).valid
         ? null
         : // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
           `capsule ${key} "${truncate(value)}" is not a bounded run/ or ` +

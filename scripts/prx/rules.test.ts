@@ -19,6 +19,8 @@ const EXPECTED_CLASSES: Record<string, string> = {
   "PRX-C-GOV": "deterministic",
   "PRX-C-FIXUP": "deterministic",
   "PRX-C-MOOD": "heuristic",
+  "PRX-C-CONTROL": "deterministic",
+  "PRX-C-CONTEXT-UNVERIFIED": "advisory",
   "PRX-B-SIZE": "deterministic",
   "PRX-B-VISIBLE": "deterministic",
   "PRX-B-SECTION-MISSING": "deterministic",
