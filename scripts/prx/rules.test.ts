@@ -5,7 +5,15 @@
 // every deterministic blocking condition's class wiring).
 import { describe, expect, it } from "vitest";
 import { RULE_METADATA } from "./rule-metadata.mjs";
-import { makeFinding, ruleClass, RULES } from "./rules.mjs";
+import {
+  makeFinding,
+  ruleClass,
+  RULES,
+  RUN_ID_RE,
+  SCOPE_RE,
+  SHA40_RE,
+  validateEvidenceRef,
+} from "./rules.mjs";
 
 const EXPECTED_CLASSES: Record<string, string> = {
   "PRX-C-SIZE": "deterministic",
@@ -66,6 +74,34 @@ describe("display metadata stays in lockstep with the registry", () => {
       );
       expect((meta as { title: string }).title.length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("shared grammar anchors (r2 mutation-hardening)", () => {
+  it("RUN_ID_RE, SHA40_RE, and SCOPE_RE are anchored at both ends", () => {
+    expect(RUN_ID_RE.test("ONE-20260814-R2")).toBe(true);
+    expect(RUN_ID_RE.test("xONE-20260814-R2")).toBe(false);
+    expect(RUN_ID_RE.test("ONE-20260814-R2 tail")).toBe(false);
+    const sha = "a".repeat(40);
+    expect(SHA40_RE.test(sha)).toBe(true);
+    expect(SHA40_RE.test(`x${sha}`)).toBe(false);
+    expect(SHA40_RE.test(`${sha}x`)).toBe(false);
+    expect(SCOPE_RE.test("TOS-12")).toBe(true);
+    expect(SCOPE_RE.test("xTOS-12")).toBe(false);
+    expect(SCOPE_RE.test("TOS-12x")).toBe(false);
+  });
+});
+
+describe("evidence reference adapter config (r2 mutation-hardening)", () => {
+  it("enforces the run-root first-segment grammar and minimum depth", () => {
+    expect(validateEvidenceRef("run/ONE-20260814-R2/x.json").valid).toBe(true);
+    expect(validateEvidenceRef("run/one-bad-id/x.json").valid).toBe(false);
+    expect(validateEvidenceRef("run/ONE-20260814-R2").valid).toBe(false);
+  });
+
+  it("enforces the docs-root minimum depth", () => {
+    expect(validateEvidenceRef("docs/x.md").valid).toBe(true);
+    expect(validateEvidenceRef("docs").valid).toBe(false);
   });
 });
 

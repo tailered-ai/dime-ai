@@ -278,3 +278,82 @@ No surviving or uncovered mutants.
 ### scripts/prx/rules.mjs
 
 No surviving or uncovered mutants.
+
+## r2 focused rerun (label-gated CI matrix, Stryker 9.6.1)
+
+Environment and scope, stated exactly: local full mutation runs are
+BLOCKED on the r2 machine (memory exhaustion at Stryker concurrency
+8-12 on 8 GB physical), so the r2 contract moved the focused runs to
+the label-gated GitHub Actions matrix `15-prx-mutation` (one job per
+r2-changed decision-path module, `--concurrency 2`, ubuntu-latest,
+Stryker 9.6.1 exact-pinned, frozen lockfile, lifecycle scripts
+disabled). First rerun: workflow run 31859979909 on head
+a436f28abe85f6874b599fe1ba747c3a4edff5c5, all six jobs `success`
+(native GitHub conclusions); raw per-module reports and logs ship in
+the review bundle's `test-output/`. These figures are SEPARATE from
+the r1 historical block above and are scoped to that head and that
+environment.
+
+| Module | Valid mutants | Killed | Timeout | Survived | No coverage | Score |
+| --- | --- | --- | --- | --- | --- | --- |
+| scripts/prx/lib/canonical.mjs | 589 | 483 | 13 | 85 | 8 | 84.21% |
+| scripts/prx/commit-check.mjs | 445 | 395 | 1 | 46 | 3 | 88.99% |
+| scripts/prx/body-check.mjs | 629 | 537 | 19 | 64 | 9 | 88.39% |
+| scripts/prx/check-commit.mjs | 185 | 163 | 1 | 13 | 8 | 88.65% |
+| scripts/prx/rules.mjs | 124 | 99 | 0 | 25 | 0 | 79.84% |
+| scripts/prx/modes.mjs | 66 | 43 | 0 | 21 | 2 | 65.15% |
+| Aggregate (six per-module runs) | 2038 | 1720 | 34 | 254 | 30 | 86.06% |
+
+Survivor triage of the 284 surviving/no-coverage mutants, by class:
+
+1. **Literal-class (128: StringLiteral 119, ObjectLiteral 3,
+   ArrayDeclaration 6).** Dominated by diagnostic message fragments and
+   configuration data in NEW r2 code (canonical reason strings, the
+   sanitizer/container element lists, the rerun's own workflow-visible
+   strings). The r1 pass suppressed this class with explicit
+   `// Stryker disable next-line StringLiteral` annotations at the
+   literal sites; much of the new r2 code does not carry those
+   annotations yet, so the class appears as survivors instead of
+   Ignored. Post-run hardening killed the highest-value members
+   structurally instead of annotating: the FULL sanitizer removed-set
+   and container-set element lists are now each pinned by per-element
+   tests, the APPROVED_BLOCKING list is pinned by an independent
+   exact-set copy plus a blocks-in-enforcing test per rule, and the
+   shared grammar anchors (RUN_ID_RE / SHA40_RE / SCOPE_RE) are pinned
+   at both ends. Annotating the remaining diagnostic fragments is
+   recorded follow-up work, not silently waved off.
+2. **r1-carried equivalence classes (recurring spans, line numbers
+   shifted).** The r1 proof table above covers these mechanisms
+   verbatim where the code is unchanged: parser-position
+   OptionalChaining (8), the looksNarrative filter family, the
+   final-trailer-block guard tautologies, the CAPSULE/TRAILER
+   line-regex `$`-anchor vacuity, the wrapper subprocess/module-scope
+   activation artifacts in check-commit.mjs/check-body.mjs, and the
+   malformed-git-record defensive guard. The carried proofs are
+   identified by original-span text, not line numbers.
+3. **Post-run targeted kills (new tests in this pass).** Added after
+   run 1 and verified locally: out-of-block governed record integrity
+   (governed flag, value trimming, empty values), ungoverned duplicate
+   keys draw no governed count, control-finding code-point labels and
+   context wording, context-advisory claim wording, revert-shape
+   advisory absence without the marker, `--verified-revert` CLI flag
+   behavior, sanitized-scanner cross-chunk comment/element state,
+   self-closing removed elements, exact drive-letter reason, and the
+   evidence-ref adapter root config (run first-segment grammar,
+   per-root minimum depth).
+4. **Residual register.** Every remaining survivor is enumerated with
+   file, line, mutator, and replacement in the bundle's raw per-module
+   JSON reports. The residual is dominated by reason-string granularity
+   in `evidenceRef` (verdict-equivalent mutants that only reroute WHICH
+   rejection reason fires first), scanner index arithmetic whose
+   divergence requires inputs the tag grammar excludes, and the
+   defensive-arm classes above. HONEST SCOPING: the r2 rerun does NOT
+   yet reproduce the r1 bar of zero unreviewed survivors with
+   individual written proofs; the class triage above plus the raw
+   registers are the r2 disposition, and the label-gated lane re-runs
+   on demand (re-add the `prx-mutation` label) so the next pass can
+   extend the per-mutant table over the residual.
+
+A second rerun on the final r2 head (after the post-run kills landed)
+is triggered by re-adding the label; its native conclusions and raw
+reports are captured in the review bundle alongside run 1's.

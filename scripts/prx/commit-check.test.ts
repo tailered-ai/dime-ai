@@ -93,7 +93,10 @@ describe("deterministic rules", () => {
 
   it("revert exemption needs the generated body marker, not the subject", () => {
     const noMarker = 'Revert "feat(x): thing"\n\nBecause reasons.\n';
-    expect(rules(checkCommit(noMarker, {}))).toContain("PRX-C-PREFIX");
+    const f = checkCommit(noMarker, {});
+    expect(rules(f)).toContain("PRX-C-PREFIX");
+    // Subject shape alone is not even revert-SHAPED: no advisory either.
+    expect(rules(f)).not.toContain("PRX-C-CONTEXT-UNVERIFIED");
   });
 
   it("rejects duplicate governed trailers", () => {
@@ -574,5 +577,97 @@ describe("mutation-hardening R8 (commit-check survivors)", () => {
   it("a foreign fence marker line inside a fence stays wrap-exempt", () => {
     const msg = "feat(x): s\n\n```\n~~~" + "z".repeat(75) + "\n```\n\nTail.\n";
     expect(checkCommit(msg, {})).toEqual([]);
+  });
+});
+
+describe("r2 mutation-hardening (post-rerun survivor kills)", () => {
+  it("a duplicate governed pair split across block and body still counts", () => {
+    // Kills the governed:false mutant on out-of-block record entries.
+    const msg =
+      "feat(x): s\n\nrun-id: ONE-20260812-BBBB\nprose tail line\n\n" +
+      "Run-Id: ONE-20260812-AAAA\nEvidence: UNKNOWN\nCo-Authored-By: A B <a@b.co>\n";
+    const f = checkCommit(msg, {});
+    expect(
+      f.some(
+        x => x.rule === "PRX-C-TRAILER" && x.message.includes("appears 2 times")
+      )
+    ).toBe(true);
+  });
+
+  it("out-of-block trailer values are trimmed before grammar checks", () => {
+    const msg =
+      "feat(x): s\n\nCo-Authored-By: A B <a@b.co>   \nprose tail line\n\n" +
+      "Final ordinary paragraph.\n";
+    const f = checkCommit(msg, {});
+    const trailer = f.filter(x => x.rule === "PRX-C-TRAILER");
+    // Placement error only — the trimmed value satisfies the grammar.
+    expect(trailer.length).toBe(1);
+    expect(trailer[0].message).toContain("outside the formal trailer block");
+  });
+
+  it("an out-of-block governed trailer with an empty value reports it", () => {
+    const msg = "feat(x): s\n\nRun-Id:\nprose tail line\n\nFinal paragraph.\n";
+    const f = checkCommit(msg, {});
+    expect(
+      f.some(
+        x => x.rule === "PRX-C-TRAILER" && x.message.includes("empty value")
+      )
+    ).toBe(true);
+  });
+
+  it("duplicate UNGOVERNED trailer keys draw no governed-count finding", () => {
+    const msg =
+      "feat(x): s\n\nWhy.\n\nAcked-by: one\nAcked-by: two\n" +
+      "Run-Id: ONE-20260812-PRX\nEvidence: UNKNOWN\nCo-Authored-By: A B <a@b.co>\n";
+    const f = checkCommit(msg, {});
+    expect(f.filter(x => x.rule === "PRX-C-TRAILER")).toEqual([]);
+  });
+
+  it("control findings name the offending code points and context", () => {
+    const msg =
+      "feat(x): s\n\nprose with an \u001B escape\n\n```\na\u0000b\n```\n";
+    const f = checkCommit(msg, {});
+    const controls = f.filter(x => x.rule === "PRX-C-CONTROL");
+    expect(controls.length).toBe(2);
+    expect(
+      controls.some(
+        x => x.message.includes("U+001B") && x.message.includes("body text")
+      )
+    ).toBe(true);
+    expect(
+      controls.some(
+        x => x.message.includes("U+0000") && x.message.includes("code content")
+      )
+    ).toBe(true);
+  });
+
+  it("subject control findings name the code points", () => {
+    const f = checkCommit("feat(x): has\ttab here\n", {});
+    const subj = f.filter(x => x.rule === "PRX-C-SUBJECT");
+    expect(subj.length).toBe(1);
+    expect(subj[0].message).toContain("U+0009");
+  });
+
+  it("the context advisory names each unverified claim", () => {
+    const revert = checkCommit(
+      'Revert "feat(x): thing"\n\nThis reverts commit ' +
+        "1".repeat(40) +
+        ".\n",
+      {}
+    );
+    const ra = revert.find(x => x.rule === "PRX-C-CONTEXT-UNVERIFIED");
+    expect(ra?.message).toContain("revert-shaped");
+    const bot = checkCommit("Bump lodash from 1 to 2\n", { claimedBot: true });
+    const ba = bot.find(x => x.rule === "PRX-C-CONTEXT-UNVERIFIED");
+    expect(ba?.message).toContain("claim a bot identity");
+    const both = checkCommit(
+      'Revert "feat(x): thing"\n\nThis reverts commit ' +
+        "1".repeat(40) +
+        ".\n",
+      { claimedBot: true }
+    );
+    const bm = both.find(x => x.rule === "PRX-C-CONTEXT-UNVERIFIED");
+    expect(bm?.message).toContain("revert-shaped");
+    expect(bm?.message).toContain("claim a bot identity");
   });
 });

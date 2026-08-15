@@ -82,6 +82,42 @@ describe("verdicts", () => {
 });
 
 describe("APPROVED_BLOCKING integrity", () => {
+  // Independent copy (r2 mutation-hardening): blanking or dropping any
+  // entry in modes.mjs fails the exact-set pin, and every listed rule is
+  // proven to actually block in enforcing mode.
+  const EXPECTED_BLOCKING = [
+    "PRX-C-SIZE",
+    "PRX-C-SUBJECT",
+    "PRX-C-PREFIX",
+    "PRX-C-SEPARATOR",
+    "PRX-C-FENCE",
+    "PRX-C-TRAILER",
+    "PRX-C-GOV",
+    "PRX-C-FIXUP",
+    "PRX-C-CONTROL",
+    "PRX-B-SIZE",
+    "PRX-B-VISIBLE",
+    "PRX-B-SECTION-MISSING",
+    "PRX-B-SECTION-DUP",
+    "PRX-B-SECTION-EMPTY",
+    "PRX-B-CAPSULE",
+  ];
+
+  it("equals the independent expected set exactly", () => {
+    expect([...APPROVED_BLOCKING].sort()).toEqual(
+      [...EXPECTED_BLOCKING].sort()
+    );
+  });
+
+  for (const id of EXPECTED_BLOCKING) {
+    it(`${id} blocks in enforcing mode`, () => {
+      const verdict = resolveVerdict("enforcing", [
+        { rule: id, level: "error" },
+      ]);
+      expect(verdict.exitCode).toBe(1);
+    });
+  }
+
   it("contains only deterministic-class rules", () => {
     for (const id of APPROVED_BLOCKING) {
       expect(ruleClass(id)).toBe("deterministic");

@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import {
   byteLength,
+  createSanitizedTextScanner,
   canonicalTrailerKey,
   classifyCommitBodyLines,
   controlCharScan,
@@ -151,6 +152,29 @@ describe("visibleTextFromHtml / meaningfulVisibleHtml", () => {
     expect(
       visibleTextFromHtml("<scr<!---->ipt>alert(1)</script>", REMOVED)
     ).toBe("ipt>alert(1)");
+  });
+
+  it("comment state persists across chunks of a sanitized-text scan", () => {
+    // The parser splits inline HTML into sibling nodes; a comment opened
+    // in one chunk must keep dropping text into the next chunk.
+    const scanner = createSanitizedTextScanner(REMOVED);
+    expect(scanner.feed("a<!-- open")).toBe("a");
+    expect(scanner.isInside()).toBe(true);
+    expect(scanner.feed("still hidden --> visible")).toBe(" visible");
+    expect(scanner.isInside()).toBe(false);
+  });
+
+  it("removed-element state persists across chunks", () => {
+    const scanner = createSanitizedTextScanner(REMOVED);
+    expect(scanner.feed("<script>")).toBe("");
+    expect(scanner.isInside()).toBe(true);
+    expect(scanner.feed("var hidden = 1;")).toBe("");
+    expect(scanner.feed("</script>after")).toBe("after");
+    expect(scanner.isInside()).toBe(false);
+  });
+
+  it("a self-closing removed element does not swallow following text", () => {
+    expect(visibleTextFromHtml("<script/>kept", REMOVED)).toBe("kept");
   });
 
   it("entity-encoded invisibles inside HTML are empty after decoding", () => {
@@ -338,8 +362,12 @@ describe("evidenceRef", () => {
   it("rejects URI schemes and drive-letter prefixes", () => {
     reject("file:///etc/passwd", /URI scheme/);
     reject("https://example.com/x", /URI scheme/);
-    reject("C:evil", /drive-letter/);
-    reject("c:/evil", /URI scheme or drive-letter/);
+    // Exact reason strings: the slash-less form takes the drive-letter
+    // branch, the slashed form falls through to the scheme branch.
+    expect(evidenceRef("C:evil", CFG).reason).toBe("drive-letter prefix");
+    expect(evidenceRef("c:/evil", CFG).reason).toBe(
+      "URI scheme or drive-letter prefix"
+    );
   });
 
   it("rejects percent-encoded dots and separators", () => {

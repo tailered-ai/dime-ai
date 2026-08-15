@@ -661,11 +661,51 @@ describe("r2 body corrections (BYP-B-01/02/04, byte caps)", () => {
   });
 
   it("the full pinned removed-content set counts for nothing", () => {
-    // selma default.rb remove_contents, the pinned public implementation.
-    for (const el of ["iframe", "noscript", "svg", "xmp"]) {
+    // selma default.rb remove_contents, the pinned public implementation —
+    // every element of the set, so a dropped entry fails here.
+    for (const el of [
+      "iframe",
+      "math",
+      "noembed",
+      "noframes",
+      "noscript",
+      "plaintext",
+      "script",
+      "style",
+      "svg",
+      "xmp",
+    ]) {
       expect(emptyFindings(sectioned(`<${el}>inner text</${el}>`)).length).toBe(
         1
       );
+    }
+  });
+
+  it("every container element in the exclusion set gates prose (r2)", () => {
+    // Each element of HTML_CONTAINER_ELEMENTS, blank-line split, so a
+    // dropped entry fails here.
+    for (const el of [
+      "table",
+      "thead",
+      "tbody",
+      "tfoot",
+      "tr",
+      "th",
+      "td",
+      "ul",
+      "ol",
+      "li",
+      "blockquote",
+      "pre",
+      "code",
+      "details",
+      "summary",
+    ]) {
+      const prose = extractProse(
+        `Control sentence outside.\n\n<${el}>\n\nLeaked ${el} text.\n\n</${el}>\n\nTail control here.\n`
+      );
+      expect(prose).toContain("Control sentence outside.");
+      expect(prose).not.toContain(`Leaked ${el} text.`);
     }
   });
 
