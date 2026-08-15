@@ -13,13 +13,18 @@ const AF = join(HERE, "../../docs/verification/prx/adversarial-fixtures");
 describe("adversarial fixture manifest integrity", () => {
   const manifest = JSON.parse(readFileSync(join(AF, "manifest.json"), "utf8"));
 
-  it("pins all 23 fixtures", () => {
+  it("pins all 23 Sol fixtures", () => {
     expect(Object.keys(manifest.fixtures).length).toBe(23);
   });
 
-  for (const [id, meta] of Object.entries<{ fixture: string; sha256: string }>(
-    manifest.fixtures
-  )) {
+  it("pins the r2 correction-pass fixtures", () => {
+    expect(Object.keys(manifest.r2_fixtures).length).toBeGreaterThan(0);
+  });
+
+  for (const [id, meta] of Object.entries<{ fixture: string; sha256: string }>({
+    ...manifest.fixtures,
+    ...manifest.r2_fixtures,
+  })) {
     it(`${id} bytes match the manifest pin`, () => {
       const actual = createHash("sha256")
         .update(readFileSync(join(AF, meta.fixture)))

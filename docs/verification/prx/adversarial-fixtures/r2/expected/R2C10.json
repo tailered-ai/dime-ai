@@ -1,0 +1,11 @@
+{
+  "fixture": "r2/commit/R2C10.txt",
+  "mechanism": "BYP-C-05: a claimed bot identity (claimedBot signal, as range mode now passes it) produces the ordinary prefix result plus the advisory, never suppression",
+  "options": {
+    "claimedBot": true
+  },
+  "expected_findings": [
+    "error:PRX-C-PREFIX",
+    "advisory:PRX-C-CONTEXT-UNVERIFIED"
+  ]
+}

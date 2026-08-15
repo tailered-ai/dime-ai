@@ -1,0 +1,8 @@
+{
+  "fixture": "r2/commit/R2C11.txt",
+  "mechanism": "BYP-C-06: 560,015 UTF-16 units but 1,120,030 UTF-8 bytes — under the v1.1 UTF-16 cap, over the r2 byte cap; the byte accounting must reject it",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-SIZE"
+  ]
+}

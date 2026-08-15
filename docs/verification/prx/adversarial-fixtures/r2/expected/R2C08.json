@@ -1,0 +1,8 @@
+{
+  "fixture": "r2/commit/R2C08.txt",
+  "mechanism": "BYP-C-02: a single malformed final-block trailer produces exactly one finding (in-block grammar), never a duplicate whole-message finding",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-TRAILER"
+  ]
+}

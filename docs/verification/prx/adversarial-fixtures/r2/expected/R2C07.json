@@ -1,0 +1,8 @@
+{
+  "fixture": "r2/commit/R2C07.txt",
+  "mechanism": "BYP-C-02 exclusion: a malformed trailer inside a valid indented code block must NOT fire (subject-period positive control)",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-SUBJECT"
+  ]
+}

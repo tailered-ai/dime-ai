@@ -1,0 +1,8 @@
+{
+  "fixture": "r2/commit/R2C01.txt",
+  "mechanism": "BYP-C-01: lowercase Co-Authored-By key must hit the value grammar via canonicalTrailerKey (exactly one finding)",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-TRAILER"
+  ]
+}

@@ -513,12 +513,21 @@ describe("wrapper output contracts (R8 wrapper hardening)", () => {
         "--json",
       ]);
       const parsed = JSON.parse(r.stdout);
-      // Bot and merge exemptions hold; every id is a 7-char short SHA.
+      // The merge exemption holds via topology (parent count). The bot
+      // CLAIM in the author fields earns no exemption (r2 BYP-C-05): the
+      // bot-authored commit takes the ordinary prefix error plus the
+      // PRX-C-CONTEXT-UNVERIFIED advisory, so enforcing mode now blocks.
       for (const res of parsed.results) {
         expect(res.id).toHaveLength(7);
-        expect(res.findings).toEqual([]);
       }
-      expect(r.code).toBe(0);
+      const flagged = parsed.results.filter(
+        (res: { findings: { rule: string }[] }) => res.findings.length > 0
+      );
+      expect(flagged.length).toBe(1);
+      expect(
+        flagged[0].findings.map((f: { rule: string }) => f.rule).sort()
+      ).toEqual(["PRX-C-CONTEXT-UNVERIFIED", "PRX-C-PREFIX"]);
+      expect(r.code).toBe(1);
 
       const plainRange = runInProcess(commitMain, [
         "--range",

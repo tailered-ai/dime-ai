@@ -1,0 +1,5 @@
+feat(x): ends with a period.
+
+Intro paragraph.
+
+    Co-Authored-By: garbage quoted as indented code

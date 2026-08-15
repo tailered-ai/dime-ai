@@ -1,0 +1,3 @@
+Bump lodash from 1 to 2
+
+Routine dependency bump body.

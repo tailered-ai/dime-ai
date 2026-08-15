@@ -1,0 +1,9 @@
+{
+  "fixture": "r2/commit/R2C09.txt",
+  "mechanism": "BYP-C-04: a forged revert line in CLI mode produces the ordinary prefix result plus the advisory, never silence",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-PREFIX",
+    "advisory:PRX-C-CONTEXT-UNVERIFIED"
+  ]
+}

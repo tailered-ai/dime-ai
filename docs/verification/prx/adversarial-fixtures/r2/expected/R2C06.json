@@ -1,0 +1,8 @@
+{
+  "fixture": "r2/commit/R2C06.txt",
+  "mechanism": "BYP-C-02 exclusion: a malformed trailer inside a fenced code block must NOT fire (the subject-period control finding proves the fixture does not pass silently)",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-SUBJECT"
+  ]
+}

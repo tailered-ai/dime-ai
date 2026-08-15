@@ -153,6 +153,28 @@ describe("mutation-hardening (targeted survivor kills)", () => {
     expect(f.some(x => x.rule === "PRX-C-SIZE")).toBe(false);
   });
 
+  it("counts the size bound in UTF-8 bytes, exact at the boundary (r2)", () => {
+    // 12 ASCII bytes of scaffold + N two-byte chars: at the bound passes,
+    // one more char exceeds it — while the UTF-16 unit count stays far
+    // below the limit in both cases (BYP-C-06).
+    const scaffold = "feat(x): s\n\n";
+    const fill = (1024 * 1024 - scaffold.length) / 2;
+    const at = scaffold + "é".repeat(fill);
+    expect(checkCommit(at, {}).some(x => x.rule === "PRX-C-SIZE")).toBe(false);
+    const over = scaffold + "é".repeat(fill + 1);
+    const f = checkCommit(over, {});
+    expect(f.map(x => x.rule)).toEqual(["PRX-C-SIZE"]);
+  });
+
+  it("applies the Evidence byte cap in UTF-8 on the commit surface (r2)", () => {
+    // 58 two-byte chars: 121 bytes but only 63 UTF-16 units.
+    const msg =
+      "feat(x): s\n\nWhy.\n\nRun-Id: ONE-20260812-PRX\nEvidence: docs/" +
+      "é".repeat(58) +
+      "\nCo-Authored-By: A B <a@b.co>\n";
+    expect(checkCommit(msg, {}).some(x => x.rule === "PRX-C-GOV")).toBe(true);
+  });
+
   it("detects every copula alternative (is/are/was/were)", () => {
     for (const subject of [
       "feat(x): parser is strict",
@@ -217,11 +239,14 @@ describe("governed scope without circularity (R3)", () => {
     expect(checkCommit(msg, {})).toEqual([]);
   });
 
-  it("a mid-body Co-Authored-By: prose line is not a formal trailer", () => {
+  it("a mid-body Co-Authored-By: line is validated where it appears (r2)", () => {
+    // BYP-C-02: recognized governed-key lines in ordinary body text are no
+    // longer invisible — this line draws a placement error plus a value
+    // grammar error, and still does not activate governed scope.
     const msg =
       "feat(x): s\n\nCo-Authored-By: nobody was harmed by this sentence.\n\nA final ordinary paragraph.\n";
     const f = checkCommit(msg, {});
-    expect(trailer(f)).toBe(0);
+    expect(trailer(f)).toBe(2);
     expect(gov(f)).toBe(0);
   });
 
@@ -304,10 +329,15 @@ describe("mutation-hardening R8 (commit-check survivors)", () => {
     ]);
   });
 
-  it("a prose tail line degrades the whole final block to prose", () => {
+  it("a prose tail no longer hides a governed trailer from validation (r2)", () => {
+    // The prose tail still degrades the FORMAL block, but the recognized
+    // Run-Id line is validated where it appears: one placement error, and
+    // governed scope activates (Evidence and Co-Authored-By missing).
     const msg =
       "feat(x): s\n\nWhy.\n\nRun-Id: ONE-20260812-PRX\nplain prose tail\n";
-    expect(checkCommit(msg, {})).toEqual([]);
+    const f = checkCommit(msg, {});
+    expect(f.filter(x => x.rule === "PRX-C-TRAILER").length).toBe(1);
+    expect(f.filter(x => x.rule === "PRX-C-GOV").length).toBe(2);
   });
 
   it("a single-space continuation line stays in the trailer block", () => {
@@ -371,12 +401,23 @@ describe("mutation-hardening R8 (commit-check survivors)", () => {
 
   it("long fence marker lines are themselves wrap-exempt", () => {
     const msg =
+      "feat(x): s\n\n```" + "x".repeat(75) + "\ncode\n```\n\nTail paragraph.\n";
+    expect(checkCommit(msg, {})).toEqual([]);
+  });
+
+  it("a marker with trailing text cannot close a fence (CommonMark, r2)", () => {
+    // Under BYP-C-09 the closing fence must carry nothing after the
+    // marker, so the old ```yyy "closer" is fence CONTENT and the fence
+    // stays open — matching how the pinned GFM parser reads the same text.
+    const msg =
       "feat(x): s\n\n```" +
       "x".repeat(75) +
       "\ncode\n```" +
       "y".repeat(75) +
       "\n\nTail paragraph.\n";
-    expect(checkCommit(msg, {})).toEqual([]);
+    const f = checkCommit(msg, {});
+    expect(f.some(x => x.rule === "PRX-C-FENCE")).toBe(true);
+    expect(f.filter(x => x.rule === "PRX-C-WRAP")).toEqual([]);
   });
 
   it("a mismatched fence marker does not close the open fence", () => {
@@ -488,12 +529,23 @@ describe("mutation-hardening R8 (commit-check survivors)", () => {
     expect(rules(checkCommit(msg, {}))).toContain("PRX-C-PREFIX");
   });
 
-  it("a generated revert may carry extra body lines beside the marker", () => {
+  it("a revert-shaped message earns no exemption without verification (r2)", () => {
+    // BYP-C-04: message shape alone is forgeable. The ordinary prefix
+    // result applies, plus the advisory explaining why.
     const msg =
       'Revert "feat(x): thing"\n\nThis reverts commit ' +
       "1".repeat(40) +
       ".\nReverted because the deploy broke.\n";
-    expect(checkCommit(msg, {})).toEqual([]);
+    const f = checkCommit(msg, {});
+    expect(rules(f)).toEqual(["PRX-C-CONTEXT-UNVERIFIED", "PRX-C-PREFIX"]);
+  });
+
+  it("a trusted caller's verified revert classification exempts the prefix", () => {
+    const msg =
+      'Revert "feat(x): thing"\n\nThis reverts commit ' +
+      "1".repeat(40) +
+      ".\nReverted because the deploy broke.\n";
+    expect(checkCommit(msg, { verifiedRevert: true })).toEqual([]);
   });
 
   it("the revert body marker must start its line", () => {

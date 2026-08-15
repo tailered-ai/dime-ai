@@ -1,3 +1,4 @@
-Revert "feat(prx): land the governed lane fixture"
+revert(prx): restore the governed lane fixture
 
-This reverts commit 1111111111111111111111111111111111111111.
+Restore the fixture removed by the previous change; the conventional
+revert: prefix needs no exemption.

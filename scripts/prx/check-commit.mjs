@@ -3,10 +3,16 @@
 //
 // usage:
 //   node scripts/prx/check-commit.mjs <file>|-
-//     [--governed] [--merge] [--bot] [--mode=audit|advisory|enforcing]
-//     [--json]
+//     [--governed] [--merge] [--bot] [--verified-revert]
+//     [--mode=audit|advisory|enforcing] [--json]
 //   node scripts/prx/check-commit.mjs --range <base>..<head> [--repo <dir>]
 //     [--mode=...] [--json]
+//
+// --merge, --bot, and --verified-revert are TRUSTED-CALLER assertions
+// (topology or verified metadata). Range mode derives merge status from
+// the commit parent count; it never derives a bot or revert exemption
+// from author fields or message text (r2 BYP-C-04/05) — those unverified
+// signals surface as PRX-C-CONTEXT-UNVERIFIED advisories instead.
 //
 // Exit codes: 0 = no blocking findings for the mode; 1 = blocking findings
 // (enforcing mode only); 2 = usage or tool error.
@@ -51,14 +57,14 @@ export function listCommits(repoDir, range) {
     commits.push({
       sha,
       isMerge: parents.trim().split(/\s+/).filter(Boolean).length > 1,
-      // Honesty bound (remediation review): in range mode the bot signal
-      // comes from the commit's OWN author fields, which the commit
-      // author controls — it is a claimed identity, not authenticated
-      // metadata. Its only power is SUPPRESSING the prefix finding, so a
-      // forged "[bot]" grants nothing; enforcing-mode graduation should
-      // bind this exemption to authenticated event metadata instead
-      // (standard §10).
-      authorIsBot: /\[bot\]/i.test(`${authorName} ${authorEmail}`),
+      // r2 BYP-C-05: the author fields are a CLAIMED identity the commit
+      // author controls, so they can no longer suppress any finding. The
+      // claim is passed through only so the checker can emit the
+      // PRX-C-CONTEXT-UNVERIFIED advisory explaining why no bot
+      // exemption was granted; a verified bot exemption requires a
+      // trusted GitHub identity signal tied to the specific commit,
+      // which range mode does not have (standard §10).
+      claimedBot: /\[bot\]/i.test(`${authorName} ${authorEmail}`),
       message,
     });
   }
@@ -76,7 +82,13 @@ function printFindings(label, findings) {
 
 export function main(argv = process.argv.slice(2)) {
   const args = [...argv];
-  const flags = { governed: false, merge: false, bot: false, json: false };
+  const flags = {
+    governed: false,
+    merge: false,
+    bot: false,
+    verifiedRevert: false,
+    json: false,
+  };
   let mode;
   let range;
   let repo = ".";
@@ -86,6 +98,7 @@ export function main(argv = process.argv.slice(2)) {
     if (a === "--governed") flags.governed = true;
     else if (a === "--merge") flags.merge = true;
     else if (a === "--bot") flags.bot = true;
+    else if (a === "--verified-revert") flags.verifiedRevert = true;
     else if (a === "--json") flags.json = true;
     else if (a.startsWith("--mode=")) mode = a.slice("--mode=".length);
     else if (a === "--range") range = args.shift();
@@ -109,7 +122,7 @@ export function main(argv = process.argv.slice(2)) {
           id: c.sha.slice(0, 7),
           findings: checkCommit(c.message, {
             isMerge: c.isMerge,
-            authorIsBot: c.authorIsBot,
+            claimedBot: c.claimedBot,
           }),
         });
       }
@@ -117,7 +130,8 @@ export function main(argv = process.argv.slice(2)) {
       if (input === undefined) {
         process.stderr.write(
           "usage: check-commit.mjs <file>|- [--governed] [--merge] [--bot] " +
-            "[--mode=...] [--json] | --range <base>..<head> [--repo <dir>]\n"
+            "[--verified-revert] [--mode=...] [--json] | " +
+            "--range <base>..<head> [--repo <dir>]\n"
         );
         return 2;
       }
@@ -131,6 +145,7 @@ export function main(argv = process.argv.slice(2)) {
           governed: flags.governed,
           isMerge: flags.merge,
           authorIsBot: flags.bot,
+          verifiedRevert: flags.verifiedRevert,
         }),
       });
     }
