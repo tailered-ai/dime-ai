@@ -60,6 +60,17 @@
         "minLength": 1
       }
     },
+    "agent_decision_receipts": {
+      "type": "object",
+      "description": "Exact approver_id-to-receipt-digest map for every AI-agent approver and no human approvers.",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/sha256"
+      }
+    },
     "train_sha256": {"$ref": "#/$defs/sha256"},
     "validation_sha256": {"$ref": "#/$defs/sha256"},
     "source_registry_sha256": {"$ref": "#/$defs/sha256"},
@@ -142,6 +153,16 @@
           "minItems": 1,
           "uniqueItems": true,
           "items": {"type": "string", "minLength": 1}
+        },
+        "agent_decision_receipts": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/sha256"
+          }
         }
       }
     }

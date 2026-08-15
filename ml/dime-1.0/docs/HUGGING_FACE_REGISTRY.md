@@ -261,6 +261,43 @@ A broad account token is not a substitute for these credentials in automation.
 Owner OAuth access is administrative and must not be embedded in a Pod,
 serving process, workflow, or script.
 
+## Foundation candidate workbench decision
+
+The owner-selected candidate workbench is the future private dataset
+repository `taileredsports/dime-foundation-workbench`. It is intentionally not
+part of the approved-release repository matrix yet: its lifecycle state is
+`selected_pending_provisioning`, and repository creation, credential
+provisioning, live access verification, and private-data admission remain
+false.
+
+The planned workbench-only service identities are:
+
+| Credential | Read | Write | Gated public models |
+|---|---|---|---|
+| `dime-foundation-workbench-read-v1` | Workbench only | None | No |
+| `dime-foundation-workbench-write-v1` | Workbench only | Workbench only | No |
+
+These service identities support repository operations only. They cannot
+represent a human or AI-agent reviewer, sign a review/audit/approval, access the approved
+Foundation or evaluation repositories, read the Meta base, publish an adapter,
+or enter training, serving, release, or locked-evaluation environments.
+
+Human authors and reviewers use individual identities with MFA; shared human
+credentials are prohibited. Registered AI-agent reviewers use a unique
+workload identity bound to one immutable registry profile; shared agent
+credentials are prohibited. Before any private data enters the workbench, live
+tests must prove both intended workbench access and denial for every training,
+serving, general-publisher, locked-evaluator, and locked-publisher credential.
+Human identity mappings, pinned AI-agent profiles, and immutable
+identity-bound decision receipts must exist before the reviewer registry can
+become active.
+
+AI agents are approved as an official reviewer principal type, but the two
+proposed assignments remain inactive. The machine-readable contract records
+`agent_receipt_verifier_status: not_implemented`; runtime validation rejects
+active AI-agent reviewers until a later focused change implements
+cryptographic receipt-signature verification.
+
 Before a full run, the training client calls the Hub identity endpoint with
 the explicit runtime token and requires access-token name
 `dime-training-read-v1` with role `fineGrained`. It then behaviorally proves

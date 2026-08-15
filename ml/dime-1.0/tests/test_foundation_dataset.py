@@ -572,6 +572,21 @@ def _review_fixture() -> tuple[
     return record, ledger, reviewer_index, config, rubric_sha
 
 
+def _active_agent_profile(suffix: str) -> dict[str, Any]:
+    return {
+        "profile_id": f"dime-agent-profile-{suffix}",
+        "status": "active",
+        "model_provider": "provider-001",
+        "model_id": "model-001",
+        "model_revision": "model-snapshot-2026-07-27",
+        "runtime_version": "review-runtime-1.0.0",
+        "system_instruction_sha256": "1" * 64,
+        "tool_contract_sha256": "2" * 64,
+        "inference_policy_sha256": "3" * 64,
+        "receipt_issuer_key_id": f"key-{hashlib.sha256(suffix.encode()).hexdigest()[:32]}",
+    }
+
+
 def test_review_ledger_binds_approval_to_exact_record_content() -> None:
     record, ledger, reviewer_index, config, rubric_sha = _review_fixture()
     validate_review_ledger(
@@ -593,6 +608,31 @@ def test_review_ledger_binds_approval_to_exact_record_content() -> None:
             rubric_sha,
             effective_at=CUTOFF,
         )
+
+
+def test_ai_agent_review_requires_identity_bound_receipt_digest() -> None:
+    record, ledger, reviewer_index, config, rubric_sha = _review_fixture()
+    reviewer_index["domain-reviewer-001"]["principal_type"] = "ai_agent"
+
+    with pytest.raises(FoundationDatasetError, match="receipt IDs"):
+        validate_review_ledger(
+            [record],
+            ledger,
+            reviewer_index,
+            config,
+            rubric_sha,
+            effective_at=CUTOFF,
+        )
+
+    ledger["decisions"][0]["agent_decision_receipt_sha256"] = "d" * 64
+    validate_review_ledger(
+        [record],
+        ledger,
+        reviewer_index,
+        config,
+        rubric_sha,
+        effective_at=CUTOFF,
+    )
 
 
 def test_review_ledger_rejects_unknown_record_decision() -> None:
@@ -721,6 +761,7 @@ def test_elevated_review_requires_distinct_independence_groups() -> None:
 def test_trusted_reviewer_registry_rejects_nonpositive_authority_period() -> None:
     reviewer = {
         "reviewer_id": "dime-reviewer-domain-001",
+        "principal_type": "human",
         "roles": ["domain"],
         "active": True,
         "independence_group_id": "dime-independence-group-domain-001",
@@ -728,13 +769,35 @@ def test_trusted_reviewer_registry_rejects_nonpositive_authority_period() -> Non
         "effective_end_or_open_ended": "2026-01-03T00:00:00Z",
     }
     registry = {
-        "schema_version": "dime-foundation-reviewer-registry-v2",
-        "registry_version": "dime-foundation-reviewers-v0.2.0",
+        "schema_version": "dime-foundation-reviewer-registry-v3",
+        "registry_version": "dime-foundation-reviewers-v0.4.0",
         "status": "active",
         "reviewers": [reviewer],
     }
 
     with pytest.raises(FoundationDatasetError, match="end must be later"):
+        foundation_dataset.trusted_reviewer_index(registry)
+
+
+def test_trusted_reviewer_registry_blocks_agent_activation_until_receipts_are_verified() -> None:
+    reviewer = {
+        "reviewer_id": "dime-reviewer-c794ca4d-001",
+        "principal_type": "ai_agent",
+        "active": True,
+        "agent_profile": _active_agent_profile("agent-001"),
+        "roles": ["domain"],
+        "independence_group_id": "dime-independence-group-c794ca4d-001",
+        "effective_start": "2026-01-01T00:00:00Z",
+        "effective_end_or_open_ended": None,
+    }
+    registry = {
+        "schema_version": "dime-foundation-reviewer-registry-v3",
+        "registry_version": "dime-foundation-reviewers-v0.4.0",
+        "status": "active",
+        "reviewers": [reviewer],
+    }
+
+    with pytest.raises(FoundationDatasetError, match="cryptographic.*verifier"):
         foundation_dataset.trusted_reviewer_index(registry)
 
 
@@ -776,6 +839,157 @@ def test_dataset_approval_requires_distinct_groups_and_non_author_approvers() ->
             reviewers,
             approval_time=datetime(2026, 1, 4, tzinfo=UTC),
             candidate_author_ids={"dime-reviewer-approver-001"},
+        )
+
+
+def test_ai_agent_dataset_approvers_require_exact_receipt_map() -> None:
+    reviewers = {
+        "dime-reviewer-approver-001": {
+            "reviewer_id": "dime-reviewer-approver-001",
+            "principal_type": "ai_agent",
+            "roles": ["dataset-approver"],
+            "active": True,
+            "independence_group_id": "dime-independence-group-approver-001",
+            "effective_start": "2026-01-01T00:00:00Z",
+            "effective_end_or_open_ended": None,
+        },
+        "dime-reviewer-approver-002": {
+            "reviewer_id": "dime-reviewer-approver-002",
+            "principal_type": "ai_agent",
+            "roles": ["dataset-approver"],
+            "active": True,
+            "independence_group_id": "dime-independence-group-approver-002",
+            "effective_start": "2026-01-01T00:00:00Z",
+            "effective_end_or_open_ended": None,
+        },
+    }
+    approver_ids = list(reviewers)
+    with pytest.raises(FoundationDatasetError, match="receipt IDs"):
+        foundation_dataset._validate_dataset_approver_authority(
+            approver_ids,
+            reviewers,
+            approval_time=datetime(2026, 1, 4, tzinfo=UTC),
+            candidate_author_ids=set(),
+        )
+
+    with pytest.raises(FoundationDatasetError, match="multiple principals"):
+        foundation_dataset._validate_dataset_approver_authority(
+            approver_ids,
+            reviewers,
+            approval_time=datetime(2026, 1, 4, tzinfo=UTC),
+            candidate_author_ids=set(),
+            agent_decision_receipts={
+                "dime-reviewer-approver-001": "1" * 64,
+                "dime-reviewer-approver-002": "1" * 64,
+            },
+        )
+
+    foundation_dataset._validate_dataset_approver_authority(
+        approver_ids,
+        reviewers,
+        approval_time=datetime(2026, 1, 4, tzinfo=UTC),
+        candidate_author_ids=set(),
+        agent_decision_receipts={
+            "dime-reviewer-approver-001": "1" * 64,
+            "dime-reviewer-approver-002": "2" * 64,
+        },
+    )
+
+
+def test_ai_agents_with_the_same_model_lineage_count_as_one_group() -> None:
+    first_profile = _active_agent_profile("first")
+    second_profile = _active_agent_profile("second")
+    second_profile.update(
+        {
+            "model_provider": first_profile["model_provider"],
+            "model_id": first_profile["model_id"],
+            "model_revision": first_profile["model_revision"],
+            "runtime_version": "review-runtime-2.0.0",
+            "system_instruction_sha256": "4" * 64,
+            "tool_contract_sha256": "5" * 64,
+            "inference_policy_sha256": "6" * 64,
+        }
+    )
+    reviewers = {
+        "dime-reviewer-approver-001": {
+            "reviewer_id": "dime-reviewer-approver-001",
+            "principal_type": "ai_agent",
+            "agent_profile": first_profile,
+            "roles": ["dataset-approver"],
+            "active": True,
+            "independence_group_id": "dime-independence-group-approver-001",
+            "effective_start": "2026-01-01T00:00:00Z",
+            "effective_end_or_open_ended": None,
+        },
+        "dime-reviewer-approver-002": {
+            "reviewer_id": "dime-reviewer-approver-002",
+            "principal_type": "ai_agent",
+            "agent_profile": second_profile,
+            "roles": ["dataset-approver"],
+            "active": True,
+            "independence_group_id": "dime-independence-group-approver-002",
+            "effective_start": "2026-01-01T00:00:00Z",
+            "effective_end_or_open_ended": None,
+        },
+    }
+
+    with pytest.raises(FoundationDatasetError, match="independence groups"):
+        foundation_dataset._validate_dataset_approver_authority(
+            list(reviewers),
+            reviewers,
+            approval_time=datetime(2026, 1, 4, tzinfo=UTC),
+            candidate_author_ids=set(),
+            agent_decision_receipts={
+                "dime-reviewer-approver-001": "1" * 64,
+                "dime-reviewer-approver-002": "2" * 64,
+            },
+        )
+
+
+def test_ai_agents_with_the_same_policy_lineage_count_as_one_group() -> None:
+    first_profile = _active_agent_profile("first")
+    second_profile = _active_agent_profile("second")
+    second_profile.update(
+        {
+            "model_provider": "provider-002",
+            "model_id": "model-002",
+            "model_revision": "model-snapshot-2026-07-28",
+            "runtime_version": "review-runtime-2.0.0",
+        }
+    )
+    reviewers = {
+        "dime-reviewer-approver-001": {
+            "reviewer_id": "dime-reviewer-approver-001",
+            "principal_type": "ai_agent",
+            "agent_profile": first_profile,
+            "roles": ["dataset-approver"],
+            "active": True,
+            "independence_group_id": "dime-independence-group-approver-001",
+            "effective_start": "2026-01-01T00:00:00Z",
+            "effective_end_or_open_ended": None,
+        },
+        "dime-reviewer-approver-002": {
+            "reviewer_id": "dime-reviewer-approver-002",
+            "principal_type": "ai_agent",
+            "agent_profile": second_profile,
+            "roles": ["dataset-approver"],
+            "active": True,
+            "independence_group_id": "dime-independence-group-approver-002",
+            "effective_start": "2026-01-01T00:00:00Z",
+            "effective_end_or_open_ended": None,
+        },
+    }
+
+    with pytest.raises(FoundationDatasetError, match="independence groups"):
+        foundation_dataset._validate_dataset_approver_authority(
+            list(reviewers),
+            reviewers,
+            approval_time=datetime(2026, 1, 4, tzinfo=UTC),
+            candidate_author_ids=set(),
+            agent_decision_receipts={
+                "dime-reviewer-approver-001": "1" * 64,
+                "dime-reviewer-approver-002": "2" * 64,
+            },
         )
 
 
@@ -908,6 +1122,22 @@ def test_external_audit_reviewer_must_be_authorized_at_completion(tmp_path: Path
 
     with pytest.raises(FoundationDatasetError, match="outside.*authority period"):
         _load_valid_external_audits(directory, inputs, config, reviewers)
+
+
+def test_ai_agent_external_auditor_requires_exact_receipt_map(tmp_path: Path) -> None:
+    directory, inputs, config, reviewers = _external_audit_fixture(tmp_path)
+    reviewer_id = "audit-reviewer-01"
+    reviewers[reviewer_id]["principal_type"] = "ai_agent"
+
+    with pytest.raises(FoundationDatasetError, match="receipt IDs"):
+        _load_valid_external_audits(directory, inputs, config, reviewers)
+
+    _mutate_external_report(
+        directory,
+        "semantic_deduplication",
+        lambda report: report.update({"agent_decision_receipts": {reviewer_id: "4" * 64}}),
+    )
+    _load_valid_external_audits(directory, inputs, config, reviewers)
 
 
 def test_external_audits_bind_tool_identity_and_version(tmp_path: Path) -> None:

@@ -39,6 +39,22 @@ only approved frozen releases. RunPod is a rebuildable working area and must
 never be the sole location of a candidate, review ledger, audit report, or
 frozen snapshot.
 
+The owner-selected private candidate workbench is
+`taileredsports/dime-foundation-workbench`. Its state is
+`selected_pending_provisioning`; it may not receive private data until private
+visibility, least-privilege access, credential denial, individual human
+identity, registered agent workload identity, and immutable review-receipt
+controls have been implemented and verified. The workbench stores pre-freeze candidate and review material only.
+It is not the approved Foundation release and cannot authorize training.
+
+Foundation v1 admits substantive human-authored gold examples and fully
+synthetic scenarios or fixtures only. Substantive AI drafting, retained
+AI-supplied prose, and relabeling AI-authored prose as `synthetic` are
+prohibited. Automated assistance may check spelling, formatting, critique, or
+compliance without supplying retained substantive prose. A separately
+registered AI-agent reviewer may approve the exact bytes under this contract;
+review authority never grants authorship authority.
+
 No current platform state authorizes publication or training.
 
 ## Trusted reviewer authority
@@ -48,7 +64,7 @@ No current platform state authorizes publication or training.
 source of reviewer status and roles. Its exact UTF-8 file bytes are the
 hashable authority. Every authority change requires a reviewed pull request
 and a new `registry_version`; IDs are stable opaque identifiers and must not be
-reassigned to another person.
+reassigned to another human or AI-agent principal.
 
 Every reviewer entry must also define an opaque `independence_group_id` and a
 half-open authority period: `effective_start` is inclusive and
@@ -57,11 +73,29 @@ Quorums count distinct independence groups, not aliases or reviewer IDs.
 Review, source-rights, external-audit, and dataset-approval timestamps must
 fall inside the referenced reviewer's authority period.
 
-The current v2 registry is `proposed` and has no reviewer entries. A proposed
-or retired registry cannot contain an active reviewer, so the current file
-grants no review, audit, or approval authority and cannot authorize a dataset,
-training run, release, or serving change. The v2 shape and runtime checks make
-future authority representable and enforceable; they do not activate a roster.
+The current v3 registry is `proposed` and contains two inactive AI-agent
+reviewer assignments in distinct independence groups. Their proposed roles
+collectively cover every elevated specialist, external audit, and
+dataset-approval duty, but neither entry grants authority. A proposed or
+retired registry cannot contain an active reviewer, so the current file cannot
+authorize a dataset, training run, release, or serving change.
+
+Registry activation requires every AI-agent profile to pin the exact model
+provider, model ID and immutable revision, runtime version, system-instruction
+hash, tool-contract hash, inference-policy hash, receipt-issuer key, approved
+roles, independence group, effective period, conflicts/recusals, and revocation
+state. Materially correlated model or policy lineages count as one
+independence group. Every governed AI-agent decision must carry the SHA-256 of
+an immutable identity-bound receipt. Shared service credentials cannot
+establish reviewer identity or sign a decision. No placeholder reviewer or
+movable model alias may satisfy this gate.
+
+AI agents are an owner-approved official reviewer principal type, and the two
+checked-in assignments are the proposed official roster. They remain inactive.
+The current runtime deliberately rejects active AI-agent entries because the
+cryptographic receipt verifier is not yet implemented. Receipt SHA-256 fields
+are content references, not signature verification and not activation
+authority.
 
 Review ledgers, external reports, and approval records may only reference a
 stable `reviewer_id` that resolves to an active entry and the required role in
@@ -302,7 +336,7 @@ The auditor resolves every ledger reviewer ID and specialist role against the
 trusted registry. The registry gate fails when the registry is not `active`,
 an ID is unknown or inactive, or the required role is absent.
 
-## Human and external approval
+## Governed reviewer and external approval
 
 The approval record binds:
 
@@ -317,6 +351,7 @@ The approval record binds:
 - six external audit report hashes, tools, versions, completion times, and
   reviewer identities, each bound to the candidate-audit hash and exact
   governed input map;
+- an exact reviewer-to-receipt-digest mapping for every AI-agent decision;
 - the approved locked-evaluation full revision or structured opaque reference;
   and
 - two dataset approvers, deletion policy, and limitations.

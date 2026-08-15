@@ -24,7 +24,7 @@
   ],
   "properties": {
     "schema_version": {"const": "dime-foundation-separation-of-duties-v1"},
-    "contract_version": {"const": "dime-foundation-separation-of-duties-v1.1.0"},
+    "contract_version": {"const": "dime-foundation-separation-of-duties-v1.2.0"},
     "status": {"const": "proposed"},
     "dataset_version": {"const": "dime-sft-foundation-v1"},
     "unresolved_decisions": {"type": "array", "maxItems": 0},
@@ -60,15 +60,29 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "allowed_reviewer_principal_types",
         "human_review_required",
+        "human_reviewer_may_approve",
         "automated_agent_may_approve",
+        "agent_profile_binding_required",
+        "agent_decision_receipt_required",
+        "agent_decision_receipt_signature_verification_required",
+        "agent_may_review_own_output",
         "author_may_review_own_record",
         "standard_minimum_approvals",
         "elevated_minimum_approvals"
       ],
       "properties": {
-        "human_review_required": {"const": true},
-        "automated_agent_may_approve": {"const": false},
+        "allowed_reviewer_principal_types": {
+          "const": ["human", "ai_agent"]
+        },
+        "human_review_required": {"const": false},
+        "human_reviewer_may_approve": {"const": true},
+        "automated_agent_may_approve": {"const": true},
+        "agent_profile_binding_required": {"const": true},
+        "agent_decision_receipt_required": {"const": true},
+        "agent_decision_receipt_signature_verification_required": {"const": true},
+        "agent_may_review_own_output": {"const": false},
         "author_may_review_own_record": {"const": false},
         "standard_minimum_approvals": {"type": "integer", "minimum": 1, "const": 1},
         "elevated_minimum_approvals": {"type": "integer", "minimum": 2, "const": 2}
@@ -83,7 +97,8 @@
         "same_group_aliases_count_once",
         "active_specialist_required",
         "review_within_effective_authority_period_required",
-        "exact_registry_sha256_binding_required"
+        "exact_registry_sha256_binding_required",
+        "same_agent_model_or_policy_lineage_counts_as_one_group"
       ],
       "properties": {
         "distinct_reviewer_ids_required": {"const": true},
@@ -91,7 +106,8 @@
         "same_group_aliases_count_once": {"const": true},
         "active_specialist_required": {"const": true},
         "review_within_effective_authority_period_required": {"const": true},
-        "exact_registry_sha256_binding_required": {"const": true}
+        "exact_registry_sha256_binding_required": {"const": true},
+        "same_agent_model_or_policy_lineage_counts_as_one_group": {"const": true}
       }
     },
     "elevated_review": {
@@ -213,12 +229,15 @@
       "required": ["required", "status", "implemented_fields"],
       "properties": {
         "required": {"const": false},
-        "status": {"const": "representation_and_runtime_ready"},
+        "status": {"const": "agent_principal_and_receipt_model_ready"},
         "implemented_fields": {
           "const": [
+            "principal_type",
+            "agent_profile",
             "independence_group_id",
             "effective_start",
-            "effective_end_or_open_ended"
+            "effective_end_or_open_ended",
+            "decision_receipt_sha256"
           ]
         }
       }
@@ -232,7 +251,9 @@
         "token_names_or_values",
         "real_reviewer_roster",
         "active_placeholder_reviewers",
-        "self_granted_authority"
+        "self_granted_authority",
+        "unpinned_active_agent_profiles",
+        "shared_agent_decision_receipts"
       ]
     }
   },

@@ -213,6 +213,17 @@
         "minLength": 1
       }
     },
+    "agent_decision_receipts": {
+      "type": "object",
+      "description": "Exact reviewer_id-to-receipt-digest map for every AI-agent reviewer and no human reviewers.",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/sha256"
+      }
+    },
     "summary": {
       "type": "string",
       "minLength": 1,

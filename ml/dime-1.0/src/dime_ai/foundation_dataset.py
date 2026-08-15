@@ -508,6 +508,9 @@ def trusted_reviewer_index(registry: dict[str, Any]) -> dict[str, dict[str, Any]
             "foundation reviewer registry must be independently reviewed and active"
         )
     reviewers: dict[str, dict[str, Any]] = {}
+    agent_profile_ids: set[str] = set()
+    receipt_issuer_key_ids: set[str] = set()
+    active_agent_ids: list[str] = []
     for reviewer in registry["reviewers"]:
         reviewer_id = reviewer["reviewer_id"]
         if reviewer_id in reviewers:
@@ -520,9 +523,29 @@ def trusted_reviewer_index(registry: dict[str, Any]) -> dict[str, dict[str, Any]
             reviewer,
             label=f"trusted reviewer {reviewer_id}",
         )
+        if reviewer["principal_type"] == "ai_agent":
+            profile = reviewer["agent_profile"]
+            profile_id = profile["profile_id"]
+            if profile_id in agent_profile_ids:
+                raise FoundationDatasetError(f"duplicate trusted AI-agent profile_id: {profile_id}")
+            agent_profile_ids.add(profile_id)
+            key_id = profile["receipt_issuer_key_id"]
+            if key_id is not None and key_id in receipt_issuer_key_ids:
+                raise FoundationDatasetError(
+                    f"duplicate trusted AI-agent receipt issuer key: {key_id}"
+                )
+            if key_id is not None:
+                receipt_issuer_key_ids.add(key_id)
+            if reviewer["active"]:
+                active_agent_ids.append(reviewer_id)
         reviewers[reviewer_id] = reviewer
     if not reviewers:
         raise FoundationDatasetError("active reviewer registry cannot be empty")
+    if active_agent_ids:
+        raise FoundationDatasetError(
+            "AI-agent reviewer activation requires a cryptographic "
+            "decision-receipt verifier; activation remains blocked"
+        )
     return reviewers
 
 
@@ -575,9 +598,72 @@ def _require_independent_reviewer_groups(
     label: str,
 ) -> None:
     groups = {reviewer_index[reviewer_id]["independence_group_id"] for reviewer_id in reviewer_ids}
-    if len(groups) < minimum:
+    model_lineages = {
+        _reviewer_lineage_keys(reviewer_index[reviewer_id])[0] for reviewer_id in reviewer_ids
+    }
+    policy_lineages = {
+        _reviewer_lineage_keys(reviewer_index[reviewer_id])[1] for reviewer_id in reviewer_ids
+    }
+    if min(len(groups), len(model_lineages), len(policy_lineages)) < minimum:
         raise FoundationDatasetError(
             f"{label}: requires at least {minimum} distinct reviewer independence groups"
+        )
+
+
+def _reviewer_lineage_keys(reviewer: dict[str, Any]) -> tuple[str, str]:
+    if reviewer.get("principal_type", "human") != "ai_agent":
+        key = f"human:{reviewer['reviewer_id']}"
+        return key, key
+    profile = reviewer.get("agent_profile")
+    if not isinstance(profile, dict):
+        key = f"ai_agent:{reviewer['reviewer_id']}"
+        return key, key
+    model_lineage = {
+        field: profile.get(field)
+        for field in (
+            "model_provider",
+            "model_id",
+            "model_revision",
+        )
+    }
+    policy_lineage = {
+        field: profile.get(field)
+        for field in (
+            "system_instruction_sha256",
+            "tool_contract_sha256",
+            "inference_policy_sha256",
+        )
+    }
+    return (
+        f"ai_model:{sha256_bytes(canonical_json_bytes(model_lineage))}",
+        f"ai_policy:{sha256_bytes(canonical_json_bytes(policy_lineage))}",
+    )
+
+
+def _require_agent_decision_receipts(
+    reviewer_ids: set[str],
+    reviewer_index: dict[str, dict[str, Any]],
+    receipts: dict[str, str] | None,
+    *,
+    label: str,
+) -> None:
+    required_ids = {
+        reviewer_id
+        for reviewer_id in reviewer_ids
+        if reviewer_index[reviewer_id].get("principal_type", "human") == "ai_agent"
+    }
+    supplied = receipts or {}
+    if set(supplied) != required_ids:
+        raise FoundationDatasetError(
+            f"{label}: AI-agent receipt IDs must exactly match AI-agent reviewer IDs"
+        )
+    if any(not SHA256_PATTERN.fullmatch(value) for value in supplied.values()):
+        raise FoundationDatasetError(
+            f"{label}: AI-agent decision receipts must be lowercase SHA-256 digests"
+        )
+    if len(set(supplied.values())) != len(supplied):
+        raise FoundationDatasetError(
+            f"{label}: one AI-agent decision receipt cannot represent multiple principals"
         )
 
 
@@ -587,6 +673,7 @@ def _validate_dataset_approver_authority(
     *,
     approval_time: datetime,
     candidate_author_ids: set[str],
+    agent_decision_receipts: dict[str, str] | None = None,
 ) -> None:
     approver_set = set(approver_ids)
     for approver_id in approver_ids:
@@ -601,6 +688,12 @@ def _validate_dataset_approver_authority(
         approver_set,
         reviewer_index,
         minimum=2,
+        label="dataset approval",
+    )
+    _require_agent_decision_receipts(
+        approver_set,
+        reviewer_index,
+        agent_decision_receipts,
         label="dataset approval",
     )
     overlapping_authors = sorted(approver_set & candidate_author_ids)
@@ -1281,6 +1374,7 @@ def validate_review_ledger(
         raise FoundationDatasetError("review ledger rubric hash does not match the frozen rubric")
     decisions: dict[str, list[dict[str, Any]]] = defaultdict(list)
     decision_keys: set[tuple[str, str]] = set()
+    seen_agent_receipts: set[str] = set()
     for decision in ledger["decisions"]:
         reviewer_id = decision["reviewer_id"]
         reviewed_at = _parse_utc(
@@ -1297,6 +1391,19 @@ def validate_review_ledger(
             event_at=reviewed_at,
             label=f"{decision['example_id']} review",
         )
+        receipt = decision.get("agent_decision_receipt_sha256")
+        _require_agent_decision_receipts(
+            {reviewer_id},
+            reviewer_index,
+            {} if receipt is None else {reviewer_id: receipt},
+            label=f"{decision['example_id']} review",
+        )
+        if receipt is not None:
+            if receipt in seen_agent_receipts:
+                raise FoundationDatasetError(
+                    "AI-agent decision receipt cannot be reused across review decisions"
+                )
+            seen_agent_receipts.add(receipt)
         key = (decision["record_sha256"], reviewer_id)
         if key in decision_keys:
             raise FoundationDatasetError(
@@ -2049,6 +2156,12 @@ def _load_external_audits(
                 label=filename,
                 required_role=required_role,
             )
+        _require_agent_decision_receipts(
+            set(report["reviewer_ids"]),
+            reviewer_index,
+            report.get("agent_decision_receipts"),
+            label=filename,
+        )
         reports[audit_type] = report
         hashes[audit_type] = (
             _captured_sha256(captured_inputs, path, audit_type)
@@ -2059,7 +2172,7 @@ def _load_external_audits(
 
 
 def _audit_metadata(report: dict[str, Any], report_sha256: str) -> dict[str, Any]:
-    return {
+    metadata = {
         "passed": True,
         "report_sha256": report_sha256,
         "tool_id": report["tool_id"],
@@ -2067,6 +2180,9 @@ def _audit_metadata(report: dict[str, Any], report_sha256: str) -> dict[str, Any
         "completed_at_utc": report["completed_at_utc"],
         "reviewer_ids": report["reviewer_ids"],
     }
+    if "agent_decision_receipts" in report:
+        metadata["agent_decision_receipts"] = report["agent_decision_receipts"]
+    return metadata
 
 
 def _verify_dataset_card(
@@ -2667,6 +2783,23 @@ def _freeze_audited_snapshot(
         reviewer_index=reviewer_index,
         captured_inputs=freeze_input_fence,
     )
+    agent_receipt_digests = [
+        *[
+            decision["agent_decision_receipt_sha256"]
+            for decision in ledger["decisions"]
+            if decision.get("agent_decision_receipt_sha256") is not None
+        ],
+        *[
+            digest
+            for report in external_reports.values()
+            for digest in report.get("agent_decision_receipts", {}).values()
+        ],
+        *approval.get("agent_decision_receipts", {}).values(),
+    ]
+    if len(agent_receipt_digests) != len(set(agent_receipt_digests)):
+        raise FoundationDatasetError(
+            "AI-agent decision receipts must be unique across reviews, audits, and approval"
+        )
     expected_audits = {
         audit_type: _audit_metadata(
             external_reports[audit_type],
@@ -2697,6 +2830,7 @@ def _freeze_audited_snapshot(
                 *audit_result.validation_records,
             ]
         },
+        agent_decision_receipts=approval.get("agent_decision_receipts"),
     )
     prerequisite_times = [
         _parse_utc(saved_audit["generated_at_utc"], "candidate_audit.generated_at_utc"),

@@ -1226,9 +1226,35 @@ def _validate_separation(
     logical_name = "separation_of_duties"
     _validate_authorization(separation, logical_name)
     record_review = separation["record_review"]
-    if record_review["automated_agent_may_approve"]:
+    if set(record_review["allowed_reviewer_principal_types"]) != {"human", "ai_agent"}:
         raise FoundationContractError(
-            "separation_of_duties at record_review.automated: automated approval is prohibited"
+            "separation_of_duties at record_review.principals: "
+            "human and AI-agent reviewers must both be supported"
+        )
+    if not record_review["automated_agent_may_approve"]:
+        raise FoundationContractError(
+            "separation_of_duties at record_review.automated: "
+            "registered AI-agent approval must be supported"
+        )
+    if not record_review["agent_profile_binding_required"]:
+        raise FoundationContractError(
+            "separation_of_duties at record_review.agent_profile: "
+            "AI-agent profile binding is required"
+        )
+    if not record_review["agent_decision_receipt_required"]:
+        raise FoundationContractError(
+            "separation_of_duties at record_review.agent_receipt: "
+            "AI-agent decision receipts are required"
+        )
+    if not record_review["agent_decision_receipt_signature_verification_required"]:
+        raise FoundationContractError(
+            "separation_of_duties at record_review.agent_receipt_signature: "
+            "AI-agent receipt signature verification is required"
+        )
+    if record_review["agent_may_review_own_output"]:
+        raise FoundationContractError(
+            "separation_of_duties at record_review.agent_self_review: "
+            "AI agents may not review their own output"
         )
     if record_review["author_may_review_own_record"]:
         raise FoundationContractError(
@@ -1298,9 +1324,12 @@ def _validate_separation(
             raise FoundationContractError(
                 f"separation_of_duties at external_audits.{audit_name}: audit tool mismatch"
             )
-    if reviewer_registry["status"] != "proposed" or reviewer_registry["reviewers"]:
+    if reviewer_registry["status"] != "proposed" or any(
+        reviewer["active"] for reviewer in reviewer_registry["reviewers"]
+    ):
         raise FoundationContractError(
-            "separation_of_duties at reviewer registry: registry must remain proposed and empty"
+            "separation_of_duties at reviewer registry: "
+            "registry must remain proposed with no active reviewers"
         )
     serialized = json.dumps(separation, ensure_ascii=False, allow_nan=False)
     if EMAIL_PATTERN.search(serialized):

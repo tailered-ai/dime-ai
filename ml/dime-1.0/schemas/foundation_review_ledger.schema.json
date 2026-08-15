@@ -71,6 +71,18 @@
           "type": "string",
           "minLength": 1
         },
+        "agent_decision_receipt_sha256": {
+          "description": "Required only when reviewer_id resolves to an active ai_agent principal; null or omitted for a human principal.",
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "decision": {
           "enum": ["approve", "reject", "changes_requested"]
         },

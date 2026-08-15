@@ -59,6 +59,100 @@ ACCESS_MATRIX = {
     },
 }
 
+FOUNDATION_OWNER_DECISION = {
+    "decision_version": "dime-foundation-v1-owner-decision-v1",
+    "status": "owner_approved",
+    "workbench": {
+        "provider": "hugging_face",
+        "repo_type": "dataset",
+        "repo_id": "taileredsports/dime-foundation-workbench",
+        "visibility": "private",
+        "lifecycle_state": "selected_pending_provisioning",
+        "private_data_admission_authorized": False,
+        "authoritative_for": [
+            "candidate_records",
+            "source_artifacts",
+            "source_registry",
+            "review_ledger",
+            "raw_external_audits",
+            "foundation_approval",
+        ],
+        "never_authoritative_for": [
+            "approved_foundation_release",
+            "training_authorization",
+            "adapter_release",
+            "serving",
+        ],
+        "runpod_is_authoritative": False,
+    },
+    "authorship_policy": {
+        "allowed_source_classes": ["human-authored", "synthetic"],
+        "substantive_ai_drafting_allowed": False,
+        "retained_ai_supplied_prose_allowed": False,
+        "synthetic_may_relabel_ai_authored_prose": False,
+        "non_substantive_ai_assistance": [
+            "spelling",
+            "formatting",
+            "critique",
+            "checklist_validation",
+        ],
+        "automated_agent_may_approve": True,
+    },
+    "credential_boundary": {
+        "individual_human_accounts_required": True,
+        "mfa_required": True,
+        "shared_human_credentials_allowed": False,
+        "agent_workload_identity_required": True,
+        "shared_agent_credentials_allowed": False,
+        "planned_service_credentials": {
+            "dime-foundation-workbench-read-v1": {
+                "read": ["foundation_workbench"],
+                "write": [],
+                "gated_public_read": False,
+            },
+            "dime-foundation-workbench-write-v1": {
+                "read": ["foundation_workbench"],
+                "write": ["foundation_workbench"],
+                "gated_public_read": False,
+            },
+        },
+        "prohibited_existing_credentials": list(ACCESS_MATRIX),
+        "service_credentials_may_establish_reviewer_identity": False,
+        "live_positive_and_negative_tests_required_before_private_data": True,
+    },
+    "reviewer_authority": {
+        "registry_path": "configs/foundation_reviewer_registry.json",
+        "registry_status": "proposed",
+        "roster_status": "proposed_inactive_ai_agent_assignments",
+        "activation_authorized": False,
+        "ai_agent_activation_authorized": False,
+        "agent_receipt_verifier_status": "not_implemented",
+        "allowed_principal_types": ["human", "ai_agent"],
+        "private_identity_mapping_required_for_humans": True,
+        "immutable_agent_profile_binding_required": True,
+        "identity_bound_decision_receipts_required": True,
+        "agent_decision_receipt_sha256_required": True,
+        "agent_decision_receipt_signature_verification_required": True,
+        "shared_service_tokens_may_sign_decisions": False,
+        "same_agent_model_or_policy_lineage_counts_as_one_group": True,
+        "minimum_dataset_approver_independence_groups": 2,
+    },
+    "authorization_effect": {
+        "creates_repository": False,
+        "provisions_credentials": False,
+        "admits_private_data": False,
+        "activates_reviewers": False,
+        "approves_data": False,
+        "authorizes_gpu_execution": False,
+        "authorizes_training": False,
+        "authorizes_locked_evaluation": False,
+        "authorizes_publication": False,
+        "authorizes_release": False,
+        "authorizes_serving": False,
+        "authorizes_provider_activation": False,
+    },
+}
+
 FOUNDATION_CONTRACT_PATHS = {
     "configs/foundation_taxonomy_v1.yaml",
     "configs/foundation_stage_profiles_v1.yaml",
@@ -234,6 +328,35 @@ def test_hugging_face_registry_and_access_matrix_are_exact() -> None:
     if authorization["adapter_publication"]:
         assert contract["status"] == "release_authorized"
         assert repositories["promoted_adapter"]["current_state"] == "release_authorized"
+
+
+def test_foundation_v1_owner_decision_is_exact_and_non_authorizing() -> None:
+    contract = load_platform_contract()
+    decision = contract["foundation_v1_owner_decision"]
+    assert decision == FOUNDATION_OWNER_DECISION
+
+    source_policy = yaml.safe_load(
+        (PROJECT / "configs/foundation_v1_build.yaml").read_text(encoding="utf-8")
+    )["source_policy"]
+    assert (
+        decision["authorship_policy"]["allowed_source_classes"]
+        == source_policy["allowed_source_classes"]
+    )
+    assert source_policy["teacher_generated_allowed"] is False
+
+    credentials = contract["hugging_face"]["credentials"]
+    prohibited = decision["credential_boundary"]["prohibited_existing_credentials"]
+    assert set(prohibited) == set(credentials)
+    assert all(
+        "foundation_workbench" not in permissions["read"] + permissions["write"]
+        for permissions in credentials.values()
+    )
+    assert all(
+        not permissions["gated_public_read"]
+        for permissions in decision["credential_boundary"]["planned_service_credentials"].values()
+    )
+    assert not any(decision["authorization_effect"].values())
+    assert decision["reviewer_authority"]["activation_authorized"] is False
 
 
 def test_runpod_workspace_and_credential_boundaries_are_exact() -> None:

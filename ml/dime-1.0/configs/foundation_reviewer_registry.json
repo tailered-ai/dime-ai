@@ -1,6 +1,63 @@
 {
-  "schema_version": "dime-foundation-reviewer-registry-v2",
-  "registry_version": "dime-foundation-reviewers-v0.2.0",
+  "schema_version": "dime-foundation-reviewer-registry-v3",
+  "registry_version": "dime-foundation-reviewers-v0.4.0",
   "status": "proposed",
-  "reviewers": []
+  "reviewers": [
+    {
+      "reviewer_id": "dime-reviewer-d55729f9-9153-4534-95bd-6bf097416980",
+      "principal_type": "ai_agent",
+      "active": false,
+      "agent_profile": {
+        "profile_id": "dime-agent-profile-85ef4149-03e2-49ae-b8a4-2767e8627404",
+        "status": "configuration_pending",
+        "model_provider": null,
+        "model_id": null,
+        "model_revision": null,
+        "runtime_version": null,
+        "system_instruction_sha256": null,
+        "tool_contract_sha256": null,
+        "inference_policy_sha256": null,
+        "receipt_issuer_key_id": null
+      },
+      "roles": [
+        "domain",
+        "numeric",
+        "simulation",
+        "semantic-audit",
+        "dataset-approver"
+      ],
+      "independence_group_id": "dime-independence-group-7e33b5f6-5167-4a16-b3a3-ec7d27140b1d",
+      "effective_start": "2026-07-27T00:00:00Z",
+      "effective_end_or_open_ended": null
+    },
+    {
+      "reviewer_id": "dime-reviewer-c3ddb330-def3-4406-9325-1b4d48d32543",
+      "principal_type": "ai_agent",
+      "active": false,
+      "agent_profile": {
+        "profile_id": "dime-agent-profile-1a0eb37e-2be7-40c7-bae5-d2e71a2889b1",
+        "status": "configuration_pending",
+        "model_provider": null,
+        "model_id": null,
+        "model_revision": null,
+        "runtime_version": null,
+        "system_instruction_sha256": null,
+        "tool_contract_sha256": null,
+        "inference_policy_sha256": null,
+        "receipt_issuer_key_id": null
+      },
+      "roles": [
+        "coaching",
+        "safety",
+        "privacy",
+        "rights",
+        "evaluation-audit",
+        "locked-evaluation",
+        "dataset-approver"
+      ],
+      "independence_group_id": "dime-independence-group-0734717e-69c8-4cc4-a1b6-bbb33f404be5",
+      "effective_start": "2026-07-27T00:00:00Z",
+      "effective_end_or_open_ended": null
+    }
+  ]
 }

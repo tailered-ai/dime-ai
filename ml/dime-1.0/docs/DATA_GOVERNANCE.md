@@ -15,7 +15,7 @@
 - Private user history stays in user-scoped retrieval; it is not placed in model
   weights merely because it is available to the product.
 - Every training item needs a stable ID, timestamp, provenance, rights basis,
-  privacy state, partition keys, and human review status.
+  privacy state, partition keys, and governed review status.
 - Reviewer status and roles come only from the Git-controlled trusted reviewer
   registry. A review ledger may reference stable reviewer IDs; it cannot create
   identities, activate reviewers, or grant roles.
@@ -41,13 +41,40 @@ an authorized private review system. RunPod is a rebuildable processor and may
 not be their sole authoritative location.
 
 The trusted authority at `configs/foundation_reviewer_registry.json` uses the
-v2 reviewer shape but is still `proposed` and contains no reviewer entries. It
-therefore grants no review, external-audit, specialist, or dataset-approval
-authority. Every future entry must carry an opaque independence group and a
-canonical UTC authority period. Quorums count distinct groups, and each
-decision timestamp must fall inside the half-open authority period. Review
-ledgers contain rubric-bound decisions and stable reviewer IDs only; they
-cannot define status, roles, groups, or authority dates.
+v3 reviewer shape and is still `proposed`. It contains two inactive,
+owner-confirmed AI-agent reviewer assignments in distinct independence groups,
+with proposed roles covering the required specialist, audit, and dataset-
+approval duties. It therefore grants no review, external-audit, specialist, or
+dataset-approval authority. Every entry carries an opaque independence group,
+a canonical UTC authority period, and an agent profile. An active agent profile
+must pin the provider, exact model and revision, runtime, system instructions,
+tool contract, inference policy, and receipt-issuer key. Null profile fields
+are allowed only while the assignment remains inactive. Quorums count distinct
+groups, and materially correlated model or policy lineages count as one group.
+
+The owner has selected `taileredsports/dime-foundation-workbench` as the future
+private candidate workbench, pending provisioning and live access
+verification. No private record may enter it yet. Human access must use
+individual MFA-protected identities. AI agents must use one workload identity
+per registered principal. Generic workbench service credentials cannot
+establish reviewer identity or sign a decision. Human activation requires a
+restricted identity mapping; AI-agent activation requires a fully pinned
+immutable profile. Every AI-agent review, audit, and approval must carry the
+SHA-256 of its identity-bound decision receipt.
+
+The owner has approved AI agents as an official reviewer principal type and
+the two assignments above are the proposed official roster. They are not yet
+active: the cryptographic receipt verifier is not implemented, so runtime
+validation rejects every active AI-agent entry. Activation requires a later
+focused change that implements and validates signature verification; a
+64-character digest by itself is not proof of a decision.
+
+Foundation v1 substantive prose is human-authored. Fully synthetic scenarios
+and fixtures remain allowed, but `synthetic` cannot relabel AI-authored answers.
+AI may assist with spelling, formatting, critique, or checklist validation only
+when it contributes no retained substantive prose. A separately registered,
+independent AI-agent reviewer may approve the exact candidate bytes; reviewer
+authority does not grant authorship or permit AI-drafted training prose.
 
 ## Required dataset lineage
 

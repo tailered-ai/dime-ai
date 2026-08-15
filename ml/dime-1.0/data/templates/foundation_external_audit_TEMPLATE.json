@@ -27,5 +27,6 @@
   "reviewer_ids": [
     "REPLACE_WITH_REVIEWER_ID"
   ],
+  "agent_decision_receipts": {},
   "summary": "No case-level, source-level, personal, or locked evaluation content belongs in this report."
 }

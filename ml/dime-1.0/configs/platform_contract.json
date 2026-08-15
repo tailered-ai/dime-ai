@@ -28,6 +28,117 @@
     "repository": "aisportsbettingcontact/ai-sports-betting-dime-ai",
     "project_path": "ml/dime-1.0"
   },
+  "foundation_v1_owner_decision": {
+    "decision_version": "dime-foundation-v1-owner-decision-v1",
+    "status": "owner_approved",
+    "workbench": {
+      "provider": "hugging_face",
+      "repo_type": "dataset",
+      "repo_id": "taileredsports/dime-foundation-workbench",
+      "visibility": "private",
+      "lifecycle_state": "selected_pending_provisioning",
+      "private_data_admission_authorized": false,
+      "authoritative_for": [
+        "candidate_records",
+        "source_artifacts",
+        "source_registry",
+        "review_ledger",
+        "raw_external_audits",
+        "foundation_approval"
+      ],
+      "never_authoritative_for": [
+        "approved_foundation_release",
+        "training_authorization",
+        "adapter_release",
+        "serving"
+      ],
+      "runpod_is_authoritative": false
+    },
+    "authorship_policy": {
+      "allowed_source_classes": [
+        "human-authored",
+        "synthetic"
+      ],
+      "substantive_ai_drafting_allowed": false,
+      "retained_ai_supplied_prose_allowed": false,
+      "synthetic_may_relabel_ai_authored_prose": false,
+      "non_substantive_ai_assistance": [
+        "spelling",
+        "formatting",
+        "critique",
+        "checklist_validation"
+      ],
+      "automated_agent_may_approve": true
+    },
+    "credential_boundary": {
+      "individual_human_accounts_required": true,
+      "mfa_required": true,
+      "shared_human_credentials_allowed": false,
+      "agent_workload_identity_required": true,
+      "shared_agent_credentials_allowed": false,
+      "planned_service_credentials": {
+        "dime-foundation-workbench-read-v1": {
+          "read": [
+            "foundation_workbench"
+          ],
+          "write": [],
+          "gated_public_read": false
+        },
+        "dime-foundation-workbench-write-v1": {
+          "read": [
+            "foundation_workbench"
+          ],
+          "write": [
+            "foundation_workbench"
+          ],
+          "gated_public_read": false
+        }
+      },
+      "prohibited_existing_credentials": [
+        "dime-training-read-v1",
+        "dime-serving-read-v1",
+        "dime-release-publisher-v1",
+        "dime-locked-evaluator-read-v1",
+        "dime-locked-publisher-v1"
+      ],
+      "service_credentials_may_establish_reviewer_identity": false,
+      "live_positive_and_negative_tests_required_before_private_data": true
+    },
+    "reviewer_authority": {
+      "registry_path": "configs/foundation_reviewer_registry.json",
+      "registry_status": "proposed",
+      "roster_status": "proposed_inactive_ai_agent_assignments",
+      "activation_authorized": false,
+      "ai_agent_activation_authorized": false,
+      "agent_receipt_verifier_status": "not_implemented",
+      "allowed_principal_types": [
+        "human",
+        "ai_agent"
+      ],
+      "private_identity_mapping_required_for_humans": true,
+      "immutable_agent_profile_binding_required": true,
+      "identity_bound_decision_receipts_required": true,
+      "agent_decision_receipt_sha256_required": true,
+      "agent_decision_receipt_signature_verification_required": true,
+      "shared_service_tokens_may_sign_decisions": false,
+      "same_agent_model_or_policy_lineage_counts_as_one_group": true,
+      "minimum_dataset_approver_independence_groups": 2
+    },
+    "authorization_effect": {
+      "creates_repository": false,
+      "provisions_credentials": false,
+      "admits_private_data": false,
+      "activates_reviewers": false,
+      "approves_data": false,
+      "authorizes_gpu_execution": false,
+      "authorizes_training": false,
+      "authorizes_locked_evaluation": false,
+      "authorizes_publication": false,
+      "authorizes_release": false,
+      "authorizes_serving": false,
+      "authorizes_provider_activation": false
+    }
+  },
   "base_model": {
     "repo_type": "model",
     "repo_id": "meta-llama/Llama-3.1-8B",

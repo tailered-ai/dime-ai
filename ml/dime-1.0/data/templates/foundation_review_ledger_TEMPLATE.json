@@ -10,6 +10,7 @@
       "example_id": "REPLACE_WITH_EXAMPLE_ID",
       "record_sha256": "REPLACE_WITH_CANONICAL_RECORD_SHA256",
       "reviewer_id": "REPLACE_WITH_REVIEWER_ID",
+      "agent_decision_receipt_sha256": null,
       "decision": "approve",
       "reviewed_at_utc": "REPLACE_WITH_NORMALIZED_UTC_TIMESTAMP",
       "rubric_sha256": "REPLACE_WITH_RUBRIC_SHA256",

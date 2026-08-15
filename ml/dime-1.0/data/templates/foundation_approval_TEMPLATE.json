@@ -8,6 +8,7 @@
     "REPLACE_WITH_DATASET_APPROVER_A",
     "REPLACE_WITH_DATASET_APPROVER_B"
   ],
+  "agent_decision_receipts": {},
   "train_sha256": "REPLACE_WITH_64_CHARACTER_SHA256",
   "validation_sha256": "REPLACE_WITH_64_CHARACTER_SHA256",
   "source_registry_sha256": "REPLACE_WITH_64_CHARACTER_SHA256",
@@ -34,7 +35,8 @@
       "completed_at_utc": "REPLACE_WITH_NORMALIZED_UTC_TIMESTAMP",
       "reviewer_ids": [
         "REPLACE_WITH_REVIEWER_ID"
-      ]
+      ],
+      "agent_decision_receipts": {}
     },
     "privacy_and_identifiers": {
       "passed": true,
@@ -44,7 +46,8 @@
       "completed_at_utc": "REPLACE_WITH_NORMALIZED_UTC_TIMESTAMP",
       "reviewer_ids": [
         "REPLACE_WITH_REVIEWER_ID"
-      ]
+      ],
+      "agent_decision_receipts": {}
     },
     "rights": {
       "passed": true,
@@ -54,7 +57,8 @@
       "completed_at_utc": "REPLACE_WITH_NORMALIZED_UTC_TIMESTAMP",
       "reviewer_ids": [
         "REPLACE_WITH_REVIEWER_ID"
-      ]
+      ],
+      "agent_decision_receipts": {}
     },
     "development_evaluation_contamination": {
       "passed": true,
@@ -64,7 +68,8 @@
       "completed_at_utc": "REPLACE_WITH_NORMALIZED_UTC_TIMESTAMP",
       "reviewer_ids": [
         "REPLACE_WITH_REVIEWER_ID"
-      ]
+      ],
+      "agent_decision_receipts": {}
     },
     "locked_evaluation_contamination": {
       "passed": true,
@@ -74,7 +79,8 @@
       "completed_at_utc": "REPLACE_WITH_NORMALIZED_UTC_TIMESTAMP",
       "reviewer_ids": [
         "REPLACE_WITH_LOCKED_EVALUATOR_REVIEWER_ID"
-      ]
+      ],
+      "agent_decision_receipts": {}
     },
     "numeric_traceability": {
       "passed": true,
@@ -84,7 +90,8 @@
       "completed_at_utc": "REPLACE_WITH_NORMALIZED_UTC_TIMESTAMP",
       "reviewer_ids": [
         "REPLACE_WITH_REVIEWER_ID"
-      ]
+      ],
+      "agent_decision_receipts": {}
     }
   },
   "locked_evaluation_reference": "locked-eval-approval:REPLACE_WITH_OPAQUE_REFERENCE",

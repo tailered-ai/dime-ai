@@ -12,7 +12,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "dime-foundation-reviewer-registry-v2"
+      "const": "dime-foundation-reviewer-registry-v3"
     },
     "registry_version": {
       "type": "string",
@@ -111,6 +111,7 @@
       "additionalProperties": false,
       "required": [
         "reviewer_id",
+        "principal_type",
         "active",
         "roles",
         "independence_group_id",
@@ -126,8 +127,18 @@
             "pattern": "(?:replace|placeholder|example|sample|test|tbd|todo|unknown|anonymous|reviewer[-_.]?[ab])"
           }
         },
+        "principal_type": {
+          "enum": [
+            "human",
+            "ai_agent"
+          ],
+          "description": "Authority principal type. AI agents receive no authority unless their immutable agent profile is fully pinned."
+        },
         "active": {
           "type": "boolean"
+        },
+        "agent_profile": {
+          "$ref": "#/$defs/agentProfile"
         },
         "roles": {
           "type": "array",
@@ -176,7 +187,202 @@
             }
           ]
         }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "principal_type": {
+                "const": "ai_agent"
+              }
+            },
+            "required": [
+              "principal_type"
+            ]
+          },
+          "then": {
+            "required": [
+              "agent_profile"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "agent_profile"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "principal_type": {
+                "const": "ai_agent"
+              },
+              "active": {
+                "const": true
+              }
+            },
+            "required": [
+              "principal_type",
+              "active"
+            ]
+          },
+          "then": {
+            "properties": {
+              "agent_profile": {
+                "$ref": "#/$defs/activeAgentProfile"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "agentProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile_id",
+        "status",
+        "model_provider",
+        "model_id",
+        "model_revision",
+        "runtime_version",
+        "system_instruction_sha256",
+        "tool_contract_sha256",
+        "inference_policy_sha256",
+        "receipt_issuer_key_id"
+      ],
+      "properties": {
+        "profile_id": {
+          "type": "string",
+          "pattern": "^dime-agent-profile-[a-z0-9][a-z0-9._-]{7,63}$",
+          "not": {
+            "pattern": "(?:replace|placeholder|example|sample|test|tbd|todo|unknown|latest)"
+          }
+        },
+        "status": {
+          "enum": [
+            "configuration_pending",
+            "active",
+            "retired"
+          ]
+        },
+        "model_provider": {
+          "$ref": "#/$defs/pinnedIdentityOrNull"
+        },
+        "model_id": {
+          "$ref": "#/$defs/pinnedIdentityOrNull"
+        },
+        "model_revision": {
+          "$ref": "#/$defs/pinnedIdentityOrNull"
+        },
+        "runtime_version": {
+          "$ref": "#/$defs/pinnedIdentityOrNull"
+        },
+        "system_instruction_sha256": {
+          "$ref": "#/$defs/sha256OrNull"
+        },
+        "tool_contract_sha256": {
+          "$ref": "#/$defs/sha256OrNull"
+        },
+        "inference_policy_sha256": {
+          "$ref": "#/$defs/sha256OrNull"
+        },
+        "receipt_issuer_key_id": {
+          "$ref": "#/$defs/pinnedIdentityOrNull"
+        }
       }
+    },
+    "activeAgentProfile": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/agentProfile"
+        },
+        {
+          "properties": {
+            "status": {
+              "const": "active"
+            },
+            "model_provider": {
+              "$ref": "#/$defs/pinnedIdentity"
+            },
+            "model_id": {
+              "$ref": "#/$defs/pinnedIdentity"
+            },
+            "model_revision": {
+              "$ref": "#/$defs/immutableRevision"
+            },
+            "runtime_version": {
+              "$ref": "#/$defs/immutableRevision"
+            },
+            "system_instruction_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "tool_contract_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "inference_policy_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "receipt_issuer_key_id": {
+              "$ref": "#/$defs/immutableKeyId"
+            }
+          }
+        }
+      ]
+    },
+    "pinnedIdentity": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "not": {
+        "pattern": "(?:^|[-_.:/])(?:replace|placeholder|example|sample|test|tbd|todo|unknown|latest|unassigned|main|master|stable|current|head)(?:$|[-_.:/])"
+      }
+    },
+    "pinnedIdentityOrNull": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/pinnedIdentity"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "immutableRevision": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"
+        },
+        {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._/-]{1,127}[-@:](?:20\\d{2}-\\d{2}-\\d{2}|v?\\d+\\.\\d+\\.\\d+(?:[-+][a-z0-9.-]+)?)$"
+        },
+        {
+          "type": "string",
+          "pattern": "^v?\\d+\\.\\d+\\.\\d+(?:[-+][a-z0-9.-]+)?$"
+        }
+      ]
+    },
+    "immutableKeyId": {
+      "type": "string",
+      "pattern": "^key-[0-9a-f]{32,64}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "sha256OrNull": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/sha256"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   }
 }

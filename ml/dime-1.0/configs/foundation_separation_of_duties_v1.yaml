@@ -1,5 +1,5 @@
 schema_version: dime-foundation-separation-of-duties-v1
-contract_version: dime-foundation-separation-of-duties-v1.1.0
+contract_version: dime-foundation-separation-of-duties-v1.2.0
 status: proposed
 dataset_version: dime-sft-foundation-v1
 unresolved_decisions: []
@@ -25,8 +25,16 @@ reviewer_authority:
   reviewer_id_reassignment_allowed: false
   approval_files_may_self_grant_roles: false
 record_review:
-  human_review_required: true
-  automated_agent_may_approve: false
+  allowed_reviewer_principal_types:
+    - human
+    - ai_agent
+  human_review_required: false
+  human_reviewer_may_approve: true
+  automated_agent_may_approve: true
+  agent_profile_binding_required: true
+  agent_decision_receipt_required: true
+  agent_decision_receipt_signature_verification_required: true
+  agent_may_review_own_output: false
   author_may_review_own_record: false
   standard_minimum_approvals: 1
   elevated_minimum_approvals: 2
@@ -37,6 +45,7 @@ independence:
   active_specialist_required: true
   review_within_effective_authority_period_required: true
   exact_registry_sha256_binding_required: true
+  same_agent_model_or_policy_lineage_counts_as_one_group: true
 elevated_review:
   task_families:
     - market_math
@@ -97,11 +106,14 @@ effective_authority:
   same_independence_group_never_counts_twice: true
 registry_migration:
   required: false
-  status: representation_and_runtime_ready
+  status: agent_principal_and_receipt_model_ready
   implemented_fields:
+    - principal_type
+    - agent_profile
     - independence_group_id
     - effective_start
     - effective_end_or_open_ended
+    - decision_receipt_sha256
 prohibited_content:
   - personal_names
   - email_addresses
@@ -111,3 +123,5 @@ prohibited_content:
   - real_reviewer_roster
   - active_placeholder_reviewers
   - self_granted_authority
+  - unpinned_active_agent_profiles
+  - shared_agent_decision_receipts

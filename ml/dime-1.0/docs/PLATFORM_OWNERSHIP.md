@@ -16,10 +16,74 @@ review, audit, approval, and freeze layer has not produced an approved
 Foundation dataset and does not change any Hugging Face repository, training
 authorization, serving configuration, or provider state.
 
-The trusted reviewer registry is also `proposed` and empty. It grants no
-reviewer or approver authority. Reviewer-backed transitions remain blocked
-until a reviewed registry is activated. The audit, freeze, and training paths
-bind its exact SHA-256 through every evidence layer.
+The trusted reviewer registry is also `proposed`. It contains two owner-
+confirmed, independent AI-agent reviewer assignments, but both entries are
+inactive and grant no reviewer or approver authority. Reviewer-backed
+transitions remain blocked until each exact agent profile and receipt issuer is
+pinned and a reviewed registry revision activates them. The audit, freeze, and
+training paths bind its exact SHA-256 through every evidence layer.
+
+## Foundation v1 owner decision
+
+The repository owner has selected the private Hugging Face dataset repository
+`taileredsports/dime-foundation-workbench` as the Foundation v1 candidate
+workbench. The machine-readable decision is
+`configs/platform_contract.json.foundation_v1_owner_decision`.
+
+This is a storage and governance decision, not an external-state claim. The
+workbench remains `selected_pending_provisioning`, and private-data admission
+is false until the repository exists, private visibility is verified, the
+fine-grained access boundary passes live positive and negative checks, and the
+reviewer identity/receipt control below is operational.
+
+The workbench is authoritative only for private candidate records, source
+artifacts and registry, review ledger, raw external audits, and the Foundation
+approval record before freeze. It is never the approved Foundation release,
+training authority, an adapter release, or a serving source. RunPod may hold a
+working copy but is never authoritative.
+
+Foundation v1 is strictly limited to substantive human-authored gold examples
+and fully synthetic scenarios or fixtures. Substantive AI drafting and retained
+AI-supplied prose are prohibited. The `synthetic` source class cannot be used
+to relabel AI-authored answers. AI assistance may be limited to spelling,
+formatting, critique, and checklist validation when it supplies no retained
+substantive prose. Registered AI-agent reviewers may approve exact candidate
+bytes under the separation-of-duties contract; that authority does not permit
+AI-authored training prose.
+
+Human workbench access requires individual accounts and MFA. Registered AI
+reviewers require a unique workload identity bound to one reviewer profile.
+Shared human or AI-agent credentials are prohibited. The planned
+`dime-foundation-workbench-read-v1` and
+`dime-foundation-workbench-write-v1` service credentials are scoped only to
+that workbench and cannot establish reviewer identity or sign a decision.
+Training, serving, release-publisher, locked-evaluator, and locked-publisher
+credentials are all denied access.
+
+Reviewer activation remains deliberately blocked. The proposed v3 registry now
+contains two inactive opaque AI-agent reviewer IDs in distinct independence
+groups. One proposed assignment covers domain, numeric, simulation,
+semantic-audit, and dataset-approver duties; the other covers coaching, safety,
+privacy, rights, evaluation-audit, locked-evaluation, and dataset-approver
+duties. Before either entry can become active, its profile must pin the exact
+provider, model and revision, runtime, system instructions, tool contract,
+inference policy, receipt issuer, approved roles, effective authority dates,
+conflicts, recusals, and revocation state. Every agent review, audit, and
+approval must carry an immutable identity-bound receipt digest. A shared
+service token is never evidence that a particular principal made a decision.
+No placeholder identity or movable model alias may be used.
+
+This owner decision approves AI agents as an official reviewer principal type
+and designates the two inactive assignments as the proposed official roster.
+It does not activate them. The cryptographic receipt verifier is not
+implemented, so the runtime rejects every active AI-agent registry entry. A
+later focused change must implement signature verification before
+`ai_agent_activation_authorized` can become true.
+
+This owner decision does not create the repository, provision credentials,
+admit private data, activate reviewers, approve a record or dataset, authorize
+GPU execution or training, publish a release, change serving, or activate the
+provider.
 
 Authorization is never a reusable global switch. Full training additionally
 requires `authorization.training_candidate` to match the exact experiment,
@@ -139,14 +203,16 @@ into `main`.
 
 `configs/foundation_reviewer_registry.json` is the sole reviewer authority.
 Every change requires review and a new registry version. Its exact bytes are
-hashed as `reviewer_registry_sha256`. The current `proposed` registry is empty,
-so it cannot authorize a decision, audit, approval, dataset, or training run.
-A future v2 reviewer entry must define its opaque independence group and
-half-open effective period. Runtime validation counts distinct groups and
-requires record reviews, source-rights reviews, external audits, and dataset
-approvals to occur during the referenced reviewer's authority. A ledger may
-reference only a stable registry ID. Any ledger-carried status, role, group, or
-authority date is non-authoritative and cannot override the registry.
+hashed as `reviewer_registry_sha256`. The current `proposed` registry contains
+two inactive AI-agent assignments, so it cannot authorize a decision, audit,
+approval, dataset, or training run. Every v3 reviewer entry defines its
+principal type, opaque independence group, and half-open effective period; AI
+entries additionally carry an immutable activation profile. Runtime validation counts
+distinct groups and requires record reviews, source-rights reviews, external
+audits, and dataset approvals to occur during the referenced reviewer's
+authority. A ledger may reference only a stable registry ID. Any ledger-
+carried status, role, group, or authority date is non-authoritative and cannot
+override the registry.
 
 GitHub must not contain:
 

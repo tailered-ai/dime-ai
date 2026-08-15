@@ -45,6 +45,7 @@ def reviewer_registry_validator() -> Draft202012Validator:
 def valid_reviewer() -> dict:
     return {
         "reviewer_id": "dime-reviewer-domain-001",
+        "principal_type": "human",
         "active": True,
         "roles": ["domain"],
         "independence_group_id": "dime-independence-group-domain-001",
@@ -53,11 +54,17 @@ def valid_reviewer() -> dict:
     }
 
 
-def test_record_review_and_dataset_approval_require_independent_humans() -> None:
+def test_record_review_allows_registered_humans_and_ai_agents() -> None:
     document = api().load_foundation_contract("separation_of_duties").document
     assert document["record_review"] == {
-        "human_review_required": True,
-        "automated_agent_may_approve": False,
+        "allowed_reviewer_principal_types": ("human", "ai_agent"),
+        "human_review_required": False,
+        "human_reviewer_may_approve": True,
+        "automated_agent_may_approve": True,
+        "agent_profile_binding_required": True,
+        "agent_decision_receipt_required": True,
+        "agent_decision_receipt_signature_verification_required": True,
+        "agent_may_review_own_output": False,
         "author_may_review_own_record": False,
         "standard_minimum_approvals": 1,
         "elevated_minimum_approvals": 2,
@@ -94,7 +101,7 @@ def test_elevated_and_external_audit_mappings_are_exact() -> None:
     }
 
 
-def test_reviewer_registry_remains_proposed_empty_and_contract_has_no_roster() -> None:
+def test_reviewer_registry_has_two_inactive_proposals_and_grants_no_authority() -> None:
     document = api().load_foundation_contract("separation_of_duties").document
     registry = json.loads(
         (PROJECT / "configs/foundation_reviewer_registry.json").read_text(encoding="utf-8")
@@ -102,10 +109,30 @@ def test_reviewer_registry_remains_proposed_empty_and_contract_has_no_roster() -
     assert document["reviewer_authority"]["registry_path"] == (
         "configs/foundation_reviewer_registry.json"
     )
-    assert registry["schema_version"] == "dime-foundation-reviewer-registry-v2"
-    assert registry["registry_version"] == "dime-foundation-reviewers-v0.2.0"
+    assert registry["schema_version"] == "dime-foundation-reviewer-registry-v3"
+    assert registry["registry_version"] == "dime-foundation-reviewers-v0.4.0"
     assert registry["status"] == "proposed"
-    assert registry["reviewers"] == []
+    assert len(registry["reviewers"]) == 2
+    assert all(reviewer["active"] is False for reviewer in registry["reviewers"])
+    assert all(reviewer["principal_type"] == "ai_agent" for reviewer in registry["reviewers"])
+    assert all(
+        reviewer["agent_profile"]["status"] == "configuration_pending"
+        for reviewer in registry["reviewers"]
+    )
+    assert len({reviewer["reviewer_id"] for reviewer in registry["reviewers"]}) == len(
+        registry["reviewers"]
+    )
+    assert len({reviewer["independence_group_id"] for reviewer in registry["reviewers"]}) == len(
+        registry["reviewers"]
+    )
+    proposed_roles = {role for reviewer in registry["reviewers"] for role in reviewer["roles"]}
+    required_roles = {
+        *document["elevated_review"]["required_specialists"].values(),
+        document["dataset_approval"]["required_role"],
+        *(audit["required_role"] for audit in document["external_audits"].values()),
+    }
+    assert required_roles.issubset(proposed_roles)
+    assert sum("dataset-approver" in reviewer["roles"] for reviewer in registry["reviewers"]) == 2
     assert "reviewers" not in document
     serialized = repr(document)
     assert not re.search(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}", serialized)
@@ -115,14 +142,50 @@ def test_reviewer_registry_remains_proposed_empty_and_contract_has_no_roster() -
     )
 
 
-def test_reviewer_registry_v2_represents_group_and_open_ended_authority() -> None:
+def test_reviewer_registry_v3_represents_human_authority() -> None:
     registry = {
-        "schema_version": "dime-foundation-reviewer-registry-v2",
-        "registry_version": "dime-foundation-reviewers-v0.2.0",
+        "schema_version": "dime-foundation-reviewer-registry-v3",
+        "registry_version": "dime-foundation-reviewers-v0.4.0",
         "status": "active",
         "reviewers": [valid_reviewer()],
     }
     assert list(reviewer_registry_validator().iter_errors(registry)) == []
+
+
+def test_active_ai_agent_requires_fully_pinned_profile() -> None:
+    reviewer = valid_reviewer()
+    reviewer["principal_type"] = "ai_agent"
+    reviewer["agent_profile"] = {
+        "profile_id": "dime-agent-profile-domain-001",
+        "status": "active",
+        "model_provider": "provider-001",
+        "model_id": "model-001",
+        "model_revision": "model-snapshot-2026-07-27",
+        "runtime_version": "review-runtime-1.0.0",
+        "system_instruction_sha256": "1" * 64,
+        "tool_contract_sha256": "2" * 64,
+        "inference_policy_sha256": "3" * 64,
+        "receipt_issuer_key_id": f"key-{'4' * 32}",
+    }
+    registry = {
+        "schema_version": "dime-foundation-reviewer-registry-v3",
+        "registry_version": "dime-foundation-reviewers-v0.4.0",
+        "status": "active",
+        "reviewers": [reviewer],
+    }
+    assert list(reviewer_registry_validator().iter_errors(registry)) == []
+    reviewer["agent_profile"]["model_revision"] = None
+    assert list(reviewer_registry_validator().iter_errors(registry))
+    reviewer["agent_profile"]["model_revision"] = "main"
+    assert list(reviewer_registry_validator().iter_errors(registry))
+    reviewer["agent_profile"]["model_revision"] = "prod"
+    assert list(reviewer_registry_validator().iter_errors(registry))
+    reviewer["agent_profile"]["model_revision"] = "model-snapshot-2026-07-27"
+    reviewer["agent_profile"]["runtime_version"] = "release"
+    assert list(reviewer_registry_validator().iter_errors(registry))
+    reviewer["agent_profile"]["runtime_version"] = "review-runtime-1.0.0"
+    reviewer["agent_profile"]["receipt_issuer_key_id"] = "active-key"
+    assert list(reviewer_registry_validator().iter_errors(registry))
 
 
 @pytest.mark.parametrize(
@@ -137,8 +200,8 @@ def test_reviewer_registry_requires_complete_authority_metadata(missing: str) ->
     reviewer = valid_reviewer()
     reviewer.pop(missing)
     registry = {
-        "schema_version": "dime-foundation-reviewer-registry-v2",
-        "registry_version": "dime-foundation-reviewers-v0.2.0",
+        "schema_version": "dime-foundation-reviewer-registry-v3",
+        "registry_version": "dime-foundation-reviewers-v0.4.0",
         "status": "active",
         "reviewers": [reviewer],
     }
@@ -162,8 +225,8 @@ def test_reviewer_registry_rejects_placeholder_groups_and_noncanonical_utc(
     reviewer = valid_reviewer()
     reviewer[field] = value
     registry = {
-        "schema_version": "dime-foundation-reviewer-registry-v2",
-        "registry_version": "dime-foundation-reviewers-v0.2.0",
+        "schema_version": "dime-foundation-reviewer-registry-v3",
+        "registry_version": "dime-foundation-reviewers-v0.4.0",
         "status": "active",
         "reviewers": [reviewer],
     }
@@ -178,7 +241,7 @@ def test_reviewer_registry_rejects_placeholder_groups_and_noncanonical_utc(
             "author",
         ),
         (
-            lambda doc: doc["record_review"].__setitem__("automated_agent_may_approve", True),
+            lambda doc: doc["record_review"].__setitem__("automated_agent_may_approve", False),
             "automated",
         ),
         (
@@ -233,10 +296,13 @@ def test_effective_authority_contract_is_ready_without_activation() -> None:
     assert document["effective_authority"]["authority_period_required"] is True
     assert document["registry_migration"] == {
         "required": False,
-        "status": "representation_and_runtime_ready",
+        "status": "agent_principal_and_receipt_model_ready",
         "implemented_fields": (
+            "principal_type",
+            "agent_profile",
             "independence_group_id",
             "effective_start",
             "effective_end_or_open_ended",
+            "decision_receipt_sha256",
         ),
     }
