@@ -8,7 +8,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { checkCommit } from "./commit-check.mjs";
-import { checkBody } from "./body-check.mjs";
+import { checkBody, extractProse } from "./body-check.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const AF = join(HERE, "../../docs/verification/prx/adversarial-fixtures");
@@ -16,8 +16,9 @@ const AF = join(HERE, "../../docs/verification/prx/adversarial-fixtures");
 interface Expected {
   fixture: string;
   mechanism: string;
-  options: Record<string, boolean>;
-  expected_findings: string[];
+  options?: Record<string, boolean>;
+  expected_findings?: string[];
+  expected_prose?: { includes: string[]; excludes: string[] };
 }
 
 const expectedFiles = readdirSync(join(AF, "r2", "expected"))
@@ -41,11 +42,25 @@ describe("r2 adversarial fixtures (correction-pass regressions)", () => {
     const id = file.replace(".json", "");
     it(`${id} — ${spec.mechanism.slice(0, 72)}`, () => {
       const input = readFileSync(join(AF, spec.fixture), "utf8");
+      if (spec.expected_prose !== undefined) {
+        // Prose-contract fixture (BYP-B-04 class): the include list is the
+        // positive control (an empty extraction cannot pass vacuously),
+        // the exclude list is the leak under test.
+        const prose = extractProse(input);
+        expect(spec.expected_prose.includes.length).toBeGreaterThan(0);
+        for (const s of spec.expected_prose.includes) {
+          expect(prose).toContain(s);
+        }
+        for (const s of spec.expected_prose.excludes) {
+          expect(prose).not.toContain(s);
+        }
+        return;
+      }
       const findings = spec.fixture.includes("/commit/")
-        ? checkCommit(input, spec.options)
+        ? checkCommit(input, spec.options ?? {})
         : checkBody(input);
       const actual = findings.map(f => `${f.level}:${f.rule}`).sort();
-      expect(actual).toEqual([...spec.expected_findings].sort());
+      expect(actual).toEqual([...(spec.expected_findings ?? [])].sort());
       expect(actual.length).toBeGreaterThan(0);
     });
   }

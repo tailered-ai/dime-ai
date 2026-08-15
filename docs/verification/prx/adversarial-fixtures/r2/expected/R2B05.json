@@ -1,0 +1,8 @@
+{
+  "fixture": "r2/body/R2B05.md",
+  "mechanism": "BYP-B-02: a section whose only content is script-element text fails as empty (the sanitizer removes the element entirely)",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-SECTION-EMPTY"
+  ]
+}

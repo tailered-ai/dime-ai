@@ -1,0 +1,8 @@
+{
+  "fixture": "r2/body/R2B04.md",
+  "mechanism": "BYP-B-01 positive control: a format character accompanying visible text is NOT empty (exactly one finding — the comment-only section)",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-SECTION-EMPTY"
+  ]
+}

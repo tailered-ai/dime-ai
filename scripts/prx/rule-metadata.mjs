@@ -90,7 +90,10 @@ export const RULE_METADATA = Object.freeze({
   },
   "PRX-B-VISIBLE": {
     surface: "body",
-    title: "rendered body has visible content (HTML comments do not count)",
+    title:
+      "rendered body has meaningful visible text (HTML comments, " +
+      "whitespace/zero-width/format-only text, and sanitizer-removed " +
+      "script/style content count for nothing)",
   },
   "PRX-B-SECTION-MISSING": {
     surface: "body",
@@ -105,6 +108,7 @@ export const RULE_METADATA = Object.freeze({
     title:
       "a required section has no meaningful visible content (the " +
       'template\'s own "none" convention satisfies content; comments, ' +
+      "whitespace/zero-width/format-only text, script/style-only HTML, " +
       "empty fences, thematic breaks, label-less links, alt-less images, " +
       "and empty lists/tables do not)",
   },

@@ -1,0 +1,13 @@
+{
+  "fixture": "r2/body/R2B08.md",
+  "mechanism": "BYP-B-04: blank lines split a raw table into top-level paragraphs; the cell text must NOT reach the Vale prose input while narrative outside the container must",
+  "expected_prose": {
+    "includes": [
+      "Narrative control sentence outside.",
+      "Tail control sentence here."
+    ],
+    "excludes": [
+      "Leaked cell paragraph text."
+    ]
+  }
+}

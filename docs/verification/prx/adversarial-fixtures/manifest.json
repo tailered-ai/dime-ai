@@ -193,6 +193,61 @@
       "fixture": "r2/commit/R2C15.txt",
       "sha256": "ee9f3bbd54e9cdc4a4692462709e9519bd7fde73dcdd10eb49d5240d3259afe6",
       "mechanism": "same-class find during r2 wiring: a subject of only zero-width code points renders as empty and must report as empty (plus the ordinary prefix result)"
+    },
+    "R2B01": {
+      "fixture": "r2/body/R2B01.md",
+      "sha256": "b114df265a222f029b906954bee9503cfa6f28e8335893742187ab349e3fb7ca",
+      "mechanism": "BYP-B-01: six sections whose only content is one raw format-class code point (U+200B/200C/200D/2060/00AD/FEFF) each fail SECTION-EMPTY"
+    },
+    "R2B02": {
+      "fixture": "r2/body/R2B02.md",
+      "sha256": "be476dae9e9bc3abe7c079d3c1f3a1423ec2edb69b02b6c0f7458447a5c2b351",
+      "mechanism": "BYP-B-01: the same six code points entity-encoded each fail SECTION-EMPTY"
+    },
+    "R2B03": {
+      "fixture": "r2/body/R2B03.md",
+      "sha256": "91c34441286d67879762509442db17a7f7cd59a56c80dd9868f5300585ea7b68",
+      "mechanism": "BYP-B-01: mixed raw/entity/whitespace invisible sequences fail SECTION-EMPTY"
+    },
+    "R2B04": {
+      "fixture": "r2/body/R2B04.md",
+      "sha256": "d4d19f1f0412f7c4c4a45d8bdc4a6e297eef22decbabcb4fbfa04cd3ad2386b2",
+      "mechanism": "BYP-B-01 positive control: a format character accompanying visible text is NOT empty (exactly one finding — the comment-only section)"
+    },
+    "R2B05": {
+      "fixture": "r2/body/R2B05.md",
+      "sha256": "d1100a7eb1fb3d29b92a3ebf1672aa9d0bed629d5fa04f9dae0e5ebb837c063d",
+      "mechanism": "BYP-B-02: a section whose only content is script-element text fails as empty (the sanitizer removes the element entirely)"
+    },
+    "R2B06": {
+      "fixture": "r2/body/R2B06.md",
+      "sha256": "aa8ce74081ec3c6a53bc0cd7d9ae5b2147a98072fe6db16abec70518636eb74d",
+      "mechanism": "BYP-B-02: a section whose only content is style-element text fails as empty"
+    },
+    "R2B07": {
+      "fixture": "r2/body/R2B07.md",
+      "sha256": "f7fbd22a05c4952eae7a2ef0ca90a346cbab35cc8eb3598d1ad3bbfdf6c91276",
+      "mechanism": "BYP-B-01/02: a body whose every node renders as nothing fails PRX-B-VISIBLE (meaningful text, not node count) alongside the 14 missing sections"
+    },
+    "R2B08": {
+      "fixture": "r2/body/R2B08.md",
+      "sha256": "2b211b73be8209a45bd3e29416b9a634e159d43a8b262461b19d1bcc175727dc",
+      "mechanism": "BYP-B-04: blank lines split a raw table into top-level paragraphs; the cell text must NOT reach the Vale prose input while narrative outside the container must"
+    },
+    "R2B09": {
+      "fixture": "r2/body/R2B09.md",
+      "sha256": "c0231773f546e230768834b89e98f050505992125a15297b67e07756e16f8125",
+      "mechanism": "BYP-B-04: the same blank-line split through a raw list container"
+    },
+    "R2B10": {
+      "fixture": "r2/body/R2B10.md",
+      "sha256": "60f0b51c570128722e6bdc1bfe5fbc56144ce3b954ac4428f031c3cdeb77981c",
+      "mechanism": "BYP-B-04: the same blank-line split through a raw blockquote"
+    },
+    "R2B11": {
+      "fixture": "r2/body/R2B11.md",
+      "sha256": "b32a6486cf3e3c12e7220ade0d80c003033e593a06d76d8b58032e967ae6821b",
+      "mechanism": "BYP-B-04: the same blank-line split through a raw details/summary container"
     }
   }
 }

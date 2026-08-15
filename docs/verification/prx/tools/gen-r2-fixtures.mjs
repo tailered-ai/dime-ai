@@ -11,6 +11,32 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const AF = join(dirname(fileURLToPath(import.meta.url)), "..", "adversarial-fixtures");
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
+
+// The live 14-section template, all sections "none" unless overridden —
+// verified clean against the real checker at generation time so every body
+// fixture's expected multiset isolates exactly its own mechanism.
+const SECTIONS = [
+  "Purpose and scope",
+  "Notion context",
+  "Linked incident / finding",
+  "User-facing behavior changes",
+  "Reproduction evidence",
+  "Tests",
+  "Bundle impact",
+  "Database impact",
+  "Security impact",
+  "Accessibility impact",
+  "Deployment and rollback plan",
+  "Federation evidence",
+  "Authorization",
+  "Post-deployment validation",
+];
+function bodyWith(overrides = {}) {
+  return `${SECTIONS.map(s => `## ${s}\n\n${overrides[s] ?? "none"}`).join(
+    "\n\n"
+  )}\n`;
+}
 
 // id -> { file, content, mechanism, options, expected }
 // expected entries are "level:RULE" strings, one per expected finding
@@ -188,7 +214,176 @@ const FIXTURES = {
     options: {},
     expected: ["error:PRX-C-SUBJECT", "error:PRX-C-PREFIX"],
   },
+  R2B01: {
+    file: "r2/body/R2B01.md",
+    content: bodyWith({
+      "Notion context": "\u200B",
+      "Linked incident / finding": "\u200C",
+      "User-facing behavior changes": "\u200D",
+      "Reproduction evidence": "\u2060",
+      "Bundle impact": "\u00AD",
+      "Database impact": "\uFEFF",
+    }),
+    mechanism:
+      "BYP-B-01: six sections whose only content is one raw format-class " +
+      "code point (U+200B/200C/200D/2060/00AD/FEFF) each fail " +
+      "SECTION-EMPTY",
+    options: {},
+    expected: Array(6).fill("error:PRX-B-SECTION-EMPTY"),
+  },
+  R2B02: {
+    file: "r2/body/R2B02.md",
+    content: bodyWith({
+      "Notion context": "&#x200B;",
+      "Linked incident / finding": "&zwnj;",
+      "User-facing behavior changes": "&zwj;",
+      "Reproduction evidence": "&#x2060;",
+      "Bundle impact": "&shy;",
+      "Database impact": "&#xFEFF;",
+    }),
+    mechanism:
+      "BYP-B-01: the same six code points entity-encoded each fail " +
+      "SECTION-EMPTY",
+    options: {},
+    expected: Array(6).fill("error:PRX-B-SECTION-EMPTY"),
+  },
+  R2B03: {
+    file: "r2/body/R2B03.md",
+    content: bodyWith({
+      "Security impact": " \u200B&#8203;\u2060 &shy; ",
+      "Accessibility impact": "\u200C \u00A0 &#xFEFF;\t",
+    }),
+    mechanism:
+      "BYP-B-01: mixed raw/entity/whitespace invisible sequences fail " +
+      "SECTION-EMPTY",
+    options: {},
+    expected: Array(2).fill("error:PRX-B-SECTION-EMPTY"),
+  },
+  R2B04: {
+    file: "r2/body/R2B04.md",
+    content: bodyWith({
+      "Security impact": "family \u200D emoji joiner text stays visible",
+      "Bundle impact": "<!-- a comment renders as nothing -->",
+    }),
+    mechanism:
+      "BYP-B-01 positive control: a format character accompanying visible " +
+      "text is NOT empty (exactly one finding \u2014 the comment-only section)",
+    options: {},
+    expected: ["error:PRX-B-SECTION-EMPTY"],
+  },
+  R2B05: {
+    file: "r2/body/R2B05.md",
+    content: bodyWith({
+      "Security impact": "<script>var forged = 'looks like content';</script>",
+    }),
+    mechanism:
+      "BYP-B-02: a section whose only content is script-element text " +
+      "fails as empty (the sanitizer removes the element entirely)",
+    options: {},
+    expected: ["error:PRX-B-SECTION-EMPTY"],
+  },
+  R2B06: {
+    file: "r2/body/R2B06.md",
+    content: bodyWith({
+      "Security impact": "<style>.forged { content: 'text'; }</style>",
+    }),
+    mechanism:
+      "BYP-B-02: a section whose only content is style-element text fails " +
+      "as empty",
+    options: {},
+    expected: ["error:PRX-B-SECTION-EMPTY"],
+  },
+  R2B07: {
+    file: "r2/body/R2B07.md",
+    content: "\u200B\n\n&#8203;&shy;\n\n<script>hidden()</script>\n",
+    mechanism:
+      "BYP-B-01/02: a body whose every node renders as nothing fails " +
+      "PRX-B-VISIBLE (meaningful text, not node count) alongside the 14 " +
+      "missing sections",
+    options: {},
+    expected: [
+      "error:PRX-B-VISIBLE",
+      ...Array(14).fill("error:PRX-B-SECTION-MISSING"),
+    ],
+  },
+  R2B08: {
+    file: "r2/body/R2B08.md",
+    content:
+      "Narrative control sentence outside.\n\n<table><tr><td>\n\n" +
+      "Leaked cell paragraph text.\n\n</td></tr></table>\n\n" +
+      "Tail control sentence here.\n",
+    mechanism:
+      "BYP-B-04: blank lines split a raw table into top-level paragraphs; " +
+      "the cell text must NOT reach the Vale prose input while narrative " +
+      "outside the container must",
+    prose: {
+      includes: [
+        "Narrative control sentence outside.",
+        "Tail control sentence here.",
+      ],
+      excludes: ["Leaked cell paragraph text."],
+    },
+  },
+  R2B09: {
+    file: "r2/body/R2B09.md",
+    content:
+      "Narrative control sentence outside.\n\n<ul><li>\n\n" +
+      "Leaked list item text.\n\n</li></ul>\n\nTail control sentence here.\n",
+    mechanism:
+      "BYP-B-04: the same blank-line split through a raw list container",
+    prose: {
+      includes: [
+        "Narrative control sentence outside.",
+        "Tail control sentence here.",
+      ],
+      excludes: ["Leaked list item text."],
+    },
+  },
+  R2B10: {
+    file: "r2/body/R2B10.md",
+    content:
+      "Narrative control sentence outside.\n\n<blockquote>\n\n" +
+      "Leaked quote text.\n\n</blockquote>\n\nTail control sentence here.\n",
+    mechanism:
+      "BYP-B-04: the same blank-line split through a raw blockquote",
+    prose: {
+      includes: [
+        "Narrative control sentence outside.",
+        "Tail control sentence here.",
+      ],
+      excludes: ["Leaked quote text."],
+    },
+  },
+  R2B11: {
+    file: "r2/body/R2B11.md",
+    content:
+      "Narrative control sentence outside.\n\n<details><summary>More</summary>\n\n" +
+      "Leaked details text.\n\n</details>\n\nTail control sentence here.\n",
+    mechanism:
+      "BYP-B-04: the same blank-line split through a raw details/summary " +
+      "container",
+    prose: {
+      includes: [
+        "Narrative control sentence outside.",
+        "Tail control sentence here.",
+      ],
+      excludes: ["Leaked details text."],
+    },
+  },
 };
+
+// Generation-time guard: the template every body fixture builds on must be
+// clean under the REAL checker, or the expected multisets above would
+// carry template noise.
+const { checkBody } = await import(
+  join(REPO_ROOT, "scripts/prx/body-check.mjs")
+);
+const templateFindings = checkBody(bodyWith({}));
+if (templateFindings.length > 0) {
+  throw new Error(
+    `body template is not clean: ${JSON.stringify(templateFindings)}`
+  );
+}
 
 const sha256 = buf => createHash("sha256").update(buf).digest("hex");
 
@@ -208,12 +403,18 @@ for (const [id, spec] of Object.entries(FIXTURES)) {
   writeFileSync(
     join(AF, "r2", "expected", `${id}.json`),
     `${JSON.stringify(
-      {
-        fixture: spec.file,
-        mechanism: spec.mechanism,
-        options: spec.options,
-        expected_findings: spec.expected,
-      },
+      spec.prose !== undefined
+        ? {
+            fixture: spec.file,
+            mechanism: spec.mechanism,
+            expected_prose: spec.prose,
+          }
+        : {
+            fixture: spec.file,
+            mechanism: spec.mechanism,
+            options: spec.options,
+            expected_findings: spec.expected,
+          },
       null,
       2
     )}\n`

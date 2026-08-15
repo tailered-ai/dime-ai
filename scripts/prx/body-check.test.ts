@@ -295,8 +295,17 @@ describe("review-pass regressions", () => {
     expect(f.length).toBeGreaterThan(0);
   });
 
-  it("extractProse survives deep nesting", () => {
-    expect(typeof extractProse(">".repeat(20000))).toBe("string");
+  it("extractProse survives deep nesting and returns exactly the empty string", () => {
+    // MUT-01 correction: the parser DOES throw in-process on ~20k nested
+    // blockquotes, so the catch arm is reachable and its return value is
+    // an observable oracle — the exact-value assertion (not typeof) is
+    // what kills the sentinel string mutant at the catch site.
+    expect(extractProse(">".repeat(20000))).toBe("");
+  });
+
+  it("checkBody degrades the same pathological input to PRX-B-SIZE in-process", () => {
+    const f = checkBody(">".repeat(20000));
+    expect(f.map(x => x.rule)).toEqual(["PRX-B-SIZE"]);
   });
 
   it("capsule Evidence over the shared length cap fails even if shaped", () => {
@@ -575,6 +584,119 @@ describe("mutation-hardening round 3 (R8 survivors)", () => {
     expect(msgs.some(m => m.includes(`${"Z".repeat(57)}...`))).toBe(true);
     expect(msgs.every(m => !m.includes("Z".repeat(58)))).toBe(true);
     expect(msgs.some(m => m.includes(`"${"Y".repeat(60)}"`))).toBe(true);
+  });
+});
+
+describe("r2 body corrections (BYP-B-01/02/04, byte caps)", () => {
+  const sectioned = (content: string) => `## Purpose and scope\n\n${content}\n`;
+  const emptyFindings = (body: string) =>
+    checkBody(body).filter(f => f.rule === "PRX-B-SECTION-EMPTY");
+
+  it("zero-width and format-only sections fail SECTION-EMPTY (raw)", () => {
+    for (const cp of [
+      "\u200B",
+      "\u200C",
+      "\u200D",
+      "\u2060",
+      "\u00AD",
+      "\uFEFF",
+    ]) {
+      expect(emptyFindings(sectioned(cp)).length).toBe(1);
+    }
+  });
+
+  it("entity-encoded invisibles fail SECTION-EMPTY", () => {
+    for (const entity of [
+      "&#x200B;",
+      "&zwnj;",
+      "&zwj;",
+      "&#x2060;",
+      "&shy;",
+      "&#xFEFF;",
+    ]) {
+      expect(emptyFindings(sectioned(entity)).length).toBe(1);
+    }
+  });
+
+  it("mixed invisible sequences fail; visible text with a format char passes", () => {
+    expect(emptyFindings(sectioned(" \u200B&#8203;\u2060 &shy; ")).length).toBe(
+      1
+    );
+    expect(emptyFindings(sectioned("family \u200D emoji joiner")).length).toBe(
+      0
+    );
+  });
+
+  it("script-only and style-only sections fail SECTION-EMPTY", () => {
+    expect(emptyFindings(sectioned("<script>var x = 1;</script>")).length).toBe(
+      1
+    );
+    expect(
+      emptyFindings(sectioned("<style>.a { color: red; }</style>")).length
+    ).toBe(1);
+    expect(
+      emptyFindings(sectioned("<script>x</script> real words")).length
+    ).toBe(0);
+  });
+
+  it("PRX-B-VISIBLE tests meaningful text, not node count", () => {
+    const zw = checkBody("\u200B\n\n\u2060&shy;\n");
+    expect(zw.some(f => f.rule === "PRX-B-VISIBLE")).toBe(true);
+    const headed = checkBody("## Purpose and scope\n");
+    expect(headed.some(f => f.rule === "PRX-B-VISIBLE")).toBe(false);
+  });
+
+  it("the body size cap counts UTF-8 bytes (r2 BYP-C-06 class)", () => {
+    // 560k two-byte chars: over 1 MiB in bytes, under it in UTF-16 units.
+    const f = checkBody("é".repeat(560000));
+    expect(f.map(x => x.rule)).toEqual(["PRX-B-SIZE"]);
+    expect(extractProse("é".repeat(560000))).toBe("");
+  });
+
+  it("prose excludes text inside a blank-line-split raw table (BYP-B-04)", () => {
+    const body =
+      "Narrative control sentence outside.\n\n<table><tr><td>\n\n" +
+      "Leaked cell paragraph one.\n\nLeaked cell paragraph two.\n\n" +
+      "</td></tr></table>\n\nTail narrative sentence.\n";
+    const prose = extractProse(body);
+    expect(prose).toContain("Narrative control sentence outside.");
+    expect(prose).toContain("Tail narrative sentence.");
+    expect(prose).not.toContain("Leaked cell paragraph one.");
+    expect(prose).not.toContain("Leaked cell paragraph two.");
+  });
+
+  it("prose excludes blank-line-split raw lists, blockquotes, details", () => {
+    const cases = [
+      "<ul><li>\n\nLeaked list text here.\n\n</li></ul>",
+      "<blockquote>\n\nLeaked quote text here.\n\n</blockquote>",
+      "<details><summary>More</summary>\n\nLeaked details text here.\n\n</details>",
+    ];
+    for (const container of cases) {
+      const prose = extractProse(
+        `Control sentence outside.\n\n${container}\n\nTail control here.\n`
+      );
+      expect(prose).toContain("Control sentence outside.");
+      expect(prose).toContain("Tail control here.");
+      expect(prose).not.toContain("Leaked");
+    }
+  });
+
+  it("an unclosed raw container excludes the rest of its sibling list", () => {
+    const prose = extractProse(
+      "Control sentence outside.\n\n<table><tr><td>\n\nLeaked text.\n"
+    );
+    expect(prose).toContain("Control sentence outside.");
+    expect(prose).not.toContain("Leaked text.");
+  });
+
+  it("container tracking is per sibling list, not global", () => {
+    // A container opened and closed inside one list item must not
+    // swallow the following top-level paragraph.
+    const prose = extractProse(
+      "- item with <table><tr><td>cell</td></tr></table> inline\n\n" +
+        "Top-level narrative after the list.\n"
+    );
+    expect(prose).toContain("Top-level narrative after the list.");
   });
 });
 

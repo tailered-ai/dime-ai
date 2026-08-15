@@ -1,0 +1,8 @@
+{
+  "fixture": "r2/body/R2B06.md",
+  "mechanism": "BYP-B-02: a section whose only content is style-element text fails as empty",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-SECTION-EMPTY"
+  ]
+}

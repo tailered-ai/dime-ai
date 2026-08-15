@@ -15,14 +15,21 @@ import { fromMarkdown } from "mdast-util-from-markdown";
 import { gfmFromMarkdown } from "mdast-util-gfm";
 import { gfm } from "micromark-extension-gfm";
 import {
+  createHtmlContainerTracker,
+  exceedsByteLimit,
+  isMeaningfulText,
+  meaningfulVisibleHtml,
+} from "./lib/canonical.mjs";
+import {
+  HTML_CONTAINER_ELEMENTS,
+  INPUT_SIZE_LIMIT_BYTES,
   makeFinding,
   RUN_ID_RE,
+  SANITIZER_REMOVED_ELEMENTS,
   SCOPE_RE,
   SHA40_RE,
   validateEvidenceRef,
 } from "./rules.mjs";
-
-const SIZE_LIMIT = 1024 * 1024;
 
 export const REQUIRED_SECTIONS = Object.freeze([
   "Purpose and scope",
@@ -101,9 +108,14 @@ export function parseBody(raw) {
 
 export function checkBody(raw, opts = {}) {
   const findings = [];
-  if (typeof raw !== "string" || raw.length > SIZE_LIMIT) {
-    // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
-    findings.push(makeFinding("PRX-B-SIZE", "PR body exceeds the 1 MiB bound"));
+  if (
+    typeof raw !== "string" ||
+    exceedsByteLimit(raw, INPUT_SIZE_LIMIT_BYTES)
+  ) {
+    findings.push(
+      // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+      makeFinding("PRX-B-SIZE", "PR body exceeds the 1 MiB byte bound")
+    );
     return findings;
   }
   let parsed;
@@ -123,13 +135,18 @@ export function checkBody(raw, opts = {}) {
   }
   const { top, visible, comments } = parsed;
 
-  // PRX-B-VISIBLE — an all-comment (or empty) body renders as nothing.
-  if (visible.length === 0) {
+  // PRX-B-VISIBLE — the decision is MEANINGFUL VISIBLE TEXT, not node
+  // count (r2 BYP-B-01): a body whose nodes render only comments,
+  // zero-width/format code points, whitespace, or sanitizer-removed
+  // script/style content still renders as nothing.
+  if (!bodyRendersMeaningfulText(visible)) {
     findings.push(
       makeFinding(
         "PRX-B-VISIBLE",
         // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
-        "PR body has no visible content once HTML comments are removed"
+        "PR body renders no meaningful visible text once HTML comments " +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          "are removed"
       )
     );
   }
@@ -427,7 +444,8 @@ const PROSE_EXCLUDED_ANCESTORS = new Set([
 ]);
 
 export function extractProse(raw) {
-  if (typeof raw !== "string" || raw.length > SIZE_LIMIT) return "";
+  if (typeof raw !== "string" || exceedsByteLimit(raw, INPUT_SIZE_LIMIT_BYTES))
+    return "";
   let visible;
   try {
     ({ visible } = parseBody(raw));
@@ -437,18 +455,44 @@ export function extractProse(raw) {
   const out = [];
   // Iterative parent-aware traversal: exclusion is inherited from ANY
   // ancestor, and attacker-controlled nesting depth never becomes JS
-  // call-stack depth.
-  const stack = visible.map(node => ({ node, excluded: false })).reverse();
-  while (stack.length > 0) {
-    const { node, excluded } = stack.pop();
-    const excludedHere = excluded || PROSE_EXCLUDED_ANCESTORS.has(node.type);
+  // call-stack depth. Each sibling list carries its own raw-HTML container
+  // tracker (r2 BYP-B-04): when a blank line splits a raw container
+  // (table, list, blockquote, details, ...) into separate top-level nodes,
+  // the siblings between its opening and closing fragments sit inside the
+  // container's source range and are excluded from designated prose.
+  const frames = [
+    {
+      nodes: visible,
+      i: 0,
+      excluded: false,
+      tracker: createHtmlContainerTracker(HTML_CONTAINER_ELEMENTS),
+    },
+  ];
+  while (frames.length > 0) {
+    const frame = frames[frames.length - 1];
+    if (frame.i >= frame.nodes.length) {
+      frames.pop();
+      continue;
+    }
+    const node = frame.nodes[frame.i];
+    frame.i += 1;
+    let excludedHere =
+      frame.excluded || PROSE_EXCLUDED_ANCESTORS.has(node.type);
+    if (node.type === "html") {
+      frame.tracker.feed(node.value);
+    } else if (frame.tracker.isInside()) {
+      excludedHere = true;
+    }
     if (node.type === "paragraph" && !excludedHere) {
       out.push(inlineText(node));
     }
     if (node.children) {
-      for (let i = node.children.length - 1; i >= 0; i -= 1) {
-        stack.push({ node: node.children[i], excluded: excludedHere });
-      }
+      frames.push({
+        nodes: node.children,
+        i: 0,
+        excluded: excludedHere,
+        tracker: createHtmlContainerTracker(HTML_CONTAINER_ELEMENTS),
+      });
     }
   }
   return out.join("\n\n");
@@ -486,11 +530,26 @@ function capsuleValueError(key, value) {
   }
 }
 
+// Body-level visibility (r2): any node whose rendered text is meaningful.
+// Unlike the section predicate, a heading's own text counts here — a body
+// of only headings still renders those headings.
+function bodyRendersMeaningfulText(visible) {
+  return visible.some(n => {
+    if (n.type === "heading") {
+      return isMeaningfulText(visibleInlineText(n));
+    }
+    return nodeHasVisibleContent(n);
+  });
+}
+
 // Remediation R5: a section is non-empty only when it contains MEANINGFUL
 // rendered text or accepted structured content — node presence is not
-// enough. Rejected as content: whitespace, empty fences, thematic breaks,
-// HTML comments and empty HTML, alt-less images, label-less links, empty
-// lists/tables, and subheadings with nothing under them.
+// enough. Rejected as content: whitespace, zero-width/format-only text,
+// empty fences, thematic breaks, HTML comments and empty HTML,
+// sanitizer-removed script/style content, alt-less images, label-less
+// links, empty lists/tables, and subheadings with nothing under them
+// (r2 BYP-B-01/02: the emptiness decision is isMeaningfulText over the
+// decoded rendered text).
 function hasVisibleSectionContent(visible, headingNode) {
   const start = visible.indexOf(headingNode);
   for (let i = start + 1; i < visible.length; i += 1) {
@@ -510,10 +569,8 @@ function nodeHasVisibleContent(node) {
       return false;
     case "code":
       // A populated structured block (evidence YAML, capsule) counts; an
-      // empty fence does not.
-      return node.value.trim() !== "";
-    case "html":
-      return visibleInlineText(node).trim() !== "";
+      // empty or zero-width-only fence does not.
+      return isMeaningfulText(node.value);
     case "list":
     case "listItem":
     case "table":
@@ -521,18 +578,22 @@ function nodeHasVisibleContent(node) {
     case "blockquote":
       return (node.children ?? []).some(nodeHasVisibleContent);
     default:
-      return visibleInlineText(node).trim() !== "";
+      return isMeaningfulText(visibleInlineText(node));
   }
 }
 
 // Text a reader actually sees: image alt text counts (where non-empty),
-// link labels count, HTML comments and bare tags count for nothing.
+// link labels count, HTML comments, bare tags, and sanitizer-removed
+// script/style content count for nothing. Raw-HTML values are decoded
+// (character references) so entity-encoded invisibles cannot masquerade
+// as content; Markdown text arrives already decoded by the parser.
 function visibleInlineText(node) {
   if (node.type === "image" || node.type === "imageReference") {
     return node.alt ?? "";
   }
   if (node.type === "html") {
-    return htmlVisibleText(node.value);
+    return meaningfulVisibleHtml(node.value, SANITIZER_REMOVED_ELEMENTS)
+      .decoded;
   }
   if (node.value !== undefined) return node.value;
   if (!node.children) return "";
@@ -563,33 +624,6 @@ function walk(nodes, visit) {
       }
     }
   }
-}
-
-// Text a reader sees inside a raw-HTML value: a single forward scan that
-// skips comments and tags and keeps everything else. This is a VISIBILITY
-// heuristic (the result is compared against "" and never rendered), but it
-// deliberately avoids replace-based stripping — repeated regex deletion
-// can leave `<!--`/`<script` residue, the incomplete-multi-character-
-// sanitization class. Unclosed comments and tags swallow the rest of the
-// value, exactly as an HTML parser treats an unterminated construct.
-function htmlVisibleText(value) {
-  let out = "";
-  let i = 0;
-  while (i < value.length) {
-    if (value.startsWith("<!--", i)) {
-      const end = value.indexOf("-->", i + 4);
-      if (end === -1) return out;
-      i = end + 3;
-    } else if (value[i] === "<") {
-      const end = value.indexOf(">", i + 1);
-      if (end === -1) return out;
-      i = end + 1;
-    } else {
-      out += value[i];
-      i += 1;
-    }
-  }
-  return out;
 }
 
 function truncate(s) {

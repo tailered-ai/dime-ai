@@ -104,6 +104,34 @@ export function validateEvidenceRef(value) {
   return evidenceRef(value, EVIDENCE_REF_CONFIG);
 }
 
+// Elements whose CONTENT GitHub's sanitizer removes entirely, so their
+// inner text renders as nothing (r2 BYP-B-02). Provenance: the closest
+// public implementation is github/html-pipeline's SanitizationFilter
+// (EXTERNAL_ADAPTATION; exact pin and parity assumption recorded in
+// source-trace-matrix.csv).
+export const SANITIZER_REMOVED_ELEMENTS = Object.freeze(["script", "style"]);
+
+// Raw-HTML container elements whose source range must exclude nested
+// content from designated narrative prose even when Markdown blank lines
+// split the container into separate top-level nodes (r2 BYP-B-04).
+export const HTML_CONTAINER_ELEMENTS = Object.freeze([
+  "table",
+  "thead",
+  "tbody",
+  "tfoot",
+  "tr",
+  "th",
+  "td",
+  "ul",
+  "ol",
+  "li",
+  "blockquote",
+  "pre",
+  "code",
+  "details",
+  "summary",
+]);
+
 export function ruleClass(id) {
   const rule = RULES[id];
   if (!rule) throw new Error(`unknown PRX rule id: ${id}`);
