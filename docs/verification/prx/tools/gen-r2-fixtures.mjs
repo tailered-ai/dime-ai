@@ -370,6 +370,20 @@ const FIXTURES = {
       excludes: ["Leaked details text."],
     },
   },
+  R2B12: {
+    file: "r2/body/R2B12.md",
+    content: bodyWith({
+      "Security impact": "<svg>forged inline text</svg>",
+      "Accessibility impact": "<xmp>forged raw text</xmp>",
+    }),
+    mechanism:
+      "same-class find during r2 wiring (BYP-B-02 class): a removed-set " +
+      "element that parses as INLINE html splits its text into sibling " +
+      "nodes; the sequential sanitized-text scanner must still drop it — " +
+      "both sections fail SECTION-EMPTY",
+    options: {},
+    expected: Array(2).fill("error:PRX-B-SECTION-EMPTY"),
+  },
 };
 
 // Generation-time guard: the template every body fixture builds on must be

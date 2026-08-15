@@ -110,6 +110,16 @@
   "replayKilled": false
  },
  {
+  "id": "213",
+  "file": "scripts/prx/body-check.mjs",
+  "line": 246,
+  "mutator": "ConditionalExpression",
+  "status": "Survived",
+  "replacement": "true",
+  "originalSpan": "n.type === \"heading\"",
+  "replayKilled": false
+ },
+ {
   "id": "221",
   "file": "scripts/prx/body-check.mjs",
   "line": 250,
@@ -307,26 +317,6 @@
   "status": "Survived",
   "replacement": "l",
   "originalSpan": "l.trim()",
-  "replayKilled": false
- },
- {
-  "id": "598",
-  "file": "scripts/prx/body-check.mjs",
-  "line": 581,
-  "mutator": "ArithmeticOperator",
-  "status": "Survived",
-  "replacement": "i - 4",
-  "originalSpan": "i + 4",
-  "replayKilled": false
- },
- {
-  "id": "599",
-  "file": "scripts/prx/body-check.mjs",
-  "line": 582,
-  "mutator": "ConditionalExpression",
-  "status": "Survived",
-  "replacement": "true",
-  "originalSpan": "end === -1",
   "replayKilled": false
  },
  {

@@ -127,6 +127,24 @@ describe("resolveAuditRange fails closed (R2)", () => {
     ).toThrow(/merge-base output .* is not a full 40-hex commit SHA/);
   });
 
+  it("quotes at most 80 characters of malformed merge-base output (MUT-03)", () => {
+    // r2 correction: the r1 disposition labeled the slice(0, 80) removal
+    // EQUIVALENT, but removing it changes the diagnostic — unbounded
+    // attacker-controlled output would be quoted into the error. This
+    // asserts the bound, which kills that mutant.
+    const junk = `${"j".repeat(200)}\n`;
+    const fake = (_dir: string, args: string[]) =>
+      args[0] === "merge-base" ? junk : "";
+    let message = "";
+    try {
+      resolveAuditRange(repo, mainTip, featureTip, { git: fake });
+    } catch (err) {
+      message = (err as Error).message;
+    }
+    expect(message).toContain(JSON.stringify("j".repeat(80)));
+    expect(message).not.toContain("j".repeat(81));
+  });
+
   it("rejects a merge base that is not an ancestor of head (injected)", () => {
     const fake = (_dir: string, args: string[]) => {
       if (args[0] === "merge-base" && args[1] === "--is-ancestor") {

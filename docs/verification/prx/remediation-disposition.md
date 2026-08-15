@@ -232,3 +232,22 @@ extract-zip change, no dependency override. Exact advisory facts
   jobs `TypeScript Check`, `Vitest`, `Build & Preview Gate` = SKIPPED;
   `DB Tests` = SKIPPED (not executed). Exact per-check data:
   `final-ci-status.json` in the review bundle.
+
+---
+
+## r2 correction pass addendum (2026-08-14)
+
+A second independent review of the remediated head
+d98793c21545bd4685151640140dd60c09a6190a produced the Appendix R
+finding register (BYP-C-01..09, BYP-B-01..04, MUT-01..04, BYP-W-01,
+plus the systemic claims-sync item). The r2 correction pass closed all
+of them in additive commits on the same branch — no history rewrite, no
+force push, no rebase; PR #511 remains a draft and the lane remains
+audit-only. The per-item register, the same-class finds, and the
+deliberate behavior changes are recorded in the r2 section of
+`v1.0-to-v1.1-change-ledger.md`; the corrected mutation dispositions
+carry inline "CORRECTED r2" tags plus a dedicated r2 corrections
+section; the reviewer hand-off is `SOL-REVIEW-DIRECTIVE-v1.1-r2.md`.
+The R1–R11 dispositions above stand unchanged as the r1 historical
+record, except where the r2 documents explicitly correct them
+(MUT-01..04 against the R8 mutation record).

@@ -20,7 +20,8 @@ export const RULE_METADATA = Object.freeze({
     surface: "commit",
     title:
       "conventional-commit prefix (measured house convention); exemptions " +
-      "require topology or authenticated metadata, never a subject prefix",
+      "require commit topology or a verified trusted-caller " +
+      "classification, never message shape or a claimed identity",
   },
   "PRX-C-SEPARATOR": {
     surface: "commit",

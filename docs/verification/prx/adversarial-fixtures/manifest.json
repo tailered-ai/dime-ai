@@ -248,6 +248,11 @@
       "fixture": "r2/body/R2B11.md",
       "sha256": "b32a6486cf3e3c12e7220ade0d80c003033e593a06d76d8b58032e967ae6821b",
       "mechanism": "BYP-B-04: the same blank-line split through a raw details/summary container"
+    },
+    "R2B12": {
+      "fixture": "r2/body/R2B12.md",
+      "sha256": "c9485f3be7b559757a1da4c93957adae01624739eed8663719b3b6cb67b7789c",
+      "mechanism": "same-class find during r2 wiring (BYP-B-02 class): a removed-set element that parses as INLINE html splits its text into sibling nodes; the sequential sanitized-text scanner must still drop it — both sections fail SECTION-EMPTY"
     }
   }
 }

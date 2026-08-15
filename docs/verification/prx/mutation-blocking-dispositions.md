@@ -71,6 +71,12 @@ blocker from a future owner decision; the mode stays audit and the
 required-check set is untouched.
 ## Final focused result
 
+These figures are the r1 HISTORICAL record, taken over the sources at
+head d98793c21545bd4685151640140dd60c09a6190a. The r2 correction pass
+changed the decision-path sources; r2 mutation figures come from the
+label-gated GitHub Actions rerun over the changed modules and are
+reported separately in the r2 ledger — they do not overwrite this block.
+
 - Mutants generated: 1605 (of which 74 ignored by the explicit diagnostic-text annotations)
 - Killed: 1269  |  Timeout (counts as detected): 153
 - Survived (Stryker view): 85  |  No coverage (Stryker view): 24
@@ -79,13 +85,55 @@ required-check set is untouched.
 - Effective detection including replay-verified kills: 1457/1531 = 95.17%
 - Unreviewed survivors: 0  |  Unexplained no-coverage: 0
 
+## r2 corrections (MUT-01..04) — disposition-integrity findings from the second independent review
+
+All four accepted; the corrected rows below are edited in place and
+tagged "CORRECTED r2".
+
+- **MUT-01** — body-check.mjs:436 claimed the extractProse catch could
+  "never be returned in-process". FALSE: `extractProse(">".repeat(20000))`
+  reaches the catch in-process (reproduced before any r2 edit). The
+  mutant was a WEAK-ORACLE survivor (the r1 test asserted only
+  `typeof`); r2 strengthens the assertion to the exact value, which
+  kills it. Row corrected.
+- **MUT-02** — three replay-artifact rows carried misattributed
+  mechanism labels: body-check 113 and 435 blamed the subprocess
+  boundary and body-check 116 blamed static module scope (and called
+  its NoCoverage status a "survivor"). All three sites are catch arms
+  reachable IN-PROCESS by the deep-nesting tests; the real Stryker
+  artifact is per-test coverage attribution of catch arms under
+  in-worker activation. Rows corrected.
+- **MUT-03** — resolve-range.mjs:59 (`slice(0, 80)` removal) was
+  labeled EQUIVALENT although the mutant changes the emitted
+  diagnostic's content and length (unbounded quotation of malformed
+  merge-base output). Reclassified NOT EQUIVALENT; a bounded-quote
+  assertion was added and negative-tested against the applied mutant.
+  Row corrected.
+- **MUT-04** — the replay log disagreed with the final report in three
+  ways, reconciled on 2026-08-14: (1) entries 598 and 599
+  (body-check.mjs:581/582) recorded `status: "Survived",
+  replayKilled: false` — TRUE-SURVIVOR claims with no equivalence
+  proofs — although the FINAL `mutation-blocking-results.json` records
+  both as Killed; they came from a superseded pre-final round and are
+  removed. (2) Mutant 213 (body-check.mjs:246, Survived in the final
+  report) had never been replayed, so the Method section's
+  "every remaining survivor was ALSO hand-applied" claim was false by
+  one; it was replayed on 2026-08-14 against the archived r1 tree at
+  d98793c21545bd4685151640140dd60c09a6190a and is a TRUE-SURVIVOR
+  (suite passes), consistent with its written equivalence proof; its
+  record is added. (3) The record count now matches the final
+  survivor+no-coverage population exactly: 109 entries, body-check 32
+  (previously 110 and 33 — the drift the review's "8-vs-9" pointer
+  flagged; the per-file counts, not a line count, were the mismatched
+  pair).
+
 ### scripts/prx/body-check.mjs
 
 | Line | Mutator | Replacement | Stryker status | Verdict | Proof / evidence |
 | --- | --- | --- | --- | --- | --- |
 | 97 | ArrayDeclaration | `["Stryker was here"]` | NoCoverage | NO-COVERAGE (explained) | `tree.children ?? []` fallback: fromMarkdown always returns a root with a children ARRAY (probed: "" -> children: []), so the ?? arm is dead code — which is also why Stryker records no coverage. |
-| 113 | BlockStatement | `{}` | NoCoverage | ARTIFACT (replay-killed) | KILLED-IN-REALITY — hand-applied replay of this mutant fails the real suite. Stryker recorded no kill because the covering tests execute the mutated file in a SPAWNED subprocess, and mutant activation does not cross the process boundary. |
-| 116 | StringLiteral | `""` | NoCoverage | ARTIFACT (replay-killed) | KILLED-IN-REALITY — hand-applied replay of this mutant fails the real suite. Stryker recorded a survivor because the mutant sits in module scope (a 'static' mutant) and the vitest runner does not reliably re-execute module scope under in-worker activation. |
+| 113 | BlockStatement | `{}` | NoCoverage | ARTIFACT (replay-killed) | KILLED-IN-REALITY — hand-applied replay fails the real suite (the deep-blockquote test reaches checkBody's parse-failure catch IN-PROCESS; the emptied catch lets execution fall through to a TypeError). CORRECTED r2 (MUT-02): the prior mechanism label blamed the subprocess boundary — wrong; the true artifact is Stryker/vitest failing to attribute per-test coverage to the catch arm under in-worker activation, so the mutant was scheduled against no tests. |
+| 116 | StringLiteral | `""` | NoCoverage | ARTIFACT (replay-killed) | KILLED-IN-REALITY — hand-applied replay fails the real suite (blanking the rule id makes makeFinding throw `unknown PRX rule id` on the in-process-reachable catch path). CORRECTED r2 (MUT-02): the prior text claimed "Stryker recorded a survivor ... module scope" — wrong on both counts; the recorded status is NoCoverage and the line sits inside checkBody's catch, not module scope. Same catch-arm coverage-attribution artifact as line 113. |
 | 152 | OptionalChaining | `c.position.start` | Survived | EQUIVALENT | c ranges only over parsed comment nodes from mdast-util-from-markdown, which stamps position on every compiled node (probed; no hand-built nodes on this path) — the optional access can never short-circuit. |
 | 180 | OptionalChaining | `capsule.position.start` | Survived | EQUIVALENT | capsule = capsules[0] is drawn from visible = filtered tree.children — parser-produced nodes always carrying position; identical evaluation everywhere. |
 | 246 | ConditionalExpression | `true` | Survived | EQUIVALENT | `n.type === "heading"` conjunct -> true in the heading filter: the predicate becomes n.depth === 2, and in mdast `depth` exists only on heading nodes — every non-heading evaluates undefined === 2 === false and still fails the filter, while headings evaluate exactly the original right operand. Same equivalence class as the section-scan twin, executed against a paragraph-only body: findings identical. |
@@ -96,8 +144,8 @@ required-check set is untouched.
 | 355 | OptionalChaining | `node.position.start` | Survived | EQUIVALENT | walk/loop visits only nodes from the parsed tree (visible and their descendants); every parser-produced node carries position, so the optional chain never short-circuits (applies identically at the Unicode-bullet, blockquoted-list, raw-HTML-list, and FENCE emit sites). |
 | 369 | OptionalChaining | `node.position.start` | Survived | EQUIVALENT | walk/loop visits only nodes from the parsed tree (visible and their descendants); every parser-produced node carries position, so the optional chain never short-circuits (applies identically at the Unicode-bullet, blockquoted-list, raw-HTML-list, and FENCE emit sites). |
 | 399 | OptionalChaining | `node.position.start` | Survived | EQUIVALENT | walk/loop visits only nodes from the parsed tree (visible and their descendants); every parser-produced node carries position, so the optional chain never short-circuits (applies identically at the Unicode-bullet, blockquoted-list, raw-HTML-list, and FENCE emit sites). |
-| 435 | BlockStatement | `{}` | NoCoverage | ARTIFACT (replay-killed) | KILLED-IN-REALITY — hand-applied replay of this mutant fails the real suite. Stryker recorded no kill because the covering tests execute the mutated file in a SPAWNED subprocess, and mutant activation does not cross the process boundary. |
-| 436 | StringLiteral | `"Stryker was here!"` | NoCoverage | NO-COVERAGE (explained) | `return ""` -> sentinel inside the dead extractProse catch: the literal can never be returned in-process (catch-arm reachability proof). |
+| 435 | BlockStatement | `{}` | NoCoverage | ARTIFACT (replay-killed) | KILLED-IN-REALITY — hand-applied replay fails the real suite (the deep-nesting test reaches extractProse's catch IN-PROCESS; the emptied catch falls through to a TypeError on the undefined parse result). CORRECTED r2 (MUT-02): the prior subprocess-boundary label was wrong — the artifact is catch-arm coverage attribution, as at line 113. |
+| 436 | StringLiteral | `"Stryker was here!"` | NoCoverage | WEAK-ORACLE, killed by r2 test | CORRECTED r2 (MUT-01): the prior claim — "the literal can never be returned in-process (catch-arm reachability proof)" — was FALSE. `extractProse(">".repeat(20000))` throws inside the parser and returns through this catch IN-PROCESS, so the sentinel IS returned; the mutant survived the replay because the r1 oracle asserted only `typeof === "string"`. Reclassified from NO-COVERAGE (explained) to WEAK-ORACLE; body-check.test.ts now asserts the exact value (`toBe("")`), which kills the sentinel. To be confirmed as a plain kill in the r2 label-gated rerun. |
 | 485 | ConditionalExpression | `default:` | NoCoverage | NO-COVERAGE (explained) | capsuleValueError default: clause: called solely from the loop over the frozen six-key CAPSULE_KEYS tuple, each with an explicit case label, so default: is unreachable. Double protection: falling off the switch returns undefined, and the caller tests plain truthiness where undefined and the original null are indistinguishable. |
 | 499 | ConditionalExpression | `true` | Survived | EQUIVALENT | `n.type === "heading"` -> true: condition becomes n.depth <= 2; depth exists only on heading nodes, so non-headings evaluate undefined <= 2 === false — still fail — while headings evaluate exactly the original right operand. Executed against both subheading bodies: findings byte-identical. |
 | 508 | StringLiteral | `""` | Survived | EQUIVALENT | case label blanked: a thematicBreak lands on default:, where visibleInlineText returns "" (no value, no children, not image/html) and the default returns false — exactly the original shared `return false`. |
@@ -217,7 +265,7 @@ No surviving or uncovered mutants.
 | 16 | StringLiteral | `""` | Survived | EQUIVALENT | individual stdio entry blanked: empirically exercised by every resolver test (each calls runGit); no pinned behavior differs — the git children read no stdin, and execFileSync's stdout-capture and throw-on-nonzero contract is unchanged for the mutated wiring. |
 | 16 | StringLiteral | `""` | Survived | EQUIVALENT | individual stdio entry blanked: empirically exercised by every resolver test (each calls runGit); no pinned behavior differs — the git children read no stdin, and execFileSync's stdout-capture and throw-on-nonzero contract is unchanged for the mutated wiring. |
 | 16 | StringLiteral | `""` | Survived | EQUIVALENT | individual stdio entry blanked: empirically exercised by every resolver test (each calls runGit); no pinned behavior differs — the git children read no stdin, and execFileSync's stdout-capture and throw-on-nonzero contract is unchanged for the mutated wiring. |
-| 59 | MethodExpression | `mergeBase` | Survived | EQUIVALENT | slice(0,80) removal in the malformed-output error: affects only how much of the malformed merge-base output is quoted inside the error string; the throw itself and its identifying prefix are pinned by test, and no other behavior exists on this path. |
+| 59 | MethodExpression | `mergeBase` | Survived | NOT EQUIVALENT, killed by r2 test | CORRECTED r2 (MUT-03): the prior EQUIVALENT label was wrong — removing slice(0, 80) observably changes the diagnostic (unbounded attacker-controlled merge-base output quoted into the error instead of an 80-character prefix). A mutant that changes emitted output is a survivor with a weak oracle, not an equivalent. resolve-range.test.ts now asserts the exact 80-character bound (negative-tested: the assertion fails with the mutant applied). |
 | 74 | MethodExpression | `process.argv` | NoCoverage | ARTIFACT (replay-killed) | KILLED-IN-REALITY — hand-applied replay of this mutant fails the real suite. Stryker recorded no kill because the covering tests execute the mutated file in a SPAWNED subprocess, and mutant activation does not cross the process boundary. |
 | 106 | ConditionalExpression | `false` | Survived | ARTIFACT (replay-killed) | KILLED-IN-REALITY — hand-applied replay of this mutant fails the real suite. Stryker recorded no kill because the covering tests execute the mutated file in a SPAWNED subprocess, and mutant activation does not cross the process boundary. |
 | 108 | BlockStatement | `{}` | NoCoverage | ARTIFACT (replay-killed) | KILLED-IN-REALITY — hand-applied replay of this mutant fails the real suite. Stryker recorded no kill because the covering tests execute the mutated file in a SPAWNED subprocess, and mutant activation does not cross the process boundary. |

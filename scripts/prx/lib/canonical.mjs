@@ -121,45 +121,83 @@ export function decodeHtmlEntities(value) {
   });
 }
 
-// Text a reader actually sees inside a raw-HTML value: one forward scan
-// that skips comments and tags and keeps everything else — never
-// replace-based stripping. Elements named in removedContentElements (the
-// sanitizer-removed set, e.g. script/style) lose their ENTIRE content, not
-// just their tags, matching HTML raw-text parsing: an unterminated
-// construct swallows the rest of the value.
-export function visibleTextFromHtml(value, removedContentElements) {
+// Stateful scanner over a SEQUENCE of raw-HTML chunks: one forward scan
+// per chunk that skips comments and tags and keeps everything else —
+// never replace-based stripping. Elements named in removedContentElements
+// (the sanitizer remove_contents set) lose their ENTIRE content, not just
+// their tags; an element or comment opened in one chunk stays open into
+// the following chunks (a Markdown parser splits inline HTML into
+// separate sibling nodes, so single-chunk scanning alone would resurrect
+// the text between an open and its close). An unterminated tag swallows
+// the rest of its chunk, matching how an HTML parser treats an
+// unterminated construct.
+export function createSanitizedTextScanner(removedContentElements) {
   const removed = new Set(
     [...removedContentElements].map(t => t.toLowerCase())
   );
-  let out = "";
-  let i = 0;
-  while (i < value.length) {
-    if (value.startsWith("<!--", i)) {
-      const end = value.indexOf("-->", i + 4);
-      if (end === -1) return out;
-      i = end + 3;
-    } else if (value[i] === "<") {
-      const tag = value.slice(i).match(/^<\/?([A-Za-z][A-Za-z0-9-]*)/);
-      const gt = value.indexOf(">", i + 1);
-      if (gt === -1) return out;
-      if (
-        tag &&
-        !tag[0].startsWith("</") &&
-        removed.has(tag[1].toLowerCase())
-      ) {
-        const close = new RegExp(`</${tag[1]}[\\t\\n\\f\\r ]*>`, "i");
-        const m = close.exec(value.slice(gt + 1));
-        if (!m) return out;
-        i = gt + 1 + m.index + m[0].length;
-      } else {
-        i = gt + 1;
+  let insideRemoved = null; // lowercase element name while its content drops
+  let insideComment = false;
+  return {
+    feed(value) {
+      let out = "";
+      let i = 0;
+      while (i < value.length) {
+        if (insideComment) {
+          const end = value.indexOf("-->", i);
+          if (end === -1) return out;
+          insideComment = false;
+          i = end + 3;
+          continue;
+        }
+        if (insideRemoved) {
+          const close = new RegExp(`</${insideRemoved}[\\t\\n\\f\\r ]*>`, "i");
+          const m = close.exec(value.slice(i));
+          if (!m) return out;
+          i += m.index + m[0].length;
+          insideRemoved = null;
+          continue;
+        }
+        if (value.startsWith("<!--", i)) {
+          const end = value.indexOf("-->", i + 4);
+          if (end === -1) {
+            insideComment = true;
+            return out;
+          }
+          i = end + 3;
+          continue;
+        }
+        if (value[i] === "<") {
+          const tag = value.slice(i).match(/^<\/?([A-Za-z][A-Za-z0-9-]*)/);
+          const gt = value.indexOf(">", i + 1);
+          if (gt === -1) return out;
+          if (
+            tag &&
+            !tag[0].startsWith("</") &&
+            removed.has(tag[1].toLowerCase()) &&
+            !value.slice(i, gt + 1).endsWith("/>")
+          ) {
+            insideRemoved = tag[1].toLowerCase();
+            i = gt + 1;
+            continue;
+          }
+          i = gt + 1;
+          continue;
+        }
+        out += value[i];
+        i += 1;
       }
-    } else {
-      out += value[i];
-      i += 1;
-    }
-  }
-  return out;
+      return out;
+    },
+    isInside() {
+      return insideRemoved !== null || insideComment;
+    },
+  };
+}
+
+// Single-value convenience over the scanner (identical semantics for one
+// chunk: unterminated removed content or comments swallow the rest).
+export function visibleTextFromHtml(value, removedContentElements) {
+  return createSanitizedTextScanner(removedContentElements).feed(value);
 }
 
 // The full meaningful-visible-text decision for a raw HTML value: extract

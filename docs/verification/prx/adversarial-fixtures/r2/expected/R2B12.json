@@ -1,0 +1,9 @@
+{
+  "fixture": "r2/body/R2B12.md",
+  "mechanism": "same-class find during r2 wiring (BYP-B-02 class): a removed-set element that parses as INLINE html splits its text into sibling nodes; the sequential sanitized-text scanner must still drop it — both sections fail SECTION-EMPTY",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY"
+  ]
+}

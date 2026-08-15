@@ -104,12 +104,25 @@ export function validateEvidenceRef(value) {
   return evidenceRef(value, EVIDENCE_REF_CONFIG);
 }
 
-// Elements whose CONTENT GitHub's sanitizer removes entirely, so their
-// inner text renders as nothing (r2 BYP-B-02). Provenance: the closest
-// public implementation is github/html-pipeline's SanitizationFilter
-// (EXTERNAL_ADAPTATION; exact pin and parity assumption recorded in
-// source-trace-matrix.csv).
-export const SANITIZER_REMOVED_ELEMENTS = Object.freeze(["script", "style"]);
+// Elements whose CONTENT the sanitizer removes entirely, so their inner
+// text renders as nothing (r2 BYP-B-02). GitHub's production sanitizer is
+// not public; this is the remove_contents set of the closest public
+// implementation — gjtorikian/selma lib/selma/sanitizer/config/default.rb,
+// consumed by html-pipeline's SanitizationFilter DEFAULT_CONFIG
+// (EXTERNAL_ADAPTATION; exact pin, parity assumption, and falsifier
+// fixtures recorded in source-trace-matrix.csv).
+export const SANITIZER_REMOVED_ELEMENTS = Object.freeze([
+  "iframe",
+  "math",
+  "noembed",
+  "noframes",
+  "noscript",
+  "plaintext",
+  "script",
+  "style",
+  "svg",
+  "xmp",
+]);
 
 // Raw-HTML container elements whose source range must exclude nested
 // content from designated narrative prose even when Markdown blank lines

@@ -16,6 +16,8 @@ import { gfmFromMarkdown } from "mdast-util-gfm";
 import { gfm } from "micromark-extension-gfm";
 import {
   createHtmlContainerTracker,
+  createSanitizedTextScanner,
+  decodeHtmlEntities,
   exceedsByteLimit,
   isMeaningfulText,
   meaningfulVisibleHtml,
@@ -584,9 +586,13 @@ function nodeHasVisibleContent(node) {
 
 // Text a reader actually sees: image alt text counts (where non-empty),
 // link labels count, HTML comments, bare tags, and sanitizer-removed
-// script/style content count for nothing. Raw-HTML values are decoded
-// (character references) so entity-encoded invisibles cannot masquerade
-// as content; Markdown text arrives already decoded by the parser.
+// content (script/style and the rest of the pinned remove_contents set)
+// count for nothing. Children are walked SEQUENTIALLY with one stateful
+// scanner because the parser splits inline HTML into sibling nodes — a
+// removed element opened in one html child must also drop the text
+// siblings up to its closing tag. Raw-HTML text is decoded (character
+// references) so entity-encoded invisibles cannot masquerade as content;
+// Markdown text arrives already decoded by the parser.
 function visibleInlineText(node) {
   if (node.type === "image" || node.type === "imageReference") {
     return node.alt ?? "";
@@ -597,7 +603,16 @@ function visibleInlineText(node) {
   }
   if (node.value !== undefined) return node.value;
   if (!node.children) return "";
-  return node.children.map(visibleInlineText).join("");
+  const scanner = createSanitizedTextScanner(SANITIZER_REMOVED_ELEMENTS);
+  let out = "";
+  for (const child of node.children) {
+    if (child.type === "html") {
+      out += decodeHtmlEntities(scanner.feed(child.value));
+    } else if (!scanner.isInside()) {
+      out += visibleInlineText(child);
+    }
+  }
+  return out;
 }
 
 function looksNarrative(value) {

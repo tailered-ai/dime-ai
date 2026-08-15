@@ -639,6 +639,15 @@ describe("r2 body corrections (BYP-B-01/02/04, byte caps)", () => {
     ).toBe(0);
   });
 
+  it("the full pinned removed-content set counts for nothing", () => {
+    // selma default.rb remove_contents, the pinned public implementation.
+    for (const el of ["iframe", "noscript", "svg", "xmp"]) {
+      expect(emptyFindings(sectioned(`<${el}>inner text</${el}>`)).length).toBe(
+        1
+      );
+    }
+  });
+
   it("PRX-B-VISIBLE tests meaningful text, not node count", () => {
     const zw = checkBody("\u200B\n\n\u2060&shy;\n");
     expect(zw.some(f => f.rule === "PRX-B-VISIBLE")).toBe(true);
