@@ -317,6 +317,21 @@ describe("review-pass regressions", () => {
     expect(checkBody(over).map(x => x.rule)).toEqual(["PRX-B-SIZE"]);
   });
 
+  it("the pre-cap counts markers separated by spaces and tabs (r3)", () => {
+    // The depth scan skips spaces and tabs BETWEEN markers, so "> > > …"
+    // and ">\t>\t…" reach the same depth as ">>>…". Every r2 pre-cap test
+    // used unseparated markers, which left the whole skip branch pinned
+    // by nothing: six mutants that turn the skip into a break survived
+    // run 2, and each one silently stops a separated deep quote from
+    // degrading to the blocking PRX-B-SIZE finding (r3 Gap A).
+    for (const sep of [" ", "\t"]) {
+      const over = `${`>${sep}`.repeat(513)}quoted text\n`;
+      expect(checkBody(over).map(x => x.rule)).toEqual(["PRX-B-SIZE"]);
+      const at = `${`>${sep}`.repeat(512)}quoted text\n`;
+      expect(checkBody(at).some(x => x.rule === "PRX-B-SIZE")).toBe(false);
+    }
+  });
+
   it("a deep tree that SURVIVES the parser never becomes call-stack depth (r2)", () => {
     // Depth under the pre-cap parses everywhere; every post-parse walker
     // (visibility, section content, prose, inline text) must traverse
