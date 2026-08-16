@@ -24,3 +24,18 @@ scripts/prx/check-commit.mjs
 
 Files differing between the two heads that fall within mutation scope:
   (none — all differences are under docs/verification/prx/)
+
+## Scope provenance
+
+The authoritative mutation scope is the `matrix.module` list in
+`.github/workflows/15-prx-mutation.yml` (six modules, listed above), not the
+`mutate` array in `scripts/prx/stryker.blocking.prx.json`. The workflow invokes
+`npx stryker run scripts/prx/stryker.blocking.prx.json --mutate "$MODULE"`, and
+the `--mutate` flag overrides the config array on every job. The config array
+(eight files, last modified in 8879de44b) is therefore not the scope of record
+for the r2 or r3 mutation runs.
+
+Three Stryker configs exist in this repository. Only
+`scripts/prx/stryker.blocking.prx.json` is used by the label-gated matrix;
+`scripts/prx/stryker.prx.json` and `stryker.conf.json` are not invoked by
+15-prx-mutation.yml.
