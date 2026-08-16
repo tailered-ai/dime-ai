@@ -702,3 +702,27 @@ describe("r3 blocking-path survivors (mutation run 2 residual)", () => {
     expect(rules(checkCommit(prose, {}))).toEqual(["PRX-C-CONTROL"]);
   });
 });
+
+describe("r3 classifier consequences on the control policy", () => {
+  // The line classifier decides which control policy applies. Each of
+  // these inputs is ordinary indented code carrying a BEL, which the code
+  // policy tolerates; a classifier mutant that demotes the line to text
+  // makes PRX-C-CONTROL (APPROVED_BLOCKING) fire on all three.
+  const BEL = String.fromCharCode(7);
+
+  it("indented code after a tab-stop indent is code", () => {
+    expect(checkCommit(`feat(x): y\n\n \t${BEL}oops\n`, {})).toEqual([]);
+  });
+
+  it("indented code after a whitespace-only line is code", () => {
+    expect(
+      checkCommit(`feat(x): y\n\nintro\n   \n    ${BEL}code\n`, {})
+    ).toEqual([]);
+  });
+
+  it("indented code after a closed fence is code", () => {
+    expect(
+      checkCommit(`feat(x): y\n\n\`\`\`\nc\n\`\`\`\n    ${BEL}code\n`, {})
+    ).toEqual([]);
+  });
+});

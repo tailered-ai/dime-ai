@@ -550,3 +550,129 @@ describe("r3 blocking-path survivors (mutation run 2 residual)", () => {
     expect(visibleTextFromHtml("</script>text", REMOVED)).toBe("text");
   });
 });
+
+const EV_CFG = {
+  sentinel: "UNKNOWN",
+  maxSegments: 7,
+  maxBytes: 120,
+  segmentRe: /^[A-Za-z0-9][A-Za-z0-9._-]*$/,
+  roots: {
+    run: { firstSegmentRe: /^ONE-[0-9]{8}-[A-Z0-9]+$/, minSegments: 3 },
+    docs: { minSegments: 2 },
+  },
+};
+
+describe("r3 blocking-path survivors — classifier, refs, container tracker", () => {
+  const TAGS = [
+    "table",
+    "thead",
+    "tbody",
+    "tfoot",
+    "tr",
+    "th",
+    "td",
+    "ul",
+    "ol",
+    "li",
+    "blockquote",
+    "pre",
+    "code",
+    "details",
+    "summary",
+  ];
+
+  it("a fence marker broken by CR or a line separator does not open a fence", () => {
+    // FENCE_OPEN_RE's trailing $ is load-bearing for the same reason the
+    // trailer regex's is: `.` cannot cross CR, U+2028 or U+2029, and the
+    // commit parser normalizes only CRLF. Without the anchor such a line
+    // opens a fence, which silently reclassifies the rest of the body as
+    // code and suppresses PRX-C-CONTROL while inventing PRX-C-FENCE.
+    for (const sep of ["\r", "\u2028", "\u2029"]) {
+      expect(classifyCommitBodyLines([`\`\`\`${sep}code`])).toEqual({
+        kinds: ["text"],
+        unclosedFence: false,
+      });
+    }
+    expect(classifyCommitBodyLines(["```"]).kinds).toEqual(["fence-open"]);
+  });
+
+  it("indentation counts to the next tab stop from the current column", () => {
+    // col += 4 - (col % 4) advances to the tab stop. Any arithmetic that
+    // undercounts turns indented code into ordinary text, which moves the
+    // line from the code control policy to the body-text one.
+    expect(classifyCommitBodyLines([" \tx"]).kinds).toEqual(["indented-code"]);
+  });
+
+  it("a whitespace-only line is blank, and closes the paragraph", () => {
+    // Without the trim a whitespace-only line becomes "text" AND opens a
+    // paragraph, so the indented line after it is read as a lazy
+    // continuation instead of code.
+    expect(classifyCommitBodyLines(["a", "   ", "\tx"]).kinds).toEqual([
+      "text",
+      "blank",
+      "indented-code",
+    ]);
+  });
+
+  it("a closed fence leaves no paragraph open behind it", () => {
+    // paragraphOpen is cleared in the fence-OPEN arm and the close arm
+    // never touches it, so the assignment governs the first line AFTER
+    // the fence: left true, indented code there degrades to text.
+    expect(classifyCommitBodyLines(["```", "x", "```", "\ty"]).kinds).toEqual([
+      "fence-open",
+      "fence-content",
+      "fence-close",
+      "indented-code",
+    ]);
+  });
+
+  it("a root without a first-segment grammar keeps its root unchecked", () => {
+    // `rest` drops the root segment; only roots carrying firstSegmentRe
+    // drop two. Without the slice the root itself is also tested against
+    // segmentRe, so a configured root outside that grammar is rejected —
+    // a reference the policy declares valid would fail PRX-C-GOV.
+    const cfg = {
+      ...EV_CFG,
+      roots: { ...EV_CFG.roots, _priv: { minSegments: 2 } },
+    };
+    expect(evidenceRef("_priv/x", cfg)).toEqual({ valid: true, reason: null });
+  });
+
+  it("comment scanning cannot resume inside the comment it skipped", () => {
+    // The terminator search starts past the opening "<!--" and an
+    // unterminated comment returns. Searching from before the opening, or
+    // dropping the guard, moves the cursor backwards into the same
+    // comment — markup inside it is then counted, and the scan can fail
+    // to terminate.
+    const empty = createHtmlContainerTracker(TAGS);
+    empty.feed("<!-->x<table>");
+    expect(empty.isInside()).toBe(false);
+
+    const unterminated = createHtmlContainerTracker(TAGS);
+    unterminated.feed("<!-- unterminated <table>");
+    expect(unterminated.isInside()).toBe(false);
+
+    // Positive control: a well-formed comment must NOT abandon the chunk.
+    const closed = createHtmlContainerTracker(TAGS);
+    closed.feed("<!--x--><table>");
+    expect(closed.isInside()).toBe(true);
+  });
+
+  it("text with no matchable tag is scanned without throwing", () => {
+    // The !m guard protects the m[1] dereference. Losing it throws a
+    // TypeError out of feed(), out of extractProse, and out of the body
+    // CLI as a tool error instead of a verdict.
+    expect(() => createHtmlContainerTracker(TAGS).feed("hello")).not.toThrow();
+    const t = createHtmlContainerTracker(TAGS);
+    t.feed("<div>x</div> tail");
+    expect(t.isInside()).toBe(false);
+  });
+
+  it("an unclosed raw-text element ends the scan without throwing", () => {
+    // When script/style is never closed in the chunk, the !c guard is the
+    // only thing standing between c === null and a TypeError.
+    const t = createHtmlContainerTracker(TAGS);
+    expect(() => t.feed("<script>x")).not.toThrow();
+    expect(t.isInside()).toBe(false);
+  });
+});
