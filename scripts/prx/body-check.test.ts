@@ -872,3 +872,56 @@ describe("HTML visibility scanning leaves no partial-token residue (CodeQL)", ()
     ).toEqual([]);
   });
 });
+
+describe("r3 blocking-path survivors (mutation run 2 residual)", () => {
+  // A minimal, fully valid identifier capsule: every one of these cases
+  // must leave it clean, so any PRX-B-CAPSULE finding is the mutant
+  // talking. Written inline rather than reusing `healthy` so the capsule
+  // is the only thing under test.
+  const capsule = [
+    "```",
+    "Scope: TOS-1",
+    "Run-Id: ONE-20260101-ABC",
+    `Base: ${"a".repeat(40)}`,
+    `Head: ${"a".repeat(40)}`,
+    "Ledger: UNKNOWN",
+    "Evidence: UNKNOWN",
+    "```",
+  ].join("\n");
+  const capsuleFindings = (body: string) =>
+    checkBody(body).filter(f => f.rule === "PRX-B-CAPSULE");
+
+  it("a capsule key must be anchored at line start to count", () => {
+    // CAPSULE_LINE_RE's ^ anchor: without it, a fence whose line merely
+    // CONTAINS "Scope:" becomes a capsule candidate and is then torn
+    // apart by the strict validator, inventing PRX-B-CAPSULE errors on a
+    // body that carries no capsule at all.
+    expect(capsuleFindings("```\njunk Scope: TOS-1\n```\n\nafter.")).toEqual(
+      []
+    );
+  });
+
+  it("a capsule value is read with no space after the colon", () => {
+    // The [ \t]* run after the colon is optional. Mutating it to [^ \t]*
+    // swallows the value itself, so "Scope:TOS-1" reads as an empty
+    // value and raises PRX-B-CAPSULE on a valid capsule.
+    expect(
+      capsuleFindings(capsule.replace("Scope: TOS-1", "Scope:TOS-1"))
+    ).toEqual([]);
+  });
+
+  it("a comment padded with whitespace is still a comment", () => {
+    // isCommentNode trims before testing the delimiters, and the parser
+    // keeps trailing spaces in the html node's value. Without the trim
+    // the comment counts as visible content, which pushes the capsule
+    // out of first position and raises PRX-B-CAPSULE.
+    expect(capsuleFindings(`<!-- lead -->   \n\n${capsule}`)).toEqual([]);
+  });
+
+  it("comments are excluded from the visible node list", () => {
+    // parseBody filters comments out of `visible`. Without that filter a
+    // leading comment occupies visible[0] and the capsule is no longer
+    // the first visible block.
+    expect(capsuleFindings(`<!-- lead comment -->\n\n${capsule}`)).toEqual([]);
+  });
+});
