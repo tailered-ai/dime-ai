@@ -918,6 +918,27 @@ describe("r3 blocking-path survivors (mutation run 2 residual)", () => {
     expect(capsuleFindings(`<!-- lead -->   \n\n${capsule}`)).toEqual([]);
   });
 
+  it("non-rendering top-level nodes do not count as visible body text", () => {
+    // bodyRendersMeaningfulText routes headings through their own inline
+    // text and everything else through nodeHasVisibleContent. Forcing the
+    // heading test true sends every node down the heading path, where a
+    // footnote definition, link-reference definition, or thematic break
+    // reports its source text as visible content and PRX-B-VISIBLE (an
+    // APPROVED_BLOCKING rule) silently stops firing on a body that
+    // renders nothing.
+    for (const body of [
+      "[^1]: note text here.\n",
+      "[ref]: https://example.com\n",
+      "---\n",
+    ]) {
+      expect(checkBody(body).some(x => x.rule === "PRX-B-VISIBLE")).toBe(true);
+    }
+    // Positive control: a heading DOES render, so its own text counts.
+    expect(
+      checkBody("## Purpose and scope\n").some(x => x.rule === "PRX-B-VISIBLE")
+    ).toBe(false);
+  });
+
   it("comments are excluded from the visible node list", () => {
     // parseBody filters comments out of `visible`. Without that filter a
     // leading comment occupies visible[0] and the capsule is no longer
