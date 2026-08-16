@@ -901,6 +901,20 @@ describe("r3 blocking-path survivors (mutation run 2 residual)", () => {
     );
   });
 
+  it("a capsule line broken by a line separator is not a key line", () => {
+    // CAPSULE_LINE_RE's trailing $ is load-bearing here for the same
+    // reason it is on the commit side: `.` cannot cross U+2028/U+2029,
+    // and the CommonMark parser does not treat them as line endings, so
+    // they survive inside the code node's value. Without the anchor the
+    // line matches as a well-formed key and the capsule validates
+    // silently — both PRX-B-CAPSULE findings disappear.
+    const broken = capsule.replace("Scope: TOS-1", "Scope: TOS-1\u2028junk");
+    expect(capsuleFindings(broken).map(f => f.message)).toEqual([
+      'capsule contains a non-key line: "Scope: TOS-1\u2028junk"',
+      'capsule key "Scope" is missing',
+    ]);
+  });
+
   it("a capsule value is read with no space after the colon", () => {
     // The [ \t]* run after the colon is optional. Mutating it to [^ \t]*
     // swallows the value itself, so "Scope:TOS-1" reads as an empty
