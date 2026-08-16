@@ -479,3 +479,74 @@ describe("createHtmlContainerTracker", () => {
     expect(t.isInside()).toBe(true);
   });
 });
+
+describe("r3 blocking-path survivors (mutation run 2 residual)", () => {
+  const REMOVED = ["script", "style"];
+
+  it("the five structural entities decode to their visible characters", () => {
+    // Blanking any of these in NAMED_REFERENCES makes the decoded
+    // expansion empty, so raw HTML whose rendered text is exactly one
+    // escaped character is scored as rendering nothing and PRX-B-VISIBLE
+    // / PRX-B-SECTION-EMPTY (both APPROVED_BLOCKING) start firing on a
+    // body that does render.
+    expect(decodeHtmlEntities("a&amp;b")).toBe("a&b");
+    expect(decodeHtmlEntities("&lt;")).toBe("<");
+    expect(decodeHtmlEntities("&gt;")).toBe(">");
+    expect(decodeHtmlEntities("&quot;")).toBe('"');
+    expect(decodeHtmlEntities("&apos;")).toBe("'");
+    for (const e of ["amp", "lt", "gt", "quot", "apos"]) {
+      expect(isMeaningfulText(decodeHtmlEntities(`&${e};`))).toBe(true);
+    }
+  });
+
+  it("only the surrogate block decodes to the replacement character", () => {
+    // The `cp <= 0xdfff` conjunct bounds the U+FFFD arm. Widened, every
+    // code point above the surrogate block becomes U+FFFD — including
+    // U+FEFF, which is a format character that must stay INVISIBLE to
+    // the emptiness decision. A zero-width body would then look
+    // meaningful and PRX-B-VISIBLE would stop firing.
+    expect(decodeHtmlEntities("&#xFEFF;")).toBe("\uFEFF");
+    expect(isMeaningfulText(decodeHtmlEntities("&#xFEFF;"))).toBe(false);
+    expect(decodeHtmlEntities("&#xD800;")).toBe("\uFFFD");
+    expect(decodeHtmlEntities("&#x1F600;")).toBe("\u{1F600}");
+  });
+
+  it("an unterminated comment keeps swallowing across chunks", () => {
+    // The parser splits inline HTML into sibling nodes, so comment state
+    // must survive between feeds. If the not-found branch stops
+    // returning early, hidden comment text is resurrected as visible.
+    const s = createSanitizedTextScanner(REMOVED);
+    expect(s.feed("a<!-- open")).toBe("a");
+    expect(s.feed("still hidden")).toBe("");
+    expect(s.isInside()).toBe(true);
+  });
+
+  it("a removed element closes case-insensitively", () => {
+    // insideRemoved is stored lowercase; without the "i" flag on the
+    // close regex a mixed-case closing tag never ends the span and the
+    // scanner swallows the rest of the chunk.
+    expect(visibleTextFromHtml("<script>x</SCRIPT>kept", REMOVED)).toBe("kept");
+  });
+
+  it("the tag probe reads from the scan position, anchored", () => {
+    // slice(i) keeps the probe aligned with the cursor: without it every
+    // tag after the first is identified by the chunk's FIRST tag name,
+    // and script content leaks out as visible text. The ^ anchor keeps
+    // the offset and the identity in sync: without it a bare "<" makes
+    // the probe adopt a tag from later in the chunk and open a removed
+    // span at the wrong offset, dropping text that really renders.
+    expect(visibleTextFromHtml("x<script>a</script>", REMOVED)).toBe("x");
+    expect(visibleTextFromHtml("<3 <script>evil</script>", REMOVED)).toBe(
+      "evil"
+    );
+  });
+
+  it("a stray angle bracket and a stray close tag are handled", () => {
+    // The `tag && !startsWith("</")` guard carries two obligations: do
+    // not dereference a failed probe, and never let a CLOSING tag open a
+    // removed span. Losing either drops visible text or throws out of
+    // checkBody.
+    expect(visibleTextFromHtml("a < b>", REMOVED)).toBe("a ");
+    expect(visibleTextFromHtml("</script>text", REMOVED)).toBe("text");
+  });
+});
