@@ -363,11 +363,15 @@ describe("evidenceRef", () => {
     reject("file:///etc/passwd", /URI scheme/);
     reject("https://example.com/x", /URI scheme/);
     // Exact reason strings: the slash-less form takes the drive-letter
-    // branch, the slashed form falls through to the scheme branch.
-    expect(evidenceRef("C:evil", CFG).reason).toBe("drive-letter prefix");
-    expect(evidenceRef("c:/evil", CFG).reason).toBe(
-      "URI scheme or drive-letter prefix"
-    );
+    // branch, the slashed form falls through to the scheme branch. Both
+    // go through `reject`, so the VERDICT is asserted alongside the
+    // reason. A reason-only oracle here (the shape this test carried
+    // between mutation run 1 and run 2) let the `valid: false -> true`
+    // mutant on the drive-letter return live: the reason string is
+    // unchanged by it, so only the verdict assertion can kill it. Same
+    // weak-oracle class as MUT-01 (r3 Gap A).
+    reject("C:evil", /^drive-letter prefix$/);
+    reject("c:/evil", /^URI scheme or drive-letter prefix$/);
   });
 
   it("rejects percent-encoded dots and separators", () => {
