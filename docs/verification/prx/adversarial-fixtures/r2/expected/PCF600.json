@@ -1,0 +1,7 @@
+{
+  "fixture": "r2/body/PCF600.md",
+  "mechanism": "r3 pre-cap KNOWN OVER-APPROXIMATION, disclosed: the pre-cap scans raw lines before parsing and has no fence context, so a 600-'>' run inside a labeled code fence - legitimate code content - still degrades to PRX-B-SIZE; recorded as a residual in the change ledger and threat-model A8, pinned here so the behavior is visible, not hidden",
+  "expected_findings": [
+    "error:PRX-B-SIZE"
+  ]
+}

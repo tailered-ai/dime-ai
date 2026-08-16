@@ -1,0 +1,20 @@
+{
+  "fixture": "r2/body/PC512.md",
+  "mechanism": "r3 pre-cap boundary (at): exactly 512 leading blockquote markers - the cap itself - still parse normally (the guard is depth > cap, not >=); same 14-finding multiset as PC511, no PRX-B-SIZE",
+  "expected_findings": [
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING"
+  ]
+}

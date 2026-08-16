@@ -1,0 +1,20 @@
+{
+  "fixture": "r2/body/PC511.md",
+  "mechanism": "r3 pre-cap boundary (under): 511 leading blockquote markers parse normally; the body yields exactly the 14 missing-section findings and never PRX-B-SIZE (BLOCKQUOTE_DEPTH_CAP = 512 in body-check.mjs parseBody; cap - 1 must not degrade)",
+  "expected_findings": [
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING"
+  ]
+}

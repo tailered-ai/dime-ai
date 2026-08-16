@@ -36,8 +36,10 @@ were fixed in the same pass with fixtures.
 The 23 Sol fixtures are unchanged and still pinned
 (`scripts/prx/adversarial.test.ts`). The 27 r2 fixtures live in
 `docs/verification/prx/adversarial-fixtures/r2/` (R2C01–R2C15 commit,
-R2B01–R2B12 body), each SHA-256-pinned in `manifest.json` under
-`r2_fixtures`, each with an exact expected finding multiset or an
+R2B01–R2B12 body; the r3 evidence-closure pass added four pre-cap
+boundary fixtures PC511/PC512/PC513/PCF600 to the same register — see
+the change ledger's r3 entry), each SHA-256-pinned in `manifest.json`
+under `r2_fixtures`, each with an exact expected finding multiset or an
 extractProse prose contract (positive controls included so nothing
 passes vacuously) in `r2/expected/<ID>.json`; the harness is
 `scripts/prx/adversarial-r2.test.ts` and byte integrity is enforced by

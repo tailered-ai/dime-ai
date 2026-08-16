@@ -12,7 +12,8 @@ grep -nEi '\b(wherever|always|never|cannot|bounded|visible|all)\b' \
   docs/verification/prx/threat-model.md
 ```
 
-Run date for this revision: 2026-08-14, over the r2 sources. 48 hits.
+Run date for this revision: 2026-08-15, over the r3 sources (unchanged
+count after the r3 pre-cap reconciliation of threat-model A8). 48 hits.
 Hits that are quotations of file paths, rule ids, or option names (for
 example "all" inside `--all`-style flag text) do not occur in this
 corpus; every hit is classified below. Where several hits state the same
@@ -48,7 +49,7 @@ T = threat-model.md. "Fixture" names an executable negative proof
 | 22 | "[BOUNDARY] step … cannot import a module before deciding" | T (line 41) | Structural: the selection must precede module loading, so it is mirrored in bash; policy-source.mjs is the tested reference | trusted-boundary.test.ts covers the reference implementation; the mirror is reviewed diff (documented limit, not a machine proof) |
 | 23 | A3/A6/A10 bootstrap carve-outs | T A3 (r2), A6, A10 | Trusted mode reads Vale config/styles/lock and dependency graph from base; bootstrap is labeled UNTRUSTED with scripts disabled and no secrets | bootstrap-install.test.ts (marker not created under --ignore-scripts, negative control proves it can be); A3 wording carries the carve-out (r2 BYP-W-01) |
 | 24 | A4 residual "BOUNDED BY A HARD GRADUATION BLOCKER" | T A4 (line 55), S §7 | Invariant statement + the lane is not required; graduation is an owner ruleset action | Not machine-enforceable from inside the lane — recorded as an invariant with the §7 blocker; falsifier: PRX appearing in the required-check list while the head controls the workflow file |
-| 25 | A8 "BOUNDED"; nesting depth "never becomes JS stack depth" | T A8 (line 59) | Byte caps; iterative AST walk and iterative prose traversal; checkBody catch degrades to PRX-B-SIZE | body-check.test.ts deep-nesting tests (20k blockquotes: finding, exact empty prose); the honest parse-cost residual stays in A8 |
+| 25 | A8 "BOUNDED"; nesting depth "never becomes JS stack depth"; pre-cap degrade "identically in every environment" | T A8 (line 59) | Byte caps; every post-parse walker iterative; the r2 structural pre-cap (`BLOCKQUOTE_DEPTH_CAP = 512`, body-check.mjs parseBody) throws before parsing on a raw-string-only decision — no environment input exists for the outcome to vary with; checkBody degrades the throw to PRX-B-SIZE | PC511/PC512/PC513 boundary fixtures (cap−1 / at-cap / cap+1, exact multisets) + PCF600 (the disclosed fence over-approximation); body-check.test.ts deep-nesting and exact-boundary tests; the parse-cost residual for other shapes stays in A8 |
 | 26 | A9 fork runs "BOUNDED"; base checkout "works identically" | T A9 (line 60) | GitHub token semantics for fork PRs + base SHA lives in the base repo | Not exercisable from this repo's test suite; UNKNOWN until a fork PR exercises the lane — the claim is narrowed by "no secrets exist in the lane" (A10, verified by workflow inspection) |
 | 27 | bootstrap workflow "always succeeds" | T bootstrap honesty (line 68) | NARROWED (r2): the bootstrap is audit-only so FINDINGS never fail it, but tool crashes exit non-zero by design (pipefail; canary exit-code demand) | cli.test.ts audit exit-0 with findings; the workflow canary requires exactly 1 in enforcing — a crash (2) fails the step. Wording adjusted here to "always exits 0 on findings; only tool failures are red" — see the narrow note below |
 | 28 | "pull_request_target: never used" / "not used at all in v1.1" | T explicit non-uses (lines 87, 91) | Text absence in the workflow file | check-github-actions-security + zizmor runs; `grep -c pull_request_target .github/workflows/14-prx-communication.yml` = 0 (re-runnable) |

@@ -253,6 +253,26 @@
       "fixture": "r2/body/R2B12.md",
       "sha256": "c9485f3be7b559757a1da4c93957adae01624739eed8663719b3b6cb67b7789c",
       "mechanism": "same-class find during r2 wiring (BYP-B-02 class): a removed-set element that parses as INLINE html splits its text into sibling nodes; the sequential sanitized-text scanner must still drop it — both sections fail SECTION-EMPTY"
+    },
+    "PC511": {
+      "fixture": "r2/body/PC511.md",
+      "sha256": "ab7aa48c8984b03b82bbcdc5763d096d5cecfe114ffc42c7b3aa69c83591c397",
+      "mechanism": "r3 pre-cap boundary (under): 511 leading blockquote markers parse normally; the body yields exactly the 14 missing-section findings and never PRX-B-SIZE (BLOCKQUOTE_DEPTH_CAP = 512 in body-check.mjs parseBody; cap - 1 must not degrade)"
+    },
+    "PC512": {
+      "fixture": "r2/body/PC512.md",
+      "sha256": "10d8f5230e9a8d06f16dfcdf55d60779ec1f3688714ba508b79769a7f246ad28",
+      "mechanism": "r3 pre-cap boundary (at): exactly 512 leading blockquote markers - the cap itself - still parse normally (the guard is depth > cap, not >=); same 14-finding multiset as PC511, no PRX-B-SIZE"
+    },
+    "PC513": {
+      "fixture": "r2/body/PC513.md",
+      "sha256": "5edcbbaf5689d70090af4901d87f81e3ae2b8f6a52abb09715c901ce8c5567cc",
+      "mechanism": "r3 pre-cap boundary (over): 513 leading blockquote markers exceed BLOCKQUOTE_DEPTH_CAP = 512, so parseBody throws BEFORE parsing and checkBody degrades to exactly one PRX-B-SIZE finding, identically in every environment"
+    },
+    "PCF600": {
+      "fixture": "r2/body/PCF600.md",
+      "sha256": "2e02a8f8e7f18f30217a18f9339bc60420cd66056f3f3e245fcb106b89fc8a87",
+      "mechanism": "r3 pre-cap KNOWN OVER-APPROXIMATION, disclosed: the pre-cap scans raw lines before parsing and has no fence context, so a 600-'>' run inside a labeled code fence - legitimate code content - still degrades to PRX-B-SIZE; recorded as a residual in the change ledger and threat-model A8, pinned here so the behavior is visible, not hidden"
     }
   }
 }
