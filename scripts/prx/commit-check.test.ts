@@ -671,3 +671,34 @@ describe("r2 mutation-hardening (post-rerun survivor kills)", () => {
     expect(bm?.message).toContain("claim a bot identity");
   });
 });
+
+describe("r3 blocking-path survivors (mutation run 2 residual)", () => {
+  it("a line broken by a lone CR or line separator is not a trailer", () => {
+    // TRAILER_LINE_RE's trailing $ is load-bearing, contradicting the r1
+    // disposition that called dropping it equivalent. That proof assumed
+    // "(.*) always consumes to end-of-string", but `.` also excludes CR,
+    // U+2028 and U+2029, and parseCommitMessage normalizes only CRLF — so
+    // those code points survive INSIDE a body line. Without the anchor
+    // such a line parses as a trailer, which flips the commit into
+    // governed scope and invents PRX-C-GOV findings.
+    for (const sep of ["\r", "\u2028", "\u2029"]) {
+      const msg = `feat(x): s\n\nRun-Id: ONE-20260812-AAAA${sep}tail\n`;
+      const parsed = parseCommitMessage(msg);
+      expect(parsed.trailers).toBeNull();
+      expect(parsed.trailerRecord).toEqual([]);
+      expect(rules(checkCommit(msg, {}))).toEqual(["PRX-C-CONTROL"]);
+    }
+  });
+
+  it("the control policy treats fenced content as code, prose as text", () => {
+    // CODE_KINDS must contain "fence-content": without it a fenced line
+    // is scanned under the body-text policy and an ESC inside a code
+    // block raises PRX-C-CONTROL, which is APPROVED_BLOCKING.
+    const fenced = "feat(x): s\n\n```\nab\u001b\n```\n\nTail paragraph.\n";
+    expect(checkCommit(fenced, {})).toEqual([]);
+    // Positive control: the same byte in ordinary prose still fires, so
+    // the assertion above cannot pass by the scan being switched off.
+    const prose = "feat(x): s\n\nprose\u001bhere.\n";
+    expect(rules(checkCommit(prose, {}))).toEqual(["PRX-C-CONTROL"]);
+  });
+});

@@ -188,7 +188,10 @@ describe("RS-byte truncation regression (review finding, high)", () => {
 // boundary — the subprocess tests above pin the real artifact, while
 // these direct calls give the mutation run visibility into the same
 // wrapper logic (arg parsing, mode resolution, verdict wiring, output).
-import { main as commitMain } from "./check-commit.mjs";
+import {
+  main as commitMain,
+  listCommits as listCommitsFn,
+} from "./check-commit.mjs";
 import { main as bodyMain } from "./check-body.mjs";
 import {
   mkdtempSync as mkdtemp2,
@@ -641,5 +644,67 @@ describe("wrapper survivors round 2 (R8)", () => {
     } finally {
       rm2(repo4, { recursive: true, force: true });
     }
+  });
+});
+
+describe("r3 blocking-path survivors (mutation run 2 residual)", () => {
+  const repo5 = mkdtemp2(join(tmpdir(), "prx-r3-"));
+  afterAll(() => rm2(repo5, { recursive: true, force: true }));
+  const g5 = (...args: string[]) =>
+    execFileSync("git", ["-C", repo5, ...args], {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        GIT_AUTHOR_NAME: "T",
+        GIT_AUTHOR_EMAIL: "t@example.com",
+        GIT_COMMITTER_NAME: "T",
+        GIT_COMMITTER_EMAIL: "t@example.com",
+      },
+    });
+
+  it("listCommits fails closed on a range that rewrites the log format", () => {
+    // The malformed-record guard is reachable through the ARGUMENT
+    // channel, not only the commit-object channel the r1 disposition
+    // considered: `range` is passed straight to `git log`, so a caller
+    // supplying a --format/--pretty argument overrides the record shape.
+    // The guard must refuse the stream rather than audit bogus records —
+    // without it the checker reports PRX-C-SUBJECT and PRX-C-PREFIX
+    // errors for commits that were never parsed.
+    g5("init", "-b", "main");
+    writeFileSync(join(repo5, "a.txt"), "a\n");
+    g5("add", ".");
+    g5("commit", "-m", "feat(x): base");
+    expect(() => listCommitsFn(repo5, "--format=%H%n%P")).toThrow(
+      /malformed git log record \(2 fields\)/
+    );
+    expect(() => listCommitsFn(repo5, "--pretty=%s")).toThrow(
+      /malformed git log record \(1 fields\)/
+    );
+  });
+
+  it("--verified-revert actually grants the trusted-caller exemption", () => {
+    // The flag is r2 code with no in-process coverage: three mutants on
+    // its parsing branch survived run 2, and each silently drops the
+    // exemption so a verified revert gains an APPROVED_BLOCKING
+    // PRX-C-PREFIX finding.
+    const revert = join(repo5, "revert.txt");
+    writeFileSync(
+      revert,
+      'Revert "feat(x): thing"\n\nThis reverts commit abcdef1234567.\n'
+    );
+    const r = runInProcess(commitMain, [
+      revert,
+      "--verified-revert",
+      "--mode=enforcing",
+    ]);
+    expect(r.code).toBe(0);
+    expect(r.stderr).toBe("");
+    expect(r.stdout).not.toContain("PRX-C-PREFIX");
+    expect(r.stdout).toContain("PRX commit gate: 0 error(s), 0 advisory");
+    // Positive control: without the flag the same message is rejected,
+    // so the assertions above cannot pass by the message being clean.
+    const bare = runInProcess(commitMain, [revert, "--mode=enforcing"]);
+    expect(bare.code).toBe(1);
+    expect(bare.stdout).toContain("PRX-C-PREFIX");
   });
 });
