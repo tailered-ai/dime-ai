@@ -492,6 +492,42 @@ now route through the `reject()` helper with anchored regexes, keeping
 the exact-reason pins while restoring the verdict assertion. Full
 delta in the Gap B section below.
 
+### Verification run (r3, label-gated CI matrix)
+
+The claim above is not left as an argument. Mutation run `31918253169`
+re-ran the full focused matrix at head
+`a5d632569ca3599483649c72784d5a4d1c286f98`, all six jobs `success`
+(native GitHub conclusions), and confirms it mutant-for-mutant.
+
+| Module | Valid | Detected | Survived | No coverage | Score |
+| --- | --- | --- | --- | --- | --- |
+| `lib/canonical.mjs` | 589 | 542 | 47 | 0 | 92.02% |
+| `commit-check.mjs` | 445 | 418 | 26 | 1 | 93.93% |
+| `body-check.mjs` | 629 | 568 | 52 | 9 | 90.30% |
+| `check-commit.mjs` | 185 | 170 | 11 | 4 | 91.89% |
+| `rules.mjs` | 124 | 123 | 1 | 0 | 99.19% |
+| `modes.mjs` | 66 | 43 | 21 | 2 | 65.15% |
+| **Aggregate** | **2038** | **1864** | **158** | **16** | **91.46%** |
+
+Matching that run's undetected set against the register, mutant for
+mutant on file, span, mutator, and replacement: **0 of the 46 live
+blocking-path survivors remain undetected.** 24 blocking-path mutants
+are still recorded undetected, and every one of them is an activation
+artifact the real suite kills — 18 in `modes.mjs` module scope and 6
+across the `check-commit.mjs` subprocess boundary — which is what the
+226-mutant replay established independently.
+
+Progression across the four runs, on the identical 2038-mutant
+population: 86.06% (run 1, pre-hardening baseline) → 88.91% (run 2,
+authoritative) → 88.96% (r3, drive-letter regression fixed) →
+**91.46%** (r3 verification). The gain is entirely tests; no
+decision-path source file was edited in r3.
+
+The remaining 158 survived and 16 no-coverage mutants are the 21
+advisory-path, 56 off-path, and 78 equivalent classes, minus those the
+new tests killed incidentally. They are enumerated individually below —
+not summarized by class.
+
 ### Per-mutant register
 
 One row per undetected mutant, ordered by class then line. "Run-2" is

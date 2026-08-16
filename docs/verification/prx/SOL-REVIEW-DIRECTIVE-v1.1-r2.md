@@ -57,9 +57,10 @@ From a checkout of the head SHA recorded in the bundle's
 the packageManager pin):
 
 1. `pnpm install --frozen-lockfile --ignore-scripts`
-2. `npx vitest run scripts/prx/` — 13 suites, 479 tests (the r1 set
+2. `npx vitest run scripts/prx/` — 13 suites, 515 tests (the r1 set
    plus `canonical.test.ts`, `adversarial-r2.test.ts`, and
-   `r2-parity.test.ts`).
+   `r2-parity.test.ts`; r3 added 36 killing tests for live
+   blocking-path mutants).
 3. `npx tsc --noEmit`
 4. `npx prettier --check scripts/prx .github/workflows/14-prx-communication.yml .github/workflows/15-prx-mutation.yml package.json`
 5. `node scripts/check-github-actions-security.mjs`
@@ -77,8 +78,9 @@ the packageManager pin):
    `--concurrency 2`, one job per module). Reproduce a single module
    locally with
    `npx stryker run scripts/prx/stryker.blocking.prx.json --mutate scripts/prx/rules.mjs --concurrency 2`
-   sized to your machine. Figures and triage:
-   `mutation-blocking-dispositions.md` §"r2 focused rerun".
+   sized to your machine. Figures and per-mutant dispositions:
+   `mutation-blocking-dispositions.md` §"r3 evidence closure" (the r2
+   §"r2 focused rerun" block is retained as the earlier record).
 
 ## Mutation-evidence state, honestly scoped
 
@@ -87,10 +89,16 @@ stand as the HISTORICAL record for head `d98793c2…`; the four
 disposition-integrity defects the second review found in that record
 (MUT-01..04) are corrected in place with "CORRECTED r2" tags, and the
 replay log is reconciled to the final survivor population (109
-records). The r2 rerun figures are separate, scoped to the label-gated
-CI environment, and triaged BY CLASS rather than to the r1 bar of
-individually-proven survivors — that gap is stated in the dispositions
-document, not hidden. The `15-prx-mutation` lane re-runs on demand.
+records). The r2 rerun figures are separate and scoped to the label-gated CI
+environment. They were triaged BY CLASS rather than to the r1 bar of
+individually-proven survivors; the r3 evidence-closure pass closed that
+gap. All 226 undetected mutants from the authoritative r2 run now carry
+individual dispositions, all 46 that were live blocking-path survivors
+carry killing tests, and the verification run `31918253169` at head
+`a5d632569ca3599483649c72784d5a4d1c286f98` confirms zero remaining —
+2038 valid, 1864 detected, 91.46%. See
+`mutation-blocking-dispositions.md` §"r3 evidence closure". The
+`15-prx-mutation` lane re-runs on demand.
 
 ## UNKNOWN / BLOCKED register (r2)
 
@@ -117,9 +125,13 @@ document, not hidden. The `15-prx-mutation` lane re-runs on demand.
    affected rules are EXTERNAL_ADAPTATION, never EXTERNAL_REQUIREMENT.
    A removed element split across block boundaries by blank lines is
    outside the modeled scope.
-7. The r2 mutation residual (class-triaged survivors without individual
-   written proofs) is an open follow-up, recorded in
-   `mutation-blocking-dispositions.md` §"r2 focused rerun".
+7. The r2 mutation residual is CLOSED by the r3 pass: every undetected
+   mutant now carries an individual disposition and every live
+   blocking-path survivor carries a killing test
+   (`mutation-blocking-dispositions.md` §"r3 evidence closure"). What
+   remains open is deliberate and stated there: 21 advisory-path and 56
+   off-path mutants are not killed, because neither class can change a
+   blocking verdict.
 
 ## Artifact map
 
