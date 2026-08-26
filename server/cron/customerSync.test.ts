@@ -16,6 +16,19 @@ import {
   type CustomerSourceRow,
 } from "./customerSync";
 
+// ─── Default-loader collaborators, mocked so the DB-unavailable / breaker-open
+// paths of loadRowsFromDb can be exercised without a real pool. The mocks are
+// inert for every test that injects loadRows/loadCatalogue (nothing imports
+// ../db in those paths).
+const { getDbMock, withCircuitBreakerMock } = vi.hoisted(() => ({
+  getDbMock: vi.fn(),
+  withCircuitBreakerMock: vi.fn(),
+}));
+vi.mock("../db", () => ({ getDb: getDbMock }));
+vi.mock("../dbCircuitBreaker", () => ({
+  withCircuitBreaker: withCircuitBreakerMock,
+}));
+
 /** The contract's forbidden-fields list — must never appear ANYWHERE in the payload. */
 const FORBIDDEN = [
   "passwordHash",
@@ -122,6 +135,12 @@ function deps(
 beforeEach(() => {
   delete process.env.TAILERED_SYNC_URL;
   delete process.env.TAILERED_SYNC_SECRET;
+  getDbMock.mockReset();
+  withCircuitBreakerMock.mockReset();
+  // Default: closed breaker — pass the wrapped query straight through.
+  withCircuitBreakerMock.mockImplementation(
+    async (fn: () => Promise<unknown>) => fn()
+  );
   vi.spyOn(console, "log").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
@@ -435,5 +454,146 @@ describe("pushCustomerSnapshot", () => {
     expect(result.ok).toBe(false);
     expect(result.error).toBe("network down");
     expect(JSON.stringify(result)).not.toContain("dummy-test-secret");
+  });
+});
+
+// ─── Empty-snapshot refusal + DB-failure surfacing ───────────────────────────
+// An empty push would WIPE the downstream mirror (tailered replaces the whole
+// table with the snapshot). A legitimately empty dime user base does not exist,
+// so zero users is always a fault — refuse the push (route maps ok:false → 502
+// and the hourly workflow goes red) and never let "DB unavailable" or
+// "breaker open" masquerade as an empty customer base.
+
+function configureEnv() {
+  process.env.TAILERED_SYNC_URL =
+    "https://tailered.ai/api/admin/customer-sync";
+  process.env.TAILERED_SYNC_SECRET = "dummy-test-secret";
+}
+
+/** Fake drizzle db: captures each select() projection, resolves fixed rows. */
+function fakeSelectDb(rows: unknown[]) {
+  const selections: Array<Record<string, unknown> | undefined> = [];
+  const db = {
+    select: (projection?: Record<string, unknown>) => {
+      selections.push(projection);
+      return {
+        from: () => ({
+          where: () => ({
+            orderBy: async () => rows,
+          }),
+        }),
+      };
+    },
+  };
+  return { db, selections };
+}
+
+describe("pushCustomerSnapshot — empty snapshots are refused, DB faults surface as ok:false", () => {
+  it("refuses a zero-user snapshot: {ok:false, error:'empty_snapshot_refused'}, NO fetch", async () => {
+    configureEnv();
+    const fetchImpl = vi.fn();
+    const result = await pushCustomerSnapshot({ ...deps([]), fetchImpl });
+    expect(result).toEqual({ ok: false, error: "empty_snapshot_refused" });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("refuses a snapshot whose only rows are soft-deleted (filters to zero users)", async () => {
+    configureEnv();
+    const fetchImpl = vi.fn();
+    const dead = fixtureRow({ deletedAt: 1750000005000 });
+    const result = await pushCustomerSnapshot({ ...deps([dead]), fetchImpl });
+    expect(result).toEqual({ ok: false, error: "empty_snapshot_refused" });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("db unavailable (getDb → null): push resolves ok:false with the throw's message, NO fetch", async () => {
+    configureEnv();
+    getDbMock.mockResolvedValue(null);
+    const fetchImpl = vi.fn();
+    // loadRows deliberately OMITTED — exercises the real loadRowsFromDb.
+    const result = await pushCustomerSnapshot({
+      loadCatalogue: async () => fixtureCatalogue(),
+      now: () => Date.parse("2026-08-26T19:00:00.000Z"),
+      fetchImpl,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe("customer-sync: db unavailable");
+    expect(result.skipped).toBeUndefined();
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("breaker OPEN: surfaces as ok:false — NEVER an empty-snapshot (or any) push", async () => {
+    configureEnv();
+    const { db } = fakeSelectDb([fixtureRow()]);
+    getDbMock.mockResolvedValue(db);
+    withCircuitBreakerMock.mockReset();
+    withCircuitBreakerMock.mockRejectedValue(
+      new Error(
+        "[DB-CIRCUIT] Circuit is OPEN — DB unavailable. Fast-failing to prevent hang."
+      )
+    );
+    const fetchImpl = vi.fn();
+    const result = await pushCustomerSnapshot({
+      loadCatalogue: async () => fixtureCatalogue(),
+      now: () => Date.parse("2026-08-26T19:00:00.000Z"),
+      fetchImpl,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.error).toContain("Circuit is OPEN");
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+});
+
+describe("loadRowsFromDb — explicit column projection inside the circuit breaker", () => {
+  /** The 22 source columns CustomerSourceRow names — and nothing else. */
+  const PROJECTED_COLUMNS = [
+    "id",
+    "email",
+    "username",
+    "role",
+    "hasAccess",
+    "expiryDate",
+    "deletedAt",
+    "termsAccepted",
+    "termsAcceptedAt",
+    "discordId",
+    "discordUsername",
+    "discordConnectedAt",
+    "manualDiscordId",
+    "createdAt",
+    "lastSignedIn",
+    "stripeCustomerId",
+    "stripeSubscriptionId",
+    "stripePlanId",
+    "planPriceId",
+    "stripeSubscriptionStatus",
+    "cancelAtPeriodEnd",
+    "pendingSetup",
+  ];
+
+  it("selects ONLY the snapshot-source columns (no credential/security columns), wrapped in withCircuitBreaker", async () => {
+    configureEnv();
+    const { db, selections } = fakeSelectDb([fixtureRow()]);
+    getDbMock.mockResolvedValue(db);
+    const fetchImpl = vi.fn(
+      async () => new Response('{"ok":true}', { status: 200 })
+    );
+    const result = await pushCustomerSnapshot({
+      loadCatalogue: async () => fixtureCatalogue(),
+      now: () => Date.parse("2026-08-26T19:00:00.000Z"),
+      fetchImpl,
+    });
+    expect(result).toEqual({ ok: true, users: 1, status: 200 });
+    expect(withCircuitBreakerMock).toHaveBeenCalledTimes(1);
+    expect(selections).toHaveLength(1);
+    const projection = selections[0];
+    expect(projection, "db.select() must be called WITH a projection").toBeDefined();
+    const keys = Object.keys(projection!).sort();
+    expect(keys).toEqual([...PROJECTED_COLUMNS].sort());
+    for (const key of FORBIDDEN) {
+      expect(keys, `credential column ${key} must not be selected`).not.toContain(
+        key
+      );
+    }
   });
 });

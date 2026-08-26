@@ -141,16 +141,58 @@ export interface SnapshotDeps {
 // cronRoutes and its registration test) never drags in the DB pool machinery.
 
 async function loadRowsFromDb(): Promise<CustomerSourceRow[]> {
-  const { getDb } = await import("../db");
+  const [{ getDb }, { withCircuitBreaker }] = await Promise.all([
+    import("../db"),
+    import("../dbCircuitBreaker"),
+  ]);
   const db = await getDb();
-  if (!db) return [];
-  // deletedAt IS NULL — the spec's row filter. listAppUsers() (server/db.ts:527)
-  // has no such filter, so the snapshot query applies it directly.
-  const rows = await db
-    .select()
-    .from(appUsers)
-    .where(isNull(appUsers.deletedAt))
-    .orderBy(appUsers.createdAt);
+  // An unavailable DB must THROW, never resolve to [] — the downstream mirror
+  // replaces its whole table with the snapshot, so a silent empty result here
+  // would read as "customer base is empty" and wipe it. pushCustomerSnapshot
+  // converts the throw into {ok:false} and the hourly workflow goes red.
+  if (!db) throw new Error("customer-sync: db unavailable");
+  // Same circuit-breaker convention as listAppUsers (server/db.ts:527) — but
+  // WITHOUT its catch-to-[] fallback, for the wipe reason above: a breaker-open
+  // fast-fail must propagate as a throw, not masquerade as an empty base.
+  //
+  // Explicit projection = defense in depth: sanitizeRow's allow-list already
+  // strips credential columns, but the query itself never fetches them
+  // (passwordHash, reset/lockout state, tokenVersion, pending* checkout
+  // fields stay in the DB). Exactly the CustomerSourceRow named columns:
+  // the 20 sanitizeRow reads + deletedAt (row filter) — accessSource derives
+  // from stripeCustomerId, entitled from hasAccess/expiryDate, both included.
+  const rows = await withCircuitBreaker(async () =>
+    db
+      .select({
+        id: appUsers.id,
+        email: appUsers.email,
+        username: appUsers.username,
+        role: appUsers.role,
+        hasAccess: appUsers.hasAccess,
+        expiryDate: appUsers.expiryDate,
+        deletedAt: appUsers.deletedAt,
+        termsAccepted: appUsers.termsAccepted,
+        termsAcceptedAt: appUsers.termsAcceptedAt,
+        discordId: appUsers.discordId,
+        discordUsername: appUsers.discordUsername,
+        discordConnectedAt: appUsers.discordConnectedAt,
+        manualDiscordId: appUsers.manualDiscordId,
+        createdAt: appUsers.createdAt,
+        lastSignedIn: appUsers.lastSignedIn,
+        stripeCustomerId: appUsers.stripeCustomerId,
+        stripeSubscriptionId: appUsers.stripeSubscriptionId,
+        stripePlanId: appUsers.stripePlanId,
+        planPriceId: appUsers.planPriceId,
+        stripeSubscriptionStatus: appUsers.stripeSubscriptionStatus,
+        cancelAtPeriodEnd: appUsers.cancelAtPeriodEnd,
+        pendingSetup: appUsers.pendingSetup,
+      })
+      .from(appUsers)
+      // deletedAt IS NULL — the spec's row filter. listAppUsers() has no such
+      // filter, so the snapshot query applies it directly.
+      .where(isNull(appUsers.deletedAt))
+      .orderBy(appUsers.createdAt)
+  );
   return rows as CustomerSourceRow[];
 }
 
@@ -339,7 +381,25 @@ export async function pushCustomerSnapshot(
     return { ok: true, skipped: "unconfigured" };
   }
 
-  const snapshot = await buildCustomerSnapshot(deps);
+  let snapshot: SnapshotV1;
+  try {
+    snapshot = await buildCustomerSnapshot(deps);
+  } catch (err) {
+    // DB unavailable / circuit open / query failure. Surface as ok:false (the
+    // cron route maps it to 502, reddening the workflow) — never push anything.
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[CustomerSync][push][FAIL] snapshot build: ${msg}`);
+    return { ok: false, error: msg };
+  }
+
+  // A legitimately empty dime user base does not exist, so zero users always
+  // means a fault upstream. Pushing it would wipe the downstream mirror
+  // (tailered replaces its whole table with the snapshot) — refuse instead.
+  if (snapshot.users.length === 0) {
+    console.error("[CustomerSync][push][FAIL] empty snapshot refused");
+    return { ok: false, error: "empty_snapshot_refused" };
+  }
+
   const body = JSON.stringify(snapshot);
   const doFetch = deps.fetchImpl ?? fetch;
 
