@@ -288,6 +288,8 @@ export function registerCronRoutes(app: Express): void {
   // no-op — 200 {ok:true, skipped:"unconfigured"} — so merging this route is
   // inert until Railway configures both. A failed push is 502 (the workflow
   // must go red, not silently "succeed"); only an unexpected throw is 500.
+  // Exception: receiver HTTP 409 = correct superseded-snapshot rejection →
+  // 200 {ok:true, skipped:"superseded_snapshot", status:409}.
   app.post("/api/cron/customer-sync", async (req: Request, res: Response) => {
     if (!requireCronSecret(req, res, "customer-sync")) return;
     console.log(`[Cron:customer-sync] [INPUT] POST /api/cron/customer-sync at ${new Date().toISOString()}`);
@@ -295,8 +297,19 @@ export function registerCronRoutes(app: Express): void {
       const result = await pushCustomerSnapshot();
       console.log(
         `[Cron:customer-sync] [OUTPUT] ok=${result.ok} skipped=${result.skipped ?? "-"} ` +
-        `users=${result.users ?? "-"} status=${result.status ?? "-"}`
+        `users=${result.users ?? "-"} bytes=${result.bytes ?? "-"} status=${result.status ?? "-"}`
       );
+      if (!result.ok && result.status === 409) {
+        // HTTP 409 = the receiver CORRECTLY rejected a superseded/stale
+        // snapshot (e.g. a manual dispatch racing the scheduled run, which
+        // lands after a fresher generatedAt has already been ingested). A
+        // correct rejection must not redden the workflow — report a skip.
+        // Every other ok:false (404, 5xx, network, empty snapshot) stays 502.
+        res
+          .status(200)
+          .json({ ok: true, skipped: "superseded_snapshot", status: 409 });
+        return;
+      }
       res.status(result.ok ? 200 : 502).json(result);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);

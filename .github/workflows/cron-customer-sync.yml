@@ -58,14 +58,41 @@ jobs:
           URL="${RAILWAY_APP_URL%/}/api/cron/customer-sync"
           echo "[INPUT] POST $URL at $(date -u +%FT%TZ)"
           BODY_FILE="$(mktemp)"
-          CODE=$(curl -sS -o "$BODY_FILE" -w '%{http_code}' \
-            --max-time 60 --retry 2 --retry-delay 5 --retry-connrefused \
-            -X POST "$URL" \
-            -H "Authorization: Bearer ${CRON_SECRET}" \
-            -H "Content-Type: application/json" \
-            -H "User-Agent: gh-actions-cron/customer-sync")
+          # Retry ONLY on connection-refused (curl exit 7) — NEVER on HTTP 5xx.
+          # A 502 from the route means a full snapshot build already ran
+          # server-side; blind HTTP retries triple the DB scans and can
+          # interleave builds. curl's --retry treats 5xx as transient (and
+          # --retry-connrefused only ADDS ECONNREFUSED to that set), so the
+          # explicit loop below replaces it: 2 retries, 5s apart, exit-7 only.
+          # --max-time 300 covers the build+push worst case — aborting a live
+          # request while Express keeps working caused overlapping-build
+          # false-reds at 60s.
+          CODE="000"
+          RC=0
+          for ATTEMPT in 1 2 3; do
+            RC=0
+            CODE=$(curl -sS -o "$BODY_FILE" -w '%{http_code}' \
+              --max-time 300 \
+              -X POST "$URL" \
+              -H "Authorization: Bearer ${CRON_SECRET}" \
+              -H "Content-Type: application/json" \
+              -H "User-Agent: gh-actions-cron/customer-sync") || RC=$?
+            if [ "$RC" -eq 7 ] && [ "$ATTEMPT" -lt 3 ]; then
+              echo "[RETRY] connection refused — attempt $ATTEMPT of 3, retrying in 5s"
+              sleep 5
+              continue
+            fi
+            break
+          done
+          if [ "$RC" -ne 0 ]; then
+            echo "::error::customer-sync curl failed (exit $RC)"
+            exit "$RC"
+          fi
           echo "[OUTPUT] HTTP $CODE"
           echo "[OUTPUT] body: $(cat "$BODY_FILE")"
+          if grep -q '"skipped":"unconfigured"' "$BODY_FILE"; then
+            echo "::warning::customer-sync is UNCONFIGURED (TAILERED_SYNC_URL/SECRET unset) — mirror not updated"
+          fi
           if [ "$CODE" -lt 200 ] || [ "$CODE" -ge 300 ]; then
             echo "::error::customer-sync failed with HTTP $CODE"
             exit 1

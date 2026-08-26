@@ -425,10 +425,15 @@ describe("pushCustomerSnapshot", () => {
     const parsed = JSON.parse(body);
     expect(parsed.version).toBe(1);
     expect(parsed.users).toHaveLength(1);
-    expect(result).toEqual({ ok: true, users: 1, status: 200 });
+    expect(result).toEqual({
+      ok: true,
+      users: 1,
+      status: 200,
+      bytes: Buffer.byteLength(body),
+    });
   });
 
-  it("returns {ok:false, status} on a non-2xx response", async () => {
+  it("returns {ok:false, status} on a non-2xx response, surfacing the HTTP status", async () => {
     process.env.TAILERED_SYNC_URL =
       "https://tailered.ai/api/admin/customer-sync";
     process.env.TAILERED_SYNC_SECRET = "dummy-test-secret";
@@ -437,7 +442,58 @@ describe("pushCustomerSnapshot", () => {
       ...deps([fixtureRow()]),
       fetchImpl,
     });
-    expect(result).toEqual({ ok: false, status: 409 });
+    expect(result).toEqual({
+      ok: false,
+      status: 409,
+      bytes: expect.any(Number),
+    });
+  });
+
+  it("logs the payload runway line (users + numeric bytes) BEFORE the fetch, and never logs any fixture email", async () => {
+    process.env.TAILERED_SYNC_URL =
+      "https://tailered.ai/api/admin/customer-sync";
+    process.env.TAILERED_SYNC_SECRET = "dummy-test-secret";
+    const fetchImpl = vi.fn(
+      async () => new Response('{"ok":true}', { status: 200 })
+    );
+    const result = await pushCustomerSnapshot({
+      ...deps([fixtureRow()]),
+      fetchImpl,
+    });
+    expect(result.ok).toBe(true);
+
+    const logSpy = vi.mocked(console.log);
+    const lines = logSpy.mock.calls.map(args => args.map(String).join(" "));
+    const runwayIdx = lines.findIndex(l =>
+      l.startsWith("[Cron:customer-sync] payload ")
+    );
+    expect(runwayIdx, "runway log line must fire").toBeGreaterThanOrEqual(0);
+    const m = lines[runwayIdx]!.match(
+      /^\[Cron:customer-sync\] payload users=(\d+) bytes=(\d+)$/
+    );
+    expect(m, "runway line must carry numeric users and bytes").not.toBeNull();
+    expect(Number(m![1])).toBe(1);
+    expect(Number(m![2])).toBeGreaterThan(0);
+    expect(result.bytes).toBe(Number(m![2]));
+
+    // Ordering: the runway line fires BEFORE the fetch (that is what makes it
+    // a runway line — it survives even if the push hangs or dies).
+    expect(logSpy.mock.invocationCallOrder[runwayIdx]!).toBeLessThan(
+      fetchImpl.mock.invocationCallOrder[0]!
+    );
+
+    // PII: no console call — log or error — ever contains the payload body or
+    // any member email from the fixture.
+    const allLines = [
+      ...lines,
+      ...vi.mocked(console.error).mock.calls.map(args =>
+        args.map(String).join(" ")
+      ),
+    ];
+    for (const line of allLines) {
+      expect(line).not.toContain("member@example.com");
+      expect(line).not.toContain("pending@example.com");
+    }
   });
 
   it("returns {ok:false, error} when fetch throws (timeout/network), without leaking the secret", async () => {
@@ -583,7 +639,12 @@ describe("loadRowsFromDb — explicit column projection inside the circuit break
       now: () => Date.parse("2026-08-26T19:00:00.000Z"),
       fetchImpl,
     });
-    expect(result).toEqual({ ok: true, users: 1, status: 200 });
+    expect(result).toEqual({
+      ok: true,
+      users: 1,
+      status: 200,
+      bytes: expect.any(Number),
+    });
     expect(withCircuitBreakerMock).toHaveBeenCalledTimes(1);
     expect(selections).toHaveLength(1);
     const projection = selections[0];

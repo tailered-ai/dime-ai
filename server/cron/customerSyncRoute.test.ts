@@ -139,7 +139,7 @@ describe("POST /api/cron/customer-sync", () => {
   });
 
   it("authenticated: calls pushCustomerSnapshot and returns its result verbatim with 200", async () => {
-    pushMock.mockResolvedValue({ ok: true, users: 3, status: 200 });
+    pushMock.mockResolvedValue({ ok: true, users: 3, status: 200, bytes: 1234 });
     const { app, handlers } = fakeApp();
     registerCronRoutes(app);
     const h = handlers.get("POST /api/cron/customer-sync")!;
@@ -147,7 +147,14 @@ describe("POST /api/cron/customer-sync", () => {
     await h(request("s3cret"), res);
     expect(pushMock).toHaveBeenCalledTimes(1);
     expect(captured.status).toBe(200);
-    expect(captured.body).toEqual({ ok: true, users: 3, status: 200 });
+    expect(captured.body).toEqual({ ok: true, users: 3, status: 200, bytes: 1234 });
+    // The [OUTPUT] log line carries the payload size for runway observability.
+    const outputLine = vi
+      .mocked(console.log)
+      .mock.calls.map(args => args.map(String).join(" "))
+      .find(l => l.includes("[Cron:customer-sync] [OUTPUT]"));
+    expect(outputLine).toBeDefined();
+    expect(outputLine!).toContain("bytes=1234");
   });
 
   it("unconfigured env: returns 200 {ok:true, skipped:'unconfigured'} verbatim", async () => {
@@ -161,15 +168,44 @@ describe("POST /api/cron/customer-sync", () => {
     expect(captured.body).toEqual({ ok: true, skipped: "unconfigured" });
   });
 
-  it("failed push (ok:false): returns the result verbatim with 502 so the workflow goes red", async () => {
-    pushMock.mockResolvedValue({ ok: false, status: 409 });
+  it("failed push (ok:false, HTTP 404): returns the result verbatim with 502 so the workflow goes red", async () => {
+    pushMock.mockResolvedValue({ ok: false, status: 404 });
     const { app, handlers } = fakeApp();
     registerCronRoutes(app);
     const h = handlers.get("POST /api/cron/customer-sync")!;
     const { captured, res } = fakeRes();
     await h(request("s3cret"), res);
     expect(captured.status).toBe(502);
-    expect(captured.body).toEqual({ ok: false, status: 409 });
+    expect(captured.body).toEqual({ ok: false, status: 404 });
+  });
+
+  it("failed push (ok:false, HTTP 500): stays 502 — receiver faults must redden the workflow", async () => {
+    pushMock.mockResolvedValue({ ok: false, status: 500 });
+    const { app, handlers } = fakeApp();
+    registerCronRoutes(app);
+    const h = handlers.get("POST /api/cron/customer-sync")!;
+    const { captured, res } = fakeRes();
+    await h(request("s3cret"), res);
+    expect(captured.status).toBe(502);
+    expect(captured.body).toEqual({ ok: false, status: 500 });
+  });
+
+  it("receiver 409 (superseded snapshot correctly rejected): 200 {ok:true, skipped:'superseded_snapshot'}", async () => {
+    // A 409 means the receiver did its job — refused a stale/superseded
+    // snapshot (e.g. a manual dispatch racing the scheduled run). A CORRECT
+    // rejection must not redden the workflow.
+    pushMock.mockResolvedValue({ ok: false, status: 409 });
+    const { app, handlers } = fakeApp();
+    registerCronRoutes(app);
+    const h = handlers.get("POST /api/cron/customer-sync")!;
+    const { captured, res } = fakeRes();
+    await h(request("s3cret"), res);
+    expect(captured.status).toBe(200);
+    expect(captured.body).toEqual({
+      ok: true,
+      skipped: "superseded_snapshot",
+      status: 409,
+    });
   });
 
   it("unexpected throw: responds 500 {ok:false, error} instead of crashing", async () => {

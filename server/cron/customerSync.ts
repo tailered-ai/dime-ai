@@ -357,6 +357,8 @@ export type PushResult = {
   skipped?: string;
   users?: number;
   status?: number;
+  /** Payload size (Buffer.byteLength of the raw JSON body); runway telemetry. */
+  bytes?: number;
   error?: string;
 };
 
@@ -401,6 +403,12 @@ export async function pushCustomerSnapshot(
   }
 
   const body = JSON.stringify(snapshot);
+  const bytes = Buffer.byteLength(body);
+  // Runway line: row count + payload size only, logged BEFORE the fetch so it
+  // survives a hung/killed push. NEVER the body itself — it carries member PII.
+  console.log(
+    `[Cron:customer-sync] payload users=${snapshot.users.length} bytes=${bytes}`
+  );
   const doFetch = deps.fetchImpl ?? fetch;
 
   let res: Response;
@@ -422,12 +430,14 @@ export async function pushCustomerSnapshot(
   }
 
   if (!res.ok) {
+    // Surface the HTTP status — the cron route maps 409 (receiver correctly
+    // rejected a superseded/stale snapshot) to a 200 skip; everything else 502.
     console.error(`[CustomerSync][push][FAIL] HTTP ${res.status}`);
-    return { ok: false, status: res.status };
+    return { ok: false, status: res.status, bytes };
   }
 
   console.log(
     `[CustomerSync][push][OK] HTTP ${res.status} users=${snapshot.users.length}`
   );
-  return { ok: true, users: snapshot.users.length, status: res.status };
+  return { ok: true, users: snapshot.users.length, status: res.status, bytes };
 }

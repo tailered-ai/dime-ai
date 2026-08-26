@@ -32,12 +32,8 @@ export const ENV = {
   // STRIPE_PRICE_ANNUAL:  $399/year recurring price ID (price_xxx)
   stripePriceMonthly: process.env.STRIPE_PRICE_MONTHLY ?? "",
   stripePriceAnnual: process.env.STRIPE_PRICE_ANNUAL ?? "",
-  // ─── Tailered customer mirror (Phase 1 push sync) ────────────────────────────
-  // Both OPTIONAL: when either is unset, POST /api/cron/customer-sync no-ops
-  // with 200 {ok:true, skipped:"unconfigured"} — the route is inert until
-  // Railway sets both. NOTE: server/cron/customerSync.ts reads these from
-  // process.env at CALL time (the CRON_SECRET pattern in cronAuth.ts) so a
-  // variable change applies on the next run; these entries document the surface.
-  taileredSyncUrl: process.env.TAILERED_SYNC_URL ?? "",
-  taileredSyncSecret: process.env.TAILERED_SYNC_SECRET ?? "",
+  // NOTE: TAILERED_SYNC_URL / TAILERED_SYNC_SECRET are deliberately NOT
+  // mirrored here — server/cron/customerSync.ts reads them from process.env at
+  // CALL time (the CRON_SECRET pattern in cronAuth.ts) so a Railway variable
+  // change applies on the next run without a rebuild. See .env.example.
 };
