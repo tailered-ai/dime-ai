@@ -30,6 +30,10 @@ reason = "xlsx@0.18.5 Prototype Pollution — patched:<0.0.0, no fix exists upst
 id = "GHSA-5pgg-2g8v-p4x9"
 reason = "xlsx@0.18.5 ReDoS — patched:<0.0.0, no fix exists upstream. Server-side only."
 
+[[IgnoredVulns]]
+id = "GHSA-jmr9-qjv8-65gv"
+reason = "extract-zip@2.0.1 symlink path traversal — OSV last_affected:2.0.1, no fixed release exists (2026-08-26). Transitive via @puppeteer/browsers, which only extracts Chromium archives fetched from Google's CDN server-side; no user-supplied zips reach it. Pre-existing lockfile dep — surfaced on PR #520 which adds zero dependencies."
+
 # RESOLVED 2026-08-03 — GHSA-5xrq-8626-4rwp (vitest UI dev-server file read/execute)
 # entry removed: the tracked "future vitest 4.x migration" landed (vitest 2.1.9 ->
 # 4.1.10), which is outside the advisory's affected range. Real fix installed beats

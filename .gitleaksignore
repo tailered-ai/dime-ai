@@ -68,3 +68,7 @@ c63bb85031c2a3404ae2a4a049dfb02e39777c2d:ml/dime-1.0/evidence/benchmarks/base-mo
 # platform/tailered-os/docs/UPSTREAM.md). A commit SHA is not a credential. This
 # exact fingerprint does not suppress the rule, the file, or hex strings elsewhere.
 5823da63238c38b46dfc23d8a12c27e0c6a6b93c:.github/workflows/tailered-os.yml:cloudflare-api-key:28
+
+# 2026-08-26 PR #520 — test fixture dummy Discord snowflake (123456789012345678) in the
+# customer-sync suite matches the discord-client-id rule; not a credential.
+aa911c996e4da5b7ccd0a4c7be1aec199fc05d5c:server/cron/customerSync.test.ts:discord-client-id:47

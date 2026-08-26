@@ -486,9 +486,9 @@ describe("pushCustomerSnapshot", () => {
     // any member email from the fixture.
     const allLines = [
       ...lines,
-      ...vi.mocked(console.error).mock.calls.map(args =>
-        args.map(String).join(" ")
-      ),
+      ...vi
+        .mocked(console.error)
+        .mock.calls.map(args => args.map(String).join(" ")),
     ];
     for (const line of allLines) {
       expect(line).not.toContain("member@example.com");
@@ -521,8 +521,7 @@ describe("pushCustomerSnapshot", () => {
 // "breaker open" masquerade as an empty customer base.
 
 function configureEnv() {
-  process.env.TAILERED_SYNC_URL =
-    "https://tailered.ai/api/admin/customer-sync";
+  process.env.TAILERED_SYNC_URL = "https://tailered.ai/api/admin/customer-sync";
   process.env.TAILERED_SYNC_SECRET = "dummy-test-secret";
 }
 
@@ -648,13 +647,17 @@ describe("loadRowsFromDb — explicit column projection inside the circuit break
     expect(withCircuitBreakerMock).toHaveBeenCalledTimes(1);
     expect(selections).toHaveLength(1);
     const projection = selections[0];
-    expect(projection, "db.select() must be called WITH a projection").toBeDefined();
+    expect(
+      projection,
+      "db.select() must be called WITH a projection"
+    ).toBeDefined();
     const keys = Object.keys(projection!).sort();
     expect(keys).toEqual([...PROJECTED_COLUMNS].sort());
     for (const key of FORBIDDEN) {
-      expect(keys, `credential column ${key} must not be selected`).not.toContain(
-        key
-      );
+      expect(
+        keys,
+        `credential column ${key} must not be selected`
+      ).not.toContain(key);
     }
   });
 });

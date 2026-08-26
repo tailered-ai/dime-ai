@@ -139,7 +139,12 @@ describe("POST /api/cron/customer-sync", () => {
   });
 
   it("authenticated: calls pushCustomerSnapshot and returns its result verbatim with 200", async () => {
-    pushMock.mockResolvedValue({ ok: true, users: 3, status: 200, bytes: 1234 });
+    pushMock.mockResolvedValue({
+      ok: true,
+      users: 3,
+      status: 200,
+      bytes: 1234,
+    });
     const { app, handlers } = fakeApp();
     registerCronRoutes(app);
     const h = handlers.get("POST /api/cron/customer-sync")!;
@@ -147,7 +152,12 @@ describe("POST /api/cron/customer-sync", () => {
     await h(request("s3cret"), res);
     expect(pushMock).toHaveBeenCalledTimes(1);
     expect(captured.status).toBe(200);
-    expect(captured.body).toEqual({ ok: true, users: 3, status: 200, bytes: 1234 });
+    expect(captured.body).toEqual({
+      ok: true,
+      users: 3,
+      status: 200,
+      bytes: 1234,
+    });
     // The [OUTPUT] log line carries the payload size for runway observability.
     const outputLine = vi
       .mocked(console.log)
