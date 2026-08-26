@@ -24,6 +24,7 @@
  *   - POST /api/cron/bet-grade-sweep  → nightly bet-grade sweep
  *   - POST /api/cron/mlb-asg          → All-Star Game sync (hand-rolled, not mountJob)
  *   - POST /api/cron/stripe-reconcile → Stripe↔DB reconciliation (hand-rolled)
+ *   - POST /api/cron/customer-sync    → tailered.ai customer-mirror push (hand-rolled)
  *   - GET  /api/cron/status           → run-lock state for all jobs (observability)
  *
  * SCOPE (second pass — MLB learning-loop ingestion, audit M-208). These three
@@ -73,6 +74,7 @@ import {
   makeOutcomesWork,
 } from "./mlbLoopJobs";
 import { mountDateJob } from "./mountDateJob";
+import { pushCustomerSnapshot } from "./customerSync";
 
 // One runner per job — module-level so the run-lock survives across requests.
 const vsinRunner = new CronJobRunner("vsin-odds", async () => {
@@ -276,6 +278,33 @@ export function registerCronRoutes(app: Express): void {
     }
   });
   console.log(`[Cron] [OUTPUT] Registered POST /api/cron/stripe-reconcile (job=stripe-reconcile)`);
+
+  // Tailered customer-mirror push (Phase 1, additive — spec:
+  // docs/superpowers/specs/2026-08-26-dime-customer-mirror-design.md in the
+  // tailered-os repo). Builds a sanitized snapshot of the live customer base
+  // and POSTs it HMAC-signed to tailered.ai. Runs synchronously (like
+  // stripe-reconcile) so the workflow log carries the outcome. When
+  // TAILERED_SYNC_URL or TAILERED_SYNC_SECRET is unset the push is an explicit
+  // no-op — 200 {ok:true, skipped:"unconfigured"} — so merging this route is
+  // inert until Railway configures both. A failed push is 502 (the workflow
+  // must go red, not silently "succeed"); only an unexpected throw is 500.
+  app.post("/api/cron/customer-sync", async (req: Request, res: Response) => {
+    if (!requireCronSecret(req, res, "customer-sync")) return;
+    console.log(`[Cron:customer-sync] [INPUT] POST /api/cron/customer-sync at ${new Date().toISOString()}`);
+    try {
+      const result = await pushCustomerSnapshot();
+      console.log(
+        `[Cron:customer-sync] [OUTPUT] ok=${result.ok} skipped=${result.skipped ?? "-"} ` +
+        `users=${result.users ?? "-"} status=${result.status ?? "-"}`
+      );
+      res.status(result.ok ? 200 : 502).json(result);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[Cron:customer-sync] [ERROR] ${msg}`);
+      res.status(500).json({ ok: false, error: msg });
+    }
+  });
+  console.log(`[Cron] [OUTPUT] Registered POST /api/cron/customer-sync (job=customer-sync)`);
 
   // Observability: read-only run-lock state for all jobs (still secret-guarded so
   // it can't be scraped anonymously). Handy for the CI perf harness and debugging.
