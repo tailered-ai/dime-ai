@@ -12,6 +12,7 @@ import { eq, isNull } from "drizzle-orm";
 import { appUsers, planPrices, subscriptionPlans } from "../../drizzle/schema";
 import {
   buildCustomerSnapshot,
+  buildSanitizedUserById,
   signSnapshot,
   pushCustomerSnapshot,
   type BillingCatalogue,
@@ -697,6 +698,7 @@ type CapturedQueries = {
   userProjection?: Record<string, unknown>;
   userWhere?: unknown;
   userOrderBy?: unknown;
+  userLimit?: unknown;
   catalogueProjection?: Record<string, unknown>;
   joinTable?: unknown;
   joinCondition?: unknown;
@@ -724,8 +726,16 @@ function fakeDrizzleDb(opts: {
               where(condition: unknown) {
                 captured.userWhere = condition;
                 return {
+                  // loadRowsFromDb's shape: select().from().where().orderBy()
                   async orderBy(order: unknown) {
                     captured.userOrderBy = order;
+                    return (opts.userRows ?? []).map(r =>
+                      projectRow(projection, r)
+                    );
+                  },
+                  // loadRowByIdFromDb's shape: select().from().where().limit(1)
+                  async limit(n: unknown) {
+                    captured.userLimit = n;
                     return (opts.userRows ?? []).map(r =>
                       projectRow(projection, r)
                     );
@@ -1032,5 +1042,91 @@ describe("default loaders — loadRowsFromDb + loadCatalogueFromDb run for real"
       ),
       "catalogue failure must be logged with its marker and message"
     ).toBe(true);
+  });
+});
+
+describe("buildSanitizedUserById (Phase 2 write-through)", () => {
+  const emptyCatalogue = (): BillingCatalogue => ({
+    byPriceId: new Map(),
+    byPlanSlug: new Map(),
+  });
+
+  it("returns the sanitized user for a live row — forbidden fields absent", async () => {
+    const user = await buildSanitizedUserById(42, {
+      loadRows: async () => [fixtureRow()],
+      loadCatalogue: async () => emptyCatalogue(),
+      now: () => Date.parse("2026-08-27T00:00:00.000Z"),
+    });
+    expect(user).not.toBeNull();
+    expect(user!.id).toBe(42);
+    expect(user!.username).toBe("member42");
+    expect(user!.entitled).toBe(true);
+    for (const key of FORBIDDEN) {
+      expect(Object.keys(user!)).not.toContain(key);
+    }
+  });
+
+  it("returns null when the id is not among the rows", async () => {
+    const user = await buildSanitizedUserById(99, {
+      loadRows: async () => [fixtureRow()],
+      loadCatalogue: async () => emptyCatalogue(),
+    });
+    expect(user).toBeNull();
+  });
+
+  it("returns null for a soft-deleted row (deletedAt set)", async () => {
+    const user = await buildSanitizedUserById(42, {
+      loadRows: async () => [fixtureRow({ deletedAt: 1700000000000 })],
+      loadCatalogue: async () => emptyCatalogue(),
+    });
+    expect(user).toBeNull();
+  });
+
+  // ── Real default single-row loader (loadRowByIdFromDb) ─────────────────────
+  // loadRows NOT injected: the real loader runs its dynamic imports, breaker
+  // wrap, shared CUSTOMER_ROW_PROJECTION, and id+deletedAt WHERE + limit(1)
+  // through the projection-honoring fake db.
+  it("real loadRowByIdFromDb: shared projection + id/deletedAt filter + limit(1), breaker-wrapped", async () => {
+    const { db, captured } = fakeDrizzleDb({ userRows: [userColumnFixture()] });
+    getDbMock.mockResolvedValue(db);
+
+    const user = await buildSanitizedUserById(42, {
+      loadCatalogue: async () => fixtureCatalogue(),
+      now: () => FIXED_NOW,
+    });
+
+    expect(withCircuitBreakerMock).toHaveBeenCalledTimes(1);
+    expect(captured.userLimit).toBe(1); // single-row loader, not orderBy
+    expect(captured.userOrderBy).toBeUndefined();
+    expect(user).not.toBeNull();
+    expect(user!.id).toBe(42);
+    expect(user!.username).toBe("member42");
+    // Values survive only if the shared projection carries their column.
+    expect(user!.email).toBe("member@example.com");
+    expect(user!.accessSource).toBe("stripe");
+    expect(user!.plan?.slug).toBe("pro");
+    for (const key of FORBIDDEN) {
+      expect(Object.keys(user!)).not.toContain(key);
+    }
+  });
+
+  it("real loadRowByIdFromDb: unknown id → empty rows → null", async () => {
+    const { db } = fakeDrizzleDb({ userRows: [] });
+    getDbMock.mockResolvedValue(db);
+    const user = await buildSanitizedUserById(999, {
+      loadCatalogue: async () => emptyCatalogue(),
+      now: () => FIXED_NOW,
+    });
+    expect(user).toBeNull();
+  });
+
+  it("real loadRowByIdFromDb: db unavailable throws (never a silent null)", async () => {
+    getDbMock.mockResolvedValue(null);
+    await expect(
+      buildSanitizedUserById(42, {
+        loadCatalogue: async () => emptyCatalogue(),
+        now: () => FIXED_NOW,
+      })
+    ).rejects.toThrow(/db unavailable/);
   });
 });

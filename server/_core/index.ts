@@ -71,6 +71,7 @@ import { ensureDebugLogsTable } from "./debugLogger";
 import { registerAnalyticsIngestRoute } from "../analytics/ingestRoute";
 import { registerAnalyticsReadRoute } from "../analytics/readRoute";
 import { registerStripeWebhookRoute, getWebhookLatencyStats } from "../stripeWebhook";
+import { registerRemoteAdminRoute } from "../remoteAdmin/userMutation";
 import { runSchemaGuardPreflight } from "./schemaGuard";
 import { registerWc2026Heartbeats } from "../wc2026/wc2026Heartbeat";
 import { registerCronRoutes } from "../cron/cronRoutes";
@@ -938,6 +939,13 @@ async function startServer() {
   // JSON body parser consumes and discards the raw body.
   console.log(`[SERVER_STARTUP] Registering Stripe webhook route`);
   registerStripeWebhookRoute(app);
+
+  // ─── Tailered write-through (Phase 2) — raw body for HMAC, same reason ────
+  // POST /api/admin/remote/user-mutation: HMAC-verified whitelisted user
+  // mutations from the tailered.ai admin console. Fails closed (uniform 404)
+  // until TAILERED_SYNC_SECRET is provisioned. See server/remoteAdmin/.
+  console.log(`[SERVER_STARTUP] Registering tailered remote-admin route`);
+  registerRemoteAdminRoute(app, globalApiLimiter);
 
   // ─── Body parser with tight size limits ──────────────────────────────────
   // 10kb for JSON API calls (tRPC procedures never need more than a few KB).
