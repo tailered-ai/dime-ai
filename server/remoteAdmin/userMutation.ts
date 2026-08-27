@@ -14,8 +14,14 @@
  * Contract authority: docs/superpowers/specs/2026-08-27-dime-customer-writethrough-design.md
  * (tailered-os repo). The rules that matter here:
  *   - Whitelist v1: `update` over {role, hasAccess, expiryDate} and
- *     `forceLogout`. Nothing else — identity fields, passwords, Discord
- *     operations, create and delete stay on dime's own admin UI.
+ *     `forceLogout`. Passwords, create and delete stay on dime's own admin UI.
+ *   - Whitelist v1.1: `setManualDiscordId` — the ONE identity field this
+ *     channel may write, and only under dime's own setManualDiscordId rules
+ *     (17–20 digit snowflake or "" to clear; never onto a user with a live
+ *     discordId; rejected if the snowflake is any other user's live or manual
+ *     Discord id — both columns are UNIQUE-indexed). PREZ manages Discord
+ *     connections from the Tailered console; every other identity/Discord
+ *     operation still stays on dime's own admin UI.
  *   - Pre-auth ladder is a single uniform 404 {ok:false,error:"not_found"}
  *     for unprovisioned secret / missing signature / wrong signature — no
  *     oracle distinguishes the three. (dime's unknown /api paths fall through
@@ -74,9 +80,14 @@ export type RemoteMutation = {
   version: 1;
   sentAt: string;
   id: number;
-  action: "update" | "forceLogout";
+  action: "update" | "forceLogout" | "setManualDiscordId";
   set?: MutationSet;
+  /** setManualDiscordId only: 17–20 digit snowflake, or "" to clear. */
+  manualDiscordId?: string;
 };
+
+/** A Discord snowflake is 17–20 digits (Discord spec). */
+const SNOWFLAKE_RE = /^\d{17,20}$/;
 
 /** Structural slice of the app_users row this module reads. */
 export type MutationTargetRow = {
@@ -118,6 +129,12 @@ export interface MutationDeps {
     id: number,
     data: { role?: Role; hasAccess?: boolean; expiryDate?: number | null }
   ) => Promise<void>;
+  /** Set (snowflake) or clear (null) a user's pre-registered manual Discord id. */
+  setManualDiscordId?: (id: number, value: string | null) => Promise<void>;
+  /** Uniqueness probe: any user holding this snowflake as live/manual id. */
+  findByDiscordSnowflake?: (
+    snowflake: string
+  ) => Promise<{ id: number; username: string } | null>;
   incrementTokenVersion?: (id: number) => Promise<number>;
   recordEvent?: (params: EntitlementEventParams) => Promise<void>;
   loadSanitizedUser?: (id: number) => Promise<SnapshotUser | null>;
@@ -223,16 +240,37 @@ export async function executeRemoteMutation(
     return reject(400, "invalid_body");
   }
   const action = req.action;
-  if (action !== "update" && action !== "forceLogout") {
+  if (
+    action !== "update" &&
+    action !== "forceLogout" &&
+    action !== "setManualDiscordId"
+  ) {
+    return reject(400, "invalid_body");
+  }
+  // Only setManualDiscordId carries manualDiscordId; a stray one elsewhere is malformed.
+  if (action !== "setManualDiscordId" && req.manualDiscordId !== undefined) {
     return reject(400, "invalid_body");
   }
   let set: MutationSet | null = null;
+  let manualDiscordId: string | null = null; // normalized: snowflake, or null = clear
   if (action === "update") {
     set = parseSet(req.set);
     if (set === null) return reject(400, "invalid_body");
-  } else if (req.set !== undefined) {
-    // forceLogout carries no set — a stray one is a malformed client.
-    return reject(400, "invalid_body");
+  } else {
+    // forceLogout / setManualDiscordId carry no `set` — a stray one is malformed.
+    if (req.set !== undefined) return reject(400, "invalid_body");
+    if (action === "setManualDiscordId") {
+      const v = req.manualDiscordId;
+      if (typeof v !== "string") return reject(400, "invalid_body");
+      const trimmed = v.trim();
+      if (trimmed === "") {
+        manualDiscordId = null; // explicit clear
+      } else if (SNOWFLAKE_RE.test(trimmed)) {
+        manualDiscordId = trimmed;
+      } else {
+        return reject(400, "invalid_discord_id");
+      }
+    }
   }
 
   try {
@@ -315,13 +353,40 @@ export async function executeRemoteMutation(
           },
         });
       }
-    } else {
+    } else if (action === "forceLogout") {
       const incrementTokenVersion =
         deps.incrementTokenVersion ??
         ((await import("../db")).incrementTokenVersion as NonNullable<
           MutationDeps["incrementTokenVersion"]
         >);
       await incrementTokenVersion(id);
+    } else {
+      // setManualDiscordId — the one identity write, under dime's own rules.
+      if (manualDiscordId !== null) {
+        // Never overwrite a live Discord connection: that id is authoritative.
+        const liveDiscordId = existing.discordId as string | null | undefined;
+        if (typeof liveDiscordId === "string" && liveDiscordId.length > 0) {
+          return reject(409, "already_connected");
+        }
+        // Uniqueness: the snowflake must not be any OTHER user's live/manual id.
+        const findByDiscordSnowflake =
+          deps.findByDiscordSnowflake ??
+          ((await import("../db"))
+            .lookupAppUserByDiscordSnowflake as NonNullable<
+            MutationDeps["findByDiscordSnowflake"]
+          >);
+        const clash = await findByDiscordSnowflake(manualDiscordId);
+        if (clash && clash.id !== id) {
+          return reject(409, "discord_id_taken");
+        }
+      }
+      const setManualDiscordId =
+        deps.setManualDiscordId ??
+        (async (uid: number, value: string | null) => {
+          const { updateAppUser } = await import("../db");
+          await updateAppUser(uid, { manualDiscordId: value });
+        });
+      await setManualDiscordId(id, manualDiscordId);
     }
 
     const loadSanitizedUser =

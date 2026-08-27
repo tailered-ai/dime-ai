@@ -584,6 +584,34 @@ export async function lookupAppUserByIdFresh(id: number): Promise<AppUserLookupR
 }
 
 /**
+ * Find any live (non-deleted) user whose live `discordId` OR pre-registered
+ * `manualDiscordId` equals this snowflake. Used to enforce Discord-identity
+ * uniqueness before a write-through set (both columns are UNIQUE-indexed).
+ * Returns null when the snowflake is free; THROWS on a genuine DB fault so a
+ * caller fails loud rather than treating "unavailable" as "free" — which would
+ * let two accounts claim the same Discord identity.
+ */
+export async function lookupAppUserByDiscordSnowflake(
+  snowflake: string,
+): Promise<{ id: number; username: string } | null> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const rows = await withCircuitBreaker(async () =>
+    db
+      .select({ id: appUsers.id, username: appUsers.username })
+      .from(appUsers)
+      .where(
+        and(
+          or(eq(appUsers.discordId, snowflake), eq(appUsers.manualDiscordId, snowflake)),
+          isNull(appUsers.deletedAt),
+        ),
+      )
+      .limit(1),
+  );
+  return rows[0] ?? null;
+}
+
+/**
  * MySQL/TiDB error codes that mean "the QUERY is wrong", not "the row is absent".
  *
  * [2026-07-31 login outage] app_users.planPriceId shipped in the Drizzle schema
