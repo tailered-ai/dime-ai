@@ -584,6 +584,78 @@ export async function lookupAppUserByIdFresh(id: number): Promise<AppUserLookupR
 }
 
 /**
+ * Find ANY user — retired (soft-deleted) rows included — whose live
+ * `discordId` OR pre-registered `manualDiscordId` equals this snowflake.
+ * Retired rows must count: soft deletion keeps both identity columns
+ * populated, both are UNIQUE-indexed across ALL rows, and dime's own owner
+ * path (appUsers.setManualDiscordId CP-4) does not exclude them either.
+ * Skipping them would make a retired identity look free — the write would
+ * then die on the index (500) or, worse, plant a second live claim that
+ * Discord login resolves to the retired row.
+ * Returns null when the snowflake is free; THROWS on a genuine DB fault so a
+ * caller fails loud rather than treating "unavailable" as "free".
+ */
+export async function lookupAppUserByDiscordSnowflake(
+  snowflake: string,
+): Promise<{ id: number; username: string } | null> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const rows = await withCircuitBreaker(async () =>
+    db
+      .select({ id: appUsers.id, username: appUsers.username })
+      .from(appUsers)
+      .where(or(eq(appUsers.discordId, snowflake), eq(appUsers.manualDiscordId, snowflake)))
+      .limit(1),
+  );
+  return rows[0] ?? null;
+}
+
+export type ManualDiscordIdWrite = "ok" | "already_connected" | "duplicate";
+
+/**
+ * Set (snowflake) or clear (null) a user's pre-registered manualDiscordId.
+ *
+ * This write is the arbiter of the two identity rules; the probe callers run
+ * first is only the cheap, clean error path:
+ *   - A set is CONDITIONAL on `discordId IS NULL`, so a Discord link that
+ *     lands between the caller's check and this statement matches zero rows
+ *     → "already_connected" (a live connection is never overwritten).
+ *   - Both Discord columns are UNIQUE-indexed, so a snowflake claimed by any
+ *     other row (retired ones included) between probe and write is rejected
+ *     by the index → "duplicate", never a 500.
+ * mysql2 connects with CLIENT_FOUND_ROWS, so affectedRows counts MATCHED rows:
+ * a same-value re-set still reports 1; only a failed condition reports 0.
+ */
+export async function setAppUserManualDiscordId(
+  id: number,
+  value: string | null,
+): Promise<ManualDiscordIdWrite> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  try {
+    const result = await withCircuitBreaker(async () =>
+      db
+        .update(appUsers)
+        .set({ manualDiscordId: value, updatedAt: new Date() })
+        .where(
+          value === null
+            ? eq(appUsers.id, id)
+            : and(eq(appUsers.id, id), isNull(appUsers.discordId)),
+        ),
+    );
+    const [header] = result as unknown as [{ affectedRows?: number }];
+    if (value !== null && (header?.affectedRows ?? 0) === 0) return "already_connected";
+  } catch (err) {
+    if (isDuplicateKeyError(err)) return "duplicate";
+    throw err;
+  }
+  // Same two caches updateAppUser clears — discord changes must propagate immediately.
+  invalidateAppUserByIdCache(id);
+  invalidateCachedAppUser(id);
+  return "ok";
+}
+
+/**
  * MySQL/TiDB error codes that mean "the QUERY is wrong", not "the row is absent".
  *
  * [2026-07-31 login outage] app_users.planPriceId shipped in the Drizzle schema

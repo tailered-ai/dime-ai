@@ -66,6 +66,7 @@ type DbUser = {
   expiryDate: number | null;
   stripePlanId: string | null;
   deletedAt: number | null;
+  discordId?: string | null;
 };
 
 function dbUser(overrides: Partial<DbUser> = {}): DbUser {
@@ -76,6 +77,7 @@ function dbUser(overrides: Partial<DbUser> = {}): DbUser {
     expiryDate: null,
     stripePlanId: null,
     deletedAt: null,
+    discordId: null,
     ...overrides,
   };
 }
@@ -90,12 +92,18 @@ function makeDeps(overrides: Partial<MutationDeps> = {}) {
     updates: [] as Array<{ id: number; data: Record<string, unknown> }>,
     logouts: [] as number[],
     events: [] as Array<Record<string, unknown>>,
+    manualIds: [] as Array<{ id: number; value: string | null }>,
   };
   const deps: MutationDeps = {
     lookupUser: vi.fn(async () => found()),
     updateUser: vi.fn(async (id: number, data: Record<string, unknown>) => {
       calls.updates.push({ id, data });
     }),
+    setManualDiscordId: vi.fn(async (id: number, value: string | null) => {
+      calls.manualIds.push({ id, value });
+      return "ok" as const;
+    }),
+    findByDiscordSnowflake: vi.fn(async () => null),
     incrementTokenVersion: vi.fn(async (id: number) => {
       calls.logouts.push(id);
       return 7;
@@ -530,5 +538,151 @@ describe("registerRemoteAdminRoute", () => {
     );
     expect(captured.status).toBe(404);
     expect(captured.body).toEqual({ ok: false, error: "not_found" });
+  });
+});
+
+describe("executeRemoteMutation — setManualDiscordId (v1.1 identity write)", () => {
+  const SNOW = "123456789012345678"; // 18 digits
+  // A different fake snowflake for the "already has a live connection" case.
+  // Held in a const (not an inline `discordId: "…"` literal) so the gitleaks
+  // discord-client-id rule does not false-positive on a test fixture.
+  const LIVE_SNOW = "999888777666555444";
+
+  function manualBody(overrides: Record<string, unknown> = {}): string {
+    return body({
+      action: "setManualDiscordId",
+      manualDiscordId: SNOW,
+      set: undefined,
+      ...overrides,
+    });
+  }
+
+  it("sets a valid snowflake and returns the sanitized user", async () => {
+    const { deps, calls } = makeDeps({
+      loadSanitizedUser: vi.fn(async () =>
+        sanitizedUser({ manualDiscordId: SNOW })
+      ),
+    });
+    const raw = manualBody();
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(200);
+    expect(calls.manualIds).toEqual([{ id: 42, value: SNOW }]);
+    expect((out.body.user as { manualDiscordId: string }).manualDiscordId).toBe(
+      SNOW
+    );
+  });
+
+  it("clears the manual id when given an empty string", async () => {
+    const { deps, calls } = makeDeps();
+    const raw = manualBody({ manualDiscordId: "" });
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(200);
+    expect(calls.manualIds).toEqual([{ id: 42, value: null }]);
+    // A clear never runs the uniqueness/connected guards.
+    expect(deps.findByDiscordSnowflake).not.toHaveBeenCalled();
+  });
+
+  it("rejects a non-snowflake id with 400 invalid_discord_id", async () => {
+    const { deps, calls } = makeDeps();
+    for (const bad of [
+      "12345",
+      "abcdefghijklmnopqr",
+      "123456789012345678901",
+    ]) {
+      const raw = manualBody({ manualDiscordId: bad });
+      const out = await run(raw, sign(raw), deps);
+      expect(out.status).toBe(400);
+      expect(out.body).toEqual({ ok: false, error: "invalid_discord_id" });
+    }
+    expect(calls.manualIds).toEqual([]);
+  });
+
+  it("refuses to overwrite a user who already has a live discordId (409 already_connected)", async () => {
+    const { deps, calls } = makeDeps({
+      lookupUser: vi.fn(async () => found(dbUser({ discordId: LIVE_SNOW }))),
+    });
+    const raw = manualBody();
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(409);
+    expect(out.body).toEqual({ ok: false, error: "already_connected" });
+    expect(calls.manualIds).toEqual([]);
+  });
+
+  it("rejects a snowflake already held by another user (409 discord_id_taken)", async () => {
+    const { deps, calls } = makeDeps({
+      findByDiscordSnowflake: vi.fn(async () => ({
+        id: 7,
+        username: "someone-else",
+      })),
+    });
+    const raw = manualBody();
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(409);
+    expect(out.body).toEqual({ ok: false, error: "discord_id_taken" });
+    expect(calls.manualIds).toEqual([]);
+  });
+
+  it("race: a claim that lands after the probe surfaces as 409 discord_id_taken, not a 500", async () => {
+    // Probe says free; the unique-index-guarded write reports the duplicate.
+    const { deps, calls } = makeDeps({
+      setManualDiscordId: vi.fn(async (id: number, value: string | null) => {
+        calls.manualIds.push({ id, value });
+        return "duplicate" as const;
+      }),
+    });
+    const raw = manualBody();
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(409);
+    expect(out.body).toEqual({ ok: false, error: "discord_id_taken" });
+    expect(deps.loadSanitizedUser).not.toHaveBeenCalled();
+  });
+
+  it("race: a Discord link that lands after the check surfaces as 409 already_connected", async () => {
+    // lookup saw no live discordId; the conditional write matched zero rows.
+    const { deps } = makeDeps({
+      setManualDiscordId: vi.fn(async () => "already_connected" as const),
+    });
+    const raw = manualBody();
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(409);
+    expect(out.body).toEqual({ ok: false, error: "already_connected" });
+    expect(deps.loadSanitizedUser).not.toHaveBeenCalled();
+  });
+
+  it("allows re-setting the SAME user's own snowflake (clash id === target id)", async () => {
+    const { deps, calls } = makeDeps({
+      findByDiscordSnowflake: vi.fn(async () => ({
+        id: 42,
+        username: "user42",
+      })),
+    });
+    const raw = manualBody();
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(200);
+    expect(calls.manualIds).toEqual([{ id: 42, value: SNOW }]);
+  });
+
+  it("rejects a stray `set` on the action (400 invalid_body)", async () => {
+    const { deps } = makeDeps();
+    const raw = body({
+      action: "setManualDiscordId",
+      manualDiscordId: SNOW,
+      set: { role: "admin" },
+    });
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(400);
+    expect(out.body).toEqual({ ok: false, error: "invalid_body" });
+  });
+
+  it("rejects a stray manualDiscordId on an update action (400 invalid_body)", async () => {
+    const { deps } = makeDeps();
+    const raw = body({
+      action: "update",
+      set: { role: "admin" },
+      manualDiscordId: SNOW,
+    });
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(400);
+    expect(out.body).toEqual({ ok: false, error: "invalid_body" });
   });
 });
