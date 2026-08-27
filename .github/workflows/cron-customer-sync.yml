@@ -1,0 +1,100 @@
+# Tailered customer-mirror push (Phase 1 customer mirror).
+#
+# Fires POST /api/cron/customer-sync hourly. The route builds a SANITIZED
+# snapshot of the live customer base (no credential material, deletedAt IS NULL
+# only) and POSTs it HMAC-signed to the tailered.ai ingest endpoint; dime stays
+# primary. When TAILERED_SYNC_URL / TAILERED_SYNC_SECRET are unset on Railway
+# the route responds 200 {ok:true, skipped:"unconfigured"} — this workflow is
+# safe to enable before the mirror is armed.
+#
+# A failed push returns non-2xx from the route, so this job goes red rather
+# than silently "succeeding" — the mirror going stale is a signal, not noise.
+#
+# Required repo secrets / vars (same pair every cron workflow already uses —
+# the tailered sync secret lives ONLY in Railway, never in GitHub):
+#   RAILWAY_APP_URL — e.g. https://aisportsbettingmodels.com  (no trailing slash)
+#   CRON_SECRET     — must match CRON_SECRET in Railway → Variables
+#
+name: Cron — Tailered customer-mirror sync
+
+on:
+  schedule:
+    - cron: "17 * * * *" # hourly at :17 (off the hour — GitHub cron is congested on :00)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cron-customer-sync
+  cancel-in-progress: false
+
+jobs:
+  fire:
+    name: Trigger /api/cron/customer-sync
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - name: "[STEP] Preflight — verify required secrets are present"
+        env:
+          RAILWAY_APP_URL: ${{ vars.RAILWAY_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${RAILWAY_APP_URL:-}" ]; then
+            echo "::error::RAILWAY_APP_URL secret is not set"; exit 1
+          fi
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::CRON_SECRET secret is not set"; exit 1
+          fi
+          echo "[PREFLIGHT] secrets present"
+
+      - name: "[STEP] POST /api/cron/customer-sync (secret never printed)"
+        env:
+          RAILWAY_APP_URL: ${{ vars.RAILWAY_APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          URL="${RAILWAY_APP_URL%/}/api/cron/customer-sync"
+          echo "[INPUT] POST $URL at $(date -u +%FT%TZ)"
+          BODY_FILE="$(mktemp)"
+          # Retry ONLY on connection-refused (curl exit 7) — NEVER on HTTP 5xx.
+          # A 502 from the route means a full snapshot build already ran
+          # server-side; blind HTTP retries triple the DB scans and can
+          # interleave builds. curl's --retry treats 5xx as transient (and
+          # --retry-connrefused only ADDS ECONNREFUSED to that set), so the
+          # explicit loop below replaces it: 2 retries, 5s apart, exit-7 only.
+          # --max-time 300 covers the build+push worst case — aborting a live
+          # request while Express keeps working caused overlapping-build
+          # false-reds at 60s.
+          CODE="000"
+          RC=0
+          for ATTEMPT in 1 2 3; do
+            RC=0
+            CODE=$(curl -sS -o "$BODY_FILE" -w '%{http_code}' \
+              --max-time 300 \
+              -X POST "$URL" \
+              -H "Authorization: Bearer ${CRON_SECRET}" \
+              -H "Content-Type: application/json" \
+              -H "User-Agent: gh-actions-cron/customer-sync") || RC=$?
+            if [ "$RC" -eq 7 ] && [ "$ATTEMPT" -lt 3 ]; then
+              echo "[RETRY] connection refused — attempt $ATTEMPT of 3, retrying in 5s"
+              sleep 5
+              continue
+            fi
+            break
+          done
+          if [ "$RC" -ne 0 ]; then
+            echo "::error::customer-sync curl failed (exit $RC)"
+            exit "$RC"
+          fi
+          echo "[OUTPUT] HTTP $CODE"
+          echo "[OUTPUT] body: $(cat "$BODY_FILE")"
+          if grep -q '"skipped":"unconfigured"' "$BODY_FILE"; then
+            echo "::warning::customer-sync is UNCONFIGURED (TAILERED_SYNC_URL/SECRET unset) — mirror not updated"
+          fi
+          if [ "$CODE" -lt 200 ] || [ "$CODE" -ge 300 ]; then
+            echo "::error::customer-sync failed with HTTP $CODE"
+            exit 1
+          fi
+          echo "[VERIFY] PASS — customer-sync completed (HTTP $CODE)"
