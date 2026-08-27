@@ -140,6 +140,40 @@ export interface SnapshotDeps {
 // `../db` is imported dynamically so that importing THIS module (e.g. from
 // cronRoutes and its registration test) never drags in the DB pool machinery.
 
+/**
+ * Explicit column projection shared by both DB loaders = defense in depth:
+ * sanitizeRow's allow-list already strips credential columns, but the query
+ * itself never even fetches them (passwordHash, reset/lockout state,
+ * tokenVersion, pending* checkout fields stay in the DB). Exactly the
+ * CustomerSourceRow named columns — the 20 sanitizeRow reads + deletedAt (row
+ * filter) — accessSource derives from stripeCustomerId, entitled from
+ * hasAccess/expiryDate, both included.
+ */
+const CUSTOMER_ROW_PROJECTION = {
+  id: appUsers.id,
+  email: appUsers.email,
+  username: appUsers.username,
+  role: appUsers.role,
+  hasAccess: appUsers.hasAccess,
+  expiryDate: appUsers.expiryDate,
+  deletedAt: appUsers.deletedAt,
+  termsAccepted: appUsers.termsAccepted,
+  termsAcceptedAt: appUsers.termsAcceptedAt,
+  discordId: appUsers.discordId,
+  discordUsername: appUsers.discordUsername,
+  discordConnectedAt: appUsers.discordConnectedAt,
+  manualDiscordId: appUsers.manualDiscordId,
+  createdAt: appUsers.createdAt,
+  lastSignedIn: appUsers.lastSignedIn,
+  stripeCustomerId: appUsers.stripeCustomerId,
+  stripeSubscriptionId: appUsers.stripeSubscriptionId,
+  stripePlanId: appUsers.stripePlanId,
+  planPriceId: appUsers.planPriceId,
+  stripeSubscriptionStatus: appUsers.stripeSubscriptionStatus,
+  cancelAtPeriodEnd: appUsers.cancelAtPeriodEnd,
+  pendingSetup: appUsers.pendingSetup,
+} as const;
+
 async function loadRowsFromDb(): Promise<CustomerSourceRow[]> {
   const [{ getDb }, { withCircuitBreaker }] = await Promise.all([
     import("../db"),
@@ -154,39 +188,9 @@ async function loadRowsFromDb(): Promise<CustomerSourceRow[]> {
   // Same circuit-breaker convention as listAppUsers (server/db.ts:527) — but
   // WITHOUT its catch-to-[] fallback, for the wipe reason above: a breaker-open
   // fast-fail must propagate as a throw, not masquerade as an empty base.
-  //
-  // Explicit projection = defense in depth: sanitizeRow's allow-list already
-  // strips credential columns, but the query itself never fetches them
-  // (passwordHash, reset/lockout state, tokenVersion, pending* checkout
-  // fields stay in the DB). Exactly the CustomerSourceRow named columns:
-  // the 20 sanitizeRow reads + deletedAt (row filter) — accessSource derives
-  // from stripeCustomerId, entitled from hasAccess/expiryDate, both included.
   const rows = await withCircuitBreaker(async () =>
     db
-      .select({
-        id: appUsers.id,
-        email: appUsers.email,
-        username: appUsers.username,
-        role: appUsers.role,
-        hasAccess: appUsers.hasAccess,
-        expiryDate: appUsers.expiryDate,
-        deletedAt: appUsers.deletedAt,
-        termsAccepted: appUsers.termsAccepted,
-        termsAcceptedAt: appUsers.termsAcceptedAt,
-        discordId: appUsers.discordId,
-        discordUsername: appUsers.discordUsername,
-        discordConnectedAt: appUsers.discordConnectedAt,
-        manualDiscordId: appUsers.manualDiscordId,
-        createdAt: appUsers.createdAt,
-        lastSignedIn: appUsers.lastSignedIn,
-        stripeCustomerId: appUsers.stripeCustomerId,
-        stripeSubscriptionId: appUsers.stripeSubscriptionId,
-        stripePlanId: appUsers.stripePlanId,
-        planPriceId: appUsers.planPriceId,
-        stripeSubscriptionStatus: appUsers.stripeSubscriptionStatus,
-        cancelAtPeriodEnd: appUsers.cancelAtPeriodEnd,
-        pendingSetup: appUsers.pendingSetup,
-      })
+      .select(CUSTOMER_ROW_PROJECTION)
       .from(appUsers)
       // deletedAt IS NULL — the spec's row filter. listAppUsers() has no such
       // filter, so the snapshot query applies it directly.
@@ -342,6 +346,49 @@ export async function buildCustomerSnapshot(
     generatedAt: new Date(now).toISOString(),
     users,
   };
+}
+
+/**
+ * Phase 2 write-through: rebuild the sanitized contract-v1 user object for ONE
+ * live (non-deleted) user — the response body of a confirmed remote mutation
+ * (server/remoteAdmin/userMutation.ts). Same allow-list constructor, same
+ * catalogue join, same injection seams as the full snapshot; null when the id
+ * is unknown or soft-deleted.
+ */
+export async function buildSanitizedUserById(
+  id: number,
+  deps: SnapshotDeps = {}
+): Promise<SnapshotUser | null> {
+  const [rows, catalogue] = await Promise.all([
+    deps.loadRows ? deps.loadRows() : loadRowByIdFromDb(id),
+    (deps.loadCatalogue ?? loadCatalogueFromDb)(),
+  ]);
+  const row = rows.find(r => r.id === id && r.deletedAt == null);
+  if (!row) return null;
+  return sanitizeRow(row, catalogue, (deps.now ?? Date.now)());
+}
+
+/** Single-row variant of loadRowsFromDb — same projection, WHERE id = ?. */
+async function loadRowByIdFromDb(id: number): Promise<CustomerSourceRow[]> {
+  const [
+    { getDb },
+    { withCircuitBreaker },
+    { and, eq: eqOp, isNull: isNullOp },
+  ] = await Promise.all([
+    import("../db"),
+    import("../dbCircuitBreaker"),
+    import("drizzle-orm"),
+  ]);
+  const db = await getDb();
+  if (!db) throw new Error("customer-sync: db unavailable");
+  const rows = await withCircuitBreaker(async () =>
+    db
+      .select(CUSTOMER_ROW_PROJECTION)
+      .from(appUsers)
+      .where(and(eqOp(appUsers.id, id), isNullOp(appUsers.deletedAt)))
+      .limit(1)
+  );
+  return rows as CustomerSourceRow[];
 }
 
 /** `x-dime-signature` value: HMAC-SHA256 hex of the RAW request body. */
