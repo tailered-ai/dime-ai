@@ -945,7 +945,7 @@ async function startServer() {
   // mutations from the tailered.ai admin console. Fails closed (uniform 404)
   // until TAILERED_SYNC_SECRET is provisioned. See server/remoteAdmin/.
   console.log(`[SERVER_STARTUP] Registering tailered remote-admin route`);
-  registerRemoteAdminRoute(app);
+  registerRemoteAdminRoute(app, globalApiLimiter);
 
   // ─── Body parser with tight size limits ──────────────────────────────────
   // 10kb for JSON API calls (tRPC procedures never need more than a few KB).

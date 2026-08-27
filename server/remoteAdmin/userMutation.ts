@@ -88,6 +88,19 @@ export type MutationTargetRow = {
   deletedAt: number | null;
 } & Record<string, unknown>;
 
+/**
+ * Tri-state existence result. A lookup FAULT must never read as "user absent":
+ * getAppUserById's legacy null merges the two, which for a privileged
+ * grant/revoke would turn a transient DB outage into a silent no-op 404.
+ */
+export type UserLookup =
+  | { status: "found"; user: MutationTargetRow }
+  | { status: "not_found" }
+  | { status: "unavailable" };
+
+/** Strip CR/LF so a free-text value can't forge log lines (CodeQL js/log-injection). */
+const logSafe = (v: unknown): string => String(v).replace(/[\r\n]+/g, " ");
+
 export type EntitlementEventParams = {
   userId: number;
   stripeEventId: string | null;
@@ -100,7 +113,7 @@ export type EntitlementEventParams = {
 
 /** Injectable collaborators; every default lazy-imports the real module. */
 export interface MutationDeps {
-  getUserById?: (id: number) => Promise<MutationTargetRow | null | undefined>;
+  lookupUser?: (id: number) => Promise<UserLookup>;
   updateUser?: (
     id: number,
     data: { role?: Role; hasAccess?: boolean; expiryDate?: number | null }
@@ -223,15 +236,24 @@ export async function executeRemoteMutation(
   }
 
   try {
-    const getUserById =
-      deps.getUserById ??
-      ((await import("../db")).getAppUserById as NonNullable<
-        MutationDeps["getUserById"]
+    const lookupUser =
+      deps.lookupUser ??
+      ((await import("../db")).lookupAppUserByIdFresh as unknown as NonNullable<
+        MutationDeps["lookupUser"]
       >);
-    const existing = await getUserById(id);
-    if (!existing || existing.deletedAt != null) {
+    const found = await lookupUser(id);
+    if (found.status === "unavailable") {
+      // A DB fault is not an absent user. Fail LOUD (500) so the console
+      // retries — never silently no-op a grant/revoke as a 404. (codex/cursor P2)
+      console.error(
+        `[RemoteAdmin][user-mutation][FAIL] lookup unavailable userId=${logSafe(id)}`
+      );
+      return reject(500, "internal_error");
+    }
+    if (found.status === "not_found" || found.user.deletedAt != null) {
       return reject(404, "user_not_found");
     }
+    const existing = found.user;
 
     if (action === "update") {
       const updateUser =
@@ -312,21 +334,21 @@ export async function executeRemoteMutation(
     if (!user) {
       // The row existed a moment ago; a missing reload is a fault, not a 404.
       console.error(
-        `[RemoteAdmin][user-mutation][FAIL] sanitized reload empty userId=${id}`
+        `[RemoteAdmin][user-mutation][FAIL] sanitized reload empty userId=${logSafe(id)}`
       );
       return reject(500, "internal_error");
     }
 
     // Counts/fields only — never body content (the payload is member PII).
     console.log(
-      `[RemoteAdmin][user-mutation][OK] action=${action} userId=${id}` +
-        (set ? ` fields=${JSON.stringify(Object.keys(set))}` : "")
+      `[RemoteAdmin][user-mutation][OK] action=${logSafe(action)} userId=${logSafe(id)}` +
+        (set ? ` fields=${logSafe(JSON.stringify(Object.keys(set)))}` : "")
     );
     return { status: 200, body: { ok: true, user } };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error(
-      `[RemoteAdmin][user-mutation][FAIL] userId=${id} error=${msg}`
+      `[RemoteAdmin][user-mutation][FAIL] userId=${logSafe(id)} error=${logSafe(msg)}`
     );
     return reject(500, "internal_error");
   }
@@ -338,22 +360,29 @@ export async function executeRemoteMutation(
  * verification. Sits before the global /api limiter for the same reason;
  * pre-auth cost is one HMAC over a ≤64 KB body.
  */
-export function registerRemoteAdminRoute(app: express.Express): void {
-  app.post(
-    REMOTE_MUTATION_PATH,
-    express.raw({ type: "application/json", limit: MAX_MUTATION_BODY_BYTES }),
-    async (req, res) => {
-      const rawBody = Buffer.isBuffer(req.body)
+export function registerRemoteAdminRoute(
+  app: express.Express,
+  limiter?: express.RequestHandler
+): void {
+  // Sibling /api routes sit behind the global limiter (index.ts). This route
+  // registers BEFORE it (raw body for HMAC), so it must carry the limiter
+  // itself or it would be the one /api path exempt from flood control. (codex P2)
+  const raw = express.raw({
+    type: "application/json",
+    limit: MAX_MUTATION_BODY_BYTES,
+  });
+  const chain = limiter ? [limiter, raw] : [raw];
+  app.post(REMOTE_MUTATION_PATH, ...chain, async (req, res) => {
+    const rawBody = Buffer.isBuffer(req.body)
+      ? req.body
+      : typeof req.body === "string"
         ? req.body
-        : typeof req.body === "string"
-          ? req.body
-          : ""; // non-JSON content-type: raw parser skipped it — signature fails
-      const header = req.headers[MUTATION_SIGNATURE_HEADER];
-      const out = await executeRemoteMutation(
-        rawBody,
-        Array.isArray(header) ? header[0] : header
-      );
-      res.status(out.status).json(out.body);
-    }
-  );
+        : ""; // non-JSON content-type: raw parser skipped it — signature fails
+    const header = req.headers[MUTATION_SIGNATURE_HEADER];
+    const out = await executeRemoteMutation(
+      rawBody,
+      Array.isArray(header) ? header[0] : header
+    );
+    res.status(out.status).json(out.body);
+  });
 }

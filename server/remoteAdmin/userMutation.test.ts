@@ -80,6 +80,11 @@ function dbUser(overrides: Partial<DbUser> = {}): DbUser {
   };
 }
 
+/** Wrap a row as the tri-state lookupUser dep returns it. */
+function found(user: DbUser = dbUser()) {
+  return { status: "found" as const, user };
+}
+
 function makeDeps(overrides: Partial<MutationDeps> = {}) {
   const calls = {
     updates: [] as Array<{ id: number; data: Record<string, unknown> }>,
@@ -87,7 +92,7 @@ function makeDeps(overrides: Partial<MutationDeps> = {}) {
     events: [] as Array<Record<string, unknown>>,
   };
   const deps: MutationDeps = {
-    getUserById: vi.fn(async () => dbUser()),
+    lookupUser: vi.fn(async () => found()),
     updateUser: vi.fn(async (id: number, data: Record<string, unknown>) => {
       calls.updates.push({ id, data });
     }),
@@ -283,9 +288,12 @@ describe("executeRemoteMutation — post-auth validation", () => {
   });
 
   it("404 user_not_found when the target is absent or soft-deleted", async () => {
-    for (const target of [null, dbUser({ deletedAt: NOW })]) {
+    for (const lookup of [
+      { status: "not_found" as const },
+      found(dbUser({ deletedAt: NOW })),
+    ]) {
       const { deps, calls } = makeDeps({
-        getUserById: vi.fn(async () => target),
+        lookupUser: vi.fn(async () => lookup),
       });
       const raw = body();
       const out = await run(raw, sign(raw), deps);
@@ -295,6 +303,19 @@ describe("executeRemoteMutation — post-auth validation", () => {
       });
       expect(calls.updates).toEqual([]);
     }
+  });
+
+  it("500 internal_error when the lookup is unavailable — a DB fault is not a 404", async () => {
+    const { deps, calls } = makeDeps({
+      lookupUser: vi.fn(async () => ({ status: "unavailable" as const })),
+    });
+    const raw = body();
+    const out = await run(raw, sign(raw), deps);
+    expect(out).toEqual({
+      status: 500,
+      body: { ok: false, error: "internal_error" },
+    });
+    expect(calls.updates).toEqual([]);
   });
 });
 
@@ -310,8 +331,10 @@ describe("executeRemoteMutation — update action", () => {
 
   it("access revoke records manual_revoke with before/after and actor tailered-console", async () => {
     const { deps, calls } = makeDeps({
-      getUserById: vi.fn(async () =>
-        dbUser({ hasAccess: true, expiryDate: 1000, stripePlanId: "plan-x" })
+      lookupUser: vi.fn(async () =>
+        found(
+          dbUser({ hasAccess: true, expiryDate: 1000, stripePlanId: "plan-x" })
+        )
       ),
     });
     const raw = body({ set: { hasAccess: false } });
@@ -333,7 +356,7 @@ describe("executeRemoteMutation — update action", () => {
 
   it("access grant records manual_grant", async () => {
     const { deps, calls } = makeDeps({
-      getUserById: vi.fn(async () => dbUser({ hasAccess: false })),
+      lookupUser: vi.fn(async () => found(dbUser({ hasAccess: false }))),
     });
     const raw = body({ set: { hasAccess: true } });
     await run(raw, sign(raw), deps);
@@ -343,7 +366,7 @@ describe("executeRemoteMutation — update action", () => {
 
   it("no event when hasAccess is set to its current value (parity with updateUser)", async () => {
     const { deps, calls } = makeDeps({
-      getUserById: vi.fn(async () => dbUser({ hasAccess: true })),
+      lookupUser: vi.fn(async () => found(dbUser({ hasAccess: true }))),
     });
     const raw = body({ set: { hasAccess: true } });
     await run(raw, sign(raw), deps);
@@ -353,7 +376,7 @@ describe("executeRemoteMutation — update action", () => {
 
   it("expiry change converts ISO to ms, records manual_expiry_change", async () => {
     const { deps, calls } = makeDeps({
-      getUserById: vi.fn(async () => dbUser({ expiryDate: 1000 })),
+      lookupUser: vi.fn(async () => found(dbUser({ expiryDate: 1000 }))),
     });
     const iso = "2026-12-31T00:00:00.000Z";
     const raw = body({ set: { expiryDate: iso } });
@@ -372,7 +395,7 @@ describe("executeRemoteMutation — update action", () => {
 
   it("expiryDate null clears to lifetime and records the change", async () => {
     const { deps, calls } = makeDeps({
-      getUserById: vi.fn(async () => dbUser({ expiryDate: 1000 })),
+      lookupUser: vi.fn(async () => found(dbUser({ expiryDate: 1000 }))),
     });
     const raw = body({ set: { expiryDate: null } });
     await run(raw, sign(raw), deps);
@@ -382,7 +405,7 @@ describe("executeRemoteMutation — update action", () => {
 
   it("no event when expiryDate is set to its current value", async () => {
     const { deps, calls } = makeDeps({
-      getUserById: vi.fn(async () => dbUser({ expiryDate: null })),
+      lookupUser: vi.fn(async () => found(dbUser({ expiryDate: null }))),
     });
     const raw = body({ set: { expiryDate: null } });
     await run(raw, sign(raw), deps);
@@ -480,6 +503,17 @@ describe("registerRemoteAdminRoute", () => {
     expect(REMOTE_MUTATION_PATH).toBe("/api/admin/remote/user-mutation");
     expect(MUTATION_SIGNATURE_HEADER).toBe("x-tailered-signature");
     expect(MAX_MUTATION_BODY_BYTES).toBe(64 * 1024);
+  });
+
+  it("mounts the rate limiter ahead of the raw-body middleware when given one", () => {
+    const { app, registrations } = fakeApp();
+    const limiter = ((_req: unknown, _res: unknown, next: () => void) =>
+      next()) as never;
+    registerRemoteAdminRoute(app, limiter);
+    // limiter + raw-body middleware = 2 middlewares before the handler.
+    expect(registrations).toEqual([
+      { path: REMOTE_MUTATION_PATH, middlewares: 2 },
+    ]);
   });
 
   it("wires header + raw body through to the ladder (bad signature → 404)", async () => {
