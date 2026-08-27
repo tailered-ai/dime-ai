@@ -758,7 +758,9 @@ function fakeDrizzleDb(opts: {
 const FIXED_NOW = Date.parse("2026-08-26T19:00:00.000Z");
 
 /** app_users fixture keyed by the real schema columns, raw DB value types. */
-function userColumnFixture(overrides: ColumnFixture = new Map()): ColumnFixture {
+function userColumnFixture(
+  overrides: ColumnFixture = new Map()
+): ColumnFixture {
   const base = new Map<unknown, unknown>([
     [appUsers.id, 42],
     [appUsers.email, "member@example.com"],
