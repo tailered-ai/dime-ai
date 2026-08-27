@@ -8,6 +8,8 @@
  */
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { createHmac } from "crypto";
+import { eq, isNull } from "drizzle-orm";
+import { appUsers, planPrices, subscriptionPlans } from "../../drizzle/schema";
 import {
   buildCustomerSnapshot,
   signSnapshot,
@@ -659,5 +661,374 @@ describe("loadRowsFromDb — explicit column projection inside the circuit break
         `credential column ${key} must not be selected`
       ).not.toContain(key);
     }
+  });
+});
+
+// ─── Real default loaders, end to end through a projection-honoring fake db ──
+// These do NOT inject loadRows/loadCatalogue: loadRowsFromDb and
+// loadCatalogueFromDb run their real lines (projection object, isNull row
+// filter, breaker wrapping, catalogue join + mapping, toIso on raw DB values).
+// Only the `../db` module boundary is faked. The fake db APPLIES the query's
+// projection to column-keyed fixtures, so these tests FAIL if the projection
+// drops a needed column (the produced SnapshotUser loses that value) or if
+// toIso misconverts (the asserted ISO strings change).
+
+/** Fixture "DB row": drizzle column object → raw stored value. */
+type ColumnFixture = Map<unknown, unknown>;
+
+/** Apply a drizzle-style projection {outKey: column} to a column fixture. */
+function projectRow(
+  projection: Record<string, unknown>,
+  source: ColumnFixture
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, column] of Object.entries(projection)) {
+    if (!source.has(column)) {
+      throw new Error(
+        `fake db: projection key "${key}" references a column with no fixture value`
+      );
+    }
+    out[key] = source.get(column);
+  }
+  return out;
+}
+
+type CapturedQueries = {
+  userProjection?: Record<string, unknown>;
+  userWhere?: unknown;
+  userOrderBy?: unknown;
+  catalogueProjection?: Record<string, unknown>;
+  joinTable?: unknown;
+  joinCondition?: unknown;
+};
+
+/**
+ * Chainable fake drizzle db routing by the from() table:
+ *   appUsers   → select().from().where().orderBy()  (loadRowsFromDb's shape)
+ *   planPrices → select().from().innerJoin()        (loadCatalogueFromDb's shape)
+ * Resolved rows are the fixtures projected through the REAL query's projection.
+ */
+function fakeDrizzleDb(opts: {
+  userRows?: ColumnFixture[];
+  catalogueRows?: ColumnFixture[];
+  catalogueError?: Error;
+}) {
+  const captured: CapturedQueries = {};
+  const db = {
+    select(projection: Record<string, unknown>) {
+      return {
+        from(table: unknown) {
+          if (table === appUsers) {
+            captured.userProjection = projection;
+            return {
+              where(condition: unknown) {
+                captured.userWhere = condition;
+                return {
+                  async orderBy(order: unknown) {
+                    captured.userOrderBy = order;
+                    return (opts.userRows ?? []).map(r =>
+                      projectRow(projection, r)
+                    );
+                  },
+                };
+              },
+            };
+          }
+          if (table === planPrices) {
+            captured.catalogueProjection = projection;
+            return {
+              async innerJoin(joinTable: unknown, condition: unknown) {
+                captured.joinTable = joinTable;
+                captured.joinCondition = condition;
+                if (opts.catalogueError) throw opts.catalogueError;
+                return (opts.catalogueRows ?? []).map(r =>
+                  projectRow(projection, r)
+                );
+              },
+            };
+          }
+          throw new Error("fake db: unexpected from() table");
+        },
+      };
+    },
+  };
+  return { db, captured };
+}
+
+const FIXED_NOW = Date.parse("2026-08-26T19:00:00.000Z");
+
+/** app_users fixture keyed by the real schema columns, raw DB value types. */
+function userColumnFixture(overrides: ColumnFixture = new Map()): ColumnFixture {
+  const base = new Map<unknown, unknown>([
+    [appUsers.id, 42],
+    [appUsers.email, "member@example.com"],
+    [appUsers.username, "member42"],
+    [appUsers.role, "user"],
+    [appUsers.hasAccess, true],
+    [appUsers.expiryDate, FIXED_NOW + 86_400_000], // ms-int column, +1 day
+    [appUsers.deletedAt, null],
+    [appUsers.termsAccepted, true],
+    [appUsers.termsAcceptedAt, 1750000000000], // ms-int column
+    [appUsers.discordId, "123456789012345678"],
+    [appUsers.discordUsername, "member#0042"],
+    [appUsers.discordConnectedAt, 1750000001000], // ms-int column
+    [appUsers.manualDiscordId, null],
+    [appUsers.createdAt, new Date("2026-01-02T03:04:05.000Z")], // Date column
+    [appUsers.lastSignedIn, new Date("2026-08-01T12:00:00.000Z")], // Date column
+    [appUsers.stripeCustomerId, "cus_TEST123"],
+    [appUsers.stripeSubscriptionId, "sub_TEST123"],
+    [appUsers.stripePlanId, null],
+    [appUsers.planPriceId, 7],
+    [appUsers.stripeSubscriptionStatus, "active"],
+    [appUsers.cancelAtPeriodEnd, false],
+    [appUsers.pendingSetup, false],
+  ]);
+  for (const [column, value] of overrides) base.set(column, value);
+  return base;
+}
+
+/** plan_prices ⋈ subscription_plans joined-row fixture, keyed by real columns. */
+function catalogueColumnFixture(values: {
+  priceId: number;
+  amountCents: number;
+  currency: string;
+  interval: string | null;
+  slug: string;
+  name: string;
+  planType: string;
+}): ColumnFixture {
+  return new Map<unknown, unknown>([
+    [planPrices.id, values.priceId],
+    [planPrices.amountCents, values.amountCents],
+    [planPrices.currency, values.currency],
+    [planPrices.interval, values.interval],
+    [subscriptionPlans.slug, values.slug],
+    [subscriptionPlans.name, values.name],
+    [subscriptionPlans.planType, values.planType],
+  ]);
+}
+
+// Each test below defaults exactly ONE loader per buildCustomerSnapshot call.
+// Defaulting both at once fires two CONCURRENT dynamic import("../db") calls
+// for the same mocked specifier, and vitest's mock interception verifiably
+// hands one of them the REAL module (observed: rows loader got the mock,
+// catalogue loader got real server/db). One default loader per call keeps the
+// module mock deterministic; production runs both against the real db anyway.
+describe("default loaders — loadRowsFromDb + loadCatalogueFromDb run for real", () => {
+  it("real loadRowsFromDb: projection applied to raw column values, isNull filter, breaker wrap, toIso conversions", async () => {
+    const userRows = [userColumnFixture()];
+    const { db, captured } = fakeDrizzleDb({ userRows });
+    getDbMock.mockResolvedValue(db);
+
+    // loadRows NOT injected — the real default loader runs its real query.
+    const snapshot = await buildCustomerSnapshot({
+      loadCatalogue: async () => fixtureCatalogue(),
+      now: () => FIXED_NOW,
+    });
+
+    // The rows query ran inside the breaker, with the spec's row filter+order.
+    expect(withCircuitBreakerMock).toHaveBeenCalledTimes(1);
+    expect(captured.userWhere).toStrictEqual(isNull(appUsers.deletedAt));
+    expect(captured.userOrderBy).toBe(appUsers.createdAt);
+
+    expect(snapshot.users).toHaveLength(1);
+    const u42 = snapshot.users[0]!;
+    // Values that only survive if the projection carries their column — the
+    // fake db applies the REAL projection to the column-keyed fixture, so a
+    // dropped column erases the value and fails these.
+    expect(u42.id).toBe(42);
+    expect(u42.email).toBe("member@example.com");
+    expect(u42.username).toBe("member42");
+    expect(u42.role).toBe("user");
+    expect(u42.hasAccess).toBe(true);
+    expect(u42.entitled).toBe(true); // expiry 1 day past fixed now
+    expect(u42.termsAccepted).toBe(true);
+    expect(u42.discordId).toBe("123456789012345678");
+    expect(u42.discordUsername).toBe("member#0042");
+    expect(u42.manualDiscordId).toBeNull();
+    expect(u42.accessSource).toBe("stripe");
+    expect(u42.stripeCustomerId).toBe("cus_TEST123");
+    expect(u42.stripeSubscriptionId).toBe("sub_TEST123");
+    expect(u42.stripeSubscriptionStatus).toBe("active");
+    expect(u42.cancelAtPeriodEnd).toBe(false);
+    expect(u42.pendingSetup).toBe(false);
+    // toIso on RAW column values: ms-int columns and Date columns both → ISO.
+    expect(u42.expiryDate).toBe(new Date(FIXED_NOW + 86_400_000).toISOString());
+    expect(u42.createdAt).toBe("2026-01-02T03:04:05.000Z");
+    expect(u42.lastSignedIn).toBe("2026-08-01T12:00:00.000Z");
+    expect(u42.termsAcceptedAt).toBe(new Date(1750000000000).toISOString());
+    expect(u42.discordConnectedAt).toBe(new Date(1750000001000).toISOString());
+    // planPriceId survived projection: resolves against the injected catalogue.
+    expect(u42.plan).toEqual({
+      slug: "pro",
+      name: "Pro",
+      planType: "recurring",
+      billingInterval: "month",
+      amountCents: 4900,
+      currency: "usd",
+      isLifetime: false,
+    });
+  });
+
+  it("real loadCatalogueFromDb: join + projection + mapping build byPriceId/byPlanSlug that resolve real plan detail", async () => {
+    const catalogueRows = [
+      catalogueColumnFixture({
+        priceId: 7,
+        amountCents: 4900,
+        currency: "usd",
+        interval: "month",
+        slug: "pro",
+        name: "Pro",
+        planType: "recurring",
+      }),
+      // Second price on the SAME plan slug — byPlanSlug keeps the first.
+      catalogueColumnFixture({
+        priceId: 9,
+        amountCents: 49900,
+        currency: "usd",
+        interval: "year",
+        slug: "pro",
+        name: "Pro",
+        planType: "recurring",
+      }),
+      catalogueColumnFixture({
+        priceId: 8,
+        amountCents: 99999,
+        currency: "usd",
+        interval: null,
+        slug: "lifetime",
+        name: "Lifetime",
+        planType: "one_time",
+      }),
+    ];
+    const { db, captured } = fakeDrizzleDb({ catalogueRows });
+    getDbMock.mockResolvedValue(db);
+
+    const loadRows = async () => [
+      // priceId 7 → Pro monthly $49 (exact-SKU path)
+      fixtureRow({ planPriceId: 7, stripePlanId: null }),
+      // priceId 8 → Lifetime one-off: billingInterval null ⇒ isLifetime true
+      fixtureRow({
+        id: 43,
+        email: "life@example.com",
+        username: "life43",
+        planPriceId: 8,
+        stripePlanId: null,
+      }),
+      // no priceId → slug fallback through the REAL byPlanSlug map
+      fixtureRow({
+        id: 44,
+        email: "slug@example.com",
+        username: "slug44",
+        planPriceId: null,
+        stripePlanId: "pro",
+      }),
+    ];
+    // loadCatalogue NOT injected — the real default loader runs its real query.
+    const snapshot = await buildCustomerSnapshot({
+      loadRows,
+      now: () => FIXED_NOW,
+    });
+
+    // The catalogue query joined subscription_plans on planId.
+    expect(captured.joinTable).toBe(subscriptionPlans);
+    expect(captured.joinCondition).toStrictEqual(
+      eq(subscriptionPlans.id, planPrices.planId)
+    );
+
+    expect(snapshot.users).toHaveLength(3);
+    const byId = new Map(snapshot.users.map(u => [u.id, u]));
+
+    // Plan detail resolved through the REAL byPriceId map: every field — a
+    // projection that drops amountCents/currency/interval/slug/name/planType
+    // makes this object wrong.
+    expect(byId.get(42)!.plan).toEqual({
+      slug: "pro",
+      name: "Pro",
+      planType: "recurring",
+      billingInterval: "month",
+      amountCents: 4900,
+      currency: "usd",
+      isLifetime: false,
+    });
+
+    // Lifetime SKU: interval null survives the loader's `?? null` mapping.
+    expect(byId.get(43)!.plan).toEqual({
+      slug: "lifetime",
+      name: "Lifetime",
+      planType: "one_time",
+      billingInterval: null,
+      amountCents: 99999,
+      currency: "usd",
+      isLifetime: true,
+    });
+
+    // Slug fallback through the REAL byPlanSlug (first "pro" entry kept).
+    expect(byId.get(44)!.plan).toEqual({
+      slug: "pro",
+      name: "Pro",
+      planType: "recurring",
+      billingInterval: null,
+      amountCents: null,
+      currency: null,
+      isLifetime: null,
+    });
+  });
+
+  it("catalogue with db unavailable degrades to empty (plan null), users still mirror", async () => {
+    // loadRows injected; loadCatalogue defaults. getDb → null exercises the
+    // real loadCatalogueFromDb early-return (NOT a throw — roles/access still
+    // mirror when plan detail is unavailable).
+    getDbMock.mockResolvedValue(null);
+    const snapshot = await buildCustomerSnapshot({
+      loadRows: async () => [fixtureRow()],
+      now: () => FIXED_NOW,
+    });
+    expect(snapshot.users).toHaveLength(1);
+    const u = snapshot.users[0]!;
+    expect(u.email).toBe("member@example.com");
+    expect(u.entitled).toBe(true);
+    // planPriceId 7 AND stripePlanId "pro" both set — with an empty catalogue
+    // neither resolves.
+    expect(u.plan).toBeNull();
+  });
+
+  it("catalogue query THROWING degrades to empty catalogue and logs [CustomerSync][catalogue][FAIL] — push still succeeds", async () => {
+    configureEnv();
+    const { db } = fakeDrizzleDb({
+      catalogueError: new Error("catalogue-query-down"),
+    });
+    getDbMock.mockResolvedValue(db);
+    const fetchImpl = vi.fn(
+      async () => new Response('{"ok":true}', { status: 200 })
+    );
+    // loadRows injected (rows healthy); loadCatalogue defaults and throws
+    // inside the real try/catch.
+    const result = await pushCustomerSnapshot({
+      loadRows: async () => [fixtureRow()],
+      now: () => FIXED_NOW,
+      fetchImpl,
+    });
+    expect(result).toEqual({
+      ok: true,
+      users: 1,
+      status: 200,
+      bytes: expect.any(Number),
+    });
+    const sent = JSON.parse(
+      (fetchImpl.mock.calls[0]! as unknown as [string, RequestInit])[1]
+        .body as string
+    );
+    expect(sent.users).toHaveLength(1);
+    expect(sent.users[0].plan).toBeNull();
+    const errLines = vi
+      .mocked(console.error)
+      .mock.calls.map(args => args.map(String).join(" "));
+    expect(
+      errLines.some(l =>
+        l.includes("[CustomerSync][catalogue][FAIL] catalogue-query-down")
+      ),
+      "catalogue failure must be logged with its marker and message"
+    ).toBe(true);
   });
 });
