@@ -19,9 +19,13 @@
  *     channel may write, and only under dime's own setManualDiscordId rules
  *     (17–20 digit snowflake or "" to clear; never onto a user with a live
  *     discordId; rejected if the snowflake is any other user's live or manual
- *     Discord id — both columns are UNIQUE-indexed). PREZ manages Discord
- *     connections from the Tailered console; every other identity/Discord
- *     operation still stays on dime's own admin UI.
+ *     Discord id — retired/soft-deleted rows included, because both columns
+ *     are UNIQUE-indexed across ALL rows). The pre-write probe is only the
+ *     cheap, clean error path: the write itself is the arbiter — a
+ *     conditional update (`discordId IS NULL`) plus the unique indexes — so
+ *     a claim that races the probe is a 409, never a 500 or a double claim.
+ *     PREZ manages Discord connections from the Tailered console; every
+ *     other identity/Discord operation still stays on dime's own admin UI.
  *   - Pre-auth ladder is a single uniform 404 {ok:false,error:"not_found"}
  *     for unprovisioned secret / missing signature / wrong signature — no
  *     oracle distinguishes the three. (dime's unknown /api paths fall through
@@ -129,8 +133,16 @@ export interface MutationDeps {
     id: number,
     data: { role?: Role; hasAccess?: boolean; expiryDate?: number | null }
   ) => Promise<void>;
-  /** Set (snowflake) or clear (null) a user's pre-registered manual Discord id. */
-  setManualDiscordId?: (id: number, value: string | null) => Promise<void>;
+  /**
+   * Set (snowflake) or clear (null) a user's pre-registered manual Discord id.
+   * The write is conditional + unique-index guarded, so it reports the race
+   * outcomes itself: "already_connected" (target gained a live discordId) or
+   * "duplicate" (another row claimed the snowflake).
+   */
+  setManualDiscordId?: (
+    id: number,
+    value: string | null
+  ) => Promise<"ok" | "already_connected" | "duplicate">;
   /** Uniqueness probe: any user holding this snowflake as live/manual id. */
   findByDiscordSnowflake?: (
     snowflake: string
@@ -368,7 +380,9 @@ export async function executeRemoteMutation(
         if (typeof liveDiscordId === "string" && liveDiscordId.length > 0) {
           return reject(409, "already_connected");
         }
-        // Uniqueness: the snowflake must not be any OTHER user's live/manual id.
+        // Uniqueness: the snowflake must not be any OTHER user's live/manual id
+        // (retired rows included). This probe is the cheap, clean error path;
+        // the write below is the actual arbiter for anything that races it.
         const findByDiscordSnowflake =
           deps.findByDiscordSnowflake ??
           ((await import("../db"))
@@ -382,11 +396,13 @@ export async function executeRemoteMutation(
       }
       const setManualDiscordId =
         deps.setManualDiscordId ??
-        (async (uid: number, value: string | null) => {
-          const { updateAppUser } = await import("../db");
-          await updateAppUser(uid, { manualDiscordId: value });
-        });
-      await setManualDiscordId(id, manualDiscordId);
+        ((await import("../db")).setAppUserManualDiscordId as NonNullable<
+          MutationDeps["setManualDiscordId"]
+        >);
+      const wrote = await setManualDiscordId(id, manualDiscordId);
+      if (wrote === "already_connected")
+        return reject(409, "already_connected");
+      if (wrote === "duplicate") return reject(409, "discord_id_taken");
     }
 
     const loadSanitizedUser =

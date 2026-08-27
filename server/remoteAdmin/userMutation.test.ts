@@ -101,6 +101,7 @@ function makeDeps(overrides: Partial<MutationDeps> = {}) {
     }),
     setManualDiscordId: vi.fn(async (id: number, value: string | null) => {
       calls.manualIds.push({ id, value });
+      return "ok" as const;
     }),
     findByDiscordSnowflake: vi.fn(async () => null),
     incrementTokenVersion: vi.fn(async (id: number) => {
@@ -619,6 +620,33 @@ describe("executeRemoteMutation — setManualDiscordId (v1.1 identity write)", (
     expect(out.status).toBe(409);
     expect(out.body).toEqual({ ok: false, error: "discord_id_taken" });
     expect(calls.manualIds).toEqual([]);
+  });
+
+  it("race: a claim that lands after the probe surfaces as 409 discord_id_taken, not a 500", async () => {
+    // Probe says free; the unique-index-guarded write reports the duplicate.
+    const { deps, calls } = makeDeps({
+      setManualDiscordId: vi.fn(async (id: number, value: string | null) => {
+        calls.manualIds.push({ id, value });
+        return "duplicate" as const;
+      }),
+    });
+    const raw = manualBody();
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(409);
+    expect(out.body).toEqual({ ok: false, error: "discord_id_taken" });
+    expect(deps.loadSanitizedUser).not.toHaveBeenCalled();
+  });
+
+  it("race: a Discord link that lands after the check surfaces as 409 already_connected", async () => {
+    // lookup saw no live discordId; the conditional write matched zero rows.
+    const { deps } = makeDeps({
+      setManualDiscordId: vi.fn(async () => "already_connected" as const),
+    });
+    const raw = manualBody();
+    const out = await run(raw, sign(raw), deps);
+    expect(out.status).toBe(409);
+    expect(out.body).toEqual({ ok: false, error: "already_connected" });
+    expect(deps.loadSanitizedUser).not.toHaveBeenCalled();
   });
 
   it("allows re-setting the SAME user's own snowflake (clash id === target id)", async () => {
