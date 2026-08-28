@@ -239,20 +239,24 @@ describe("setGatedCacheHeaders — cache-leak fix (Phase 4)", () => {
     };
   }
 
-  it("authed: private, no-store (never shared/edge-cached) + Vary: Cookie", () => {
+  it("authed: private, no-store (never shared/edge-cached) + gated Vary", () => {
     const res = spyRes();
     setGatedCacheHeaders(res, true);
     expect(res.headers["Cache-Control"]).toBe("private, no-store");
-    expect(res.headers["Vary"]).toBe("Cookie");
+    expect(res.headers["Vary"]).toBe(
+      "Cookie, Authorization, x-tailered-sports-secret"
+    );
   });
 
-  it("anon: short public cache for the stripped commodity shape + Vary: Cookie", () => {
+  it("anon: short public cache for the stripped commodity shape + gated Vary", () => {
     const res = spyRes();
     setGatedCacheHeaders(res, false);
     expect(res.headers["Cache-Control"]).toBe(
       "public, max-age=30, stale-while-revalidate=60"
     );
-    expect(res.headers["Vary"]).toBe("Cookie");
+    expect(res.headers["Vary"]).toBe(
+      "Cookie, Authorization, x-tailered-sports-secret"
+    );
   });
 
   it("never throws on a missing/!function res (defensive)", () => {

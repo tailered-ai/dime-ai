@@ -6,7 +6,9 @@ import {
   applyMlbMarketGatesToStrikeoutProp,
   isOwnerRequest,
   isRequestAuthenticated,
+  isGamesListAuthenticated,
   setGatedCacheHeaders,
+  GATED_FEED_VARY,
   stripGameModelFields,
   stripHrPropModelFields,
   stripStrikeoutPropModelFields,
@@ -309,7 +311,7 @@ export const appRouter = router({
             )
           : stripped;
 
-        const authed = await isRequestAuthenticated(ctx.req);
+        const authed = await isGamesListAuthenticated(ctx.req);
         const gated = authed ? published : published.map(g => stripGameModelFields(g));
 
         // Cache-Control + ETag. Authed responses carry the model IP and MUST NOT
@@ -341,7 +343,7 @@ export const appRouter = router({
             'Cache-Control',
             authed ? 'private, no-store' : 'public, max-age=30, stale-while-revalidate=60'
           );
-          ctx.res.setHeader('Vary', 'Cookie');
+          ctx.res.setHeader('Vary', GATED_FEED_VARY);
           ctx.res.setHeader('ETag', `"${etag}"`);
           ctx.res.setHeader('X-Games-Count', String(gated.length));
           ctx.res.setHeader('X-Cache-Status', 'MISS'); // overridden by cache layer if HIT

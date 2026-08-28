@@ -18,11 +18,9 @@ import type { MlbMarketGates, MlbMarketKey } from "./mlbMarketGates";
  * DIME-FEED-MIGRATION-DRAFT.md) — owner-ratified via the PR.
  */
 
-/** Is this request from a logged-in app user OR Tailered OS sports-read machine principal? */
+/** Is this request from a logged-in app user? (cookie + JWT verify, no DB hit.) */
 export async function isRequestAuthenticated(req: Request): Promise<boolean> {
   try {
-    const { isMachineSportsReadRequest } = await import("./_core/machineAuth");
-    if (isMachineSportsReadRequest(req)) return true;
     const header = req?.headers?.cookie;
     if (!header) return false;
     const token = parseCookieHeader(header)[APP_USER_COOKIE];
@@ -32,6 +30,24 @@ export async function isRequestAuthenticated(req: Request): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * games.list PREZ ungating only: cookie subscriber OR Tailered OS machine principal.
+ * Do NOT use for props/WC feeds — keep those cookie-only via isRequestAuthenticated.
+ */
+export async function isGamesListAuthenticated(req: Request): Promise<boolean> {
+  try {
+    const { isMachineSportsReadRequest } = await import("./_core/machineAuth");
+    if (isMachineSportsReadRequest(req)) return true;
+    return await isRequestAuthenticated(req);
+  } catch {
+    return false;
+  }
+}
+
+/** Cache key must include machine headers so anon public responses never serve to S2S. */
+export const GATED_FEED_VARY =
+  "Cookie, Authorization, x-tailered-sports-secret";
 
 /**
  * Is this request from the OWNER? Used only by the MLB per-market publication
@@ -241,7 +257,8 @@ export function stripWcMatchupModelFields<T extends Record<string, unknown>>(
  *   Cloudflare does). `private` alone is not enough against an "Override TTL"
  *   edge rule — `no-store` is the belt-and-suspenders.
  * - anon: the stripped commodity shape → a short public cache is fine.
- * - always `Vary: Cookie` so a compliant cache keys on auth state.
+ * - always `Vary: Cookie, Authorization, x-tailered-sports-secret` so a
+ *   compliant cache keys on cookie and Tailered OS machine credentials.
  *
  * Mirrors the games.list auth-aware header (Phase 3), extended to the strikeout
  * / HR / WC endpoints that previously set NO Cache-Control at all.
@@ -503,7 +520,7 @@ export function setGatedCacheHeaders(
   authed: boolean
 ): void {
   if (!res || typeof res.setHeader !== "function") return;
-  res.setHeader("Vary", "Cookie");
+  res.setHeader("Vary", GATED_FEED_VARY);
   res.setHeader(
     "Cache-Control",
     authed
