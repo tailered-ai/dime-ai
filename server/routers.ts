@@ -67,6 +67,7 @@ import {
   getAvailableDates,
 } from "./db";
 import { appUsersRouter, ownerProcedure, appUserProcedure } from "./routers/appUsers";
+import { sportsReadProcedure } from "./_core/machineAuth";
 import { betTrackerRouter } from "./routers/betTracker";
 import { dimeChatsRouter } from "./routers/dimeChats";
 import { securityRouter } from "./routers/security";
@@ -1109,12 +1110,17 @@ export const appRouter = router({
   oddsHistory: router({
     /**
      * List all odds snapshots for a specific game, newest first.
-     * SECURITY: appUserProcedure — odds movement data is premium content.
+     * SECURITY: sportsReadProcedure — subscriber cookie OR Tailered OS machine principal.
+     * Machine path does not impersonate a human user.
      */
-    listForGame: appUserProcedure
+    listForGame: sportsReadProcedure
       .input(z.object({ gameId: z.number().int().positive() }))
       .query(async ({ input, ctx }) => {
-        console.log(`[tRPC][oddsHistory.listForGame] AUTHED userId=${ctx.appUser.id} gameId=${input.gameId}`);
+        const who =
+          ctx.sportsPrincipal === "machine"
+            ? "machine:tailered-os"
+            : `userId=${ctx.appUser?.id ?? "?"}`;
+        console.log(`[tRPC][oddsHistory.listForGame] AUTHED ${who} gameId=${input.gameId}`);
         const rows = await listOddsHistory(input.gameId);
         return { history: rows };
       }),

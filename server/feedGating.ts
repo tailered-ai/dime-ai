@@ -18,9 +18,11 @@ import type { MlbMarketGates, MlbMarketKey } from "./mlbMarketGates";
  * DIME-FEED-MIGRATION-DRAFT.md) — owner-ratified via the PR.
  */
 
-/** Is this request from a logged-in app user? (cookie + JWT verify, no DB hit.) */
+/** Is this request from a logged-in app user OR Tailered OS sports-read machine principal? */
 export async function isRequestAuthenticated(req: Request): Promise<boolean> {
   try {
+    const { isMachineSportsReadRequest } = await import("./_core/machineAuth");
+    if (isMachineSportsReadRequest(req)) return true;
     const header = req?.headers?.cookie;
     if (!header) return false;
     const token = parseCookieHeader(header)[APP_USER_COOKIE];
