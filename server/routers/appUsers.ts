@@ -93,7 +93,7 @@ async function retryOnce<T>(fn: () => Promise<T>, tag: string): Promise<T> {
   }
 }
 
-function getAppCookie(req: Request): string | undefined {
+export function getAppCookie(req: Request): string | undefined {
   const cookies = parseCookieHeader(req.headers.cookie ?? "");
   return cookies[APP_USER_COOKIE];
 }

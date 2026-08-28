@@ -6,7 +6,9 @@ import {
   applyMlbMarketGatesToStrikeoutProp,
   isOwnerRequest,
   isRequestAuthenticated,
+  isGamesListAuthenticated,
   setGatedCacheHeaders,
+  GATED_FEED_VARY,
   stripGameModelFields,
   stripHrPropModelFields,
   stripStrikeoutPropModelFields,
@@ -67,6 +69,7 @@ import {
   getAvailableDates,
 } from "./db";
 import { appUsersRouter, ownerProcedure, appUserProcedure } from "./routers/appUsers";
+import { sportsReadProcedure } from "./_core/machineAuth";
 import { betTrackerRouter } from "./routers/betTracker";
 import { dimeChatsRouter } from "./routers/dimeChats";
 import { securityRouter } from "./routers/security";
@@ -308,7 +311,7 @@ export const appRouter = router({
             )
           : stripped;
 
-        const authed = await isRequestAuthenticated(ctx.req);
+        const authed = await isGamesListAuthenticated(ctx.req);
         const gated = authed ? published : published.map(g => stripGameModelFields(g));
 
         // Cache-Control + ETag. Authed responses carry the model IP and MUST NOT
@@ -340,7 +343,7 @@ export const appRouter = router({
             'Cache-Control',
             authed ? 'private, no-store' : 'public, max-age=30, stale-while-revalidate=60'
           );
-          ctx.res.setHeader('Vary', 'Cookie');
+          ctx.res.setHeader('Vary', GATED_FEED_VARY);
           ctx.res.setHeader('ETag', `"${etag}"`);
           ctx.res.setHeader('X-Games-Count', String(gated.length));
           ctx.res.setHeader('X-Cache-Status', 'MISS'); // overridden by cache layer if HIT
@@ -1109,12 +1112,15 @@ export const appRouter = router({
   oddsHistory: router({
     /**
      * List all odds snapshots for a specific game, newest first.
-     * SECURITY: appUserProcedure — odds movement data is premium content.
+     * SECURITY: sportsReadProcedure — subscriber cookie OR Tailered OS machine principal.
+     * Machine path does not impersonate a human user.
      */
-    listForGame: appUserProcedure
+    listForGame: sportsReadProcedure
       .input(z.object({ gameId: z.number().int().positive() }))
       .query(async ({ input, ctx }) => {
-        console.log(`[tRPC][oddsHistory.listForGame] AUTHED userId=${ctx.appUser.id} gameId=${input.gameId}`);
+        console.log(
+          `[tRPC][oddsHistory.listForGame] AUTHED principal=${ctx.sportsPrincipal} gameId=${input.gameId}`
+        );
         const rows = await listOddsHistory(input.gameId);
         return { history: rows };
       }),
