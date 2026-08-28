@@ -1116,11 +1116,9 @@ export const appRouter = router({
     listForGame: sportsReadProcedure
       .input(z.object({ gameId: z.number().int().positive() }))
       .query(async ({ input, ctx }) => {
-        const who =
-          ctx.sportsPrincipal === "machine"
-            ? "machine:tailered-os"
-            : `userId=${ctx.appUser?.id ?? "?"}`;
-        console.log(`[tRPC][oddsHistory.listForGame] AUTHED ${who} gameId=${input.gameId}`);
+        console.log(
+          `[tRPC][oddsHistory.listForGame] AUTHED principal=${ctx.sportsPrincipal} gameId=${input.gameId}`
+        );
         const rows = await listOddsHistory(input.gameId);
         return { history: rows };
       }),
