@@ -1,0 +1,13 @@
+{
+  "fixture": "r2/body/R2B10.md",
+  "mechanism": "BYP-B-04: the same blank-line split through a raw blockquote",
+  "expected_prose": {
+    "includes": [
+      "Narrative control sentence outside.",
+      "Tail control sentence here."
+    ],
+    "excludes": [
+      "Leaked quote text."
+    ]
+  }
+}

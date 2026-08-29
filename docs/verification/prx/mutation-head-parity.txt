@@ -1,0 +1,41 @@
+# Mutation certificate head parity
+
+Mutation verification head: a5d632569ca3599483649c72784d5a4d1c286f98
+Archive / candidate head:   69ea39315303b509dbb390a5f4ead9c4d1f0678e
+
+## Diff between the two heads
+
+ .../prx/SOL-REVIEW-DIRECTIVE-v1.1-r2.md            | 34 +++++++++++++-------
+ docs/verification/prx/artifact-map.sha256          | 28 +++++++++++------
+ .../prx/mutation-blocking-dispositions.md          | 36 ++++++++++++++++++++++
+ 3 files changed, 77 insertions(+), 21 deletions(-)
+
+## Files changed
+
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1-r2.md
+docs/verification/prx/artifact-map.sha256
+docs/verification/prx/mutation-blocking-dispositions.md
+
+## Mutated-module parity
+
+Mutation scope: scripts/prx/lib/canonical.mjs, scripts/prx/commit-check.mjs,
+scripts/prx/body-check.mjs, scripts/prx/rules.mjs, scripts/prx/modes.mjs,
+scripts/prx/check-commit.mjs
+
+Files differing between the two heads that fall within mutation scope:
+  (none — all differences are under docs/verification/prx/)
+
+## Scope provenance
+
+The authoritative mutation scope is the `matrix.module` list in
+`.github/workflows/15-prx-mutation.yml` (six modules, listed above), not the
+`mutate` array in `scripts/prx/stryker.blocking.prx.json`. The workflow invokes
+`npx stryker run scripts/prx/stryker.blocking.prx.json --mutate "$MODULE"`, and
+the `--mutate` flag overrides the config array on every job. The config array
+(eight files, last modified in 8879de44b) is therefore not the scope of record
+for the r2 or r3 mutation runs.
+
+Three Stryker configs exist in this repository. Only
+`scripts/prx/stryker.blocking.prx.json` is used by the label-gated matrix;
+`scripts/prx/stryker.prx.json` and `stryker.conf.json` are not invoked by
+15-prx-mutation.yml.

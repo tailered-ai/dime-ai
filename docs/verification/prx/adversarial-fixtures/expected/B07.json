@@ -1,0 +1,9 @@
+{
+  "fixture": "body/B07.md",
+  "mechanism": "HTML list",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-B-STRUCTURE"
+  ],
+  "adaptation_notes": "as B05: library-level detection, advisory"
+}

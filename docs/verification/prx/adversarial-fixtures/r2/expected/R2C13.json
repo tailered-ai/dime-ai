@@ -1,0 +1,8 @@
+{
+  "fixture": "r2/commit/R2C13.txt",
+  "mechanism": "BYP-C-08: the body control scan runs in file mode and is context-sensitive — the ESC in prose fires once, the same ESC in fenced code content does not",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-CONTROL"
+  ]
+}

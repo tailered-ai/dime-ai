@@ -52,7 +52,10 @@
     "pi:json": "pi --mode json -a",
     "pi:audit": "tsx scripts/pi-harness-audit.ts",
     "qm:pack:verify": "tsx scripts/qm-pack-verify.ts",
-    "postinstall": "if [ -f requirements.txt ] && command -v pip3 >/dev/null 2>&1; then pip3 install -r requirements.txt -q; else echo '[postinstall] skipping python deps: pip3 unavailable or requirements.txt missing (expected on Railway, which installs via apt in Dockerfile)'; fi"
+    "postinstall": "if [ -f requirements.txt ] && command -v pip3 >/dev/null 2>&1; then pip3 install -r requirements.txt -q; else echo '[postinstall] skipping python deps: pip3 unavailable or requirements.txt missing (expected on Railway, which installs via apt in Dockerfile)'; fi",
+    "prx:commit": "node scripts/prx/check-commit.mjs",
+    "prx:body": "node scripts/prx/check-body.mjs",
+    "prx:test": "vitest run scripts/prx/"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.3.220",
@@ -142,6 +145,8 @@
   "devDependencies": {
     "@builder.io/vite-plugin-jsx-loc": "^0.1.1",
     "@playwright/test": "1.62.1",
+    "@stryker-mutator/core": "9.6.1",
+    "@stryker-mutator/vitest-runner": "9.6.1",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.3",
     "@types/bcryptjs": "^3.0.0",
@@ -161,6 +166,9 @@
     "drizzle-kit": "^0.31.10",
     "esbuild": "^0.28.1",
     "fast-check": "^4.9.0",
+    "mdast-util-from-markdown": "2.0.2",
+    "mdast-util-gfm": "3.1.0",
+    "micromark-extension-gfm": "3.0.0",
     "pnpm": "^11.19.0",
     "postcss": "^8.5.25",
     "prettier": "^3.9.6",
@@ -184,6 +192,7 @@
       "tailwindcss>nanoid": "3.3.7",
       "postcss": ">=8.5.12 <9.0.0",
       "brace-expansion": ">=1.1.18 <2.0.0",
+      "minimatch@>=10 <11>brace-expansion": ">=5.0.2 <6.0.0",
       "js-yaml": ">=4.3.1 <5.0.0",
       "discord.js>undici": "6.28.0",
       "@discordjs/rest>undici": "6.28.0",

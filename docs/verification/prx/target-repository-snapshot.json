@@ -1,0 +1,260 @@
+{
+  "generated_utc": "2026-08-13T02:01:23Z",
+  "target": {
+    "full_name": "tailered-ai/dime-ai",
+    "url": "https://github.com/tailered-ai/dime-ai",
+    "default_branch": "main",
+    "origin_main_sha": "249bf314c131e0f34aa0f1aae393411e4e8c8d55",
+    "verified_by": [
+      "git remote -v",
+      "gh repo view --json nameWithOwner,defaultBranchRef,url"
+    ]
+  },
+  "authenticated_identity": "prez-tailered-ai (gh auth status; scopes gist, read:org, repo, workflow)",
+  "repo_api": {
+    "archived": false,
+    "default_branch": "main",
+    "disabled": false,
+    "full_name": "tailered-ai/dime-ai",
+    "permissions": {
+      "admin": false,
+      "maintain": false,
+      "pull": true,
+      "push": true,
+      "triage": true
+    },
+    "visibility": "public"
+  },
+  "ruleset": {
+    "id": 18701573,
+    "name": "main-protection",
+    "target": "branch",
+    "source_type": "Repository",
+    "source": "tailered-ai/dime-ai",
+    "enforcement": "active",
+    "conditions": {
+      "ref_name": {
+        "exclude": [],
+        "include": [
+          "~DEFAULT_BRANCH",
+          "refs/heads/main"
+        ]
+      }
+    },
+    "rules": [
+      {
+        "type": "deletion"
+      },
+      {
+        "type": "non_fast_forward"
+      },
+      {
+        "type": "pull_request",
+        "parameters": {
+          "required_approving_review_count": 1,
+          "dismiss_stale_reviews_on_push": true,
+          "required_reviewers": [],
+          "require_code_owner_review": false,
+          "require_last_push_approval": true,
+          "required_review_thread_resolution": true,
+          "allowed_merge_methods": [
+            "merge"
+          ]
+        }
+      },
+      {
+        "type": "required_status_checks",
+        "parameters": {
+          "strict_required_status_checks_policy": true,
+          "do_not_enforce_on_create": false,
+          "required_status_checks": [
+            {
+              "context": "Security Audit",
+              "integration_id": 15368
+            },
+            {
+              "context": "TypeScript Check",
+              "integration_id": 15368
+            },
+            {
+              "context": "Vitest",
+              "integration_id": 15368
+            },
+            {
+              "context": "Secret Scan (gitleaks)",
+              "integration_id": 15368
+            },
+            {
+              "context": "01-pr-proof-contract",
+              "integration_id": 15368
+            },
+            {
+              "context": "05-workflow-security",
+              "integration_id": 15368
+            },
+            {
+              "context": "06-dependency-review",
+              "integration_id": 15368
+            },
+            {
+              "context": "08-contract-and-data-integrity",
+              "integration_id": 15368
+            },
+            {
+              "context": "10-ai-eval-critical",
+              "integration_id": 15368
+            },
+            {
+              "context": "13-tos-notion-context",
+              "integration_id": 15368
+            }
+          ]
+        }
+      }
+    ],
+    "node_id": "RRS_lACqUmVwb3NpdG9yec5NJK4XzgEdXQU",
+    "created_at": "2026-07-08T22:45:21.546-07:00",
+    "updated_at": "2026-08-11T11:34:20.913-07:00",
+    "current_user_can_bypass": "never",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/tailered-ai/dime-ai/rulesets/18701573"
+      },
+      "html": {
+        "href": "https://github.com/tailered-ai/dime-ai/rules/18701573"
+      }
+    }
+  },
+  "required_status_checks": [
+    "Security Audit",
+    "TypeScript Check",
+    "Vitest",
+    "Secret Scan (gitleaks)",
+    "01-pr-proof-contract",
+    "05-workflow-security",
+    "06-dependency-review",
+    "08-contract-and-data-integrity",
+    "10-ai-eval-critical",
+    "13-tos-notion-context"
+  ],
+  "merge_methods_allowed": [
+    "merge"
+  ],
+  "classic_branch_protection": "NOT USED (GET /branches/main/protection returns 404; protection is ruleset main-protection id 18701573)",
+  "pull_request_template": {
+    "path": ".github/pull_request_template.md",
+    "sha256": "4d396de9e3ff77064089cee380320c612721863e40f016c8a7d6a4b26a8cc610",
+    "sections": [
+      "Purpose and scope",
+      "Notion context",
+      "Linked incident / finding",
+      "User-facing behavior changes",
+      "Reproduction evidence",
+      "Tests",
+      "Bundle impact",
+      "Database impact",
+      "Security impact",
+      "Accessibility impact",
+      "Deployment and rollback plan",
+      "Federation evidence",
+      "Authorization",
+      "Post-deployment validation"
+    ],
+    "case_variants_present": [
+      "pull_request_template.md only \u2014 no PULL_REQUEST_TEMPLATE.md"
+    ]
+  },
+  "codeowners": {
+    "path": ".github/CODEOWNERS",
+    "sha256": "4442d8a4c9e29eea714fa9465c58beb66fef5e4019d5800edfb0cd53eda6adde",
+    "note": "default owners on *; /.github/ and /docs/verification/ explicitly owner-listed; ruleset require_code_owner_review=false"
+  },
+  "workflows": [
+    "01-pr-proof-contract.yml",
+    "02-codeql.yml",
+    "03-semgrep.yml",
+    "05-workflow-security.yml",
+    "06-dependency-review.yml",
+    "07-coverage-patch.yml",
+    "08-contract-and-data-integrity.yml",
+    "09-artifact-build-and-smoke.yml",
+    "10-ai-eval-critical.yml",
+    "11-artifact-attestation.yml",
+    "12-nightly-verification.yml",
+    "13-tos-notion-context.yml",
+    "auto-merge-dependabot.yml",
+    "ci.yml",
+    "cron-bet-grade.yml",
+    "cron-mlb-canonical-refresh.yml",
+    "cron-mlb-cycle.yml",
+    "cron-mlb-learning-loop.yml",
+    "cron-scores.yml",
+    "cron-stripe-reconcile.yml",
+    "cron-vsin-odds.yml",
+    "db-push.yml",
+    "db-query.yml",
+    "db-reconcile-migrations.yml",
+    "deploy-smoke.yml",
+    "dime-llm-validation.yml",
+    "edge-arming-gate.yml",
+    "feed-responsive-cross-browser.yml",
+    "gitleaks.yml",
+    "os-ledger-append.yml",
+    "os-observe-crons.yml",
+    "p0-db-verify.yml",
+    "p0-feed-verify.yml",
+    "perf-harness.yml",
+    "pi-review.yml",
+    "railway-p0-control.yml",
+    "refresh-cf-cidrs.yml",
+    "security-audit-weekly.yml",
+    "seed-cfb.yml",
+    "seed-nfl.yml",
+    "stripe-e2e.yml",
+    "tailered-os.yml"
+  ],
+  "existing_gates": {
+    "pr_body_enforcement": "13-tos-notion-context (structured Notion block for TOS-scoped paths only); no other PR-body linter",
+    "commit_message_enforcement": "NONE (no commitlint, no husky, no core.hooksPath, no .git/hooks active)",
+    "prose_linters": "NONE (.vale.ini ABSENT, .markdownlint.json ABSENT)",
+    "formatter": "prettier 3.9.6 via 01-pr-proof-contract format-check job (npx prettier --check .); .prettierrc printWidth 80, proseWrap preserve",
+    "workflow_security": "05-workflow-security (zizmor 1.29.0 pinned, blocking >= high) + scripts/check-github-actions-security.mjs in ci.yml",
+    "mutation_testing": "Stryker via stryker.conf.json (scoped to money/settlement core), run nightly via npx --yes @stryker-mutator/core@9; NOT in devDependencies",
+    "secret_scanning": "gitleaks.yml (required check Secret Scan (gitleaks))",
+    "dependency_review": "06-dependency-review (required)",
+    "coverage": "07-coverage-patch (advisory per ROLLOUT.md wave 3)"
+  },
+  "rollout_doctrine": "docs/verification/ROLLOUT.md: new workflows run informationally (wave 0); graduation to required is owner-gated per RULESETS.md with calibration criteria (>=20 observations, FP rate bounds, one dry-run of the failure mode)",
+  "toolchain": {
+    "node": "v22.22.0",
+    "pnpm": "10.33.0",
+    "packageManager_pin": "pnpm@10.33.0",
+    "vitest": "4.1.10",
+    "coverage": "@vitest/coverage-v8 4.1.10",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3"
+  },
+  "commonmark_parsers_in_lockfile": {
+    "mdast-util-from-markdown": "2.0.2",
+    "micromark": "4.0.2",
+    "remark-parse": "11.0.0",
+    "unified": "11.0.5",
+    "via": "react-markdown ^10.1.0 (transitive)"
+  },
+  "measured_absences": [
+    ".vale.ini",
+    ".vale/",
+    ".gitmessage",
+    "commitlint.config.js",
+    ".markdownlint.json",
+    ".husky/",
+    "core.hooksPath",
+    "tools/",
+    "scripts/prx/",
+    "docs/verification/prx/",
+    "v1.0 archive pr-execution-standard-v1.0.zip (not in workspace)",
+    "Sol review bundle files (not in workspace)"
+  ],
+  "agent_context_capsule": "BLOCKED \u2014 pnpm agent:context fails closed: \"node execution is blocked: independent root-owned provenance is unavailable\" (raw output preserved); repository identity verified directly instead",
+  "tailered_communication_laws_in_repo": "OPERATING-RULES.md (claims/failures/verification vocabulary \u2014 ratified, repo-local); CLAUDE.md commit Co-Authored-By law; no 17-field writing system, CCA charter, or machine identity matrix file found in this repository"
+}

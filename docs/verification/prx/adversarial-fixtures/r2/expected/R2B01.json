@@ -1,0 +1,13 @@
+{
+  "fixture": "r2/body/R2B01.md",
+  "mechanism": "BYP-B-01: six sections whose only content is one raw format-class code point (U+200B/200C/200D/2060/00AD/FEFF) each fail SECTION-EMPTY",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY"
+  ]
+}

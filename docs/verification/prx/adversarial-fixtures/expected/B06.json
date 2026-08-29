@@ -1,0 +1,9 @@
+{
+  "fixture": "body/B06.md",
+  "mechanism": "blockquoted list",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-B-STRUCTURE"
+  ],
+  "adaptation_notes": "as B05: library-level detection, advisory"
+}

@@ -1,0 +1,24 @@
+{
+  "fixture": "body/B10.md",
+  "mechanism": "contract hidden in HTML comment",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-B-COMMENT",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-VISIBLE"
+  ],
+  "adaptation_notes": "comment-aware rendered-content validation: no visible content + all 14 sections missing (R5 subcode PRX-B-SECTION-MISSING) + comment-hidden-contract advisory"
+}

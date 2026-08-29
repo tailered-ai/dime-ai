@@ -1,0 +1,10 @@
+{
+  "fixture": "commit/C04.txt",
+  "mechanism": "imperative-prefix grammar bypass",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-C-MOOD",
+    "error:PRX-C-PREFIX"
+  ],
+  "adaptation_notes": "declared heuristic copula finding + deterministic repo prefix error; mood beyond the heuristic stays reviewer-class"
+}

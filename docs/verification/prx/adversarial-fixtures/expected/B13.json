@@ -1,0 +1,9 @@
+{
+  "fixture": "body/B13.md",
+  "mechanism": "arbitrary extra heading",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-B-EXT"
+  ],
+  "adaptation_notes": "adapted insertion point: before User-facing behavior changes, all 14 live sections kept; controlled extension policy reports the unknown heading (advisory class per the declared policy)"
+}

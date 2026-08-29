@@ -1,0 +1,13 @@
+{
+  "fixture": "r2/body/R2B02.md",
+  "mechanism": "BYP-B-01: the same six code points entity-encoded each fail SECTION-EMPTY",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY"
+  ]
+}

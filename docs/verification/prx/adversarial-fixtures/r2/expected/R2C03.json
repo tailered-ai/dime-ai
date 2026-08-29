@@ -1,0 +1,12 @@
+{
+  "fixture": "r2/commit/R2C03.txt",
+  "mechanism": "BYP-C-01: a fullwidth lookalike key must not satisfy governed-trailer presence and must not be recognized as a governed key (with --governed, all three requirements report missing)",
+  "options": {
+    "governed": true
+  },
+  "expected_findings": [
+    "error:PRX-C-GOV",
+    "error:PRX-C-GOV",
+    "error:PRX-C-GOV"
+  ]
+}

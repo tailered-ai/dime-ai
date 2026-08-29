@@ -1,0 +1,7 @@
+feat(x): adjust the parser
+
+prose line with an [31mescape[0m sequence
+
+```
+code line with an [31mescape[0m sequence
+```

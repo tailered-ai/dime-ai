@@ -1,0 +1,9 @@
+{
+  "fixture": "r2/commit/R2C15.txt",
+  "mechanism": "same-class find during r2 wiring: a subject of only zero-width code points renders as empty and must report as empty (plus the ordinary prefix result)",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-SUBJECT",
+    "error:PRX-C-PREFIX"
+  ]
+}

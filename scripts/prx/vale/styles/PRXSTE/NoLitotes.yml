@@ -1,0 +1,6 @@
+extends: existence
+message: "Litotes '%s' hides the direct claim; state it plainly."
+level: warning
+ignorecase: true
+raw:
+  - '\bnot un[a-z]+\b'

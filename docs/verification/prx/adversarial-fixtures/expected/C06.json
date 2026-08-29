@@ -1,0 +1,10 @@
+{
+  "fixture": "commit/C06.txt",
+  "mechanism": "URL wrap bypass",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-C-WRAP",
+    "error:PRX-C-PREFIX"
+  ],
+  "adaptation_notes": "only the URL token is exempt; the line still exceeds 72 without it"
+}

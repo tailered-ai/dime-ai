@@ -1,0 +1,10 @@
+{
+  "fixture": "body/B04.md",
+  "mechanism": "duplicate required section",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-B-ORDER",
+    "error:PRX-B-SECTION-DUP"
+  ],
+  "adaptation_notes": "adapted: duplicated section is Tests (live template has no Evidence section); order advisory also fires because the duplicate lands after Post-deployment validation. R5 subcode: duplication is PRX-B-SECTION-DUP"
+}

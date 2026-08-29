@@ -1,0 +1,555 @@
+// PRX v1.1 commit-message checker — pure library, no CLI side effects.
+// Replaces the rejected v1.0 first-word / whole-line-exemption heuristics
+// (SOL-PRX-006, SOL-PRX-007) with a structural parser: subject, separator,
+// body paragraphs, fences, URLs, and a formal trailer block are distinct
+// structures, and exemption spans are narrow (the URL token itself, the
+// parsed trailer block itself).
+//
+// r2: every shared predicate routes through lib/canonical.mjs via the
+// rules.mjs adapter — trailer keys canonicalize ASCII case-insensitively
+// (BYP-C-01), recognized governed trailers are validated wherever they
+// appear in ordinary body text via one line-indexed record (BYP-C-02),
+// size caps count UTF-8 bytes (BYP-C-06), the context-sensitive control
+// policy runs identically in file/stdin/range modes (BYP-C-07/08), and
+// fence state follows the CommonMark-consistent classifier (BYP-C-09).
+import {
+  classifyCommitBodyLines,
+  controlCharScan,
+  exceedsByteLimit,
+  isMeaningfulText,
+} from "./lib/canonical.mjs";
+import {
+  canonicalGovernedKey,
+  INPUT_SIZE_LIMIT_BYTES,
+  makeFinding,
+  RUN_ID_RE,
+  validateEvidenceRef,
+} from "./rules.mjs";
+
+const CONVENTIONAL_TYPES = [
+  "feat",
+  "fix",
+  "chore",
+  "docs",
+  "refactor",
+  "test",
+  "perf",
+  "ci",
+  "build",
+  "style",
+  "revert",
+];
+const CONVENTIONAL_RE = new RegExp(
+  `^(${CONVENTIONAL_TYPES.join("|")})(\\([A-Za-z0-9][A-Za-z0-9._/-]*\\))?!?: \\S`
+);
+// Strip variant for the mood heuristic: identical prefix shape but it must
+// NOT consume the first description character (review finding: a copula as
+// the first description word was silently missed).
+const PREFIX_STRIP_RE = new RegExp(
+  `^(${CONVENTIONAL_TYPES.join("|")})(\\([A-Za-z0-9][A-Za-z0-9._/-]*\\))?!?: `
+);
+// A trailer line is "Key:" followed by an optional value. The empty-value
+// form MUST parse as a trailer line so that "Run-Id:" is judged as an empty
+// governed value instead of silently degrading the whole block to prose
+// (v1.0 accepted exactly that bypass, Sol case C02).
+const TRAILER_LINE_RE = /^([A-Za-z][A-Za-z0-9-]*):[ \t]*(.*)$/;
+const TRAILER_CONTINUATION_RE = /^[ \t]+\S/;
+const URL_RE = /https?:\/\/[^\s<>]+/g;
+// The Evidence reference policy (validateEvidenceRef) is shared with the
+// body checker via rules.mjs so the two surfaces cannot drift (Sol case
+// C09); r2 replaced the regex grammar with structured segment validation.
+const CO_AUTHOR_RE = /^[^<>]+ <[^<>@\s]+@[^<>@\s]+\.[A-Za-z]{2,}>$/;
+const COPULA_RE = /(^|\s)(is|are|was|were)(\s|$)/;
+
+// Line kinds the recognized-key scan and the control policy treat as code
+// content (fenced content and valid indented code, per the CommonMark
+// classifier).
+const CODE_KINDS = new Set(["fence-content", "indented-code"]);
+const FENCE_KINDS = new Set(["fence-open", "fence-close", "fence-content"]);
+
+export function parseCommitMessage(raw) {
+  const text = raw.replace(/\r\n/g, "\n").replace(/\n+$/, "");
+  const lines = text.split("\n");
+  const subject = lines[0] ?? "";
+
+  let bodyStart = 1;
+  let separatorBlanks = 0;
+  while (bodyStart < lines.length && lines[bodyStart].trim() === "") {
+    separatorBlanks += 1;
+    bodyStart += 1;
+  }
+  const bodyLines = lines
+    .slice(bodyStart)
+    .map((textLine, i) => ({ text: textLine, line: bodyStart + i + 1 }));
+
+  // CommonMark-consistent line classification (r2 BYP-C-09): fences follow
+  // the spec's open/close rules (closing length >= opening, info-string
+  // constraints, <=3-space indent) and valid indented code is recognized.
+  const { kinds, unclosedFence } = classifyCommitBodyLines(
+    bodyLines.map(l => l.text)
+  );
+  for (const [i, l] of bodyLines.entries()) {
+    l.kind = kinds[i];
+    l.inFence = FENCE_KINDS.has(kinds[i]);
+  }
+
+  // Formal trailer block: the final non-blank run of body lines, outside
+  // any fence or indented code, in which every line is trailer-shaped or a
+  // continuation. This is a documented strict adaptation of git
+  // interpret-trailers.
+  let trailers = null;
+  if (!unclosedFence && bodyLines.length > 0) {
+    let end = bodyLines.length - 1;
+    while (end >= 0 && bodyLines[end].text.trim() === "") end -= 1;
+    let start = end;
+    while (start >= 0 && bodyLines[start].text.trim() !== "") start -= 1;
+    start += 1;
+    if (end >= start && start >= 0) {
+      const block = bodyLines.slice(start, end + 1);
+      const allShaped =
+        block.every(
+          l =>
+            (TRAILER_LINE_RE.test(l.text) ||
+              TRAILER_CONTINUATION_RE.test(l.text)) &&
+            !CODE_KINDS.has(l.kind) &&
+            !FENCE_KINDS.has(l.kind)
+        ) && TRAILER_LINE_RE.test(block[0].text);
+      if (allShaped) {
+        const parsed = [];
+        for (const l of block) {
+          const m = l.text.match(TRAILER_LINE_RE);
+          if (m) {
+            parsed.push({ key: m[1], value: m[2].trim(), line: l.line });
+          } else if (parsed.length > 0) {
+            parsed[parsed.length - 1].value += ` ${l.text.trim()}`;
+          }
+        }
+        trailers = {
+          entries: parsed,
+          startLine: block[0].line,
+          blockLines: block.map(l => l.line),
+        };
+      }
+    }
+  }
+
+  // One line-indexed canonical trailer record (r2 BYP-C-01/C-02): the
+  // formal block's entries plus every RECOGNIZED governed-key line in
+  // ordinary body text (subject, fenced code, and valid indented code are
+  // excluded; a line already processed as part of the formal block is
+  // never re-recorded). Placement, value, duplicate, and governed-scope
+  // decisions all read from this record.
+  const blockLineSet = new Set(trailers?.blockLines ?? []);
+  const trailerRecord = [];
+  if (trailers) {
+    for (const e of trailers.entries) {
+      const ck = canonicalGovernedKey(e.key);
+      trailerRecord.push({
+        key: e.key,
+        canonical: ck.canonical,
+        governed: ck.governed,
+        value: e.value,
+        line: e.line,
+        inBlock: true,
+      });
+    }
+  }
+  for (const l of bodyLines) {
+    if (l.kind !== "text" || blockLineSet.has(l.line)) continue;
+    const m = l.text.match(TRAILER_LINE_RE);
+    if (!m) continue;
+    const ck = canonicalGovernedKey(m[1]);
+    if (!ck.governed) continue;
+    trailerRecord.push({
+      key: m[1],
+      canonical: ck.canonical,
+      governed: true,
+      value: m[2].trim(),
+      line: l.line,
+      inBlock: false,
+    });
+  }
+
+  return {
+    subject,
+    separatorBlanks,
+    bodyLines,
+    trailers,
+    trailerRecord,
+    unclosedFence,
+  };
+}
+
+function trailerLines(parsed) {
+  // The whole parsed trailer block is the exemption span, continuation
+  // lines included (the standard's wording is the contract here).
+  return new Set(parsed.trailers?.blockLines ?? []);
+}
+
+export function checkCommit(raw, opts = {}) {
+  const findings = [];
+  if (
+    typeof raw !== "string" ||
+    exceedsByteLimit(raw, INPUT_SIZE_LIMIT_BYTES)
+  ) {
+    findings.push(
+      // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+      makeFinding("PRX-C-SIZE", "commit message exceeds the 1 MiB byte bound")
+    );
+    return findings;
+  }
+  const parsed = parseCommitMessage(raw);
+  const {
+    subject,
+    separatorBlanks,
+    bodyLines,
+    trailers,
+    trailerRecord,
+    unclosedFence,
+  } = parsed;
+  const hasBody = bodyLines.some(l => isMeaningfulText(l.text));
+
+  // PRX-C-SUBJECT — emptiness via the meaningful-visible-text decision
+  // (a subject of only zero-width/format code points renders as empty).
+  if (!isMeaningfulText(subject)) {
+    // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+    findings.push(makeFinding("PRX-C-SUBJECT", "subject line is empty", 1));
+  } else {
+    if (subject !== subject.trim()) {
+      findings.push(
+        makeFinding(
+          "PRX-C-SUBJECT",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          "subject has leading or trailing whitespace",
+          1
+        )
+      );
+    }
+    if (/\.\s*$/.test(subject)) {
+      findings.push(
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+        makeFinding("PRX-C-SUBJECT", "subject ends with a period", 1)
+      );
+    }
+    const subjectControls = controlCharScan(subject, "subject");
+    if (subjectControls.length > 0) {
+      findings.push(
+        makeFinding(
+          "PRX-C-SUBJECT",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          "subject contains control characters " +
+            `(${subjectControls.map(v => v.label).join(", ")})`,
+          1
+        )
+      );
+    }
+  }
+
+  // PRX-C-CONTROL — the same context-sensitive policy in every input mode:
+  // ordinary body text (body-text policy) vs fenced/indented code content
+  // (code policy, NUL still rejected).
+  for (const l of bodyLines) {
+    const context = CODE_KINDS.has(l.kind) ? "code" : "body-text";
+    const violations = controlCharScan(l.text, context);
+    if (violations.length > 0) {
+      findings.push(
+        makeFinding(
+          "PRX-C-CONTROL",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `control character (${violations.map(v => v.label).join(", ")}) in ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            (context === "code" ? "code content" : "body text"),
+          l.line
+        )
+      );
+    }
+  }
+
+  // Exemptions come from commit topology or metadata supplied by a trusted
+  // caller — never from the message text (Sol case C03; r2 BYP-C-04/05:
+  // message-shape revert detection and author-claimed bot identity grant
+  // nothing and instead surface an advisory when they would have mattered).
+  const revertShaped = isRevertShaped(subject, bodyLines);
+  const exemptFromPrefix =
+    opts.isMerge === true ||
+    opts.authorIsBot === true ||
+    opts.verifiedRevert === true;
+
+  // PRX-C-FIXUP
+  if (/^(fixup!|squash!)/.test(subject)) {
+    findings.push(
+      makeFinding(
+        "PRX-C-FIXUP",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+        "fixup!/squash! commit must be autosquashed before it reaches a " +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          "mainline range",
+        1
+      )
+    );
+  } else if (!exemptFromPrefix && !CONVENTIONAL_RE.test(subject)) {
+    findings.push(
+      makeFinding(
+        "PRX-C-PREFIX",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+        "subject does not match the repository convention " +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          '"type(scope): summary"; merge/bot/revert exemptions require ' +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          "topology or verified metadata from a trusted caller",
+        1
+      )
+    );
+    if (revertShaped || opts.claimedBot === true) {
+      const claims = [];
+      // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+      if (revertShaped) claims.push("the message text is revert-shaped");
+      if (opts.claimedBot === true) {
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+        claims.push("the author fields claim a bot identity");
+      }
+      findings.push(
+        makeFinding(
+          "PRX-C-CONTEXT-UNVERIFIED",
+          `${claims.join(" and ")}, but no verified classification was ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            "supplied by a trusted caller, so no exemption was granted and " +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            "the ordinary prefix result applies",
+          1
+        )
+      );
+    }
+  }
+
+  // PRX-C-SEPARATOR
+  if (hasBody && separatorBlanks !== 1) {
+    findings.push(
+      makeFinding(
+        "PRX-C-SEPARATOR",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+        `exactly one blank line must separate subject and body ` +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `(found ${separatorBlanks})`,
+        2
+      )
+    );
+  }
+
+  // PRX-C-LENGTH (advisory)
+  if (subject.length > 72) {
+    findings.push(
+      makeFinding(
+        "PRX-C-LENGTH",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+        `subject is ${subject.length} characters (advisory threshold 72)`,
+        1
+      )
+    );
+  }
+
+  // PRX-C-FENCE
+  if (unclosedFence) {
+    findings.push(
+      // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+      makeFinding("PRX-C-FENCE", "unclosed code fence in commit body")
+    );
+  }
+
+  // PRX-C-WRAP (advisory) — narrow exemption spans only.
+  const exemptLines = trailerLines(parsed);
+  for (const l of bodyLines) {
+    if (l.inFence || exemptLines.has(l.line)) continue;
+    if (/^\s*\|/.test(l.text)) continue;
+    const withoutUrls = l.text.replace(URL_RE, "");
+    if (withoutUrls.length > 72) {
+      findings.push(
+        makeFinding(
+          "PRX-C-WRAP",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `body line is ${l.text.length} columns ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            `(${withoutUrls.length} excluding URL tokens; advisory limit 72)`,
+          l.line
+        )
+      );
+    }
+  }
+
+  // PRX-C-TRAILER — recognized-trailer grammar is validated WHEREVER the
+  // trailer appears (r2 BYP-C-02): the formal final block's entries AND
+  // every recognized governed-key line in ordinary body text, from the one
+  // line-indexed record built by the parser. A malformed lone
+  // Co-Authored-By is a trailer-grammar error and never activates the
+  // governed Run-Id/Evidence requirements (R3).
+  const governedPresent = trailerRecord.some(
+    e => e.canonical === "Run-Id" || e.canonical === "Evidence"
+  );
+  if (trailers) {
+    for (const e of trailers.entries) {
+      if (e.value === "") {
+        findings.push(
+          makeFinding(
+            "PRX-C-TRAILER",
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            `trailer "${e.key}" has an empty value`,
+            e.line
+          )
+        );
+      }
+    }
+  }
+  for (const e of trailerRecord) {
+    if (e.inBlock) continue;
+    findings.push(
+      makeFinding(
+        "PRX-C-TRAILER",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+        `governed trailer "${e.key}" appears outside the formal trailer ` +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          "block; git tooling does not parse it there — move it into the " +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          "final trailer block",
+        e.line
+      )
+    );
+    if (e.value === "") {
+      findings.push(
+        makeFinding(
+          "PRX-C-TRAILER",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `trailer "${e.key}" has an empty value`,
+          e.line
+        )
+      );
+    }
+  }
+  const governedCounts = new Map();
+  for (const e of trailerRecord) {
+    if (!e.governed) continue;
+    governedCounts.set(e.canonical, (governedCounts.get(e.canonical) ?? 0) + 1);
+  }
+  for (const [canonical, count] of governedCounts) {
+    if (canonical !== "Co-Authored-By" && count > 1) {
+      findings.push(
+        makeFinding(
+          "PRX-C-TRAILER",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `governed trailer "${canonical}" appears ${count} times ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            "(exactly once required)"
+        )
+      );
+    }
+  }
+  for (const e of trailerRecord) {
+    if (e.canonical === "Co-Authored-By" && !CO_AUTHOR_RE.test(e.value)) {
+      findings.push(
+        makeFinding(
+          "PRX-C-TRAILER",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `${e.key} "${truncate(e.value)}" is not "Name <email>"`,
+          e.line
+        )
+      );
+    }
+  }
+
+  // PRX-C-GOV — the governed-scope predicate: explicit opt-in from the
+  // caller, or the commit declares itself governed by carrying a governed
+  // identity trailer ANYWHERE in ordinary body text (canonical record).
+  // Whether a commit OUGHT to be governed is a reviewer rule; this library
+  // enforces the schema once the scope applies.
+  const governed = opts.governed === true || governedPresent;
+  if (governed) {
+    const byCanonical = key => trailerRecord.filter(e => e.canonical === key);
+    const runIds = byCanonical("Run-Id");
+    if (runIds.length !== 1) {
+      findings.push(
+        makeFinding(
+          "PRX-C-GOV",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `governed commit must carry Run-Id exactly once (found ${runIds.length})`
+        )
+      );
+    } else if (!RUN_ID_RE.test(runIds[0].value)) {
+      findings.push(
+        makeFinding(
+          "PRX-C-GOV",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `Run-Id "${truncate(runIds[0].value)}" does not match ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            "ONE-YYYYMMDD-TOKEN",
+          runIds[0].line
+        )
+      );
+    }
+    const evidences = byCanonical("Evidence");
+    if (evidences.length !== 1) {
+      findings.push(
+        makeFinding(
+          "PRX-C-GOV",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `governed commit must carry Evidence exactly once (found ${evidences.length})`
+        )
+      );
+    } else if (!validateEvidenceRef(evidences[0].value).valid) {
+      findings.push(
+        makeFinding(
+          "PRX-C-GOV",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          `Evidence "${truncate(evidences[0].value)}" is not a bounded run/ ` +
+            // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+            "or docs/ reference (or UNKNOWN)",
+          evidences[0].line
+        )
+      );
+    }
+    // Presence only: the value grammar is already enforced by the
+    // always-on PRX-C-TRAILER pass above, governed or not (R3).
+    if (byCanonical("Co-Authored-By").length === 0) {
+      findings.push(
+        makeFinding(
+          "PRX-C-GOV",
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          "governed commit must carry at least one Co-Authored-By trailer"
+        )
+      );
+    }
+  }
+
+  // PRX-C-MOOD (heuristic, declared) — a copula in the subject description
+  // suggests indicative narration. This is the ONLY machine mood check;
+  // imperative mood in general is a reviewer rule (SOL-PRX-007 honesty).
+  const description = subject.replace(PREFIX_STRIP_RE, "").trim() || subject;
+  if (COPULA_RE.test(description)) {
+    findings.push(
+      makeFinding(
+        "PRX-C-MOOD",
+        // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+        "subject reads as indicative (copula heuristic); write the summary " +
+          // Stryker disable next-line StringLiteral: diagnostic message text (R8 exclusion)
+          "as an instruction",
+        1
+      )
+    );
+  }
+
+  return findings;
+}
+
+// Message-SHAPE detection only (r2 BYP-C-04): the generated subject shape
+// plus the generated body marker. This never grants an exemption — it only
+// feeds the PRX-C-CONTEXT-UNVERIFIED advisory. A verified revert
+// classification must come from a trusted caller (opts.verifiedRevert);
+// a conventional `revert:` subject needs no exemption at all.
+function isRevertShaped(subject, bodyLines) {
+  return (
+    /^Revert "/.test(subject) &&
+    bodyLines.some(l => /^This reverts commit [0-9a-f]{7,40}\b/.test(l.text))
+  );
+}
+
+function truncate(s) {
+  return s.length > 60 ? `${s.slice(0, 57)}...` : s;
+}

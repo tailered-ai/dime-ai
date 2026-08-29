@@ -1,0 +1,9 @@
+{
+  "fixture": "body/B09.md",
+  "mechanism": "violations hidden in a fence",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-B-FENCE"
+  ],
+  "adaptation_notes": "unlabeled fence classified as narrative-like; fenced content audited, never invisible"
+}

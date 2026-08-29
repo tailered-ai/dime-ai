@@ -1,0 +1,9 @@
+{
+  "fixture": "r2/commit/R2C05.txt",
+  "mechanism": "BYP-C-02: malformed Co-Authored-By in a non-final block fails (placement + value grammar)",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-TRAILER",
+    "error:PRX-C-TRAILER"
+  ]
+}

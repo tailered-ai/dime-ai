@@ -1,0 +1,7 @@
+{
+  "fixture": "r2/body/PC513.md",
+  "mechanism": "r3 pre-cap boundary (over): 513 leading blockquote markers exceed BLOCKQUOTE_DEPTH_CAP = 512, so parseBody throws BEFORE parsing and checkBody degrades to exactly one PRX-B-SIZE finding, identically in every environment",
+  "expected_findings": [
+    "error:PRX-B-SIZE"
+  ]
+}

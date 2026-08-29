@@ -1,0 +1,10 @@
+{
+  "fixture": "commit/C10.txt",
+  "mechanism": "indicative sentence with allowed opener",
+  "options": {},
+  "expected_findings": [
+    "advisory:PRX-C-MOOD",
+    "error:PRX-C-PREFIX"
+  ],
+  "adaptation_notes": "copula heuristic advisory + deterministic repo prefix error; no silent pass"
+}

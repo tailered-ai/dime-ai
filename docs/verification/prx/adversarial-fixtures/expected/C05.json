@@ -1,0 +1,12 @@
+{
+  "fixture": "commit/C05.txt",
+  "mechanism": "trailer-key wrap bypass",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-GOV",
+    "error:PRX-C-GOV",
+    "error:PRX-C-GOV",
+    "error:PRX-C-PREFIX"
+  ],
+  "adaptation_notes": "formal trailer parse: the final Evidence: block is a trailer, so the governed grammar fires (missing Run-Id/Co-Authored-By, invalid Evidence value); no whole-line prose exemption exists"
+}

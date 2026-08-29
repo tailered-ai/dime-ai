@@ -1,0 +1,22 @@
+{
+  "fixture": "r2/body/R2B07.md",
+  "mechanism": "BYP-B-01/02: a body whose every node renders as nothing fails PRX-B-VISIBLE (meaningful text, not node count) alongside the 14 missing sections",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-VISIBLE",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING",
+    "error:PRX-B-SECTION-MISSING"
+  ]
+}

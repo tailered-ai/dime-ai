@@ -1,0 +1,4 @@
+Add policy gate
+
+```
+This prose remains hidden after an unclosed fence and the gate still returns success even though the message is malformed.

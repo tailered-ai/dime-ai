@@ -1,0 +1,9 @@
+{
+  "fixture": "r2/commit/R2C12.txt",
+  "mechanism": "BYP-C-07: TAB in the subject and U+2028 in body text are rejected by the context-sensitive control policy",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-SUBJECT",
+    "error:PRX-C-CONTROL"
+  ]
+}

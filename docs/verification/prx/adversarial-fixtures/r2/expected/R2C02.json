@@ -1,0 +1,9 @@
+{
+  "fixture": "r2/commit/R2C02.txt",
+  "mechanism": "BYP-C-01: case-variant duplicate pair (Run-Id + run-id) trips duplicate detection and the governed count",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-TRAILER",
+    "error:PRX-C-GOV"
+  ]
+}

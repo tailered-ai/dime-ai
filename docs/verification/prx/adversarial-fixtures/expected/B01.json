@@ -1,0 +1,15 @@
+{
+  "fixture": "body/B01.md",
+  "mechanism": "junk capsule values and duplicate key",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-CAPSULE",
+    "error:PRX-B-CAPSULE",
+    "error:PRX-B-CAPSULE",
+    "error:PRX-B-CAPSULE",
+    "error:PRX-B-CAPSULE",
+    "error:PRX-B-CAPSULE",
+    "error:PRX-B-CAPSULE"
+  ],
+  "adaptation_notes": "7 capsule errors: duplicate Scope, placeholder Scope, empty Run-Id, invalid Base, invalid Head, missing Ledger, missing Evidence \u2014 errors, not warnings"
+}

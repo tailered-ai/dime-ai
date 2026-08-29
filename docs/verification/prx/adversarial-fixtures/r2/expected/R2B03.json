@@ -1,0 +1,9 @@
+{
+  "fixture": "r2/body/R2B03.md",
+  "mechanism": "BYP-B-01: mixed raw/entity/whitespace invisible sequences fail SECTION-EMPTY",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-SECTION-EMPTY",
+    "error:PRX-B-SECTION-EMPTY"
+  ]
+}

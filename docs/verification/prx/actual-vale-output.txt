@@ -1,0 +1,607 @@
+# PRX Vale evidence — remediated candidate (supersedes the first-iteration run)
+# Binary: vale 3.17.1, downloaded per vale-lock.json, tarball SHA-256 re-verified before this run.
+=== Vale 3.17.1 (pinned; tarball sha256 verified against vale-lock.json macos_arm64) — 2026-08-13T09:29:13Z ===
+
+--- docs/verification/prx/PRX-STANDARD-v1.1.md
+docs/verification/prx/PRX-STANDARD-v1.1.md:1:12:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:9:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:11:31:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:11:31:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:44:57:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:44:57:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:44:222:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:47:27:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:49:35:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:49:35:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:49:263:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:50:31:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:54:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:54:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:57:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:57:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:62:61:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:62:61:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:64:60:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:72:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:72:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:87:41:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:87:41:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:87:241:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:89:35:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:95:19:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:100:50:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:102:67:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:102:67:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:109:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:109:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:119:30:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:119:30:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:123:65:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:123:65:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:131:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:131:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:134:39:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:135:67:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:141:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:141:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:144:63:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:158:46:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:158:46:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:160:61:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:160:61:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:163:72:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:164:37:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:164:37:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:176:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:177:59:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/PRX-STANDARD-v1.1.md:178:42:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:183:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/PRX-STANDARD-v1.1.md:187:4:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/PRX-STANDARD-v1.1.md:187:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+exit=0 (0 = no error-level alerts; suggestions/warnings are the advisory style layer working)
+
+--- docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:1:29:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:3:20:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:10:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:10:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:20:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:20:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:22:57:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:22:57:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:23:57:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:28:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:29:17:PRXSTE.Dashes:Dash '–': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:30:19:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:33:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:33:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:41:30:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:48:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:48:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:63:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:67:36:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:67:36:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:88:35:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:99:51:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:99:51:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:101:53:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:106:60:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:106:60:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:109:71:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:115:25:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:119:4:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:119:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:123:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:123:4:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:127:10:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:127:10:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:130:9:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:133:4:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:133:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:137:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:140:4:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:140:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:142:32:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:145:67:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:147:30:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:152:4:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:152:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:155:31:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:155:31:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:156:44:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:160:4:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:169:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:171:58:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:171:58:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/SOL-REVIEW-DIRECTIVE-v1.1.md:180:37:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+exit=0 (0 = no error-level alerts; suggestions/warnings are the advisory style layer working)
+
+--- docs/verification/prx/threat-model.md
+docs/verification/prx/threat-model.md:1:25:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:10:52:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:32:37:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:32:37:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:35:41:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:52:83:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:53:127:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:53:127:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:54:92:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:55:53:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:55:53:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:55:105:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:55:248:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:55:248:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:55:479:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:55:479:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:55:679:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:55:679:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:55:876:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:55:964:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:56:87:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:56:87:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:56:96:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:57:109:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:57:293:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:57:293:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:57:401:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:58:49:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:58:58:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:59:81:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:59:81:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:59:89:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:59:362:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:59:362:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:59:438:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:60:19:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:60:19:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:60:27:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:61:52:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/threat-model.md:61:152:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:61:152:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:65:45:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:65:45:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:74:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:74:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/threat-model.md:79:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/threat-model.md:79:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+exit=0 (0 = no error-level alerts; suggestions/warnings are the advisory style layer working)
+
+--- docs/verification/prx/v1.0-to-v1.1-change-ledger.md
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:9:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:9:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:11:70:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:22:41:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:23:43:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:24:42:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:24:382:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:24:382:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:24:539:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:25:42:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:25:42:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:25:324:PRXSTE.Dashes:Dash '–': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:25:389:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:26:45:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:26:45:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:27:44:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:27:44:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:27:306:PRXSTE.Dashes:Dash '–': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:28:56:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:29:42:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:29:42:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:30:42:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:31:43:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:31:43:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:32:39:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:32:39:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:33:51:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:33:51:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:34:44:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:35:44:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:36:38:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:36:38:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:37:39:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:37:39:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:38:43:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:38:43:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:39:38:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:39:38:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:40:46:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:44:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:44:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:49:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:49:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:50:76:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:53:6:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:53:6:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:55:60:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:55:60:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:70:39:PRXSTE.Dashes:Dash '–': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:77:103:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:78:101:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:78:101:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:79:170:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:79:423:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:79:423:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:80:340:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:80:340:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:81:8:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:82:65:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:82:65:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:83:324:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:84:92:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:84:92:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:85:100:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:85:100:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:86:92:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:86:92:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:86:331:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:87:68:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/v1.0-to-v1.1-change-ledger.md:87:68:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+exit=0 (0 = no error-level alerts; suggestions/warnings are the advisory style layer working)
+
+--- docs/verification/prx/remediation-disposition.md
+docs/verification/prx/remediation-disposition.md:1:36:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:13:7:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:15:31:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:15:31:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:16:28:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:16:28:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:17:73:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:30:7:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:32:32:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:32:32:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:36:33:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:40:43:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:41:20:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:41:20:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:47:7:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:49:32:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:49:32:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:53:44:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:62:54:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:62:54:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:68:11:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:71:7:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:77:24:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:77:24:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:79:29:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:81:13:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:82:50:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:83:21:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:83:21:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:90:7:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:95:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:95:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:98:23:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:98:23:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:103:24:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:107:7:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:109:31:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:109:31:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:115:3:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:115:3:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:126:7:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:128:32:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:128:32:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:131:55:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:132:24:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:132:24:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:137:38:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:139:17:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:143:7:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:145:56:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:145:56:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:147:62:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:152:19:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:152:19:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:153:32:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:156:54:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:156:54:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:160:50:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:160:50:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:165:34:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:167:23:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:167:23:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:178:7:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:181:43:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:181:43:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:187:35:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:194:8:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:196:31:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:196:31:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:200:19:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:200:19:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:207:8:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:209:16:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:214:35:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:218:3:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:222:3:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:222:3:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:224:7:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/remediation-disposition.md:225:3:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/remediation-disposition.md:225:3:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:230:3:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/remediation-disposition.md:231:18:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+exit=0 (0 = no error-level alerts; suggestions/warnings are the advisory style layer working)
+
+--- docs/verification/prx/mutation-blocking-dispositions.md
+docs/verification/prx/mutation-blocking-dispositions.md:1:12:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:3:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:3:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:3:56:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:17:3:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:17:3:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:24:36:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:27:3:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:27:3:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:34:29:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:34:29:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:43:48:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:43:48:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:52:29:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:56:3:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:56:3:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:59:53:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:63:3:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:63:3:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:77:3:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:86:237:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:88:90:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:88:149:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:88:149:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:89:73:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:89:73:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:89:232:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:90:148:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:91:89:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:91:89:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:91:216:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:92:118:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:93:90:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:93:90:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:93:207:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:94:239:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:94:239:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:95:76:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:95:76:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:96:114:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:97:76:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:97:76:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:98:76:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:98:76:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:99:76:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:99:76:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:102:85:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:102:254:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:103:92:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:103:92:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:103:216:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:104:56:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:104:56:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:104:216:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:105:56:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:106:74:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:106:74:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:106:287:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:107:56:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:108:56:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:108:56:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:109:56:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:109:206:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:109:206:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:110:56:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:110:56:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:111:114:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:112:270:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:113:74:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:113:74:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:113:268:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:114:109:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:115:58:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:116:73:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:116:73:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:116:240:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:117:67:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:117:194:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:118:58:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:118:58:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:118:248:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:125:102:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:125:161:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:126:98:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:126:157:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:127:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:127:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:128:89:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:128:148:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:129:98:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:129:157:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:130:90:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:130:149:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:136:55:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:136:55:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:137:79:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:137:79:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:137:132:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:138:71:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:138:71:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:138:164:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:141:204:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:141:204:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:141:337:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:142:64:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:142:64:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:143:51:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:143:51:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:144:102:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:144:161:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:145:55:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:145:55:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:145:129:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:146:176:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:147:242:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:148:99:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:148:158:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:149:88:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:149:147:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:150:90:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:150:149:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:151:99:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:151:158:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:152:91:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:152:150:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:158:157:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:158:157:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:159:55:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:159:55:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:160:82:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:160:82:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:160:254:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:161:249:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:162:72:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:163:65:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:163:65:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:163:370:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:164:107:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:164:147:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:165:65:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:165:65:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:165:370:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:166:87:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:167:267:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:167:267:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:168:73:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:168:73:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:168:156:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:169:65:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:169:65:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:169:373:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:171:65:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:171:65:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:171:373:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:172:65:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:172:65:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:172:373:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:173:89:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:173:89:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:176:66:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:176:66:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:176:254:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:177:63:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:177:63:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:178:250:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:179:115:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:179:115:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:179:198:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:180:93:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:180:93:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:186:96:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:186:96:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:186:217:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:187:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:187:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:187:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:188:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:188:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:188:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:189:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:189:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:189:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:190:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:190:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:190:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:191:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:191:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:191:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:192:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:192:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:192:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:193:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:193:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:193:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:194:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:194:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:194:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:195:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:195:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:195:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:196:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:196:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:196:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:197:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:197:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:197:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:198:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:198:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:198:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:199:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:199:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:199:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:200:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:200:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:200:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:201:97:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:201:156:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:201:156:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:202:66:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:202:66:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:202:261:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:203:121:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:203:180:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:203:180:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:204:87:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:204:146:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:204:146:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:205:71:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:205:71:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:207:66:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:207:66:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:207:235:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:217:58:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:217:58:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:217:305:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:218:55:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:218:55:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:218:180:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:219:55:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:219:55:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:219:180:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:220:55:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:220:55:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:220:180:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:221:65:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/mutation-blocking-dispositions.md:221:65:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:222:102:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:222:161:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:223:99:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:223:158:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+docs/verification/prx/mutation-blocking-dispositions.md:224:91:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/mutation-blocking-dispositions.md:224:150:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+exit=0 (0 = no error-level alerts; suggestions/warnings are the advisory style layer working)
+
+=== negative controls (every rule must fire) ===
+--- docs/verification/prx/vale-controls/dashes.md
+docs/verification/prx/vale-controls/dashes.md:1:10:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+docs/verification/prx/vale-controls/dashes.md:1:26:PRXSTE.Dashes:Dash '—': house style allows it; a comma, colon, or parentheses may read plainer.
+exit=0
+--- docs/verification/prx/vale-controls/filler.md
+docs/verification/prx/vale-controls/filler.md:1:9:PRXSTE.Filler:Filler word 'basically' adds no information.
+exit=0
+--- docs/verification/prx/vale-controls/hedging.md
+docs/verification/prx/vale-controls/hedging.md:1:12:PRXSTE.Hedging:Vague hedge 'should be fine': state the verified fact, an evidence-backed probability, or UNKNOWN.
+exit=1
+--- docs/verification/prx/vale-controls/nolitotes.md
+docs/verification/prx/vale-controls/nolitotes.md:1:15:PRXSTE.NoLitotes:Litotes 'not unreasonable' hides the direct claim; state it plainly.
+exit=0
+--- docs/verification/prx/vale-controls/plainwords.md
+docs/verification/prx/vale-controls/plainwords.md:1:4:PRXSTE.PlainWords:Prefer the plain form: use 'use' instead of 'utilize'.
+docs/verification/prx/vale-controls/plainwords.md:1:23:PRXSTE.PlainWords:Prefer the plain form: use 'before' instead of 'prior to'.
+docs/verification/prx/vale-controls/plainwords.md:1:43:PRXSTE.PlainWords:Prefer the plain form: use 'to' instead of 'in order to'.
+exit=1
+--- docs/verification/prx/vale-controls/sentence-limit.md
+docs/verification/prx/vale-controls/sentence-limit.md:1:1:PRXSTE.SentenceLengthLimit:Sentence exceeds the 25-word STE-inspired limit; split it.
+docs/verification/prx/vale-controls/sentence-limit.md:1:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+exit=0
+--- docs/verification/prx/vale-controls/sentence-target.md
+docs/verification/prx/vale-controls/sentence-target.md:1:1:PRXSTE.SentenceLengthTarget:Sentence exceeds the 20-word STE-inspired target.
+exit=0

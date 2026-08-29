@@ -1,0 +1,8 @@
+{
+  "fixture": "r2/commit/R2C14.txt",
+  "mechanism": "BYP-C-09: a three-backtick marker cannot close a five-backtick fence (CommonMark closing length rule); the fence is unclosed",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-C-FENCE"
+  ]
+}

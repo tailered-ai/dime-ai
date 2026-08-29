@@ -1,0 +1,9 @@
+{
+  "fixture": "body/B02.md",
+  "mechanism": "prose before capsule",
+  "options": {},
+  "expected_findings": [
+    "error:PRX-B-CAPSULE"
+  ],
+  "adaptation_notes": "capsule must be the first visible block"
+}
