@@ -55,7 +55,7 @@ describe("Mobile Floating Nav — Config & Feature Flags", () => {
     const paths = MOBILE_NAV_TABS.map(t => t.path);
     expect(paths).toEqual([
       "/feed/model/mlb",
-      "/betting-splits/MLB",
+      "/betting-splits/NCAAF",
       "/chat",
       "/bet-tracker",
       "/profile",
@@ -288,7 +288,7 @@ describe("Mobile Floating Nav — Destinations Map Onto Existing Routes", () => 
   it("Feed/Tools/Tracker destinations route to their canonical path-based surfaces", () => {
     const byId = new Map(MOBILE_NAV_TABS.map(t => [t.id, t.path]));
     expect(byId.get("feed")).toBe("/feed/model/mlb");
-    expect(byId.get("tools")).toBe("/betting-splits/MLB");
+    expect(byId.get("tools")).toBe("/betting-splits/NCAAF");
     expect(byId.get("tracker")).toBe("/bet-tracker");
   });
 
@@ -304,7 +304,7 @@ describe("Mobile Floating Nav — Destinations Map Onto Existing Routes", () => 
       t.path.startsWith("/betting-splits")
     );
     expect(splitsTabs.map(t => t.id)).toEqual(["tools"]);
-    expect(splitsTabs[0]?.path).toBe("/betting-splits/MLB");
+    expect(splitsTabs[0]?.path).toBe("/betting-splits/NCAAF");
   });
 
   it("no destination targets an /m/* screen (the bar left /m/props behind)", () => {
