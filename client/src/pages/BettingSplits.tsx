@@ -26,6 +26,8 @@ const CDN_NBA =
 
 // League pill logos — rendered only for in-season leagues (see leagueSeasons).
 const LEAGUE_LOGOS: Record<SplitsLeague, string> = {
+  NCAAF:
+    "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-football-college.png",
   MLB: "https://www.mlbstatic.com/team-logos/league-on-dark/1.svg",
   NHL: "https://assets.nhle.com/logos/nhl/svg/NHL_light.svg",
   NBA: CDN_NBA,
@@ -338,7 +340,7 @@ function SearchResultRow({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export interface BettingSplitsPageProps {
-  initialSport?: "MLB" | "NHL" | "NBA";
+  initialSport?: SplitsLeague;
   /** ISO date parsed from the canonical URL; URL state is authoritative. */
   initialDate?: string;
   /**
@@ -356,7 +358,7 @@ export interface BettingSplitsPageProps {
 const identityRouteHref = (href: string) => href;
 
 export default function BettingSplitsPage({
-  initialSport = "MLB",
+  initialSport = "NCAAF",
   initialDate,
   initialDateSource = initialDate ? "url-explicit" : "app-default",
   resolveRouteHref = identityRouteHref,
@@ -367,15 +369,14 @@ export default function BettingSplitsPage({
   const [showAgeModal, setShowAgeModal] = useState(false);
   // Sport is seeded from the canonical route (/betting-splits/:sport) and the
   // URL is kept in sync on pill changes so the address bar stays shareable.
-  const [selectedSport, setSelectedSportState] = useState<
-    "MLB" | "NHL" | "NBA"
-  >(initialSport);
+  const [selectedSport, setSelectedSportState] =
+    useState<SplitsLeague>(initialSport);
   const [selectedDate, setSelectedDateState] = useState<string>(
     initialDate ?? todayUTC()
   );
   const userSelectedDateRef = useRef(false);
   const setSelectedSport = useCallback(
-    (sport: "MLB" | "NHL" | "NBA") => {
+    (sport: SplitsLeague) => {
       setSelectedSportState(sport);
       // Analytics: fire-and-forget, inert until the pipeline is enabled server-side.
       trackAction("splits_sport_switched", { props: { sport } });
@@ -1020,11 +1021,13 @@ export default function BettingSplitsPage({
                   whiteSpace: "nowrap",
                 }}
               >
-                {selectedSport === "MLB"
-                  ? "MLB BASEBALL"
-                  : selectedSport === "NHL"
-                    ? "NHL HOCKEY"
-                    : "NBA BASKETBALL"}
+                {selectedSport === "NCAAF"
+                  ? "NCAAF FOOTBALL"
+                  : selectedSport === "MLB"
+                    ? "MLB BASEBALL"
+                    : selectedSport === "NHL"
+                      ? "NHL HOCKEY"
+                      : "NBA BASKETBALL"}
               </span>
             </div>
             {/* 2026-08-05: splitsAgoLabel was computed but never rendered —

@@ -91,7 +91,7 @@ export { invalidateStatsCacheForUser } from "../betTrackerStatsCache";
 // ─── Shared Zod enums ─────────────────────────────────────────────────────────
 
 const RESULTS    = ["PENDING", "WIN", "LOSS", "PUSH", "VOID"] as const;
-const SPORTS     = ["MLB", "NBA", "NHL", "NCAAM", "NFL", "CUSTOM"] as const;
+const SPORTS     = ["NCAAF", "MLB", "NBA", "NHL", "NCAAM", "NFL", "CUSTOM"] as const;
 const TIMEFRAMES = [
   "FULL_GAME",
   "FIRST_5",
@@ -1183,7 +1183,7 @@ export const betTrackerRouter = router({
    */
   getSlate: appUserProcedure
     .input(z.object({
-      sport:    z.enum(["MLB", "NBA", "NHL", "NCAAM"]),
+      sport:    z.enum(["NCAAF", "MLB", "NBA", "NHL", "NCAAM"]),
       gameDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     }))
     .query(async ({ ctx, input }) => {

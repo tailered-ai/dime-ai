@@ -34,7 +34,7 @@ export interface MobileNavTabConfig {
 // screen stay reachable by URL, just not from the primary bar).
 export const MOBILE_NAV_TABS: MobileNavTabConfig[] = [
   { id: "feed", label: "Feed", path: "/feed/model/mlb" },
-  { id: "tools", label: "Tools", path: "/betting-splits/MLB" },
+  { id: "tools", label: "Tools", path: "/betting-splits/NCAAF" },
   { id: "chat", label: "Chat", path: "/chat" },
   // Visible label is the short "Tracker" (product directive 2026-07-18); the
   // product name stays "Bet Tracker" (aria-label + everywhere off the pill).

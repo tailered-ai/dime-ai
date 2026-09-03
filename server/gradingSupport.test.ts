@@ -37,10 +37,17 @@ describe("sports with a score feed", () => {
     expect(graderSrc).toMatch(/async function fetchNflScores/);
   });
 
-  it("covers all five feed-backed sports", () => {
+  it("NCAAF is gradeable through the shared football score shape", () => {
+    expect(isGradableSport("NCAAF")).toBe(true);
+    expect(graderSrc).toMatch(/case "NCAAF":\s*data = await fetchNcaafScores/);
+    expect(graderSrc).toMatch(/fetchNflScores\(date, "NCAAF"\)/);
+  });
+
+  it("covers all six feed-backed sports", () => {
     expect(GRADABLE_SPORTS.sort()).toEqual([
       "MLB",
       "NBA",
+      "NCAAF",
       "NCAAM",
       "NFL",
       "NHL",
@@ -123,6 +130,15 @@ describe("timeframe support per sport", () => {
 
   it("NFL carries quarters and halves", () => {
     expect([...SPORT_TIMEFRAMES.NFL].sort()).toEqual([
+      "FIRST_HALF",
+      "FIRST_QUARTER",
+      "FULL_GAME",
+      "REGULATION",
+    ]);
+  });
+
+  it("NCAAF carries the same football periods", () => {
+    expect([...SPORT_TIMEFRAMES.NCAAF].sort()).toEqual([
       "FIRST_HALF",
       "FIRST_QUARTER",
       "FULL_GAME",
@@ -214,6 +230,7 @@ describe("the declared matrix matches the grader's implementation", () => {
   }
 
   const FETCHERS: Record<GradableSport, string> = {
+    NCAAF: "fetchNflScores",
     MLB: "fetchMlbScores",
     NHL: "fetchNhlScores",
     NBA: "fetchNbaScores",

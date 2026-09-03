@@ -401,7 +401,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
               (tablet/desktop have no bottom tab bar; non-owners never do) */}
           {!props.embeddedInShell && (
             <nav className="dmf-nav" aria-label="Dime surfaces">
-              <Link href={bettingSplitsPath("MLB")} className="dmf-navlink">Splits</Link>
+              <Link href={bettingSplitsPath()} className="dmf-navlink">Splits</Link>
               <Link href="/chat" className="dmf-navlink">Chat</Link>
               <Link href="/profile" className="dmf-navlink">Profile</Link>
             </nav>

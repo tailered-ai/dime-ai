@@ -1472,7 +1472,7 @@ async function startServer() {
   // its ?tab=… query hooks, the public /splits page, /projections, /dashboard)
   // are permanently routed to the canonical surfaces:
   //   /feed/model/{mlb|wc}-MM-DD-YYYY  (AI Model Projections)
-  //   /betting-splits/MLB              (Betting Splits)
+  //   /betting-splits/NCAAF            (Betting Splits)
   // Client-side <Redirect>s in App.tsx cover SPA navigations; this middleware
   // covers full-page loads (bookmarks, Discord links, crawlers) with a real
   // HTTP 308 so the legacy URLs drop out of caches and search indexes.
@@ -1506,7 +1506,7 @@ async function startServer() {
     const tab = firstQueryValue(req.query.tab);
     let target: string;
     if (req.path === "/splits" || tab === "splits") {
-      target = "/betting-splits/MLB";
+      target = "/betting-splits/NCAAF";
     } else {
       const sport =
         firstQueryValue(req.query.sport).toUpperCase() === "WC" ? "wc" : "mlb";

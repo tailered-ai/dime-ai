@@ -46,9 +46,9 @@ describe("Legacy slug eradication — server 308 layer", () => {
     expect(serverSrc).toMatch(/res\.redirect\(308, target\)/);
   });
 
-  it("maps /splits and ?tab=splits to /betting-splits/MLB", () => {
+  it("maps /splits and ?tab=splits to /betting-splits/NCAAF", () => {
     expect(serverSrc).toMatch(/req\.path === "\/splits" \|\| tab === "splits"/);
-    expect(serverSrc).toMatch(/target = "\/betting-splits\/MLB"/);
+    expect(serverSrc).toMatch(/target = "\/betting-splits\/NCAAF"/);
   });
 
   it("maps everything else to the dated canonical feed slug", () => {
@@ -125,7 +125,7 @@ describe("Legacy slug eradication — client router", () => {
       /path="\/feed"> ?\{\(\) => ?\( ?<Redirect to=\{legacyFeedRedirectTarget\(window\.location\.search\)\} replace \/> ?\) ?\}|path="\/feed">\{\(\) => <Redirect to=\{legacyFeedRedirectTarget\(window\.location\.search\)\} replace \/>/
     );
     expect(flat).toMatch(
-      /path="\/splits"> ?\{\(\) => <Redirect to=\{bettingSplitsPath\("MLB"\)\} replace \/>/
+      /path="\/splits"> ?\{\(\) => <Redirect to=\{bettingSplitsPath\(\)\} replace \/>/
     );
     expect(flat).toMatch(
       /path="\/dashboard"> ?\{\(\) => ?\(? ?<Redirect to=\{feedModelPath\("MLB"\)\} replace \/>/
@@ -162,7 +162,7 @@ describe("Legacy slug eradication — navigation hooks", () => {
   it("mobile tab config carries no query-string hooks", () => {
     expect(configSrc).not.toMatch(/\?tab=/);
     expect(configSrc).toMatch(/"\/feed\/model\/mlb"/);
-    expect(configSrc).toMatch(/"\/betting-splits\/MLB"/);
+    expect(configSrc).toMatch(/"\/betting-splits\/NCAAF"/);
     expect(configSrc).toMatch(/"\/bet-tracker"/);
   });
 

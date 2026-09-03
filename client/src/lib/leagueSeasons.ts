@@ -15,7 +15,7 @@
  *    result returns every league rather than blanking the page.
  */
 
-export const SPLITS_LEAGUES = ["MLB", "NHL", "NBA"] as const;
+export const SPLITS_LEAGUES = ["NCAAF", "MLB", "NHL", "NBA"] as const;
 export type SplitsLeague = (typeof SPLITS_LEAGUES)[number];
 
 /**
@@ -26,6 +26,7 @@ export type SplitsLeague = (typeof SPLITS_LEAGUES)[number];
  *  - NBA: preseason-to-opening-week October start → Finals (mid/late June).
  */
 const SEASON_WINDOWS: Record<SplitsLeague, { start: string; end: string }> = {
+  NCAAF: { start: "08-15", end: "01-31" },
   MLB: { start: "03-15", end: "11-10" },
   NHL: { start: "10-01", end: "06-30" },
   NBA: { start: "10-15", end: "06-30" },

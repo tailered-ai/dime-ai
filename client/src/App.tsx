@@ -243,7 +243,7 @@ function Router() {
           {() => <Redirect to={feedModelPath("MLB")} replace />}
         </Route>
         <Route path="/splits">
-          {() => <Redirect to={bettingSplitsPath("MLB")} replace />}
+          {() => <Redirect to={bettingSplitsPath()} replace />}
         </Route>
         {/* Legal pages — public, no auth required */}
         <Route path="/privacy" component={Privacy} />
@@ -286,7 +286,7 @@ function Router() {
         <Route path="/checkout" component={CheckoutPage} />
         {/* ── Protected routes (RequireAuth redirects to /login if not authed) ── */}
         {/* Legacy /feed (+ ?tab=… query hooks) → canonical surfaces. tab=splits
-          maps to /betting-splits/MLB; everything else to the dated feed URL. */}
+          maps to /betting-splits/NCAAF; everything else to the dated feed URL. */}
         <Route path="/feed">
           {() => (
             <Redirect
@@ -326,7 +326,7 @@ function Router() {
           {p => <StandaloneSplitsRoute sportSegment={p.sport} />}
         </Route>
         <Route path="/betting-splits">
-          {() => <Redirect to={bettingSplitsPath("MLB")} replace />}
+          {() => <Redirect to={bettingSplitsPath()} replace />}
         </Route>
         {/* /trends is a shell-owned (≥768px) surface. Below the shell
             boundary there is no Trends pane — the accordions still live on
