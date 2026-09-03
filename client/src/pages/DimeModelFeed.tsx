@@ -1152,9 +1152,9 @@ export interface FeedSection {
 }
 
 /** Combined slate (owner directive 2026-07-18): ONE collective feed for the
- *  date — World Cup section on top, MLB beneath it (CBS-scores league grouping;
+ *  date — World Cup section on top, NCAAF above MLB (CBS-scores league grouping;
  *  only the grouping/order is mirrored, nothing else). A league renders only
- *  when it has games that date, so post-final WC dates are pure MLB with no
+ *  when it has games that date, so inactive leagues leave no empty header.
  *  empty header. Within a section the existing slate order holds. */
 export function buildFeedSections(
   wcCards: FeedCardSpec[],
@@ -1196,7 +1196,7 @@ function useFeedCards(
   const ncaafQuery = trpc.games.list.useQuery(
     { sport: "NCAAF", gameDate: isoDate },
     {
-      enabled: !!isoDate && ncaafOnly,
+      enabled: !!isoDate,
       refetchOnWindowFocus: false,
       refetchInterval: 60 * 1000,
       staleTime: 60 * 1000,
@@ -1240,35 +1240,45 @@ function useFeedCards(
     // 2026-07-17; timeToMinutes sends TBD times to the bottom), then LIVE
     // above upcoming above FINAL (2026-07-18) — the stable sort keeps the
     // time order within each tier. Tiers apply WITHIN a league section; the
-    // WC-above-MLB section order is absolute.
+    // WC → NCAAF → MLB section order is absolute.
     const wcCards = ((wcQuery.data ?? []) as WcMatch[])
       .map((m) => wcMatchToCard(m, isoDate))
+      .sort((a, b) => slateStatusRank(a) - slateStatusRank(b));
+    const ncaafCards = [...((ncaafQuery.data ?? []) as MlbRow[])]
+      .sort((a, b) => timeToMinutes(a.startTimeEst) - timeToMinutes(b.startTimeEst))
+      .map(ncaafRowToCard)
       .sort((a, b) => slateStatusRank(a) - slateStatusRank(b));
     const lineupByGameId = (mlbLineupsQuery.data ?? {}) as Record<number, MlbLineupLike>;
     const mlbCards = [...((mlbQuery.data ?? []) as MlbRow[])]
       .sort((a, b) => timeToMinutes(a.startTimeEst) - timeToMinutes(b.startTimeEst))
       .map((game) => mlbRowToCard(game, lineupByGameId[game.id]))
       .sort((a, b) => slateStatusRank(a) - slateStatusRank(b));
-    return buildFeedSections(wcCards, mlbCards);
+    return buildFeedSections(wcCards, mlbCards, ncaafCards);
   }, [wcQuery.data, mlbQuery.data, mlbLineupsQuery.data, ncaafQuery.data, isoDate, ncaafOnly]);
 
-  const isLoading = ncaafOnly ? ncaafQuery.isLoading : wcQuery.isLoading || mlbQuery.isLoading;
+  const isLoading = ncaafOnly
+    ? ncaafQuery.isLoading
+    : wcQuery.isLoading || ncaafQuery.isLoading || mlbQuery.isLoading;
   // Stale = paging dates while placeholderData keeps the previous slate
   // mounted — the UI dims so the old cards are never mistaken for the new
   // date's numbers (this is a betting surface; wrong-slate reads cost money).
   const isStale = ncaafOnly
     ? ncaafQuery.isPlaceholderData && ncaafQuery.isFetching
     : (wcQuery.isPlaceholderData && wcQuery.isFetching) ||
+      (ncaafQuery.isPlaceholderData && ncaafQuery.isFetching) ||
       (mlbQuery.isPlaceholderData && mlbQuery.isFetching);
   const gamesCount = sections.reduce((n, s) => n + s.cards.length, 0);
   // Outage surface (audit D-FEED-ERROR / page law "query errors must be
   // surfaced"): with no data to show and every league query failed, the feed
   // must say so instead of claiming an empty slate.
-  const isError = ncaafOnly ? ncaafQuery.isError : mlbQuery.isError && wcQuery.isError;
+  const isError = ncaafOnly
+    ? ncaafQuery.isError
+    : mlbQuery.isError && ncaafQuery.isError && wcQuery.isError;
   const retry = () => {
     if (ncaafOnly) void ncaafQuery.refetch();
     else {
       void mlbQuery.refetch();
+      void ncaafQuery.refetch();
       void wcQuery.refetch();
     }
   };

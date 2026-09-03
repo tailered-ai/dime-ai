@@ -176,9 +176,9 @@ describe("DimeModelFeed — MLB bindings", () => {
     // the ones they can.
     expect(slateStatusRank({ status: "postponed" })).toBe(2);
     expect(slateStatusRank({ status: "suspended" })).toBe(2);
-    // The tier sort is applied to BOTH league sections of the combined slate
-    // (per-section — the WC-above-MLB section order is absolute).
-    expect(src.match(/\.sort\(\(a, b\) => slateStatusRank\(a\) - slateStatusRank\(b\)\)/g)).toHaveLength(3);
+    // The tier sort is applied per section: WC, combined NCAAF, MLB, plus the
+    // dedicated NCAAF route.
+    expect(src.match(/\.sort\(\(a, b\) => slateStatusRank\(a\) - slateStatusRank\(b\)\)/g)).toHaveLength(4);
   });
 
   it("derives the tier from status, not from the timeLabel string", () => {
@@ -356,14 +356,20 @@ describe("DimeModelFeed — combined slate (owner directive 2026-07-18)", () => 
   const card = (id: string): Parameters<typeof buildFeedSections>[0][number] =>
     ({ id, liveLabel: null, timeLabel: "7:05 PM ET" }) as Parameters<typeof buildFeedSections>[0][number];
 
-  it("sections order is absolute: World Cup on top, MLB beneath", () => {
-    const sections = buildFeedSections([card("wc-1"), card("wc-2")], [card("mlb-1")]);
-    expect(sections.map((s) => s.key)).toEqual(["WC", "MLB"]);
+  it("sections order is absolute: World Cup, NCAAF, then MLB", () => {
+    const sections = buildFeedSections(
+      [card("wc-1"), card("wc-2")],
+      [card("mlb-1")],
+      [card("ncaaf-1")],
+    );
+    expect(sections.map((s) => s.key)).toEqual(["WC", "NCAAF", "MLB"]);
     // Full spelled-out league names own the header width (2026-07-18).
     expect(sections[0].label).toBe("2026 FIFA World Cup");
-    expect(sections[1].label).toBe("Major League Baseball (MLB)");
+    expect(sections[1].label).toBe("College Football (NCAAF)");
+    expect(sections[2].label).toBe("Major League Baseball (MLB)");
     expect(sections[0].cards.map((c) => c.id)).toEqual(["wc-1", "wc-2"]);
-    expect(sections[1].cards.map((c) => c.id)).toEqual(["mlb-1"]);
+    expect(sections[1].cards.map((c) => c.id)).toEqual(["ncaaf-1"]);
+    expect(sections[2].cards.map((c) => c.id)).toEqual(["mlb-1"]);
   });
 
   it("a league with no games renders no section (no empty WC header post-final)", () => {
@@ -372,10 +378,11 @@ describe("DimeModelFeed — combined slate (owner directive 2026-07-18)", () => 
     expect(buildFeedSections([], [])).toEqual([]);
   });
 
-  it("the sport toggle chips are gone; NCAAF is isolated from the combined slate", () => {
+  it("the sport toggle chips are gone; NCAAF also loads into the combined slate", () => {
     expect(src).not.toMatch(/dmf-chip|dmf-sports|role="tablist"/);
     expect(src).toContain("enabled: !!isoDate && !ncaafOnly");
-    expect(src).toContain("enabled: !!isoDate && ncaafOnly");
+    expect(src).toMatch(/sport: "NCAAF"[\s\S]*?enabled: !!isoDate,/);
+    expect(src).toContain("buildFeedSections(wcCards, mlbCards, ncaafCards)");
   });
 
   it("league sections are collapsible containers with logo + full name, no counts", () => {
