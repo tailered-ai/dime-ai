@@ -9,7 +9,7 @@ import {
   legacyFeedRedirectTarget,
 } from "./feedRoutes";
 
-const SLUG_RE = /^\/feed\/model\/(mlb|wc|ncaaf)-\d{2}-\d{2}-\d{4}$/;
+const SLUG_RE = /^\/feed\/model\/\d{2}-\d{2}-\d{4}$/;
 const SPLITS_SLUG_RE = /^\/betting-splits\/(mlb|nhl|nba)-\d{2}-\d{2}-\d{4}$/;
 
 describe("feedRoutes — canonical path builders", () => {
@@ -18,20 +18,16 @@ describe("feedRoutes — canonical path builders", () => {
     expect(toFeedSlugDate("2026-01-02")).toBe("01-02-2026");
   });
 
-  it("feedModelPath builds dated lowercase slugs", () => {
-    expect(feedModelPath("MLB", "2026-07-11")).toBe(
-      "/feed/model/mlb-07-11-2026"
-    );
-    expect(feedModelPath("WC", "2026-07-11")).toBe("/feed/model/wc-07-11-2026");
-    expect(feedModelPath("NCAAF", "2026-09-03")).toBe(
-      "/feed/model/ncaaf-09-03-2026"
-    );
+  it("feedModelPath builds one sport-neutral daily slug", () => {
+    expect(feedModelPath("MLB", "2026-07-11")).toBe("/feed/model/07-11-2026");
+    expect(feedModelPath("WC", "2026-07-11")).toBe("/feed/model/07-11-2026");
+    expect(feedModelPath("NCAAF", "2026-09-03")).toBe("/feed/model/09-03-2026");
   });
 
-  it("feedModelPath defaults to MLB + today's effective date", () => {
+  it("feedModelPath defaults to today's effective date", () => {
     expect(feedModelPath()).toMatch(SLUG_RE);
-    expect(feedModelPath()).toContain("/feed/model/mlb-");
-    expect(feedModelPath("WC")).toContain("/feed/model/wc-");
+    expect(feedModelPath()).toMatch(/^\/feed\/model\/\d/);
+    expect(feedModelPath("WC")).toBe(feedModelPath("MLB"));
   });
 
   it("bettingSplitsPath mirrors the feed's lowercase MM-DD-YYYY slug", () => {
@@ -156,20 +152,17 @@ describe("feedRoutes — legacy /feed?… eradication mapping", () => {
       "?tab=hrprops",
     ]) {
       expect(legacyFeedRedirectTarget(q)).toMatch(SLUG_RE);
-      expect(legacyFeedRedirectTarget(q)).toContain("mlb-");
     }
   });
 
-  it("legacy ?sport=WC is preserved; unknown sports fall back to MLB", () => {
-    expect(legacyFeedRedirectTarget("?sport=WC")).toContain("/feed/model/wc-");
-    expect(legacyFeedRedirectTarget("?sport=NHL")).toContain(
-      "/feed/model/mlb-"
-    );
+  it("legacy sport queries converge on the combined feed", () => {
+    expect(legacyFeedRedirectTarget("?sport=WC")).toMatch(SLUG_RE);
+    expect(legacyFeedRedirectTarget("?sport=NHL")).toMatch(SLUG_RE);
   });
 
   it("legacy ?date=YYYY-MM-DD carries into the slug; invalid dates ignored", () => {
     expect(legacyFeedRedirectTarget("?sport=MLB&date=2026-07-04")).toBe(
-      "/feed/model/mlb-07-04-2026"
+      "/feed/model/07-04-2026"
     );
     expect(legacyFeedRedirectTarget("?date=07/04/2026")).toMatch(SLUG_RE);
     expect(legacyFeedRedirectTarget("?date=2026-02-30")).toMatch(SLUG_RE);

@@ -70,12 +70,15 @@ function useFeedPrefetch(authenticated: boolean) {
 
     prefetchedRef.current = true;
 
-    // Parse /feed/model/{mlb|wc}-MM-DD-YYYY (also the split /{sport}/{date}
-    // form and the bare /{sport} form, which canonicalizes to today).
+    // Parse the canonical date-only slug plus legacy sport-prefixed forms.
     const seg = pathname.split("/").filter(Boolean); // ["feed","model","mlb-07-11-2026"(,"07-11-2026")]
     let sport = (seg[2] ?? "").toLowerCase();
     let slugDate = seg[3] ?? "";
-    const combined = /^(mlb|wc)-(\d{2}-\d{2}-\d{4})$/.exec(sport);
+    if (!slugDate && /^\d{2}-\d{2}-\d{4}$/.test(sport)) {
+      slugDate = sport;
+      sport = "mlb";
+    }
+    const combined = /^(mlb|wc|ncaaf)-(\d{2}-\d{2}-\d{4})$/.exec(sport);
     if (combined) {
       sport = combined[1];
       slugDate = combined[2];

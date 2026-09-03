@@ -48,7 +48,7 @@ const SLATE = [
     time: "19:00",
     eventId: 288778,
     bookSpread: -27,
-    bookTotal: 50.5,
+    bookTotal: 51.5,
     modelSpread: -29.6,
     modelTotal: 53.6,
     awayScore: 12,
@@ -308,7 +308,10 @@ async function main() {
   );
 }
 
-main().catch(error => {
-  console.error(`${TAG}[FAIL]`, error);
-  process.exitCode = 1;
-});
+main().then(
+  () => process.exit(0),
+  error => {
+    console.error(`${TAG}[FAIL]`, error);
+    process.exit(1);
+  }
+);

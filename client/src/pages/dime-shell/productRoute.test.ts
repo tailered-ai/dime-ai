@@ -12,6 +12,11 @@ describe("parseDimeProductRoute", () => {
   });
 
   it("preserves combined and split feed route segments", () => {
+    expect(parseDimeProductRoute("/feed/model/07-11-2026")).toEqual({
+      pane: "feed",
+      sportSegment: "07-11-2026",
+      dateSegment: undefined,
+    });
     expect(parseDimeProductRoute("/feed/model/mlb-07-11-2026")).toEqual({
       pane: "feed",
       sportSegment: "mlb-07-11-2026",

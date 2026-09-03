@@ -2,7 +2,7 @@
  * feedRoutes — canonical navigation targets for the Dime AI surfaces.
  *
  * The ONLY link targets app code may emit for these surfaces:
- *   • AI Model Projections → /feed/model/{mlb|wc|ncaaf}-MM-DD-YYYY
+ *   • AI Model Projections → /feed/model/MM-DD-YYYY
  *   • Betting Splits       → /betting-splits/{mlb|nhl|nba}-MM-DD-YYYY
  *
  * Legacy slugs (/feed, /feed?tab=…, /splits, /projections, /dashboard) must
@@ -24,16 +24,16 @@ export function toFeedSlugDate(iso: string): string {
 }
 
 /**
- * Canonical AI Model Projections path, e.g. /feed/model/mlb-07-11-2026.
+ * Canonical combined AI Model Projections path, e.g. /feed/model/07-11-2026.
  * Defaults to today's effective feed date (todayUTC — the 07:00 UTC /
  * 00:00 PT rollover shared by the whole feed stack).
  */
 export function feedModelPath(
-  sport: FeedSport = "MLB",
+  _sport: FeedSport = "MLB",
   isoDate?: string
 ): string {
   const iso = isoDate ?? todayUTC();
-  return `/feed/model/${sport.toLowerCase()}-${toFeedSlugDate(iso)}`;
+  return `/feed/model/${toFeedSlugDate(iso)}`;
 }
 
 /**
@@ -143,8 +143,8 @@ export function canonicalBettingSplitsPath(
  * Maps a legacy /feed?… URL onto its canonical replacement. Pure — pass the
  * query string (window.location.search); "" handles the bare /feed slug.
  *   ?tab=splits            → /betting-splits/mlb-MM-DD-YYYY
- *   ?sport=WC[&date=ISO]   → /feed/model/wc-…
- *   anything else          → /feed/model/mlb-… (today, or legacy ?date=)
+ *   ?sport=WC[&date=ISO]   → /feed/model/MM-DD-YYYY
+ *   anything else          → /feed/model/MM-DD-YYYY (today, or legacy ?date=)
  */
 export function legacyFeedRedirectTarget(search: string): string {
   const params = new URLSearchParams(search);
