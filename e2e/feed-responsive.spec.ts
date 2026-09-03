@@ -571,7 +571,7 @@ test.describe("one-line text contracts", () => {
     await gotoFeed(page, 320);
     const clipped = await page.evaluate(() => {
       const el = document.querySelector<HTMLElement>(
-        "#dmf-league-MLB .dmf-lgname"
+        '.dmf-lgbar[aria-controls="dmf-league-MLB"] .dmf-lgname'
       )!;
       return { sw: el.scrollWidth, cw: el.clientWidth, text: el.textContent };
     });
