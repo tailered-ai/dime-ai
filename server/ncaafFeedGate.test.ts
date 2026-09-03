@@ -17,9 +17,22 @@ describe("NCAAF feed gates", () => {
     const badge = (value: number) => `<span class="sp-badge">${value}%</span>`;
     const away = `<tr class="sp-row"><td><button data-gamecode="20260903CFB00206"></button><a class="sp-team-link" href="/cfb/teams/massachusetts-minutemen">Massachusetts Minutemen</a></td><td></td><td></td><td>${badge(87)}</td><td>${badge(89)}</td><td></td><td>${badge(30)}</td><td>${badge(23)}</td><td></td><td>${badge(50)}</td><td>${badge(6)}</td></tr>`;
     const home = `<tr class="sp-row"><td><a class="sp-team-link" href="/cfb/teams/rutgers-scarlet-knights">Rutgers Scarlet Knights</a></td>${"<td></td>".repeat(10)}</tr>`;
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(`<table class="sp-table"><thead><tr><th class="sp-sport-name">CFB</th></tr></thead><tbody>${away}${home}</tbody></table>`, { status: 200 })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(
+            `<table class="sp-table"><thead><tr><th class="sp-sport-name">CFB</th></tr></thead><tbody>${away}${home}</tbody></table>`,
+            { status: 200 }
+          )
+      )
+    );
     const rows = await scrapeVsinBettingSplits("today", "CFB");
     expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({ sport: "CFB", awayVsinSlug: "massachusetts-minutemen", homeVsinSlug: "rutgers-scarlet-knights" });
+    expect(rows[0]).toMatchObject({
+      sport: "CFB",
+      awayVsinSlug: "massachusetts-minutemen",
+      homeVsinSlug: "rutgers-scarlet-knights",
+    });
   });
 });

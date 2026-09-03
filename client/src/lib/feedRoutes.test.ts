@@ -23,7 +23,9 @@ describe("feedRoutes — canonical path builders", () => {
       "/feed/model/mlb-07-11-2026"
     );
     expect(feedModelPath("WC", "2026-07-11")).toBe("/feed/model/wc-07-11-2026");
-    expect(feedModelPath("NCAAF", "2026-09-03")).toBe("/feed/model/ncaaf-09-03-2026");
+    expect(feedModelPath("NCAAF", "2026-09-03")).toBe(
+      "/feed/model/ncaaf-09-03-2026"
+    );
   });
 
   it("feedModelPath defaults to MLB + today's effective date", () => {
