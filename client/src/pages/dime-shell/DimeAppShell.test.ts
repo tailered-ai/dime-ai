@@ -122,7 +122,7 @@ describe("DimeAppShell integration contract", () => {
     );
     // Combined feed (2026-07-18): date nav canonicalizes on the mlb- slug.
     expect(feedSource).toMatch(
-      /navigate\(resolveRouteHref\(feedModelPath\("MLB", nextIso\)\)\)/
+      /feedModelPath\(sport === "NCAAF" \? "NCAAF" : "MLB", nextIso\)/
     );
     expect(splitsSource).toMatch(
       /setLocation\(resolveRouteHref\(bettingSplitsPath\(sport, selectedDate\)\)\)/

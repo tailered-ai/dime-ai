@@ -6,7 +6,7 @@
  *   https://data.vsin.com/betting-splits/?source=DK&view=today    (today's games)
  *   https://data.vsin.com/betting-splits/?source=DK&view=tomorrow (tomorrow's games)
  *
- * Both URLs serve ALL sports (MLB, NBA, NHL, CBB) from a single unified page.
+ * Both URLs serve ALL sports (MLB, NBA, NHL, CBB, CFB) from a single unified page.
  * NO other VSIN URLs are used for betting splits. No sport-specific subpages.
  * No auth required — data is publicly accessible.
  *
@@ -23,7 +23,7 @@
  *   td[9]:  ML handle %      ← away team row = away ML handle
  *   td[10]: ML bets %        ← away team row = away ML bets
  *
- * Column order is IDENTICAL for all sports (NBA, MLB, NHL, CBB).
+ * Column order is IDENTICAL for all sports (NBA, MLB, NHL, CBB, CFB).
  * Game rows come in pairs: away row first, home row second.
  * We only read the away row for all percentages.
  * Sport is detected from the data-gamecode value (e.g. "20260330MLB00008" → MLB).
@@ -31,12 +31,12 @@
 
 import * as cheerio from "cheerio";
 
-export type VsinSplitsSport = "NBA" | "CBB" | "NHL" | "MLB";
+export type VsinSplitsSport = "NBA" | "CBB" | "CFB" | "NHL" | "MLB";
 
 export interface VsinSplitsGame {
   /** VSiN game ID, e.g. "20260330MLB00008" */
   gameId: string;
-  /** Sport: "NBA" | "CBB" | "NHL" | "MLB" */
+  /** Sport: "NBA" | "CBB" | "CFB" | "NHL" | "MLB" */
   sport: VsinSplitsSport;
   /** Away team VSiN slug, e.g. "minnesota-twins" */
   awayVsinSlug: string;
@@ -109,6 +109,7 @@ function detectSportFromGameId(gameId: string): VsinSplitsSport | null {
   const code = m[1];
   if (code === "NBA") return "NBA";
   if (code === "CBB") return "CBB";
+  if (code === "CFB") return "CFB";
   if (code === "NHL") return "NHL";
   if (code === "MLB") return "MLB";
   return null;
@@ -151,9 +152,11 @@ function parseAllSpTables(
         ? "MLB"
         : sportHeader.includes("NHL")
           ? "NHL"
-          : sportHeader.includes("CBB") || sportHeader.includes("College")
-            ? "CBB"
-            : null;
+          : sportHeader.includes("CFB")
+            ? "CFB"
+            : sportHeader.includes("CBB") || sportHeader.includes("College")
+              ? "CBB"
+              : null;
 
     const blockTag = `${logTag}[${blockSport ?? "UNKNOWN"}]`;
     console.log(

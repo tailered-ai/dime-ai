@@ -2,7 +2,7 @@
  * feedRoutes — canonical navigation targets for the Dime AI surfaces.
  *
  * The ONLY link targets app code may emit for these surfaces:
- *   • AI Model Projections → /feed/model/{mlb|wc}-MM-DD-YYYY
+ *   • AI Model Projections → /feed/model/{mlb|wc|ncaaf}-MM-DD-YYYY
  *   • Betting Splits       → /betting-splits/{mlb|nhl|nba}-MM-DD-YYYY
  *
  * Legacy slugs (/feed, /feed?tab=…, /splits, /projections, /dashboard) must
@@ -12,7 +12,7 @@
  */
 import { todayUTC } from "@/components/CalendarPicker";
 
-export type FeedSport = "MLB" | "WC";
+export type FeedSport = "MLB" | "WC" | "NCAAF";
 export type SplitsSport = "MLB" | "NHL" | "NBA";
 
 const SPLITS_SPORTS: readonly SplitsSport[] = ["MLB", "NHL", "NBA"];
