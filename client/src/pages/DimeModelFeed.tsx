@@ -50,6 +50,22 @@ import {
 import { feedModelPath, bettingSplitsPath, toFeedSlugDate } from "@/lib/feedRoutes";
 import "./dimeModelFeed.css";
 
+const NCAAF_ESPN_TEAM_IDS: Readonly<Record<string, string>> = {
+  MASS: "113",
+  RUTG: "164",
+  AKR: "2006",
+  WAKE: "154",
+  COLO: "38",
+  GT: "59",
+  UAB: "5",
+  ILL: "356",
+};
+
+const ncaafEspnLogo = (abbr: string): string | null => {
+  const id = NCAAF_ESPN_TEAM_IDS[abbr];
+  return id ? `https://a.espncdn.com/i/teamlogos/ncaa/500/${id}.png` : null;
+};
+
 // ─── Normalized card model (adapters below map tRPC rows into this) ─────────
 
 interface CrestSpec {
@@ -788,8 +804,8 @@ export function mlbRowToCard(
 export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
   const awayAbbr = (g.awayTeam ?? "").toUpperCase();
   const homeAbbr = (g.homeTeam ?? "").toUpperCase();
-  const awayCrest: CrestSpec = { code: awayAbbr.slice(0, 4) };
-  const homeCrest: CrestSpec = { code: homeAbbr.slice(0, 4) };
+  const awayCrest: CrestSpec = { code: awayAbbr.slice(0, 4), url: ncaafEspnLogo(awayAbbr) };
+  const homeCrest: CrestSpec = { code: homeAbbr.slice(0, 4), url: ncaafEspnLogo(homeAbbr) };
   const status: GameStatus =
     g.gameStatus === "live" ? "live" :
     g.gameStatus === "final" ? "final" :

@@ -48,9 +48,23 @@ describe("DimeModelFeed — NCAAF route", () => {
   });
 
   it("uses fair prices for edge math and shows projected lines as context", () => {
-    const card = ncaafRowToCard({ id: 1, awayTeam: "COLO", homeTeam: "GT", gameDate: "2026-09-03", startTimeEst: "20:00", gameStatus: "upcoming", awayBookSpread: "6.5", homeBookSpread: "-6.5", bookTotal: "51.5", awaySpreadOdds: "-106", homeSpreadOdds: "-114", modelAwaySpreadOdds: "-111", modelHomeSpreadOdds: "+111", awayModelSpread: "5.59", homeModelSpread: "-5.59", modelTotal: "56.9", modelRunAt: 1 } as never);
+    const card = ncaafRowToCard({ id: 1, awayTeam: "COLO", homeTeam: "GT", gameDate: "2026-09-03", startTimeEst: "20:00", gameStatus: "upcoming", awayBookSpread: "6.5", homeBookSpread: "-6.5", bookTotal: "51.5", awaySpreadOdds: "-106", homeSpreadOdds: "-114", overOdds: "-112", underOdds: "-108", modelAwaySpreadOdds: "-111", modelHomeSpreadOdds: "+111", awayModelSpread: "5.59", homeModelSpread: "-5.59", modelTotal: "56.9", modelRunAt: 1 } as never);
     expect(card.markets[0].rows.map((row) => row.model)).toEqual(["-111", "+111"]);
+    expect(card.markets[1].rows.map((row) => row.book)).toEqual(["-112", "-108"]);
+    expect(card.away.crest.url).toBe("https://a.espncdn.com/i/teamlogos/ncaa/500/38.png");
+    expect(card.home.crest.url).toBe("https://a.espncdn.com/i/teamlogos/ncaa/500/59.png");
     expect(card.venueLine).toBe("Model: GT -5.59 · Total 56.9");
+  });
+
+  it.each([
+    ["MASS", "RUTG", "113", "164"],
+    ["AKR", "WAKE", "2006", "154"],
+    ["COLO", "GT", "38", "59"],
+    ["UAB", "ILL", "5", "356"],
+  ])("uses ESPN logos for %s at %s", (away, home, awayId, homeId) => {
+    const card = ncaafRowToCard({ awayTeam: away, homeTeam: home } as never);
+    expect(card.away.crest.url).toBe(`https://a.espncdn.com/i/teamlogos/ncaa/500/${awayId}.png`);
+    expect(card.home.crest.url).toBe(`https://a.espncdn.com/i/teamlogos/ncaa/500/${homeId}.png`);
   });
 });
 
