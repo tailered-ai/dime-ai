@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
-import { WC_WINNER_MARKETS, buildFeedSections, slateStatusRank, wcDisplayCity, wcDisplayStadium, wcRoundLabel } from "./DimeModelFeed";
+import { WC_WINNER_MARKETS, buildFeedSections, ncaafRowToCard, parseFeedModelPath, slateStatusRank, wcDisplayCity, wcDisplayStadium, wcRoundLabel } from "./DimeModelFeed";
 import type { GameStatus } from "@/components/projections/types";
 
 /**
@@ -39,6 +39,20 @@ const css = fs.readFileSync(
   "utf8",
 );
 const flatCss = css.replace(/\s+/g, " ");
+
+describe("DimeModelFeed — NCAAF route", () => {
+  it("parses the canonical Week 1 slug and isolates the NCAAF query", () => {
+    expect(parseFeedModelPath("ncaaf-09-03-2026", undefined)).toEqual({ sport: "NCAAF", isoDate: "2026-09-03" });
+    expect(src).toContain('{ sport: "NCAAF", gameDate: isoDate }');
+    expect(src).toContain('sportAdapters.NCAAF(g, { competition: "NCAAF" })');
+  });
+
+  it("uses fair prices for edge math and shows projected lines as context", () => {
+    const card = ncaafRowToCard({ id: 1, awayTeam: "COLO", homeTeam: "GT", gameDate: "2026-09-03", startTimeEst: "20:00", gameStatus: "upcoming", awayBookSpread: "6.5", homeBookSpread: "-6.5", bookTotal: "51.5", awaySpreadOdds: "-106", homeSpreadOdds: "-114", modelAwaySpreadOdds: "-111", modelHomeSpreadOdds: "+111", awayModelSpread: "5.59", homeModelSpread: "-5.59", modelTotal: "56.9", modelRunAt: 1 } as never);
+    expect(card.markets[0].rows.map((row) => row.model)).toEqual(["-111", "+111"]);
+    expect(card.venueLine).toBe("Model: GT -5.59 · Total 56.9");
+  });
+});
 
 const EMBEDDED_SERIALIZATION_EXCLUSIONS = Object.freeze([
   "external shell wrapper",
@@ -164,7 +178,7 @@ describe("DimeModelFeed — MLB bindings", () => {
     expect(slateStatusRank({ status: "suspended" })).toBe(2);
     // The tier sort is applied to BOTH league sections of the combined slate
     // (per-section — the WC-above-MLB section order is absolute).
-    expect(src.match(/\.sort\(\(a, b\) => slateStatusRank\(a\) - slateStatusRank\(b\)\)/g)).toHaveLength(2);
+    expect(src.match(/\.sort\(\(a, b\) => slateStatusRank\(a\) - slateStatusRank\(b\)\)/g)).toHaveLength(3);
   });
 
   it("derives the tier from status, not from the timeLabel string", () => {
@@ -280,7 +294,7 @@ describe("DimeModelFeed — routes", () => {
   });
 
   it("parseFeedModelPath accepts slug and split forms", () => {
-    expect(src).toMatch(/\^\(mlb\|wc\)-\\d\{2\}-\\d\{2\}-\\d\{4\}\$/);
+    expect(src).toMatch(/\^\(mlb\|wc\|ncaaf\)-\\d\{2\}-\\d\{2\}-\\d\{4\}\$/);
   });
 
   it("bare /feed/model/:sport canonicalizes to today's dated URL (history replace)", () => {
@@ -292,10 +306,9 @@ describe("DimeModelFeed — routes", () => {
 
   it("in-page navigation builds URLs through the canonical feedModelPath helper", () => {
     expect(src).toMatch(/from "@\/lib\/feedRoutes"/);
-    // Combined feed (2026-07-18): date nav canonicalizes on the mlb- slug —
-    // one URL per date; legacy wc- deep links still parse and render.
+    // MLB/WC remain combined; NCAAF date navigation remains on NCAAF.
     expect(src).toMatch(
-      /navigate\(resolveRouteHref\(feedModelPath\("MLB", nextIso\)\)\)/
+      /feedModelPath\(sport === "NCAAF" \? "NCAAF" : "MLB", nextIso\)/
     );
   });
 });
@@ -359,11 +372,10 @@ describe("DimeModelFeed — combined slate (owner directive 2026-07-18)", () => 
     expect(buildFeedSections([], [])).toEqual([]);
   });
 
-  it("the sport toggle chips are gone; both league queries always load", () => {
+  it("the sport toggle chips are gone; NCAAF is isolated from the combined slate", () => {
     expect(src).not.toMatch(/dmf-chip|dmf-sports|role="tablist"/);
-    // Neither query is gated on a sport tab anymore — both enable on the date.
-    // MLB, WC, and the scheduled-only Rotowire enrichment all key off the date.
-    expect(src.match(/enabled: !!isoDate/g)).toHaveLength(3);
+    expect(src).toContain("enabled: !!isoDate && !ncaafOnly");
+    expect(src).toContain("enabled: !!isoDate && ncaafOnly");
   });
 
   it("league sections are collapsible containers with logo + full name, no counts", () => {

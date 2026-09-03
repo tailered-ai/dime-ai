@@ -56,9 +56,9 @@ export const zodGameDate = z
 
 /**
  * Zod schema for a sport key.
- * Only "MLB", "NBA", "NHL" are valid active sports.
+ * Active sports accepted by the shared games feed.
  */
-export const zodSport = z.enum(["MLB", "NBA", "NHL"]);
+export const zodSport = z.enum(["MLB", "NBA", "NHL", "NCAAF"]);
 
 /**
  * Zod schema for a team abbreviation (2–8 uppercase letters/digits).

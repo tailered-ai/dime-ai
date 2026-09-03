@@ -9,7 +9,7 @@ import {
   legacyFeedRedirectTarget,
 } from "./feedRoutes";
 
-const SLUG_RE = /^\/feed\/model\/(mlb|wc)-\d{2}-\d{2}-\d{4}$/;
+const SLUG_RE = /^\/feed\/model\/(mlb|wc|ncaaf)-\d{2}-\d{2}-\d{4}$/;
 const SPLITS_SLUG_RE = /^\/betting-splits\/(mlb|nhl|nba)-\d{2}-\d{2}-\d{4}$/;
 
 describe("feedRoutes — canonical path builders", () => {
@@ -23,6 +23,7 @@ describe("feedRoutes — canonical path builders", () => {
       "/feed/model/mlb-07-11-2026"
     );
     expect(feedModelPath("WC", "2026-07-11")).toBe("/feed/model/wc-07-11-2026");
+    expect(feedModelPath("NCAAF", "2026-09-03")).toBe("/feed/model/ncaaf-09-03-2026");
   });
 
   it("feedModelPath defaults to MLB + today's effective date", () => {

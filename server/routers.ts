@@ -94,7 +94,10 @@ import { parseAnAllMarketsHtml, type AnSport } from "./anHtmlParser";
 import { NBA_VALID_DB_SLUGS, NBA_TEAMS } from "@shared/nbaTeams";
 import { NHL_VALID_DB_SLUGS, NHL_TEAMS } from "@shared/nhlTeams";
 import { MLB_VALID_DB_SLUGS, MLB_VALID_ABBREVS } from "@shared/mlbTeams";
+import CFB_TEAMS from "../scripts/data/cfb-2026/teams.json";
 import { createHash } from 'node:crypto';
+
+const NCAAF_VALID_ABBREVS = new Set(CFB_TEAMS.map((team) => team.espnAbbreviation));
 
 /**
  * Strip fields that are always null for the given sport from the game object.
@@ -183,7 +186,7 @@ function stripSportNullFields(game: import('../drizzle/schema').Game): import('.
 }
 
 /** Returns true if both teams are in the appropriate registry for the given sport */
-function isValidGame(awayTeam: string, homeTeam: string, sport?: string | null): boolean {
+export function isValidGame(awayTeam: string, homeTeam: string, sport?: string | null): boolean {
   if (sport === "NBA") {
     return NBA_VALID_DB_SLUGS.has(awayTeam) && NBA_VALID_DB_SLUGS.has(homeTeam);
   }
@@ -196,6 +199,9 @@ function isValidGame(awayTeam: string, homeTeam: string, sport?: string | null):
     const awayOk = MLB_VALID_ABBREVS.has(awayTeam) || MLB_VALID_DB_SLUGS.has(awayTeam);
     const homeOk = MLB_VALID_ABBREVS.has(homeTeam) || MLB_VALID_DB_SLUGS.has(homeTeam);
     return awayOk && homeOk;
+  }
+  if (sport === "NCAAF") {
+    return NCAAF_VALID_ABBREVS.has(awayTeam) && NCAAF_VALID_ABBREVS.has(homeTeam);
   }
   // Unknown sport: fall back to MARCH_MADNESS registry
   return MARCH_MADNESS_DB_SLUGS.has(awayTeam) && MARCH_MADNESS_DB_SLUGS.has(homeTeam);

@@ -150,21 +150,21 @@ function SkeletonRow() {
 
 // ─── Route parsing ───────────────────────────────────────────────────────────
 
-/** Accepts "mlb-07-11-2026" | "wc-07-11-2026" (also :sport/:date split form).
- *  A bare "mlb" | "wc" parses with isoDate=null — the page canonicalizes it
+/** Accepts dated MLB, WC, or NCAAF slugs (also :sport/:date split form).
+ *  A bare sport parses with isoDate=null — the page canonicalizes it
  *  to today's dated URL so sport-only links always land on a real slate. */
 export function parseFeedModelPath(
   sportSeg: string | undefined,
   dateSeg: string | undefined,
-): { sport: "MLB" | "WC"; isoDate: string | null } | null {
+): { sport: "MLB" | "WC" | "NCAAF"; isoDate: string | null } | null {
   let sport = (sportSeg ?? "").toLowerCase();
   let date = dateSeg ?? "";
-  if (!date && /^(mlb|wc)-\d{2}-\d{2}-\d{4}$/.test(sport)) {
+  if (!date && /^(mlb|wc|ncaaf)-\d{2}-\d{2}-\d{4}$/.test(sport)) {
     date = sport.slice(sport.indexOf("-") + 1);
     sport = sport.slice(0, sport.indexOf("-"));
   }
-  if (sport !== "mlb" && sport !== "wc") return null;
-  const sportCode = sport === "mlb" ? ("MLB" as const) : ("WC" as const);
+  if (sport !== "mlb" && sport !== "wc" && sport !== "ncaaf") return null;
+  const sportCode = sport === "mlb" ? ("MLB" as const) : sport === "wc" ? ("WC" as const) : ("NCAAF" as const);
   if (!date) return { sport: sportCode, isoDate: null };
   const m = /^(\d{2})-(\d{2})-(\d{4})$/.exec(date);
   if (!m) return null;
@@ -195,7 +195,10 @@ const prettyDate = (iso: string): string =>
  *  text. MLB uses the actual current mark (navy/red, owner directive
  *  2026-07-21) — official mlbstatic league SVG with the bundled recolored mark
  *  as offline fallback before hiding. */
-function LeagueMark({ league }: { league: "WC" | "MLB" }) {
+function LeagueMark({ league }: { league: "WC" | "MLB" | "NCAAF" }) {
+  if (league === "NCAAF") {
+    return <span className="dmf-lglogo dmf-micro" aria-hidden="true">CFB</span>;
+  }
   return (
     <span className={`dmf-lglogo${league === "MLB" ? " dmf-lglogo--mlb" : ""}`} aria-hidden="true">
       {league === "WC" ? (
@@ -294,7 +297,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
   // ADAPTER WIRING (exact bindings from GameCard / WcFeedInline) is attached
   // below in useFeedCards — see mlbRowToCard / wcMatchToCard. The feed is
   // combined (owner directive 2026-07-18): both leagues load for the date.
-  const { sections, isLoading, isStale, gamesCount, isError, retry } = useFeedCards(isoDate);
+  const { sections, isLoading, isStale, gamesCount, isError, retry } = useFeedCards(isoDate, sport);
 
   // League open/closed is CONTROLLED state (owner directive 2026-07-29): on
   // mobile the league header lives inside the sticky feedhead (the feed's
@@ -336,7 +339,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
   // Date nav canonicalizes on the mlb- slug: the combined feed has one URL per
   // date. Legacy wc- deep links still parse and render the same combined slate.
   const go = (nextIso: string) =>
-    navigate(resolveRouteHref(feedModelPath("MLB", nextIso)));
+    navigate(resolveRouteHref(feedModelPath(sport === "NCAAF" ? "NCAAF" : "MLB", nextIso)));
 
   if (needsDateCanonicalize) {
     // One-frame redirect to the dated URL; queries stay disabled (isoDate="").
@@ -352,8 +355,9 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
         <div className="dmf-invalid">
           <span className="dmf-micro">Invalid feed URL</span>
           <p>
-            Expected <code>/feed/model/mlb-MM-DD-YYYY</code> or{" "}
-            <code>/feed/model/wc-MM-DD-YYYY</code>.
+            Expected <code>/feed/model/mlb-MM-DD-YYYY</code>,{" "}
+            <code>/feed/model/wc-MM-DD-YYYY</code>, or{" "}
+            <code>/feed/model/ncaaf-MM-DD-YYYY</code>.
           </p>
         </div>
       </div>
@@ -511,9 +515,10 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
                 </summary>
                 <div className="dmf-leaguebody">
                   {section.cards.map((g) => {
-                    const model =
-                      section.key === "WC"
-                        ? sportAdapters.SOCCER(g, { competition: "World Cup" })
+                    const model = section.key === "WC"
+                      ? sportAdapters.SOCCER(g, { competition: "World Cup" })
+                      : section.key === "NCAAF"
+                        ? sportAdapters.NCAAF(g, { competition: "NCAAF" })
                         : sportAdapters.MLB(g, { competition: "MLB" });
                     const projectionGame = presentationToProjectionGame(model);
                     return (
@@ -771,6 +776,61 @@ export function mlbRowToCard(
     venueLine: g.venue || null,
     pregameLineups,
     markets: [rl, total, ml],
+    modelPublished: hasModel,
+    verdict: verdictOf(best),
+  };
+}
+
+/** NCAAF uses the shared games row, but compares book prices only to fair prices. */
+export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
+  const awayAbbr = (g.awayTeam ?? "").toUpperCase();
+  const homeAbbr = (g.homeTeam ?? "").toUpperCase();
+  const awayCrest: CrestSpec = { code: awayAbbr.slice(0, 4) };
+  const homeCrest: CrestSpec = { code: homeAbbr.slice(0, 4) };
+  const status: GameStatus =
+    g.gameStatus === "live" ? "live" :
+    g.gameStatus === "final" ? "final" :
+    g.gameStatus === "suspended" ? "suspended" :
+    g.gameStatus === "postponed" ? "postponed" : "scheduled";
+  const hasModel = g.modelRunAt != null;
+  const M = <T,>(v: T | null): T | null => hasModel ? v : null;
+  const awaySp = n(g.awayBookSpread);
+  const homeSp = n(g.homeBookSpread);
+  const spread = twoWayCol(
+    "Spread",
+    { label: awaySp == null ? awayAbbr : `${awayAbbr} ${fmtLine(awaySp)}`, crest: awayCrest, book: n(g.awaySpreadOdds), model: M(n(g.modelAwaySpreadOdds)) },
+    { label: homeSp == null ? homeAbbr : `${homeAbbr} ${fmtLine(homeSp)}`, crest: homeCrest, book: n(g.homeSpreadOdds), model: M(n(g.modelHomeSpreadOdds)) },
+  );
+  const totalLine = n(g.bookTotal);
+  const total = twoWayCol(
+    "Total",
+    { label: totalLine == null ? "OVER" : `O ${totalLine}`, book: n(g.overOdds), model: M(n(g.modelOverOdds)) },
+    { label: totalLine == null ? "UNDER" : `U ${totalLine}`, book: n(g.underOdds), model: M(n(g.modelUnderOdds)) },
+  );
+  const awayWp = n(g.modelAwayWinPct);
+  const homeWp = n(g.modelHomeWinPct);
+  const favIsAway = awayWp != null && homeWp != null && awayWp >= homeWp;
+  const ml = twoWayCol(
+    "Moneyline",
+    { label: awayAbbr, crest: awayCrest, book: n(g.awayML), model: M(n(g.modelAwayML)), wp: hasModel && favIsAway && awayWp != null ? `${Math.round(awayWp)}%` : null },
+    { label: homeAbbr, crest: homeCrest, book: n(g.homeML), model: M(n(g.modelHomeML)), wp: hasModel && !favIsAway && homeWp != null ? `${Math.round(homeWp)}%` : null },
+    "ML",
+  );
+  let best: BestPick | null = null;
+  for (const col of [spread, total, ml]) best = trackBest(best, col);
+  return {
+    id: String(g.id ?? `${awayAbbr}-${homeAbbr}-${g.gameDate ?? ""}-${g.startTimeEst ?? ""}`),
+    status,
+    sourceGameId: Number.isInteger(g.id) ? g.id : undefined,
+    liveLabel: status === "live" ? "LIVE" : null,
+    timeLabel: status === "suspended" ? "SUSPENDED" : status === "postponed" ? "POSTPONED" : status === "final" ? "FINAL" : formatGameTime(g.startTimeEst),
+    away: { name: awayAbbr, crest: awayCrest },
+    home: { name: homeAbbr, crest: homeCrest },
+    meta: "NCAAF",
+    venueLine: hasModel
+      ? `Model: ${homeAbbr} ${fmtLine(n(g.homeModelSpread) ?? 0)} · Total ${n(g.modelTotal) ?? "—"}`
+      : g.venue || null,
+    markets: [spread, total, ml],
     modelPublished: hasModel,
     verdict: verdictOf(best),
   };
@@ -1084,7 +1144,7 @@ export function slateStatusRank(card: Pick<FeedCardSpec, "status">): number {
 
 /** One league group in the combined slate. */
 export interface FeedSection {
-  key: "WC" | "MLB";
+  key: "WC" | "MLB" | "NCAAF";
   /** Full spelled-out league name for the collapsible header (owner directive
    *  2026-07-18: no game counts in the header — the name owns the width). */
   label: string;
@@ -1099,22 +1159,24 @@ export interface FeedSection {
 export function buildFeedSections(
   wcCards: FeedCardSpec[],
   mlbCards: FeedCardSpec[],
+  ncaafCards: FeedCardSpec[] = [],
 ): FeedSection[] {
   const sections: FeedSection[] = [];
   if (wcCards.length > 0) sections.push({ key: "WC", label: "2026 FIFA World Cup", cards: wcCards });
+  if (ncaafCards.length > 0) sections.push({ key: "NCAAF", label: "College Football (NCAAF)", cards: ncaafCards });
   if (mlbCards.length > 0) sections.push({ key: "MLB", label: "Major League Baseball (MLB)", cards: mlbCards });
   return sections;
 }
 
 function useFeedCards(
   isoDate: string,
+  feedSport: "MLB" | "WC" | "NCAAF" = "MLB",
 ): { sections: FeedSection[]; isLoading: boolean; isStale: boolean; gamesCount: number; isError: boolean; retry: () => void } {
-  // Both leagues load together — the combined feed has no sport toggle
-  // (owner directive 2026-07-18), so neither query is gated on a tab.
+  const ncaafOnly = feedSport === "NCAAF";
   const mlbQuery = trpc.games.list.useQuery(
     { sport: "MLB", gameDate: isoDate },
     {
-      enabled: !!isoDate,
+      enabled: !!isoDate && !ncaafOnly,
       refetchOnWindowFocus: false,
       refetchInterval: 60 * 1000,
       staleTime: 60 * 1000,
@@ -1124,11 +1186,21 @@ function useFeedCards(
   const wcQuery = trpc.wc2026.matchesByDate.useQuery(
     { date: isoDate },
     {
-      enabled: !!isoDate,
+      enabled: !!isoDate && !ncaafOnly,
       refetchOnWindowFocus: false,
       refetchInterval: 60 * 1000,
       staleTime: 60 * 1000,
       placeholderData: keepPreviousData,
+    },
+  );
+  const ncaafQuery = trpc.games.list.useQuery(
+    { sport: "NCAAF", gameDate: isoDate },
+    {
+      enabled: !!isoDate && ncaafOnly,
+      refetchOnWindowFocus: false,
+      refetchInterval: 60 * 1000,
+      staleTime: 60 * 1000,
+      placeholderData: (prev) => prev,
     },
   );
   const scheduledMlbGameIds = useMemo(
@@ -1148,7 +1220,7 @@ function useFeedCards(
   const mlbLineupsQuery = trpc.games.mlbLineups.useQuery(
     { gameIds: scheduledMlbGameIds },
     {
-      enabled: !!isoDate && scheduledMlbGameIds.length > 0,
+      enabled: !!isoDate && !ncaafOnly && scheduledMlbGameIds.length > 0,
       refetchOnWindowFocus: false,
       refetchInterval: 60 * 1000,
       staleTime: 60 * 1000,
@@ -1157,6 +1229,13 @@ function useFeedCards(
   );
 
   const sections = useMemo<FeedSection[]>(() => {
+    if (ncaafOnly) {
+      const cards = [...((ncaafQuery.data ?? []) as MlbRow[])]
+        .sort((a, b) => timeToMinutes(a.startTimeEst) - timeToMinutes(b.startTimeEst))
+        .map(ncaafRowToCard)
+        .sort((a, b) => slateStatusRank(a) - slateStatusRank(b));
+      return buildFeedSections([], [], cards);
+    }
     // Slate order per league: earliest → latest first pitch (owner directive
     // 2026-07-17; timeToMinutes sends TBD times to the bottom), then LIVE
     // above upcoming above FINAL (2026-07-18) — the stable sort keeps the
@@ -1171,23 +1250,27 @@ function useFeedCards(
       .map((game) => mlbRowToCard(game, lineupByGameId[game.id]))
       .sort((a, b) => slateStatusRank(a) - slateStatusRank(b));
     return buildFeedSections(wcCards, mlbCards);
-  }, [wcQuery.data, mlbQuery.data, mlbLineupsQuery.data, isoDate]);
+  }, [wcQuery.data, mlbQuery.data, mlbLineupsQuery.data, ncaafQuery.data, isoDate, ncaafOnly]);
 
-  const isLoading = wcQuery.isLoading || mlbQuery.isLoading;
+  const isLoading = ncaafOnly ? ncaafQuery.isLoading : wcQuery.isLoading || mlbQuery.isLoading;
   // Stale = paging dates while placeholderData keeps the previous slate
   // mounted — the UI dims so the old cards are never mistaken for the new
   // date's numbers (this is a betting surface; wrong-slate reads cost money).
-  const isStale =
-    (wcQuery.isPlaceholderData && wcQuery.isFetching) ||
-    (mlbQuery.isPlaceholderData && mlbQuery.isFetching);
+  const isStale = ncaafOnly
+    ? ncaafQuery.isPlaceholderData && ncaafQuery.isFetching
+    : (wcQuery.isPlaceholderData && wcQuery.isFetching) ||
+      (mlbQuery.isPlaceholderData && mlbQuery.isFetching);
   const gamesCount = sections.reduce((n, s) => n + s.cards.length, 0);
   // Outage surface (audit D-FEED-ERROR / page law "query errors must be
   // surfaced"): with no data to show and every league query failed, the feed
   // must say so instead of claiming an empty slate.
-  const isError = mlbQuery.isError && wcQuery.isError;
+  const isError = ncaafOnly ? ncaafQuery.isError : mlbQuery.isError && wcQuery.isError;
   const retry = () => {
-    void mlbQuery.refetch();
-    void wcQuery.refetch();
+    if (ncaafOnly) void ncaafQuery.refetch();
+    else {
+      void mlbQuery.refetch();
+      void wcQuery.refetch();
+    }
   };
   return { sections, isLoading, isStale, gamesCount, isError, retry };
 }
