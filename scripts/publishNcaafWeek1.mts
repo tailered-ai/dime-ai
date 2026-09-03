@@ -308,7 +308,10 @@ async function main() {
   );
 }
 
-main().catch(error => {
-  console.error(`${TAG}[FAIL]`, error);
-  process.exitCode = 1;
-});
+main().then(
+  () => process.exit(0),
+  error => {
+    console.error(`${TAG}[FAIL]`, error);
+    process.exit(1);
+  }
+);
