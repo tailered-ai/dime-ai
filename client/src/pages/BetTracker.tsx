@@ -123,7 +123,7 @@ type LinescoreEntry = {
   status: string;
 };
 
-const SPORTS = ["MLB", "NHL", "NBA", "NCAAM"] as const;
+const SPORTS = ["NCAAF", "MLB", "NHL", "NBA", "NCAAM"] as const;
 type Sport = (typeof SPORTS)[number];
 type SportOrAll = Sport | "ALL";
 
@@ -184,6 +184,12 @@ const TIMEFRAMES_BY_SPORT: Record<
   Sport,
   { value: Timeframe; label: string }[]
 > = {
+  NCAAF: [
+    { value: "FULL_GAME", label: "Full Game" },
+    { value: "REGULATION", label: "Regulation" },
+    { value: "FIRST_HALF", label: "1st Half" },
+    { value: "FIRST_QUARTER", label: "1st Quarter" },
+  ],
   MLB: [
     { value: "FULL_GAME", label: "Full Game" },
     { value: "FIRST_5", label: "First 5 Innings (F5)" },
@@ -208,6 +214,7 @@ const TIMEFRAMES_BY_SPORT: Record<
 };
 
 const MARKET_LABELS: Record<Sport, Record<Market, string>> = {
+  NCAAF: { ML: "Moneyline", RL: "Spread", TOTAL: "Total (Points)" },
   MLB: { ML: "Moneyline", RL: "Run Line", TOTAL: "Total (Runs)" },
   NHL: { ML: "Moneyline", RL: "Puck Line", TOTAL: "Total (Goals)" },
   NBA: { ML: "Moneyline", RL: "Spread", TOTAL: "Total (Points)" },
@@ -2032,6 +2039,7 @@ function LogsTab({
 // ── Module-level constants (outside component — never recreated on render) ──────────────────
 /** Season start dates per sport (YYYY-MM-DD). Update each new season. */
 const SEASON_START_DATES: Record<string, string> = {
+  NCAAF: "2026-08-22",
   MLB: "2026-03-25",
   NHL: "2025-10-04", // 2025-26 NHL season
   NBA: "2025-10-22", // 2025-26 NBA season
@@ -2367,7 +2375,7 @@ export default function BetTracker({ previewMode = false, embeddedInShell = fals
   const isViewingOtherUser = effectiveUserId !== undefined;
 
   // ── Sport / filter state ──────────────────────────────────────────────────
-  const [activeSport, setActiveSport] = useState<SportOrAll>("ALL");
+  const [activeSport, setActiveSport] = useState<SportOrAll>("NCAAF");
   const [filterResult, setFilterResult] = useState<Result | "">("");
   // Date range filter: ALL_TIME | TODAY | L7 | L14 | 1M | SEASON
   // SEASON = from sport's season start date through today
@@ -2524,8 +2532,8 @@ export default function BetTracker({ previewMode = false, embeddedInShell = fals
     return fmtUnits(unitSize > 0 ? n / unitSize : n);
   }
 
-  // When activeSport is ALL, default the form sport to MLB
-  const formSport: Sport = activeSport === "ALL" ? "MLB" : activeSport;
+  // When activeSport is ALL, use the primary NCAAF slate in the entry form.
+  const formSport: Sport = activeSport === "ALL" ? "NCAAF" : activeSport;
   const timeframeOptions = TIMEFRAMES_BY_SPORT[formSport];
 
   useEffect(() => {
@@ -2594,7 +2602,7 @@ export default function BetTracker({ previewMode = false, embeddedInShell = fals
   // For today/future dates, use 4-minute staleTime to pick up live odds updates.
   const isFormDatePast = formDate < todayEst();
   const slateQuery = trpc.betTracker.getSlate.useQuery(
-    { sport: activeSport === "ALL" ? "MLB" : activeSport, gameDate: formDate },
+    { sport: activeSport === "ALL" ? "NCAAF" : activeSport, gameDate: formDate },
     {
       enabled: canLoadProtectedData && !!formDate,
       staleTime: isFormDatePast ? Infinity : 4 * 60 * 1000,
@@ -2920,6 +2928,7 @@ export default function BetTracker({ previewMode = false, embeddedInShell = fals
       } else if (range === "SEASON") {
         const start =
           {
+            NCAAF: "2026-08-22",
             MLB: "2026-03-25",
             NHL: "2025-10-04",
             NBA: "2025-10-22",
@@ -2938,7 +2947,7 @@ export default function BetTracker({ previewMode = false, embeddedInShell = fals
         sport:
           sport === "ALL"
             ? undefined
-            : (sport as "MLB" | "NHL" | "NBA" | "NCAAM" | "NFL" | "CUSTOM"),
+            : (sport as "NCAAF" | "MLB" | "NHL" | "NBA" | "NCAAM" | "NFL" | "CUSTOM"),
         gameDate: undefined,
         dateFrom: range !== "ALL_TIME" ? dFrom : undefined,
         dateTo: range !== "ALL_TIME" ? dTo : undefined,
@@ -4463,7 +4472,9 @@ export default function BetTracker({ previewMode = false, embeddedInShell = fals
                         ? "AI SPORTS BETTING"
                         : selectedHandicapperName;
                     const sportLabel =
-                      activeSport === "MLB"
+                      activeSport === "NCAAF"
+                        ? "ON NCAAF"
+                        : activeSport === "MLB"
                         ? "ON MLB"
                         : activeSport === "NHL"
                           ? "ON NHL"
@@ -4515,6 +4526,13 @@ export default function BetTracker({ previewMode = false, embeddedInShell = fals
                       <>
                         {/* Sport logo row */}
                         <div className="flex items-center gap-2 mb-1">
+                          {activeSport === "NCAAF" && (
+                            <img
+                              src="https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-football-college.png"
+                              alt="NCAAF"
+                              className="w-7 h-7 object-contain"
+                            />
+                          )}
                           {activeSport === "MLB" && (
                             <img
                               src="/dime-storage/mlb-logo_50fd8568.png"
@@ -4541,8 +4559,10 @@ export default function BetTracker({ previewMode = false, embeddedInShell = fals
                             className="text-xs font-bold tracking-widest uppercase"
                             style={{ color: "var(--bt-text-faint, #FFFFFF)" }}
                           >
-                            {activeSport === "MLB"
-                              ? "2026 MLB SEASON"
+                            {activeSport === "NCAAF"
+                              ? "2026 NCAAF"
+                              : activeSport === "MLB"
+                                ? "2026 MLB SEASON"
                               : activeSport === "NHL"
                                 ? "2025-26 NHL"
                                 : activeSport === "NBA"

@@ -26,7 +26,7 @@
  * what the grader implements.
  */
 
-export type GradableSport = "MLB" | "NHL" | "NBA" | "NCAAM" | "NFL";
+export type GradableSport = "NCAAF" | "MLB" | "NHL" | "NBA" | "NCAAM" | "NFL";
 export type AnySport = GradableSport | "CUSTOM";
 
 export type GradingTimeframe =
@@ -52,6 +52,8 @@ export const SPORT_TIMEFRAMES: Record<
   GradableSport,
   readonly GradingTimeframe[]
 > = {
+  // Quarters, plus regulation for overtime games.
+  NCAAF: ["FULL_GAME", "REGULATION", "FIRST_HALF", "FIRST_QUARTER"],
   // Innings, so first-5 and first-inning windows exist. NRFI/YRFI are the
   // first-inning total expressed as a 0.5 line.
   MLB: ["FULL_GAME", "FIRST_5", "FIRST_INNING", "NRFI", "YRFI"],

@@ -10,7 +10,8 @@ import {
 } from "./feedRoutes";
 
 const SLUG_RE = /^\/feed\/model\/\d{2}-\d{2}-\d{4}$/;
-const SPLITS_SLUG_RE = /^\/betting-splits\/(mlb|nhl|nba)-\d{2}-\d{2}-\d{4}$/;
+const SPLITS_SLUG_RE =
+  /^\/betting-splits\/(ncaaf|mlb|nhl|nba)-\d{2}-\d{2}-\d{4}$/;
 
 describe("feedRoutes — canonical path builders", () => {
   it("toFeedSlugDate converts YYYY-MM-DD to MM-DD-YYYY", () => {
@@ -31,6 +32,9 @@ describe("feedRoutes — canonical path builders", () => {
   });
 
   it("bettingSplitsPath mirrors the feed's lowercase MM-DD-YYYY slug", () => {
+    expect(bettingSplitsPath("NCAAF", "2026-09-03")).toBe(
+      "/betting-splits/ncaaf-09-03-2026"
+    );
     expect(bettingSplitsPath("MLB", "2026-07-11")).toBe(
       "/betting-splits/mlb-07-11-2026"
     );
@@ -42,13 +46,14 @@ describe("feedRoutes — canonical path builders", () => {
     );
   });
 
-  it("bettingSplitsPath defaults to MLB + today's effective date", () => {
+  it("bettingSplitsPath defaults to NCAAF + today's effective date", () => {
     expect(bettingSplitsPath()).toMatch(SPLITS_SLUG_RE);
-    expect(bettingSplitsPath()).toContain("/betting-splits/mlb-");
+    expect(bettingSplitsPath()).toContain("/betting-splits/ncaaf-");
     expect(bettingSplitsPath("NHL")).toContain("/betting-splits/nhl-");
   });
 
   it("parseSplitsSport validates case-insensitively and rejects junk", () => {
+    expect(parseSplitsSport("ncaaf")).toBe("NCAAF");
     expect(parseSplitsSport("MLB")).toBe("MLB");
     expect(parseSplitsSport("mlb")).toBe("MLB");
     expect(parseSplitsSport("nhl")).toBe("NHL");
@@ -58,6 +63,10 @@ describe("feedRoutes — canonical path builders", () => {
   });
 
   it("parseBettingSplitsPath accepts combined dated slugs and returns ISO", () => {
+    expect(parseBettingSplitsPath("ncaaf-09-03-2026")).toEqual({
+      sport: "NCAAF",
+      isoDate: "2026-09-03",
+    });
     expect(parseBettingSplitsPath("mlb-07-11-2026")).toEqual({
       sport: "MLB",
       isoDate: "2026-07-11",
@@ -104,7 +113,9 @@ describe("feedRoutes — canonical path builders", () => {
 
   it("converges every required splits input to one stable dated URL in at most two hops", () => {
     const todayMlb = bettingSplitsPath("MLB");
+    const todayNcaaf = bettingSplitsPath("NCAAF");
     const cases = [
+      ["/betting-splits/NCAAF", "NCAAF", undefined, todayNcaaf],
       ["/betting-splits/MLB", "MLB", undefined, todayMlb],
       ["/betting-splits/mlb", "mlb", undefined, todayMlb],
       [
@@ -113,9 +124,9 @@ describe("feedRoutes — canonical path builders", () => {
         "07-11-2026",
         "/betting-splits/mlb-07-11-2026",
       ],
-      ["/betting-splits/MLB/2026-07-11", "MLB", "2026-07-11", todayMlb],
-      ["/betting-splits/MLB/garbage", "MLB", "garbage", todayMlb],
-      ["/betting-splits/XYZ", "XYZ", undefined, todayMlb],
+      ["/betting-splits/MLB/2026-07-11", "MLB", "2026-07-11", todayNcaaf],
+      ["/betting-splits/MLB/garbage", "MLB", "garbage", todayNcaaf],
+      ["/betting-splits/XYZ", "XYZ", undefined, todayNcaaf],
     ] as const;
 
     for (const owner of ["standalone", ">=768 shell"] as const) {
@@ -138,7 +149,7 @@ describe("feedRoutes — legacy /feed?… eradication mapping", () => {
   it("?tab=splits routes to the canonical splits page", () => {
     expect(legacyFeedRedirectTarget("?tab=splits")).toMatch(SPLITS_SLUG_RE);
     expect(legacyFeedRedirectTarget("?tab=splits&date=2026-07-11")).toBe(
-      "/betting-splits/mlb-07-11-2026"
+      "/betting-splits/ncaaf-07-11-2026"
     );
   });
 

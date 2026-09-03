@@ -365,6 +365,23 @@ describe("grading has a cron path", () => {
 });
 
 describe("client", () => {
+  it("renders NCAAF before MLB and selects it by default", () => {
+    expect(clientPage).toMatch(
+      /const SPORTS = \["NCAAF", "MLB", "NHL", "NBA", "NCAAM"\]/
+    );
+    expect(clientPage).toMatch(/useState<SportOrAll>\("NCAAF"\)/);
+    expect(clientPage).toMatch(
+      /activeSport === "ALL" \? "NCAAF" : activeSport/
+    );
+  });
+
+  it("loads NCAAF slates from Action Network through the tracker router", () => {
+    expect(router).toMatch(
+      /z\.enum\(\["NCAAF", "MLB", "NBA", "NHL", "NCAAM"\]\)/
+    );
+    expect(read("server/actionNetwork.ts")).toMatch(/NCAAF: "ncaaf"/);
+  });
+
   it("the tracker is open to every authenticated user, not owner-only", () => {
     expect(clientPage).toMatch(/const canAccess = !!appUser;/);
     expect(clientPage).not.toMatch(/const canAccess = role === "owner"/);

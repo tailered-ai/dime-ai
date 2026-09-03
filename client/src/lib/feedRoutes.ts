@@ -3,7 +3,7 @@
  *
  * The ONLY link targets app code may emit for these surfaces:
  *   • AI Model Projections → /feed/model/MM-DD-YYYY
- *   • Betting Splits       → /betting-splits/{mlb|nhl|nba}-MM-DD-YYYY
+ *   • Betting Splits       → /betting-splits/{ncaaf|mlb|nhl|nba}-MM-DD-YYYY
  *
  * Legacy slugs (/feed, /feed?tab=…, /splits, /projections, /dashboard) must
  * never populate from any link, tab, or redirect default. They survive only
@@ -13,9 +13,9 @@
 import { todayUTC } from "@/components/CalendarPicker";
 
 export type FeedSport = "MLB" | "WC" | "NCAAF";
-export type SplitsSport = "MLB" | "NHL" | "NBA";
+export type SplitsSport = "NCAAF" | "MLB" | "NHL" | "NBA";
 
-const SPLITS_SPORTS: readonly SplitsSport[] = ["MLB", "NHL", "NBA"];
+const SPLITS_SPORTS: readonly SplitsSport[] = ["NCAAF", "MLB", "NHL", "NBA"];
 
 /** YYYY-MM-DD → MM-DD-YYYY (the feed slug date form). */
 export function toFeedSlugDate(iso: string): string {
@@ -42,7 +42,7 @@ export function feedModelPath(
  * callers and parsed state remain ISO-only.
  */
 export function bettingSplitsPath(
-  sport: SplitsSport = "MLB",
+  sport: SplitsSport = "NCAAF",
   isoDate?: string
 ): string {
   const iso = isoDate ?? todayUTC();
@@ -126,7 +126,7 @@ export function parseBettingSplitsPath(
 /**
  * Resolves every recognized or malformed splits route form to one dated URL.
  * A missing/invalid date falls back to today's effective date; an invalid sport
- * falls back to MLB. Passing the returned slug back through this function is
+ * falls back to NCAAF. Passing the returned slug back through this function is
  * stable, which bounds client canonicalization to one redirect hop.
  */
 export function canonicalBettingSplitsPath(
@@ -136,13 +136,13 @@ export function canonicalBettingSplitsPath(
   const parsed = parseBettingSplitsPath(sportSegment, dateSegment);
   return parsed?.isoDate
     ? bettingSplitsPath(parsed.sport, parsed.isoDate)
-    : bettingSplitsPath(parsed?.sport ?? "MLB");
+    : bettingSplitsPath(parsed?.sport ?? "NCAAF");
 }
 
 /**
  * Maps a legacy /feed?… URL onto its canonical replacement. Pure — pass the
  * query string (window.location.search); "" handles the bare /feed slug.
- *   ?tab=splits            → /betting-splits/mlb-MM-DD-YYYY
+ *   ?tab=splits            → /betting-splits/ncaaf-MM-DD-YYYY
  *   ?sport=WC[&date=ISO]   → /feed/model/MM-DD-YYYY
  *   anything else          → /feed/model/MM-DD-YYYY (today, or legacy ?date=)
  */
@@ -150,7 +150,7 @@ export function legacyFeedRedirectTarget(search: string): string {
   const params = new URLSearchParams(search);
   const date = params.get("date");
   const iso = date && validIsoDate(date) ? date : undefined;
-  if (params.get("tab") === "splits") return bettingSplitsPath("MLB", iso);
+  if (params.get("tab") === "splits") return bettingSplitsPath("NCAAF", iso);
   const sport: FeedSport =
     (params.get("sport") ?? "").toUpperCase() === "WC" ? "WC" : "MLB";
   return feedModelPath(sport, iso);

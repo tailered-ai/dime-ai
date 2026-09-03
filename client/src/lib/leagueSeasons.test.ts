@@ -13,13 +13,18 @@ describe("leagueSeasons", () => {
     expect(isLeagueInSeason("NBA", "2026-07-12")).toBe(false);
   });
 
-  it("offers NHL and NBA through the winter, without MLB", () => {
-    expect(inSeasonLeagues("2026-01-15")).toEqual(["NHL", "NBA"]);
-    expect(inSeasonLeagues("2025-12-25")).toEqual(["NHL", "NBA"]);
+  it("offers NCAAF, NHL, and NBA through the winter, without MLB", () => {
+    expect(inSeasonLeagues("2026-01-15")).toEqual(["NCAAF", "NHL", "NBA"]);
+    expect(inSeasonLeagues("2025-12-25")).toEqual(["NCAAF", "NHL", "NBA"]);
   });
 
-  it("overlaps all three leagues in late October (World Series window)", () => {
-    expect(inSeasonLeagues("2026-10-20")).toEqual(["MLB", "NHL", "NBA"]);
+  it("overlaps all four leagues in late October (World Series window)", () => {
+    expect(inSeasonLeagues("2026-10-20")).toEqual([
+      "NCAAF",
+      "MLB",
+      "NHL",
+      "NBA",
+    ]);
   });
 
   it("handles the wrap boundaries of winter leagues inclusively", () => {
@@ -37,9 +42,16 @@ describe("leagueSeasons", () => {
     expect(isLeagueInSeason("MLB", "2026-11-11")).toBe(false);
   });
 
+  it("handles the wrap boundaries of the NCAAF season inclusively", () => {
+    expect(isLeagueInSeason("NCAAF", "2026-08-15")).toBe(true);
+    expect(isLeagueInSeason("NCAAF", "2026-08-14")).toBe(false);
+    expect(isLeagueInSeason("NCAAF", "2027-01-31")).toBe(true);
+    expect(isLeagueInSeason("NCAAF", "2027-02-01")).toBe(false);
+  });
+
   it("resolves an out-of-season deep link to the first in-season league", () => {
     expect(resolveInSeasonSport("NBA", "2026-07-12")).toBe("MLB");
-    expect(resolveInSeasonSport("MLB", "2026-01-15")).toBe("NHL");
+    expect(resolveInSeasonSport("MLB", "2026-01-15")).toBe("NCAAF");
     expect(resolveInSeasonSport("MLB", "2026-07-12")).toBe("MLB");
   });
 

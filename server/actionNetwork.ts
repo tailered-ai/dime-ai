@@ -32,6 +32,7 @@ import { getTeamColors } from "@shared/teamColors";
 
 /** AN sport slug map — BetTracker sport → AN URL slug */
 const AN_SPORT_SLUG: Record<string, string> = {
+  NCAAF: "ncaaf",
   MLB: "mlb",
   NHL: "nhl",
   NBA: "nba",
@@ -40,7 +41,7 @@ const AN_SPORT_SLUG: Record<string, string> = {
 };
 
 /** All sports we pre-warm on startup */
-const PREWARM_SPORTS = ["MLB", "NHL", "NBA", "NCAAM"] as const;
+const PREWARM_SPORTS = ["NCAAF", "MLB", "NHL", "NBA", "NCAAM"] as const;
 
 /**
  * Book IDs priority order for odds extraction.
@@ -709,6 +710,14 @@ export async function fetchAnSlate(
           console.log(
             `[AN][FALLBACK][OUTPUT] ESPN NBA fallback: date=${dateStr} games=${finalGames.length}`
           );
+        } else if (sportUpper === "NCAAF") {
+          console.log(
+            `[AN][FALLBACK][STEP] AN returned 0 NCAAF games for date=${dateStr} — trying ESPN NCAAF fallback`
+          );
+          finalGames = await fetchEspnSlate("NCAAF", dateStr);
+          console.log(
+            `[AN][FALLBACK][OUTPUT] ESPN NCAAF fallback: date=${dateStr} games=${finalGames.length}`
+          );
         } else if (sportUpper === "NCAAM") {
           console.log(
             `[AN][FALLBACK][STEP] AN returned 0 NCAAM games for date=${dateStr} — trying ESPN NCAAM fallback`
@@ -1120,14 +1129,15 @@ async function fetchNhlStatsSlate(dateStr: string): Promise<SlateGame[]> {
   return result;
 }
 
-// ─── ESPN Fallback (NBA + NCAAM) ──────────────────────────────────────────────
+// ─── ESPN Fallback (NBA + NCAAF + NCAAM) ──────────────────────────────────────
 
 /**
- * ESPN sport config for NBA and NCAAM.
+ * ESPN sport config for NBA, NCAAF, and NCAAM.
  * groups=50 for NCAAM returns only D1 games (avoids thousands of lower-division games).
  */
 const ESPN_SPORT_CONFIG: Record<string, { path: string; sport: string }> = {
   NBA: { path: "basketball/nba", sport: "NBA" },
+  NCAAF: { path: "football/college-football", sport: "NCAAF" },
   NCAAM: { path: "basketball/mens-college-basketball", sport: "NCAAM" },
 };
 
@@ -1149,17 +1159,22 @@ const ESPN_NBA_ABBREV_ALIASES: Record<string, string> = {
 };
 
 /**
- * Fetch NBA or NCAAM game slate from ESPN API as a fallback
+ * Fetch NBA, NCAAF, or NCAAM game slate from ESPN API as a fallback
  * when Action Network returns 0 games for past dates.
  * Returns SlateGame[] with empty odds — sufficient for bet entry and history display.
  */
 async function fetchEspnSlate(
-  sport: "NBA" | "NCAAM",
+  sport: "NBA" | "NCAAF" | "NCAAM",
   dateStr: string
 ): Promise<SlateGame[]> {
   const cfg = ESPN_SPORT_CONFIG[sport];
   const dateCompact = dateStr.replace(/-/g, ""); // YYYYMMDD
-  const groupsParam = sport === "NCAAM" ? "&groups=50" : "";
+  const groupsParam =
+    sport === "NCAAM"
+      ? "&groups=50"
+      : sport === "NCAAF"
+        ? "&groups=80&limit=400"
+        : "";
   const url = `https://site.api.espn.com/apis/site/v2/sports/${cfg.path}/scoreboard?dates=${dateCompact}${groupsParam}`;
   console.log(
     `[AN][FALLBACK][INPUT] fetchEspnSlate: sport=${sport} date=${dateStr}`

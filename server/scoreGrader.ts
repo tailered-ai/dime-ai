@@ -32,7 +32,7 @@
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type Sport = "MLB" | "NHL" | "NBA" | "NCAAM" | "NFL";
+export type Sport = "NCAAF" | "MLB" | "NHL" | "NBA" | "NCAAM" | "NFL";
 
 export type Timeframe =
   | "FULL_GAME"
@@ -502,14 +502,19 @@ async function fetchNbaScores(date: string): Promise<GameScoreData[]> {
  * 13/0/0/12 with 0 and 6 in OT. Regulation was 25-25 — a PUSH on the moneyline
  * where the full game was an IND win.
  */
-async function fetchNflScores(date: string): Promise<GameScoreData[]> {
+async function fetchNflScores(
+  date: string,
+  sport: "NFL" | "NCAAF" = "NFL"
+): Promise<GameScoreData[]> {
   const dateStr = date.replace(/-/g, ""); // YYYYMMDD
-  const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${dateStr}`;
-  console.log(`[ScoreGrader][STEP] NFL fetch: GET ${url}`);
+  const league = sport === "NCAAF" ? "college-football" : "nfl";
+  const groups = sport === "NCAAF" ? "&groups=80&limit=400" : "";
+  const url = `https://site.api.espn.com/apis/site/v2/sports/football/${league}/scoreboard?dates=${dateStr}${groups}`;
+  console.log(`[ScoreGrader][STEP] ${sport} fetch: GET ${url}`);
 
   const res = await fetch(url);
   if (!res.ok) {
-    console.log(`[ScoreGrader][ERROR] NFL fetch failed: status=${res.status}`);
+    console.log(`[ScoreGrader][ERROR] ${sport} fetch failed: status=${res.status}`);
     return [];
   }
   const json = await res.json() as {
@@ -528,7 +533,7 @@ async function fetchNflScores(date: string): Promise<GameScoreData[]> {
   };
 
   const events = json.events ?? [];
-  console.log(`[ScoreGrader][STATE] NFL: ${events.length} games found for date=${date}`);
+  console.log(`[ScoreGrader][STATE] ${sport}: ${events.length} games found for date=${date}`);
 
   return events.map(e => {
     const comp = e.competitions[0];
@@ -561,10 +566,10 @@ async function fetchNflScores(date: string): Promise<GameScoreData[]> {
     const homeReg = sum(homeQs, 0, 4);
     const isFinalReg = isFinalFull || awayQs.length > 4;
 
-    console.log(`[ScoreGrader][STATE] NFL game=${e.id} ${awayComp.team.abbreviation}@${homeComp.team.abbreviation} state=${status} full=${awayFull}-${homeFull} reg=${awayReg}-${homeReg} h1=${awayH1}-${homeH1} q1=${awayQ1}-${homeQ1}`);
+    console.log(`[ScoreGrader][STATE] ${sport} game=${e.id} ${awayComp.team.abbreviation}@${homeComp.team.abbreviation} state=${status} full=${awayFull}-${homeFull} reg=${awayReg}-${homeReg} h1=${awayH1}-${homeH1} q1=${awayQ1}-${homeQ1}`);
 
     return {
-      sport: "NFL" as Sport,
+      sport,
       gameId: e.id,
       startTime: "",
       awayAbbrev: awayComp.team.abbreviation,
@@ -578,6 +583,10 @@ async function fetchNflScores(date: string): Promise<GameScoreData[]> {
       },
     };
   });
+}
+
+async function fetchNcaafScores(date: string): Promise<GameScoreData[]> {
+  return fetchNflScores(date, "NCAAF");
 }
 
 async function fetchNcaamScores(date: string): Promise<GameScoreData[]> {
@@ -656,6 +665,7 @@ export async function fetchScores(sport: Sport, date: string): Promise<GameScore
   let data: GameScoreData[] = [];
 
   switch (sport) {
+    case "NCAAF": data = await fetchNcaafScores(date); break;
     case "MLB":   data = await fetchMlbScores(date);   break;
     case "NHL":   data = await fetchNhlScores(date);   break;
     case "NBA":   data = await fetchNbaScores(date);   break;
@@ -674,6 +684,9 @@ export async function fetchScores(sport: Sport, date: string): Promise<GameScore
 // Maps common AN abbreviation variants to the official league abbreviation
 
 const ABBREV_ALIASES: Record<string, string> = {
+  // NCAAF — ESPN and Action Network use different abbreviations.
+  "RUTG": "RUT",
+  "WAKE": "WF",
   // MLB — normalize MLB Stats API abbreviations to AN canonical form
   "AZ":  "ARI",  // Diamondbacks: MLB Stats API returns "AZ", AN/DB uses "ARI"
   "KC":  "KC",   // Royals — AN sends KC, MLB API sends KC
