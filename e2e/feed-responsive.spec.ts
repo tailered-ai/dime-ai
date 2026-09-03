@@ -570,7 +570,9 @@ test.describe("one-line text contracts", () => {
   test("full league name is unclipped at the 320px floor", async ({ page }) => {
     await gotoFeed(page, 320);
     const clipped = await page.evaluate(() => {
-      const el = document.querySelector<HTMLElement>(".dmf-lgname")!;
+      const el = document.querySelector<HTMLElement>(
+        '.dmf-lgbar[aria-controls="dmf-league-MLB"] .dmf-lgname'
+      )!;
       return { sw: el.scrollWidth, cw: el.clientWidth, text: el.textContent };
     });
     expect(clipped.text).toContain("Major League Baseball");

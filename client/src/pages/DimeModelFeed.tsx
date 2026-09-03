@@ -50,6 +50,19 @@ import {
 import { feedModelPath, bettingSplitsPath, toFeedSlugDate } from "@/lib/feedRoutes";
 import "./dimeModelFeed.css";
 
+const NCAAF_HELMETS: Readonly<Record<string, string>> = {
+  MASS: "/brand/ncaaf-helmets/mass-clean.png",
+  RUTG: "/brand/ncaaf-helmets/rutgers-clean.png",
+  AKR: "/brand/ncaaf-helmets/akron-clean.png",
+  WAKE: "/brand/ncaaf-helmets/wake-forest-clean.png",
+  COLO: "/brand/ncaaf-helmets/colorado-clean.png",
+  GT: "/brand/ncaaf-helmets/georgia-tech-clean.png",
+  UAB: "/brand/ncaaf-helmets/uab-clean.png",
+  ILL: "/brand/ncaaf-helmets/illinois-clean.png",
+};
+
+const ncaafHelmet = (abbr: string): string | null => NCAAF_HELMETS[abbr] ?? null;
+
 // ─── Normalized card model (adapters below map tRPC rows into this) ─────────
 
 interface CrestSpec {
@@ -788,8 +801,8 @@ export function mlbRowToCard(
 export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
   const awayAbbr = (g.awayTeam ?? "").toUpperCase();
   const homeAbbr = (g.homeTeam ?? "").toUpperCase();
-  const awayCrest: CrestSpec = { code: awayAbbr.slice(0, 4) };
-  const homeCrest: CrestSpec = { code: homeAbbr.slice(0, 4) };
+  const awayCrest: CrestSpec = { code: awayAbbr.slice(0, 4), url: ncaafHelmet(awayAbbr) };
+  const homeCrest: CrestSpec = { code: homeAbbr.slice(0, 4), url: ncaafHelmet(homeAbbr) };
   const status: GameStatus =
     g.gameStatus === "live" ? "live" :
     g.gameStatus === "final" ? "final" :
