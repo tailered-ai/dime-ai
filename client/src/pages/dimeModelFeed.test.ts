@@ -6,7 +6,7 @@ import type { GameStatus } from "@/components/projections/types";
 
 /**
  * Regression guards for the Dime AI Model Projections surface
- * (/feed/model/mlb-MM-DD-YYYY, /feed/model/wc-MM-DD-YYYY).
+ * (/feed/model/MM-DD-YYYY, with legacy sport-prefixed URLs redirected).
  *
  * Three protected properties:
  *   1. ODDS BINDINGS — the WC market bindings mirror the production
@@ -295,21 +295,22 @@ describe("DimeModelFeed — routes", () => {
 
   it("parseFeedModelPath accepts slug and split forms", () => {
     expect(src).toMatch(/\^\(mlb\|wc\|ncaaf\)-\\d\{2\}-\\d\{2\}-\\d\{4\}\$/);
+    expect(parseFeedModelPath("09-03-2026", undefined)).toEqual({
+      sport: "MLB",
+      isoDate: "2026-09-03",
+    });
   });
 
-  it("bare /feed/model/:sport canonicalizes to today's dated URL (history replace)", () => {
+  it("bare and sport-prefixed feeds canonicalize to the combined dated URL", () => {
     expect(src).toMatch(/if \(!date\) return \{ sport: sportCode, isoDate: null \}/);
     expect(src).toMatch(
-      /navigate\(resolveRouteHref\(feedModelPath\(sport\)\), \{ replace: true \}\)/
+      /navigate\(resolveRouteHref\(feedModelPath\("MLB", parsed\?\.isoDate \?\? undefined\)\), \{ replace: true \}\)/
     );
   });
 
-  it("in-page navigation builds URLs through the canonical feedModelPath helper", () => {
+  it("in-page navigation builds the sport-neutral canonical URL", () => {
     expect(src).toMatch(/from "@\/lib\/feedRoutes"/);
-    // MLB/WC remain combined; NCAAF date navigation remains on NCAAF.
-    expect(src).toMatch(
-      /feedModelPath\(sport === "NCAAF" \? "NCAAF" : "MLB", nextIso\)/
-    );
+    expect(src).toMatch(/feedModelPath\("MLB", nextIso\)/);
   });
 });
 
