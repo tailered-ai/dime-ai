@@ -48,9 +48,38 @@ describe("DimeModelFeed — NCAAF route", () => {
   });
 
   it("uses fair prices for edge math and shows projected lines as context", () => {
-    const card = ncaafRowToCard({ id: 1, awayTeam: "COLO", homeTeam: "GT", gameDate: "2026-09-03", startTimeEst: "20:00", gameStatus: "upcoming", awayBookSpread: "6.5", homeBookSpread: "-6.5", bookTotal: "51.5", awaySpreadOdds: "-106", homeSpreadOdds: "-114", modelAwaySpreadOdds: "-111", modelHomeSpreadOdds: "+111", awayModelSpread: "5.59", homeModelSpread: "-5.59", modelTotal: "56.9", modelRunAt: 1 } as never);
+    const card = ncaafRowToCard({ id: 1, awayTeam: "COLO", homeTeam: "GT", gameDate: "2026-09-03", startTimeEst: "20:00", gameStatus: "upcoming", awayBookSpread: "6.5", homeBookSpread: "-6.5", bookTotal: "51.5", awaySpreadOdds: "-106", homeSpreadOdds: "-114", overOdds: "-112", underOdds: "-108", modelAwaySpreadOdds: "-111", modelHomeSpreadOdds: "+111", awayModelSpread: "5.59", homeModelSpread: "-5.59", modelTotal: "56.9", modelRunAt: 1 } as never);
     expect(card.markets[0].rows.map((row) => row.model)).toEqual(["-111", "+111"]);
+    expect(card.markets[1].rows.map((row) => row.book)).toEqual(["-112", "-108"]);
+    expect(card.away.crest.url).toBe("/brand/ncaaf-helmets/colorado-clean.png");
+    expect(card.home.crest.url).toBe("/brand/ncaaf-helmets/georgia-tech-clean.png");
     expect(card.venueLine).toBe("Model: GT -5.59 · Total 56.9");
+  });
+
+  it.each([
+    ["MASS", "RUTG", "mass", "rutgers"],
+    ["AKR", "WAKE", "akron", "wake-forest"],
+    ["COLO", "GT", "colorado", "georgia-tech"],
+    ["UAB", "ILL", "uab", "illinois"],
+  ])("uses ESPN-marked helmets for %s at %s", (away, home, awaySlug, homeSlug) => {
+    const card = ncaafRowToCard({ awayTeam: away, homeTeam: home } as never);
+    expect(card.away.crest.url).toBe(`/brand/ncaaf-helmets/${awaySlug}-clean.png`);
+    expect(card.home.crest.url).toBe(`/brand/ncaaf-helmets/${homeSlug}-clean.png`);
+    expect(fs.existsSync(path.join(import.meta.dirname, "..", "..", "public", card.away.crest.url!))).toBe(true);
+    expect(fs.existsSync(path.join(import.meta.dirname, "..", "..", "public", card.home.crest.url!))).toBe(true);
+  });
+
+  it.each([
+    ["MASS", "RUTG", "53.5", "-109", "-112"],
+    ["AKR", "WAKE", "51.5", "+100", "-120"],
+    ["COLO", "GT", "51.5", "-112", "-108"],
+    ["UAB", "ILL", "54.5", "-107", "-113"],
+  ])("shows both Total prices for %s at %s", (away, home, line, over, under) => {
+    const card = ncaafRowToCard({ awayTeam: away, homeTeam: home, bookTotal: line, overOdds: over, underOdds: under } as never);
+    expect(card.markets[1].rows.map(({ label, book }) => [label, book])).toEqual([
+      [`O ${line}`, over],
+      [`U ${line}`, under],
+    ]);
   });
 });
 
