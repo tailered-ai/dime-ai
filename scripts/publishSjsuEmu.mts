@@ -58,6 +58,10 @@ function target(rows: RowDataPacket[]) {
   const row = matches[0];
   if (row) {
     assert(
+      row.gameDate === DATE && row.sport === "NCAAF",
+      "Event date or sport mismatch"
+    );
+    assert(
       row.awayTeam === "SJSU" && row.homeTeam === "EMU",
       "Event identity mismatch"
     );
@@ -105,6 +109,8 @@ async function main() {
       130
     );
     const valid = {
+      gameDate: DATE,
+      sport: "NCAAF",
       awayTeam: "SJSU",
       homeTeam: "EMU",
       ncaaContestId: EVENT,
@@ -112,6 +118,8 @@ async function main() {
     } as RowDataPacket;
     verify(target([valid]));
     assert.throws(() => target([valid, valid]));
+    assert.throws(() => target([{ ...valid, gameDate: "2026-09-03" }]));
+    assert.throws(() => target([{ ...valid, sport: "NCAAM" }]));
     assert.throws(() => target([{ ...valid, homeTeam: "USC" }]));
     assert.throws(() => target([{ ...valid, ncaaContestId: "wrong-event" }]));
     assert.throws(() => verify({ ...valid, modelTotal: "55.0" }));
@@ -134,12 +142,12 @@ async function main() {
   });
   try {
     await db.beginTransaction();
-    // ponytail: one date lock; use a unique event constraint if parallel publishers are added.
+    // ponytail: one date/event lock; use a unique event constraint if parallel publishers are added.
     const read = async () =>
       (
         await db.query<RowDataPacket[]>(
-          "SELECT * FROM games WHERE gameDate = ? AND sport = ? ORDER BY id FOR UPDATE",
-          [DATE, "NCAAF"]
+          "SELECT * FROM games WHERE (gameDate = ? AND sport = ?) OR ncaaContestId = ? ORDER BY id FOR UPDATE",
+          [DATE, "NCAAF", EVENT]
         )
       )[0];
     const before = await read();
