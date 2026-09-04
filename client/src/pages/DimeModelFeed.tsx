@@ -59,6 +59,8 @@ const NCAAF_HELMETS: Readonly<Record<string, string>> = {
   GT: "/brand/ncaaf-helmets/georgia-tech-clean.png",
   UAB: "/brand/ncaaf-helmets/uab-clean.png",
   ILL: "/brand/ncaaf-helmets/illinois-clean.png",
+  SJSU: "/brand/ncaaf-helmets/san-jose-state-clean.png",
+  EMU: "/brand/ncaaf-helmets/eastern-michigan-clean.png",
 };
 
 const ncaafHelmet = (abbr: string): string | null => NCAAF_HELMETS[abbr] ?? null;
@@ -842,7 +844,9 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     timeLabel: status === "suspended" ? "SUSPENDED" : status === "postponed" ? "POSTPONED" : status === "final" ? "FINAL" : formatGameTime(g.startTimeEst),
     away: { name: awayAbbr, crest: awayCrest },
     home: { name: homeAbbr, crest: homeCrest },
-    meta: "NCAAF",
+    meta: g.ingestionPipelineRevision === "vsin-circa-selected-sjsu-emu-20260904"
+      ? "NCAAF · Circa 9/4 5:50 PM ET · Provisional model"
+      : "NCAAF",
     venueLine: hasModel
       ? `Model: ${homeAbbr} ${fmtLine(n(g.homeModelSpread) ?? 0)} · Total ${n(g.modelTotal) ?? "—"}`
       : g.venue || null,

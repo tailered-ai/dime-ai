@@ -41,6 +41,15 @@ const css = fs.readFileSync(
 const flatCss = css.replace(/\s+/g, " ");
 
 describe("DimeModelFeed — NCAAF route", () => {
+  it("shows the selected Circa SJSU–EMU snapshot without inventing model prices", () => {
+    const card = ncaafRowToCard({ awayTeam: "SJSU", homeTeam: "EMU", modelRunAt: 1, awayBookSpread: "1", homeBookSpread: "-1", bookTotal: "55", awaySpreadOdds: "-110", homeSpreadOdds: "-110", overOdds: "-110", underOdds: "-110", homeModelSpread: "-2.3", modelTotal: "54.7", awayML: "+100", homeML: "-120", modelAwayML: "+130", modelHomeML: "-130", ingestionPipelineRevision: "vsin-circa-selected-sjsu-emu-20260904" } as never);
+    expect(card.meta).toBe("NCAAF · Circa 9/4 5:50 PM ET · Provisional model");
+    expect(card.venueLine).toBe("Model: EMU -2.3 · Total 54.7");
+    expect(card.markets[0].rows.map(row => [row.label, row.book, row.model])).toEqual([["SJSU +1", "-110", "—"], ["EMU -1", "-110", "—"]]);
+    expect(card.markets[1].rows.map(row => [row.label, row.book, row.model])).toEqual([["O 55", "-110", "—"], ["U 55", "-110", "—"]]);
+    expect(card.markets[2].rows.map(row => [row.book, row.model])).toEqual([["+100", "+130"], ["-120", "-130"]]);
+  });
+
   it("parses the canonical Week 1 slug and isolates the NCAAF query", () => {
     expect(parseFeedModelPath("ncaaf-09-03-2026", undefined)).toEqual({ sport: "NCAAF", isoDate: "2026-09-03" });
     expect(src).toContain('{ sport: "NCAAF", gameDate: isoDate }');
@@ -61,6 +70,7 @@ describe("DimeModelFeed — NCAAF route", () => {
     ["AKR", "WAKE", "akron", "wake-forest"],
     ["COLO", "GT", "colorado", "georgia-tech"],
     ["UAB", "ILL", "uab", "illinois"],
+    ["SJSU", "EMU", "san-jose-state", "eastern-michigan"],
   ])("uses ESPN-marked helmets for %s at %s", (away, home, awaySlug, homeSlug) => {
     const card = ncaafRowToCard({ awayTeam: away, homeTeam: home } as never);
     expect(card.away.crest.url).toBe(`/brand/ncaaf-helmets/${awaySlug}-clean.png`);
