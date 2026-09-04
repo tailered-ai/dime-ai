@@ -3309,12 +3309,18 @@ function GameCardInner({
   // Resolve professional team info only outside the college feed.
   const awayNba = isNcaaf ? null : getNbaTeamByDbSlug(game.awayTeam);
   const homeNba = isNcaaf ? null : getNbaTeamByDbSlug(game.homeTeam);
-  const awayNhl = !isNcaaf && !awayNba ? (NHL_BY_DB_SLUG.get(game.awayTeam) ?? null) : null;
-  const homeNhl = !isNcaaf && !homeNba ? (NHL_BY_DB_SLUG.get(game.homeTeam) ?? null) : null;
+  const awayNhl =
+    !isNcaaf && !awayNba ? (NHL_BY_DB_SLUG.get(game.awayTeam) ?? null) : null;
+  const homeNhl =
+    !isNcaaf && !homeNba ? (NHL_BY_DB_SLUG.get(game.homeTeam) ?? null) : null;
   const awayMlb =
-    !isNcaaf && !awayNba && !awayNhl ? (MLB_BY_ABBREV.get(game.awayTeam) ?? null) : null;
+    !isNcaaf && !awayNba && !awayNhl
+      ? (MLB_BY_ABBREV.get(game.awayTeam) ?? null)
+      : null;
   const homeMlb =
-    !isNcaaf && !homeNba && !homeNhl ? (MLB_BY_ABBREV.get(game.homeTeam) ?? null) : null;
+    !isNcaaf && !homeNba && !homeNhl
+      ? (MLB_BY_ABBREV.get(game.homeTeam) ?? null)
+      : null;
   // Normalize city abbreviations: "LA" → "Los Angeles" (defensive, DB should already have full name)
   const normCity = (c: string | undefined) => (c === "LA" ? "Los Angeles" : c);
   const awayName =
@@ -3331,8 +3337,12 @@ function GameCardInner({
     awayNba?.nickname ?? awayNhl?.nickname ?? awayMlb?.nickname ?? "";
   const homeNickname =
     homeNba?.nickname ?? homeNhl?.nickname ?? homeMlb?.nickname ?? "";
-  const awayLogoUrl = isNcaaf ? ncaafHelmet(game.awayTeam) ?? undefined : awayNba?.logoUrl ?? awayNhl?.logoUrl ?? awayMlb?.logoUrl;
-  const homeLogoUrl = isNcaaf ? ncaafHelmet(game.homeTeam) ?? undefined : homeNba?.logoUrl ?? homeNhl?.logoUrl ?? homeMlb?.logoUrl;
+  const awayLogoUrl = isNcaaf
+    ? (ncaafHelmet(game.awayTeam) ?? undefined)
+    : (awayNba?.logoUrl ?? awayNhl?.logoUrl ?? awayMlb?.logoUrl);
+  const homeLogoUrl = isNcaaf
+    ? (ncaafHelmet(game.homeTeam) ?? undefined)
+    : (homeNba?.logoUrl ?? homeNhl?.logoUrl ?? homeMlb?.logoUrl);
 
   const time = formatMilitaryTime(game.startTimeEst, game.sport);
   // All sports use ET — no date-shift needed (games end before midnight ET).
