@@ -46,6 +46,7 @@ function marketToProjection(m: MarketPresentationModel): ProjectionMarket {
   return {
     key: m.key,
     label: m.label,
+    note: m.note,
     sides,
     resultLabel: m.resultLabel,
     resultIsEdge: m.resultIsEdge,

@@ -1,0 +1,175 @@
+{
+  "status": "PROVISIONAL_NEW_PRICING_APPROXIMATION",
+  "method": "Weekly walk-forward FBS-v-FBS score-only forecasts; 28-day warmup in 2025; final2025 priors for 2026; train only before held-out week. Total sigma is zero-centered Gaussian MLE = held-out residual RMSE. Current point estimates unchanged. Integer outcomes approximate rounded continuous normal with explicit push mass; fair odds conditional on no push.",
+  "limitations": [
+    "Uncalibrated provisional shared variance; no football key-number adjustment",
+    "2025 FBS classification uses frozen2026 membership",
+    "No per-game injuries/weather adjustments in historical forecasts",
+    "SJSU paper center uses shared newly estimated baseline uncertainty",
+    "Fresno supplied -111/+111 at model +/-19.5 is an override, separate from Circa +/-21.5 prices"
+  ],
+  "source": "ncaaf-week1-20260904-evidence-8af9da5be3370751abe6f6fbd9b408778c0cccd216190458a9f6214741e6e224.json",
+  "source_sha256": "30b5ec71423f37d460f6e523c6587744d7ac2082eab6dbc9bed6933a6decc5e7",
+  "model_files_sha256": {
+    "prez_model.py": "d3fe07c4aa0a5bcc4c384f09b2eddd0a07ccb410561380e7c1f0551f531dce22",
+    "price_week1_20260904.py": "fb32499d6b5d4219f9a339a0985dd7a9280313c44f5fd093c04d9a4acf0a89d7"
+  },
+  "source_history_count": 1686,
+  "source_current_count": 90,
+  "warmup_end": "2025-09-20",
+  "overall": {
+    "n": 623,
+    "first_game": "2025-09-25",
+    "last_game": "2026-09-03",
+    "mean_error": -1.5692134831460673,
+    "sample_stdev": 16.05775759445852,
+    "rmse": 16.12141814337222
+  },
+  "by_season": {
+    "2025": {
+      "n": 613,
+      "first_game": "2025-09-25",
+      "last_game": "2026-01-19",
+      "mean_error": -1.5031647634584013,
+      "sample_stdev": 16.089872726252114,
+      "rmse": 16.146863027980757
+    },
+    "2026": {
+      "n": 10,
+      "first_game": "2026-08-29",
+      "last_game": "2026-09-03",
+      "mean_error": -5.618,
+      "sample_stdev": 14.063627475789373,
+      "rmse": 14.476497504576166
+    }
+  },
+  "total_sigma_used": 16.12141814337222,
+  "margin_sigma_used": 13.5,
+  "prices": [
+    {
+      "game": "SJSU at Eastern Michigan",
+      "total": {
+        "mean": 54.7,
+        "sigma": 16.12141814337222,
+        "line": 55,
+        "higher_probability": 0.480211239195405,
+        "lower_probability": 0.49505090626805154,
+        "push_probability": 0.024737854536543535,
+        "higher_conditional_probability": 0.49239195987372475,
+        "higher_fair_odds": 103,
+        "lower_fair_odds": -103
+      },
+      "spread_home": {
+        "mean": 2.3,
+        "sigma": 13.5,
+        "line": 1,
+        "higher_probability": 0.5236271947701447,
+        "lower_probability": 0.446964883376386,
+        "push_probability": 0.0294079218534693,
+        "higher_conditional_probability": 0.5394925495065627,
+        "higher_fair_odds": -117,
+        "lower_fair_odds": 117
+      }
+    },
+    {
+      "game": "UTEP at Oklahoma",
+      "total": {
+        "mean": 45.86,
+        "sigma": 16.12141814337222,
+        "line": 50.5,
+        "higher_probability": 0.3867438440599542,
+        "lower_probability": 0.6132561559400458,
+        "push_probability": 0.0,
+        "higher_conditional_probability": 0.3867438440599542,
+        "higher_fair_odds": 159,
+        "lower_fair_odds": -159
+      },
+      "spread_home": {
+        "mean": 26.27,
+        "sigma": 13.5,
+        "line": 41,
+        "higher_probability": 0.12962867895202512,
+        "lower_probability": 0.85407549757329,
+        "push_probability": 0.016295823474684834,
+        "higher_conditional_probability": 0.1317760786681881,
+        "higher_fair_odds": 659,
+        "lower_fair_odds": -659
+      }
+    },
+    {
+      "game": "Toledo at Michigan State",
+      "total": {
+        "mean": 51.06,
+        "sigma": 16.12141814337222,
+        "line": 48.5,
+        "higher_probability": 0.5630847913582411,
+        "lower_probability": 0.4369152086417589,
+        "push_probability": 0.0,
+        "higher_conditional_probability": 0.5630847913582411,
+        "higher_fair_odds": -129,
+        "lower_fair_odds": 129
+      },
+      "spread_home": {
+        "mean": -7.36,
+        "sigma": 13.5,
+        "line": 10,
+        "higher_probability": 0.09292384745651938,
+        "lower_probability": 0.8941471419485305,
+        "push_probability": 0.012929010594950108,
+        "higher_conditional_probability": 0.09414099740944527,
+        "higher_fair_odds": 962,
+        "lower_fair_odds": -962
+      }
+    },
+    {
+      "game": "Fresno State at USC",
+      "total": {
+        "mean": 54.35,
+        "sigma": 16.12141814337222,
+        "line": 51,
+        "higher_probability": 0.5701607573487724,
+        "lower_probability": 0.40562539641835343,
+        "push_probability": 0.02421384623287426,
+        "higher_conditional_probability": 0.5843091287446603,
+        "higher_fair_odds": -141,
+        "lower_fair_odds": 141
+      },
+      "spread_home": {
+        "mean": 19.5,
+        "sigma": 13.5,
+        "line": 21.5,
+        "higher_probability": 0.44111292596172436,
+        "lower_probability": 0.5588870740382756,
+        "push_probability": 0.0,
+        "higher_conditional_probability": 0.44111292596172436,
+        "higher_fair_odds": 127,
+        "lower_fair_odds": -127
+      }
+    },
+    {
+      "game": "Miami FL at Stanford",
+      "total": {
+        "mean": 45.67,
+        "sigma": 16.12141814337222,
+        "line": 46.5,
+        "higher_probability": 0.4794698042458767,
+        "lower_probability": 0.5205301957541233,
+        "push_probability": 0.0,
+        "higher_conditional_probability": 0.4794698042458767,
+        "higher_fair_odds": 109,
+        "lower_fair_odds": -109
+      },
+      "spread_home": {
+        "mean": -18.91,
+        "sigma": 13.5,
+        "line": -25,
+        "higher_probability": 0.6605900704418974,
+        "lower_probability": 0.3127224544964342,
+        "push_probability": 0.026687475061668353,
+        "higher_conditional_probability": 0.6787029381788259,
+        "higher_fair_odds": -211,
+        "lower_fair_odds": 211
+      }
+    }
+  ]
+}
