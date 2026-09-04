@@ -2,6 +2,13 @@ import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
 import { WC_WINNER_MARKETS, buildFeedSections, ncaafRowToCard, parseFeedModelPath, slateStatusRank, wcDisplayCity, wcDisplayStadium, wcRoundLabel } from "./DimeModelFeed";
+import { NCAAF_SEPTEMBER4, NCAAF_DATE, ncaafSeptember4Record, presentNcaafSeptember4 } from "@shared/ncaafSeptember4";
+import { stripGameModelFields } from "../../../server/feedGating";
+import { sportAdapters } from "@/lib/sport/presentation";
+import { presentationToProjectionGame } from "@/components/projections/fromPresentation";
+import { MarketTable } from "@/components/projections/MarketTable";
+import { renderToStaticMarkup } from "react-dom/server";
+import { createElement } from "react";
 import type { GameStatus } from "@/components/projections/types";
 
 /**
@@ -50,6 +57,43 @@ describe("DimeModelFeed — NCAAF route", () => {
     expect(card.markets[2].rows.map(row => [row.book, row.model])).toEqual([["+100", "+130"], ["-120", "-130"]]);
   });
 
+  it("carries all five exact snapshots through auth and the rendered market tables", () => {
+    expect(NCAAF_SEPTEMBER4.map(g => [g.away, g.home])).toEqual([["SJSU", "EMU"], ["TOL", "MSU"], ["FRES", "USC"], ["UTEP", "OU"], ["MIA", "STAN"]]);
+    const names: Record<string, string> = { source_updated_at: "sourceUpdatedAt", provider_observed_at: "providerObservedAt", ingestion_pipeline_revision: "ingestionPipelineRevision" };
+    for (const game of NCAAF_SEPTEMBER4) {
+      const row = { ...Object.fromEntries(Object.entries(ncaafSeptember4Record(game)).map(([key, value]) => [names[key] ?? key, value])), sport: "NCAAF", gameDate: NCAAF_DATE, awayTeam: game.away, homeTeam: game.home, publishedToFeed: true, publishedModel: true };
+      const exact = presentNcaafSeptember4(row);
+      expect(exact.awayModelSpread).toBe(String(game.modelSpread));
+      expect(exact.modelTotal).toBe(String(game.modelTotal));
+      const card = ncaafRowToCard(exact as never);
+      expect(card.venueLine).toBe(`Model: ${game.home} ${-game.modelSpread > 0 ? "+" : ""}${-game.modelSpread} · Total ${game.modelTotal}`);
+      const projection = presentationToProjectionGame(sportAdapters.NCAAF(card, { competition: "NCAAF" }));
+      expect(projection.markets.map(m => m.label)).toEqual(game.away === "UTEP" ? ["Spread", "Total"] : ["Spread", "Total", "Moneyline"]);
+      for (const [index, odds] of [game.spreadOdds, game.totalOdds].entries()) {
+        const market = projection.markets[index];
+        expect(market.sides.map(side => side.modelPrice)).toEqual(odds);
+        expect(market.sides.map(side => side.bookPrice)).toEqual([-110, -110]);
+        const html = renderToStaticMarkup(createElement(MarketTable, { market }));
+        expect(html).not.toContain("—");
+        expect(html).toContain("Circa");
+      }
+      if (game.away === "FRES") {
+        const spread = projection.markets[0];
+        expect(spread.note).toContain("+19.5 (-111) / USC -19.5 (+111)");
+        expect(spread.sides.map(side => side.modelPrice)).toEqual([-127, 127]);
+        expect(spread.sides[0].sideLabel).toContain("+21.5");
+      }
+      const anon = stripGameModelFields(exact);
+      expect(anon.modelSpreadNote).toBeNull();
+      expect(anon.awayModelSpread).toBeNull();
+      expect(ncaafRowToCard(anon as never).markets.every(m => m.rows.every(r => r.model === "—"))).toBe(true);
+      for (const wrong of [{ gameDate: "2026-09-03" }, { sport: "NCAAM" }, { ncaaContestId: "wrong" }, { homeTeam: "WRONG" }, { bookTotal: "999.0" }, { modelRunAt: null }, { modelOverOdds: "-999" }, { publishedModel: false }]) {
+        const changed = { ...row, ...wrong };
+        expect(presentNcaafSeptember4(changed)).toBe(changed);
+      }
+    }
+  });
+
   it("parses the canonical Week 1 slug and isolates the NCAAF query", () => {
     expect(parseFeedModelPath("ncaaf-09-03-2026", undefined)).toEqual({ sport: "NCAAF", isoDate: "2026-09-03" });
     expect(src).toContain('{ sport: "NCAAF", gameDate: isoDate }');
@@ -71,6 +115,10 @@ describe("DimeModelFeed — NCAAF route", () => {
     ["COLO", "GT", "colorado", "georgia-tech"],
     ["UAB", "ILL", "uab", "illinois"],
     ["SJSU", "EMU", "san-jose-state", "eastern-michigan"],
+    ["TOL", "MSU", "toledo", "michigan-state"],
+    ["FRES", "USC", "fresno-state", "usc"],
+    ["UTEP", "OU", "utep", "oklahoma"],
+    ["MIA", "STAN", "miami", "stanford"],
   ])("uses ESPN-marked helmets for %s at %s", (away, home, awaySlug, homeSlug) => {
     const card = ncaafRowToCard({ awayTeam: away, homeTeam: home } as never);
     expect(card.away.crest.url).toBe(`/brand/ncaaf-helmets/${awaySlug}-clean.png`);

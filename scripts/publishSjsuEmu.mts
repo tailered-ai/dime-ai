@@ -1,6 +1,10 @@
 /** Owner-selected pregame snapshot; no model fitting or live odds substitution. */
 import assert from "node:assert/strict";
 import mysql, { type RowDataPacket } from "mysql2/promise";
+import {
+  NCAAF_SEPTEMBER4,
+  ncaafSeptember4Record,
+} from "../shared/ncaafSeptember4";
 
 const DATE = "2026-09-04";
 const EVENT = "288794";
@@ -45,11 +49,28 @@ const record = {
   publishedModel: 1,
 };
 
-function target(rows: RowDataPacket[]) {
+const five = process.argv.includes("--slate=september-4-five");
+assert(
+  process.argv
+    .filter(arg => arg.startsWith("--slate="))
+    .every(arg => arg === "--slate=september-4-five"),
+  "Unsupported slate"
+);
+const selected = five
+  ? NCAAF_SEPTEMBER4.map(game => ({
+      away: game.away,
+      home: game.home,
+      event: game.event,
+      record: ncaafSeptember4Record(game),
+    }))
+  : [{ away: "SJSU", home: "EMU", event: EVENT, record }];
+type Target = (typeof selected)[number];
+
+function target(rows: RowDataPacket[], game: Target) {
   const matches = rows.filter(
     row =>
-      (row.awayTeam === "SJSU" && row.homeTeam === "EMU") ||
-      row.ncaaContestId === EVENT
+      (row.awayTeam === game.away && row.homeTeam === game.home) ||
+      row.ncaaContestId === game.event
   );
   assert(
     matches.length <= 1,
@@ -62,20 +83,20 @@ function target(rows: RowDataPacket[]) {
       "Event date or sport mismatch"
     );
     assert(
-      row.awayTeam === "SJSU" && row.homeTeam === "EMU",
+      row.awayTeam === game.away && row.homeTeam === game.home,
       "Event identity mismatch"
     );
     assert(
-      !row.ncaaContestId || row.ncaaContestId === EVENT,
+      !row.ncaaContestId || row.ncaaContestId === game.event,
       "Matchup event mismatch"
     );
   }
   return row;
 }
 
-function verify(row: RowDataPacket | undefined) {
+function verify(row: RowDataPacket | undefined, game: Target) {
   assert(row, "Published matchup missing");
-  for (const [key, value] of Object.entries(record)) {
+  for (const [key, value] of Object.entries(game.record)) {
     if (key === "source_updated_at") {
       assert.equal(
         new Date(row[key]).toISOString(),
@@ -92,48 +113,61 @@ function verify(row: RowDataPacket | undefined) {
   }
 }
 
-async function main() {
-  if (process.argv.includes("--check")) {
+function checkPayload() {
+  assert.equal(selected.length, five ? 5 : 1);
+  assert.equal(new Set(selected.map(g => g.event)).size, selected.length);
+  for (const game of selected) {
     assert.equal(
-      Number(record.awayModelSpread),
-      -Number(record.homeModelSpread)
-    );
-    assert.equal(
-      Number(record.modelAwayScore) + Number(record.modelHomeScore),
-      Number(record.modelTotal)
-    );
-    assert.equal(
-      Math.round(
-        (100 * Number(record.modelHomeWinPct)) / Number(record.modelAwayWinPct)
-      ),
-      130
+      Number(game.record.awayModelSpread),
+      -Number(game.record.homeModelSpread)
     );
     const valid = {
       gameDate: DATE,
       sport: "NCAAF",
-      awayTeam: "SJSU",
-      homeTeam: "EMU",
-      ncaaContestId: EVENT,
-      ...record,
+      awayTeam: game.away,
+      homeTeam: game.home,
+      ...game.record,
     } as RowDataPacket;
-    verify(target([valid]));
-    assert.throws(() => target([valid, valid]));
-    assert.throws(() => target([{ ...valid, gameDate: "2026-09-03" }]));
-    assert.throws(() => target([{ ...valid, sport: "NCAAM" }]));
-    assert.throws(() => target([{ ...valid, homeTeam: "USC" }]));
-    assert.throws(() => target([{ ...valid, ncaaContestId: "wrong-event" }]));
-    assert.throws(() => verify({ ...valid, modelTotal: "55.0" }));
-    assert.throws(() => verify({ ...valid, modelOverOdds: "-110" }));
-    console.log("SJSU_EMU_PAYLOAD_CHECK_PASS");
+    verify(target([valid], game), game);
+    assert.throws(() => target([valid, valid], game));
+    for (const wrong of [
+      { gameDate: "2026-09-03" },
+      { sport: "NCAAM" },
+      { homeTeam: "WRONG" },
+      { ncaaContestId: "wrong-event" },
+    ]) {
+      assert.throws(() => target([{ ...valid, ...wrong }], game));
+    }
+    assert.throws(() => verify({ ...valid, modelTotal: "999.0" }, game));
+    assert.throws(() => verify({ ...valid, modelOverOdds: "-999" }, game));
+    if (five) {
+      assert(
+        game.record.modelAwaySpreadOdds &&
+          game.record.modelHomeSpreadOdds &&
+          game.record.modelOverOdds &&
+          game.record.modelUnderOdds
+      );
+      if (game.away === "UTEP") assert.equal(game.record.homeML, null);
+    }
+  }
+}
+
+async function main() {
+  checkPayload();
+  const modes = ["--check", "--publish", "--dry-run", "--verify"].filter(mode =>
+    process.argv.includes(mode)
+  );
+  assert.equal(
+    modes.length,
+    1,
+    "Choose exactly one mode: --check, --dry-run, --publish, or --verify"
+  );
+  const prefix = five ? "NCAAF_FIVE" : "SJSU_EMU";
+  if (modes[0] === "--check") {
+    console.log(`${prefix}_PAYLOAD_CHECK_PASS`);
     return;
   }
-  const publish = process.argv.includes("--publish");
-  assert(
-    publish ||
-      process.argv.includes("--dry-run") ||
-      process.argv.includes("--verify"),
-    "Choose --dry-run, --publish, or --verify"
-  );
+  const publish = modes[0] === "--publish";
   assert(process.env.DATABASE_URL, "DATABASE_URL unavailable");
   const db = await mysql.createConnection({
     uri: process.env.DATABASE_URL,
@@ -142,62 +176,72 @@ async function main() {
   });
   try {
     await db.beginTransaction();
-    // ponytail: one date/event lock; use a unique event constraint if parallel publishers are added.
+    // ponytail: one slate/event lock; use a unique event constraint if parallel publishers are added.
     const read = async () =>
       (
         await db.query<RowDataPacket[]>(
-          "SELECT * FROM games WHERE (gameDate = ? AND sport = ?) OR ncaaContestId = ? ORDER BY id FOR UPDATE",
-          [DATE, "NCAAF", EVENT]
+          `SELECT * FROM games WHERE (gameDate = ? AND sport = ?) OR ncaaContestId IN (${selected.map(() => "?").join(", ")}) ORDER BY id FOR UPDATE`,
+          [DATE, "NCAAF", ...selected.map(g => g.event)]
         )
       )[0];
     const before = await read();
-    const existing = target(before);
-    if (process.argv.includes("--verify")) verify(existing);
+    // Validate EVERY identity before the first write, including cross-date/event collisions.
+    const existing = selected.map(game => target(before, game));
+    if (modes[0] === "--verify")
+      selected.forEach((game, i) => verify(existing[i], game));
     else if (publish) {
-      const entries = Object.entries(record);
-      if (existing) {
-        await db.execute(
-          `UPDATE games SET ${entries.map(([key]) => `\`${key}\` = ?`).join(", ")} WHERE id = ? AND gameDate = ? AND sport = ? AND awayTeam = ? AND homeTeam = ?`,
-          [
-            ...entries.map(([, value]) => value),
-            existing.id,
-            DATE,
-            "NCAAF",
-            "SJSU",
-            "EMU",
-          ]
-        );
-      } else {
-        const insert = {
-          fileId: 0,
-          gameDate: DATE,
-          sport: "NCAAF",
-          awayTeam: "SJSU",
-          homeTeam: "EMU",
-          ...record,
-        };
-        await db.execute(
-          `INSERT INTO games (${Object.keys(insert)
-            .map(key => `\`${key}\``)
-            .join(", ")}) VALUES (${Object.keys(insert)
-            .map(() => "?")
-            .join(", ")})`,
-          Object.values(insert)
-        );
+      for (const [i, game] of selected.entries()) {
+        const entries = Object.entries(game.record);
+        if (existing[i]) {
+          await db.execute(
+            `UPDATE games SET ${entries.map(([key]) => `\`${key}\` = ?`).join(", ")} WHERE id = ? AND gameDate = ? AND sport = ? AND awayTeam = ? AND homeTeam = ?`,
+            [
+              ...entries.map(([, value]) => value),
+              existing[i]!.id,
+              DATE,
+              "NCAAF",
+              game.away,
+              game.home,
+            ]
+          );
+        } else {
+          const insert = {
+            fileId: 0,
+            gameDate: DATE,
+            sport: "NCAAF",
+            awayTeam: game.away,
+            homeTeam: game.home,
+            ...game.record,
+          };
+          await db.execute(
+            `INSERT INTO games (${Object.keys(insert)
+              .map(key => `\`${key}\``)
+              .join(", ")}) VALUES (${Object.keys(insert)
+              .map(() => "?")
+              .join(", ")})`,
+            Object.values(insert)
+          );
+        }
       }
       const after = await read();
-      const published = target(after);
-      verify(published);
+      const published = selected.map(game => {
+        const row = target(after, game);
+        verify(row, game);
+        return row!;
+      });
+      const oldIds = new Set(existing.filter(Boolean).map(row => row!.id));
+      const newIds = new Set(published.map(row => row.id));
       assert.deepEqual(
-        after.filter(row => row.id !== published!.id),
-        before.filter(row => row.id !== existing?.id),
+        after.filter(row => !newIds.has(row.id)),
+        before.filter(row => !oldIds.has(row.id)),
         "Unrelated rows changed"
       );
       await db.commit();
     }
     if (!publish) await db.rollback();
+    const count = existing.filter(Boolean).length;
     console.log(
-      `SJSU_EMU_${publish ? "PUBLISH" : process.argv.includes("--verify") ? "VERIFY" : "DRY_RUN"}_PASS existingRows=${existing ? 1 : 0} unrelatedRows=${before.length - (existing ? 1 : 0)}`
+      `${prefix}_${publish ? "PUBLISH" : modes[0] === "--verify" ? "VERIFY" : "DRY_RUN"}_PASS selectedRows=${selected.length} existingRows=${count} unrelatedRows=${before.length - count}`
     );
   } catch (error) {
     await db.rollback();

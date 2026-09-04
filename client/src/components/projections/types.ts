@@ -28,6 +28,8 @@ export interface ProjectionMarketSide extends MarketSideInput {
 
 /** One market (run line / total / moneyline) with its two sides. */
 export interface ProjectionMarket {
+  /** Context for prices at a different line; excluded from edge arithmetic. */
+  note?: string;
   key: string; // "runline" | "total" | "moneyline"
   label: string; // "Run line" | "Total" | "Moneyline"
   sides: ProjectionMarketSide[]; // decision-engine shape + display extras

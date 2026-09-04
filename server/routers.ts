@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { presentNcaafSeptember4 } from "../shared/ncaafSeptember4";
 import { gamesListInput } from "./gamesListInput";
 import {
   applyMlbMarketGatesToGame,
@@ -113,7 +114,7 @@ const NCAAF_VALID_ABBREVS = new Set(CFB_TEAMS.map((team) => team.espnAbbreviatio
  * (e.g. NHL games never have F5 innings, MLB games never have goalies).
  * Fields that are null for TODAY but could be non-null in future are NOT stripped.
  */
-function stripSportNullFields(game: import('../drizzle/schema').Game): import('../drizzle/schema').Game {
+function stripSportNullFields<T extends import('../drizzle/schema').Game>(game: T): T {
   const g = game as Record<string, unknown>;
   const sport = game.sport;
 
@@ -182,7 +183,7 @@ function stripSportNullFields(game: import('../drizzle/schema').Game): import('.
   if (sport !== 'NHL') for (const f of nhlOnlyFields) delete result[f];
   if (sport !== 'MLB') for (const f of mlbOnlyFields) delete result[f];
 
-  return result as import('../drizzle/schema').Game;
+  return result as T;
 }
 
 /** Returns true if both teams are in the appropriate registry for the given sport */
@@ -290,7 +291,7 @@ export const appRouter = router({
         //   MLB (111 games × 175 fields): 425KB → ~250KB
         //   NHL/NBA (fewer games, fewer fields): proportionally smaller
         // Cache stores full Game objects; stripping happens at the wire layer only.
-        const stripped = filtered.map(g => stripSportNullFields(g));
+        const stripped = filtered.map(g => stripSportNullFields(presentNcaafSeptember4(g)));
 
         // IP gating (Phase 3): the model projections/edges are the paid product.
         // Anonymous callers get commodity fields only (schedule, book lines,

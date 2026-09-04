@@ -67,16 +67,25 @@ export function MarketTable({ market }: { market: ProjectionMarket }) {
           );
         })}
       </tbody>
-      {market.resultLabel && (
+      {(market.resultLabel || market.note) && (
         <tfoot>
-          <tr>
-            <td
-              colSpan={3}
-              className={`market-table__result ds-label${market.resultIsEdge ? " market-table__result--edge" : ""}`}
-            >
-              {market.resultLabel}
-            </td>
-          </tr>
+          {market.note && (
+            <tr>
+              <td colSpan={3} className="market-table__result">
+                {market.note}
+              </td>
+            </tr>
+          )}
+          {market.resultLabel && (
+            <tr>
+              <td
+                colSpan={3}
+                className={`market-table__result ds-label${market.resultIsEdge ? " market-table__result--edge" : ""}`}
+              >
+                {market.resultLabel}
+              </td>
+            </tr>
+          )}
         </tfoot>
       )}
     </table>

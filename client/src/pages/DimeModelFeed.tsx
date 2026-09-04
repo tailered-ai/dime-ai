@@ -61,6 +61,14 @@ const NCAAF_HELMETS: Readonly<Record<string, string>> = {
   ILL: "/brand/ncaaf-helmets/illinois-clean.png",
   SJSU: "/brand/ncaaf-helmets/san-jose-state-clean.png",
   EMU: "/brand/ncaaf-helmets/eastern-michigan-clean.png",
+  TOL: "/brand/ncaaf-helmets/toledo-clean.png",
+  MSU: "/brand/ncaaf-helmets/michigan-state-clean.png",
+  FRES: "/brand/ncaaf-helmets/fresno-state-clean.png",
+  USC: "/brand/ncaaf-helmets/usc-clean.png",
+  UTEP: "/brand/ncaaf-helmets/utep-clean.png",
+  OU: "/brand/ncaaf-helmets/oklahoma-clean.png",
+  MIA: "/brand/ncaaf-helmets/miami-clean.png",
+  STAN: "/brand/ncaaf-helmets/stanford-clean.png",
 };
 
 const ncaafHelmet = (abbr: string): string | null => NCAAF_HELMETS[abbr] ?? null;
@@ -84,6 +92,7 @@ interface MarketRowSpec {
 }
 interface MarketColSpec {
   title: string;
+  note?: string;
   rows: MarketRowSpec[];
   foot: { label: string; crest?: CrestSpec | null; edge: boolean };
 }
@@ -834,8 +843,15 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     { label: homeAbbr, crest: homeCrest, book: n(g.homeML), model: M(n(g.modelHomeML)), wp: hasModel && !favIsAway && homeWp != null ? `${Math.round(homeWp)}%` : null },
     "ML",
   );
+  spread.note = hasModel ? g.modelSpreadNote ?? undefined : undefined;
+  total.note = hasModel && g.ingestionPipelineRevision === "vsin-circa-five-provisional-20260904-v1"
+    ? "Provisional model odds at the Circa total shown."
+    : undefined;
+  const markets = n(g.awayML) == null && n(g.homeML) == null
+    ? [spread, total]
+    : [spread, total, ml];
   let best: BestPick | null = null;
-  for (const col of [spread, total, ml]) best = trackBest(best, col);
+  for (const col of markets) best = trackBest(best, col);
   return {
     id: String(g.id ?? `${awayAbbr}-${homeAbbr}-${g.gameDate ?? ""}-${g.startTimeEst ?? ""}`),
     status,
@@ -844,13 +860,13 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     timeLabel: status === "suspended" ? "SUSPENDED" : status === "postponed" ? "POSTPONED" : status === "final" ? "FINAL" : formatGameTime(g.startTimeEst),
     away: { name: awayAbbr, crest: awayCrest },
     home: { name: homeAbbr, crest: homeCrest },
-    meta: g.ingestionPipelineRevision === "vsin-circa-selected-sjsu-emu-20260904"
+    meta: ["vsin-circa-selected-sjsu-emu-20260904", "vsin-circa-five-provisional-20260904-v1"].includes(g.ingestionPipelineRevision ?? "")
       ? "NCAAF · Circa 9/4 5:50 PM ET · Provisional model"
       : "NCAAF",
     venueLine: hasModel
       ? `Model: ${homeAbbr} ${fmtLine(n(g.homeModelSpread) ?? 0)} · Total ${n(g.modelTotal) ?? "—"}`
       : g.venue || null,
-    markets: [spread, total, ml],
+    markets,
     modelPublished: hasModel,
     verdict: verdictOf(best),
   };

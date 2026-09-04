@@ -80,6 +80,7 @@ export interface MarketSelectionModel {
 }
 
 export interface MarketPresentationModel {
+  note?: string;
   key: string;
   /** Sport-appropriate market name — never forced into MLB terminology. */
   label: string;
@@ -166,6 +167,7 @@ export interface FeedRowLike {
   crest?: FeedCrestLike | null;
 }
 export interface FeedMarketLike {
+  note?: string;
   title: string;
   rows: FeedRowLike[];
   foot: { label: string; edge: boolean };
@@ -377,6 +379,7 @@ function teamMarkets(
     return {
       key,
       label: marketDisplayLabel(m.title),
+      note: m.note,
       selections,
       ...footOf(m, selections),
     };
