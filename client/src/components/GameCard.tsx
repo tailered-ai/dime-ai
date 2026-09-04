@@ -35,6 +35,7 @@ import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/lib/trpc";
 import { getNbaTeamByDbSlug } from "@shared/nbaTeams";
 import { NHL_BY_DB_SLUG, NHL_BY_ABBREV } from "@shared/nhlTeams";
+import { ncaafHelmet } from "@shared/ncaafHelmets";
 import { MLB_BY_ABBREV } from "@shared/mlbTeams";
 import { getGameTeamColorsClient } from "@shared/teamColors";
 import { useVisibility } from "@/hooks/useVisibility";
@@ -3303,15 +3304,17 @@ function GameCardInner({
   const displayAwayML = game.awayML ?? "—";
   const displayHomeML = game.homeML ?? "—";
 
-  // Resolve team info from NBA, NHL, or MLB registry
-  const awayNba = getNbaTeamByDbSlug(game.awayTeam);
-  const homeNba = getNbaTeamByDbSlug(game.homeTeam);
-  const awayNhl = !awayNba ? (NHL_BY_DB_SLUG.get(game.awayTeam) ?? null) : null;
-  const homeNhl = !homeNba ? (NHL_BY_DB_SLUG.get(game.homeTeam) ?? null) : null;
+  // College abbreviations must not resolve to professional teams (MIA is also the Marlins).
+  const isNcaaf = game.sport === "NCAAF";
+  // Resolve professional team info only outside the college feed.
+  const awayNba = isNcaaf ? null : getNbaTeamByDbSlug(game.awayTeam);
+  const homeNba = isNcaaf ? null : getNbaTeamByDbSlug(game.homeTeam);
+  const awayNhl = !isNcaaf && !awayNba ? (NHL_BY_DB_SLUG.get(game.awayTeam) ?? null) : null;
+  const homeNhl = !isNcaaf && !homeNba ? (NHL_BY_DB_SLUG.get(game.homeTeam) ?? null) : null;
   const awayMlb =
-    !awayNba && !awayNhl ? (MLB_BY_ABBREV.get(game.awayTeam) ?? null) : null;
+    !isNcaaf && !awayNba && !awayNhl ? (MLB_BY_ABBREV.get(game.awayTeam) ?? null) : null;
   const homeMlb =
-    !homeNba && !homeNhl ? (MLB_BY_ABBREV.get(game.homeTeam) ?? null) : null;
+    !isNcaaf && !homeNba && !homeNhl ? (MLB_BY_ABBREV.get(game.homeTeam) ?? null) : null;
   // Normalize city abbreviations: "LA" → "Los Angeles" (defensive, DB should already have full name)
   const normCity = (c: string | undefined) => (c === "LA" ? "Los Angeles" : c);
   const awayName =
@@ -3328,8 +3331,8 @@ function GameCardInner({
     awayNba?.nickname ?? awayNhl?.nickname ?? awayMlb?.nickname ?? "";
   const homeNickname =
     homeNba?.nickname ?? homeNhl?.nickname ?? homeMlb?.nickname ?? "";
-  const awayLogoUrl = awayNba?.logoUrl ?? awayNhl?.logoUrl ?? awayMlb?.logoUrl;
-  const homeLogoUrl = homeNba?.logoUrl ?? homeNhl?.logoUrl ?? homeMlb?.logoUrl;
+  const awayLogoUrl = isNcaaf ? ncaafHelmet(game.awayTeam) ?? undefined : awayNba?.logoUrl ?? awayNhl?.logoUrl ?? awayMlb?.logoUrl;
+  const homeLogoUrl = isNcaaf ? ncaafHelmet(game.homeTeam) ?? undefined : homeNba?.logoUrl ?? homeNhl?.logoUrl ?? homeMlb?.logoUrl;
 
   const time = formatMilitaryTime(game.startTimeEst, game.sport);
   // All sports use ET — no date-shift needed (games end before midnight ET).
@@ -5047,6 +5050,7 @@ function GameCardInner({
               }}
             >
               <OddsHistoryPanel
+                sport={game.sport}
                 gameId={game.id}
                 enabled={isCardVisible}
                 awayTeam={game.awayTeam}

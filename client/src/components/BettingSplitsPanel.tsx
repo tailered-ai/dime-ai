@@ -1099,13 +1099,14 @@ export function BettingSplitsPanel({
   onMarketChange,
 }: BettingSplitsPanelProps) {
   const [mobileMarket, setMobileMarket] = useState<MobileMarket>("spread");
+  const isMdUp = useIsMdUp();
 
   // Wrapper that updates internal state AND notifies parent (GameCard)
   const handleMarketChange = (m: MobileMarket) => {
     setMobileMarket(m);
     onMarketChange?.(m);
   };
-  const sport = (game.sport ?? "NBA") as "MLB" | "NBA" | "NHL";
+  const sport = game.sport ?? "NBA";
   // Performance Fix #5: client-side color lookup (eliminates tRPC round-trip per card)
   const colors = getGameTeamColorsClient(game.awayTeam, game.homeTeam, sport);
 
@@ -1196,8 +1197,6 @@ export function BettingSplitsPanel({
   const activeMarket: MobileMarket = availableMarkets.includes(mobileMarket)
     ? mobileMarket
     : (availableMarkets[0] ?? "spread");
-
-  const isMdUp = useIsMdUp();
 
   return (
     <>

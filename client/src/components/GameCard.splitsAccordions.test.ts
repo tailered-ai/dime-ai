@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getTeamColors } from "@shared/teamColors";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -39,5 +40,22 @@ describe("splits-surface accordion gating (Last 5 + Trends live on the Trends ta
         `\\(mode === ${Q}splits${Q} \\|\\|\\s*\\(mode === ${Q}full${Q} && !isMdUp && mobileTab === ${Q}splits${Q}\\)\\) &&\\s*isCardVisible &&\\s*game\\.id != null`
       )
     );
+  });
+});
+
+describe("NCAAF splits publication", () => {
+  it("does not resolve college Miami as the MLB Marlins", () => {
+    expect(getTeamColors("MIA", "MLB")).not.toBeNull();
+    expect(getTeamColors("MIA", "NCAAF")).toBeNull();
+  });
+  it("keeps the viewport hook unconditional when empty split data populates", () => {
+    const panel = fs.readFileSync(
+      path.join(import.meta.dirname, "BettingSplitsPanel.tsx"),
+      "utf8"
+    );
+    const hook = panel.indexOf("const isMdUp = useIsMdUp()");
+    const emptyReturn = panel.indexOf("if (!hasAnySplits)");
+    expect(hook).toBeGreaterThan(-1);
+    expect(emptyReturn).toBeGreaterThan(hook);
   });
 });
