@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { presentNcaafSeptember4 } from "../shared/ncaafSeptember4";
+import { presentNcaafSeptember4, presentNcaafSeptember4History } from "../shared/ncaafSeptember4";
 import { gamesListInput } from "./gamesListInput";
 import {
   applyMlbMarketGatesToGame,
@@ -1129,7 +1129,7 @@ export const appRouter = router({
           `[tRPC][oddsHistory.listForGame] AUTHED principal=${ctx.sportsPrincipal} gameId=${input.gameId}`
         );
         const rows = await listOddsHistory(input.gameId);
-        return { history: rows };
+        return { history: rows.map(presentNcaafSeptember4History) };
       }),
 
     /**

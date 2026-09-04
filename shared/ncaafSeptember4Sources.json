@@ -1,0 +1,207 @@
+[
+  {
+    "event": "288794",
+    "away": "SJSU",
+    "home": "EMU",
+    "splits": {
+      "spreadAwayMoneyPct": 82,
+      "spreadAwayBetsPct": 39,
+      "totalOverMoneyPct": 56,
+      "totalOverBetsPct": 50,
+      "mlAwayMoneyPct": 95,
+      "mlAwayBetsPct": 77
+    },
+    "history": [
+      {
+        "lineSource": "open",
+        "scrapedAt": 1788564979387,
+        "awaySpread": "+3.5",
+        "homeSpread": "-3.5",
+        "awaySpreadOdds": "-108",
+        "homeSpreadOdds": "-112",
+        "total": "54.5",
+        "overOdds": "-110",
+        "underOdds": "-110",
+        "awayML": "+136",
+        "homeML": "-164"
+      },
+      {
+        "lineSource": "dk",
+        "scrapedAt": 1788564979387,
+        "awaySpread": "+1.5",
+        "homeSpread": "-1.5",
+        "awaySpreadOdds": "-112",
+        "homeSpreadOdds": "-108",
+        "total": "54.5",
+        "overOdds": "-118",
+        "underOdds": "-102",
+        "awayML": "-105",
+        "homeML": "-115"
+      }
+    ]
+  },
+  {
+    "event": "288839",
+    "away": "TOL",
+    "home": "MSU",
+    "splits": {
+      "spreadAwayMoneyPct": 55,
+      "spreadAwayBetsPct": 54,
+      "totalOverMoneyPct": 72,
+      "totalOverBetsPct": 38,
+      "mlAwayMoneyPct": 84,
+      "mlAwayBetsPct": 75
+    },
+    "history": [
+      {
+        "lineSource": "open",
+        "scrapedAt": 1788564979387,
+        "awaySpread": "+10.5",
+        "homeSpread": "-10.5",
+        "awaySpreadOdds": "-112",
+        "homeSpreadOdds": "-108",
+        "total": "48.5",
+        "overOdds": "-115",
+        "underOdds": "-105",
+        "awayML": "+365",
+        "homeML": "-490"
+      },
+      {
+        "lineSource": "dk",
+        "scrapedAt": 1788564979387,
+        "awaySpread": "+10",
+        "homeSpread": "-10",
+        "awaySpreadOdds": "-110",
+        "homeSpreadOdds": "-110",
+        "total": "48.5",
+        "overOdds": "-108",
+        "underOdds": "-112",
+        "awayML": "+310",
+        "homeML": "-395"
+      }
+    ]
+  },
+  {
+    "event": "288845",
+    "away": "FRES",
+    "home": "USC",
+    "splits": {
+      "spreadAwayMoneyPct": 46,
+      "spreadAwayBetsPct": 56,
+      "totalOverMoneyPct": 45,
+      "totalOverBetsPct": 83,
+      "mlAwayMoneyPct": 1,
+      "mlAwayBetsPct": 57
+    },
+    "history": [
+      {
+        "lineSource": "open",
+        "scrapedAt": 1788564979387,
+        "awaySpread": "+23.5",
+        "homeSpread": "-23.5",
+        "awaySpreadOdds": "-112",
+        "homeSpreadOdds": "-108",
+        "total": "49.5",
+        "overOdds": "-115",
+        "underOdds": "-105",
+        "awayML": "+1280",
+        "homeML": "-3500"
+      },
+      {
+        "lineSource": "dk",
+        "scrapedAt": 1788564979387,
+        "awaySpread": "+21.5",
+        "homeSpread": "-21.5",
+        "awaySpreadOdds": "-108",
+        "homeSpreadOdds": "-112",
+        "total": "51.5",
+        "overOdds": "-112",
+        "underOdds": "-108",
+        "awayML": "+1000",
+        "homeML": "-1800"
+      }
+    ]
+  },
+  {
+    "event": "288837",
+    "away": "UTEP",
+    "home": "OU",
+    "splits": {
+      "spreadAwayMoneyPct": 31,
+      "spreadAwayBetsPct": 19,
+      "totalOverMoneyPct": 27,
+      "totalOverBetsPct": 73,
+      "mlAwayMoneyPct": 50,
+      "mlAwayBetsPct": 50
+    },
+    "history": [
+      {
+        "lineSource": "open",
+        "scrapedAt": 1788564979387,
+        "awaySpread": "+40.5",
+        "homeSpread": "-40.5",
+        "awaySpreadOdds": "-115",
+        "homeSpreadOdds": "-105",
+        "total": "51.5",
+        "overOdds": "-110",
+        "underOdds": "-110",
+        "awayML": null,
+        "homeML": null
+      },
+      {
+        "lineSource": "dk",
+        "scrapedAt": 1788564979387,
+        "awaySpread": "+40.5",
+        "homeSpread": "-40.5",
+        "awaySpreadOdds": "-110",
+        "homeSpreadOdds": "-110",
+        "total": "51.5",
+        "overOdds": "-112",
+        "underOdds": "-108",
+        "awayML": null,
+        "homeML": null
+      }
+    ]
+  },
+  {
+    "event": "288791",
+    "away": "MIA",
+    "home": "STAN",
+    "splits": {
+      "spreadAwayMoneyPct": 36,
+      "spreadAwayBetsPct": 53,
+      "totalOverMoneyPct": 35,
+      "totalOverBetsPct": 80,
+      "mlAwayMoneyPct": 97,
+      "mlAwayBetsPct": 40
+    },
+    "history": [
+      {
+        "lineSource": "open",
+        "scrapedAt": 1788564979387,
+        "awaySpread": "-21.5",
+        "homeSpread": "+21.5",
+        "awaySpreadOdds": "-110",
+        "homeSpreadOdds": "-110",
+        "total": "48.5",
+        "overOdds": "-110",
+        "underOdds": "-110",
+        "awayML": "-3000",
+        "homeML": "+1200"
+      },
+      {
+        "lineSource": "dk",
+        "scrapedAt": 1788564979387,
+        "awaySpread": "-24.5",
+        "homeSpread": "+24.5",
+        "awaySpreadOdds": "-108",
+        "homeSpreadOdds": "-112",
+        "total": "46.5",
+        "overOdds": "-110",
+        "underOdds": "-110",
+        "awayML": "-4000",
+        "homeML": "+1600"
+      }
+    ]
+  }
+]

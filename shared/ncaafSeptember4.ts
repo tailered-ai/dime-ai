@@ -1,7 +1,9 @@
+import sourceRows from "./ncaafSeptember4Sources.json";
+
 /** Owner-selected Circa snapshot, 2026-09-04 17:50 ET; server/publisher only. */
 export const NCAAF_DATE = "2026-09-04";
-export const NCAAF_REVISION = "vsin-circa-five-provisional-20260904-v1";
-export const NCAAF_MODEL_RUN_AT = Date.parse("2026-09-04T23:21:00Z");
+export const NCAAF_REVISION = "vsin-circa-five-provisional-20260904-v2";
+export const NCAAF_MODEL_RUN_AT = Date.parse("2026-09-04T23:43:00Z");
 export const NCAAF_SOURCE_TIME = "2026-09-04T21:50:00.000Z";
 
 export const NCAAF_SEPTEMBER4 = [
@@ -20,7 +22,7 @@ export const NCAAF_SEPTEMBER4 = [
     modelML: [130, -130],
   },
   {
-    spreadOdds: [-962, 962],
+    spreadOdds: [-138, 138],
     totalOdds: [-129, 129],
     away: "TOL",
     home: "MSU",
@@ -29,9 +31,9 @@ export const NCAAF_SEPTEMBER4 = [
     bookSpread: 10,
     bookTotal: 48.5,
     bookML: [310, -380],
-    modelSpread: -7.36,
+    modelSpread: 7.36,
     modelTotal: 51.06,
-    modelML: [-241, 241],
+    modelML: [241, -241],
   },
   {
     spreadOdds: [-127, 127],
@@ -176,4 +178,45 @@ export function presentNcaafSeptember4<T extends Record<string, unknown>>(
         ? game.modelSpreadNote
         : "Provisional model odds at the Circa spread shown.",
   };
+}
+
+/** Opening-time splits are unavailable; current Circa percentages belong only to the market snapshot. */
+export function ncaafSeptember4HistoryRecord(
+  event: string,
+  quote: (typeof sourceRows)[number]["history"][number]
+) {
+  const splits = sourceRows.find(source => source.event === event)!.splits;
+  return {
+    sport: "NCAAF",
+    source: "manual",
+    ...quote,
+    ...Object.fromEntries(
+      Object.entries(splits).map(([key, value]) => [
+        key,
+        quote.lineSource === "open" ? null : value,
+      ])
+    ),
+  };
+}
+
+/** Label only the verified source observation; subsequent automatic history keeps its own provenance. */
+export function presentNcaafSeptember4History<
+  T extends Record<string, unknown>,
+>(row: T): T & { sourceNote?: string } {
+  if (row.sport !== "NCAAF" || row.source !== "manual") return row;
+  const matches = sourceRows.some(source =>
+    source.history.some(quote =>
+      Object.entries(ncaafSeptember4HistoryRecord(source.event, quote)).every(
+        ([key, value]) =>
+          value == null ? row[key] == null : String(row[key]) === String(value)
+      )
+    )
+  );
+  return matches
+    ? {
+        ...row,
+        sourceNote:
+          "9/4 7:36 PM ET snapshot: opening odds — Action Network Open; market odds — DraftKings NJ via Action Network; current splits — VSiN Circa. Opening-time splits unavailable.",
+      }
+    : row;
 }

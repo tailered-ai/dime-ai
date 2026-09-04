@@ -2,7 +2,8 @@ import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
 import { WC_WINNER_MARKETS, buildFeedSections, ncaafRowToCard, parseFeedModelPath, slateStatusRank, wcDisplayCity, wcDisplayStadium, wcRoundLabel } from "./DimeModelFeed";
-import { NCAAF_SEPTEMBER4, NCAAF_DATE, ncaafSeptember4Record, presentNcaafSeptember4 } from "@shared/ncaafSeptember4";
+import { NCAAF_SEPTEMBER4, NCAAF_DATE, ncaafSeptember4Record, presentNcaafSeptember4, presentNcaafSeptember4History, ncaafSeptember4HistoryRecord } from "@shared/ncaafSeptember4";
+import sourceRows from "@shared/ncaafSeptember4Sources.json";
 import { stripGameModelFields } from "../../../server/feedGating";
 import { sportAdapters } from "@/lib/sport/presentation";
 import { presentationToProjectionGame } from "@/components/projections/fromPresentation";
@@ -55,6 +56,19 @@ describe("DimeModelFeed — NCAAF route", () => {
     expect(card.markets[0].rows.map(row => [row.label, row.book, row.model])).toEqual([["SJSU +1", "-110", "—"], ["EMU -1", "-110", "—"]]);
     expect(card.markets[1].rows.map(row => [row.label, row.book, row.model])).toEqual([["O 55", "-110", "—"], ["U 55", "-110", "—"]]);
     expect(card.markets[2].rows.map(row => [row.book, row.model])).toEqual([["+100", "+130"], ["-120", "-130"]]);
+  });
+
+  it("uses the owner-revised Michigan State favorite and labels only verified source history", () => {
+    const game = NCAAF_SEPTEMBER4.find(game => game.away === "TOL")!;
+    expect([game.modelSpread, ...game.modelML, ...game.spreadOdds]).toEqual([7.36, 241, -241, -138, 138]);
+    for (const source of sourceRows) for (const quote of source.history) {
+      const row = ncaafSeptember4HistoryRecord(source.event, quote);
+      expect(row.spreadAwayBetsPct).toBe(quote.lineSource === "open" ? null : source.splits.spreadAwayBetsPct);
+      expect(presentNcaafSeptember4History(row).sourceNote).toContain("DraftKings NJ via Action Network; current splits — VSiN Circa");
+      for (const wrong of [{ sport: "NFL" }, { source: "auto" }, { scrapedAt: quote.scrapedAt + 1 }, { awaySpread: "999" }, { spreadAwayBetsPct: -1 }]) {
+        expect(presentNcaafSeptember4History({ ...row, ...wrong }).sourceNote).toBeUndefined();
+      }
+    }
   });
 
   it("carries all five exact snapshots through auth and the rendered market tables", () => {

@@ -110,15 +110,27 @@
         "lower_fair_odds": 129
       },
       "spread_home": {
-        "mean": -7.36,
+        "mean": 7.36,
         "sigma": 13.5,
         "line": 10,
-        "higher_probability": 0.09292384745651938,
-        "lower_probability": 0.8941471419485305,
-        "push_probability": 0.012929010594950108,
-        "higher_conditional_probability": 0.09414099740944527,
-        "higher_fair_odds": 962,
-        "lower_fair_odds": -962
+        "higher_probability": 0.40803888991746906,
+        "lower_probability": 0.5629758852590624,
+        "push_probability": 0.028985224823468547,
+        "higher_conditional_probability": 0.4202190330659873,
+        "higher_fair_odds": 138,
+        "lower_fair_odds": -138
+      },
+      "ownerDirectionOverride": {
+        "basis": "User explicitly revised model favorite to Michigan State; original saved model sources remain unchanged.",
+        "modelAwaySpread": 7.36,
+        "modelHomeSpread": -7.36,
+        "modelAwayMoneyline": 241,
+        "modelHomeMoneyline": -241,
+        "originalHomeMarginMean": -7.36,
+        "revisedHomeMarginMean": 7.36,
+        "totalUnchanged": 51.06,
+        "pricingBasis": "Same rounded-normal margin sigma13.5, priced at Circa Toledo+10/MichiganState-10; fair odds conditional on no push.",
+        "reproductionNote": "Original calibration script reproduces original model direction; apply this explicit owner override to its Toledo spread result."
       }
     },
     {

@@ -844,7 +844,7 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     "ML",
   );
   spread.note = hasModel ? g.modelSpreadNote ?? undefined : undefined;
-  total.note = hasModel && g.ingestionPipelineRevision === "vsin-circa-five-provisional-20260904-v1"
+  total.note = hasModel && ["vsin-circa-five-provisional-20260904-v1", "vsin-circa-five-provisional-20260904-v2"].includes(g.ingestionPipelineRevision ?? "")
     ? "Provisional model odds at the Circa total shown."
     : undefined;
   const markets = n(g.awayML) == null && n(g.homeML) == null
@@ -860,7 +860,7 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     timeLabel: status === "suspended" ? "SUSPENDED" : status === "postponed" ? "POSTPONED" : status === "final" ? "FINAL" : formatGameTime(g.startTimeEst),
     away: { name: awayAbbr, crest: awayCrest },
     home: { name: homeAbbr, crest: homeCrest },
-    meta: ["vsin-circa-selected-sjsu-emu-20260904", "vsin-circa-five-provisional-20260904-v1"].includes(g.ingestionPipelineRevision ?? "")
+    meta: ["vsin-circa-selected-sjsu-emu-20260904", "vsin-circa-five-provisional-20260904-v1", "vsin-circa-five-provisional-20260904-v2"].includes(g.ingestionPipelineRevision ?? "")
       ? "NCAAF · Circa 9/4 5:50 PM ET · Provisional model"
       : "NCAAF",
     venueLine: hasModel

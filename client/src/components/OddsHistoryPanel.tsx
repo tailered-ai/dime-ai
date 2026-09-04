@@ -169,6 +169,7 @@ function fmtPct(val: number | null | undefined): string {
 // ── Row type ───────────────────────────────────────────────────────────────────
 
 type HistoryRow = {
+  sourceNote?: string;
   id: number;
   scrapedAt: number;
   source: string | null;
@@ -835,6 +836,21 @@ export function OddsHistoryPanel({
             </p>
           ) : (
             <div className="flex flex-col" style={{ gap: 14 }}>
+              {Array.from(
+                new Set(
+                  rawRows.flatMap(row =>
+                    row.sourceNote ? [row.sourceNote] : []
+                  )
+                )
+              ).map(note => (
+                <p
+                  key={note}
+                  className="text-xs"
+                  style={{ color: "var(--dime-text-secondary)" }}
+                >
+                  {note}
+                </p>
+              ))}
               {markets.map(market => (
                 <div key={market} className="flex flex-col" style={{ gap: 6 }}>
                   {/* Section label — only needed when several markets stack.

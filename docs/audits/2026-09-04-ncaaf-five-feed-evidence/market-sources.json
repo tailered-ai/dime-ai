@@ -1,0 +1,58 @@
+{
+  "gameDate": "2026-09-04",
+  "sport": "NCAAF",
+  "splits": {
+    "provider": "VSiN",
+    "sportsbook": "Circa",
+    "url": "https://data.vsin.com/betting-splits/?source=CIRCA&view=today",
+    "fetchedAt": "2026-09-04T23:36:04.968Z"
+  },
+  "history": {
+    "provider": "Action Network",
+    "url": "https://api.actionnetwork.com/web/v2/scoreboard/ncaaf?bookIds=78,68,123&date=20260904&periods=event",
+    "fetchedAt": "2026-09-04T23:36:19.387Z",
+    "scrapedAtMeaning": "Observation timestamp in UTC milliseconds; not an inferred opening time",
+    "lineSources": {
+      "open": {
+        "bookId": 30,
+        "label": "Action Network Open"
+      },
+      "dk": {
+        "bookId": 68,
+        "label": "DraftKings NJ"
+      }
+    },
+    "missing": "UTEP/Oklahoma moneylines absent from both Open and DK; preserved as null.",
+    "openFlagNote": "AN book 30 event outcomes omit is_live/is_alt_market; official book directory identifies this source as Open. No true live or alternative flags accepted."
+  },
+  "circaActionAvailability": "Official book 78 is Circa, but all five API events omit markets[78]. History is explicitly Open/DraftKings; no Circa substitution.",
+  "modelReference": "Preserve existing selected VSiN Circa 2026-09-04 17:50 ET book/model comparison unchanged.",
+  "sourceFiles": [
+    {
+      "name": "action-books-fresh.json",
+      "fetchedAt": "2026-09-04T23:35:58.623Z",
+      "sha256": "7096983d3520da212f162769c8d7cf1002176aac6caf5023f6863a5cd4131e01"
+    },
+    {
+      "name": "action-circa-78-20260904.json",
+      "fetchedAt": "2026-09-04T23:35:37.345Z",
+      "sha256": "81acf8a5f4dad4f61af1d75827b4d10e9ee7cc6f586acc131ba19e0dae4a3d5a"
+    },
+    {
+      "name": "action-78-68-123-20260904.json",
+      "fetchedAt": "2026-09-04T23:36:19.387Z",
+      "sha256": "dd19ddcebf0f2f87bee5dd698b9a087e6e7ac63a917c99cbf85912015a173feb"
+    },
+    {
+      "name": "vsin-circa-today.html",
+      "fetchedAt": "2026-09-04T23:36:04.968Z",
+      "sha256": "967f1aef3515db381dea2859e7c66ae398b0edffcff3befa51e0da1de61e3a68"
+    },
+    {
+      "name": "vsin-dk-today.html",
+      "fetchedAt": "2026-09-04T23:36:11.686Z",
+      "sha256": "d3db3192ab646d37b1356e202ad9e6c28147b36d34ea5cb3f30cbcb62f1ff288"
+    }
+  ],
+  "outputSha256": "d824968f9f674201d2b7a99025b470c0d5f6dbc36d401f7174bcfeb2423324aa"
+}
