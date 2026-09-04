@@ -3,6 +3,14 @@ name: Publish NCAAF Week 1
 on:
   workflow_dispatch:
     inputs:
+      slate:
+        description: Exact authorized slate
+        required: true
+        default: september-3
+        type: choice
+        options:
+          - september-3
+          - sjsu-emu
       dry_run:
         description: Fetch and validate without writing TiDB
         required: true
@@ -11,6 +19,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: publish-ncaaf-week1
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -24,7 +36,27 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Publish exact four-game slate
+      - name: Publish selected exact slate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: pnpm exec tsx scripts/publishNcaafWeek1.mts ${{ inputs.dry_run && '--dry-run' || '' }}
+          PUBLISH_SLATE: ${{ inputs.slate }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ "$PUBLISH_SLATE" = "sjsu-emu" ]; then
+            pnpm exec tsx scripts/publishSjsuEmu.mts --check
+            if [ "$DRY_RUN" = "true" ]; then
+              pnpm exec tsx scripts/publishSjsuEmu.mts --dry-run
+            else
+              pnpm exec tsx scripts/publishSjsuEmu.mts --publish
+              pnpm exec tsx scripts/publishSjsuEmu.mts --verify
+            fi
+          elif [ "$PUBLISH_SLATE" = "september-3" ]; then
+            if [ "$DRY_RUN" = "true" ]; then
+              pnpm exec tsx scripts/publishNcaafWeek1.mts --dry-run
+            else
+              pnpm exec tsx scripts/publishNcaafWeek1.mts
+            fi
+          else
+            echo "Unsupported slate" >&2
+            exit 1
+          fi
