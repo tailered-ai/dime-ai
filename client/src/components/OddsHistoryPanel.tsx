@@ -47,6 +47,7 @@
 
 import { useId, useState } from "react";
 import { ChevronDown, Clock, RefreshCw } from "lucide-react";
+import { ncaafHelmet } from "@shared/ncaafHelmets";
 import { trpc } from "@/lib/trpc";
 import { useIsMdUp } from "@/hooks/useIsMdUp";
 // The panel's .ohp-* styles ride whichever chunk renders it (NOT the chat
@@ -57,6 +58,7 @@ import "@/styles/splits-interactions.css";
 export type ActiveMarket = "spread" | "total" | "ml";
 
 interface OddsHistoryPanelProps {
+  sport?: string;
   gameId: number;
   awayTeam: string;
   homeTeam: string;
@@ -169,6 +171,7 @@ function fmtPct(val: number | null | undefined): string {
 // ── Row type ───────────────────────────────────────────────────────────────────
 
 type HistoryRow = {
+  sourceNote?: string;
   id: number;
   scrapedAt: number;
   source: string | null;
@@ -660,6 +663,7 @@ function MarketHistoryTable({
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export function OddsHistoryPanel({
+  sport,
   gameId,
   awayTeam,
   homeTeam,
@@ -668,6 +672,7 @@ export function OddsHistoryPanel({
   demo = false,
 }: OddsHistoryPanelProps) {
   const [open, setOpen] = useState(demo);
+  const isNcaaf = sport === "NCAAF";
   const bodyId = useId();
 
   // Tablet + desktop show every market together; mobile follows the toggle.
@@ -695,17 +700,24 @@ export function OddsHistoryPanel({
   // ── Team colors + logos (try MLB → NHL → NBA) ──────────────────────────────
   const { data: colorsMlb } = trpc.teamColors.getForGame.useQuery(
     { awayTeam, homeTeam, sport: "MLB" },
-    { staleTime: 3_600_000, enabled: open }
+    { staleTime: 3_600_000, enabled: open && !isNcaaf }
   );
   const { data: colorsNhl } = trpc.teamColors.getForGame.useQuery(
     { awayTeam, homeTeam, sport: "NHL" },
-    { staleTime: 3_600_000, enabled: open && !colorsMlb?.away?.logoUrl }
+    {
+      staleTime: 3_600_000,
+      enabled: open && !isNcaaf && !colorsMlb?.away?.logoUrl,
+    }
   );
   const { data: colorsNba } = trpc.teamColors.getForGame.useQuery(
     { awayTeam, homeTeam, sport: "NBA" },
     {
       staleTime: 3_600_000,
-      enabled: open && !colorsMlb?.away?.logoUrl && !colorsNhl?.away?.logoUrl,
+      enabled:
+        open &&
+        !isNcaaf &&
+        !colorsMlb?.away?.logoUrl &&
+        !colorsNhl?.away?.logoUrl,
     }
   );
 
@@ -717,10 +729,10 @@ export function OddsHistoryPanel({
         ? colorsNba
         : colorsMlb;
 
-  const awayLogo = colors?.away?.logoUrl;
-  const homeLogo = colors?.home?.logoUrl;
-  const awayAbbrev = colors?.away?.abbrev ?? awayTeam;
-  const homeAbbrev = colors?.home?.abbrev ?? homeTeam;
+  const awayLogo = isNcaaf ? ncaafHelmet(awayTeam) : colors?.away?.logoUrl;
+  const homeLogo = isNcaaf ? ncaafHelmet(homeTeam) : colors?.home?.logoUrl;
+  const awayAbbrev = isNcaaf ? awayTeam : (colors?.away?.abbrev ?? awayTeam);
+  const homeAbbrev = isNcaaf ? homeTeam : (colors?.home?.abbrev ?? homeTeam);
 
   const rawRows = (data?.history ?? []) as HistoryRow[];
 
@@ -835,6 +847,21 @@ export function OddsHistoryPanel({
             </p>
           ) : (
             <div className="flex flex-col" style={{ gap: 14 }}>
+              {Array.from(
+                new Set(
+                  rawRows.flatMap(row =>
+                    row.sourceNote ? [row.sourceNote] : []
+                  )
+                )
+              ).map(note => (
+                <p
+                  key={note}
+                  className="text-xs"
+                  style={{ color: "var(--dime-text-secondary)" }}
+                >
+                  {note}
+                </p>
+              ))}
               {markets.map(market => (
                 <div key={market} className="flex flex-col" style={{ gap: 6 }}>
                   {/* Section label — only needed when several markets stack.

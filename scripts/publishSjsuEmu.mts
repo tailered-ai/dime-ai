@@ -1,9 +1,11 @@
 /** Owner-selected pregame snapshot; no model fitting or live odds substitution. */
 import assert from "node:assert/strict";
 import mysql, { type RowDataPacket } from "mysql2/promise";
+import sourceRows from "../shared/ncaafSeptember4Sources.json";
 import {
   NCAAF_SEPTEMBER4,
   ncaafSeptember4Record,
+  ncaafSeptember4HistoryRecord,
 } from "../shared/ncaafSeptember4";
 
 const DATE = "2026-09-04";
@@ -61,7 +63,10 @@ const selected = five
       away: game.away,
       home: game.home,
       event: game.event,
-      record: ncaafSeptember4Record(game),
+      record: {
+        ...ncaafSeptember4Record(game),
+        ...sourceRows.find(source => source.event === game.event)!.splits,
+      },
     }))
   : [{ away: "SJSU", home: "EMU", event: EVENT, record }];
 type Target = (typeof selected)[number];
@@ -114,6 +119,46 @@ function verify(row: RowDataPacket | undefined, game: Target) {
 }
 
 function checkPayload() {
+  assert.equal(sourceRows.length, 5);
+  assert.equal(new Set(sourceRows.map(source => source.event)).size, 5);
+  for (const source of sourceRows) {
+    assert(
+      NCAAF_SEPTEMBER4.some(
+        game =>
+          game.event === source.event &&
+          game.away === source.away &&
+          game.home === source.home
+      )
+    );
+    assert.equal(Object.keys(source.splits).length, 6);
+    assert(
+      Object.values(source.splits).every(
+        value => Number.isInteger(value) && value >= 0 && value <= 100
+      )
+    );
+    assert.deepEqual(
+      source.history.map(row => row.lineSource),
+      ["open", "dk"]
+    );
+    for (const row of source.history) {
+      assert.equal(
+        new Date(row.scrapedAt).toISOString(),
+        "2026-09-04T23:36:19.387Z"
+      );
+      assert.equal(Number(row.awaySpread), -Number(row.homeSpread));
+      assert(Number(row.total) > 0);
+      for (const value of [
+        row.awaySpreadOdds,
+        row.homeSpreadOdds,
+        row.overOdds,
+        row.underOdds,
+      ])
+        assert(value && Math.abs(Number(value)) >= 100);
+      if (source.away === "UTEP")
+        assert(row.awayML === null && row.homeML === null);
+    }
+  }
+
   assert.equal(selected.length, five ? 5 : 1);
   assert.equal(new Set(selected.map(g => g.event)).size, selected.length);
   for (const game of selected) {
@@ -148,8 +193,59 @@ function checkPayload() {
           game.record.modelUnderOdds
       );
       if (game.away === "UTEP") assert.equal(game.record.homeML, null);
+      for (const quote of sourceRows.find(
+        source => source.event === game.event
+      )!.history) {
+        const expected = historyRecord(game, 1, quote);
+        const valid = { id: 2, ...expected } as RowDataPacket;
+        verifyHistory(snapshot([valid], expected), expected);
+        assert.equal(snapshot([], expected), undefined);
+        assert.throws(() => snapshot([valid, valid], expected));
+        assert.throws(() =>
+          snapshot([{ ...valid, awaySpread: "999" }], expected)
+        );
+        assert.throws(() => verifyHistory(undefined, expected));
+      }
     }
   }
+}
+
+function historyRecord(
+  game: Target,
+  gameId: number,
+  quote: (typeof sourceRows)[number]["history"][number]
+) {
+  return {
+    gameId,
+    ...ncaafSeptember4HistoryRecord(game.event, quote),
+  };
+}
+function verifyHistory(
+  row: RowDataPacket | undefined,
+  record: ReturnType<typeof historyRecord>
+) {
+  assert(row, "Required AN history snapshot missing");
+  for (const [key, value] of Object.entries(record))
+    assert.equal(
+      row[key] == null ? null : String(row[key]),
+      value == null ? null : String(value),
+      `History readback mismatch: ${key}`
+    );
+}
+
+function snapshot(
+  rows: RowDataPacket[],
+  record: ReturnType<typeof historyRecord>
+) {
+  const found = rows.filter(
+    row =>
+      row.gameId === record.gameId &&
+      row.scrapedAt === record.scrapedAt &&
+      row.lineSource === record.lineSource
+  );
+  assert(found.length <= 1, "Duplicate AN history snapshot");
+  if (found[0]) verifyHistory(found[0], record);
+  return found[0];
 }
 
 async function main() {
@@ -187,9 +283,42 @@ async function main() {
     const before = await read();
     // Validate EVERY identity before the first write, including cross-date/event collisions.
     const existing = selected.map(game => target(before, game));
-    if (modes[0] === "--verify")
+    const readHistory = async (ids: number[]) =>
+      ids.length === 0
+        ? []
+        : (
+            await db.query<RowDataPacket[]>(
+              `SELECT * FROM odds_history WHERE gameId IN (${ids.map(() => "?").join(", ")}) ORDER BY id FOR UPDATE`,
+              ids
+            )
+          )[0];
+    const historyBefore = five
+      ? await readHistory(existing.filter(Boolean).map(row => row!.id))
+      : [];
+    // Validate pre-existing observations before any write; never rewrite history.
+    if (five)
+      selected.forEach((game, i) => {
+        if (existing[i])
+          for (const quote of sourceRows.find(
+            source => source.event === game.event
+          )!.history)
+            snapshot(
+              historyBefore,
+              historyRecord(game, existing[i]!.id, quote)
+            );
+      });
+    if (modes[0] === "--verify") {
       selected.forEach((game, i) => verify(existing[i], game));
-    else if (publish) {
+      if (five)
+        selected.forEach((game, i) => {
+          for (const quote of sourceRows.find(
+            source => source.event === game.event
+          )!.history) {
+            const record = historyRecord(game, existing[i]!.id, quote);
+            verifyHistory(snapshot(historyBefore, record), record);
+          }
+        });
+    } else if (publish) {
       for (const [i, game] of selected.entries()) {
         const entries = Object.entries(game.record);
         if (existing[i]) {
@@ -236,12 +365,47 @@ async function main() {
         before.filter(row => !oldIds.has(row.id)),
         "Unrelated rows changed"
       );
+      if (five) {
+        for (const [i, game] of selected.entries()) {
+          for (const quote of sourceRows.find(
+            source => source.event === game.event
+          )!.history) {
+            const record = historyRecord(game, published[i].id, quote);
+            if (snapshot(historyBefore, record)) continue;
+            await db.execute(
+              `INSERT INTO odds_history (${Object.keys(record)
+                .map(key => `\`${key}\``)
+                .join(", ")}) VALUES (${Object.keys(record)
+                .map(() => "?")
+                .join(", ")})`,
+              Object.values(record)
+            );
+          }
+        }
+        const historyAfter = await readHistory(published.map(row => row.id));
+        const insertedIds = new Set<number>();
+        selected.forEach((game, i) => {
+          for (const quote of sourceRows.find(
+            source => source.event === game.event
+          )!.history) {
+            const record = historyRecord(game, published[i].id, quote);
+            const row = snapshot(historyAfter, record);
+            verifyHistory(row, record);
+            if (!snapshot(historyBefore, record)) insertedIds.add(row!.id);
+          }
+        });
+        assert.deepEqual(
+          historyAfter.filter(row => !insertedIds.has(row.id)),
+          historyBefore,
+          "Existing odds history changed"
+        );
+      }
       await db.commit();
     }
     if (!publish) await db.rollback();
     const count = existing.filter(Boolean).length;
     console.log(
-      `${prefix}_${publish ? "PUBLISH" : modes[0] === "--verify" ? "VERIFY" : "DRY_RUN"}_PASS selectedRows=${selected.length} existingRows=${count} unrelatedRows=${before.length - count}`
+      `${prefix}_${publish ? "PUBLISH" : modes[0] === "--verify" ? "VERIFY" : "DRY_RUN"}_PASS selectedRows=${selected.length} existingRows=${count} unrelatedRows=${before.length - count} historySnapshots=${five ? 10 : 0}`
     );
   } catch (error) {
     await db.rollback();

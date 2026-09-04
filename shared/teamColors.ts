@@ -622,8 +622,9 @@ const ALL_COLORS = new Map<string, TeamColorEntry>([
  */
 export function getTeamColors(
   dbSlug: string,
-  _sport?: string
+  sport?: string
 ): TeamColorEntry | null {
+  if (sport === "NCAAF") return null; // College aliases must not inherit pro-team colors.
   return ALL_COLORS.get(dbSlug) ?? null;
 }
 

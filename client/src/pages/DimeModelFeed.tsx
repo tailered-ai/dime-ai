@@ -39,6 +39,7 @@ import type {
   ProjectionPregameLineups,
 } from "@/components/projections/types";
 import { sportAdapters } from "@/lib/sport/presentation";
+import { ncaafHelmet } from "@shared/ncaafHelmets";
 import { MLB_BY_ABBREV } from "@shared/mlbTeams";
 import { formatGameTime, timeToMinutes } from "@/lib/gameUtils";
 import {
@@ -49,29 +50,6 @@ import {
 } from "@/lib/edgeUtils";
 import { feedModelPath, bettingSplitsPath, toFeedSlugDate } from "@/lib/feedRoutes";
 import "./dimeModelFeed.css";
-
-const NCAAF_HELMETS: Readonly<Record<string, string>> = {
-  MASS: "/brand/ncaaf-helmets/mass-clean.png",
-  RUTG: "/brand/ncaaf-helmets/rutgers-clean.png",
-  AKR: "/brand/ncaaf-helmets/akron-clean.png",
-  WAKE: "/brand/ncaaf-helmets/wake-forest-clean.png",
-  COLO: "/brand/ncaaf-helmets/colorado-clean.png",
-  GT: "/brand/ncaaf-helmets/georgia-tech-clean.png",
-  UAB: "/brand/ncaaf-helmets/uab-clean.png",
-  ILL: "/brand/ncaaf-helmets/illinois-clean.png",
-  SJSU: "/brand/ncaaf-helmets/san-jose-state-clean.png",
-  EMU: "/brand/ncaaf-helmets/eastern-michigan-clean.png",
-  TOL: "/brand/ncaaf-helmets/toledo-clean.png",
-  MSU: "/brand/ncaaf-helmets/michigan-state-clean.png",
-  FRES: "/brand/ncaaf-helmets/fresno-state-clean.png",
-  USC: "/brand/ncaaf-helmets/usc-clean.png",
-  UTEP: "/brand/ncaaf-helmets/utep-clean.png",
-  OU: "/brand/ncaaf-helmets/oklahoma-clean.png",
-  MIA: "/brand/ncaaf-helmets/miami-clean.png",
-  STAN: "/brand/ncaaf-helmets/stanford-clean.png",
-};
-
-const ncaafHelmet = (abbr: string): string | null => NCAAF_HELMETS[abbr] ?? null;
 
 // ─── Normalized card model (adapters below map tRPC rows into this) ─────────
 
@@ -844,7 +822,7 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     "ML",
   );
   spread.note = hasModel ? g.modelSpreadNote ?? undefined : undefined;
-  total.note = hasModel && g.ingestionPipelineRevision === "vsin-circa-five-provisional-20260904-v1"
+  total.note = hasModel && ["vsin-circa-five-provisional-20260904-v1", "vsin-circa-five-provisional-20260904-v2"].includes(g.ingestionPipelineRevision ?? "")
     ? "Provisional model odds at the Circa total shown."
     : undefined;
   const markets = n(g.awayML) == null && n(g.homeML) == null
@@ -860,7 +838,7 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     timeLabel: status === "suspended" ? "SUSPENDED" : status === "postponed" ? "POSTPONED" : status === "final" ? "FINAL" : formatGameTime(g.startTimeEst),
     away: { name: awayAbbr, crest: awayCrest },
     home: { name: homeAbbr, crest: homeCrest },
-    meta: ["vsin-circa-selected-sjsu-emu-20260904", "vsin-circa-five-provisional-20260904-v1"].includes(g.ingestionPipelineRevision ?? "")
+    meta: ["vsin-circa-selected-sjsu-emu-20260904", "vsin-circa-five-provisional-20260904-v1", "vsin-circa-five-provisional-20260904-v2"].includes(g.ingestionPipelineRevision ?? "")
       ? "NCAAF · Circa 9/4 5:50 PM ET · Provisional model"
       : "NCAAF",
     venueLine: hasModel

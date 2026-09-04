@@ -17,3 +17,14 @@ The existing DECIMAL(6,1) schema stores rounded points. A server-only view resto
 ## Verification
 
 The publisher checks all selected identities before any write, locks global event collisions as well as the date slate, verifies every value before commit, and compares unrelated rows. A subsequent fresh connection verifies committed data. Tests cover complete presentation, protected model stripping, stale/mismatched snapshots, and the missing UTEP moneyline.
+
+
+## Owner revision and additional source publication
+
+The owner subsequently revised the model to favor Michigan State: Toledo +7.36 / +241 ML, MSU -7.36 / -241 ML. At Circa Toledo +10 / MSU -10, recalculated fair prices are -138 / +138; total 51.06 and all other game projections remain unchanged. The original baseline remains in the earlier commit and source artifacts.
+
+The five existing game records receive all six VSiN Circa split percentages, observed September 4 at 7:36 PM ET. Separate odds_history rows hold AN Opening (book 30) and DraftKings NJ (book 68) pregame odds, observed 23:36:19.387Z. They do not overwrite Circa's selected book lines or model prices. Each observation time means retrieval time, not a reconstructed opening timestamp. AN Circa (book 78) was explicitly requested and absent for all five; default Consensus/Open fallbacks were not mislabeled Circa. UTEP–Oklahoma moneylines remain unavailable in both history sources.
+
+Opening history rows leave all split percentages null because opening-time splits were not provided; the current AN market snapshot carries the explicitly labeled VSiN Circa percentages.
+
+Live verification also found college MIA resolving to the MLB Marlins on the splits surface, plus a conditional viewport hook that could fail when UTEP changed from no splits to populated. NCAAF now bypasses professional identity/color lookups, reuses the same public helmet map in cards and history, and calls the viewport hook before the empty-state return.
