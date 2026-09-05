@@ -442,7 +442,7 @@ describe("DimeModelFeed — routes", () => {
 
   it("bare and sport-prefixed feeds canonicalize to the combined dated URL", () => {
     expect(src).toMatch(/if \(!date\) return \{ sport: sportCode, isoDate: null \}/);
-    expect(src).toContain('feedModelPath("MLB", parsed?.isoDate ?? easternToday())');
+    expect(src).toContain('feedModelPath("MLB", parsed?.isoDate ?? today)');
     expect(src).toContain('{ replace: true }');
     expect(parseFeedModelPath("02-29-2026", undefined)).toBeNull();
     expect(parseFeedModelPath("02-29-2028", undefined)?.isoDate).toBe("2028-02-29");

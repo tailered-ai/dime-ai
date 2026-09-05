@@ -21,6 +21,7 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { TZDate } from "react-day-picker";
 import { Link, useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import type { inferRouterOutputs } from "@trpc/server";
@@ -255,6 +256,26 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
   }, [search]);
   const resolveRouteHref = props.resolveRouteHref ?? identityRouteHref;
   const parsed = parseFeedModelPath(props.sport, props.date);
+  const [today, setToday] = useState(easternToday);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const refreshToday = () => {
+      clearTimeout(timer);
+      const now = Date.now();
+      setToday(easternToday(new Date(now)));
+      const midnight = new TZDate(now, "America/New_York");
+      midnight.setHours(24, 0, 0, 0);
+      timer = setTimeout(refreshToday, midnight.getTime() - now);
+    };
+    refreshToday();
+    window.addEventListener("focus", refreshToday);
+    document.addEventListener("visibilitychange", refreshToday);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("focus", refreshToday);
+      document.removeEventListener("visibilitychange", refreshToday);
+    };
+  }, []);
   // Theme is app-global (ThemeContext) so the choice follows the user across
   // every tab and the bottom tab bar. ?theme= is still honored for embeds.
   const { theme, mode, setTheme } = useTheme();
@@ -279,9 +300,9 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
     /^(mlb|wc|ncaaf)(?:-|$)/i.test(props.sport ?? "");
   useEffect(() => {
     if (needsDateCanonicalize || needsSportCanonicalize) {
-      navigate(resolveRouteHref(feedModelPath("MLB", parsed?.isoDate ?? easternToday()) + (search ? `?${search}` : "")), { replace: true });
+      navigate(resolveRouteHref(feedModelPath("MLB", parsed?.isoDate ?? today) + (search ? `?${search}` : "")), { replace: true });
     }
-  }, [needsDateCanonicalize, needsSportCanonicalize, parsed?.isoDate, navigate, resolveRouteHref, search]);
+  }, [needsDateCanonicalize, needsSportCanonicalize, parsed?.isoDate, navigate, resolveRouteHref, search, today]);
 
   // Discord account-link feedback lands here now (the legacy /dashboard
   // consumer is unrouted): surface it once, then strip the params.
@@ -428,14 +449,14 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
       <main className="dmf-scroll">
         {!props.embeddedInShell && <h1 className="sr-only">AI Model Projections</h1>}
         <div className="dmf-feedhead">
-          <FeedToolbar date={isoDate} today={easternToday()} filters={filters}
+          <FeedToolbar date={isoDate} today={today} filters={filters}
             onFiltersChange={changeFilters} onDateChange={go}
             leagueOptions={options.leagues} conferenceOptions={options.conferences} gameOptions={options.games}
-            loading={isLoading && gamesCount === 0} visibleCount={visibleIds.size} totalCount={gamesCount} />
+            loading={isLoading} visibleCount={visibleIds.size} totalCount={gamesCount} />
         </div>
 
         <div className="dmf-list" aria-busy={isLoading}>
-          {isLoading && gamesCount === 0 ? (
+          {isLoading && visibleIds.size === 0 ? (
             /* 2026-08-05 (audit DIME-UI-019 completion): skeletons render
                inside the SAME .dmf-league/.dmf-leaguebody containers as the
                loaded slate, so the container-driven 1/2/3-up column count is

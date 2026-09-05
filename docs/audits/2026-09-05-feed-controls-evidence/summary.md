@@ -12,7 +12,7 @@ Lead: Impeccable. Advisors: UI UX Pro Max, Apple Design, Emil Design Engineering
 
 - Navigation/conference: 11 tests passed; card-owned suites: 140 passed; toolbar: five real-browser tests passed; page/shell: 78 passed.
 - New integration matrix: nine tests passed, including filters/back navigation, date replacement, calendar focus and full-projections geometry at 320–1920px, light/dark and reduced motion. Screenshots remain untracked by repository policy in `screenshots/`.
-- TypeScript, production client/server build, production-preview exclusion and bundle budget passed (216,812 gzip bytes / 222,538 ceiling).
+- TypeScript, production client/server build, production-preview exclusion and bundle budget passed (216,794 gzip bytes / 222,538 ceiling).
 - Initial broad Vitest run: 5,341 passed, 66 failed, 40 pending, one todo. Of the failures, 64 require unavailable database/provider credentials. Two local UI-test failures (open-calendar loading state and superseded shell source assertion) were corrected and passed focused reruns. CI must supply the independent final suite result.
 - Impeccable final detector results were empty for each owned UI scope. Motion verdict: Approve.
 - Initial browser pass caught the oversized calendar and cmdk search label; both repaired and confirmed. The original integration overflow assertion counted intentionally hidden measurement text; it now measures visible labels and page boundaries.
@@ -25,3 +25,11 @@ Lead: Impeccable. Advisors: UI UX Pro Max, Apple Design, Emil Design Engineering
 Conference metadata is the exact 2026 FBS seed snapshot, covering 138 programs. Unknown FCS affiliations are not guessed; MLB/WC have no conference options from this source. Backend lifecycle exclusions remain in force. The site broker preflight is unavailable because independent root-owned provenance is missing; GitHub read-only CLI preflight verified the repository and baseline instead. No credential retrieval or Railway mutation was performed.
 
 The update is not live until the new PR receives latest-head independent approval, passes checks, merges and deploys. Baseline/rollback target: `b2170b6382ac157e91cbc822a33ef00eb3066d1e`.
+
+## Review follow-up
+
+The owner approved 398ab3a, but GitHub's required thread-resolution rule blocked merging because two automated findings remained unresolved. Both reproduced in browser tests: an already-loaded MLB slate could produce a false NCAAF filtered-empty message, and a mounted page could retain yesterday in Today after Eastern midnight.
+
+The toolbar now stays busy while any league initially loads, and an empty filtered view keeps its skeleton until those requests settle. Today is held in state and refreshed at the next Eastern midnight, on focus, and on visibility changes. The existing DayPicker TZDate export handles 23/25-hour days; no dependency was added.
+
+TypeScript, 73 focused tests and the rebuilt production bundle passed. The delayed-league regression and midnight checks cover ordinary midnight plus both daylight-saving transitions. Playwright's fake Date must be installed after TZDate loads because the library generates setters from Date's own prototype keys; instrumented timer evidence identified this test-harness mismatch and the corrected setup passed all three midnight cases. The final integrated browser run passed all 13 tests (gate output SHA-256 8aef826dc34dd799a8e612715446f3c805e97c8c9b5600f29feff6ec3118b3bb); latest-head CI follows the push. The new push requires renewed independent approval under GitHub's stale-review rule.

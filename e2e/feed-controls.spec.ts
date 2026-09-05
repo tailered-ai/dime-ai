@@ -47,13 +47,21 @@ const user = {
   expiryDate: null,
   termsAccepted: true,
 };
-async function stub(page: Page) {
+async function stub(page: Page, ncaafReady?: Promise<void>) {
   await page.route("**/api/trpc/**", async route => {
     const url = new URL(route.request().url());
     const operations = decodeURIComponent(
       url.pathname.replace(/^.*\/api\/trpc\//, "")
     ).split(",");
     const input = JSON.parse(url.searchParams.get("input") ?? "{}");
+    if (
+      operations.some(
+        (operation, index) =>
+          operation === "games.list" && input[index]?.json?.sport === "NCAAF"
+      )
+    ) {
+      await ncaafReady;
+    }
     const body = operations.map((operation, index) => {
       let json: unknown = [];
       if (operation === "appUsers.me") json = user;
@@ -142,6 +150,62 @@ async function overflow(page: Page) {
           .map(element => element.className)
       )
   ).toEqual([]);
+}
+
+test("waits for every league before declaring a filtered slate empty", async ({
+  page,
+}) => {
+  let release!: () => void;
+  await stub(
+    page,
+    new Promise<void>(resolve => {
+      release = resolve;
+    })
+  );
+  await page.goto(`${route}?league=NCAAF`);
+  const league = page.getByLabel("Sport / league", { exact: true });
+  // MLB has loaded into the shared slate while the selected league is pending.
+  await expect(league.locator('option[value="MLB"]')).toHaveCount(1);
+  await expect(page.locator(".dmf-list")).toHaveAttribute("aria-busy", "true");
+  await expect(
+    page.getByText("No games match these filters", { exact: true })
+  ).toHaveCount(0);
+  await expect(league).toBeDisabled();
+  await expect(page.locator(".feed-toolbar__count")).toHaveText(
+    "Loading games…"
+  );
+  release();
+  await expect(cards(page)).toHaveCount(68);
+  await expect(league).toBeEnabled();
+  await expect(league).toHaveValue("NCAAF");
+});
+
+for (const [start, selected, next, elapsed] of [
+  ["2026-09-06T03:59:00Z", "09-05-2026", "09-06-2026", 60_000],
+  ["2026-03-08T05:00:00Z", "03-08-2026", "03-09-2026", 23 * 3_600_000],
+  ["2026-11-01T04:00:00Z", "11-01-2026", "11-02-2026", 25 * 3_600_000],
+] as const) {
+  test(`refreshes Today at Eastern midnight after ${selected}`, async ({
+    page,
+  }) => {
+    await stub(page);
+    await page.goto(`/feed/model/${selected}`);
+    await expect(page.locator(".dmf-list")).toHaveAttribute(
+      "aria-busy",
+      "false"
+    );
+    // Load TZDate against the real Date prototype before Playwright replaces
+    // it; its timezone setters are generated from Date's own prototype keys.
+    await page.clock.install({ time: new Date(start) });
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    const today = page.getByRole("button", { name: "Today", exact: true });
+    await expect(today).toBeDisabled();
+    await page.clock.fastForward(elapsed);
+    await expect(today).toBeEnabled();
+    await expect(page).toHaveURL(new RegExp(selected));
+    await today.click();
+    await expect(page).toHaveURL(new RegExp(next));
+  });
 }
 
 test("composes URL filters, restores back navigation and clears old games on date change", async ({
