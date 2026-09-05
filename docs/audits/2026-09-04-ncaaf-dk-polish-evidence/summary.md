@@ -21,7 +21,7 @@ Card metadata is simply NCAAF. Pricing methodology remains documented; detailed 
 ## Verification
 
 - Exact publisher checks: DK 134 observations and original five-game payload PASS.
-- Independent pricing replay PASS. Independent transactional/source review found no defects.
+- Independent pricing replay PASS. Independent transactional review found no defects. A separate source/render review found that real 0%/100% opening splits were displayed as pending. Verified VSiN DK zeros now render as percentages, with an opening-row browser assertion; unavailable markets retain their guard.
 - Focused Vitest: 194 passed, 0 failed, 0 skipped. TypeScript exit 0.
 - Rendered matrix: 375/768/1024/1440, dark/light, plus reduced motion; market tabs, keyboard focus return, rail/drawer and account-menu bounds covered. Final output in `browser.txt`.
 - Client/server production builds, preview activation guard and bundle budget pass; final output in `build.txt`.

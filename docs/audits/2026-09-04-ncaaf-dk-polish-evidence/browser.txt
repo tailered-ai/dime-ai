@@ -1,18 +1,18 @@
-[WebServer] (node:40291) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (node:41595) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 [WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
 
 Running 9 tests using 1 worker
 
-(node:40293) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:41625) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-  ✓  1 [chromium] › e2e/ncaaf-dk-polish.spec.ts:100:5 › 375 dark: five cards, centered control, scaled sidebar and DK history (5.9s)
-  ✓  2 [chromium] › e2e/ncaaf-dk-polish.spec.ts:100:5 › 375 light: five cards, centered control, scaled sidebar and DK history (4.2s)
-  ✓  3 [chromium] › e2e/ncaaf-dk-polish.spec.ts:100:5 › 768 dark: five cards, centered control, scaled sidebar and DK history (6.1s)
-  ✓  4 [chromium] › e2e/ncaaf-dk-polish.spec.ts:100:5 › 768 light: five cards, centered control, scaled sidebar and DK history (4.5s)
-  ✓  5 [chromium] › e2e/ncaaf-dk-polish.spec.ts:100:5 › 1024 dark: five cards, centered control, scaled sidebar and DK history (5.4s)
-  ✓  6 [chromium] › e2e/ncaaf-dk-polish.spec.ts:100:5 › 1024 light: five cards, centered control, scaled sidebar and DK history (5.6s)
-  ✓  7 [chromium] › e2e/ncaaf-dk-polish.spec.ts:100:5 › 1440 dark: five cards, centered control, scaled sidebar and DK history (5.8s)
-  ✓  8 [chromium] › e2e/ncaaf-dk-polish.spec.ts:100:5 › 1440 light: five cards, centered control, scaled sidebar and DK history (7.3s)
-  ✓  9 [chromium] › e2e/ncaaf-dk-polish.spec.ts:211:1 › reduced motion keeps sidebar navigation usable (3.6s)
+  ✓  1 [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 375 dark: five cards, centered control, scaled sidebar and DK history (5.6s)
+  ✓  2 [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 375 light: five cards, centered control, scaled sidebar and DK history (4.3s)
+  ✓  3 [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 768 dark: five cards, centered control, scaled sidebar and DK history (4.2s)
+  ✓  4 [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 768 light: five cards, centered control, scaled sidebar and DK history (3.9s)
+  ✓  5 [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 1024 dark: five cards, centered control, scaled sidebar and DK history (3.6s)
+  ✓  6 [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 1024 light: five cards, centered control, scaled sidebar and DK history (3.5s)
+  ✓  7 [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 1440 dark: five cards, centered control, scaled sidebar and DK history (3.9s)
+  ✓  8 [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 1440 light: five cards, centered control, scaled sidebar and DK history (4.4s)
+  ✓  9 [chromium] › e2e/ncaaf-dk-polish.spec.ts:235:1 › reduced motion keeps sidebar navigation usable (2.7s)
 
-  9 passed (52.8s)
+  9 passed (42.4s)

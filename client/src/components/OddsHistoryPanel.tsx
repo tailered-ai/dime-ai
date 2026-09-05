@@ -266,12 +266,14 @@ type MarketCells = {
 };
 
 function marketCells(row: HistoryRow, market: ActiveMarket): MarketCells {
+  // Verified VSiN DK zeros are real percentages when the market has a line.
+  const unknown = (value: number | null) =>
+    value == null || (value === 0 && row.sourceLabel !== "VSiN DK");
   const inv = (pending: boolean, v: number | null) =>
     pending || v == null ? null : 100 - v;
   if (market === "spread") {
     const pending =
-      (row.spreadAwayBetsPct == null || row.spreadAwayBetsPct === 0) &&
-      (row.spreadAwayMoneyPct == null || row.spreadAwayMoneyPct === 0);
+      unknown(row.spreadAwayBetsPct) && unknown(row.spreadAwayMoneyPct);
     return {
       pending,
       lineA: fmtSpread(row.awaySpread, row.awaySpreadOdds),
@@ -284,8 +286,7 @@ function marketCells(row: HistoryRow, market: ActiveMarket): MarketCells {
   }
   if (market === "total") {
     const pending =
-      (row.totalOverBetsPct == null || row.totalOverBetsPct === 0) &&
-      (row.totalOverMoneyPct == null || row.totalOverMoneyPct === 0);
+      unknown(row.totalOverBetsPct) && unknown(row.totalOverMoneyPct);
     return {
       pending,
       lineA: fmtOver(row.total, row.overOdds),
@@ -296,9 +297,7 @@ function marketCells(row: HistoryRow, market: ActiveMarket): MarketCells {
       moneyB: inv(pending, row.totalOverMoneyPct),
     };
   }
-  const pending =
-    (row.mlAwayBetsPct == null || row.mlAwayBetsPct === 0) &&
-    (row.mlAwayMoneyPct == null || row.mlAwayMoneyPct === 0);
+  const pending = unknown(row.mlAwayBetsPct) && unknown(row.mlAwayMoneyPct);
   return {
     pending,
     lineA: fmtML(row.awayML),
