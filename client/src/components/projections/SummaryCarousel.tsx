@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import type { MarketInsight } from "@/lib/gameInsight";
 import { ProjectionSummary } from "./ProjectionSummary";
-import type { ProjectionTeam } from "./types";
+import type { ProjectionMarket, ProjectionTeam } from "./types";
 
 export function clampActiveEdgeIndex(active: number, count: number): number {
   return Math.max(0, Math.min(active, Math.max(0, count - 1)));
@@ -24,25 +24,31 @@ export function clampActiveEdgeIndex(active: number, count: number): number {
  * scrolling to an instant jump.
  */
 export function SummaryCarousel({
-  insights,
+  insights = [],
+  comparisonMarkets,
   teams = [],
   variant = "edge",
 }: {
-  insights: MarketInsight[];
+  insights?: MarketInsight[];
+  comparisonMarkets?: ProjectionMarket[];
   teams?: ProjectionTeam[];
   variant?: "edge" | "no-edge";
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const nextButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [active, setActive] = useState(0);
-  const activeIndex = clampActiveEdgeIndex(active, insights.length);
+  const isComparison = Boolean(comparisonMarkets?.length);
+  const slides = isComparison
+    ? comparisonMarkets!.map(market => ({ key: market.key, label: market.label, market, insight: null }))
+    : insights.map(insight => ({ key: `${insight.marketKey}-${insight.sideLabel}`, label: insight.sideLabel, market: undefined, insight }));
+  const activeIndex = clampActiveEdgeIndex(active, slides.length);
   const isNoEdgeRanking = variant === "no-edge";
 
   const onScroll = () => {
     const el = trackRef.current;
     if (!el || el.clientWidth === 0) return;
     const i = Math.round(el.scrollLeft / el.clientWidth);
-    setActive(clampActiveEdgeIndex(i, insights.length));
+    setActive(clampActiveEdgeIndex(i, slides.length));
   };
 
   const goTo = (i: number, moveFocus = false) => {
@@ -60,11 +66,13 @@ export function SummaryCarousel({
 
   return (
     <section
-      className={`summary-carousel summary-carousel--${variant}`}
+      className={`summary-carousel summary-carousel--${isComparison ? "comparison" : variant}`}
       role="group"
       aria-roledescription="carousel"
       aria-label={
-        isNoEdgeRanking
+        isComparison
+          ? `${slides.length} Book and Model markets, priced at their shown lines`
+          : isNoEdgeRanking
           ? `${insights.length} non-actionable market projections, ranked by no-vig ROI`
           : `${insights.length} model edges, ranked strongest first`
       }
@@ -79,32 +87,37 @@ export function SummaryCarousel({
         // scroll stop per card was pure tab bloat.
         tabIndex={-1}
         aria-label={
-          isNoEdgeRanking
+          isComparison
+            ? "Swipe through this game's Book and Model markets"
+            : isNoEdgeRanking
             ? "Swipe through this game's highest no-vig ROI market projections"
             : "Swipe through this game's model edges"
         }
       >
-        {insights.map((ins, i) => (
+        {slides.map((slide, i) => (
           <div
-            key={`${ins.marketKey}-${ins.sideLabel}`}
+            key={slide.key}
             className="summary-carousel__slide"
             role="group"
             aria-roledescription="slide"
             aria-label={
-              isNoEdgeRanking
-                ? `Projection ${i + 1} of ${insights.length}: ${ins.sideLabel}; no actionable edge`
-                : `Edge ${i + 1} of ${insights.length}: ${ins.sideLabel}`
+              isComparison
+                ? `Market ${i + 1} of ${slides.length}: ${slide.label}; Book and Model pricing lines`
+                : isNoEdgeRanking
+                  ? `Projection ${i + 1} of ${slides.length}: ${slide.label}; no actionable edge`
+                  : `Edge ${i + 1} of ${slides.length}: ${slide.label}`
             }
           >
             <ProjectionSummary
-              insight={ins}
+              insight={slide.insight}
+              comparisonMarkets={slide.market ? [slide.market] : undefined}
               teams={teams}
-              onNextEdge={() => goTo((i + 1) % insights.length, true)}
+              onNextEdge={() => goTo((i + 1) % slides.length, true)}
               nextEdgeLabel={`View next ${
-                isNoEdgeRanking ? "projection" : "model edge"
-              }: ${insights[(i + 1) % insights.length]?.sideLabel} (${
-                (i + 1) % insights.length + 1
-              } of ${insights.length})`}
+                isComparison ? "market" : isNoEdgeRanking ? "projection" : "model edge"
+              }: ${slides[(i + 1) % slides.length]?.label} (${
+                (i + 1) % slides.length + 1
+              } of ${slides.length})`}
               nextEdgeTabIndex={i === activeIndex ? 0 : -1}
               nextEdgeButtonRef={(element) => {
                 nextButtonRefs.current[i] = element;

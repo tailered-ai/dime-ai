@@ -203,6 +203,17 @@ html:not(.dark) .projection-card--compact .projection-card__status--live {
   border-radius: 0;
   box-shadow: none;
 }
+/* September 5 helmets share a centered 366px artwork height on a 512x384
+   transparent canvas. Crop that padding; every helmet shares one rem-based size. */
+.team-logo-box.team-logo-box--helmet {
+  block-size: 3.5rem;
+  inline-size: 3.99rem;
+  overflow: hidden;
+}
+.team-logo-box--helmet .team-logo {
+  block-size: calc(100% * 384 / 366);
+  flex: none;
+}
 /* A crisp alpha-following keyline, not a rectangular image border. Dark is
    the black surface; Light keeps the original mark. (Two-mode system,
    2026-07-31 — the retired "system" selectors are gone.) */
@@ -665,6 +676,9 @@ html:not([data-theme-mode]) .dmf-root[data-dmf-mode="dark"] .team-logo-box--dark
 .summary { grid-area: summary; display: grid; align-items: center; min-inline-size: 0; padding-block: var(--space-sm); border-block: 1px solid var(--border, #262626); }
 .summary__viewport { display: grid; justify-content: safe center; justify-items: safe center; inline-size: 100%; min-inline-size: 0; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: none; }
 .summary__viewport::-webkit-scrollbar { display: none; }
+.summary--comparison .summary__viewport { justify-content: stretch; justify-items: stretch; gap: var(--space-sm); }
+.summary__comparison-navigation { display: flex; justify-content: flex-end; }
+.summary--comparison .summary__next { color: var(--text-primary, #fff); box-shadow: none; }
 .summary__viewport:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ring, rgba(69, 224, 168, 0.36)); border-radius: 8px; }
 /* FEED-EDGE-ROW-CLIP v2 (2026-08-02 responsive rebuild, supersedes the
    content-dependent flex-wrap): summary anatomy is DETERMINED BY CARD WIDTH,

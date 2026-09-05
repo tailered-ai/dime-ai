@@ -843,8 +843,8 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
   for (const [market, comparable, bookPrices] of [[spread, spreadComparable, spreadBookPrices], [total, totalComparable, totalBookPrices]] as const) {
     if (!comparable) {
       market.note = unknownBasis
-        ? "Model pricing line unavailable; comparison unavailable."
-        : "Model odds apply to the line in the Model column. Book and model lines differ; comparison unavailable.";
+        ? "Model pricing line unavailable."
+        : "Model odds apply to the line in the Model column. Book and model lines differ.";
       market.foot = { label: unknownBasis ? "COMPARISON UNAVAILABLE" : "DIFFERENT LINES", edge: false };
     }
     if (basis) {

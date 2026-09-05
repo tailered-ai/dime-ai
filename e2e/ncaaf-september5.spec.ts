@@ -173,6 +173,7 @@ async function checkMarket(
 
 for (const [width, theme] of [
   [375, "dark"],
+  [817, "dark"],
   [1440, "dark"],
   [1440, "light"],
 ] as const) {
@@ -214,7 +215,53 @@ for (const [width, theme] of [
           `Model: ${source.home} ${signed(source.model.homeSpread)} · Total ${source.model.total}`
         );
       await expect(card).not.toContainText("No model projection published");
+      await expect(card).not.toContainText(
+        "Book/model comparison unavailable."
+      );
     }
+    const helmets = cards.locator(".team-logo-box--helmet");
+    await expect(helmets).toHaveCount(136);
+    const helmetLayout = await helmets.evaluateAll(elements =>
+      elements.map(element => {
+        const box = element.getBoundingClientRect();
+        const center = element
+          .closest(".matchup__grid")!
+          .querySelector(".matchup__center")!
+          .getBoundingClientRect();
+        return {
+          height: box.height,
+          overlapsName: box.left < center.right && box.right > center.left,
+        };
+      })
+    );
+    const helmetHeight = await page.evaluate(
+      () =>
+        3.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)
+    );
+    expect(
+      helmetLayout.every(
+        box => Math.abs(box.height - helmetHeight) < 0.1 && !box.overlapsName
+      )
+    ).toBe(true);
+    const comparison = sourceCard(cards, SOURCES[0]);
+    await comparison
+      .getByRole("button", {
+        name: "View next market: Total (2 of 2)",
+        exact: true,
+      })
+      .click();
+    await expect(
+      comparison.locator('.summary__viewport[tabindex="0"]')
+    ).toContainText("O 50.5");
+    const returnToSpread = comparison.getByRole("button", {
+      name: "View next market: Spread (1 of 2)",
+      exact: true,
+    });
+    await expect(returnToSpread).toBeFocused();
+    await returnToSpread.click();
+    await expect(
+      comparison.locator('.summary__viewport[tabindex="0"]')
+    ).toContainText("BRY +37.5");
     const missingSpread = SOURCES.filter(
       source => source.book.awaySpread == null
     );
@@ -222,6 +269,14 @@ for (const [width, theme] of [
     for (const source of missingSpread)
       await expect(sourceCard(cards, source)).toHaveCount(1);
     await noOverflow(page);
+    await page.evaluate(() => {
+      for (const scroller of document.querySelectorAll(
+        ".dc-shell-external-scroll, .dmf-scroll"
+      )) {
+        scroller.scrollTo({ top: 0, behavior: "instant" });
+      }
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
     await page.screenshot({ path: `${output}/feed-${width}-${theme}.png` });
     // All model prices are checked through rendered tables once; the other widths cover the same actual source's longest-value controls.
     const checked =

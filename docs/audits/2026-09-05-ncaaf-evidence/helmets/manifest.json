@@ -1,0 +1,1639 @@
+{
+  "approvedAt": "2026-09-05T19:25:53Z",
+  "approvalTask": "01a04cc7-34cb-7132-9b45-cf43eabd8d5e",
+  "count": 136,
+  "teams": {
+    "ACU": {
+      "asset": "/brand/ncaaf-helmets/sept5-acu-v2.png",
+      "sha256": "0b3a6dcadeb48e7404d382b68f2459b96b0ef218511f0995b699b31b8f87235a",
+      "bytes": 180582,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.467621,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "372x366+70+9"
+    },
+    "AFA": {
+      "asset": "/brand/ncaaf-helmets/sept5-afa-v2.png",
+      "sha256": "ac63688a399a66c8e73655d70368c19a97b33986427b4d7cd9ccafdb1dd0672c",
+      "bytes": 181698,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.473329,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "ALA": {
+      "asset": "/brand/ncaaf-helmets/sept5-ala-v2.png",
+      "sha256": "d012896b6a0ece67acf9573ba69a49547e87ed47ac3fbb08b4f6e6d622a81888",
+      "bytes": 175362,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.470845,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "374x366+69+9"
+    },
+    "ALCN": {
+      "asset": "/brand/ncaaf-helmets/sept5-alcn-v2.png",
+      "sha256": "232e5f7ce8f4e7101caec479505c6072baf773629958f7011462e5d8a78f6b3d",
+      "bytes": 168590,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.476677,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "372x366+70+9"
+    },
+    "APP": {
+      "asset": "/brand/ncaaf-helmets/sept5-app-v2.png",
+      "sha256": "896c7200ae180d6ff19d7088a25a8fa08c0776f18182f8d9114a96efb21d1890",
+      "bytes": 197634,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.459119,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x365+72+9"
+    },
+    "APSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-apsu-v2.png",
+      "sha256": "094caa7e7b9dc079d7956d993a475161c5ed9440a7f2a4019c810fb449144937",
+      "bytes": 169748,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.463888,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "365x366+73+9"
+    },
+    "ARIZ": {
+      "asset": "/brand/ncaaf-helmets/sept5-ariz-v2.png",
+      "sha256": "b580b2a7eab7a3eb19655e7fe672e9cd86906d53fb604027efa6a1805185b178",
+      "bytes": 184230,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.48281,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "378x366+67+9"
+    },
+    "ARK": {
+      "asset": "/brand/ncaaf-helmets/sept5-ark-v2.png",
+      "sha256": "9abd09c1edf4a7335270a881037dcdab1b045a288d0b9ecedce7fe560924959c",
+      "bytes": 171928,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.473842,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "ARMY": {
+      "asset": "/brand/ncaaf-helmets/sept5-army-v2.png",
+      "sha256": "ec358c62e46802bd90038b510362e6ab760a22f92b7516c286a0db11f17c307d",
+      "bytes": 179689,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.439523,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "381x366+65+9"
+    },
+    "ARST": {
+      "asset": "/brand/ncaaf-helmets/sept5-arst-v2.png",
+      "sha256": "c8faa8de187bfa48753f97ee2d00fbfdd91d967d5a3d03238c85338cb2e58af5",
+      "bytes": 190968,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.472694,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "ASU": {
+      "asset": "/brand/ncaaf-helmets/sept5-asu-v2.png",
+      "sha256": "15717b8f649efc0ec53417644be029b58f46d48959e8291aae3167092a938681",
+      "bytes": 184793,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.463628,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "AUB": {
+      "asset": "/brand/ncaaf-helmets/sept5-aub-v2.png",
+      "sha256": "ecc543bae2b43526b6807208830844740fff70e086afbdf406c0a0eed9cdec9b",
+      "bytes": 189365,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.462651,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "BALL": {
+      "asset": "/brand/ncaaf-helmets/sept5-ball-v2.png",
+      "sha256": "4bcee96dd5ffc197b515f0c07d2b223a1ddb90f931b1557e17f3c29e7f162169",
+      "bytes": 203100,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.482687,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "380x366+66+9"
+    },
+    "BAY": {
+      "asset": "/brand/ncaaf-helmets/sept5-bay-v2.png",
+      "sha256": "4cebd45e7e9a4303684a2ea2a69a535c2edaa586aa2d5572c4704293dc8444b2",
+      "bytes": 207143,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.469108,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "BC": {
+      "asset": "/brand/ncaaf-helmets/sept5-bc-v2.png",
+      "sha256": "afefb99bf37f670bba4c4cbd8dfddbea65cba051a25a87c33417e33e9bc96bf1",
+      "bytes": 225001,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.472181,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "BGSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-bgsu-v2.png",
+      "sha256": "d99aa7e8e99d02db88ab29c0d92e6f54e74e38d20e6ed6a44cf48b5c325b26ce",
+      "bytes": 198707,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.485324,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "391x366+60+9"
+    },
+    "BOIS": {
+      "asset": "/brand/ncaaf-helmets/sept5-bois-v2.png",
+      "sha256": "4081bab207a5cb7bb3a86bce97032bee22897f37e2e008705547f05aea262cbe",
+      "bytes": 192480,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.462833,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "BRY": {
+      "asset": "/brand/ncaaf-helmets/sept5-bry-v2.png",
+      "sha256": "ed1abf3c91ed60db6cb8f62811a8f65e89617851df52f4bd8714b16bd4c54ce8",
+      "bytes": 190393,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.442356,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x364+71+10"
+    },
+    "BYU": {
+      "asset": "/brand/ncaaf-helmets/sept5-byu-v2.png",
+      "sha256": "1fe95554dc1d6be9b798f977f03c19d8f551b1a4ba2e44e0476ca34818083acf",
+      "bytes": 180617,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.472047,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "CAL": {
+      "asset": "/brand/ncaaf-helmets/sept5-cal-v2.png",
+      "sha256": "68b439392ea7fd82f5c95e7c83fb423ef641a291d7bdbe846295a9537c1f4e99",
+      "bytes": 176758,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.463618,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "CCU": {
+      "asset": "/brand/ncaaf-helmets/sept5-ccu-v2.png",
+      "sha256": "fca6526d48329e5a54bed4be9ac5e6b6b1c77e92e6d941a9d342ace10d40b972",
+      "bytes": 185077,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.465244,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x364+72+10"
+    },
+    "CHSO": {
+      "asset": "/brand/ncaaf-helmets/sept5-chso-v2.png",
+      "sha256": "f9019ae6b69691b3cc68f53f965d8c837bf7d04976a14158e64942b0382514c6",
+      "bytes": 184904,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.476082,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "CIN": {
+      "asset": "/brand/ncaaf-helmets/sept5-cin-v2.png",
+      "sha256": "efb735a1d7079db40ed510eb49cf845e15deeacdd83f23d2f8f23c8801e1657e",
+      "bytes": 175746,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.467799,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "372x366+70+9"
+    },
+    "CIT": {
+      "asset": "/brand/ncaaf-helmets/sept5-cit-v2.png",
+      "sha256": "86ac2fc98fb5ee0752ae46bbc512a5e92ef18619cf3f54a70078a35d99e51461",
+      "bytes": 177856,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.461406,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "361x366+75+9"
+    },
+    "CLEM": {
+      "asset": "/brand/ncaaf-helmets/sept5-clem-v2.png",
+      "sha256": "41e8fb0ec4ea31dfb6117409b28d264dab2af312fe6cbf5590f4027442d43951",
+      "bytes": 175196,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.47383,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "CLT": {
+      "asset": "/brand/ncaaf-helmets/sept5-clt-v2.png",
+      "sha256": "25a6e7eadbfd227fcc875d71a9885df9785ffdb7fd42573487363a6f3f1ce0a8",
+      "bytes": 178369,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.475464,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "CMU": {
+      "asset": "/brand/ncaaf-helmets/sept5-cmu-v2.png",
+      "sha256": "9f12060c941f5a3c058c515b3c15930f8ff6e6dc1649aae7a184bb430b1e59bd",
+      "bytes": 168116,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.463491,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "CONN": {
+      "asset": "/brand/ncaaf-helmets/sept5-conn-v2.png",
+      "sha256": "8e1dc01be92173df9b7942dd2b41e1b5bcb987c2abda732fd69f99a18885a41a",
+      "bytes": 178566,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.449933,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "362x360+75+12"
+    },
+    "CSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-csu-v2.png",
+      "sha256": "f18a624cb2cfd65c1b0c825c513a7c6cef60dc76b0dd61d837cb9ba5bdcc3e2f",
+      "bytes": 195366,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.464448,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "364x366+74+9"
+    },
+    "DUKE": {
+      "asset": "/brand/ncaaf-helmets/sept5-duke-v2.png",
+      "sha256": "744e4d6c45c4176d51c593a5aa8d34de2e4a5d25fcace1a7176802489666b563",
+      "bytes": 176763,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.475508,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "DUQ": {
+      "asset": "/brand/ncaaf-helmets/sept5-duq-v2.png",
+      "sha256": "f8169dbcd4facbcc128cf0a38b3b2f01f11135da07d7d92e0dec96d226f56a76",
+      "bytes": 171943,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.47257,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "372x366+70+9"
+    },
+    "ECU": {
+      "asset": "/brand/ncaaf-helmets/sept5-ecu-v2.png",
+      "sha256": "9c8f5da726ec7619b808a90e115f2a441ff9afdfef1167272444e7ed1656539d",
+      "bytes": 206410,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.482185,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "379x366+66+9"
+    },
+    "EKU": {
+      "asset": "/brand/ncaaf-helmets/sept5-eku-v2.png",
+      "sha256": "bad303862b4df32d6c6596538b30e25af74e156eaddcd5e7726e49266c19e567",
+      "bytes": 178462,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.477088,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "FAU": {
+      "asset": "/brand/ncaaf-helmets/sept5-fau-v2.png",
+      "sha256": "9f7d02667169e6ed6feb61665a6f8488d11810f4c557ac01c3153bf5d658a6e9",
+      "bytes": 181673,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.475659,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "FIU": {
+      "asset": "/brand/ncaaf-helmets/sept5-fiu-v2.png",
+      "sha256": "65362626042d34571a00e4e2900985820950568540af011479122473938b626f",
+      "bytes": 188229,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.474181,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "FLA": {
+      "asset": "/brand/ncaaf-helmets/sept5-fla-v2.png",
+      "sha256": "7cf66b18677bc4f14c1a3478edf68d99b799f641aecafaf57602de1cffbd972b",
+      "bytes": 188225,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.471071,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "FOR": {
+      "asset": "/brand/ncaaf-helmets/sept5-for-v2.png",
+      "sha256": "a83dcf18a09fa6a71b45d596db2365164544ff97e05eba609690274f1834e253",
+      "bytes": 181173,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.467219,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "FUR": {
+      "asset": "/brand/ncaaf-helmets/sept5-fur-v2.png",
+      "sha256": "779f2ecaced0839a0acbae46115529514b4969d5b941d351cc6486fb6be6a8c3",
+      "bytes": 193183,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.458955,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "GASO": {
+      "asset": "/brand/ncaaf-helmets/sept5-gaso-v2.png",
+      "sha256": "a64ca3bd88422bf7b4a98456bd55305128a42f1799a60258556e7f11a2551917",
+      "bytes": 192413,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.471894,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "HAMP": {
+      "asset": "/brand/ncaaf-helmets/sept5-hamp-v2.png",
+      "sha256": "95ef61e4ba85f79a72942e54729d2915090cb6318ec9a97cba5a56edce6c9cd7",
+      "bytes": 178700,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.471553,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "HAW": {
+      "asset": "/brand/ncaaf-helmets/sept5-haw-v2.png",
+      "sha256": "d023aa71be29b5e25d6d8ec59183a0bda5d353ccb3c9625380f8a628b6844a15",
+      "bytes": 161672,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.462477,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "364x363+74+10"
+    },
+    "HCU": {
+      "asset": "/brand/ncaaf-helmets/sept5-hcu-v2.png",
+      "sha256": "210daa2d18c40cc329ed6f5cead15d3eb23d8ce19ffe613d445edd06c0512c55",
+      "bytes": 193840,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.468478,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "HOU": {
+      "asset": "/brand/ncaaf-helmets/sept5-hou-v2.png",
+      "sha256": "a2dd95e485b1344e4973ecc47232290b9f1c24f9c6a7af840af6891b7daf3b3f",
+      "bytes": 174080,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.456148,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "366x364+50+10"
+    },
+    "IDST": {
+      "asset": "/brand/ncaaf-helmets/sept5-idst-v2.png",
+      "sha256": "87dd9e38c6c6cfcca9e0e53bb49529c174a32e1f1009302053d4f2aeeac0b760",
+      "bytes": 175333,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.473666,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "373x366+69+9"
+    },
+    "IOWA": {
+      "asset": "/brand/ncaaf-helmets/sept5-iowa-v2.png",
+      "sha256": "deaa59d3c13003daa89888fca123ceb1ec21799c77abfe2494cc7e7087c3101a",
+      "bytes": 173613,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.46775,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "366x366+73+9"
+    },
+    "ISU": {
+      "asset": "/brand/ncaaf-helmets/sept5-isu-v2.png",
+      "sha256": "6705209cd209f354e3798f7a0be58083678d53a82c83b05e99aa98630f0eb818",
+      "bytes": 192208,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.46571,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "IU": {
+      "asset": "/brand/ncaaf-helmets/sept5-iu-v2.png",
+      "sha256": "461a0d98f1dec1c62e3a74efe5be758f041c9125c152a4d6cfe31c0022972eef",
+      "bytes": 176237,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.465038,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "JMU": {
+      "asset": "/brand/ncaaf-helmets/sept5-jmu-v2.png",
+      "sha256": "6f663ec51df0acfe8ad237269e214c10b51f82a6fc702e4251213712be22f7b0",
+      "bytes": 185067,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.465094,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "JVST": {
+      "asset": "/brand/ncaaf-helmets/sept5-jvst-v2.png",
+      "sha256": "a46cb79f220570d9c3b62923a7e69f2352b8d213ebbd409b0f08481a73996d15",
+      "bytes": 169516,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.468443,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "374x366+70+9"
+    },
+    "KENT": {
+      "asset": "/brand/ncaaf-helmets/sept5-kent-v2.png",
+      "sha256": "7ed531b0399f6594b1170f33134d231d2d9eefbbed69c51a26c19f0692d091c1",
+      "bytes": 206872,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.464116,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x364+72+10"
+    },
+    "KSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-ksu-v2.png",
+      "sha256": "6cd344b417b49757b7b957840e8458595852e44be44d3dd254a81af3bd6ccaba",
+      "bytes": 188976,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.472515,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "LAF": {
+      "asset": "/brand/ncaaf-helmets/sept5-laf-v2.png",
+      "sha256": "651cdfe439c64dffa91e898f8b86ae6ad4e2ad8b9c9335d14018cecd546647aa",
+      "bytes": 202009,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.48896,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "386x366+63+9"
+    },
+    "LAM": {
+      "asset": "/brand/ncaaf-helmets/sept5-lam-v2.png",
+      "sha256": "bc96766ec36af9b99f6a88d7b9bc46140412213d8116f2f62330e8addbe5cdef",
+      "bytes": 179979,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.475133,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "LIB": {
+      "asset": "/brand/ncaaf-helmets/sept5-lib-v2.png",
+      "sha256": "8db7766919b0f435e2c96efb4252ee3f25ec377af1fe7c421d10c2809e0b6fc2",
+      "bytes": 187694,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.46893,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "LSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-lsu-v2.png",
+      "sha256": "65cb3ec8bfe85b445dacce68650c76d69640aa64a0d55601088ed8bcbd183db2",
+      "bytes": 179993,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.478236,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "LT": {
+      "asset": "/brand/ncaaf-helmets/sept5-lt-v2.png",
+      "sha256": "6875e3f00aaa05e87adafc91003777a127a563880cea578cd7d4493db9aa74b9",
+      "bytes": 183926,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.474393,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "M-OH": {
+      "asset": "/brand/ncaaf-helmets/sept5-m-oh-v2.png",
+      "sha256": "74bb9c3fdbddb680ca50f450a73b106481cb7b692aa32a994da3e2d997ee2418",
+      "bytes": 193232,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.491403,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "375x366+68+9"
+    },
+    "MD": {
+      "asset": "/brand/ncaaf-helmets/sept5-md-v2.png",
+      "sha256": "93fcc39006ec6ffd8c86946cfcbac107754d7826eb7f0a43bd5eb21131a095a0",
+      "bytes": 183167,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.477283,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "ME": {
+      "asset": "/brand/ncaaf-helmets/sept5-me-v2.png",
+      "sha256": "97070d04dc05ccd2fcc443a0c16ba941bb0e96a71893bd96efab91ebac4f6b17",
+      "bytes": 205606,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.468833,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "MEM": {
+      "asset": "/brand/ncaaf-helmets/sept5-mem-v2.png",
+      "sha256": "a98e7f274e2723184d4e171106355df640310a7370cde3c1ca2b2043ed64eb56",
+      "bytes": 176801,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.455741,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "366x363+73+10"
+    },
+    "MERC": {
+      "asset": "/brand/ncaaf-helmets/sept5-merc-v2.png",
+      "sha256": "7928772ea9dde2dfdf574fbf513d171fa98c0791d73dfb1ce6bbbbb4d88beed0",
+      "bytes": 178100,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.471878,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "372x366+70+9"
+    },
+    "MICH": {
+      "asset": "/brand/ncaaf-helmets/sept5-mich-v2.png",
+      "sha256": "27d7b8689a6ff77d67072022f114a9192822d70ab7c110f2fe0cab3c770d8d1d",
+      "bytes": 180210,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.470104,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "MORG": {
+      "asset": "/brand/ncaaf-helmets/sept5-morg-v2.png",
+      "sha256": "a5e001d04d57e3a7862160eaadc56e02f57565d1db053ecb4a58e7f6273e4320",
+      "bytes": 179741,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.465968,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "372x366+70+9"
+    },
+    "MOST": {
+      "asset": "/brand/ncaaf-helmets/sept5-most-v2.png",
+      "sha256": "07934802a0ac1c8cb24781e20c737022a30150d035b30ac1604ee713f473abeb",
+      "bytes": 187454,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.46923,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "MRSH": {
+      "asset": "/brand/ncaaf-helmets/sept5-mrsh-v2.png",
+      "sha256": "c12846b2daec459071b82def917508b63229cb28c08a0a81b4498f0627c9bf23",
+      "bytes": 193369,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.474984,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "MSST": {
+      "asset": "/brand/ncaaf-helmets/sept5-msst-v2.png",
+      "sha256": "6e64252daa6f9bc2ae7f6f2cbd2a5b4e982338b19f9a0427b51b9c49e92f8a23",
+      "bytes": 188999,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.472154,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "MTSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-mtsu-v2.png",
+      "sha256": "aea7ede692cf3ab1a1a800e905731f21d9e3f14038f6b969f37af3715232ed13",
+      "bytes": 197300,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.477428,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "MUR": {
+      "asset": "/brand/ncaaf-helmets/sept5-mur-v2.png",
+      "sha256": "fb0fea422d6e4d3c5d01548f44343e2bfc32bf499b7e0ebbb5335fd80814f964",
+      "bytes": 185522,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.471511,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "MVSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-mvsu-v2.png",
+      "sha256": "a4e7f38053b8e332240d50a480f446c8ba6280380e6ee5bd2a72aa0f3c1a24e3",
+      "bytes": 184306,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.466756,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "372x366+70+9"
+    },
+    "NAU": {
+      "asset": "/brand/ncaaf-helmets/sept5-nau-v2.png",
+      "sha256": "0430f70570c333025ee436849fd4dc3990d2086b79ee0d8a24863b237f9fa878",
+      "bytes": 176258,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.477863,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "NAVY": {
+      "asset": "/brand/ncaaf-helmets/sept5-navy-v2.png",
+      "sha256": "76e71e62a718720b6f8321fce26f1387db09efc93dc0e41988a203595b3ea551",
+      "bytes": 181943,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.473909,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "366x366+73+9"
+    },
+    "NDSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-ndsu-v2.png",
+      "sha256": "7d26cfcbc3ebe8601b993242d7efcbbb64ed8bb5b1f91600fb279b8eca433b10",
+      "bytes": 179140,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.46889,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "366x366+73+9"
+    },
+    "NEB": {
+      "asset": "/brand/ncaaf-helmets/sept5-neb-v2.png",
+      "sha256": "76ff5cffd4426579dc790475112f65b49e5ad58975ed791291a3ab9d61f366d3",
+      "bytes": 169373,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.47284,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "373x366+69+9"
+    },
+    "NEV": {
+      "asset": "/brand/ncaaf-helmets/sept5-nev-v2.png",
+      "sha256": "77ae940677aa96149a4c18b8ed775b09f395de834badc8853bc6aac8c048593f",
+      "bytes": 182955,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.444921,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "366x366+73+9"
+    },
+    "NICH": {
+      "asset": "/brand/ncaaf-helmets/sept5-nich-v2.png",
+      "sha256": "149ff3a70a2540fe8b54e6006aa5ed51f3e39543ae9683ec01726cbb3034550e",
+      "bytes": 192003,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.472006,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "NIU": {
+      "asset": "/brand/ncaaf-helmets/sept5-niu-v2.png",
+      "sha256": "b24ce77edb1add6d71752969135fbb4f39fbf1b0ce6b552342886aa2bdc7c793",
+      "bytes": 178850,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.466157,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "365x366+73+9"
+    },
+    "NMSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-nmsu-v2.png",
+      "sha256": "8a7974fbead885326b3161f07c5f671013552a8406a77f5748910808e434e50a",
+      "bytes": 149630,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.481507,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "364x363+73+10"
+    },
+    "NORF": {
+      "asset": "/brand/ncaaf-helmets/sept5-norf-v2.png",
+      "sha256": "31c7178143be2263321e1f01b1d2fe05a34d8b07f7567c69cecb763d134d8da8",
+      "bytes": 176666,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.474067,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "NU": {
+      "asset": "/brand/ncaaf-helmets/sept5-nu-v2.png",
+      "sha256": "fde92d4a6edac6638a971e25364d15c3f9d94aa3c3aac4c8f3360af450e6d8c6",
+      "bytes": 178577,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.46994,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "NWST": {
+      "asset": "/brand/ncaaf-helmets/sept5-nwst-v2.png",
+      "sha256": "503a6de0367def20f98fd4b916c75636f9558ac821b54f9ad7e514c81f27206f",
+      "bytes": 198508,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.474859,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "ODU": {
+      "asset": "/brand/ncaaf-helmets/sept5-odu-v2.png",
+      "sha256": "61d63e5df154125e1ad4dc8aecfd8dfe4563023ad21771a7306570ec3c658af2",
+      "bytes": 185209,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.466553,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "OHIO": {
+      "asset": "/brand/ncaaf-helmets/sept5-ohio-v2.png",
+      "sha256": "7c0bcdc2b0440fb310ec69fb516aa34c65ab656d1de6b80bc74c7e5e70eee446",
+      "bytes": 165310,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.468893,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "OKST": {
+      "asset": "/brand/ncaaf-helmets/sept5-okst-v2.png",
+      "sha256": "78965f3fd617c3b5c3720abcd6cd6ab5e4e3ad0ba942ca1734e4957a2938bf43",
+      "bytes": 165318,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.473996,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "ORE": {
+      "asset": "/brand/ncaaf-helmets/sept5-ore-v2.png",
+      "sha256": "3badd220b4923e3d6aaf7c44e2711e2e60cce85a726a28c1fbd8ed652e4750f7",
+      "bytes": 190239,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.468262,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "ORST": {
+      "asset": "/brand/ncaaf-helmets/sept5-orst-v2.png",
+      "sha256": "86e11c953f6ef246243b4355b4d8635eb7a2c74cb8d10ca8b85d581993982998",
+      "bytes": 182759,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.451547,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "379x366+66+9"
+    },
+    "OSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-osu-v2.png",
+      "sha256": "7d520434d9ed3890206c3a01f01969c2a7a5c7b2f2e619efb379787757488e0f",
+      "bytes": 210156,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.488294,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "383x365+64+10"
+    },
+    "PITT": {
+      "asset": "/brand/ncaaf-helmets/sept5-pitt-v2.png",
+      "sha256": "f91456e3b209c4afaebd4093e35f185bc403bed2e6272447caa2be5f9352ef42",
+      "bytes": 189713,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.46513,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x364+72+10"
+    },
+    "PRST": {
+      "asset": "/brand/ncaaf-helmets/sept5-prst-v2.png",
+      "sha256": "447effb9829a7bf6d91534a58e096a84815da1c4c57dfae4f87d09c8c462bbb8",
+      "bytes": 164674,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.465602,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "PSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-psu-v2.png",
+      "sha256": "a74c5b2c9cd29e5801d8dbccb0194744a2a3c4b47a08672c034632a9e5bfdbf3",
+      "bytes": 180307,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.452721,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "372x365+69+9"
+    },
+    "RGV": {
+      "asset": "/brand/ncaaf-helmets/sept5-rgv-v2.png",
+      "sha256": "62dce0a617a1a8f0a7488dc1c1e2cb67c7fd00f7a5e3c01f27b8646a2d7e8e97",
+      "bytes": 173839,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.471077,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "365x366+73+9"
+    },
+    "RICE": {
+      "asset": "/brand/ncaaf-helmets/sept5-rice-v2.png",
+      "sha256": "744d3f3d743d0c248a171ca9585d8371f891ec6f5f91c3dfcc1cd8cdbb6fdfdf",
+      "bytes": 180119,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.474006,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "SAC": {
+      "asset": "/brand/ncaaf-helmets/sept5-sac-v2.png",
+      "sha256": "3809e6c44affd2da078833536df417a95ab71cbdbe07d5e606279289736ace02",
+      "bytes": 191862,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.43922,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "362x363+75+12"
+    },
+    "SC": {
+      "asset": "/brand/ncaaf-helmets/sept5-sc-v2.png",
+      "sha256": "78c50c2b8a7dfc93d1cc77537adc81be033ecafac722aa9d388e6a4712df3567",
+      "bytes": 191509,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.455169,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "373x366+69+9"
+    },
+    "SDST": {
+      "asset": "/brand/ncaaf-helmets/sept5-sdst-v2.png",
+      "sha256": "c0fa2be657e14b5e9fc07f648b6555342db3c8ca519794f644babc24ee0e4453",
+      "bytes": 204950,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.469598,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "SDSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-sdsu-v2.png",
+      "sha256": "5f8f46633dceaf40da9ea45453494f0bfad117e9a74b683fa0ce0af149304e35",
+      "bytes": 172183,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.470901,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "SELA": {
+      "asset": "/brand/ncaaf-helmets/sept5-sela-v2.png",
+      "sha256": "b1ede0356e3d814ac27142e33a7ef2cbd8462b44ad65d596dae09786419d9ff9",
+      "bytes": 181344,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.472599,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "SEMO": {
+      "asset": "/brand/ncaaf-helmets/sept5-semo-v2.png",
+      "sha256": "144bc474227a8c8c1b59ac15098526823b2647f9122c09e6761b4e78d9c0ee32",
+      "bytes": 188872,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.461906,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "SHSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-shsu-v2.png",
+      "sha256": "31602e77ffc6dd7cb2c6c7f4915ca091298cfab70734d656e3278e61a8dcb7eb",
+      "bytes": 166530,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.476851,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "SYR": {
+      "asset": "/brand/ncaaf-helmets/sept5-syr-v2.png",
+      "sha256": "3c6f174a683bda262f97c12c52d1c64c4c55928c7ac8eee405581db0aa4e4f12",
+      "bytes": 189089,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.484684,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "385x365+63+10"
+    },
+    "TA&M": {
+      "asset": "/brand/ncaaf-helmets/sept5-ta&m-v2.png",
+      "sha256": "8cb29f1c418f3a45060d29694714131da4d3efaf01df785e02c87dd4664e02f5",
+      "bytes": 179945,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.466573,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "TAR": {
+      "asset": "/brand/ncaaf-helmets/sept5-tar-v2.png",
+      "sha256": "1ba119af7c407f673225aeec2aaa031486f97a45ee004518df5eb2ee6fe18fe9",
+      "bytes": 189797,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.505199,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "400x366+56+9"
+    },
+    "TEM": {
+      "asset": "/brand/ncaaf-helmets/sept5-tem-v2.png",
+      "sha256": "4460c9ca3dc13bd0f30ab90ee62c812277214afcb470471f94ba5e2f20791437",
+      "bytes": 179498,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.468146,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "TENN": {
+      "asset": "/brand/ncaaf-helmets/sept5-tenn-v2.png",
+      "sha256": "3c4d3cebd30dd61289f0133cbd8d3215fa852f43625c18374e51f166113c4498",
+      "bytes": 184112,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.469561,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "TEX": {
+      "asset": "/brand/ncaaf-helmets/sept5-tex-v2.png",
+      "sha256": "8b818f0fcf1efb9a2e64358978b0aae7ae5a65b057c9f279d77428dddfee7bf6",
+      "bytes": 171600,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.476499,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "TLSA": {
+      "asset": "/brand/ncaaf-helmets/sept5-tlsa-v2.png",
+      "sha256": "6ae519fecb31276a2198fd4d0c16b7463e4de1fefad42b27bd901369c996fd45",
+      "bytes": 176107,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.476328,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "TNST": {
+      "asset": "/brand/ncaaf-helmets/sept5-tnst-v2.png",
+      "sha256": "11745fb81871760ea26a6c72e920df5af70d23252c7a07eb113ea0a6111b31ef",
+      "bytes": 189817,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.462359,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "366x366+73+9"
+    },
+    "TOW": {
+      "asset": "/brand/ncaaf-helmets/sept5-tow-v2.png",
+      "sha256": "9141a74ea6b5e1e64b06e8b6979c76972b12856a5f2de4036254f4b17522edd0",
+      "bytes": 190531,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.473899,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "TROY": {
+      "asset": "/brand/ncaaf-helmets/sept5-troy-v2.png",
+      "sha256": "8cea07c79838a7c44f6a8fba667b07fbb9d7452858f528b91510ae8433e212ef",
+      "bytes": 181787,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.468061,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "TTU": {
+      "asset": "/brand/ncaaf-helmets/sept5-ttu-v2.png",
+      "sha256": "58005add492b8b82bb44b7ded9ba447efd7dc77605f5f2d8619b3b9a18d552b9",
+      "bytes": 164787,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.460932,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "TULN": {
+      "asset": "/brand/ncaaf-helmets/sept5-tuln-v2.png",
+      "sha256": "3c31da2a542679ac0ca02f6220b8c5c08ee5e49cf4cfd70a1b3c0c51240f78b7",
+      "bytes": 192863,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.467987,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "TXST": {
+      "asset": "/brand/ncaaf-helmets/sept5-txst-v2.png",
+      "sha256": "b0b950de5e8a85809bee708fdcf65ae0214a20fba2f2bc205214e23b6063916c",
+      "bytes": 180282,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.47729,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "UCLA": {
+      "asset": "/brand/ncaaf-helmets/sept5-ucla-v2.png",
+      "sha256": "e5e8aea26675a855426c50088f9d62cdb305e09f6f78419c33662df572864582",
+      "bytes": 187943,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.45487,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "UGA": {
+      "asset": "/brand/ncaaf-helmets/sept5-uga-v2.png",
+      "sha256": "4e62c257215fc54bdb8d0be72b6381f73939f298303a8475909c360ca91062d0",
+      "bytes": 178118,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.460752,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "364x366+74+9"
+    },
+    "UK": {
+      "asset": "/brand/ncaaf-helmets/sept5-uk-v2.png",
+      "sha256": "051ce651f0b8dc83210d21466119093bd2ff572c94e60d6fcdfbbd0569df97bc",
+      "bytes": 189624,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.466951,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "UL": {
+      "asset": "/brand/ncaaf-helmets/sept5-ul-v2.png",
+      "sha256": "43128534287e60939ab69309b6da914d6c9d8becbbcec1f5f99bc4e20bb82a03",
+      "bytes": 198507,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.47736,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "373x366+69+9"
+    },
+    "ULM": {
+      "asset": "/brand/ncaaf-helmets/sept5-ulm-v2.png",
+      "sha256": "b3c5d84cd0e7ff5aefd2ec792cbc4a19fe8ca58f1f446866e28d7d3403d52db9",
+      "bytes": 186806,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.470283,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "UNA": {
+      "asset": "/brand/ncaaf-helmets/sept5-una-v2.png",
+      "sha256": "c3e3a96876740950478e57bb8ff3c9ea5ecbb705ab410002f1402ea96c432505",
+      "bytes": 175528,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.475913,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "UNH": {
+      "asset": "/brand/ncaaf-helmets/sept5-unh-v2.png",
+      "sha256": "ebae8d5b4670d928273551d914dd6624aba897715ea9f82d93b761a550416e6d",
+      "bytes": 190049,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.476662,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "381x364+66+9"
+    },
+    "UNLV": {
+      "asset": "/brand/ncaaf-helmets/sept5-unlv-v2.png",
+      "sha256": "d2ebfe260b63151ab2ff26c0f22ef8012d1e50f28487a059322b8dc3f8de2282",
+      "bytes": 197205,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.46594,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "372x365+91+9"
+    },
+    "UNM": {
+      "asset": "/brand/ncaaf-helmets/sept5-unm-v2.png",
+      "sha256": "32e5370ca0f6a3d3a3266f3d78f645b892d523dd50c28922949fc6c04e9f394a",
+      "bytes": 200774,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.453145,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "374x366+69+9"
+    },
+    "UNT": {
+      "asset": "/brand/ncaaf-helmets/sept5-unt-v2.png",
+      "sha256": "43125d9077e527b37f141f34b5c507d82e8232ac9bc52844eeccec1e7c8a8df5",
+      "bytes": 175886,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.45654,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x364+79+10"
+    },
+    "URI": {
+      "asset": "/brand/ncaaf-helmets/sept5-uri-v2.png",
+      "sha256": "180d1606e9ca130560e60ee0e082dcd12c4dbf59d8b299f307ad4361e101142c",
+      "bytes": 185855,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.471441,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "USA": {
+      "asset": "/brand/ncaaf-helmets/sept5-usa-v2.png",
+      "sha256": "2f5366e626dc2d7a3b767c372b31f803a27300dfdac7e44a483a2d92f6d3494a",
+      "bytes": 174477,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.473299,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "365x366+73+9"
+    },
+    "USF": {
+      "asset": "/brand/ncaaf-helmets/sept5-usf-v2.png",
+      "sha256": "ff547f40bb8fdf19ccaf16071cb8a4cab8677b9637d7f3b180d5db8e7582650d",
+      "bytes": 188594,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.471722,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "USM": {
+      "asset": "/brand/ncaaf-helmets/sept5-usm-v2.png",
+      "sha256": "3a6959bfb1c26555f70b7f24d609da27e4a59edd82a3156fb8ec3512f69a2e54",
+      "bytes": 174222,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.475536,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "USU": {
+      "asset": "/brand/ncaaf-helmets/sept5-usu-v2.png",
+      "sha256": "305e243ceab6b0a767ce3492a676b25615fa1df33eb3284adaf9f340fbd80e03",
+      "bytes": 175090,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.467203,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "367x366+72+9"
+    },
+    "UTSA": {
+      "asset": "/brand/ncaaf-helmets/sept5-utsa-v2.png",
+      "sha256": "4783cc19c38ca90af7a2f798d16b42af044f53e89e4d29d214b7a784712a5ee7",
+      "bytes": 177677,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.472229,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    },
+    "UTU": {
+      "asset": "/brand/ncaaf-helmets/sept5-utu-v2.png",
+      "sha256": "51cdc7276b73c2f0d537f298b6fddac3ad50b6531ea089d1d6a20955bad72a1d",
+      "bytes": 176264,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.475967,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "VAN": {
+      "asset": "/brand/ncaaf-helmets/sept5-van-v2.png",
+      "sha256": "0d1e558da73520bcbcca22738cd7a6fabcfbef73c8f993448e479223f0c9336f",
+      "bytes": 181248,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.468154,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "VMI": {
+      "asset": "/brand/ncaaf-helmets/sept5-vmi-v2.png",
+      "sha256": "4e045d36c66968e3c640430170b24575a39655b44528fe5afb2fb8d27c63fb8d",
+      "bytes": 180078,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.473907,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "369x366+71+9"
+    },
+    "VT": {
+      "asset": "/brand/ncaaf-helmets/sept5-vt-v2.png",
+      "sha256": "cb6be1b4c8c060e402a533e69fa6f6c20f007edb199511e06df697c0f85f9331",
+      "bytes": 184972,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.474174,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "371x366+70+9"
+    },
+    "WKU": {
+      "asset": "/brand/ncaaf-helmets/sept5-wku-v2.png",
+      "sha256": "5b523c226e68f812fcf06750ac33d7e465ef4f6e9c6d48b17d183474b5a2eed7",
+      "bytes": 172391,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.46052,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "370x366+71+9"
+    },
+    "WMU": {
+      "asset": "/brand/ncaaf-helmets/sept5-wmu-v2.png",
+      "sha256": "d8d5d1ea9832957cf2401c594b413d7a13380e87d99d1c2238b424e7e02185ba",
+      "bytes": 191221,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.473903,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "376x366+68+9"
+    },
+    "WVU": {
+      "asset": "/brand/ncaaf-helmets/sept5-wvu-v2.png",
+      "sha256": "2b12999c6b096782b203d7c19c26e3a7c53cee5ffbbf94621427794c3df3e598",
+      "bytes": 187082,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.475607,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "372x366+69+9"
+    },
+    "WYO": {
+      "asset": "/brand/ncaaf-helmets/sept5-wyo-v2.png",
+      "sha256": "d92efb995a6907de7ab4ea12c251413c1812d7f1f82451f86cec3d32a1ce8d83",
+      "bytes": 172156,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.46795,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "365x366+73+9"
+    },
+    "YSU": {
+      "asset": "/brand/ncaaf-helmets/sept5-ysu-v2.png",
+      "sha256": "15fdf025fc5bac4c728bf43e1b5ec4b9ce37de77c20612f7b8b014035afce770",
+      "bytes": 187253,
+      "dimensions": [
+        512,
+        384
+      ],
+      "alphaMean": 0.468351,
+      "transparentCorners": true,
+      "alphaBoundsAt25Percent": "368x366+72+9"
+    }
+  }
+}
