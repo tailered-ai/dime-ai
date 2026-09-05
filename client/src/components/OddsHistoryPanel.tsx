@@ -172,6 +172,8 @@ function fmtPct(val: number | null | undefined): string {
 
 type HistoryRow = {
   sourceNote?: string;
+  sourceLabel?: string;
+  isOpening?: boolean;
   id: number;
   scrapedAt: number;
   source: string | null;
@@ -264,12 +266,14 @@ type MarketCells = {
 };
 
 function marketCells(row: HistoryRow, market: ActiveMarket): MarketCells {
+  // Verified VSiN DK zeros are real percentages when the market has a line.
+  const unknown = (value: number | null) =>
+    value == null || (value === 0 && row.sourceLabel !== "VSiN DK");
   const inv = (pending: boolean, v: number | null) =>
     pending || v == null ? null : 100 - v;
   if (market === "spread") {
     const pending =
-      (row.spreadAwayBetsPct == null || row.spreadAwayBetsPct === 0) &&
-      (row.spreadAwayMoneyPct == null || row.spreadAwayMoneyPct === 0);
+      unknown(row.spreadAwayBetsPct) && unknown(row.spreadAwayMoneyPct);
     return {
       pending,
       lineA: fmtSpread(row.awaySpread, row.awaySpreadOdds),
@@ -282,8 +286,7 @@ function marketCells(row: HistoryRow, market: ActiveMarket): MarketCells {
   }
   if (market === "total") {
     const pending =
-      (row.totalOverBetsPct == null || row.totalOverBetsPct === 0) &&
-      (row.totalOverMoneyPct == null || row.totalOverMoneyPct === 0);
+      unknown(row.totalOverBetsPct) && unknown(row.totalOverMoneyPct);
     return {
       pending,
       lineA: fmtOver(row.total, row.overOdds),
@@ -294,9 +297,7 @@ function marketCells(row: HistoryRow, market: ActiveMarket): MarketCells {
       moneyB: inv(pending, row.totalOverMoneyPct),
     };
   }
-  const pending =
-    (row.mlAwayBetsPct == null || row.mlAwayBetsPct === 0) &&
-    (row.mlAwayMoneyPct == null || row.mlAwayMoneyPct === 0);
+  const pending = unknown(row.mlAwayBetsPct) && unknown(row.mlAwayMoneyPct);
   return {
     pending,
     lineA: fmtML(row.awayML),
@@ -453,8 +454,8 @@ function MarketHistoryTable({
 }) {
   // OPEN pinning: first OPEN row with values for THIS market (oldest = last in
   // the DESC-ordered array); DK rows dedupe per market so every move is real.
-  const openRows = rawRows.filter(r => r.lineSource === "open");
-  const dkRows = rawRows.filter(r => r.lineSource !== "open");
+  const openRows = rawRows.filter(r => r.isOpening || r.lineSource === "open");
+  const dkRows = rawRows.filter(r => !r.isOpening && r.lineSource !== "open");
   const pinnedOpenRow = openRows.find(r => hasMarketValue(r, market)) ?? null;
   const rows = deduplicateRows(
     dkRows.filter(r => hasMarketValue(r, market)),
@@ -492,6 +493,9 @@ function MarketHistoryTable({
       >
         <td style={{ ...TD, ...TD_TIME, textAlign: "left" }}>
           {fmtTimestamp(row.scrapedAt)}
+          {row.sourceLabel && (
+            <span className="block text-[10px]">{row.sourceLabel}</span>
+          )}
         </td>
         <td style={{ ...TD, ...TD_LINE, ...BORDER_L, textAlign: "center" }}>
           {cells.lineA}

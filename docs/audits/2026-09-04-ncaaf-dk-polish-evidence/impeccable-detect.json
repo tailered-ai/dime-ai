@@ -1,0 +1,42 @@
+[
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/private/tmp/ncaaf-five-publish/site/client/src/components/projections/ProjectionCard.css",
+    "line": 1012,
+    "snippet": "border-inline-start-width: 3px"
+  },
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/private/tmp/ncaaf-five-publish/site/client/src/components/projections/ProjectionCard.css",
+    "line": 1236,
+    "snippet": ".market-table__model--signal — inset box-shadow 3px stripe (left)"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/private/tmp/ncaaf-five-publish/site/client/src/pages/dime-chat/conversation.css",
+    "line": 250,
+    "snippet": "transition: height"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "/private/tmp/ncaaf-five-publish/site/client/src/pages/dime-chat/conversation.css",
+    "line": 1395,
+    "snippet": "transition: width"
+  }
+]

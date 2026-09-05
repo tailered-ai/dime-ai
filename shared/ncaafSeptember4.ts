@@ -1,4 +1,4 @@
-import sourceRows from "./ncaafSeptember4Sources.json";
+import sourceRows from "./ncaafSeptember4Sources.json" with { type: "json" };
 
 /** Owner-selected Circa snapshot, 2026-09-04 17:50 ET; server/publisher only. */
 export const NCAAF_DATE = "2026-09-04";
@@ -176,7 +176,7 @@ export function presentNcaafSeptember4<T extends Record<string, unknown>>(
     modelSpreadNote:
       "modelSpreadNote" in game
         ? game.modelSpreadNote
-        : "Provisional model odds at the Circa spread shown.",
+        : "Estimated model odds at the Circa spread shown.",
   };
 }
 
@@ -202,7 +202,7 @@ export function ncaafSeptember4HistoryRecord(
 /** Label only the verified source observation; subsequent automatic history keeps its own provenance. */
 export function presentNcaafSeptember4History<
   T extends Record<string, unknown>,
->(row: T): T & { sourceNote?: string } {
+>(row: T): T & { sourceNote?: string; sourceLabel?: string } {
   if (row.sport !== "NCAAF" || row.source !== "manual") return row;
   const matches = sourceRows.some(source =>
     source.history.some(quote =>
@@ -215,8 +215,15 @@ export function presentNcaafSeptember4History<
   return matches
     ? {
         ...row,
+        spreadAwayMoneyPct: null,
+        spreadAwayBetsPct: null,
+        totalOverMoneyPct: null,
+        totalOverBetsPct: null,
+        mlAwayMoneyPct: null,
+        mlAwayBetsPct: null,
+        sourceLabel: row.lineSource === "open" ? "AN Open" : "AN DK",
         sourceNote:
-          "9/4 7:36 PM ET snapshot: opening odds — Action Network Open; market odds — DraftKings NJ via Action Network; current splits — VSiN Circa. Opening-time splits unavailable.",
+          "9/4 7:36 PM ET odds snapshot via Action Network. AN DK is DraftKings NJ; betting splits are not included in this API observation.",
       }
     : row;
 }

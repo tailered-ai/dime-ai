@@ -1,0 +1,10 @@
+TypeScript: node --max-old-space-size=6144 node_modules/typescript/bin/tsc --noEmit; exit 0; no diagnostics
+
+ RUN  v4.1.10 /private/tmp/ncaaf-five-publish/site
+
+
+ Test Files  4 passed (4)
+      Tests  194 passed (194)
+   Start at  17:28:36
+   Duration  1.57s (transform 1.17s, setup 0ms, import 3.43s, tests 255ms, environment 0ms)
+

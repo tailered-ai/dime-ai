@@ -1,0 +1,38 @@
+id: ncaaf-dk-feed-polish-2026-09-04
+surface:
+  name: model-feed-and-splits-shell
+  kind: feed
+  mode: operate
+  change: refine
+lead: impeccable
+advisors: [ui-ux-pro-max]
+product:
+  audience: Dime subscribers comparing college football markets
+  single_job: Read five games with accurate market sources and usable navigation
+  business_goal: Complete the owner-selected September 4 publication
+  evidence: [Owner browser comments 1 through 7]
+content:
+  source: [shared/ncaafSeptember4.ts, shared/ncaafSeptember4Dk.json]
+  responsible_gaming: false
+  invented_claims: false
+law:
+  - design-system/dime-ai/pages/ai-model-projections.md
+  - design-system/dime-ai/MASTER.md
+  - dime-ai/THREE-COLOR-LAW.md
+  - design-system/dime-ai/TYPOGRAPHY.md
+direction:
+  adjectives: [compact, readable, precise]
+  anti_references: [oversized navigation, repeated source metadata]
+  signature_element: Existing mint active-navigation indicator
+engineering:
+  stack: React + Vite, Express, pnpm
+  component_reuse_first: true
+  viewports: [375x812, 768x1024, 1024x768, 1440x900]
+  reduced_motion: required
+  dark_and_light: required
+acceptance:
+  required_states: [expanded-sidebar, collapsed-rail, mobile-drawer, keyboard-focus, account-menu, expanded-markets, odds-history]
+  no_console_errors: true
+  no_horizontal_overflow: true
+  motion_gate: auto
+  delivery_gate: MASTER.md Pre-Delivery Checklist + evidence bundle

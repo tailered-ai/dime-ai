@@ -1,3 +1,4 @@
+import { presentNcaafDk, presentNcaafDkHistory } from "../shared/ncaafSeptember4Dk";
 import { TRPCError } from "@trpc/server";
 import { presentNcaafSeptember4, presentNcaafSeptember4History } from "../shared/ncaafSeptember4";
 import { gamesListInput } from "./gamesListInput";
@@ -291,7 +292,7 @@ export const appRouter = router({
         //   MLB (111 games × 175 fields): 425KB → ~250KB
         //   NHL/NBA (fewer games, fewer fields): proportionally smaller
         // Cache stores full Game objects; stripping happens at the wire layer only.
-        const stripped = filtered.map(g => stripSportNullFields(presentNcaafSeptember4(g)));
+        const stripped = filtered.map(g => stripSportNullFields(presentNcaafDk(presentNcaafSeptember4(g))));
 
         // IP gating (Phase 3): the model projections/edges are the paid product.
         // Anonymous callers get commodity fields only (schedule, book lines,
@@ -1129,7 +1130,9 @@ export const appRouter = router({
           `[tRPC][oddsHistory.listForGame] AUTHED principal=${ctx.sportsPrincipal} gameId=${input.gameId}`
         );
         const rows = await listOddsHistory(input.gameId);
-        return { history: rows.map(presentNcaafSeptember4History) };
+        const history = rows.map(row => presentNcaafDkHistory(presentNcaafSeptember4History(row)));
+        const hasDkHistory = history.some(row => row.sourceLabel === "VSiN DK");
+        return { history: hasDkHistory ? history.filter(row => row.sourceLabel !== "AN Open") : history };
       }),
 
     /**

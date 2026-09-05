@@ -1037,9 +1037,9 @@ html:not(.dark) .projection-card__live-dot {
   margin-block-start: calc(-1 * var(--space-xs));
 }
 .projection-card__markets-toggle {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr) 1rem;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-sm);
   inline-size: 100%;
   min-block-size: 2.75rem; /* CL-04 (closure): was 2.25rem/36px; 2.75rem = 44px meets the internal target-size floor */
@@ -1050,9 +1050,10 @@ html:not(.dark) .projection-card__live-dot {
   border: 0;
   border-radius: 10px;
   font: inherit;
-  text-align: start;
+  text-align: center;
 }
 .projection-card__markets-toggle > span {
+  grid-column: 2;
   min-inline-size: 0;
   /* One line at EVERY card width (2026-08-02): the label sizes from the card
      container with a 10px floor, so "View full AI model projections" never
@@ -1077,12 +1078,14 @@ html:not(.dark) .projection-card__live-dot {
   background: var(--row-hover, #141414);
 }
 .projection-card__markets-icon {
+  grid-column: 3;
   inline-size: 1rem;
   block-size: 1rem;
   flex: none;
   color: currentColor;
 }
 .projection-card__markets-toggle[data-state="open"] .projection-card__markets-icon {
+  grid-column: 3;
   color: var(--brand-mint, #45e0a8);
 }
 @container projcard (max-width: 472px) {
