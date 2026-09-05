@@ -1377,7 +1377,7 @@ export async function updateNcaaStartTime(
   id: number,
   data: {
     startTimeEst: string;
-    ncaaContestId: string;
+    ncaaContestId?: string;
     gameStatus?: 'upcoming' | 'live' | 'final' | 'postponed' | 'suspended';
     awayScore?: number | null;
     homeScore?: number | null;
