@@ -39,6 +39,7 @@ export function ProjectionSummary({
   insight,
   teams = [],
   modelPublished = true,
+  comparisonUnavailable = false,
   onNextEdge,
   nextEdgeLabel,
   nextEdgeTabIndex = 0,
@@ -48,6 +49,7 @@ export function ProjectionSummary({
   teams?: ProjectionTeam[];
   /** False when the game has NO published model output — see ProjectionGame. */
   modelPublished?: boolean;
+  comparisonUnavailable?: boolean;
   onNextEdge?: () => void;
   nextEdgeLabel?: string;
   nextEdgeTabIndex?: number;
@@ -105,9 +107,11 @@ export function ProjectionSummary({
               <div className="summary__item summary__item--message">
                 <dt className="sr-only">Projection status</dt>
                 <dd className="summary__none ds-body-sm">
-                  {modelPublished
-                    ? "Every market is efficiently priced. No action."
-                    : "No model projection published for this game."}
+                  {comparisonUnavailable
+                    ? "Book/model comparison unavailable."
+                    : modelPublished
+                      ? "Every market is efficiently priced. No action."
+                      : "No model projection published for this game."}
                 </dd>
               </div>
             )}

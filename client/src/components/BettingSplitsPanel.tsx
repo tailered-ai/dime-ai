@@ -13,7 +13,7 @@ import { useState } from "react";
 import { useIsMdUp } from "@/hooks/useIsMdUp";
 import { trpc } from "@/lib/trpc";
 import { getGameTeamColorsClient } from "@shared/teamColors";
-import { OddsHistoryPanel } from "./OddsHistoryPanel";
+import { resolveSplitPair } from "./OddsHistoryPanel";
 // The panel's .bsp-* styles ride whichever chunk renders it (NOT the chat
 // critical path) — importing here covers every direct consumer, including
 // PublishProjections, regardless of navigation order.
@@ -31,6 +31,16 @@ interface BettingSplitsPanelProps {
     awayBookSpread?: string | null;
     homeBookSpread?: string | null;
     bookTotal?: string | null;
+    awaySpreadOdds?: string | null;
+    homeSpreadOdds?: string | null;
+    overOdds?: string | null;
+    underOdds?: string | null;
+    spreadHomeBetsPct?: number | null;
+    spreadHomeMoneyPct?: number | null;
+    totalUnderBetsPct?: number | null;
+    totalUnderMoneyPct?: number | null;
+    mlHomeBetsPct?: number | null;
+    mlHomeMoneyPct?: number | null;
     spreadAwayBetsPct: number | null | undefined;
     spreadAwayMoneyPct: number | null | undefined;
     totalOverBetsPct: number | null | undefined;
@@ -169,6 +179,7 @@ interface LabeledBarProps {
   awayLineLabel: string; // e.g. "LBS (-14.5)"
   homeLineLabel: string; // e.g. "HAW (+14.5)"
   rowLabel: string; // e.g. "Tickets" or "Money"
+  wrapLabels?: boolean;
 }
 
 // Minimum pixel width for a segment that must show a label.
@@ -233,6 +244,7 @@ function LabeledBar({
   awayLineLabel,
   homeLineLabel,
   rowLabel,
+  wrapLabels = false,
 }: LabeledBarProps) {
   const hasData = awayPct != null && homePct != null;
 
@@ -242,7 +254,11 @@ function LabeledBar({
         {/* Header row */}
         <div
           className="flex items-center justify-between"
-          style={{ paddingLeft: 2, paddingRight: 2 }}
+          style={{
+            paddingLeft: 2,
+            paddingRight: 2,
+            ...(wrapLabels ? { gap: 6 } : {}),
+          }}
         >
           <span
             style={{
@@ -250,6 +266,13 @@ function LabeledBar({
               color: "var(--dime-text-body, #ffffff)",
               fontWeight: 700,
               letterSpacing: "0.04em",
+              ...(wrapLabels
+                ? ({
+                    flex: "1 1 0",
+                    minWidth: 0,
+                    whiteSpace: "normal",
+                  } as const)
+                : {}),
             }}
           >
             {awayLineLabel}
@@ -271,6 +294,14 @@ function LabeledBar({
               color: "var(--dime-text-body, #ffffff)",
               fontWeight: 700,
               letterSpacing: "0.04em",
+              ...(wrapLabels
+                ? ({
+                    flex: "1 1 0",
+                    minWidth: 0,
+                    whiteSpace: "normal",
+                    textAlign: "right",
+                  } as const)
+                : {}),
             }}
           >
             {homeLineLabel}
@@ -302,8 +333,8 @@ function LabeledBar({
   const home = homePct ?? 0;
 
   // 100%/0% special case — render a single full-width segment, hide the zero side entirely
-  const isAwayFull = away >= 100;
-  const isHomeFull = home >= 100;
+  const isAwayFull = away >= 100 && home === 0;
+  const isHomeFull = home >= 100 && away === 0;
 
   // Use flexGrow proportional sizing so segments always fill the container
   // without exceeding it. overflow:hidden is on each segment (not the container).
@@ -372,7 +403,11 @@ function LabeledBar({
       {/* Header row: AWAY_LABEL  [rowLabel]  HOME_LABEL */}
       <div
         className="bsp-hdr flex items-center justify-between"
-        style={{ paddingLeft: 2, paddingRight: 2 }}
+        style={{
+          paddingLeft: 2,
+          paddingRight: 2,
+          ...(wrapLabels ? { gap: 6 } : {}),
+        }}
       >
         <span
           style={{
@@ -381,6 +416,9 @@ function LabeledBar({
             fontWeight: 700,
             letterSpacing: "0.03em",
             fontVariantNumeric: "tabular-nums",
+            ...(wrapLabels
+              ? ({ flex: "1 1 0", minWidth: 0, whiteSpace: "normal" } as const)
+              : {}),
           }}
         >
           {awayLineLabel}
@@ -403,6 +441,14 @@ function LabeledBar({
             fontWeight: 700,
             letterSpacing: "0.03em",
             fontVariantNumeric: "tabular-nums",
+            ...(wrapLabels
+              ? ({
+                  flex: "1 1 0",
+                  minWidth: 0,
+                  whiteSpace: "normal",
+                  textAlign: "right",
+                } as const)
+              : {}),
           }}
         >
           {homeLineLabel}
@@ -412,6 +458,8 @@ function LabeledBar({
       {/* Header spans: 11px floor — the mobile type law bans sub-10px content. */}
       <div
         className="bsp-bar"
+        role="img"
+        aria-label={`${rowLabel}: ${awayLineLabel} ${away}%; ${homeLineLabel} ${home}%`}
         style={{
           // Mobile pill height: fixed 20px (mobile baseline, not scaled — mobile is already at scale=1)
           height: 20,
@@ -527,6 +575,9 @@ interface CompactMarketRowProps {
   title: string;
   ticketsPct: number | null | undefined;
   handlePct: number | null | undefined;
+  oppositeTicketsPct?: number | null;
+  oppositeHandlePct?: number | null;
+  wrapLabels?: boolean;
   awayColor: string;
   homeColor: string;
   awayLineLabel: string; // e.g. "LBS (-14.5)"
@@ -537,28 +588,26 @@ function CompactMarketRow({
   title,
   ticketsPct,
   handlePct,
+  oppositeTicketsPct,
+  oppositeHandlePct,
+  wrapLabels,
   awayColor,
   homeColor,
   awayLineLabel,
   homeLineLabel,
 }: CompactMarketRowProps) {
-  // Treat 0%/0% as "no data" — VSIN returns 0/0 when the market hasn't opened yet.
-  // Symmetric guard with desktop MarketBlock — prevents the misleading 100% home bar.
-  const bothZero = ticketsPct === 0 && handlePct === 0;
-  const effectiveTickets = bothZero ? null : ticketsPct;
-  const effectiveHandle = bothZero ? null : handlePct;
-
-  const hasTickets = effectiveTickets != null;
-  const hasHandle = effectiveHandle != null;
-  if (!hasTickets && !hasHandle) return null;
-
-  const awayTickets = hasTickets ? effectiveTickets! : null;
-  const homeTickets = hasTickets ? 100 - effectiveTickets! : null;
-  const awayHandle = hasHandle ? effectiveHandle! : null;
-  const homeHandle = hasHandle ? 100 - effectiveHandle! : null;
-
-  const marketLabel =
-    title === "Moneyline" ? "ML" : title === "Spread" ? "SPR" : "TOT";
+  const pending = ticketsPct === 0 && handlePct === 0;
+  const [awayTickets, homeTickets] = resolveSplitPair(
+    ticketsPct,
+    oppositeTicketsPct,
+    pending
+  );
+  const [awayHandle, homeHandle] = resolveSplitPair(
+    handlePct,
+    oppositeHandlePct,
+    pending
+  );
+  if (!wrapLabels && awayTickets == null && awayHandle == null) return null;
 
   return (
     <div
@@ -566,6 +615,7 @@ function CompactMarketRow({
       style={{ padding: "2px 8px 4px 8px", gap: 6 }}
     >
       <LabeledBar
+        wrapLabels={wrapLabels}
         awayPct={awayTickets}
         homePct={homeTickets}
         awayColor={awayColor}
@@ -575,6 +625,7 @@ function CompactMarketRow({
         rowLabel="Tickets"
       />
       <LabeledBar
+        wrapLabels={wrapLabels}
         awayPct={awayHandle}
         homePct={homeHandle}
         awayColor={awayColor}
@@ -684,8 +735,8 @@ function SplitBar({
         (() => {
           const away = awayPct ?? 0;
           const home = homePct ?? 0;
-          const isAwayFull = away >= 100;
-          const isHomeFull = home >= 100;
+          const isAwayFull = away >= 100 && home === 0;
+          const isHomeFull = home >= 100 && away === 0;
           const showDivider =
             !isAwayFull && !isHomeFull && away > 0 && home > 0;
 
@@ -893,6 +944,9 @@ interface MarketBlockProps {
   totalValue?: number;
   ticketsPct: number | null | undefined;
   handlePct: number | null | undefined;
+  oppositeTicketsPct?: number | null;
+  oppositeHandlePct?: number | null;
+  wrapLabels?: boolean;
   awayColor: string;
   homeColor: string;
 }
@@ -904,24 +958,25 @@ function MarketBlock({
   totalValue,
   ticketsPct,
   handlePct,
+  oppositeTicketsPct,
+  oppositeHandlePct,
+  wrapLabels,
   awayColor,
   homeColor,
 }: MarketBlockProps) {
-  // Treat 0%/0% as "no data" — VSIN returns 0/0 when the market hasn't opened yet.
-  // This is the same guard applied on mobile. Prevents the misleading 100% home bar.
-  const ticketsBothZero = ticketsPct === 0 && handlePct === 0;
-  const effectiveTickets = ticketsBothZero ? null : ticketsPct;
-  const effectiveHandle = ticketsBothZero ? null : handlePct;
-
-  const hasTickets = effectiveTickets != null;
-  const hasHandle = effectiveHandle != null;
-  // Never return null — always render the column so all 3 fill the full width
-
-  const awayTickets = hasTickets ? effectiveTickets! : null;
-  const homeTickets = hasTickets ? 100 - effectiveTickets! : null;
-  const awayHandle = hasHandle ? effectiveHandle! : null;
-  const homeHandle = hasHandle ? 100 - effectiveHandle! : null;
-  const isTotalMarket = totalValue !== undefined && !isNaN(totalValue);
+  const pending = ticketsPct === 0 && handlePct === 0;
+  const [awayTickets, homeTickets] = resolveSplitPair(
+    ticketsPct,
+    oppositeTicketsPct,
+    pending
+  );
+  const [awayHandle, homeHandle] = resolveSplitPair(
+    handlePct,
+    oppositeHandlePct,
+    pending
+  );
+  const isTotalMarket =
+    !wrapLabels && totalValue !== undefined && !isNaN(totalValue);
 
   return (
     // Horizontal inset keeps adjacent market columns' labels ≥24px apart
@@ -1139,24 +1194,35 @@ export function BettingSplitsPanel({
   const awayAbbr = colors?.away?.abbrev ?? awayAbbrProp ?? awayLabel;
   const homeAbbr = colors?.home?.abbrev ?? homeAbbrProp ?? homeLabel;
 
+  const isNcaaf = sport === "NCAAF";
+  const priceLabel = (price: string | null | undefined) => {
+    if (!isNcaaf || price == null || price.trim() === "") return "";
+    const value = Number(price);
+    return Number.isFinite(value) ? ` (${value > 0 ? "+" : ""}${value})` : "";
+  };
   const awaySpreadLabel = !isNaN(awaySpread)
-    ? `${awayAbbr} (${spreadSign(awaySpread)})`
+    ? `${awayAbbr} (${spreadSign(awaySpread)})${priceLabel(game.awaySpreadOdds)}`
     : awayAbbr;
   const homeSpreadLabel = !isNaN(homeSpread)
-    ? `${homeAbbr} (${spreadSign(homeSpread)})`
+    ? `${homeAbbr} (${spreadSign(homeSpread)})${priceLabel(game.homeSpreadOdds)}`
     : homeAbbr;
+  const overLabel = `${!isNaN(bookTotal) ? `OVER ${bookTotal}` : "OVER"}${priceLabel(game.overOdds)}`;
+  const underLabel = `${!isNaN(bookTotal) ? `UNDER ${bookTotal}` : "UNDER"}${priceLabel(game.underOdds)}`;
   const awayMlLabel = game.awayML ? `${awayAbbr} (${game.awayML})` : awayAbbr;
   const homeMlLabel = game.homeML ? `${homeAbbr} (${game.homeML})` : homeAbbr;
 
-  // Treat 0%/0% as "no data" — VSIN returns 0/0 when the run-line/spread market
-  // hasn't opened yet (line shows "-"). Displaying it renders a misleading 100% home bar.
   const spreadBothZero =
     game.spreadAwayBetsPct === 0 && game.spreadAwayMoneyPct === 0;
   const hasSpreadSplits =
-    !spreadBothZero &&
-    (game.spreadAwayMoneyPct != null || game.spreadAwayBetsPct != null);
+    (!spreadBothZero &&
+      (game.spreadAwayMoneyPct != null || game.spreadAwayBetsPct != null)) ||
+    (game.spreadHomeBetsPct ?? 0) > 0 ||
+    (game.spreadHomeMoneyPct ?? 0) > 0 ||
+    (isNcaaf && !isNaN(awaySpread));
   const hasTotalSplits =
-    game.totalOverMoneyPct != null || game.totalOverBetsPct != null;
+    game.totalOverMoneyPct != null ||
+    game.totalOverBetsPct != null ||
+    (isNcaaf && !isNaN(bookTotal));
   const hasMlSplits =
     game.mlAwayMoneyPct != null ||
     game.mlAwayBetsPct != null ||
@@ -1248,6 +1314,9 @@ export function BettingSplitsPanel({
               title="Spread"
               ticketsPct={game.spreadAwayBetsPct}
               handlePct={game.spreadAwayMoneyPct}
+              oppositeTicketsPct={game.spreadHomeBetsPct}
+              oppositeHandlePct={game.spreadHomeMoneyPct}
+              wrapLabels={isNcaaf}
               awayColor={awayColor}
               homeColor={homeColor}
               awayLineLabel={awaySpreadLabel}
@@ -1259,10 +1328,13 @@ export function BettingSplitsPanel({
               title="Total"
               ticketsPct={game.totalOverBetsPct}
               handlePct={game.totalOverMoneyPct}
+              oppositeTicketsPct={game.totalUnderBetsPct}
+              oppositeHandlePct={game.totalUnderMoneyPct}
+              wrapLabels={isNcaaf}
               awayColor={awayColor}
               homeColor={homeColor}
-              awayLineLabel={!isNaN(bookTotal) ? `OVER ${bookTotal}` : "OVER"}
-              homeLineLabel={!isNaN(bookTotal) ? `UNDER ${bookTotal}` : "UNDER"}
+              awayLineLabel={overLabel}
+              homeLineLabel={underLabel}
             />
           )}
           {activeMarket === "ml" && hasMlSplits && (
@@ -1270,6 +1342,9 @@ export function BettingSplitsPanel({
               title="Moneyline"
               ticketsPct={game.mlAwayBetsPct}
               handlePct={game.mlAwayMoneyPct}
+              oppositeTicketsPct={game.mlHomeBetsPct}
+              oppositeHandlePct={game.mlHomeMoneyPct}
+              wrapLabels={isNcaaf}
               awayColor={awayColor}
               homeColor={homeColor}
               awayLineLabel={awayMlLabel}
@@ -1304,6 +1379,9 @@ export function BettingSplitsPanel({
               homeLabel={homeSpreadLabel}
               ticketsPct={game.spreadAwayBetsPct}
               handlePct={game.spreadAwayMoneyPct}
+              oppositeTicketsPct={game.spreadHomeBetsPct}
+              oppositeHandlePct={game.spreadHomeMoneyPct}
+              wrapLabels={isNcaaf}
               awayColor={awayColor}
               homeColor={homeColor}
             />
@@ -1316,11 +1394,14 @@ export function BettingSplitsPanel({
           <div className="min-w-0">
             <MarketBlock
               title="Total"
-              awayLabel=""
-              homeLabel=""
+              awayLabel={isNcaaf ? overLabel : ""}
+              homeLabel={isNcaaf ? underLabel : ""}
               totalValue={isNaN(bookTotal) ? undefined : bookTotal}
               ticketsPct={game.totalOverBetsPct}
               handlePct={game.totalOverMoneyPct}
+              oppositeTicketsPct={game.totalUnderBetsPct}
+              oppositeHandlePct={game.totalUnderMoneyPct}
+              wrapLabels={isNcaaf}
               awayColor={awayColor}
               homeColor={homeColor}
             />
@@ -1337,6 +1418,9 @@ export function BettingSplitsPanel({
               homeLabel={homeMlLabel}
               ticketsPct={game.mlAwayBetsPct}
               handlePct={game.mlAwayMoneyPct}
+              oppositeTicketsPct={game.mlHomeBetsPct}
+              oppositeHandlePct={game.mlHomeMoneyPct}
+              wrapLabels={isNcaaf}
               awayColor={awayColor}
               homeColor={homeColor}
             />

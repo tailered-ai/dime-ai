@@ -94,6 +94,8 @@ export interface MarketSideInput {
   bookOppPrice?: number | null | undefined;
   /** model's American fair price for THIS side (model has no vig; it is fair) */
   modelPrice: number | null | undefined;
+  /** False when the model price applies to a different threshold than the book. */
+  comparable?: boolean;
 }
 
 /** A fully-scored market side. Raw and derived metrics kept separate. */
@@ -135,6 +137,7 @@ export function scoreMarketSide(
   side: MarketSideInput,
   thresholds: EdgeThresholds = {}
 ): MarketInsight | null {
+  if (side.comparable === false) return null;
   const bookPrice = toNum(side.bookPrice);
   const modelPrice = toNum(side.modelPrice);
   if (isNaN(bookPrice) || isNaN(modelPrice)) return null;

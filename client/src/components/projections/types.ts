@@ -22,6 +22,8 @@ export type GameStatus =
 
 /** One rendered market side: the decision-engine input plus display extras. */
 export interface ProjectionMarketSide extends MarketSideInput {
+  /** The threshold at which the supplied model odds were priced. */
+  modelLineLabel?: string;
   /** Country flag emoji for participant-bound sides (soccer); null otherwise. */
   flag?: string | null;
 }

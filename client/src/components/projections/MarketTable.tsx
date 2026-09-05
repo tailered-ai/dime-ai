@@ -61,7 +61,14 @@ export function MarketTable({ market }: { market: ProjectionMarket }) {
               <td
                 className={`odds-value${isSignal ? " market-table__model--signal" : ""}`}
               >
-                {fmtPrice(side.modelPrice)}
+                {side.modelLineLabel && side.modelPrice != null ? (
+                  <>
+                    <span className="block">{side.modelLineLabel}</span>
+                    <span>({fmtPrice(side.modelPrice)})</span>
+                  </>
+                ) : (
+                  fmtPrice(side.modelPrice)
+                )}
               </td>
             </tr>
           );

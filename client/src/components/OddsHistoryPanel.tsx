@@ -193,7 +193,27 @@ type HistoryRow = {
   totalOverMoneyPct: number | null;
   mlAwayBetsPct: number | null;
   mlAwayMoneyPct: number | null;
+  spreadHomeBetsPct?: number | null;
+  spreadHomeMoneyPct?: number | null;
+  totalUnderBetsPct?: number | null;
+  totalUnderMoneyPct?: number | null;
+  mlHomeBetsPct?: number | null;
+  mlHomeMoneyPct?: number | null;
 };
+
+/** Preserve separately rounded source percentages; undefined retains legacy inversion. */
+export function resolveSplitPair(
+  value: number | null | undefined,
+  opposite: number | null | undefined,
+  pending: boolean
+): [number | null, number | null] {
+  if (opposite !== undefined) {
+    return value == null || opposite === null || (value === 0 && opposite === 0)
+      ? [null, null]
+      : [value, opposite];
+  }
+  return pending || value == null ? [null, null] : [value, 100 - value];
+}
 
 // ── Deduplication ──────────────────────────────────────────────────────────────
 
@@ -206,6 +226,8 @@ function dedupKey(row: HistoryRow, market: ActiveMarket): string {
       row.homeSpreadOdds,
       row.spreadAwayBetsPct,
       row.spreadAwayMoneyPct,
+      row.spreadHomeBetsPct,
+      row.spreadHomeMoneyPct,
     ].join("|");
   }
   if (market === "total") {
@@ -215,11 +237,18 @@ function dedupKey(row: HistoryRow, market: ActiveMarket): string {
       row.underOdds,
       row.totalOverBetsPct,
       row.totalOverMoneyPct,
+      row.totalUnderBetsPct,
+      row.totalUnderMoneyPct,
     ].join("|");
   }
-  return [row.awayML, row.homeML, row.mlAwayBetsPct, row.mlAwayMoneyPct].join(
-    "|"
-  );
+  return [
+    row.awayML,
+    row.homeML,
+    row.mlAwayBetsPct,
+    row.mlAwayMoneyPct,
+    row.mlHomeBetsPct,
+    row.mlHomeMoneyPct,
+  ].join("|");
 }
 
 function deduplicateRows(
@@ -265,47 +294,67 @@ type MarketCells = {
   moneyB: number | null;
 };
 
-function marketCells(row: HistoryRow, market: ActiveMarket): MarketCells {
+export function marketCells(
+  row: HistoryRow,
+  market: ActiveMarket
+): MarketCells {
   // Verified VSiN DK zeros are real percentages when the market has a line.
   const unknown = (value: number | null) =>
     value == null || (value === 0 && row.sourceLabel !== "VSiN DK");
-  const inv = (pending: boolean, v: number | null) =>
-    pending || v == null ? null : 100 - v;
-  if (market === "spread") {
-    const pending =
-      unknown(row.spreadAwayBetsPct) && unknown(row.spreadAwayMoneyPct);
+  const splits = (
+    bets: number | null,
+    money: number | null,
+    oppositeBets: number | null | undefined,
+    oppositeMoney: number | null | undefined
+  ) => {
+    const legacyPending = unknown(bets) && unknown(money);
+    const [betsA, betsB] = resolveSplitPair(bets, oppositeBets, legacyPending);
+    const [moneyA, moneyB] = resolveSplitPair(
+      money,
+      oppositeMoney,
+      legacyPending
+    );
     return {
-      pending,
+      betsA,
+      betsB,
+      moneyA,
+      moneyB,
+      pending: betsA == null && moneyA == null,
+    };
+  };
+  if (market === "spread") {
+    return {
+      ...splits(
+        row.spreadAwayBetsPct,
+        row.spreadAwayMoneyPct,
+        row.spreadHomeBetsPct,
+        row.spreadHomeMoneyPct
+      ),
       lineA: fmtSpread(row.awaySpread, row.awaySpreadOdds),
       lineB: fmtSpread(row.homeSpread, row.homeSpreadOdds),
-      betsA: row.spreadAwayBetsPct,
-      moneyA: row.spreadAwayMoneyPct,
-      betsB: inv(pending, row.spreadAwayBetsPct),
-      moneyB: inv(pending, row.spreadAwayMoneyPct),
     };
   }
   if (market === "total") {
-    const pending =
-      unknown(row.totalOverBetsPct) && unknown(row.totalOverMoneyPct);
     return {
-      pending,
+      ...splits(
+        row.totalOverBetsPct,
+        row.totalOverMoneyPct,
+        row.totalUnderBetsPct,
+        row.totalUnderMoneyPct
+      ),
       lineA: fmtOver(row.total, row.overOdds),
       lineB: fmtUnder(row.total, row.underOdds),
-      betsA: row.totalOverBetsPct,
-      moneyA: row.totalOverMoneyPct,
-      betsB: inv(pending, row.totalOverBetsPct),
-      moneyB: inv(pending, row.totalOverMoneyPct),
     };
   }
-  const pending = unknown(row.mlAwayBetsPct) && unknown(row.mlAwayMoneyPct);
   return {
-    pending,
+    ...splits(
+      row.mlAwayBetsPct,
+      row.mlAwayMoneyPct,
+      row.mlHomeBetsPct,
+      row.mlHomeMoneyPct
+    ),
     lineA: fmtML(row.awayML),
     lineB: fmtML(row.homeML),
-    betsA: row.mlAwayBetsPct,
-    moneyA: row.mlAwayMoneyPct,
-    betsB: inv(pending, row.mlAwayBetsPct),
-    moneyB: inv(pending, row.mlAwayMoneyPct),
   };
 }
 
