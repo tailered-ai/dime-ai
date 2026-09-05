@@ -9,6 +9,13 @@
 
 ---
 
+## Owner amendment — 2026-09-05 NCAAF market tables
+
+- Use full school names throughout NCAAF projections, splits and odds history.
+- Side contains the school or Over/Under. Book shows its line with odds beneath. Model shows the actual projection, then its odds and original pricing threshold when different.
+- The NCAAF table footer is reserved for **EDGE % only when the raw comparable edge is strictly greater than zero**, otherwise **NO EDGE** (including zero, missing or incomparable prices). This supersedes the older 1.5-point display threshold for these tables.
+- The strongest strictly positive NCAAF table row/footer uses the existing mint signal treatment, including on otherwise PASS cards. This is a table-only exception to the older zero-mint backstop; summary recommendations and all other sports retain their existing thresholds. Unplayable-game color suppression remains in force.
+
 ## Page-Specific Rules
 
 ### Layout Overrides

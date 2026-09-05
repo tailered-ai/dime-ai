@@ -1,0 +1,22 @@
+[
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/Users/danielwalker/Documents/ChatGPT/Migration/ncaaf-september5/site/client/src/components/GameCard.tsx",
+    "line": 4600,
+    "snippet": "borderLeft: `3px solid"
+  },
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "/Users/danielwalker/Documents/ChatGPT/Migration/ncaaf-september5/site/client/src/components/GameCard.tsx",
+    "line": 5080,
+    "snippet": "borderLeft: `3px solid"
+  }
+]

@@ -35,6 +35,7 @@ import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/lib/trpc";
 import { getNbaTeamByDbSlug } from "@shared/nbaTeams";
 import { NHL_BY_DB_SLUG, NHL_BY_ABBREV } from "@shared/nhlTeams";
+import { ncaafSchoolName } from "@shared/ncaafSchoolNames";
 import { ncaafHelmet } from "@shared/ncaafHelmets";
 import { MLB_BY_ABBREV } from "@shared/mlbTeams";
 import { getGameTeamColorsClient } from "@shared/teamColors";
@@ -3323,16 +3324,18 @@ function GameCardInner({
       : null;
   // Normalize city abbreviations: "LA" → "Los Angeles" (defensive, DB should already have full name)
   const normCity = (c: string | undefined) => (c === "LA" ? "Los Angeles" : c);
-  const awayName =
-    normCity(awayNba?.city) ??
-    awayNhl?.city ??
-    awayMlb?.city ??
-    game.awayTeam.replace(/_/g, " ");
-  const homeName =
-    normCity(homeNba?.city) ??
-    homeNhl?.city ??
-    homeMlb?.city ??
-    game.homeTeam.replace(/_/g, " ");
+  const awayName = isNcaaf
+    ? ncaafSchoolName(game.awayTeam)
+    : (normCity(awayNba?.city) ??
+      awayNhl?.city ??
+      awayMlb?.city ??
+      game.awayTeam.replace(/_/g, " "));
+  const homeName = isNcaaf
+    ? ncaafSchoolName(game.homeTeam)
+    : (normCity(homeNba?.city) ??
+      homeNhl?.city ??
+      homeMlb?.city ??
+      game.homeTeam.replace(/_/g, " "));
   const awayNickname =
     awayNba?.nickname ?? awayNhl?.nickname ?? awayMlb?.nickname ?? "";
   const homeNickname =
@@ -3634,8 +3637,18 @@ function GameCardInner({
     const word = (name || "").split(/\s+/)[0] ?? name;
     return word.slice(0, 4).toUpperCase();
   };
-  const awayAbbr = makeCityAbbr(awayNhl, awayNba, awayMlb, awayName);
-  const homeAbbr = makeCityAbbr(homeNhl, homeNba, homeMlb, homeName);
+  const awayAbbr = makeCityAbbr(
+    awayNhl,
+    awayNba,
+    awayMlb,
+    isNcaaf ? game.awayTeam : awayName
+  );
+  const homeAbbr = makeCityAbbr(
+    homeNhl,
+    homeNba,
+    homeMlb,
+    isNcaaf ? game.homeTeam : homeName
+  );
 
   // ── AUTHORITATIVE edge direction — single source of truth for all render paths ──
   // Computed here (after awayAbbr is resolved) and passed to DesktopMergedPanel + mobile IIFE.
@@ -3877,11 +3890,11 @@ function GameCardInner({
                   ? "hsl(var(--muted-foreground))"
                   : "hsl(var(--foreground))",
               fontWeight: awayWins ? 800 : 600,
-              whiteSpace: "nowrap",
+              whiteSpace: isNcaaf ? "normal" : "nowrap",
               letterSpacing: "0.05em",
             }}
           >
-            {awayAbbr}
+            {isNcaaf ? awayName : awayAbbr}
           </span>
         </div>
         {(isLive || isFinal) && hasScores && (
@@ -3923,11 +3936,11 @@ function GameCardInner({
                   ? "hsl(var(--muted-foreground))"
                   : "hsl(var(--foreground))",
               fontWeight: homeWins ? 800 : 600,
-              whiteSpace: "nowrap",
+              whiteSpace: isNcaaf ? "normal" : "nowrap",
               letterSpacing: "0.05em",
             }}
           >
-            {homeAbbr}
+            {isNcaaf ? homeName : homeAbbr}
           </span>
         </div>
         {(isLive || isFinal) && hasScores && (
@@ -4237,7 +4250,10 @@ function GameCardInner({
               {/* Responsive name display:
                Mobile (< 1024px): abbreviation only (e.g. "GSW", "NYY") — never truncates
                Desktop (≥ 1024px): city name + nickname on two lines */}
-              <div className="flex flex-col">
+              <div
+                className="flex flex-col"
+                style={isNcaaf ? { minWidth: 0 } : undefined}
+              >
                 {/* Mobile: abbreviation only */}
                 <span
                   className="font-bold leading-tight lg:hidden"
@@ -4249,12 +4265,12 @@ function GameCardInner({
                         ? "hsl(var(--muted-foreground))"
                         : "hsl(var(--foreground))",
                     fontWeight: awayFontWeight,
-                    whiteSpace: "nowrap",
+                    whiteSpace: isNcaaf ? "normal" : "nowrap",
                     letterSpacing: "0.06em",
                     lineHeight: 1.2,
                   }}
                 >
-                  {awayAbbr}
+                  {isNcaaf ? awayName : awayAbbr}
                 </span>
                 {/* Desktop: city name */}
                 <span
@@ -4267,7 +4283,7 @@ function GameCardInner({
                         ? "hsl(var(--muted-foreground))"
                         : "hsl(var(--foreground))",
                     fontWeight: awayFontWeight,
-                    whiteSpace: "nowrap",
+                    whiteSpace: isNcaaf ? "normal" : "nowrap",
                     lineHeight: 1.15,
                   }}
                 >
@@ -4336,7 +4352,10 @@ function GameCardInner({
           {/* Home team row */}
           <div className="flex items-center justify-between gap-2 py-1 w-full">
             {/* Left: logo + name/nickname — always two lines */}
-            <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-2"
+              style={isNcaaf ? { minWidth: 0, flex: "1 1 0%" } : undefined}
+            >
               {/* Change G: greyscale home logo when home team lost and game is FINAL on desktop */}
               {/* [LAYOUT FIX] Mobile logo: 28px (was 36px) — frees 8px for abbrev+score */}
               <TeamLogo
@@ -4349,7 +4368,10 @@ function GameCardInner({
               {/* Responsive name display:
                Mobile (< 1024px): abbreviation only (e.g. "GSW", "NYY") — never truncates
                Desktop (≥ 1024px): city name + nickname on two lines */}
-              <div className="flex flex-col">
+              <div
+                className="flex flex-col"
+                style={isNcaaf ? { minWidth: 0 } : undefined}
+              >
                 {/* Mobile: abbreviation only */}
                 <span
                   className="font-bold leading-tight lg:hidden"
@@ -4361,12 +4383,12 @@ function GameCardInner({
                         ? "hsl(var(--muted-foreground))"
                         : "hsl(var(--foreground))",
                     fontWeight: homeFontWeight,
-                    whiteSpace: "nowrap",
+                    whiteSpace: isNcaaf ? "normal" : "nowrap",
                     letterSpacing: "0.06em",
                     lineHeight: 1.2,
                   }}
                 >
-                  {homeAbbr}
+                  {isNcaaf ? homeName : homeAbbr}
                 </span>
                 {/* Desktop: city name */}
                 <span
@@ -4379,7 +4401,7 @@ function GameCardInner({
                         ? "hsl(var(--muted-foreground))"
                         : "hsl(var(--foreground))",
                     fontWeight: homeFontWeight,
-                    whiteSpace: "nowrap",
+                    whiteSpace: isNcaaf ? "normal" : "nowrap",
                     lineHeight: 1.15,
                   }}
                 >

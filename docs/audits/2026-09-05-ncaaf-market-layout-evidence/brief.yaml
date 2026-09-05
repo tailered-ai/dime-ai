@@ -1,0 +1,38 @@
+id: ncaaf-market-layout-2026-09-05
+surface:
+  name: NCAAF feed and market tables
+  kind: feed
+  mode: operate
+  change: refine
+lead: impeccable
+advisors: [pricing-contract-review]
+product:
+  audience: Sports bettors comparing Book and Model values
+  single_job: Compare each school's Book line and price with the actual model projection
+  business_goal: Make the comparison readable and unambiguous
+  evidence: [Owner browser comments on September 5]
+content:
+  source: [shared/ncaafFeedTeams.json, shared/ncaafSeptember5Sources.json]
+  responsible_gaming: true
+  invented_claims: false
+law:
+  - design-system/dime-ai/pages/ai-model-projections.md
+  - design-system/dime-ai/MASTER.md
+  - dime-ai/THREE-COLOR-LAW.md
+  - design-system/dime-ai/TYPOGRAPHY.md
+direction:
+  adjectives: [clear, compact, consistent]
+  anti_references: [ambiguous price-line pairing, abbreviated school identities]
+  signature_element: Aligned line-above-price columns
+engineering:
+  stack: React + Vite
+  component_reuse_first: true
+  viewports: [375x812, 768x1024, 817x827, 1024x768, 1440x900]
+  reduced_motion: required
+  dark_and_light: required
+acceptance:
+  required_states: [positive-edge, no-edge, missing-quote, different-pricing-lines, live, final, scheduled, keyboard]
+  no_console_errors: true
+  no_horizontal_overflow: true
+  motion_gate: no-motion-change-planned
+  delivery_gate: Existing design checklist and evidence bundle

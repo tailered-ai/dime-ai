@@ -142,7 +142,7 @@ export function ProjectionCard({
 
   return (
     <article
-      className={`projection-card ds-cq projection-card--${game.status}${isCompact ? " projection-card--compact" : ""}${showPregame ? " projection-card--with-pregame" : ""}${isPass ? " projection-card--pass" : ""}${isNoModel ? " projection-card--nomodel" : ""}${isUnplayable ? " projection-card--unplayable" : ""}`}
+      className={`projection-card ds-cq projection-card--${game.status}${game.league === "NCAAF" ? " projection-card--ncaaf" : ""}${isCompact ? " projection-card--compact" : ""}${showPregame ? " projection-card--with-pregame" : ""}${isPass ? " projection-card--pass" : ""}${isNoModel ? " projection-card--nomodel" : ""}${isUnplayable ? " projection-card--unplayable" : ""}`}
       aria-label={cardLabel}
     >
       {/* One centered status slot for every lifecycle state (owner directive

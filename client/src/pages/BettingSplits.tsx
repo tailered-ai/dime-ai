@@ -41,6 +41,7 @@ import { trpc } from "@/lib/trpc";
 import { useAppAuth } from "@/_core/hooks/useAppAuth";
 import { getNbaTeamByDbSlug } from "@shared/nbaTeams";
 import { NHL_BY_DB_SLUG } from "@shared/nhlTeams";
+import { ncaafSchoolName } from "@shared/ncaafSchoolNames";
 import { MLB_BY_ABBREV } from "@shared/mlbTeams";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -158,38 +159,48 @@ type GameRow = {
   id: number;
   awayTeam: string;
   homeTeam: string;
+  sport?: string | null;
   gameDate: string;
   startTimeEst: string | null;
   awayBookSpread?: string | null;
 };
 
-function SearchResultRow({
+export function SearchResultRow({
   game,
   onClick,
 }: {
   game: GameRow;
   onClick: () => void;
 }) {
-  const awayNba = getNbaTeamByDbSlug(game.awayTeam);
-  const homeNba = getNbaTeamByDbSlug(game.homeTeam);
-  const awayNhl = !awayNba ? (NHL_BY_DB_SLUG.get(game.awayTeam) ?? null) : null;
-  const homeNhl = !homeNba ? (NHL_BY_DB_SLUG.get(game.homeTeam) ?? null) : null;
+  const isNcaaf = game.sport === "NCAAF";
+  const awayNba = isNcaaf ? null : getNbaTeamByDbSlug(game.awayTeam);
+  const homeNba = isNcaaf ? null : getNbaTeamByDbSlug(game.homeTeam);
+  const awayNhl =
+    !isNcaaf && !awayNba ? (NHL_BY_DB_SLUG.get(game.awayTeam) ?? null) : null;
+  const homeNhl =
+    !isNcaaf && !homeNba ? (NHL_BY_DB_SLUG.get(game.homeTeam) ?? null) : null;
   const awayMlb =
-    !awayNba && !awayNhl ? (MLB_BY_ABBREV.get(game.awayTeam) ?? null) : null;
+    !isNcaaf && !awayNba && !awayNhl
+      ? (MLB_BY_ABBREV.get(game.awayTeam) ?? null)
+      : null;
   const homeMlb =
-    !homeNba && !homeNhl ? (MLB_BY_ABBREV.get(game.homeTeam) ?? null) : null;
-  const awaySchool =
-    awayNba?.city ??
-    awayNhl?.city ??
-    awayMlb?.city ??
-    game.awayTeam.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    !isNcaaf && !homeNba && !homeNhl
+      ? (MLB_BY_ABBREV.get(game.homeTeam) ?? null)
+      : null;
+  const awaySchool = isNcaaf
+    ? ncaafSchoolName(game.awayTeam)
+    : (awayNba?.city ??
+      awayNhl?.city ??
+      awayMlb?.city ??
+      game.awayTeam.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()));
   const awayNick =
     awayNba?.nickname ?? awayNhl?.nickname ?? awayMlb?.nickname ?? "";
-  const homeSchool =
-    homeNba?.city ??
-    homeNhl?.city ??
-    homeMlb?.city ??
-    game.homeTeam.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  const homeSchool = isNcaaf
+    ? ncaafSchoolName(game.homeTeam)
+    : (homeNba?.city ??
+      homeNhl?.city ??
+      homeMlb?.city ??
+      game.homeTeam.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()));
   const homeNick =
     homeNba?.nickname ?? homeNhl?.nickname ?? homeMlb?.nickname ?? "";
   // Official abbreviations for responsive display — never truncated
@@ -232,19 +243,19 @@ function SearchResultRow({
               className="font-bold leading-tight sm:hidden"
               style={{
                 fontSize: 12,
-                whiteSpace: "nowrap",
+                whiteSpace: isNcaaf ? "normal" : "nowrap",
                 letterSpacing: "0.06em",
                 color: "var(--dime-text-primary)",
               }}
             >
-              {awayAbbr}
+              {isNcaaf ? awaySchool : awayAbbr}
             </span>
             {/* sm+: city name + nickname — nowrap, no ellipsis */}
             <span
               className="font-bold leading-tight hidden sm:block"
               style={{
                 fontSize: 12,
-                whiteSpace: "nowrap",
+                whiteSpace: isNcaaf ? "normal" : "nowrap",
                 color: "var(--dime-text-primary)",
               }}
             >
@@ -255,7 +266,7 @@ function SearchResultRow({
                 className="bs-nick font-normal leading-tight hidden sm:block"
                 style={{
                   fontSize: 10,
-                  whiteSpace: "nowrap",
+                  whiteSpace: isNcaaf ? "normal" : "nowrap",
                   color: "var(--dime-text-secondary)",
                 }}
               >
@@ -299,19 +310,19 @@ function SearchResultRow({
               className="font-bold leading-tight sm:hidden"
               style={{
                 fontSize: 12,
-                whiteSpace: "nowrap",
+                whiteSpace: isNcaaf ? "normal" : "nowrap",
                 letterSpacing: "0.06em",
                 color: "var(--dime-text-primary)",
               }}
             >
-              {homeAbbr}
+              {isNcaaf ? homeSchool : homeAbbr}
             </span>
             {/* sm+: city name + nickname — nowrap, no ellipsis */}
             <span
               className="font-bold leading-tight hidden sm:block"
               style={{
                 fontSize: 12,
-                whiteSpace: "nowrap",
+                whiteSpace: isNcaaf ? "normal" : "nowrap",
                 color: "var(--dime-text-primary)",
               }}
             >
@@ -322,7 +333,7 @@ function SearchResultRow({
                 className="bs-nick font-normal leading-tight hidden sm:block"
                 style={{
                   fontSize: 10,
-                  whiteSpace: "nowrap",
+                  whiteSpace: isNcaaf ? "normal" : "nowrap",
                   color: "var(--dime-text-secondary)",
                 }}
               >
@@ -751,6 +762,9 @@ export default function BettingSplitsPage({
         const awayNba = getNbaTeamByDbSlug(game.awayTeam);
         const homeNba = getNbaTeamByDbSlug(game.homeTeam);
         const terms = [
+          ...(game.sport === "NCAAF"
+            ? [ncaafSchoolName(game.awayTeam), ncaafSchoolName(game.homeTeam)]
+            : []),
           awayNba?.name ?? "",
           awayNba?.nickname ?? "",
           game.awayTeam.replace(/_/g, " "),

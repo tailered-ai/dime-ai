@@ -1,4 +1,5 @@
 import { test, expect, type Page, type Locator } from "@playwright/test";
+import { ncaafSchoolName } from "../shared/ncaafSchoolNames";
 import {
   DATE,
   SOURCES,
@@ -100,9 +101,14 @@ const signed = (value: number | null) =>
   value == null ? "—" : value > 0 ? `+${value}` : `${value}`;
 const sourceCard = (cards: Locator, source: (typeof SOURCES)[number]) =>
   cards.filter({
-    has: cards.page().locator(`[title="${source.away} @ ${source.home}"]`),
+    has: cards
+      .page()
+      .locator(
+        `[title="${ncaafSchoolName(source.away)} @ ${ncaafSchoolName(source.home)}"]`
+      ),
   });
-const output = "docs/audits/2026-09-05-ncaaf-evidence/screenshots";
+const output =
+  "docs/audits/2026-09-05-ncaaf-market-layout-evidence/screenshots";
 const chronologicalGames = [...games].sort((a, b) =>
   String(a.startTimeEst).localeCompare(String(b.startTimeEst))
 );
@@ -110,6 +116,24 @@ async function noOverflow(page: Page) {
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)
   ).toBeLessThanOrEqual(1);
+  const clippedTables = await page
+    .locator(".market-table:visible")
+    .evaluateAll(tables =>
+      tables.flatMap(table => {
+        const tableBox = table.getBoundingClientRect();
+        return Array.from(table.querySelectorAll("tbody th, tbody td")).flatMap(
+          cell => {
+            const box = cell.getBoundingClientRect();
+            return cell.scrollWidth > cell.clientWidth + 1 ||
+              box.left < tableBox.left - 1 ||
+              box.right > tableBox.right + 1
+              ? [cell.textContent]
+              : [];
+          }
+        );
+      })
+    );
+  expect(clippedTables).toEqual([]);
 }
 async function checkMarket(
   page: Page,
@@ -132,6 +156,18 @@ async function checkMarket(
       : market === "total"
         ? [source.model.overOdds, source.model.underOdds]
         : [null, null];
+  const bookLines =
+    market === "spread"
+      ? [signed(source.book.awaySpread), signed(source.book.homeSpread)]
+      : market === "total"
+        ? [String(source.book.total), String(source.book.total)]
+        : [null, null];
+  const projections =
+    market === "spread"
+      ? [signed(source.model.awaySpread), signed(source.model.homeSpread)]
+      : market === "total"
+        ? [String(source.model.total), String(source.model.total)]
+        : [null, null];
   const basis =
     market === "spread"
       ? [
@@ -139,15 +175,42 @@ async function checkMarket(
           signed(source.model.basis.homeSpread),
         ]
       : market === "total"
-        ? [`O ${source.model.basis.total}`, `U ${source.model.basis.total}`]
+        ? [String(source.model.basis.total), String(source.model.basis.total)]
         : [null, null];
   for (let side = 0; side < 2; side++) {
-    await expect(rows.nth(side).locator("td").nth(0)).toHaveText(
-      book[side] ?? "—"
+    const row = rows.nth(side);
+    await expect(row.locator("th")).toHaveText(
+      market === "total"
+        ? side === 0
+          ? "Over"
+          : "Under"
+        : ncaafSchoolName(side === 0 ? source.away : source.home)
     );
-    await expect(rows.nth(side).locator("td").nth(1)).toHaveText(
-      model[side] == null ? "—" : `${basis[side]}(${model[side]})`
-    );
+    const bookCell = row.locator("td").nth(0);
+    const modelCell = row.locator("td").nth(1);
+    if (market === "ml") {
+      await expect(bookCell).toHaveText(book[side] ?? "—");
+      await expect(modelCell).toHaveText("—");
+    } else {
+      await expect(bookCell.locator(".market-table__line")).toHaveText(
+        bookLines[side]!
+      );
+      await expect(bookCell.locator(".market-table__price")).toHaveText(
+        `(${book[side] ?? "—"})`
+      );
+      await expect(modelCell.locator(".market-table__line")).toHaveText(
+        projections[side]!
+      );
+      await expect(modelCell.locator(".market-table__price")).toHaveText(
+        `(${model[side] ?? "—"})`
+      );
+      if (model[side] != null && basis[side] !== projections[side])
+        await expect(modelCell.locator(".market-table__basis")).toHaveText(
+          `at ${basis[side]}`
+        );
+      else
+        await expect(modelCell.locator(".market-table__basis")).toHaveCount(0);
+    }
   }
   const differs =
     market === "spread"
@@ -156,28 +219,48 @@ async function checkMarket(
       : market === "total"
         ? source.model.basis.total !== source.book.total
         : false;
-  if (differs) {
-    await expect(
-      dialog.getByText("DIFFERENT LINES", { exact: true })
-    ).toBeVisible();
+  const implied = (price: string) => {
+    const odds = Number(price);
+    return odds < 0 ? -odds / (-odds + 100) : 100 / (odds + 100);
+  };
+  const edges = book.map((price, side) =>
+    !differs && price != null && model[side] != null
+      ? (implied(model[side]!) - implied(price)) * 100
+      : 0
+  );
+  const edge = Math.max(0, ...edges);
+  await expect(dialog.locator(".market-table tfoot")).toHaveText(
+    edge > 0
+      ? `EDGE ${edge < 0.1 ? "<0.1" : `+${edge.toFixed(1)}`}%`
+      : "NO EDGE"
+  );
+  if (differs || edge === 0) {
     await expect(dialog.locator(".market-table__row--signal")).toHaveCount(0);
-  }
-  if (source.away === "BRY" && market !== "ml")
-    await expect(dialog).toContainText(
-      market === "spread"
-        ? "Model spread: BRY +26.7 / ARMY -26.7."
-        : "Model total: 54.4."
-    );
+  } else
+    await expect(dialog.locator(".market-table__row--signal")).toHaveCount(1);
   await noOverflow(page);
 }
 
-for (const [width, theme] of [
-  [375, "dark"],
-  [817, "dark"],
-  [1440, "dark"],
-  [1440, "light"],
-] as const) {
-  test(`${width} ${theme}: all 68 NCAAF models, AN DK prices and VSiN splits`, async ({
+const scenarios = [
+  ...[375, 768, 817, 1024, 1440].flatMap(width =>
+    (["dark", "light"] as const).map(theme => ({
+      width,
+      theme,
+      fullAudit: false,
+      reducedMotion: false,
+    }))
+  ),
+  { width: 375, theme: "dark" as const, fullAudit: false, reducedMotion: true },
+  {
+    width: 1440,
+    theme: "dark" as const,
+    fullAudit: true,
+    reducedMotion: false,
+  },
+];
+for (const { width, theme, fullAudit, reducedMotion } of scenarios) {
+  const scenario = `${width}-${theme}${reducedMotion ? "-reduced-motion" : ""}${fullAudit ? "-source-audit" : ""}`;
+  test(`${fullAudit ? "source audit" : "layout"} ${scenario}: 68 NCAAF school names and honest market cells`, async ({
     page,
   }) => {
     test.setTimeout(180_000);
@@ -185,7 +268,10 @@ for (const [width, theme] of [
     page.on("pageerror", error => errors.push(error.message));
     await stub(page);
     await page.setViewportSize({ width, height: width === 375 ? 812 : 900 });
-    await page.emulateMedia({ colorScheme: theme });
+    await page.emulateMedia({
+      colorScheme: theme,
+      reducedMotion: reducedMotion ? "reduce" : "no-preference",
+    });
     await page.addInitScript(theme => {
       localStorage.setItem("dime-theme", theme);
       localStorage.setItem("dime.sidebar.rail", "0");
@@ -201,7 +287,10 @@ for (const [width, theme] of [
           elements.map(element => element.getAttribute("title"))
         )
     ).toEqual(
-      chronologicalGames.map(game => `${game.awayTeam} @ ${game.homeTeam}`)
+      chronologicalGames.map(
+        game =>
+          `${ncaafSchoolName(game.awayTeam)} @ ${ncaafSchoolName(game.homeTeam)}`
+      )
     );
     for (const source of SOURCES) {
       const card = sourceCard(cards, source);
@@ -212,7 +301,7 @@ for (const [width, theme] of [
       )
         await expect(card.locator(".matchup__venue")).toHaveAttribute(
           "title",
-          `Model: ${source.home} ${signed(source.model.homeSpread)} · Total ${source.model.total}`
+          `Model: ${ncaafSchoolName(source.home)} ${signed(source.model.homeSpread)} · Total ${source.model.total}`
         );
       await expect(card).not.toContainText("No model projection published");
       await expect(card).not.toContainText(
@@ -243,6 +332,14 @@ for (const [width, theme] of [
         box => Math.abs(box.height - helmetHeight) < 0.1 && !box.overlapsName
       )
     ).toBe(true);
+    const namesOverflow = await cards
+      .locator(".matchup__line, .matchup__venue, .summary__pick")
+      .evaluateAll(elements =>
+        elements
+          .filter(element => element.scrollWidth > element.clientWidth + 1)
+          .map(element => element.textContent)
+      );
+    expect(namesOverflow).toEqual([]);
     const comparison = sourceCard(cards, SOURCES[0]);
     await comparison
       .getByRole("button", {
@@ -252,16 +349,45 @@ for (const [width, theme] of [
       .click();
     await expect(
       comparison.locator('.summary__viewport[tabindex="0"]')
-    ).toContainText("O 50.5");
+    ).toContainText("54.4");
+    await expect(
+      comparison.locator('.summary__viewport[tabindex="0"]')
+    ).toContainText("at 50.5");
     const returnToSpread = comparison.getByRole("button", {
       name: "View next market: Spread (1 of 2)",
       exact: true,
     });
     await expect(returnToSpread).toBeFocused();
+    if (theme === "light")
+      expect(
+        await returnToSpread.evaluate(
+          element => getComputedStyle(element).color
+        )
+      ).not.toBe("rgb(255, 255, 255)");
     await returnToSpread.click();
     await expect(
       comparison.locator('.summary__viewport[tabindex="0"]')
-    ).toContainText("BRY +37.5");
+    ).toContainText("Bryant");
+    await expect(
+      comparison.locator('.summary__viewport[tabindex="0"]')
+    ).toContainText("+26.7");
+    if (reducedMotion) {
+      expect(
+        await comparison
+          .locator(".summary-carousel__track")
+          .evaluate(element => getComputedStyle(element).scrollBehavior)
+      ).toBe("auto");
+      const nextTotal = comparison.getByRole("button", {
+        name: "View next market: Total (2 of 2)",
+        exact: true,
+      });
+      expect(
+        await nextTotal.evaluate(
+          element => getComputedStyle(element).transitionDuration
+        )
+      ).toBe("0s");
+      await expect(nextTotal).toBeFocused();
+    }
     const missingSpread = SOURCES.filter(
       source => source.book.awaySpread == null
     );
@@ -277,12 +403,16 @@ for (const [width, theme] of [
       }
       window.scrollTo({ top: 0, behavior: "instant" });
     });
-    await page.screenshot({ path: `${output}/feed-${width}-${theme}.png` });
-    // All model prices are checked through rendered tables once; the other widths cover the same actual source's longest-value controls.
-    const checked =
-      width === 1440 && theme === "dark"
-        ? SOURCES
-        : [SOURCES[0], ...missingSpread];
+    await page.screenshot({ path: `${output}/feed-${scenario}.png` });
+    // The separate source audit walks all prices. Layout cases exercise the
+    // owner's Miami example, a long-name positive edge and missing Book/model prices.
+    const checked = fullAudit
+      ? SOURCES
+      : [
+          SOURCES.find(source => source.away === "M-OH")!,
+          SOURCES.find(source => source.away === "VMI")!,
+          missingSpread[0],
+        ];
     for (const [index, source] of checked.entries()) {
       const button = sourceCard(cards, source).getByRole("button", {
         name: "View full AI model projections",
@@ -295,7 +425,7 @@ for (const [width, theme] of [
       await checkMarket(page, source, "spread");
       if (index === 0)
         await page.screenshot({
-          path: `${output}/model-basis-${width}-${theme}.png`,
+          path: `${output}/model-basis-${scenario}.png`,
         });
       await dialog
         .getByRole("link", {
@@ -312,6 +442,10 @@ for (const [width, theme] of [
       }
       await page.keyboard.press("Escape");
       await expect(button).toBeFocused();
+    }
+    if (!fullAudit) {
+      expect(errors).toEqual([]);
+      return;
     }
     await page.goto("/betting-splits/ncaaf-09-05-2026");
     await expect(page.locator('[id^="game-card-"]')).toHaveCount(68, {
@@ -332,7 +466,7 @@ for (const [width, theme] of [
         await expect(columns).toHaveCount(3);
         if (source.book.awaySpread != null)
           await expect(columns.nth(0)).toContainText(
-            `${source.away} (${signed(source.book.awaySpread)}) (${source.book.awaySpreadOdds})`
+            `${ncaafSchoolName(source.away)} (${signed(source.book.awaySpread)}) (${source.book.awaySpreadOdds})`
           );
         await expect(columns.nth(1)).toContainText(
           `OVER ${source.book.total} (${source.book.overOdds})`
@@ -342,13 +476,13 @@ for (const [width, theme] of [
         );
       }
     } else {
-      await expect(first).toContainText(`BRY (+37.5) (-108)`);
+      await expect(first).toContainText(`Bryant (+37.5) (-108)`);
       await first.getByRole("button", { name: "TOTAL", exact: true }).click();
       await expect(first).toContainText(`OVER 51.5 (-110)`);
       await first.getByRole("button", { name: "SPREAD", exact: true }).click();
     }
     await noOverflow(page);
-    await page.screenshot({ path: `${output}/splits-${width}-${theme}.png` });
+    await page.screenshot({ path: `${output}/splits-${scenario}.png` });
     await first.getByRole("button", { name: /ODDS.*SPLITS HISTORY/i }).click();
     await expect(
       first.getByText("AN DK", { exact: true }).first()
@@ -364,7 +498,7 @@ for (const [width, theme] of [
     await expect(rounded.first()).toBeVisible();
     await rounded.first().scrollIntoViewIfNeeded();
     await noOverflow(page);
-    await page.screenshot({ path: `${output}/history-${width}-${theme}.png` });
+    await page.screenshot({ path: `${output}/history-${scenario}.png` });
     expect(errors).toEqual([]);
   });
 }

@@ -20,8 +20,17 @@ export interface ProjectionTeam {
 export type GameStatus =
   "scheduled" | "live" | "final" | "postponed" | "suspended";
 
+/** Display facts are separate from the threshold used to price model odds. */
+export interface MarketLineDisplay {
+  side: string;
+  book?: string;
+  model?: string;
+  priceAt?: string;
+}
+
 /** One rendered market side: the decision-engine input plus display extras. */
 export interface ProjectionMarketSide extends MarketSideInput {
+  lineDisplay?: MarketLineDisplay;
   /** The threshold at which the supplied model odds were priced. */
   modelLineLabel?: string;
   /** Country flag emoji for participant-bound sides (soccer); null otherwise. */

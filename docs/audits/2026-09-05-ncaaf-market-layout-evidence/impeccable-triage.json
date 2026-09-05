@@ -1,0 +1,45 @@
+{
+  "capturedAt": "2026-09-05T20:50:29.125266+00:00",
+  "baseline": "ad3dbd175bd568f3944e34c30d0b9cba58696a25",
+  "detectorInvocations": 1,
+  "detectorExitCode": 2,
+  "sourceHashes": {
+    "client/src/components/projections/MarketTable.tsx": "7eb12a208f550f1a6135f28988386d9bbfbf8412a66a91413a4170b18b27d2d5",
+    "client/src/components/projections/ProjectionCard.tsx": "a2d3664bf1a7e865a3b3434c79036a96c3124cd60f711c4d9854200ed62ac3cc",
+    "client/src/components/GameCard.tsx": "0f3ef7d4b66e083fb9b0e46c5527b1361596ce52076940d5fe4410fe7495db1c",
+    "client/src/components/BettingSplitsPanel.tsx": "542c9b9cfe5b71613794cf1aa02064b7d28d73fa5ef85d4625ebd18f88620399",
+    "client/src/components/OddsHistoryPanel.tsx": "66e01fc7044fdc35174c35e79429c2c8d44b009ea8a19721cafcc5d928301331",
+    "client/src/pages/BettingSplits.tsx": "6b1fde30591e7cc589f51881384190de0a0543bb05d5708739324d6b20f9f554",
+    "client/src/pages/DimeModelFeed.tsx": "266a37b8686f1c6c1d67d8066cdf3f6f649615ff6c58e4470731ab6854a0670f"
+  },
+  "detectorFindings": 2,
+  "newBlockers": 0,
+  "classifications": [
+    {
+      "file": "client/src/components/GameCard.tsx",
+      "line": 4600,
+      "rule": "side-tab",
+      "onAddedLine": false,
+      "baselineMatchingLines": [
+        4578,
+        5058
+      ],
+      "disposition": "pre-existing product signal treatment; generic stylistic heuristic, not a new blocker"
+    },
+    {
+      "file": "client/src/components/GameCard.tsx",
+      "line": 5080,
+      "rule": "side-tab",
+      "onAddedLine": false,
+      "baselineMatchingLines": [
+        4578,
+        5058
+      ],
+      "disposition": "pre-existing product signal treatment; generic stylistic heuristic, not a new blocker"
+    }
+  ],
+  "limits": [
+    "Static audit only; no browser or runtime contrast measurement was run by this audit agent.",
+    "Final viewport/theme/keyboard matrix belongs to the root release verification."
+  ]
+}
