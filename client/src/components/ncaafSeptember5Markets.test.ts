@@ -3,11 +3,27 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { load } from "cheerio";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BettingSplitsPanel } from "./BettingSplitsPanel";
-import { marketCells, resolveSplitPair } from "./OddsHistoryPanel";
+import {
+  OddsHistoryPanel,
+  marketCells,
+  resolveSplitPair,
+} from "./OddsHistoryPanel";
 
 const viewport = vi.hoisted(() => ({ wide: true }));
 vi.mock("@/hooks/useIsMdUp", () => ({ useIsMdUp: () => viewport.wide }));
-vi.mock("@/lib/trpc", () => ({ trpc: {} }));
+const queries = vi.hoisted(() => ({
+  history: vi.fn(),
+  colors: vi.fn(() => ({ data: undefined })),
+}));
+vi.mock("@/lib/trpc", () => ({
+  trpc: {
+    oddsHistory: {
+      listForGame: { useQuery: queries.history },
+      listForDemoGame: { useQuery: queries.history },
+    },
+    teamColors: { getForGame: { useQuery: queries.colors } },
+  },
+}));
 
 const game = {
   sport: "NCAAF",
@@ -59,14 +75,21 @@ const history = {
 
 beforeEach(() => {
   viewport.wide = true;
+  queries.history.mockReset();
+  queries.colors.mockClear();
+  queries.history.mockReturnValue({
+    data: { history: [history] },
+    isLoading: false,
+    error: null,
+  });
 });
 
 describe("September 5 NCAAF Book prices and independently rounded splits", () => {
   it("renders AN spread and total juice beside all three current split markets", () => {
     const $ = load(render());
     const columns = $("[data-market-col]");
-    expect(columns.eq(0).text()).toContain("LIB (+6.5) (+105)");
-    expect(columns.eq(0).text()).toContain("JMU (-6.5) (-125)");
+    expect(columns.eq(0).text()).toContain("Liberty (+6.5) (+105)");
+    expect(columns.eq(0).text()).toContain("James Madison (-6.5) (-125)");
     expect(columns.eq(1).text()).toContain("OVER 51.5 (-115)");
     expect(columns.eq(1).text()).toContain("UNDER 51.5 (-105)");
     for (const [index, percentages] of [
@@ -81,6 +104,8 @@ describe("September 5 NCAAF Book prices and independently rounded splits", () =>
 
   it("keeps the existing non-NCAAF line labels without adding juice", () => {
     const text = load(render({ sport: "MLB" })).text();
+    expect(text).toContain("LIB (+6.5)");
+    expect(text).toContain("JMU (-6.5)");
     expect(text).not.toContain("(+105)");
     expect(text).not.toContain("(-115)");
   });
@@ -98,9 +123,11 @@ describe("September 5 NCAAF Book prices and independently rounded splits", () =>
     viewport.wide = false;
     const $ = load(render(zero));
     expect($(".bsp-bar").first().attr("aria-label")).toBe(
-      "Tickets: LIB (+6.5) (+105) 0%; JMU (-6.5) (-125) 100%"
+      "Tickets: Liberty (+6.5) (+105) 0%; James Madison (-6.5) (-125) 100%"
     );
-    expect($(".bsp-hdr").first().text()).toContain("JMU (-6.5) (-125)");
+    expect($(".bsp-hdr").first().text()).toContain(
+      "James Madison (-6.5) (-125)"
+    );
   });
 
   it("shows AN market headings even while current split percentages are unavailable", () => {
@@ -112,8 +139,47 @@ describe("September 5 NCAAF Book prices and independently rounded splits", () =>
     };
     viewport.wide = false;
     const text = load(render(unavailable)).text();
-    expect(text).toContain("LIB (+6.5) (+105)");
+    expect(text).toContain("Liberty (+6.5) (+105)");
     expect(text).not.toContain("100%");
+  });
+
+  it("uses complete school names in history headers while keeping API and helmet identities canonical", () => {
+    const $ = load(
+      renderToStaticMarkup(
+        createElement(OddsHistoryPanel, {
+          sport: "NCAAF",
+          gameId: 4350031,
+          awayTeam: "SEMO",
+          homeTeam: "ISU",
+          activeMarket: "spread",
+          demo: true,
+        })
+      )
+    );
+    const names = $("thead th span")
+      .map((_, el) => $(el).text())
+      .get();
+    expect(names).toEqual([
+      "Southeast Missouri State",
+      "Iowa State",
+      "Southeast Missouri State",
+      "Iowa State",
+    ]);
+    expect($("thead th span").first().attr("style")).toContain(
+      "white-space:normal"
+    );
+    expect($("thead img").first().attr("alt")).toBe("Southeast Missouri State");
+    expect($("thead img").first().attr("src")).toBe(
+      "/brand/ncaaf-helmets/sept5-semo-v2.png"
+    );
+    expect(queries.history).toHaveBeenCalledWith(
+      { gameId: 4350031 },
+      expect.any(Object)
+    );
+    expect(queries.colors).toHaveBeenCalledWith(
+      { awayTeam: "SEMO", homeTeam: "ISU", sport: "MLB" },
+      expect.objectContaining({ enabled: false })
+    );
   });
 
   it("retains source percentages for each history market instead of forcing a sum of 100", () => {

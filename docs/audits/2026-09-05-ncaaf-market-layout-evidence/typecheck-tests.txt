@@ -1,0 +1,99 @@
+INITIAL FOCUSED CHECK (existing CSS-selector expectation; updated for owner's >0 table rule)
+
+ RUN  v4.1.10 /Users/danielwalker/Documents/ChatGPT/Migration/ncaaf-september5/site
+
+ ❯ client/src/components/projections/ProjectionCard.test.ts (93 tests | 1 failed) 292ms
+     × neutralizes market-table signal/edge classes and the real edge-indicator variant under .projection-card--pass 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  client/src/components/projections/ProjectionCard.test.ts > ProjectionCard — defensive PASS-mint backstop (Round 4 Wave 3 fold-in, W1 review) > neutralizes market-table signal/edge classes and the real edge-indicator variant under .projection-card--pass
+AssertionError: expected 'Defensive PASS backstop (Round 4, fro…' to contain '.projection-card--pass .market-table_…'
+
+- Expected
++ Received
+
+- .projection-card--pass .market-table__model--signal,
++ Defensive PASS backstop (Round 4, from the W1 review — plan:
++      docs/superpowers/plans/2026-07-23-feed-desktop-polish.md, item 3):
++      zero mint is already structurally guaranteed —
++      rankedEdges() is empty on a genuine PASS card, so none of these
++      signal/edge classes can ever be emitted on one today (see the comment
++      above) — but this rule neutralizes stray mint anyway if that invariant
++      is ever broken by a future change to gameInsight.ts/edgeUtils.ts.
++      Defense-in-depth, not a substitute for the structural guarantee. */
++   /* 2026-08-02: importance flags removed — the two-class selectors already
++      out-rank every one-class signal rule they guard against, and the chip's
++      icon color moved from an inline style into EdgeIndicator.css, so plain
++      cascade order is sufficient. PASS meaning is unchanged. */
++   /* 2026-08-06 (owner directive "unplayable games"): `--unplayable` joins every
++      selector below. On a PASS card these rules are a defensive backstop for an
++      invariant that already holds; on an unplayable card they are LOAD-BEARING —
++      a postponed game can and does carry real edges, so this is the only thing
++      standing between a dead game and a full mint EDGE chip. Same treatment,
++      opposite meanings: PASS = nothing worth acting on in a game that will be
++      played; unplayable = the game is not available to act on at all. */
++   .projection-card--pass .market-table:not(.market-table--lines) .market-table__model--signal,
++   .projection-card--pass .market-table:not(.market-table--lines) .market-table__result--edge,
++   .projection-card__markets-popover--pass .market-table:not(.market-table--lines) .market-table__model--signal,
++   .projection-card__markets-popover--pass .market-table:not(.market-table--lines) .market-table__result--edge,
++   .projection-card--pass .edge-indicator,
++   .projection-card--unplayable .market-table__model--signal,
++   .projection-card--unplayable .market-table__result--edge,
++   .projection-card__markets-popover--unplayable .market-table__model--signal,
++   .projection-card__markets-popover--unplayable .market-table__result--edge,
++   .projection-card--unplayable .edge-indicator {
++     color: var(--text-secondary, #a6a6a6);
++     background: transparent;
++     border-color: var(--border, #262626);
++     box-shadow: none;
++   }
++   .projection-card--pass .edge-indicator svg,
++   .projection-card--unplayable .edge-indicator svg {
++     color: var(--text-secondary, #a6a6a6);
++   }
++   /* The carousel advance arrow is `color: var(--brand-mint)` by default (see
++      `.projection-card .summary__next`). On an unplayable card it is a scroll
++      control, not a model signal — the same reasoning that already neutralizes
++      it on a ranked no-edge strip (`.summary-carousel--no-edge .summary__next`).
++      The doubled class is deliberate: `.projection-card--unplayable
++      .summary__next` alone is (0,2,0) — a tie with the mint default, won only by
++      source order. (0,3,0) wins outright and stays correct if these blocks are
++      ever reordered. */
++   .projection-card.projection-card--unplayable .summary__next {
++     color: var(--foreground, #fff);
++     box-shadow: none;
++   }
++
++ /* 
+
+ ❯ client/src/components/projections/ProjectionCard.test.ts:1785:22
+    1783|       "Item 4 — live indicator"
+    1784|     );
+    1785|     expect(backstop).toContain(
+       |                      ^
+    1786|       ".projection-card--pass .market-table__model--signal,"
+    1787|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 133 passed (134)
+   Start at  13:46:03
+   Duration  2.20s (transform 2.19s, setup 0ms, import 6.20s, tests 680ms, environment 1ms)
+
+
+FINAL FOCUSED CHECK
+
+ RUN  v4.1.10 /Users/danielwalker/Documents/ChatGPT/Migration/ncaaf-september5/site
+
+
+ Test Files  7 passed (7)
+      Tests  134 passed (134)
+   Start at  13:47:14
+   Duration  1.26s (transform 1.26s, setup 0ms, import 3.84s, tests 558ms, environment 0ms)
+
+
+WHOLE PROJECT: pnpm exec tsc --noEmit
+Exit 0

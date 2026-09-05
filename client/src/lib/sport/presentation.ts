@@ -18,6 +18,7 @@ import {
   type MarketInsight,
   type MarketSideInput,
 } from "@/lib/gameInsight";
+import type { MarketLineDisplay } from "@/components/projections/types";
 import { parseAmerican } from "@/components/projections/fromFeedSpec";
 import { countryIdentity, isRawCountryCode } from "./countries";
 
@@ -68,6 +69,7 @@ export type SelectionRole =
 /** One selectable side of a market, bound to a participant where applicable. */
 export interface MarketSelectionModel {
   modelLineLabel?: string;
+  lineDisplay?: MarketLineDisplay;
   comparable?: boolean;
   id: string;
   role: SelectionRole;
@@ -164,6 +166,7 @@ export interface FeedTeamLike {
 }
 export interface FeedRowLike {
   modelLineLabel?: string;
+  lineDisplay?: MarketLineDisplay;
   comparable?: boolean;
   label: string;
   book: string;
@@ -381,6 +384,7 @@ function teamMarkets(
       bookPrice: parseAmerican(row.book),
       modelPrice: parseAmerican(row.model),
       modelLineLabel: row.modelLineLabel,
+      lineDisplay: row.lineDisplay,
       comparable: row.comparable,
     }));
     return {

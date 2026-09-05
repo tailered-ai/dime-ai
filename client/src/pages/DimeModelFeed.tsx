@@ -36,9 +36,11 @@ import {
 } from "@/components/projections/fromMlbLineup";
 import type {
   GameStatus,
+  MarketLineDisplay,
   ProjectionPregameLineups,
 } from "@/components/projections/types";
 import { sportAdapters } from "@/lib/sport/presentation";
+import { ncaafSchoolName } from "@shared/ncaafSchoolNames";
 import { ncaafHelmet } from "@shared/ncaafHelmets";
 import { MLB_BY_ABBREV } from "@shared/mlbTeams";
 import { formatGameTime, timeToMinutes } from "@/lib/gameUtils";
@@ -66,6 +68,7 @@ interface MarketRowSpec {
   book: string;
   model: string;
   modelLineLabel?: string;
+  lineDisplay?: MarketLineDisplay;
   comparable?: boolean;
   sig?: boolean;
   wp?: string | null;
@@ -577,6 +580,7 @@ interface SideCalc {
   book: number | null;
   model: number | null;
   modelLineLabel?: string;
+  lineDisplay?: MarketLineDisplay;
   comparable?: boolean;
   wp?: string | null;
 }
@@ -599,6 +603,7 @@ function twoWayCol(
     book: fmtAm(s.book),
     model: fmtAm(s.model),
     modelLineLabel: s.modelLineLabel,
+    lineDisplay: s.lineDisplay,
     comparable: s.comparable,
     sig: !Number.isNaN(i === 0 ? topPP : botPP) && (i === 0 ? topPP : botPP) >= EDGE_THRESHOLD_PP,
     wp: s.wp ?? null,
@@ -799,6 +804,8 @@ export function mlbRowToCard(
 export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
   const awayAbbr = (g.awayTeam ?? "").toUpperCase();
   const homeAbbr = (g.homeTeam ?? "").toUpperCase();
+  const awayName = ncaafSchoolName(awayAbbr);
+  const homeName = ncaafSchoolName(homeAbbr);
   const awayCrest: CrestSpec = { code: awayAbbr.slice(0, 4), url: ncaafHelmet(awayAbbr) };
   const homeCrest: CrestSpec = { code: homeAbbr.slice(0, 4), url: ncaafHelmet(homeAbbr) };
   const status: GameStatus =
@@ -816,8 +823,8 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
   const spreadBookPrices = basis && spreadComparable ? g.modelBookPrices : null;
   const spread = twoWayCol(
     "Spread",
-    { label: awaySp == null ? awayAbbr : `${awayAbbr} ${fmtLine(awaySp)}`, crest: awayCrest, book: n(spreadBookPrices?.awaySpreadOdds ?? g.awaySpreadOdds), model: M(n(g.modelAwaySpreadOdds)), modelLineLabel: basis ? fmtLine(basis.awaySpread) : undefined, comparable: spreadComparable },
-    { label: homeSp == null ? homeAbbr : `${homeAbbr} ${fmtLine(homeSp)}`, crest: homeCrest, book: n(spreadBookPrices?.homeSpreadOdds ?? g.homeSpreadOdds), model: M(n(g.modelHomeSpreadOdds)), modelLineLabel: basis ? fmtLine(basis.homeSpread) : undefined, comparable: spreadComparable },
+    { label: awaySp == null ? awayName : `${awayName} ${fmtLine(awaySp)}`, crest: awayCrest, book: n(spreadBookPrices?.awaySpreadOdds ?? g.awaySpreadOdds), model: M(n(g.modelAwaySpreadOdds)), modelLineLabel: basis ? fmtLine(basis.awaySpread) : undefined, comparable: spreadComparable },
+    { label: homeSp == null ? homeName : `${homeName} ${fmtLine(homeSp)}`, crest: homeCrest, book: n(spreadBookPrices?.homeSpreadOdds ?? g.homeSpreadOdds), model: M(n(g.modelHomeSpreadOdds)), modelLineLabel: basis ? fmtLine(basis.homeSpread) : undefined, comparable: spreadComparable },
   );
   const totalLine = n(g.bookTotal);
   const totalComparable = !unknownBasis && (!basis || basis.total === totalLine);
@@ -832,29 +839,38 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
   const favIsAway = awayWp != null && homeWp != null && awayWp >= homeWp;
   const ml = twoWayCol(
     "Moneyline",
-    { label: awayAbbr, crest: awayCrest, book: n(g.awayML), model: M(n(g.modelAwayML)), wp: hasModel && favIsAway && awayWp != null ? `${Math.round(awayWp)}%` : null },
-    { label: homeAbbr, crest: homeCrest, book: n(g.homeML), model: M(n(g.modelHomeML)), wp: hasModel && !favIsAway && homeWp != null ? `${Math.round(homeWp)}%` : null },
+    { label: awayName, crest: awayCrest, book: n(g.awayML), model: M(n(g.modelAwayML)), wp: hasModel && favIsAway && awayWp != null ? `${Math.round(awayWp)}%` : null },
+    { label: homeName, crest: homeCrest, book: n(g.homeML), model: M(n(g.modelHomeML)), wp: hasModel && !favIsAway && homeWp != null ? `${Math.round(homeWp)}%` : null },
     "ML",
   );
-  spread.note = hasModel ? g.modelSpreadNote ?? undefined : undefined;
-  total.note = hasModel && ["vsin-circa-five-provisional-20260904-v1", "vsin-circa-five-provisional-20260904-v2"].includes(g.ingestionPipelineRevision ?? "")
-    ? "Estimated model odds at the Circa total shown."
-    : undefined;
-  for (const [market, comparable, bookPrices] of [[spread, spreadComparable, spreadBookPrices], [total, totalComparable, totalBookPrices]] as const) {
-    if (!comparable) {
-      market.note = unknownBasis
-        ? "Model pricing line unavailable."
-        : "Model odds apply to the line in the Model column. Book and model lines differ.";
-      market.foot = { label: unknownBasis ? "COMPARISON UNAVAILABLE" : "DIFFERENT LINES", edge: false };
-    }
-    if (basis) {
-      const projection = market === spread
-        ? `Model spread: ${awayAbbr} ${n(g.awayModelSpread) == null ? "—" : fmtLine(n(g.awayModelSpread)!)} / ${homeAbbr} ${n(g.homeModelSpread) == null ? "—" : fmtLine(n(g.homeModelSpread)!)}.`
-        : `Model total: ${n(g.modelTotal) ?? "—"}.`;
-      market.note = [projection, market.note].filter(Boolean).join(" ");
-    }
-    if (bookPrices) market.note = [market.note, "Book prices supplied by owner."].filter(Boolean).join(" ");
-  }
+  const projectionLine = (value: string | number | null | undefined, signed = true) => {
+    const parsed = M(n(value));
+    return parsed == null ? "—" : signed ? fmtLine(parsed) : String(parsed);
+  };
+  const spreadProjections = [projectionLine(g.awayModelSpread), projectionLine(g.homeModelSpread)];
+  const bookSpreadLines = [awaySp, homeSp].map(value => value == null ? "—" : fmtLine(value));
+  spread.rows.forEach((side, index) => {
+    const priceLine = unknownBasis ? "line unavailable" : side.modelLineLabel ?? bookSpreadLines[index];
+    side.lineDisplay = {
+      side: [awayName, homeName][index],
+      book: bookSpreadLines[index],
+      model: spreadProjections[index],
+      priceAt: priceLine !== spreadProjections[index] ? priceLine : undefined,
+    };
+  });
+  total.rows.forEach((side, index) => {
+    const priceLine = unknownBasis ? "line unavailable" : String(basis?.total ?? totalLine ?? "—");
+    const projectedTotal = projectionLine(g.modelTotal, false);
+    side.lineDisplay = {
+      side: index === 0 ? "Over" : "Under",
+      book: String(totalLine ?? "—"),
+      model: projectedTotal,
+      priceAt: priceLine !== projectedTotal ? priceLine : undefined,
+    };
+  });
+  ml.rows.forEach((side, index) => {
+    side.lineDisplay = { side: [awayName, homeName][index] };
+  });
   const markets = n(g.awayML) == null && n(g.homeML) == null
     ? [spread, total]
     : [spread, total, ml];
@@ -866,11 +882,11 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     sourceGameId: Number.isInteger(g.id) ? g.id : undefined,
     liveLabel: status === "live" ? "LIVE" : null,
     timeLabel: status === "suspended" ? "SUSPENDED" : status === "postponed" ? "POSTPONED" : status === "final" ? "FINAL" : formatGameTime(g.startTimeEst),
-    away: { name: awayAbbr, crest: awayCrest },
-    home: { name: homeAbbr, crest: homeCrest },
+    away: { name: awayName, crest: awayCrest },
+    home: { name: homeName, crest: homeCrest },
     meta: g.neutralSite ? "NCAAF · Neutral site" : "NCAAF",
     venueLine: hasModel
-      ? `Model: ${homeAbbr} ${fmtLine(n(g.homeModelSpread) ?? 0)} · Total ${n(g.modelTotal) ?? "—"}`
+      ? `Model: ${homeName} ${fmtLine(n(g.homeModelSpread) ?? 0)} · Total ${n(g.modelTotal) ?? "—"}`
       : g.venue || null,
     markets,
     modelPublished: hasModel,

@@ -1,0 +1,44 @@
+INITIAL MATRIX
+[WebServer] (node:61738) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 11 tests using 1 worker
+
+(node:61750) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/ncaaf-september5.spec.ts:262:3 › layout 375-dark: 68 NCAAF school names and honest market cells (14.1s)
+  ✓   2 e2e/ncaaf-september5.spec.ts:262:3 › layout 375-light: 68 NCAAF school names and honest market cells (12.0s)
+  ✓   3 e2e/ncaaf-september5.spec.ts:262:3 › layout 768-dark: 68 NCAAF school names and honest market cells (12.3s)
+  ✓   4 e2e/ncaaf-september5.spec.ts:262:3 › layout 768-light: 68 NCAAF school names and honest market cells (11.7s)
+  ✓   5 e2e/ncaaf-september5.spec.ts:262:3 › layout 817-dark: 68 NCAAF school names and honest market cells (12.2s)
+  ✓   6 e2e/ncaaf-september5.spec.ts:262:3 › layout 817-light: 68 NCAAF school names and honest market cells (12.2s)
+  ✓   7 e2e/ncaaf-september5.spec.ts:262:3 › layout 1024-dark: 68 NCAAF school names and honest market cells (14.2s)
+  ✓   8 e2e/ncaaf-september5.spec.ts:262:3 › layout 1024-light: 68 NCAAF school names and honest market cells (11.2s)
+  ✓   9 e2e/ncaaf-september5.spec.ts:262:3 › layout 1440-dark: 68 NCAAF school names and honest market cells (9.6s)
+  ✓  10 e2e/ncaaf-september5.spec.ts:262:3 › layout 1440-light: 68 NCAAF school names and honest market cells (10.2s)
+  ✓  11 e2e/ncaaf-september5.spec.ts:262:3 › layout 375-dark-reduced-motion: 68 NCAAF school names and honest market cells (7.5s)
+
+  11 passed (2.3m)
+
+FINAL PRODUCTION-BUILD CONFIRMATION AND ALL-GAME SOURCE AUDIT
+[WebServer] (node:62642) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 12 tests using 1 worker
+
+(node:62645) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e/ncaaf-september5.spec.ts:263:3 › layout 375-dark: 68 NCAAF school names and honest market cells (10.2s)
+  ✓   2 e2e/ncaaf-september5.spec.ts:263:3 › layout 375-light: 68 NCAAF school names and honest market cells (10.3s)
+  ✓   3 e2e/ncaaf-september5.spec.ts:263:3 › layout 768-dark: 68 NCAAF school names and honest market cells (10.0s)
+  ✓   4 e2e/ncaaf-september5.spec.ts:263:3 › layout 768-light: 68 NCAAF school names and honest market cells (11.1s)
+  ✓   5 e2e/ncaaf-september5.spec.ts:263:3 › layout 817-dark: 68 NCAAF school names and honest market cells (11.0s)
+  ✓   6 e2e/ncaaf-september5.spec.ts:263:3 › layout 817-light: 68 NCAAF school names and honest market cells (10.7s)
+  ✓   7 e2e/ncaaf-september5.spec.ts:263:3 › layout 1024-dark: 68 NCAAF school names and honest market cells (10.7s)
+  ✓   8 e2e/ncaaf-september5.spec.ts:263:3 › layout 1024-light: 68 NCAAF school names and honest market cells (10.4s)
+  ✓   9 e2e/ncaaf-september5.spec.ts:263:3 › layout 1440-dark: 68 NCAAF school names and honest market cells (11.7s)
+  ✓  10 e2e/ncaaf-september5.spec.ts:263:3 › layout 1440-light: 68 NCAAF school names and honest market cells (10.2s)
+  ✓  11 e2e/ncaaf-september5.spec.ts:263:3 › layout 375-dark-reduced-motion: 68 NCAAF school names and honest market cells (9.0s)
+  ✓  12 e2e/ncaaf-september5.spec.ts:263:3 › source audit 1440-dark-source-audit: 68 NCAAF school names and honest market cells (2.0m)
+
+  12 passed (3.9m)

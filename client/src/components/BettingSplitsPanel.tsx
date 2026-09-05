@@ -10,6 +10,7 @@
  */
 
 import { useState } from "react";
+import { ncaafSchoolName } from "@shared/ncaafSchoolNames";
 import { useIsMdUp } from "@/hooks/useIsMdUp";
 import { trpc } from "@/lib/trpc";
 import { getGameTeamColorsClient } from "@shared/teamColors";
@@ -1189,12 +1190,15 @@ export function BettingSplitsPanel({
   const homeSpread = toNum(game.homeBookSpread);
   const bookTotal = toNum(game.bookTotal);
 
-  // Abbreviations keep the tight label rows collision-free; city names are the
-  // last resort ("KANSAS CITY (+1.5)" is what used to overlap the next column).
-  const awayAbbr = colors?.away?.abbrev ?? awayAbbrProp ?? awayLabel;
-  const homeAbbr = colors?.home?.abbrev ?? homeAbbrProp ?? homeLabel;
-
   const isNcaaf = sport === "NCAAF";
+  // College display names wrap in the existing market-label rows. Keep the
+  // canonical team keys above for colors, and professional abbreviations intact.
+  const awayAbbr = isNcaaf
+    ? ncaafSchoolName(game.awayTeam)
+    : (colors?.away?.abbrev ?? awayAbbrProp ?? awayLabel);
+  const homeAbbr = isNcaaf
+    ? ncaafSchoolName(game.homeTeam)
+    : (colors?.home?.abbrev ?? homeAbbrProp ?? homeLabel);
   const priceLabel = (price: string | null | undefined) => {
     if (!isNcaaf || price == null || price.trim() === "") return "";
     const value = Number(price);

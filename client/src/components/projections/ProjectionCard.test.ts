@@ -1783,16 +1783,16 @@ describe("ProjectionCard — defensive PASS-mint backstop (Round 4 Wave 3 fold-i
       "Item 4 — live indicator"
     );
     expect(backstop).toContain(
-      ".projection-card--pass .market-table__model--signal,"
+      ".projection-card--pass .market-table:not(.market-table--lines) .market-table__model--signal,"
     );
     expect(backstop).toContain(
-      ".projection-card--pass .market-table__result--edge,"
+      ".projection-card--pass .market-table:not(.market-table--lines) .market-table__result--edge,"
     );
     expect(backstop).toContain(
-      ".projection-card__markets-popover--pass .market-table__model--signal,"
+      ".projection-card__markets-popover--pass .market-table:not(.market-table--lines) .market-table__model--signal,"
     );
     expect(backstop).toContain(
-      ".projection-card__markets-popover--pass .market-table__result--edge,"
+      ".projection-card__markets-popover--pass .market-table:not(.market-table--lines) .market-table__result--edge,"
     );
     // 2026-08-06: the selector is now grouped with its --unplayable twin, so
     // it ends in a comma and the brace closes the whole list.

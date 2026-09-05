@@ -47,6 +47,7 @@
 
 import { useId, useState } from "react";
 import { ChevronDown, Clock, RefreshCw } from "lucide-react";
+import { ncaafSchoolName } from "@shared/ncaafSchoolNames";
 import { ncaafHelmet } from "@shared/ncaafHelmets";
 import { trpc } from "@/lib/trpc";
 import { useIsMdUp } from "@/hooks/useIsMdUp";
@@ -376,11 +377,13 @@ function TeamHeader({
   abbrev,
   name,
   size = 16,
+  wrapName = false,
 }: {
   logoUrl?: string | null;
   abbrev?: string | null;
   name?: string | null;
   size?: number;
+  wrapName?: boolean;
 }) {
   const displayName = name ?? abbrev ?? "?";
   return (
@@ -415,10 +418,11 @@ function TeamHeader({
         style={{
           fontWeight: 700,
           color: "var(--dime-text-body)",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          maxWidth: "6em",
+          whiteSpace: wrapName ? "normal" : "nowrap",
+          overflow: wrapName ? "visible" : "hidden",
+          textOverflow: wrapName ? undefined : "ellipsis",
+          maxWidth: wrapName ? undefined : "6em",
+          minWidth: 0,
         }}
       >
         {displayName}
@@ -489,6 +493,7 @@ function MarketHistoryTable({
   awayAbbrev,
   homeAbbrev,
   alignFixed = false,
+  fullSchoolNames = false,
 }: {
   market: ActiveMarket;
   rawRows: HistoryRow[];
@@ -500,6 +505,7 @@ function MarketHistoryTable({
    * market tables align column-for-column. Mobile keeps auto layout so the
    * timestamp column can breathe at 390px. */
   alignFixed?: boolean;
+  fullSchoolNames?: boolean;
 }) {
   // OPEN pinning: first OPEN row with values for THIS market (oldest = last in
   // the DESC-ordered array); DK rows dedupe per market so every move is real.
@@ -645,6 +651,7 @@ function MarketHistoryTable({
                   logoUrl={awayLogo}
                   abbrev={awayAbbrev}
                   name={awayAbbrev}
+                  wrapName={fullSchoolNames}
                 />
               </th>
             )}
@@ -668,6 +675,7 @@ function MarketHistoryTable({
                   logoUrl={homeLogo}
                   abbrev={homeAbbrev}
                   name={homeAbbrev}
+                  wrapName={fullSchoolNames}
                 />
               </th>
             )}
@@ -784,8 +792,12 @@ export function OddsHistoryPanel({
 
   const awayLogo = isNcaaf ? ncaafHelmet(awayTeam) : colors?.away?.logoUrl;
   const homeLogo = isNcaaf ? ncaafHelmet(homeTeam) : colors?.home?.logoUrl;
-  const awayAbbrev = isNcaaf ? awayTeam : (colors?.away?.abbrev ?? awayTeam);
-  const homeAbbrev = isNcaaf ? homeTeam : (colors?.home?.abbrev ?? homeTeam);
+  const awayAbbrev = isNcaaf
+    ? ncaafSchoolName(awayTeam)
+    : (colors?.away?.abbrev ?? awayTeam);
+  const homeAbbrev = isNcaaf
+    ? ncaafSchoolName(homeTeam)
+    : (colors?.home?.abbrev ?? homeTeam);
 
   const rawRows = (data?.history ?? []) as HistoryRow[];
 
@@ -946,6 +958,7 @@ export function OddsHistoryPanel({
                     awayAbbrev={awayAbbrev}
                     homeAbbrev={homeAbbrev}
                     alignFixed={isMdUp}
+                    fullSchoolNames={isNcaaf}
                   />
                 </div>
               ))}

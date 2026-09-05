@@ -18,19 +18,26 @@ function fmtPrice(p: number | null | undefined): string {
 }
 
 export function MarketTable({ market }: { market: ProjectionMarket }) {
+  const showLines = market.sides.some(side => side.lineDisplay);
   // Which side (if any) is the signal? Highest positive edge among this market's sides.
   const scored = market.sides.map(s => scoreMarketSide(s));
   let signalIdx = -1;
   let best = 0;
   scored.forEach((m, i) => {
-    if (m && m.recommendation !== "NO_EDGE" && m.edgePP > best) {
+    if (m && (showLines || m.recommendation !== "NO_EDGE") && m.edgePP > best) {
       best = m.edgePP;
       signalIdx = i;
     }
   });
+  const resultLabel = showLines
+    ? best > 0
+      ? `EDGE ${best < 0.1 ? "<0.1" : `+${best.toFixed(1)}`}%`
+      : "NO EDGE"
+    : market.resultLabel;
+  const resultIsEdge = showLines ? best > 0 : market.resultIsEdge;
 
   return (
-    <table className="market-table">
+    <table className={`market-table${showLines ? " market-table--lines" : ""}`}>
       <caption className="market-table__caption ds-label">
         {market.label}
       </caption>
@@ -55,13 +62,44 @@ export function MarketTable({ market }: { market: ProjectionMarket }) {
                     {side.flag}
                   </span>
                 )}
-                {side.sideLabel}
+                {side.lineDisplay?.side ?? side.sideLabel}
               </th>
-              <td className="odds-value">{fmtPrice(side.bookPrice)}</td>
+              <td className="odds-value">
+                {side.lineDisplay?.book != null && (
+                  <span className="market-table__line">
+                    {side.lineDisplay.book}
+                  </span>
+                )}
+                <span className="market-table__price">
+                  {side.lineDisplay?.book != null
+                    ? `(${fmtPrice(side.bookPrice)})`
+                    : fmtPrice(side.bookPrice)}
+                </span>
+              </td>
               <td
                 className={`odds-value${isSignal ? " market-table__model--signal" : ""}`}
               >
-                {side.modelLineLabel && side.modelPrice != null ? (
+                {side.lineDisplay ? (
+                  <>
+                    {side.lineDisplay.model != null && (
+                      <span className="market-table__line">
+                        {side.lineDisplay.model}
+                      </span>
+                    )}
+                    <span className="market-table__price">
+                      {side.lineDisplay.model != null
+                        ? `(${fmtPrice(side.modelPrice)})`
+                        : fmtPrice(side.modelPrice)}
+                    </span>
+                    {side.modelPrice != null && side.lineDisplay.priceAt && (
+                      <span className="market-table__basis">
+                        {side.lineDisplay.priceAt === "line unavailable"
+                          ? "Pricing line unavailable"
+                          : `at ${side.lineDisplay.priceAt}`}
+                      </span>
+                    )}
+                  </>
+                ) : side.modelLineLabel && side.modelPrice != null ? (
                   <>
                     <span className="block">{side.modelLineLabel}</span>
                     <span>({fmtPrice(side.modelPrice)})</span>
@@ -74,22 +112,22 @@ export function MarketTable({ market }: { market: ProjectionMarket }) {
           );
         })}
       </tbody>
-      {(market.resultLabel || market.note) && (
+      {(resultLabel || market.note) && (
         <tfoot>
-          {market.note && (
+          {!showLines && market.note && (
             <tr>
               <td colSpan={3} className="market-table__result">
                 {market.note}
               </td>
             </tr>
           )}
-          {market.resultLabel && (
+          {resultLabel && (
             <tr>
               <td
                 colSpan={3}
-                className={`market-table__result ds-label${market.resultIsEdge ? " market-table__result--edge" : ""}`}
+                className={`market-table__result ds-label${resultIsEdge ? " market-table__result--edge" : ""}`}
               >
-                {market.resultLabel}
+                {resultLabel}
               </td>
             </tr>
           )}

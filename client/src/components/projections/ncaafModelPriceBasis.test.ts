@@ -84,7 +84,7 @@ function adapted(overrides: Partial<typeof row> = {}) {
 describe("NCAAF model odds priced at the supplied attachment lines", () => {
   it("preserves the current Book and original model prices while retaining each model threshold", () => {
     const { card, model, game } = adapted();
-    expect(card.venueLine).toBe("Model: JMU -5.123 · Total 49.456");
+    expect(card.venueLine).toBe("Model: James Madison -5.123 · Total 49.456");
     expect(
       card.markets[0].rows.map(side => [
         side.label,
@@ -94,8 +94,12 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
         side.comparable,
       ])
     ).toEqual([
-      ["LIB +8.5", "-110", "-220", "+6.5", false],
-      ["JMU -8.5", "-110", "+220", "-6.5", false],
+      ["Liberty +8.5", "-110", "-220", "+6.5", false],
+      ["James Madison -8.5", "-110", "+220", "-6.5", false],
+    ]);
+    expect(game.markets[0].sides.map(side => side.lineDisplay)).toEqual([
+      { side: "Liberty", book: "+8.5", model: "+5.123", priceAt: "+6.5" },
+      { side: "James Madison", book: "-8.5", model: "-5.123", priceAt: "-6.5" },
     ]);
     expect(
       game.markets[1].sides.map(side => [
@@ -109,6 +113,10 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
       ["Over 55.5", -110, -220, "O 51.5", false],
       ["Under 55.5", -110, 220, "U 51.5", false],
     ]);
+    expect(game.markets[1].sides.map(side => side.lineDisplay)).toEqual([
+      { side: "Over", book: "55.5", model: "49.456", priceAt: "51.5" },
+      { side: "Under", book: "55.5", model: "49.456", priceAt: "51.5" },
+    ]);
     expect(card.verdict.pass).toBe(true);
     expect(model.projection.primary).toBeNull();
     expect(model.projection.ranked).toEqual([]);
@@ -119,7 +127,7 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     );
   });
 
-  it("shows complete basis lines and odds in Model cells without mint or misleading comparison claims", () => {
+  it("separates school names, Book lines, Model projections and price bases without a false edge", () => {
     const { game } = adapted();
     const $ = load(
       renderToStaticMarkup(
@@ -127,12 +135,17 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
       )
     );
     const first = $("tbody tr").first();
-    expect(first.find("th").text()).toBe("LIB +8.5");
-    expect(first.find("td").eq(0).text()).toBe("-110");
-    expect(first.find("td").eq(1).text()).toBe("+6.5(-220)");
-    expect(first.find("td").eq(1).find(".block").text()).toBe("+6.5");
+    expect(first.find("th").text()).toBe("Liberty");
+    expect(first.find("td").eq(0).text()).toBe("+8.5(-110)");
+    expect(first.find("td").eq(1).text()).toBe("+5.123(-220)at +6.5");
+    expect(first.find("td").eq(1).find(".market-table__line").text()).toBe(
+      "+5.123"
+    );
+    expect(first.find("td").eq(1).find(".market-table__basis").text()).toBe(
+      "at +6.5"
+    );
     expect($(".market-table__row--signal")).toHaveLength(0);
-    expect($("tfoot").text()).toContain("Book and model lines differ.");
+    expect($("tfoot").text()).toBe("NO EDGE");
     const summary = renderToStaticMarkup(
       createElement(ProjectionCard, { game })
     );
@@ -190,7 +203,11 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
       expect(
         market.sides.every(side => side.modelLineLabel === undefined)
       ).toBe(true);
-      expect(market.note).toBe("Model pricing line unavailable.");
+      expect(
+        market.sides.every(
+          side => side.lineDisplay?.priceAt === "line unavailable"
+        )
+      ).toBe(true);
     }
     const $ = load(
       renderToStaticMarkup(createElement(ProjectionCard, { game }))
@@ -201,8 +218,16 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     expect($(".summary-carousel__slide").first().attr("aria-label")).toBe(
       "Market 1 of 3: Spread; Book and Model values"
     );
-    expect($(".summary--comparison").text()).toContain(
-      "Model pricing line unavailable."
+    expect($(".summary--comparison .market-table__basis").first().text()).toBe(
+      "Pricing line unavailable"
+    );
+    expect(
+      $(".summary--comparison tfoot")
+        .toArray()
+        .every(foot => $(foot).text() === "NO EDGE")
+    ).toBe(true);
+    expect($(".summary--comparison .market-table__row--signal")).toHaveLength(
+      0
     );
     expect($.html()).not.toContain("priced at their shown lines");
     expect($.html()).not.toContain("Book and Model pricing lines");
@@ -216,13 +241,18 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
         .slice(0, 2)
         .flatMap(market => market.rows.map(side => side.book))
     ).toEqual(["-110", "-110", "-110", "-110"]);
-    expect(
-      card.markets
-        .slice(0, 2)
-        .every(market =>
-          market.note?.includes("Book prices supplied by owner.")
-        )
-    ).toBe(true);
+    const game = presentationToProjectionGame(sportAdapters.NCAAF(card));
+    for (const market of game.markets.slice(0, 2)) {
+      const $ = load(
+        renderToStaticMarkup(createElement(MarketTable, { market }))
+      );
+      expect(
+        $("tbody tr td:first-of-type .market-table__price")
+          .toArray()
+          .map(cell => $(cell).text())
+      ).toEqual(["(-110)", "(-110)"]);
+      expect($("tfoot").text()).toMatch(/^EDGE \+\d+\.\d+%$/);
+    }
     expect(override.awaySpreadOdds).toBe("-112");
     expect(override.underOdds).toBe("-108");
   });
@@ -263,10 +293,19 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
         expect(market.rows.every(side => side.comparable === matches)).toBe(
           true
         );
-        expect(market.note?.includes("Book prices supplied by owner.")).toBe(
-          matches
-        );
         if (!matches) expect(market.foot.edge).toBe(false);
+      }
+      const game = presentationToProjectionGame(sportAdapters.NCAAF(card));
+      for (const [index, matches] of [spreadMatches, totalMatches].entries()) {
+        const $ = load(
+          renderToStaticMarkup(
+            createElement(MarketTable, { market: game.markets[index] })
+          )
+        );
+        if (!matches) {
+          expect($("tfoot").text()).toBe("NO EDGE");
+          expect($(".market-table__row--signal")).toHaveLength(0);
+        } else expect($("tfoot").text()).toMatch(/^EDGE \+\d+\.\d+%$/);
       }
     }
   );
@@ -281,17 +320,28 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
       modelTotal: "54.4",
       modelPriceBasis: { awaySpread: 37, homeSpread: -37, total: 50.5 },
     });
-    const spread = renderToStaticMarkup(
-      createElement(MarketTable, { market: game.markets[0] })
+    const spread = load(
+      renderToStaticMarkup(
+        createElement(MarketTable, { market: game.markets[0] })
+      )
     );
-    const total = renderToStaticMarkup(
-      createElement(MarketTable, { market: game.markets[1] })
+    const total = load(
+      renderToStaticMarkup(
+        createElement(MarketTable, { market: game.markets[1] })
+      )
     );
-    expect(spread).toContain("Model spread: BRY +26.7 / ARMY -26.7.");
-    expect(spread).toContain(
-      "Model odds apply to the line in the Model column."
+    expect(spread("tbody tr").first().find("th").text()).toBe("Bryant");
+    expect(spread("tbody tr").first().find("td").eq(1).text()).toBe(
+      "+26.7(-220)at +37"
     );
-    expect(total).toContain("Model total: 54.4.");
+    expect(spread("tbody tr").last().find("td").eq(1).text()).toBe(
+      "-26.7(+220)at -37"
+    );
+    expect(total("tbody tr").first().find("td").eq(1).text()).toBe(
+      "54.4(-220)at 50.5"
+    );
+    expect(spread("tfoot").text()).toBe("NO EDGE");
+    expect(total("tfoot").text()).toBe("NO EDGE");
     expect(game.markets[0].sides[0].modelLineLabel).toBe("+37");
     expect(game.markets[1].sides[0].modelLineLabel).toBe("O 50.5");
   });
@@ -347,14 +397,17 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
             .map(cell => $(cell).text())
         )
     ).toEqual([
-      ["BRY +37.5", "-108", "+37(-289)"],
-      ["ARMY -37.5", "-112", "-37(+289)"],
-      ["Over 51.5", "-110", "O 50.5(-147)"],
-      ["Under 51.5", "-110", "U 50.5(+147)"],
+      ["Bryant", "+37.5(-108)", "+26.7(-289)at +37"],
+      ["Army", "-37.5(-112)", "-26.7(+289)at -37"],
+      ["Over", "51.5(-110)", "54.4(-147)at 50.5"],
+      ["Under", "51.5(-110)", "54.4(+147)at 50.5"],
     ]);
-    expect(summary.text()).toContain("Model spread: BRY +26.7 / ARMY -26.7.");
-    expect(summary.text()).toContain("Model total: 54.4.");
-    expect(summary.text()).toContain("Odds at the lines shown.");
+    expect(
+      summary
+        .find("tfoot")
+        .toArray()
+        .map(foot => $(foot).text())
+    ).toEqual(["NO EDGE", "NO EDGE"]);
     expect(summary.text()).not.toContain("comparison unavailable");
     expect(summary.text()).not.toContain("Moneyline");
     expect(
