@@ -2,7 +2,7 @@
 #
 # Fires POST /api/cron/scores on the Railway app on a schedule. The endpoint is
 # shared-secret authed (CRON_SECRET) and responds 200 immediately while
-# refreshAllScoresNow() (NBA/NHL/MLB) runs in the background under a run-lock.
+# refreshAllScoresNow() (NBA/NHL/MLB/NCAAF) runs in the background under a run-lock.
 #
 # Required repo secrets:
 #   RAILWAY_APP_URL — e.g. https://your-app.up.railway.app  (no trailing slash)

@@ -68,6 +68,7 @@ import {
   VSIN_MLB_HREF_ALIASES,
 } from "../shared/mlbTeams";
 import type { InsertGame } from "../drizzle/schema";
+import { refreshNcaafScoresNow } from "./ncaafScoreRefresh";
 
 const INTERVAL_MS = 5 * 60 * 1000; // 5 minutes — all sports refresh cadence (24/7, no time gates)
 
@@ -1966,7 +1967,7 @@ async function refreshMlbScoresNow(): Promise<{ newlyFinalGamePks: number[] }> {
 }
 
 /**
- * Runs NBA, NHL, and MLB score refreshes immediately.
+ * Runs NBA, NHL, MLB, and NCAAF score refreshes immediately.
  * Exported so it can be triggered manually from the admin panel.
  */
 export async function refreshAllScoresNow(): Promise<void> {
@@ -1974,6 +1975,7 @@ export async function refreshAllScoresNow(): Promise<void> {
     refreshNbaScores(),
     refreshNhlScores(),
     refreshMlbScoresNow(),
+    refreshNcaafScoresNow(),
   ]);
   lastScoresRefreshedAt = new Date().toISOString();
   // Patch scoresRefreshedAt into the last refresh result so the UI can show it
