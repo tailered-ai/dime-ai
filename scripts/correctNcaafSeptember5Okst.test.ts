@@ -158,7 +158,7 @@ describe("bounded Oklahoma State model direction correction", () => {
     expect(plan.modelRunAt).toBe(original().modelRunAt);
     expect(plan.previous).toEqual(
       Object.fromEntries(
-        Object.keys(correction).map(key => [key, original()[key]])
+        Object.entries(original()).filter(([key]) => key in correction)
       )
     );
     expect(plan.replacement).toEqual(correction);
