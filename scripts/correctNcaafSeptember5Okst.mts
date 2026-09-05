@@ -171,6 +171,9 @@ export async function runCorrection(
     return {
       event: EVENT,
       rowId: row.id,
+      modelRunAt: row.modelRunAt,
+      previous: Object.fromEntries(entries.map(([key]) => [key, row[key]])),
+      replacement: correction,
       changed: mode === "--apply" && changed,
       pending: mode === "--dry-run" && changed,
     };

@@ -153,7 +153,15 @@ describe("bounded Oklahoma State model direction correction", () => {
 
   it("dry-run performs no writes and verification refuses the original direction", async () => {
     const db = fake([original()]);
-    expect((await runCorrection(db.store, "--dry-run")).pending).toBe(true);
+    const plan = await runCorrection(db.store, "--dry-run");
+    expect(plan.pending).toBe(true);
+    expect(plan.modelRunAt).toBe(original().modelRunAt);
+    expect(plan.previous).toEqual(
+      Object.fromEntries(
+        Object.keys(correction).map(key => [key, original()[key]])
+      )
+    );
+    expect(plan.replacement).toEqual(correction);
     expect(db.calls).toEqual(["begin", "rollback"]);
     await expect(runCorrection(db.store, "--verify")).rejects.toThrow(
       "not been applied"
