@@ -65,7 +65,7 @@ AssertionError: expected 'Defensive PASS backstop (Round 4, fro…' to contain '
 +     box-shadow: none;
 +   }
 +
-+ /* 
++ /*
 
  ❯ client/src/components/projections/ProjectionCard.test.ts:1785:22
     1783|       "Item 4 — live indicator"
@@ -97,3 +97,13 @@ FINAL FOCUSED CHECK
 
 WHOLE PROJECT: pnpm exec tsc --noEmit
 Exit 0
+
+CI found three stale abbreviation/prose assertions in the September 3/4 route tests (5296 passed, 3 failed, 104 skipped, 1 todo). Updated only those test expectations; no production source changed.
+
+ RUN  v4.1.10 /Users/danielwalker/Documents/ChatGPT/Migration/ncaaf-september5/site
+
+
+ Test Files  8 passed (8)
+      Tests  200 passed (200)
+   Start at  13:59:17
+   Duration  2.24s (transform 2.02s, setup 0ms, import 6.36s, tests 874ms, environment 1ms)

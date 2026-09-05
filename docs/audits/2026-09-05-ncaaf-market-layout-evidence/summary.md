@@ -13,13 +13,13 @@ The live page was inspected before publication: 68 NCAAF cards were present, and
 ## Evidence
 
 - Lead: Impeccable. Advisor: independent pricing-contract review. [Brief](brief.yaml).
-- TypeScript passed; 134 focused checks passed. The initial CSS-contract test failed after the owner-directed strict-positive exception; its expectation was updated and all focused checks passed. [Verbatim checks](typecheck-tests.txt).
+- TypeScript passed; 200 focused checks passed, including the September 3/4 route suite. The initial CSS-contract test failed after the owner-directed strict-positive exception; its expectation was updated and all focused checks passed. [Verbatim checks](typecheck-tests.txt).
 - Production build and bundle gate passed: 216,134 gzip bytes / 222,538 ceiling. [Build](smoke.txt).
 - Initial browser matrix: 11 passed across 375/768/817/1024/1440, dark/light and reduced motion. Visual review caught the neutral comparison arrow's light-theme token; one batched repair fixed it and allowed long projection subtitles to wrap. Final production-build confirmation passed all 12 browser cases, including every spread/total/available moneyline for all 68 games plus splits and source history. [Browser output](browser-tests.txt).
 - Independent source review found no pricing/comparability regression. Shared adapters carry display values separately from pricing basis; UCLA bound quote overrides retain their guards.
 - Detector ran once: two unchanged accent-rail heuristics, zero new blockers. [Audit](audit.md), [raw detector](impeccable-detect.json), [triage](impeccable-triage.json).
 - Screenshots are local in `screenshots/` per the repository PNG policy. Viewports, keyboard and overflow are checked in `e2e/ncaaf-september5.spec.ts` against the production build with public-slate API fixtures.
-- Final owner review, required CI and deployment are pending. No database migration or publication is needed.
+- Initial CI found three older route assertions still expecting abbreviations or the removed prose footer (5296 passed / 3 failed / 104 skipped / 1 todo). A test-only follow-up updated those expectations; all 200 focused tests pass. Production source and the browser-tested build are unchanged. Final owner review, rerun CI and deployment are pending. No database migration or publication is needed.
 
 ## Limits
 
