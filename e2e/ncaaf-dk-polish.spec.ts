@@ -207,6 +207,25 @@ for (const width of [375, 768, 1024, 1440])
       }
       await expect(page.locator("#game-card-4320001")).toContainText("55.5");
       await expect(page.locator("#game-card-4320002")).toContainText("-395");
+      if (width >= 768) {
+        for (const label of [
+          "FRES (+21.5)",
+          "USC (-21.5)",
+          "FRES (+1000)",
+          "USC (-1800)",
+        ]) {
+          const matches = page.getByText(label, { exact: true });
+          let checked = false;
+          for (const match of await matches.all()) {
+            if (!(await match.isVisible())) continue;
+            expect(
+              await match.evaluate(el => el.scrollWidth - el.clientWidth)
+            ).toBeLessThanOrEqual(1);
+            checked = true;
+          }
+          expect(checked).toBe(true);
+        }
+      }
       await page.screenshot({
         path: `${output}/splits-${width}-${theme}.png`,
         fullPage: true,

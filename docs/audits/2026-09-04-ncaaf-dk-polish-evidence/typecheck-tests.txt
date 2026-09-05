@@ -5,6 +5,6 @@ TypeScript: node --max-old-space-size=6144 node_modules/typescript/bin/tsc --noE
 
  Test Files  4 passed (4)
       Tests  194 passed (194)
-   Start at  17:24:23
-   Duration  1.87s (transform 1.00s, setup 0ms, import 3.94s, tests 276ms, environment 0ms)
+   Start at  17:28:36
+   Duration  1.57s (transform 1.17s, setup 0ms, import 3.43s, tests 255ms, environment 0ms)
 

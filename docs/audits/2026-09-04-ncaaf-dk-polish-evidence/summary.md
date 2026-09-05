@@ -16,14 +16,14 @@ DK current-line overrides are attached only to exact date/event/team rows with m
 
 Impeccable leads; UI UX Pro Max advises. See `brief.yaml`.
 
-Card metadata is simply NCAAF. Pricing methodology remains documented; detailed market notes call calculated prices estimated. The full-projections label is centered independently of the trailing icon. Desktop sidebar width is bounded at 17–19rem, with navigation type adapting from 0.875–1rem; rail, tablet drawer, themes, focus and reduced-motion behavior use the existing controls.
+Card metadata is simply NCAAF. Pricing methodology remains documented; detailed market notes call calculated prices estimated. The full-projections label is centered independently of the trailing icon. Compact desktop market headers wrap team and price within equal lanes so Fresno spread and ML values remain fully visible. Desktop sidebar width is bounded at 17–19rem, with navigation type adapting from 0.875–1rem; rail, tablet drawer, themes, focus and reduced-motion behavior use the existing controls.
 
 ## Verification
 
 - Exact publisher checks: DK 134 observations and original five-game payload PASS.
 - Independent pricing replay PASS. Independent transactional review found no defects. A separate source/render review found that real 0%/100% opening splits were displayed as pending. Verified VSiN DK zeros now render as percentages, with an opening-row browser assertion; unavailable markets retain their guard.
 - Focused Vitest: 194 passed, 0 failed, 0 skipped. TypeScript exit 0.
-- Rendered matrix: 375/768/1024/1440, dark/light, plus reduced motion; market tabs, keyboard focus return, rail/drawer and account-menu bounds covered. Final output in `browser.txt`.
+- Rendered matrix: 375/768/1024/1440, dark/light, plus reduced motion; market tabs, keyboard focus return, rail/drawer and account-menu bounds covered. Nine NCAAF cases plus six existing split-layout cases passed. Final output in `browser.txt`.
 - Client/server production builds, preview activation guard and bundle budget pass; final output in `build.txt`.
 - Detector returned four warnings, all on unchanged declarations: two existing market signal stripes and two existing height/width transitions. They were reviewed against the owner-approved existing UI and retained. No new motion declaration or new detector finding; motion redesign not part of this refinement.
 - The first matrix exposed test assumptions (phone market tabs, rem-based sizing) and a narrow-label/source-stamp layout concern. One batched correction and final confirmation were performed. No production failure was inferred from a test-fixture mismatch.

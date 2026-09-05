@@ -974,7 +974,7 @@ function MarketBlock({
             paddingLeft: 2,
             paddingRight: 2,
             gap: 8,
-            minHeight: "clamp(21px, 1.8vw, 30px)",
+            minHeight: "clamp(32px, 2.8vw, 40px)",
             minWidth: 0,
           }}
         >
@@ -1021,15 +1021,15 @@ function MarketBlock({
           </span>
         </div>
       ) : (
-        // min-width:0 + ellipsis on both sides: the two labels can never
-        // collide or bleed into the neighboring market column.
+        // Equal lanes let the team and complete price wrap at their space.
+        // Never ellipsize numerical market values.
         <div
           className="flex items-center justify-between"
           style={{
             paddingLeft: 2,
             paddingRight: 2,
             gap: 8,
-            minHeight: "clamp(21px, 1.8vw, 30px)",
+            minHeight: "clamp(32px, 2.8vw, 40px)",
           }}
         >
           <span
@@ -1039,10 +1039,9 @@ function MarketBlock({
               color: "var(--dime-text-primary, #ffffff)",
               fontWeight: 700,
               letterSpacing: "0.02em",
-              whiteSpace: "nowrap",
+              whiteSpace: "normal",
+              flex: "1 1 0",
               minWidth: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
               fontVariantNumeric: "tabular-nums",
             }}
           >
@@ -1055,10 +1054,9 @@ function MarketBlock({
               color: "var(--dime-text-primary, #ffffff)",
               fontWeight: 700,
               letterSpacing: "0.02em",
-              whiteSpace: "nowrap",
+              whiteSpace: "normal",
+              flex: "1 1 0",
               minWidth: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
               fontVariantNumeric: "tabular-nums",
             }}
           >
