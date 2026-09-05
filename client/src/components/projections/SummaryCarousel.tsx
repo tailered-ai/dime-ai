@@ -71,7 +71,7 @@ export function SummaryCarousel({
       aria-roledescription="carousel"
       aria-label={
         isComparison
-          ? `${slides.length} Book and Model markets, priced at their shown lines`
+          ? `${slides.length} Book and Model markets`
           : isNoEdgeRanking
           ? `${insights.length} non-actionable market projections, ranked by no-vig ROI`
           : `${insights.length} model edges, ranked strongest first`
@@ -102,7 +102,7 @@ export function SummaryCarousel({
             aria-roledescription="slide"
             aria-label={
               isComparison
-                ? `Market ${i + 1} of ${slides.length}: ${slide.label}; Book and Model pricing lines`
+                ? `Market ${i + 1} of ${slides.length}: ${slide.label}; Book and Model values`
                 : isNoEdgeRanking
                   ? `Projection ${i + 1} of ${slides.length}: ${slide.label}; no actionable edge`
                   : `Edge ${i + 1} of ${slides.length}: ${slide.label}`

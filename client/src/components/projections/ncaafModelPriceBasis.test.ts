@@ -192,6 +192,20 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
       ).toBe(true);
       expect(market.note).toBe("Model pricing line unavailable.");
     }
+    const $ = load(
+      renderToStaticMarkup(createElement(ProjectionCard, { game }))
+    );
+    expect($(".summary-carousel--comparison").attr("aria-label")).toBe(
+      "3 Book and Model markets"
+    );
+    expect($(".summary-carousel__slide").first().attr("aria-label")).toBe(
+      "Market 1 of 3: Spread; Book and Model values"
+    );
+    expect($(".summary--comparison").text()).toContain(
+      "Model pricing line unavailable."
+    );
+    expect($.html()).not.toContain("priced at their shown lines");
+    expect($.html()).not.toContain("Book and Model pricing lines");
   });
 
   it("uses an owner-bound Book display override without changing the original API fields", () => {
