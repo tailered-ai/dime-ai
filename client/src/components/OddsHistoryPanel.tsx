@@ -172,6 +172,8 @@ function fmtPct(val: number | null | undefined): string {
 
 type HistoryRow = {
   sourceNote?: string;
+  sourceLabel?: string;
+  isOpening?: boolean;
   id: number;
   scrapedAt: number;
   source: string | null;
@@ -453,8 +455,8 @@ function MarketHistoryTable({
 }) {
   // OPEN pinning: first OPEN row with values for THIS market (oldest = last in
   // the DESC-ordered array); DK rows dedupe per market so every move is real.
-  const openRows = rawRows.filter(r => r.lineSource === "open");
-  const dkRows = rawRows.filter(r => r.lineSource !== "open");
+  const openRows = rawRows.filter(r => r.isOpening || r.lineSource === "open");
+  const dkRows = rawRows.filter(r => !r.isOpening && r.lineSource !== "open");
   const pinnedOpenRow = openRows.find(r => hasMarketValue(r, market)) ?? null;
   const rows = deduplicateRows(
     dkRows.filter(r => hasMarketValue(r, market)),
@@ -492,6 +494,9 @@ function MarketHistoryTable({
       >
         <td style={{ ...TD, ...TD_TIME, textAlign: "left" }}>
           {fmtTimestamp(row.scrapedAt)}
+          {row.sourceLabel && (
+            <span className="block text-[10px]">{row.sourceLabel}</span>
+          )}
         </td>
         <td style={{ ...TD, ...TD_LINE, ...BORDER_L, textAlign: "center" }}>
           {cells.lineA}

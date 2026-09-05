@@ -12,6 +12,7 @@ on:
           - september-3
           - sjsu-emu
           - september-4-five
+          - september-4-dk
       dry_run:
         description: Fetch and validate without writing TiDB
         required: true
@@ -43,10 +44,13 @@ jobs:
           PUBLISH_SLATE: ${{ inputs.slate }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          if [ "$PUBLISH_SLATE" = "sjsu-emu" ] || [ "$PUBLISH_SLATE" = "september-4-five" ]; then
+          if [ "$PUBLISH_SLATE" = "sjsu-emu" ] || [ "$PUBLISH_SLATE" = "september-4-five" ] || [ "$PUBLISH_SLATE" = "september-4-dk" ]; then
             slate_args=()
-            if [ "$PUBLISH_SLATE" = "september-4-five" ]; then
+            if [ "$PUBLISH_SLATE" = "september-4-five" ] || [ "$PUBLISH_SLATE" = "september-4-dk" ]; then
               slate_args+=(--slate=september-4-five)
+            fi
+            if [ "$PUBLISH_SLATE" = "september-4-dk" ]; then
+              slate_args+=(--source=vsin-dk)
             fi
             pnpm exec tsx scripts/publishSjsuEmu.mts "${slate_args[@]}" --check
             if [ "$DRY_RUN" = "true" ]; then

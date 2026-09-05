@@ -483,15 +483,31 @@ export default function BettingSplitsPage({
   // appAuthLoading=false → NO spinner shown, NO games loaded → "No games found" shown.
   // games.list is declared as publicProcedure on the server — no auth required.
   const isAppAuthed = !appAuthLoading && Boolean(appUser);
-  const { data: allGames, isLoading: gamesLoading } = trpc.games.list.useQuery(
-    { sport: selectedSport, gameDate: selectedDate },
-    {
-      enabled: true, // FIX 1: always enabled — games.list is public
-      refetchOnWindowFocus: false,
-      refetchInterval: 60 * 1000,
-      staleTime: 30 * 1000,
-    }
+  const { data: sourceGames, isLoading: gamesLoading } =
+    trpc.games.list.useQuery(
+      { sport: selectedSport, gameDate: selectedDate },
+      {
+        enabled: true, // FIX 1: always enabled — games.list is public
+        refetchOnWindowFocus: false,
+        refetchInterval: 60 * 1000,
+        staleTime: 30 * 1000,
+      }
+    );
+
+  const allGames = useMemo(
+    () =>
+      sourceGames?.map(game =>
+        game.bettingSplitsSnapshot
+          ? { ...game, ...game.bettingSplitsSnapshot }
+          : game
+      ),
+    [sourceGames]
   );
+
+  const dkSnapshot =
+    sourceGames?.length && sourceGames.every(game => game.bettingSplitsSnapshot)
+      ? sourceGames[0].bettingSplitsSnapshot
+      : null;
 
   // ─── Fix 2: Server-authoritative date sync ───────────────────────────────────────────────────────
   // BettingSplits previously had NO server date sync — selectedDate was computed ONCE at mount
@@ -1046,7 +1062,9 @@ export default function BettingSplitsPage({
                   whiteSpace: "nowrap",
                 }}
               >
-                Splits synced {splitsAgoLabel}
+                {dkSnapshot
+                  ? `VSiN DK · ${new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }).format(new Date(dkSnapshot.retrievedAt))} ET`
+                  : `Splits synced ${splitsAgoLabel}`}
               </span>
             </div>
           </div>

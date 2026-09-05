@@ -1,3 +1,4 @@
+import { NCAAF_DK_SOURCES, presentNcaafDk, presentNcaafDkHistory, ncaafDkHistoryRecord } from "@shared/ncaafSeptember4Dk";
 import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
@@ -51,7 +52,7 @@ const flatCss = css.replace(/\s+/g, " ");
 describe("DimeModelFeed — NCAAF route", () => {
   it("shows the selected Circa SJSU–EMU snapshot without inventing model prices", () => {
     const card = ncaafRowToCard({ awayTeam: "SJSU", homeTeam: "EMU", modelRunAt: 1, awayBookSpread: "1", homeBookSpread: "-1", bookTotal: "55", awaySpreadOdds: "-110", homeSpreadOdds: "-110", overOdds: "-110", underOdds: "-110", homeModelSpread: "-2.3", modelTotal: "54.7", awayML: "+100", homeML: "-120", modelAwayML: "+130", modelHomeML: "-130", ingestionPipelineRevision: "vsin-circa-selected-sjsu-emu-20260904" } as never);
-    expect(card.meta).toBe("NCAAF · Circa 9/4 5:50 PM ET · Provisional model");
+    expect(card.meta).toBe("NCAAF");
     expect(card.venueLine).toBe("Model: EMU -2.3 · Total 54.7");
     expect(card.markets[0].rows.map(row => [row.label, row.book, row.model])).toEqual([["SJSU +1", "-110", "—"], ["EMU -1", "-110", "—"]]);
     expect(card.markets[1].rows.map(row => [row.label, row.book, row.model])).toEqual([["O 55", "-110", "—"], ["U 55", "-110", "—"]]);
@@ -64,9 +65,35 @@ describe("DimeModelFeed — NCAAF route", () => {
     for (const source of sourceRows) for (const quote of source.history) {
       const row = ncaafSeptember4HistoryRecord(source.event, quote);
       expect(row.spreadAwayBetsPct).toBe(quote.lineSource === "open" ? null : source.splits.spreadAwayBetsPct);
-      expect(presentNcaafSeptember4History(row).sourceNote).toContain("DraftKings NJ via Action Network; current splits — VSiN Circa");
+      expect(presentNcaafSeptember4History(row).sourceNote).toContain("AN DK is DraftKings NJ; betting splits are not included");
       for (const wrong of [{ sport: "NFL" }, { source: "auto" }, { scrapedAt: quote.scrapedAt + 1 }, { awaySpread: "999" }, { spreadAwayBetsPct: -1 }]) {
         expect(presentNcaafSeptember4History({ ...row, ...wrong }).sourceNote).toBeUndefined();
+      }
+    }
+  });
+
+  it("isolates DK splits and history from model-book values and refuses unverified snapshots", () => {
+    for (const source of NCAAF_DK_SOURCES) {
+      const game = NCAAF_SEPTEMBER4.find(game => game.event === source.event)!;
+      const row = { ...ncaafSeptember4Record(game), ...source.splits, sport: "NCAAF", gameDate: NCAAF_DATE, awayTeam: source.away, homeTeam: source.home };
+      const presented = presentNcaafDk(row);
+      expect(presented.awayBookSpread).toBe(game.bookSpread.toFixed(1));
+      expect(presented.bettingSplitsSnapshot?.awayBookSpread).toBe(source.currentLines.awaySpread);
+      expect(presented.bettingSplitsSnapshot?.awaySpreadOdds).toBeNull();
+      if (source.away === "UTEP") {
+        expect(presented.bettingSplitsSnapshot?.awayML).toBeNull();
+        expect(presented.bettingSplitsSnapshot?.mlAwayBetsPct).toBeNull();
+      }
+      for (const wrong of [{ sport: "NFL" }, { gameDate: "2026-09-03" }, { awayTeam: "WRONG" }, { ncaaContestId: "wrong" }, { spreadAwayBetsPct: -1 }])
+        expect(presentNcaafDk({ ...row, ...wrong }).bettingSplitsSnapshot).toBeNull();
+      for (const quote of source.history) {
+        const record = ncaafDkHistoryRecord(quote);
+        const view = presentNcaafDkHistory(record);
+        expect(view.sourceLabel).toBe("VSiN DK");
+        expect(view.isOpening).toBe(quote.sourceSection === "Opening Split");
+        expect(view.lineSource).toBe("dk");
+        for (const wrong of [{ sport: "NFL" }, { source: "auto" }, { scrapedAt: quote.scrapedAt + 1 }, { awaySpreadOdds: "-110" }, { spreadAwayBetsPct: -1 }])
+          expect(presentNcaafDkHistory({ ...record, ...wrong }).sourceLabel).toBeUndefined();
       }
     }
   });

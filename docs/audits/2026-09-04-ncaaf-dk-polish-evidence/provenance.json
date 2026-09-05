@@ -1,0 +1,52 @@
+{
+  "provider": "VSiN",
+  "sportsbook": "DraftKings",
+  "sport": "NCAAF",
+  "eventDate": "2026-09-04",
+  "historyAvailability": "Opening Split and Last 25 Changes for all five. First Full Split is present for four; absent for UTEP/Oklahoma.",
+  "historyCount": 134,
+  "timestampMeaning": "History scrapedAt/sourceObservedAt comes from the actual source row month/day and ET clock. Year 2026 follows the requested event code; America/New_York handles timezone. Current page has retrieval timestamp only. Retrieval is recorded separately for each response.",
+  "marketLimitations": "VSiN history supplies spread and total lines and moneyline prices, but does not supply spread or total juice. Those four price fields remain null; no AN prices attached to VSiN history.",
+  "zeros": "Numeric 0 percentages are preserved only where printed by VSiN. Missing lines/prices remain null. An opening split can have ML only and no spread/total.",
+  "observationLimit": "Last 25 Changes is a source-limited sample, not a complete timeline. No interpolation or invented observations.",
+  "circaModelReference": "Original selected VSiN Circa 2026-09-04 17:50 ET Book vs Model snapshot remains separate and unchanged.",
+  "files": [
+    {
+      "file": "vsin-dk-history-20260904CFB00148.html",
+      "url": "https://data.vsin.com/betting-splits/splits_history.php?gamecode=20260904CFB00148&source=DK",
+      "retrievedAt": "2026-09-05T00:03:17.859Z",
+      "sha256": "cd2789957670c0b936c26927f3ca1ae18ae9d79f2d42da2fc464a81aa1b08d4b"
+    },
+    {
+      "file": "vsin-dk-history-20260904CFB00179.html",
+      "url": "https://data.vsin.com/betting-splits/splits_history.php?gamecode=20260904CFB00179&source=DK",
+      "retrievedAt": "2026-09-05T00:03:35.539Z",
+      "sha256": "15d284f2b81f64c2869749092a7df311693174282a3194c7d44e4f11c48118d4"
+    },
+    {
+      "file": "vsin-dk-history-20260904CFB00198.html",
+      "url": "https://data.vsin.com/betting-splits/splits_history.php?gamecode=20260904CFB00198&source=DK",
+      "retrievedAt": "2026-09-05T00:03:35.578Z",
+      "sha256": "fb4ab681f91d2d1fabbc6fcf3ca1b235ddda554e18c86889939eb05f2e8b4057"
+    },
+    {
+      "file": "vsin-dk-history-20260904CFB00213.html",
+      "url": "https://data.vsin.com/betting-splits/splits_history.php?gamecode=20260904CFB00213&source=DK",
+      "retrievedAt": "2026-09-05T00:03:35.443Z",
+      "sha256": "ad7311229fb8895b1c55e613d6eff62309ce15e060d6fc0aed4047dae0c72369"
+    },
+    {
+      "file": "vsin-dk-history-20260904CFB00229.html",
+      "url": "https://data.vsin.com/betting-splits/splits_history.php?gamecode=20260904CFB00229&source=DK",
+      "retrievedAt": "2026-09-05T00:03:35.439Z",
+      "sha256": "307c04ba2196d9db95540f2d3d3fd7c983ac6ad996c04bf89f6ff290bf158067"
+    },
+    {
+      "file": "vsin-dk-today.html",
+      "url": "https://data.vsin.com/betting-splits/?source=DK&view=today",
+      "retrievedAt": "2026-09-05T00:03:10.608Z",
+      "sha256": "3b9215738277a9639b6275dd830b79fd66827926717701a133afbab71b67de6f"
+    }
+  ],
+  "normalizedSha256": "9a3a9d12f0277322e08923505050d07f8a0ba2f438a80a7f76b7df58eecd3a64"
+}
