@@ -42,6 +42,32 @@ const row = {
   modelHomeML: null,
   modelPriceBasis: { awaySpread: 6.5, homeSpread: -6.5, total: 51.5 },
 };
+const uclaRow = {
+  ...row,
+  awayTeam: "UCLA",
+  homeTeam: "CAL",
+  awayBookSpread: "-2.5",
+  homeBookSpread: "2.5",
+  bookTotal: "53.5",
+  awayModelSpread: "-6.7",
+  homeModelSpread: "6.7",
+  modelTotal: "50.1",
+  modelAwaySpreadOdds: "-153",
+  modelHomeSpreadOdds: "+153",
+  modelOverOdds: "+140",
+  modelUnderOdds: "-140",
+  modelPriceBasis: { awaySpread: -2.5, homeSpread: 2.5, total: 53.5 },
+  modelBookPrices: {
+    awaySpreadOdds: "-110",
+    homeSpreadOdds: "-110",
+    overOdds: "-110",
+    underOdds: "-110",
+  },
+  awaySpreadOdds: "-112",
+  homeSpreadOdds: "-108",
+  overOdds: "-112",
+  underOdds: "-108",
+};
 function adapted(overrides: Partial<typeof row> = {}) {
   const card = ncaafRowToCard({ ...row, ...overrides } as never);
   const model = sportAdapters.NCAAF(card);
@@ -172,19 +198,7 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
   });
 
   it("uses an owner-bound Book display override without changing the original API fields", () => {
-    const override = {
-      ...row,
-      modelBookPrices: {
-        awaySpreadOdds: "-110",
-        homeSpreadOdds: "-110",
-        overOdds: "-110",
-        underOdds: "-110",
-      },
-      awaySpreadOdds: "-112",
-      homeSpreadOdds: "-108",
-      overOdds: "-112",
-      underOdds: "-108",
-    };
+    const override = { ...uclaRow };
     const card = ncaafRowToCard(override as never);
     expect(
       card.markets
@@ -201,6 +215,50 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     expect(override.awaySpreadOdds).toBe("-112");
     expect(override.underOdds).toBe("-108");
   });
+
+  it.each([
+    ["-3", "3", "53.5", false, true],
+    ["-2.5", "2.5", "54.5", true, false],
+    ["-3", "3", "54.5", false, false],
+  ] as const)(
+    "keeps refreshed API prices when UCLA thresholds move to %s / %s and %s",
+    (
+      awayBookSpread,
+      homeBookSpread,
+      bookTotal,
+      spreadMatches,
+      totalMatches
+    ) => {
+      const card = ncaafRowToCard({
+        ...uclaRow,
+        awayBookSpread,
+        homeBookSpread,
+        bookTotal,
+        awaySpreadOdds: "-115",
+        homeSpreadOdds: "-105",
+        overOdds: "-117",
+        underOdds: "-103",
+      } as never);
+      expect(card.markets[0].rows.map(side => side.book)).toEqual(
+        spreadMatches ? ["-110", "-110"] : ["-115", "-105"]
+      );
+      expect(card.markets[1].rows.map(side => side.book)).toEqual(
+        totalMatches ? ["-110", "-110"] : ["-117", "-103"]
+      );
+      for (const [market, matches] of [
+        [card.markets[0], spreadMatches],
+        [card.markets[1], totalMatches],
+      ] as const) {
+        expect(market.rows.every(side => side.comparable === matches)).toBe(
+          true
+        );
+        expect(market.note?.includes("Book prices supplied by owner.")).toBe(
+          matches
+        );
+        if (!matches) expect(market.foot.edge).toBe(false);
+      }
+    }
+  );
 
   it("keeps the actual live model projection accessible separately from the model price threshold", () => {
     const { game } = adapted({

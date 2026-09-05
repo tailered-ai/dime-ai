@@ -498,7 +498,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
             </div>
           ) : (
             // Combined slate, league-sectioned (owner directive 2026-07-18):
-            // World Cup on top, MLB beneath — buildFeedSections owns the order
+            // NCAAF on top — buildFeedSections owns the order
             // and drops empty leagues. Each league is a COLLAPSIBLE container
             // (native details/summary, open by default): official league logo
             // + the full spelled-out name across the row, chevron affordance
@@ -813,18 +813,19 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
   const basis = hasModel ? g.modelPriceBasis : null;
   const unknownBasis = hasModel && g.modelPriceBasis === null;
   const spreadComparable = !unknownBasis && (!basis || (basis.awaySpread === awaySp && basis.homeSpread === homeSp));
-  const bookPrices = g.modelBookPrices;
+  const spreadBookPrices = basis && spreadComparable ? g.modelBookPrices : null;
   const spread = twoWayCol(
     "Spread",
-    { label: awaySp == null ? awayAbbr : `${awayAbbr} ${fmtLine(awaySp)}`, crest: awayCrest, book: n(bookPrices?.awaySpreadOdds ?? g.awaySpreadOdds), model: M(n(g.modelAwaySpreadOdds)), modelLineLabel: basis ? fmtLine(basis.awaySpread) : undefined, comparable: spreadComparable },
-    { label: homeSp == null ? homeAbbr : `${homeAbbr} ${fmtLine(homeSp)}`, crest: homeCrest, book: n(bookPrices?.homeSpreadOdds ?? g.homeSpreadOdds), model: M(n(g.modelHomeSpreadOdds)), modelLineLabel: basis ? fmtLine(basis.homeSpread) : undefined, comparable: spreadComparable },
+    { label: awaySp == null ? awayAbbr : `${awayAbbr} ${fmtLine(awaySp)}`, crest: awayCrest, book: n(spreadBookPrices?.awaySpreadOdds ?? g.awaySpreadOdds), model: M(n(g.modelAwaySpreadOdds)), modelLineLabel: basis ? fmtLine(basis.awaySpread) : undefined, comparable: spreadComparable },
+    { label: homeSp == null ? homeAbbr : `${homeAbbr} ${fmtLine(homeSp)}`, crest: homeCrest, book: n(spreadBookPrices?.homeSpreadOdds ?? g.homeSpreadOdds), model: M(n(g.modelHomeSpreadOdds)), modelLineLabel: basis ? fmtLine(basis.homeSpread) : undefined, comparable: spreadComparable },
   );
   const totalLine = n(g.bookTotal);
   const totalComparable = !unknownBasis && (!basis || basis.total === totalLine);
+  const totalBookPrices = basis && totalComparable ? g.modelBookPrices : null;
   const total = twoWayCol(
     "Total",
-    { label: totalLine == null ? "OVER" : `O ${totalLine}`, book: n(bookPrices?.overOdds ?? g.overOdds), model: M(n(g.modelOverOdds)), modelLineLabel: basis ? `O ${basis.total}` : undefined, comparable: totalComparable },
-    { label: totalLine == null ? "UNDER" : `U ${totalLine}`, book: n(bookPrices?.underOdds ?? g.underOdds), model: M(n(g.modelUnderOdds)), modelLineLabel: basis ? `U ${basis.total}` : undefined, comparable: totalComparable },
+    { label: totalLine == null ? "OVER" : `O ${totalLine}`, book: n(totalBookPrices?.overOdds ?? g.overOdds), model: M(n(g.modelOverOdds)), modelLineLabel: basis ? `O ${basis.total}` : undefined, comparable: totalComparable },
+    { label: totalLine == null ? "UNDER" : `U ${totalLine}`, book: n(totalBookPrices?.underOdds ?? g.underOdds), model: M(n(g.modelUnderOdds)), modelLineLabel: basis ? `U ${basis.total}` : undefined, comparable: totalComparable },
   );
   const awayWp = n(g.modelAwayWinPct);
   const homeWp = n(g.modelHomeWinPct);
@@ -839,7 +840,7 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
   total.note = hasModel && ["vsin-circa-five-provisional-20260904-v1", "vsin-circa-five-provisional-20260904-v2"].includes(g.ingestionPipelineRevision ?? "")
     ? "Estimated model odds at the Circa total shown."
     : undefined;
-  for (const [market, comparable] of [[spread, spreadComparable], [total, totalComparable]] as const) {
+  for (const [market, comparable, bookPrices] of [[spread, spreadComparable, spreadBookPrices], [total, totalComparable, totalBookPrices]] as const) {
     if (!comparable) {
       market.note = unknownBasis
         ? "Model pricing line unavailable; comparison unavailable."
@@ -1192,19 +1193,16 @@ export interface FeedSection {
   cards: FeedCardSpec[];
 }
 
-/** Combined slate (owner directive 2026-07-18): ONE collective feed for the
- *  date — World Cup section on top, NCAAF above MLB (CBS-scores league grouping;
- *  only the grouping/order is mirrored, nothing else). A league renders only
- *  when it has games that date, so inactive leagues leave no empty header.
- *  empty header. Within a section the existing slate order holds. */
+/** Combined slate: NCAAF first, then World Cup and MLB (owner directive
+ *  2026-09-05). Inactive leagues leave no empty header. */
 export function buildFeedSections(
   wcCards: FeedCardSpec[],
   mlbCards: FeedCardSpec[],
   ncaafCards: FeedCardSpec[] = [],
 ): FeedSection[] {
   const sections: FeedSection[] = [];
-  if (wcCards.length > 0) sections.push({ key: "WC", label: "2026 FIFA World Cup", cards: wcCards });
   if (ncaafCards.length > 0) sections.push({ key: "NCAAF", label: "College Football (NCAAF)", cards: ncaafCards });
+  if (wcCards.length > 0) sections.push({ key: "WC", label: "2026 FIFA World Cup", cards: wcCards });
   if (mlbCards.length > 0) sections.push({ key: "MLB", label: "Major League Baseball (MLB)", cards: mlbCards });
   return sections;
 }
@@ -1273,22 +1271,17 @@ function useFeedCards(
     if (ncaafOnly) {
       const cards = [...((ncaafQuery.data ?? []) as MlbRow[])]
         .sort((a, b) => timeToMinutes(a.startTimeEst) - timeToMinutes(b.startTimeEst))
-        .map(ncaafRowToCard)
-        .sort((a, b) => slateStatusRank(a) - slateStatusRank(b));
+        .map(ncaafRowToCard);
       return buildFeedSections([], [], cards);
     }
-    // Slate order per league: earliest → latest first pitch (owner directive
-    // 2026-07-17; timeToMinutes sends TBD times to the bottom), then LIVE
-    // above upcoming above FINAL (2026-07-18) — the stable sort keeps the
-    // time order within each tier. Tiers apply WITHIN a league section; the
-    // WC → NCAAF → MLB section order is absolute.
+    // NCAAF keeps Eastern kickoff order across all statuses. WC and MLB retain
+    // their existing lifecycle tiers; the NCAAF → WC → MLB order is absolute.
     const wcCards = ((wcQuery.data ?? []) as WcMatch[])
       .map((m) => wcMatchToCard(m, isoDate))
       .sort((a, b) => slateStatusRank(a) - slateStatusRank(b));
     const ncaafCards = [...((ncaafQuery.data ?? []) as MlbRow[])]
       .sort((a, b) => timeToMinutes(a.startTimeEst) - timeToMinutes(b.startTimeEst))
-      .map(ncaafRowToCard)
-      .sort((a, b) => slateStatusRank(a) - slateStatusRank(b));
+      .map(ncaafRowToCard);
     const lineupByGameId = (mlbLineupsQuery.data ?? {}) as Record<number, MlbLineupLike>;
     const mlbCards = [...((mlbQuery.data ?? []) as MlbRow[])]
       .sort((a, b) => timeToMinutes(a.startTimeEst) - timeToMinutes(b.startTimeEst))

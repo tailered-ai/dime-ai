@@ -84,9 +84,9 @@ type BettingSplitsSnapshot = SplitValues &
     sourceLabel: string;
     retrievedAt: string;
     observedAt: number | null;
-  awayBookSpread?: string | null;
-  homeBookSpread?: string | null;
-  bookTotal?: string | null;
+    awayBookSpread?: string | null;
+    homeBookSpread?: string | null;
+    bookTotal?: string | null;
   };
 type Presentation = {
   modelPriceBasis?: ModelPriceBasis | null;

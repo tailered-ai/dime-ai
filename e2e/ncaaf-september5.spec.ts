@@ -26,7 +26,13 @@ const games = SOURCES.map((source, index) =>
     gameDate: DATE,
     awayTeam: source.away,
     homeTeam: source.home,
-    gameStatus: source.initialStatus,
+    // Regression: an early final must stay above a later live game.
+    gameStatus:
+      source.away === "BRY"
+        ? "final"
+        : source.away === "BAY"
+          ? "live"
+          : source.initialStatus,
     publishedModel: true,
     publishedToFeed: true,
   })
@@ -97,6 +103,9 @@ const sourceCard = (cards: Locator, source: (typeof SOURCES)[number]) =>
     has: cards.page().locator(`[title="${source.away} @ ${source.home}"]`),
   });
 const output = "docs/audits/2026-09-05-ncaaf-evidence/screenshots";
+const chronologicalGames = [...games].sort((a, b) =>
+  String(a.startTimeEst).localeCompare(String(b.startTimeEst))
+);
 async function noOverflow(page: Page) {
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)
@@ -184,10 +193,22 @@ for (const [width, theme] of [
     const cards = page.locator("#dmf-league-NCAAF article.projection-card");
     await expect(cards).toHaveCount(68);
     await expect(page.locator("article.projection-card")).toHaveCount(68);
+    expect(
+      await cards
+        .locator(".matchup__line")
+        .evaluateAll(elements =>
+          elements.map(element => element.getAttribute("title"))
+        )
+    ).toEqual(
+      chronologicalGames.map(game => `${game.awayTeam} @ ${game.homeTeam}`)
+    );
     for (const source of SOURCES) {
       const card = sourceCard(cards, source);
       await expect(card).toHaveCount(1);
-      if (source.initialStatus === "upcoming")
+      if (
+        games.find(game => game.awayTeam === source.away)?.gameStatus ===
+        "upcoming"
+      )
         await expect(card.locator(".matchup__venue")).toHaveAttribute(
           "title",
           `Model: ${source.home} ${signed(source.model.homeSpread)} · Total ${source.model.total}`
@@ -241,6 +262,11 @@ for (const [width, theme] of [
     await expect(page.locator('[id^="game-card-"]')).toHaveCount(68, {
       timeout: 20_000,
     });
+    expect(
+      await page
+        .locator('[id^="game-card-"]')
+        .evaluateAll(elements => elements.map(element => element.id))
+    ).toEqual(chronologicalGames.map(game => `game-card-${game.id}`));
     await expect(page.locator(".bs-header")).toContainText("VSiN DK");
     const first = page.locator(`#game-card-${games[0].id}`);
     if (width >= 768) {
