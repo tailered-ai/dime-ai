@@ -571,7 +571,7 @@ test.describe("one-line text contracts", () => {
     await gotoFeed(page, 320);
     const clipped = await page.evaluate(() => {
       const el = document.querySelector<HTMLElement>(
-        '#dmf-league-MLB .dmf-lgname'
+        "#dmf-league-MLB .dmf-lgname"
       )!;
       return { sw: el.scrollWidth, cw: el.clientWidth, text: el.textContent };
     });
@@ -602,7 +602,11 @@ test.describe("sticky chrome — one offset variable", () => {
         };
       });
       if (width < 768) {
-        expect(await page.locator(".dmf-feedhead").evaluate(el => getComputedStyle(el).position)).toBe("relative");
+        expect(
+          await page
+            .locator(".dmf-feedhead")
+            .evaluate(el => getComputedStyle(el).position)
+        ).toBe("relative");
         return;
       }
       // The sticky feedhead re-anchors exactly at the band's height — no
@@ -632,7 +636,9 @@ test.describe("interactive target floors", () => {
   }) => {
     await gotoFeed(page, 1512);
     const targets = await page.evaluate(() => {
-      const sq = document.querySelector<HTMLElement>(".feed-toolbar__icon-button")!;
+      const sq = document.querySelector<HTMLElement>(
+        ".feed-toolbar__icon-button"
+      )!;
       const sqAfter = getComputedStyle(sq, "::after");
       const lineups = document.querySelector<HTMLElement>(
         ".pregame-pitchers__lineups"

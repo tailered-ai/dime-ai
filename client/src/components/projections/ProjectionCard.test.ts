@@ -984,7 +984,9 @@ describe("ProjectionCard — paginated market popover", () => {
     );
     expect(popoverCss).toContain("overflow-y: auto;");
     expect(marketPopoverSrc).not.toContain("projection-card__markets-eyebrow");
-    expect(marketPopoverSrc).toContain('aria-label="Close full model projections"');
+    expect(marketPopoverSrc).toContain(
+      'aria-label="Close full model projections"'
+    );
     expect(popoverCss).not.toMatch(/#0a7c50/i);
   });
 
@@ -1805,10 +1807,15 @@ describe("ProjectionCard — defensive PASS-mint backstop (Round 4 Wave 3 fold-i
   });
 
   it("keeps EDGE labeled with a quiet signal token and no ornamental glyph", () => {
-    const edgeIndicatorSrc = fs.readFileSync(path.join(import.meta.dirname, "EdgeIndicator.tsx"), "utf8");
+    const edgeIndicatorSrc = fs.readFileSync(
+      path.join(import.meta.dirname, "EdgeIndicator.tsx"),
+      "utf8"
+    );
     expect(edgeIndicatorSrc).not.toMatch(/style=\{\{/);
     expect(edgeIndicatorSrc).not.toContain("TrendingUp");
-    expect(edgeIndicatorSrc).toContain('className="edge-indicator__label">Edge');
+    expect(edgeIndicatorSrc).toContain(
+      'className="edge-indicator__label">Edge'
+    );
     expect(edgeIndicatorCss).toContain("color: var(--mint-ink)");
     expect(edgeIndicatorCss).not.toMatch(/border-inline-start|box-shadow/);
   });

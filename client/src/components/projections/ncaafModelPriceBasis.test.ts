@@ -220,7 +220,9 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     );
     expect($(".summary--comparison table")).toHaveLength(0);
     expect($(".summary--comparison .market-table__basis")).toHaveLength(0);
-    expect($(".summary--comparison .summary__item--model dd").first().text()).toBe("+5.123");
+    expect(
+      $(".summary--comparison .summary__item--model dd").first().text()
+    ).toBe("+5.123");
     expect($(".summary--comparison .edge-indicator")).toHaveLength(0);
     expect($.html()).not.toContain("priced at their shown lines");
     expect($.html()).not.toContain("Book and Model pricing lines");
@@ -367,10 +369,23 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     expect(summary.find("table")).toHaveLength(0);
     const slides = $(".summary-carousel--comparison .summary-carousel__slide");
     expect(slides).toHaveLength(4);
-    expect(slides.first().find("button").attr("aria-label")).toBe("View next comparison: Spread: Army (2 of 4)");
-    expect(slides.last().find("button").attr("aria-label")).toBe("View next comparison: Spread: Bryant (1 of 4)");
-    expect(slides.toArray().map(slide => $(slide).find("button").attr("tabindex"))).toEqual(["0", "-1", "-1", "-1"]);
-    expect(slides.toArray().map(slide => $(slide).find("dd").toArray().map(cell => $(cell).text()))).toEqual([
+    expect(slides.first().find("button").attr("aria-label")).toBe(
+      "View next comparison: Spread: Army (2 of 4)"
+    );
+    expect(slides.last().find("button").attr("aria-label")).toBe(
+      "View next comparison: Spread: Bryant (1 of 4)"
+    );
+    expect(
+      slides.toArray().map(slide => $(slide).find("button").attr("tabindex"))
+    ).toEqual(["0", "-1", "-1", "-1"]);
+    expect(
+      slides.toArray().map(slide =>
+        $(slide)
+          .find("dd")
+          .toArray()
+          .map(cell => $(cell).text())
+      )
+    ).toEqual([
       ["Bryant", "+37.5 (-108)", "+26.7"],
       ["Army", "-37.5 (-112)", "-26.7"],
       ["Over", "51.5 (-110)", "54.4"],
@@ -380,7 +395,9 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     expect(summary.text()).not.toContain("-289");
     expect(summary.text()).not.toContain("comparison unavailable");
     expect(summary.text()).not.toContain("Moneyline");
-    expect(summary.find(".edge-indicator, .market-table__row--signal")).toHaveLength(0);
+    expect(
+      summary.find(".edge-indicator, .market-table__row--signal")
+    ).toHaveLength(0);
     expect(rankedEdges(game)).toEqual([]);
     expect(rankedNoEdgeCandidates(game)).toEqual([]);
   });

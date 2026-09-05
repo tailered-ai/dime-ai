@@ -16,7 +16,8 @@ Lead: Impeccable. Advisors: UI UX Pro Max, Apple Design, Emil Design Engineering
 - Initial broad Vitest run: 5,341 passed, 66 failed, 40 pending, one todo. Of the failures, 64 require unavailable database/provider credentials. Two local UI-test failures (open-calendar loading state and superseded shell source assertion) were corrected and passed focused reruns. CI must supply the independent final suite result.
 - Impeccable final detector results were empty for each owned UI scope. Motion verdict: Approve.
 - Initial browser pass caught the oversized calendar and cmdk search label; both repaired and confirmed. The original integration overflow assertion counted intentionally hidden measurement text; it now measures visible labels and page boundaries.
-- Existing responsive suite initially could not create pages because local Playwright ffmpeg is absent. Local rerun disables optional video only; CI configuration retains its installed recorder.
+- Existing responsive suite passed all 36 tests, including 200% text zoom. Its initial attempt could not create pages because local Playwright ffmpeg is absent; the successful local run disabled optional video only. CI retains normal recording.
+- The first combined gate rerun reached its 120-second limit under concurrent local build/browser load. Its orphaned preview was stopped; the build passed a sequential rerun with a 600-second bound. The subsequent browser confirmation passed all nine tests against that completed artifact. All implementation gates are met; independent approval and deployed verification remain pending.
 - Local production smoke: 10/11 passed. Build identity is absent in a local process without Railway commit metadata; live commit proof remains a deployment gate.
 
 ## Known limits and release
