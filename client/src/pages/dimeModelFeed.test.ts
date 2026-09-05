@@ -295,7 +295,7 @@ describe("DimeModelFeed — MLB bindings", () => {
     );
   });
 
-  it("LIVE games rank above upcoming, settled sinks last (2026-07-18, amended 2026-08-06)", () => {
+  it("WC and MLB retain lifecycle tiers while NCAAF uses kickoff order", () => {
     expect(slateStatusRank({ status: "live" })).toBe(0);
     expect(slateStatusRank({ status: "scheduled" })).toBe(1);
     expect(slateStatusRank({ status: "final" })).toBe(2);
@@ -304,9 +304,9 @@ describe("DimeModelFeed — MLB bindings", () => {
     // the ones they can.
     expect(slateStatusRank({ status: "postponed" })).toBe(2);
     expect(slateStatusRank({ status: "suspended" })).toBe(2);
-    // The tier sort is applied per section: WC, combined NCAAF, MLB, plus the
-    // dedicated NCAAF route.
-    expect(src.match(/\.sort\(\(a, b\) => slateStatusRank\(a\) - slateStatusRank\(b\)\)/g)).toHaveLength(4);
+    // Only WC and MLB apply the status sort. Both NCAAF paths finish after mapping.
+    expect(src.match(/\.sort\(\(a, b\) => slateStatusRank\(a\) - slateStatusRank\(b\)\)/g)).toHaveLength(2);
+    expect(src.match(/\.map\(ncaafRowToCard\);/g)).toHaveLength(2);
   });
 
   it("derives the tier from status, not from the timeLabel string", () => {
@@ -485,19 +485,19 @@ describe("DimeModelFeed — combined slate (owner directive 2026-07-18)", () => 
   const card = (id: string): Parameters<typeof buildFeedSections>[0][number] =>
     ({ id, liveLabel: null, timeLabel: "7:05 PM ET" }) as Parameters<typeof buildFeedSections>[0][number];
 
-  it("sections order is absolute: World Cup, NCAAF, then MLB", () => {
+  it("sections order is absolute: NCAAF, World Cup, then MLB", () => {
     const sections = buildFeedSections(
       [card("wc-1"), card("wc-2")],
       [card("mlb-1")],
       [card("ncaaf-1")],
     );
-    expect(sections.map((s) => s.key)).toEqual(["WC", "NCAAF", "MLB"]);
+    expect(sections.map((s) => s.key)).toEqual(["NCAAF", "WC", "MLB"]);
     // Full spelled-out league names own the header width (2026-07-18).
-    expect(sections[0].label).toBe("2026 FIFA World Cup");
-    expect(sections[1].label).toBe("College Football (NCAAF)");
+    expect(sections[0].label).toBe("College Football (NCAAF)");
+    expect(sections[1].label).toBe("2026 FIFA World Cup");
     expect(sections[2].label).toBe("Major League Baseball (MLB)");
-    expect(sections[0].cards.map((c) => c.id)).toEqual(["wc-1", "wc-2"]);
-    expect(sections[1].cards.map((c) => c.id)).toEqual(["ncaaf-1"]);
+    expect(sections[0].cards.map((c) => c.id)).toEqual(["ncaaf-1"]);
+    expect(sections[1].cards.map((c) => c.id)).toEqual(["wc-1", "wc-2"]);
     expect(sections[2].cards.map((c) => c.id)).toEqual(["mlb-1"]);
   });
 

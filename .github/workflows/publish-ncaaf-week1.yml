@@ -13,6 +13,7 @@ on:
           - sjsu-emu
           - september-4-five
           - september-4-dk
+          - september-5-dk-model
       dry_run:
         description: Fetch and validate without writing TiDB
         required: true
@@ -58,6 +59,14 @@ jobs:
             else
               pnpm exec tsx scripts/publishSjsuEmu.mts "${slate_args[@]}" --publish
               pnpm exec tsx scripts/publishSjsuEmu.mts "${slate_args[@]}" --verify
+            fi
+          elif [ "$PUBLISH_SLATE" = "september-5-dk-model" ]; then
+            pnpm exec tsx scripts/publishNcaafSeptember5.mts --check
+            if [ "$DRY_RUN" = "true" ]; then
+              pnpm exec tsx scripts/publishNcaafSeptember5.mts --dry-run
+            else
+              pnpm exec tsx scripts/publishNcaafSeptember5.mts --publish
+              pnpm exec tsx scripts/publishNcaafSeptember5.mts --verify
             fi
           elif [ "$PUBLISH_SLATE" = "september-3" ]; then
             if [ "$DRY_RUN" = "true" ]; then

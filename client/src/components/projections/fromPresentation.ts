@@ -41,6 +41,8 @@ function marketToProjection(m: MarketPresentationModel): ProjectionMarket {
     bookPrice: sel.bookPrice,
     bookOppPrice: n === 2 ? m.selections[n - 1 - i].bookPrice : undefined,
     modelPrice: sel.modelPrice,
+    modelLineLabel: sel.modelLineLabel,
+    comparable: sel.comparable,
     flag: sel.flag ?? null,
   }));
   return {

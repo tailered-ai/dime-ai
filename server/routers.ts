@@ -1,4 +1,6 @@
 import { presentNcaafDk, presentNcaafDkHistory } from "../shared/ncaafSeptember4Dk";
+import { presentNcaafSeptember5, presentNcaafSeptember5History, DATE as NCAAF_SEPT5_DATE } from "../shared/ncaafSeptember5";
+import NCAAF_FEED_TEAMS from "../shared/ncaafFeedTeams.json";
 import { TRPCError } from "@trpc/server";
 import { presentNcaafSeptember4, presentNcaafSeptember4History } from "../shared/ncaafSeptember4";
 import { gamesListInput } from "./gamesListInput";
@@ -99,7 +101,7 @@ import { MLB_VALID_DB_SLUGS, MLB_VALID_ABBREVS } from "@shared/mlbTeams";
 import CFB_TEAMS from "../scripts/data/cfb-2026/teams.json";
 import { createHash } from 'node:crypto';
 
-const NCAAF_VALID_ABBREVS = new Set(CFB_TEAMS.map((team) => team.espnAbbreviation));
+const NCAAF_VALID_ABBREVS = new Set([...CFB_TEAMS.map((team) => team.espnAbbreviation), ...Object.keys(NCAAF_FEED_TEAMS)]);
 
 /**
  * Strip fields that are always null for the given sport from the game object.
@@ -182,7 +184,10 @@ function stripSportNullFields<T extends import('../drizzle/schema').Game>(game: 
 
   // Strip sport-specific fields
   if (sport !== 'NHL') for (const f of nhlOnlyFields) delete result[f];
-  if (sport !== 'MLB') for (const f of mlbOnlyFields) delete result[f];
+  if (sport !== 'MLB') for (const f of mlbOnlyFields) {
+    if (sport === 'NCAAF' && (f === 'venue' || f === 'broadcaster')) continue;
+    delete result[f];
+  }
 
   return result as T;
 }
@@ -292,7 +297,7 @@ export const appRouter = router({
         //   MLB (111 games × 175 fields): 425KB → ~250KB
         //   NHL/NBA (fewer games, fewer fields): proportionally smaller
         // Cache stores full Game objects; stripping happens at the wire layer only.
-        const stripped = filtered.map(g => stripSportNullFields(presentNcaafDk(presentNcaafSeptember4(g))));
+        const stripped = filtered.map(g => stripSportNullFields(presentNcaafSeptember5(presentNcaafDk(presentNcaafSeptember4(g)))));
 
         // IP gating (Phase 3): the model projections/edges are the paid product.
         // Anonymous callers get commodity fields only (schedule, book lines,
@@ -1130,7 +1135,11 @@ export const appRouter = router({
           `[tRPC][oddsHistory.listForGame] AUTHED principal=${ctx.sportsPrincipal} gameId=${input.gameId}`
         );
         const rows = await listOddsHistory(input.gameId);
-        const history = rows.map(row => presentNcaafDkHistory(presentNcaafSeptember4History(row)));
+        // Bind imported source labels to the actual parent event as well as its observation.
+        const game = rows.some(row => row.sport === "NCAAF")
+          ? (await listGamesByDate(NCAAF_SEPT5_DATE, "NCAAF")).find(game => game.id === input.gameId)
+          : undefined;
+        const history = rows.map(row => presentNcaafSeptember5History(presentNcaafDkHistory(presentNcaafSeptember4History(row)), game));
         const hasDkHistory = history.some(row => row.sourceLabel === "VSiN DK");
         return { history: hasDkHistory ? history.filter(row => row.sourceLabel !== "AN Open") : history };
       }),

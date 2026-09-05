@@ -101,8 +101,18 @@ export function ProjectionCard({
   // an analysis that did not happen. Same reasoning the owner used to split
   // `unplayable` out of PASS (pages/ai-model-projections.md, 2026-08-06).
   const modelPublished = game.modelPublished !== false;
+  const comparisonUnavailable =
+    modelPublished &&
+    displayInsights.length === 0 &&
+    game.markets.some(market =>
+      market.sides.some(side => side.comparable === false)
+    );
   const isNoModel = game.status !== "live" && !modelPublished;
-  const isPass = game.status !== "live" && modelPublished && edges.length === 0;
+  const isPass =
+    game.status !== "live" &&
+    modelPublished &&
+    edges.length === 0 &&
+    !comparisonUnavailable;
   // Unplayable (owner directive 2026-08-06): the game is not available to act
   // on, whatever the model found. Deliberately NOT folded into isPass — PASS
   // means "nothing worth acting on in a game that WILL be played", which is the
@@ -176,6 +186,7 @@ export function ProjectionCard({
           insight={displayInsights[0] ?? null}
           teams={[game.away, game.home]}
           modelPublished={modelPublished}
+          comparisonUnavailable={comparisonUnavailable}
         />
       )}
 

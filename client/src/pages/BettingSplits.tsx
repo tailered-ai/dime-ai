@@ -616,6 +616,9 @@ export default function BettingSplitsPage({
     a: NonNullable<typeof allGames>[number],
     b: NonNullable<typeof allGames>[number]
   ): number => {
+    // NCAAF stays in Eastern kickoff order as games move through their lifecycle.
+    if (a?.sport === "NCAAF" && b?.sport === "NCAAF")
+      return sortableMinutes(a.startTimeEst) - sortableMinutes(b.startTimeEst);
     const statusOrder = (s: string | null | undefined) =>
       s === "live" ? 0 : s === "upcoming" ? 1 : s === "final" ? 2 : 3;
     const sSortA = statusOrder(a?.gameStatus);

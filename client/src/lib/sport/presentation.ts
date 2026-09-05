@@ -67,6 +67,8 @@ export type SelectionRole =
 
 /** One selectable side of a market, bound to a participant where applicable. */
 export interface MarketSelectionModel {
+  modelLineLabel?: string;
+  comparable?: boolean;
   id: string;
   role: SelectionRole;
   /** Rendered label — participant-resolved, never a raw country code. */
@@ -161,6 +163,8 @@ export interface FeedTeamLike {
   score?: string | null;
 }
 export interface FeedRowLike {
+  modelLineLabel?: string;
+  comparable?: boolean;
   label: string;
   book: string;
   model: string;
@@ -281,6 +285,7 @@ function sidesFromMarket(m: MarketPresentationModel): MarketSideInput[] {
     bookPrice: sel.bookPrice,
     bookOppPrice: n === 2 ? m.selections[n - 1 - i].bookPrice : undefined,
     modelPrice: sel.modelPrice,
+    comparable: sel.comparable,
   }));
 }
 
@@ -375,6 +380,8 @@ function teamMarkets(
       label: teamSideLabel(m.title, row.label, away, home),
       bookPrice: parseAmerican(row.book),
       modelPrice: parseAmerican(row.model),
+      modelLineLabel: row.modelLineLabel,
+      comparable: row.comparable,
     }));
     return {
       key,
