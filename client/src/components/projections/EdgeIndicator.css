@@ -1,61 +1,37 @@
-/* EdgeIndicator — accessible mint accent (Law v3). Mint reads as a tinted CELL
-   with a high-contrast foreground, never small mint text on white. Meaning is
-   carried by surface + border + label + icon, so it never depends on color. */
-
+/* The signal is a labeled value, with no decorative badge or trend glyph. */
 .edge-indicator {
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  align-items: baseline;
+  gap: 6px;
   inline-size: fit-content;
   max-inline-size: 100%;
   min-block-size: 2rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 10px;
+  padding: 0.375rem 0;
+  color: var(--mint-ink);
   font-variant-numeric: tabular-nums;
-  color: var(--brand-mint-foreground);
-  background: var(--brand-mint-surface);
-  border: 1px solid var(--brand-mint-border);
-  border-inline-start: 4px solid var(--brand-mint, #45e0a8); /* the one mint rail */
-  box-shadow: var(--elev-1);
+  white-space: nowrap;
 }
-/* The trend icon strokes with currentColor; owned here (not inline) so PASS
-   neutralization works through the plain cascade. */
-.edge-indicator > svg { color: var(--brand-mint-foreground); }
-
 .edge-indicator__label {
   font-size: var(--proj-meta);
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  opacity: 0.85;
 }
-
 .edge-indicator__value {
   font-size: var(--proj-odds);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
-
-/* NO_EDGE: compact ROI-only badge. Every non-actionable value stays neutral
-   regardless of sign; mint remains reserved for a real model signal. */
 .edge-indicator--none {
   display: inline-flex;
-  align-items: center;
-  /* Audit DIME-UI-008: one badge geometry — the neutral variant shares the
-     mint cell's height and padding so mixed rows align. */
+  align-items: baseline;
   min-block-size: 2rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 10px;
+  padding: 0.375rem 0;
   color: var(--text-secondary, #a6a6a6);
-  background: transparent;
-  border: 1px solid var(--border, #262626);
   font-size: var(--proj-label);
   font-weight: 600;
-  box-shadow: none;
   white-space: nowrap;
 }
-
-.edge-indicator__roi {
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-}
+.edge-indicator__roi { font-variant-numeric: tabular-nums; font-weight: 700; }
+html:not(.dark) .projection-card--compact .edge-indicator { color: color-mix(in srgb, var(--mint-ink) 50%, #000000); }
+html:not(.dark) .projection-card--compact.projection-card--unplayable .edge-indicator { color: var(--text-secondary); }

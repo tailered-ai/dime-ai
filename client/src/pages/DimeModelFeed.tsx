@@ -21,13 +21,15 @@
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { TZDate } from "react-day-picker";
+import { Link, useLocation, useSearch } from "wouter";
 import { toast } from "sonner";
 import type { inferRouterOutputs } from "@trpc/server";
-import { keepPreviousData } from "@tanstack/react-query";
 import { trpc, type AppRouter } from "@/lib/trpc";
 import { useAnalytics, useTrackAction } from "@/lib/analytics";
 import { useTheme } from "@/contexts/ThemeContext";
+import { FeedToolbar } from "@/components/feed/FeedToolbar";
+import { DEFAULT_FEED_FILTERS, easternToday, feedFilterOptions, filterFeedItems, isValidFeedDate, type FeedFilters } from "@/lib/feedNavigation";
 import { ProjectionCard } from "@/components/projections/ProjectionCard";
 import { presentationToProjectionGame } from "@/components/projections/fromPresentation";
 import {
@@ -147,7 +149,6 @@ function SkeletonRow() {
       <div className="dmf-skel" style={{ width: "55%", height: 20, marginInline: "auto" }} />
       <div className="dmf-skel" style={{ width: "38%", height: 12, marginTop: 8, marginInline: "auto" }} />
       <div className="dmf-skel" style={{ width: "30%", height: 10, marginTop: 6, marginInline: "auto" }} />
-      <div className="dmf-skel" style={{ width: "100%", height: 132, marginTop: 12, borderRadius: 12 }} />
       <div className="dmf-skel" style={{ width: "100%", height: 44, marginTop: 12, borderRadius: 10 }} />
       <div className="dmf-skel" style={{ width: "100%", height: 44, marginTop: 8, borderRadius: 10 }} />
     </div>
@@ -179,24 +180,9 @@ export function parseFeedModelPath(
   const m = /^(\d{2})-(\d{2})-(\d{4})$/.exec(date);
   if (!m) return null;
   const [, mm, dd, yyyy] = m;
-  const mo = Number(mm), da = Number(dd);
-  if (mo < 1 || mo > 12 || da < 1 || da > 31) return null;
-  return { sport: sportCode, isoDate: `${yyyy}-${mm}-${dd}` };
+  const isoDate = `${yyyy}-${mm}-${dd}`;
+  return isValidFeedDate(isoDate) ? { sport: sportCode, isoDate } : null;
 }
-
-const shiftIso = (iso: string, days: number): string => {
-  const d = new Date(`${iso}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-};
-
-const prettyDate = (iso: string): string =>
-  new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    timeZone: "UTC",
-  });
 
 /** League logo box, shared by the in-list collapsible header (desktop) and the
  *  feedhead league bar (mobile). WC emblem is theme-keyed (black FIFA wordmark
@@ -262,8 +248,34 @@ const identityRouteHref = (href: string) => href;
 
 export default function DimeModelFeed(props: DimeModelFeedProps) {
   const [, navigate] = useLocation();
+  const search = useSearch();
+  const filters = useMemo<FeedFilters>(() => {
+    const params = new URLSearchParams(search);
+    return { status: params.get("status") || "all", league: params.get("league") || "all",
+      conference: params.get("conference") || "all", game: params.get("game") || "all" };
+  }, [search]);
   const resolveRouteHref = props.resolveRouteHref ?? identityRouteHref;
   const parsed = parseFeedModelPath(props.sport, props.date);
+  const [today, setToday] = useState(easternToday);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const refreshToday = () => {
+      clearTimeout(timer);
+      const now = Date.now();
+      setToday(easternToday(new Date(now)));
+      const midnight = new TZDate(now, "America/New_York");
+      midnight.setHours(24, 0, 0, 0);
+      timer = setTimeout(refreshToday, midnight.getTime() - now);
+    };
+    refreshToday();
+    window.addEventListener("focus", refreshToday);
+    document.addEventListener("visibilitychange", refreshToday);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("focus", refreshToday);
+      document.removeEventListener("visibilitychange", refreshToday);
+    };
+  }, []);
   // Theme is app-global (ThemeContext) so the choice follows the user across
   // every tab and the bottom tab bar. ?theme= is still honored for embeds.
   const { theme, mode, setTheme } = useTheme();
@@ -288,9 +300,9 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
     /^(mlb|wc|ncaaf)(?:-|$)/i.test(props.sport ?? "");
   useEffect(() => {
     if (needsDateCanonicalize || needsSportCanonicalize) {
-      navigate(resolveRouteHref(feedModelPath("MLB", parsed?.isoDate ?? undefined)), { replace: true });
+      navigate(resolveRouteHref(feedModelPath("MLB", parsed?.isoDate ?? today) + (search ? `?${search}` : "")), { replace: true });
     }
-  }, [needsDateCanonicalize, needsSportCanonicalize, parsed?.isoDate, navigate, resolveRouteHref]);
+  }, [needsDateCanonicalize, needsSportCanonicalize, parsed?.isoDate, navigate, resolveRouteHref, search, today]);
 
   // Discord account-link feedback lands here now (the legacy /dashboard
   // consumer is unrouted): surface it once, then strip the params.
@@ -310,14 +322,32 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
   // ADAPTER WIRING (exact bindings from GameCard / WcFeedInline) is attached
   // below in useFeedCards — see mlbRowToCard / wcMatchToCard. The feed is
   // combined (owner directive 2026-07-18): both leagues load for the date.
-  const { sections, isLoading, isStale, gamesCount, isError, retry } = useFeedCards(isoDate, sport);
+  const { sections, isLoading, gamesCount, isError, retry } = useFeedCards(isoDate);
+  const filterItems = useMemo(() => sections.flatMap(section => section.cards.map(game => ({
+    id: game.id, league: section.key, status: game.status,
+    awayCode: game.away.crest.code, homeCode: game.home.crest.code,
+    awayName: game.away.name, homeName: game.home.name,
+  }))), [sections]);
+  const options = useMemo(() => feedFilterOptions(filterItems, filters), [filterItems, filters]);
+  const visibleIds = useMemo(() => new Set(filterFeedItems(filterItems, filters).map(game => game.id)), [filterItems, filters]);
+  const visibleSections = sections.map(section => ({ ...section, cards: section.cards.filter(game => visibleIds.has(game.id)) })).filter(section => section.cards.length > 0);
+  const navigateFeed = (nextDate: string, nextFilters: FeedFilters, replace = false) => {
+    const params = new URLSearchParams(search);
+    for (const [key, value] of Object.entries(nextFilters)) {
+      if (value === "all") params.delete(key);
+      else params.set(key, value);
+    }
+    const query = params.toString();
+    navigate(resolveRouteHref(feedModelPath("MLB", nextDate) + (query ? `?${query}` : "")), { replace });
+  };
+  const changeFilters = (next: FeedFilters) => {
+    if (next.status !== filters.status) next = { ...next, league: "all", conference: "all", game: "all" };
+    else if (next.league !== filters.league) next = { ...next, conference: "all", game: "all" };
+    else if (next.conference !== filters.conference) next = { ...next, game: "all" };
+    navigateFeed(isoDate, next);
+  };
 
-  // League open/closed is CONTROLLED state (owner directive 2026-07-29): on
-  // mobile the league header lives inside the sticky feedhead (the feed's
-  // primary menu bar), physically apart from the <details> it collapses, so
-  // native summary toggling alone can't drive it. Desktop summary clicks and
-  // mobile bar taps both funnel through setLeagueOpen; onToggle keeps state in
-  // sync when the browser flips the DOM first. Leagues default open.
+  // Preserve per-league disclosure state while filtering the ordered slate.
   const [closedLeagues, setClosedLeagues] = useState<ReadonlySet<FeedSection["key"]>>(
     () => new Set(),
   );
@@ -338,7 +368,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
   const trackAction = useTrackAction();
   const firedRef = useRef<string | null>(null);
   useEffect(() => {
-    if (isLoading || isStale || gamesCount <= 0) return;
+    if (isLoading || gamesCount <= 0) return;
     const sig = `${isoDate}:${gamesCount}`;
     if (firedRef.current === sig) return;
     firedRef.current = sig;
@@ -347,11 +377,14 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
       outcome: "success",
       props: { sport: sport.toLowerCase(), data_freshness_state: "fresh" },
     });
-  }, [isLoading, isStale, gamesCount, isoDate, track, sport]);
+  }, [isLoading, gamesCount, isoDate, track, sport]);
 
   // The combined feed has one sport-neutral URL per date.
-  const go = (nextIso: string) =>
-    navigate(resolveRouteHref(feedModelPath("MLB", nextIso)));
+  const go = (nextIso: string) => {
+    if (!isValidFeedDate(nextIso) || nextIso === isoDate) return;
+    trackAction("feed_date_navigated", { props: { direction: nextIso < isoDate ? "prev" : "next" } });
+    navigateFeed(nextIso, { ...filters, game: "all" });
+  };
 
   if (needsDateCanonicalize || needsSportCanonicalize) {
     // One-frame redirect to the dated URL; queries stay disabled (isoDate="").
@@ -416,64 +449,14 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
       <main className="dmf-scroll">
         {!props.embeddedInShell && <h1 className="sr-only">AI Model Projections</h1>}
         <div className="dmf-feedhead">
-          <div className="dmf-datenav">
-            <button
-              className="dmf-sq"
-              aria-label="Previous day"
-              onClick={() => {
-                trackAction("feed_date_navigated", { props: { direction: "prev" } });
-                go(shiftIso(isoDate, -1));
-              }}
-            >
-              ‹
-            </button>
-            <div className="dmf-datelbl">{prettyDate(isoDate)}</div>
-            <button
-              className="dmf-sq"
-              aria-label="Next day"
-              onClick={() => {
-                trackAction("feed_date_navigated", { props: { direction: "next" } });
-                go(shiftIso(isoDate, 1));
-              }}
-            >
-              ›
-            </button>
-          </div>
-          {/* Combined slate (owner directive 2026-07-18): no sport toggle and
-              no slate count — the league headers below own identification;
-              the feedhead's bottom border stays as the divider. */}
-          {/* MOBILE (<768px, owner directive 2026-07-29): the league headers
-              join the date inside this sticky feedhead — one grouped primary
-              menu bar with no gap to the floating nav. Each bar toggles its
-              league's <details> below (controlled state); the in-list summary
-              headers are display:none'd on mobile so the bar is the single
-              control. Desktop never shows these (CSS hides .dmf-lgbars). */}
-          {sections.length > 0 && (
-            <div className="dmf-lgbars">
-              {sections.map((section) => {
-                const open = !closedLeagues.has(section.key);
-                return (
-                  <button
-                    key={section.key}
-                    type="button"
-                    className="dmf-lgbar"
-                    aria-expanded={open}
-                    aria-controls={`dmf-league-${section.key}`}
-                    onClick={() => setLeagueOpen(section.key, !open)}
-                  >
-                    <LeagueMark league={section.key} />
-                    <span className="dmf-lgname">{section.label}</span>
-                    <ChevronDown className="dmf-lgchev dmf-lgchev--expand" aria-hidden="true" />
-                    <ChevronUp className="dmf-lgchev dmf-lgchev--collapse" aria-hidden="true" />
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <FeedToolbar date={isoDate} today={today} filters={filters}
+            onFiltersChange={changeFilters} onDateChange={go}
+            leagueOptions={options.leagues} conferenceOptions={options.conferences} gameOptions={options.games}
+            loading={isLoading} visibleCount={visibleIds.size} totalCount={gamesCount} />
         </div>
 
-        <div className={`dmf-list${isStale ? " dmf-stale" : ""}`} aria-busy={isStale}>
-          {isLoading && gamesCount === 0 ? (
+        <div className="dmf-list" aria-busy={isLoading}>
+          {isLoading && visibleIds.size === 0 ? (
             /* 2026-08-05 (audit DIME-UI-019 completion): skeletons render
                inside the SAME .dmf-league/.dmf-leaguebody containers as the
                loaded slate, so the container-driven 1/2/3-up column count is
@@ -499,6 +482,11 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
               <span className="dmf-micro">No games for this date</span>
               <p>Try the date arrows above.</p>
             </div>
+          ) : visibleIds.size === 0 ? (
+            <div className="dmf-empty" role="status">
+              <span className="dmf-micro">No games match these filters</span>
+              <button type="button" className="dmf-retry" onClick={() => changeFilters({ ...DEFAULT_FEED_FILTERS })}>Clear filters</button>
+            </div>
           ) : (
             // Combined slate, league-sectioned (owner directive 2026-07-18):
             // NCAAF on top — buildFeedSections owns the order
@@ -509,7 +497,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
             // wordmark on light, white on dark — CSS swaps by data-dmf-theme;
             // both render in the same fixed box). A missing logo file hides
             // itself and the header stays clean text.
-            sections.map((section) => (
+            visibleSections.map((section) => (
               <details
                 key={section.key}
                 id={`dmf-league-${section.key}`}
@@ -1225,27 +1213,23 @@ export function buildFeedSections(
 
 function useFeedCards(
   isoDate: string,
-  feedSport: "MLB" | "WC" | "NCAAF" = "MLB",
-): { sections: FeedSection[]; isLoading: boolean; isStale: boolean; gamesCount: number; isError: boolean; retry: () => void } {
-  const ncaafOnly = feedSport === "NCAAF";
+): { sections: FeedSection[]; isLoading: boolean; gamesCount: number; isError: boolean; retry: () => void } {
   const mlbQuery = trpc.games.list.useQuery(
     { sport: "MLB", gameDate: isoDate },
     {
-      enabled: !!isoDate && !ncaafOnly,
+      enabled: !!isoDate,
       refetchOnWindowFocus: false,
       refetchInterval: 60 * 1000,
       staleTime: 60 * 1000,
-      placeholderData: (prev) => prev,
     },
   );
   const wcQuery = trpc.wc2026.matchesByDate.useQuery(
     { date: isoDate },
     {
-      enabled: !!isoDate && !ncaafOnly,
+      enabled: !!isoDate,
       refetchOnWindowFocus: false,
       refetchInterval: 60 * 1000,
       staleTime: 60 * 1000,
-      placeholderData: keepPreviousData,
     },
   );
   const ncaafQuery = trpc.games.list.useQuery(
@@ -1255,7 +1239,6 @@ function useFeedCards(
       refetchOnWindowFocus: false,
       refetchInterval: 60 * 1000,
       staleTime: 60 * 1000,
-      placeholderData: (prev) => prev,
     },
   );
   const scheduledMlbGameIds = useMemo(
@@ -1275,7 +1258,7 @@ function useFeedCards(
   const mlbLineupsQuery = trpc.games.mlbLineups.useQuery(
     { gameIds: scheduledMlbGameIds },
     {
-      enabled: !!isoDate && !ncaafOnly && scheduledMlbGameIds.length > 0,
+      enabled: !!isoDate && scheduledMlbGameIds.length > 0,
       refetchOnWindowFocus: false,
       refetchInterval: 60 * 1000,
       staleTime: 60 * 1000,
@@ -1284,12 +1267,6 @@ function useFeedCards(
   );
 
   const sections = useMemo<FeedSection[]>(() => {
-    if (ncaafOnly) {
-      const cards = [...((ncaafQuery.data ?? []) as MlbRow[])]
-        .sort((a, b) => timeToMinutes(a.startTimeEst) - timeToMinutes(b.startTimeEst))
-        .map(ncaafRowToCard);
-      return buildFeedSections([], [], cards);
-    }
     // NCAAF keeps Eastern kickoff order across all statuses. WC and MLB retain
     // their existing lifecycle tiers; the NCAAF → WC → MLB order is absolute.
     const wcCards = ((wcQuery.data ?? []) as WcMatch[])
@@ -1304,33 +1281,20 @@ function useFeedCards(
       .map((game) => mlbRowToCard(game, lineupByGameId[game.id]))
       .sort((a, b) => slateStatusRank(a) - slateStatusRank(b));
     return buildFeedSections(wcCards, mlbCards, ncaafCards);
-  }, [wcQuery.data, mlbQuery.data, mlbLineupsQuery.data, ncaafQuery.data, isoDate, ncaafOnly]);
+  }, [wcQuery.data, mlbQuery.data, mlbLineupsQuery.data, ncaafQuery.data, isoDate]);
 
-  const isLoading = ncaafOnly
-    ? ncaafQuery.isLoading
-    : wcQuery.isLoading || ncaafQuery.isLoading || mlbQuery.isLoading;
-  // Stale = paging dates while placeholderData keeps the previous slate
-  // mounted — the UI dims so the old cards are never mistaken for the new
-  // date's numbers (this is a betting surface; wrong-slate reads cost money).
-  const isStale = ncaafOnly
-    ? ncaafQuery.isPlaceholderData && ncaafQuery.isFetching
-    : (wcQuery.isPlaceholderData && wcQuery.isFetching) ||
-      (ncaafQuery.isPlaceholderData && ncaafQuery.isFetching) ||
-      (mlbQuery.isPlaceholderData && mlbQuery.isFetching);
+  // Date is part of every query key. Never render a previous date as placeholder
+  // data; same-date cache remains available during the regular background poll.
+  const isLoading = wcQuery.isLoading || ncaafQuery.isLoading || mlbQuery.isLoading;
   const gamesCount = sections.reduce((n, s) => n + s.cards.length, 0);
   // Outage surface (audit D-FEED-ERROR / page law "query errors must be
   // surfaced"): with no data to show and every league query failed, the feed
   // must say so instead of claiming an empty slate.
-  const isError = ncaafOnly
-    ? ncaafQuery.isError
-    : mlbQuery.isError && ncaafQuery.isError && wcQuery.isError;
+  const isError = mlbQuery.isError || ncaafQuery.isError || wcQuery.isError;
   const retry = () => {
-    if (ncaafOnly) void ncaafQuery.refetch();
-    else {
-      void mlbQuery.refetch();
-      void ncaafQuery.refetch();
-      void wcQuery.refetch();
-    }
+    void mlbQuery.refetch();
+    void ncaafQuery.refetch();
+    void wcQuery.refetch();
   };
-  return { sections, isLoading, isStale, gamesCount, isError, retry };
+  return { sections, isLoading, gamesCount, isError, retry };
 }

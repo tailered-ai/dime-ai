@@ -213,22 +213,17 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
       renderToStaticMarkup(createElement(ProjectionCard, { game }))
     );
     expect($(".summary-carousel--comparison").attr("aria-label")).toBe(
-      "3 Book and Model markets"
+      "6 Book and Model comparisons"
     );
     expect($(".summary-carousel__slide").first().attr("aria-label")).toBe(
-      "Market 1 of 3: Spread; Book and Model values"
+      "Comparison 1 of 6: Spread: Bryant; Book and Model values"
     );
-    expect($(".summary--comparison .market-table__basis").first().text()).toBe(
-      "Pricing line unavailable"
-    );
+    expect($(".summary--comparison table")).toHaveLength(0);
+    expect($(".summary--comparison .market-table__basis")).toHaveLength(0);
     expect(
-      $(".summary--comparison tfoot")
-        .toArray()
-        .every(foot => $(foot).text() === "NO EDGE")
-    ).toBe(true);
-    expect($(".summary--comparison .market-table__row--signal")).toHaveLength(
-      0
-    );
+      $(".summary--comparison .summary__item--model dd").first().text()
+    ).toBe("+5.123");
+    expect($(".summary--comparison .edge-indicator")).toHaveLength(0);
     expect($.html()).not.toContain("priced at their shown lines");
     expect($.html()).not.toContain("Book and Model pricing lines");
   });
@@ -371,47 +366,37 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
       renderToStaticMarkup(createElement(ProjectionCard, { game }))
     );
     const summary = $(".summary--comparison");
-    expect(summary.find("table")).toHaveLength(2);
+    expect(summary.find("table")).toHaveLength(0);
     const slides = $(".summary-carousel--comparison .summary-carousel__slide");
-    expect(slides).toHaveLength(2);
-    expect(
-      slides.toArray().map(slide => $(slide).find("table").length)
-    ).toEqual([1, 1]);
+    expect(slides).toHaveLength(4);
     expect(slides.first().find("button").attr("aria-label")).toBe(
-      "View next market: Total (2 of 2)"
+      "View next comparison: Spread: Army (2 of 4)"
     );
     expect(slides.last().find("button").attr("aria-label")).toBe(
-      "View next market: Spread (1 of 2)"
+      "View next comparison: Spread: Bryant (1 of 4)"
     );
     expect(
       slides.toArray().map(slide => $(slide).find("button").attr("tabindex"))
-    ).toEqual(["0", "-1"]);
+    ).toEqual(["0", "-1", "-1", "-1"]);
     expect(
-      summary
-        .find("tbody tr")
-        .toArray()
-        .map(tr =>
-          $(tr)
-            .find("th, td")
-            .toArray()
-            .map(cell => $(cell).text())
-        )
+      slides.toArray().map(slide =>
+        $(slide)
+          .find("dd")
+          .toArray()
+          .map(cell => $(cell).text())
+      )
     ).toEqual([
-      ["Bryant", "+37.5(-108)", "+26.7(-289)at +37"],
-      ["Army", "-37.5(-112)", "-26.7(+289)at -37"],
-      ["Over", "51.5(-110)", "54.4(-147)at 50.5"],
-      ["Under", "51.5(-110)", "54.4(+147)at 50.5"],
+      ["Bryant", "+37.5 (-108)", "+26.7"],
+      ["Army", "-37.5 (-112)", "-26.7"],
+      ["Over", "51.5 (-110)", "54.4"],
+      ["Under", "51.5 (-110)", "54.4"],
     ]);
-    expect(
-      summary
-        .find("tfoot")
-        .toArray()
-        .map(foot => $(foot).text())
-    ).toEqual(["NO EDGE", "NO EDGE"]);
+    expect(summary.text()).not.toContain("at +37");
+    expect(summary.text()).not.toContain("-289");
     expect(summary.text()).not.toContain("comparison unavailable");
     expect(summary.text()).not.toContain("Moneyline");
     expect(
-      summary.find(".summary__signal, .market-table__row--signal")
+      summary.find(".edge-indicator, .market-table__row--signal")
     ).toHaveLength(0);
     expect(rankedEdges(game)).toEqual([]);
     expect(rankedNoEdgeCandidates(game)).toEqual([]);

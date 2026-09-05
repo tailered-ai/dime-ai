@@ -97,15 +97,8 @@
 /* ── Scroll region (document scroll — no inner overflow, or the sticky slate
    header could never stick) ── */
 .dmf-scroll { flex: 1; padding: 0 var(--dmf-gutter) 60px; position: relative; }
-.dmf-feedhead { position: sticky; top: var(--dmf-topbar-h); z-index: 10; padding: 16px 0 10px; background: var(--dmf-page); border-bottom: 1px solid var(--dmf-border); margin-bottom: 10px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-.dmf-datenav { display: flex; align-items: center; gap: 12px; }
-.dmf-sq { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--dmf-border-hi); color: var(--dmf-t2); display: grid; place-items: center; position: relative; transition: border-color var(--dmf-t) var(--dmf-ease), color var(--dmf-t) var(--dmf-ease); }
-.dmf-sq::after { content: ""; position: absolute; inset: -9px; } /* CL-04 (closure): 28px + 2x9px = 46px effective hit-area, clears the 44px target-size floor with margin */
-.dmf-sq:hover { border-color: var(--dmf-border-hover); color: var(--dmf-t1); }
-.dmf-sq:active { background: var(--dmf-card-hi); }
-.dmf-datelbl { font-size: 15px; font-weight: 700; letter-spacing: -0.005em; white-space: nowrap; }
-.dmf-list { display: flex; flex-direction: column; gap: 12px; padding-top: 6px; transition: opacity var(--dmf-t) var(--dmf-ease); }
-.dmf-list.dmf-stale { opacity: 0.45; pointer-events: none; }
+.dmf-feedhead { position: sticky; top: var(--dmf-topbar-h); z-index: 10; padding: 16px 0 10px; background: var(--dmf-page); border-bottom: 1px solid var(--dmf-border); margin-bottom: 10px; }
+.dmf-list { display: flex; flex-direction: column; gap: 12px; padding-top: 6px; }
 
 /* ── League sections (owner directive 2026-07-18): combined slate grouped by
    league — World Cup on top, MLB beneath — each a COLLAPSIBLE container
@@ -114,23 +107,15 @@
    centered as a cluster; chevron at the right edge. No game counts. ── */
 .dmf-league { display: block; container: dmf-league / inline-size; }
 .dmf-league + .dmf-league { margin-top: 10px; padding-top: 16px; border-top: 1px solid var(--dmf-border); }
-.dmf-leaguehead,
-.dmf-lgbar { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 44px; padding: 2px 32px; position: relative; cursor: pointer; list-style: none; font-family: var(--dmf-mono); font-size: clamp(12px, 2.6vw + 4px, 15px); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dmf-t2); border-radius: 10px; transition: color var(--dmf-t) var(--dmf-ease), background var(--dmf-t) var(--dmf-ease); }
+.dmf-leaguehead { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 44px; padding: 2px 32px; position: relative; cursor: pointer; list-style: none; font-family: var(--dmf-mono); font-size: clamp(12px, 2.6vw + 4px, 15px); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dmf-t2); border-radius: 10px; transition: color var(--dmf-t) var(--dmf-ease), background var(--dmf-t) var(--dmf-ease); }
 /* ^ fluid slope measured against the longest label ("MAJOR LEAGUE BASEBALL
    (MLB)"): the old 3.9vw slope hit its 15px cap with ZERO slack at 390px and
    clipped in the 384-389px band; 2.6vw+4px keeps >=10px of slack at every
    width above the 383.98px reduction tier below. */
 .dmf-leaguehead::-webkit-details-marker { display: none; }
 .dmf-leaguehead::marker { content: ""; }
-.dmf-leaguehead:hover,
-.dmf-lgbar:hover { color: var(--dmf-t1); }
-.dmf-leaguehead:focus-visible,
-.dmf-lgbar:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--dmf-ring); }
-/* Feedhead league bars (owner directive 2026-07-29): mobile-only controls for
-   the league <details> below. Chevron swap keys off aria-expanded. */
-.dmf-lgbars { display: none; }
-.dmf-lgbar[aria-expanded="true"] .dmf-lgchev--expand { display: none; }
-.dmf-lgbar[aria-expanded="true"] .dmf-lgchev--collapse { display: inline-block; }
+.dmf-leaguehead:hover { color: var(--dmf-t1); }
+.dmf-leaguehead:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--dmf-ring); }
 .dmf-lglogo { display: inline-grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px; }
 .dmf-lglogo img { max-width: 100%; max-height: 100%; object-fit: contain; }
 /* WC emblem is theme-keyed: black FIFA wordmark on light, white on dark. */
@@ -154,19 +139,16 @@
    complete down to the 320 floor (10px = the micro-label floor, reached
    only at <=329.98). */
 @media (max-width: 479.98px) {
-  .dmf-leaguehead,
-  .dmf-lgbar { gap: 8px; padding: 2px 26px; font-size: 12px; letter-spacing: 0.02em; }
+  .dmf-leaguehead { gap: 8px; padding: 2px 26px; font-size: 12px; letter-spacing: 0.02em; }
   .dmf-lglogo { width: 24px; height: 24px; flex: 0 0 24px; }
   .dmf-lgchev { right: 4px; width: 18px; height: 18px; }
 }
 @media (max-width: 359.98px) {
-  .dmf-leaguehead,
-  .dmf-lgbar { gap: 6px; padding: 2px 24px; font-size: 11px; letter-spacing: 0.01em; }
+  .dmf-leaguehead { gap: 6px; padding: 2px 24px; font-size: 11px; letter-spacing: 0.01em; }
   .dmf-lglogo { width: 22px; height: 22px; flex: 0 0 22px; }
 }
 @media (max-width: 329.98px) {
-  .dmf-leaguehead,
-  .dmf-lgbar { gap: 6px; padding: 2px 20px; font-size: 10px; letter-spacing: 0; }
+  .dmf-leaguehead { gap: 6px; padding: 2px 20px; font-size: 10px; letter-spacing: 0; }
   .dmf-lglogo { width: 20px; height: 20px; flex: 0 0 20px; }
   .dmf-lgchev { width: 16px; height: 16px; }
 }
@@ -177,8 +159,8 @@
    three fit, 3-up beyond. Works identically inside the app shell (whatever
    the sidebar's width) and standalone; a viewport media query must never
    reintroduce a column rule here (FEED-CL01a). Multi-column rows stretch so
-   scheduled row-mates align; compact lifecycle cards opt out via their own
-   align-self (ProjectionCard.css). */
+   every card in the row aligns. Compact summaries share the same anatomy;
+   full market tables open above the grid without changing row height. */
 .dmf-leaguebody { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 12px; margin-top: 12px; }
 @container dmf-league (min-width: 622px) {
   .dmf-leaguebody { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
@@ -204,14 +186,6 @@
   .dmf-toptitle,
   .dmf-topsep { display: none; }
 }
-@container dmf (max-width: 440px) {
-  /* 320-360px: keep the date row inside the viewport without shrinking the
-     28px arrows (their ::after keeps the effective hit area at 44px+). */
-  .dmf-datenav { flex-wrap: wrap; gap: 8px; }
-  .dmf-datelbl { font-size: 13.5px; }
-  .dmf-feedhead { gap: 10px; }
-}
-
 /* ── MOBILE (<768px): the floating nav owns navigation; page chrome centers
    on one axis (owner directives 2026-07-17/18/29). ── */
 @media (max-width: 767px) {
@@ -222,15 +196,7 @@
   .dmf-root .dmf-wordmark { font-size: 42px; }
   .dmf-root .dmf-sync { display: none; }
   .dmf-root .dmf-scroll { padding-bottom: max(24px, env(safe-area-inset-bottom, 0px)); }
-  /* Grouped primary menu bar (owner directive 2026-07-29): the sticky
-     feedhead holds the centered date picker AND the league header bars as
-     one unit; the in-list summary headers hide. */
-  .dmf-root .dmf-feedhead { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 12px; padding: 10px 0 8px; }
-  .dmf-root .dmf-datenav { justify-content: center; flex-wrap: nowrap; gap: 8px; }
-  .dmf-root .dmf-datelbl { font-size: 13px; }
-  .dmf-root .dmf-lgbars { display: flex; flex-direction: column; width: 100%; gap: 0; }
-  .dmf-root .dmf-leaguehead { display: none; }
-  .dmf-root .dmf-leaguebody { margin-top: 0; }
+  .dmf-root .dmf-feedhead { padding: 10px 0; }
   .dmf-root .dmf-league + .dmf-league { margin-top: 0; padding-top: 12px; }
 }
 
@@ -257,8 +223,7 @@ body.dime-floating-nav-active .dmf-root .dmf-topbar { display: none; }
   .dc-shell-external-scroll .dmf-topbar { justify-content: center; }
   .dc-shell-external-scroll .dmf-toptitle { font-size: clamp(1.5rem, 6cqi, 4.375rem); line-height: 1; letter-spacing: -0.02em; white-space: nowrap; }
   .dc-shell-external-scroll .dmf-sync { display: none; }
-  .dc-shell-external-scroll .dmf-feedhead { justify-content: center; padding-top: 24px; padding-bottom: 10px; margin-bottom: 16px; }
-  .dc-shell-external-scroll .dmf-datelbl { font-size: 17px; }
+  .dc-shell-external-scroll .dmf-feedhead { padding-top: 16px; padding-bottom: 12px; margin-bottom: 12px; }
   .dmf-lglogo--mlb { width: 60px; height: 60px; flex: 0 0 60px; }
 }
 
@@ -268,4 +233,10 @@ body.dime-floating-nav-active .dmf-root .dmf-topbar { display: none; }
 @media (prefers-contrast: more) {
   .dmf-root { --dmf-border: #ffffff; --dmf-border-hi: #ffffff; --dmf-t3: #ffffff; --dmf-t4: #ffffff; }
   .dmf-root[data-dmf-theme="light"] { --dmf-border: #000000; --dmf-border-hi: #000000; --dmf-t3: #000000; --dmf-t4: #000000; }
+}
+
+/* On short/narrow screens a multi-row filter bar must not consume the scroll
+   viewport. It stays in normal flow; the shell keeps primary navigation. */
+@media (max-width: 767px), (max-height: 600px) {
+  .dmf-root .dmf-feedhead { position: relative; top: auto; }
 }

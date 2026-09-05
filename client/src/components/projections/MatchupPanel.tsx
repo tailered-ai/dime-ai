@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import { TeamLogoMark } from "./TeamLogoMark";
 import type { ProjectionGame } from "./types";
 
@@ -8,7 +9,7 @@ import type { ProjectionGame } from "./types";
  *   {AWAY TEAM NAME} @ {HOME TEAM NAME}   ← "Giants @ Mariners"
  *   {BALLPARK / STAGE CONTEXT}            ← "T-Mobile Park" — pregame only
  *
- * Team names only — no abbreviations, no pitcher names, no raw country codes.
+ * Full names when they fit; canonical abbreviations in constrained lanes.
  * The venue is suppressed when the context line already carries it — each fact
  * renders once. Scores stay beside the logos for live/final games.
  *
@@ -22,6 +23,23 @@ import type { ProjectionGame } from "./types";
  */
 export function MatchupPanel({ game }: { game: ProjectionGame }) {
   const { away, home, matchupContext, venue } = game;
+  const centerRef = useRef<HTMLDivElement>(null);
+  const fullNameRef = useRef<HTMLSpanElement>(null);
+  const [compactNames, setCompactNames] = useState(true);
+  useLayoutEffect(() => {
+    const center = centerRef.current;
+    const fullName = fullNameRef.current;
+    if (!center || !fullName) return;
+    const measure = () =>
+      setCompactNames(
+        fullName.getBoundingClientRect().width > center.clientWidth
+      );
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(center);
+    observer.observe(fullName);
+    return () => observer.disconnect();
+  }, [away.name, home.name]);
   const showScore = away.score != null && home.score != null;
   const isPregame = game.status === "scheduled";
   // No duplicate ballpark: drop the venue line when the context already has it.
@@ -42,13 +60,30 @@ export function MatchupPanel({ game }: { game: ProjectionGame }) {
           )}
         </div>
 
-        <div className="matchup__center">
-          <span className="matchup__line" title={`${away.name} @ ${home.name}`}>
-            {away.name}{" "}
+        <div
+          className="matchup__center"
+          ref={centerRef}
+          role="group"
+          aria-label={`${away.name} at ${home.name}`}
+        >
+          <span
+            className="matchup__line matchup__line--measure"
+            ref={fullNameRef}
+            aria-hidden="true"
+          >
+            {away.name} <span className="matchup__at">@</span> {home.name}
+          </span>
+          <span
+            className="matchup__line"
+            title={`${away.name} @ ${home.name}`}
+            aria-hidden="true"
+            data-compact={compactNames}
+          >
+            {compactNames ? away.abbr || away.name : away.name}{" "}
             <span className="matchup__at" aria-hidden="true">
               @
             </span>{" "}
-            {home.name}
+            {compactNames ? home.abbr || home.name : home.name}
           </span>
         </div>
 

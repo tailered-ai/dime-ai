@@ -838,7 +838,7 @@ describe("ProjectionCard — ranked edge carousel (owner directive 2026-07-18)",
     expect(html.indexOf("Yankees ML")).toBeGreaterThan(-1);
     expect(html.indexOf("Yankees ML")).toBeLessThan(html.indexOf("Under 9"));
     expect(countOccurrences(html, 'class="summary__next"')).toBe(2);
-    expect(html).toContain("lucide-arrow-right");
+    expect(html).toContain("lucide-chevron-right");
     expect(html).toContain("View next model edge: Under 9 (2 of 2)");
   });
 
@@ -867,11 +867,12 @@ describe("ProjectionCard — ranked edge carousel (owner directive 2026-07-18)",
 });
 
 describe("ProjectionCard — matchup block format (owner directive 2026-07-17)", () => {
-  it("renders the matchup line with names (countries never show raw codes)", () => {
+  it("keeps full country names accessible when canonical codes fit the compact lane", () => {
     const html = render(wcFixture());
     expect(html).toContain("Spain");
     expect(html).toContain("France");
-    expect(html).not.toMatch(/\bESP\b|\bFRA\b/);
+    expect(html).toContain('aria-label="Spain at France"');
+    expect(html).toContain('title="Spain @ France"');
   });
 
   it("renders the ballpark exactly once (no duplicate venue line)", () => {
@@ -982,12 +983,9 @@ describe("ProjectionCard — paginated market popover", () => {
       "max-block-size: min(34rem, var(--radix-popover-content-available-height));"
     );
     expect(popoverCss).toContain("overflow-y: auto;");
-    // Audit DIME-UI-015 + theme audit 2026-07-31 (tokenized 2026-08-02): the
-    // eyebrow consumes --mint-ink, the app's theme-correct mint-text token
-    // (raw mint dark / #0A7C50 light — defined in index.css). No per-theme
-    // literal override remains here.
-    expect(popoverCss).toMatch(
-      /\.projection-card__markets-eyebrow \{[^}]*color: var\(--mint-ink, #45e0a8\);/
+    expect(marketPopoverSrc).not.toContain("projection-card__markets-eyebrow");
+    expect(marketPopoverSrc).toContain(
+      'aria-label="Close full model projections"'
     );
     expect(popoverCss).not.toMatch(/#0a7c50/i);
   });
@@ -1610,9 +1608,9 @@ describe("ProjectionCard — centered single-row summary group", () => {
     );
   });
 
-  it("the multi-edge next control is mint with a theme foreground border and 44px target", () => {
+  it("the multi-edge next control is neutral and keeps its 44px target", () => {
     expect(cardCss).toMatch(
-      /\.summary__next\s*\{[^}]*inline-size:\s*44px;[^}]*block-size:\s*44px;[^}]*color:\s*var\(--brand-mint, #45e0a8\);[^}]*border:\s*1px solid var\(--foreground, #fff\);/
+      /\.summary__next\s*\{[^}]*inline-size:\s*44px;[^}]*block-size:\s*44px;[^}]*color:\s*var\(--text-secondary, #a6a6a6\);[^}]*border:\s*0;/
     );
   });
 
@@ -1808,30 +1806,18 @@ describe("ProjectionCard — defensive PASS-mint backstop (Round 4 Wave 3 fold-i
     expect(backstop).not.toContain("!important");
   });
 
-  it("covers the edge chip's icon through the plain cascade (icon color is CSS-owned, not inline)", () => {
-    // EdgeIndicator owns the icon color in its stylesheet (no inline style in
-    // the TSX), so the higher-specificity PASS rule wins without !important.
+  it("keeps EDGE labeled with a quiet signal token and no ornamental glyph", () => {
     const edgeIndicatorSrc = fs.readFileSync(
       path.join(import.meta.dirname, "EdgeIndicator.tsx"),
       "utf8"
     );
     expect(edgeIndicatorSrc).not.toMatch(/style=\{\{/);
-    expect(edgeIndicatorCss).toMatch(
-      /\.edge-indicator > svg \{ color: var\(--brand-mint-foreground\); \}/
+    expect(edgeIndicatorSrc).not.toContain("TrendingUp");
+    expect(edgeIndicatorSrc).toContain(
+      'className="edge-indicator__label">Edge'
     );
-    const backstop = cssBlock(
-      cardCss,
-      "Defensive PASS backstop (Round 4, from the W1 review",
-      "Item 4 — live indicator"
-    );
-    expect(backstop).toContain(".projection-card--pass .edge-indicator svg,");
-    expect(backstop).toContain(
-      ".projection-card--unplayable .edge-indicator svg {"
-    );
-    const svgRule = backstop.slice(
-      backstop.indexOf(".projection-card--pass .edge-indicator svg,")
-    );
-    expect(svgRule).toMatch(/color: var\(--text-secondary, #a6a6a6\);/);
+    expect(edgeIndicatorCss).toContain("color: var(--mint-ink)");
+    expect(edgeIndicatorCss).not.toMatch(/border-inline-start|box-shadow/);
   });
 
   it("applies items 3-4 (PASS dim + live dot) at EVERY breakpoint (2026-08-05: the item-8 >=768 scoping is superseded by the unqualified page law)", () => {

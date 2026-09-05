@@ -317,7 +317,7 @@ describe("DimeModelFeed — MLB bindings", () => {
     expect(slateStatusRank({ status: "suspended" })).toBe(2);
     // Only WC and MLB apply the status sort. Both NCAAF paths finish after mapping.
     expect(src.match(/\.sort\(\(a, b\) => slateStatusRank\(a\) - slateStatusRank\(b\)\)/g)).toHaveLength(2);
-    expect(src.match(/\.map\(ncaafRowToCard\);/g)).toHaveLength(2);
+    expect(src.match(/\.map\(ncaafRowToCard\);/g)).toHaveLength(1);
   });
 
   it("derives the tier from status, not from the timeLabel string", () => {
@@ -442,14 +442,15 @@ describe("DimeModelFeed — routes", () => {
 
   it("bare and sport-prefixed feeds canonicalize to the combined dated URL", () => {
     expect(src).toMatch(/if \(!date\) return \{ sport: sportCode, isoDate: null \}/);
-    expect(src).toMatch(
-      /navigate\(resolveRouteHref\(feedModelPath\("MLB", parsed\?\.isoDate \?\? undefined\)\), \{ replace: true \}\)/
-    );
+    expect(src).toContain('feedModelPath("MLB", parsed?.isoDate ?? today)');
+    expect(src).toContain('{ replace: true }');
+    expect(parseFeedModelPath("02-29-2026", undefined)).toBeNull();
+    expect(parseFeedModelPath("02-29-2028", undefined)?.isoDate).toBe("2028-02-29");
   });
 
   it("in-page navigation builds the sport-neutral canonical URL", () => {
     expect(src).toMatch(/from "@\/lib\/feedRoutes"/);
-    expect(src).toMatch(/feedModelPath\("MLB", nextIso\)/);
+    expect(src).toMatch(/feedModelPath\("MLB", nextDate\)/);
   });
 });
 
@@ -518,9 +519,11 @@ describe("DimeModelFeed — combined slate (owner directive 2026-07-18)", () => 
     expect(buildFeedSections([], [])).toEqual([]);
   });
 
-  it("the sport toggle chips are gone; NCAAF also loads into the combined slate", () => {
+  it("the combined dated query powers the sport filter without suppressing another league", () => {
     expect(src).not.toMatch(/dmf-chip|dmf-sports|role="tablist"/);
-    expect(src).toContain("enabled: !!isoDate && !ncaafOnly");
+    expect(src).not.toContain("ncaafOnly");
+    expect(src).not.toContain("placeholderData:");
+    expect(src).toContain("<FeedToolbar");
     expect(src).toMatch(/sport: "NCAAF"[\s\S]*?enabled: !!isoDate,/);
     expect(src).toContain("buildFeedSections(wcCards, mlbCards, ncaafCards)");
   });
@@ -534,8 +537,7 @@ describe("DimeModelFeed — combined slate (owner directive 2026-07-18)", () => 
     expect(src).toMatch(/<summary className="dmf-leaguehead">/);
     // Mobile grouped menu bar: league toggle bars render inside the sticky
     // feedhead and target their <details> by id.
-    expect(src).toMatch(/className="dmf-lgbar"/);
-    expect(src).toMatch(/aria-controls=\{`dmf-league-\$\{section\.key\}`\}/);
+    expect(src).not.toMatch(/className="dmf-lgbar"/);
     expect(src).toMatch(/id=\{`dmf-league-\$\{section\.key\}`\}/);
     expect(src).toMatch(/dmf-lgchev--expand/);
     expect(src).toMatch(/dmf-lgchev--collapse/);
@@ -560,7 +562,7 @@ describe("DimeModelFeed — combined slate (owner directive 2026-07-18)", () => 
     expect(flatCss).toMatch(/\.dmf-lglogo \{[^}]*width: 30px; height: 30px/);
     // Header cluster centers within the page; chevron holds the right edge.
     // (2026-07-29: the feedhead league bar shares the same rule.)
-    expect(flatCss).toMatch(/\.dmf-leaguehead, \.dmf-lgbar \{[^}]*justify-content: center/);
+    expect(flatCss).toMatch(/\.dmf-leaguehead \{[^}]*justify-content: center/);
     expect(flatCss).toMatch(/\.dmf-lgchev \{ position: absolute; right: 8px/);
   });
 
@@ -606,51 +608,17 @@ describe("DimeModelFeed — combined slate (owner directive 2026-07-18)", () => 
   });
 });
 
-/** Round 4 Wave 3, item 6 (docs/superpowers/plans/2026-07-23-feed-desktop-polish.md;
- *  law: design-system/dime-ai/pages/ai-model-projections.md "Date nav" line, amended
- *  2026-07-23). Shell/desktop (>=1024px) only — <1024px and the standalone /feed
- *  topbar (no 96px title band) must stay byte-identical to the shipped surface. */
-describe("DimeModelFeed — header rhythm (Round 4 Wave 3, item 6)", () => {
-  it("shell-desktop date nav centers under the title band with the 24/32px rhythm", () => {
-    // 24px title-band -> date-nav (padding-top); date text scales 15 -> 17px;
-    // the row centers instead of sitting left-aligned under the 5x title. The
-    // sticky offset itself flows from --dmf-topbar-h (96px in the shell) —
-    // one variable, no per-rule top literals (2026-08-02 rebuild).
-    expect(flatCss).toMatch(
-      /\.dc-shell-external-scroll \.dmf-feedhead \{ justify-content: center; padding-top: 24px; padding-bottom: 10px; margin-bottom: 16px; \}/,
-    );
-    expect(flatCss).toMatch(/\.dc-shell-external-scroll \.dmf-datelbl \{ font-size: 17px; \}/);
+describe("DimeModelFeed — integrated feed controls", () => {
+  it("keeps a single toolbar and current-date query keys", () => {
+    expect(src.match(/<FeedToolbar/g)).toHaveLength(1);
+    expect(src).not.toContain("placeholderData:");
+    expect(src).toContain('navigateFeed(nextIso, { ...filters, game: "all" })');
+    expect(src).toContain('new URLSearchParams(search)');
   });
-
-  it("the 32px date-nav -> league header gap is padding-bottom + margin-bottom + the pre-existing .dmf-list top padding", () => {
-    // 10 (padding-bottom) + 16 (margin-bottom) + 6 (.dmf-list padding-top,
-    // untouched by item 6) = 32px of space, matching the law's fixed rhythm
-    // step; the feedhead's pre-existing 1px divider border sits between the
-    // padding and margin (33px edge-to-edge — divider, not rhythm).
-    expect(flatCss).toMatch(/padding-bottom: 10px; margin-bottom: 16px/);
-    expect(flatCss).toMatch(/\.dmf-list \{ display: flex; flex-direction: column; gap: 12px; padding-top: 6px;/);
-  });
-
-  it("is scoped to the shell wrapper inside the single >=1024px block only (item 8 scoping)", () => {
-    const desktopBlockStart = css.indexOf("@media (min-width: 1024px) {");
-    const desktopBlockEnd = css.indexOf("@media (prefers-reduced-motion: reduce) {", desktopBlockStart);
-    expect(desktopBlockStart).toBeGreaterThan(-1);
-    expect(desktopBlockEnd).toBeGreaterThan(desktopBlockStart);
-    const desktopBlock = css.slice(desktopBlockStart, desktopBlockEnd).replace(/\s+/g, " ");
-    expect(desktopBlock).toContain(".dc-shell-external-scroll .dmf-root { --dmf-topbar-h: 96px; }");
-    expect(desktopBlock).toContain(".dc-shell-external-scroll .dmf-feedhead { justify-content: center");
-    expect(desktopBlock).toContain(".dc-shell-external-scroll .dmf-datelbl { font-size: 17px; }");
-    // Not duplicated anywhere else in the stylesheet (standalone /feed and
-    // <1024px keep the shipped compact layout — no rhythm override leaks out).
-    const outside = (css.slice(0, desktopBlockStart) + css.slice(desktopBlockEnd)).replace(/\s+/g, " ");
-    expect(outside).not.toMatch(/dmf-datelbl \{ font-size: 17px; \}/);
-    expect(outside).not.toMatch(/dmf-feedhead \{[^}]*padding-top: 24px/);
-  });
-
-  it("<1024px and standalone keep the 15px date label, 16/10px feedhead padding, and the var-driven sticky offset", () => {
-    const base = css.slice(0, css.indexOf("@media (min-width: 1024px) {")).replace(/\s+/g, " ");
-    expect(base).toMatch(/\.dmf-feedhead \{ position: sticky; top: var\(--dmf-topbar-h\); z-index: 10; padding: 16px 0 10px;/);
-    expect(base).toMatch(/\.dmf-datelbl \{ font-size: 15px; font-weight: 700;/);
+  it("lets the multi-row toolbar scroll away on narrow or short screens", () => {
+    expect(flatCss).toContain('@media (max-width: 767px), (max-height: 600px)');
+    expect(flatCss).toContain('.dmf-root .dmf-feedhead { position: relative; top: auto; }');
+    expect(css).not.toContain('.dmf-root .dmf-leaguehead { display: none; }');
   });
 });
 

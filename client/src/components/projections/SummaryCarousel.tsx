@@ -12,14 +12,15 @@ export function clampActiveEdgeIndex(active: number, count: number): number {
  * in a swipeable strip (owner directive 2026-07-18). Actionable games show one
  * slide per edge in
  * the exact ProjectionSummary format (uniform readout: MODEL EDGE / BOOK /
- * MODEL + the mint edge cell); slides arrive pre-ranked strongest → weakest,
+ * MODEL + a labeled signal); slides arrive pre-ranked strongest → weakest,
  * so the first visible edge is always the strongest. No-action games instead
  * show one best canonical no-vig ROI side per market, ranked highest → lowest,
- * with a neutral ROI-only badge on every slide.
+ * with a neutral ROI-only value on every slide. Unranked comparisons use
+ * one compact slide per side so no supplied Book/model context is lost.
  *
  * Mechanics per brand law: native scroll-snap (momentum swipe on touch,
  * trackpad/scroll on desktop, interruptible by design) plus one compact,
- * accessible next-edge arrow immediately after the edge pill. The last
+ * accessible next control with its current position after the signal. The last
  * edge wraps to the strongest edge. Prefers-reduced-motion collapses smooth
  * scrolling to an instant jump.
  */
@@ -39,7 +40,12 @@ export function SummaryCarousel({
   const [active, setActive] = useState(0);
   const isComparison = Boolean(comparisonMarkets?.length);
   const slides = isComparison
-    ? comparisonMarkets!.map(market => ({ key: market.key, label: market.label, market, insight: null }))
+    ? comparisonMarkets!.flatMap(market => market.sides.map(side => ({
+        key: `${market.key}-${side.sideLabel}`,
+        label: `${market.label}: ${side.lineDisplay?.side ?? side.sideLabel}`,
+        market: { ...market, sides: [side] },
+        insight: null,
+      })))
     : insights.map(insight => ({ key: `${insight.marketKey}-${insight.sideLabel}`, label: insight.sideLabel, market: undefined, insight }));
   const activeIndex = clampActiveEdgeIndex(active, slides.length);
   const isNoEdgeRanking = variant === "no-edge";
@@ -71,7 +77,7 @@ export function SummaryCarousel({
       aria-roledescription="carousel"
       aria-label={
         isComparison
-          ? `${slides.length} Book and Model markets`
+          ? `${slides.length} Book and Model comparisons`
           : isNoEdgeRanking
           ? `${insights.length} non-actionable market projections, ranked by no-vig ROI`
           : `${insights.length} model edges, ranked strongest first`
@@ -102,7 +108,7 @@ export function SummaryCarousel({
             aria-roledescription="slide"
             aria-label={
               isComparison
-                ? `Market ${i + 1} of ${slides.length}: ${slide.label}; Book and Model values`
+                ? `Comparison ${i + 1} of ${slides.length}: ${slide.label}; Book and Model values`
                 : isNoEdgeRanking
                   ? `Projection ${i + 1} of ${slides.length}: ${slide.label}; no actionable edge`
                   : `Edge ${i + 1} of ${slides.length}: ${slide.label}`
@@ -114,10 +120,11 @@ export function SummaryCarousel({
               teams={teams}
               onNextEdge={() => goTo((i + 1) % slides.length, true)}
               nextEdgeLabel={`View next ${
-                isComparison ? "market" : isNoEdgeRanking ? "projection" : "model edge"
+                isComparison ? "comparison" : isNoEdgeRanking ? "projection" : "model edge"
               }: ${slides[(i + 1) % slides.length]?.label} (${
                 (i + 1) % slides.length + 1
               } of ${slides.length})`}
+              positionLabel={`${i + 1}/${slides.length}`}
               nextEdgeTabIndex={i === activeIndex ? 0 : -1}
               nextEdgeButtonRef={(element) => {
                 nextButtonRefs.current[i] = element;

@@ -1,6 +1,5 @@
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { EdgeIndicator } from "./EdgeIndicator";
-import { MarketTable } from "./MarketTable";
 import type { MarketInsight } from "@/lib/gameInsight";
 import type { ProjectionMarket, ProjectionTeam } from "./types";
 
@@ -18,26 +17,8 @@ import type { ProjectionMarket, ProjectionTeam } from "./types";
  * that still arrives compact.
  */
 function fmtPrice(p: number): string {
+  if (!Number.isFinite(p)) return "—";
   return p > 0 ? `+${p}` : `${p}`;
-}
-
-function comparisonNote(market: ProjectionMarket): string | undefined {
-  const projection = market.note
-    ?.split(". ")
-    .find(
-      note =>
-        note.startsWith("Model spread:") || note.startsWith("Model total:")
-    );
-  const basis = market.sides.some(side => side.comparable === false)
-    ? market.sides.some(side => side.modelLineLabel)
-      ? "Odds at the lines shown."
-      : "Model pricing line unavailable."
-    : undefined;
-  return (
-    [projection ? `${projection.replace(/\.$/, "")}.` : undefined, basis]
-      .filter(Boolean)
-      .join(" ") || undefined
-  );
 }
 
 /** Expand a market side label for the readout: O/U → Over/Under, a leading
@@ -63,6 +44,7 @@ export function ProjectionSummary({
   comparisonMarkets,
   onNextEdge,
   nextEdgeLabel,
+  positionLabel,
   nextEdgeTabIndex = 0,
   nextEdgeButtonRef,
 }: {
@@ -71,15 +53,16 @@ export function ProjectionSummary({
   /** False when the game has NO published model output — see ProjectionGame. */
   modelPublished?: boolean;
   comparisonUnavailable?: boolean;
-  /** Actual NCAAF quotes when different pricing lines prevent edge ranking. */
+  /** Unranked market context; mismatched model odds stay in full details. */
   comparisonMarkets?: ProjectionMarket[];
   onNextEdge?: () => void;
   nextEdgeLabel?: string;
+  positionLabel?: string;
   nextEdgeTabIndex?: number;
   nextEdgeButtonRef?: (element: HTMLButtonElement | null) => void;
 }) {
   // Readout above the EdgeIndicator (owner directive 2026-07-18): the
-  // MODEL EDGE / BOOK / MODEL facts lead, the mint edge cell sits beneath.
+  // MODEL EDGE / BOOK / MODEL facts lead, the labeled signal sits beneath.
   //
   // A scored no-edge case uses the SAME readout structure as an edge card,
   // with an ROI-only neutral badge in the signal slot. A genuinely unscorable
@@ -93,47 +76,22 @@ export function ProjectionSummary({
     teams.length >= 2 && teams[0]?.name && teams[1]?.name
       ? `Model projection summary: ${teams[0].name} at ${teams[1].name}`
       : "Model projection summary";
-  if (!insight && modelPublished && comparisonMarkets?.length) {
-    return (
-      <div className="summary summary--comparison">
-        <div
-          className="summary__viewport"
-          role="region"
-          aria-label={regionLabel}
-          tabIndex={nextEdgeTabIndex}
-        >
-          {comparisonMarkets.map(market => (
-            <MarketTable
-              key={market.key}
-              market={{
-                ...market,
-                note: comparisonNote(market),
-                resultLabel: undefined,
-                resultIsEdge: false,
-              }}
-            />
-          ))}
-          {onNextEdge && nextEdgeLabel && (
-            <div className="summary__comparison-navigation">
-              <button
-                type="button"
-                className="summary__next"
-                aria-label={nextEdgeLabel}
-                tabIndex={nextEdgeTabIndex}
-                ref={nextEdgeButtonRef}
-                onClick={onNextEdge}
-              >
-                <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  const comparison =
+    !insight && modelPublished
+      ? comparisonMarkets?.find(market => market.sides.length > 0)
+      : undefined;
+  const side = comparison?.sides[0];
+  // A projected line is not the threshold that priced model odds. Show the
+  // projection alone here; the full table retains the odds and explicit basis.
+  const modelProjection = side?.lineDisplay?.model;
+  const compactModel =
+    modelProjection ??
+    (side?.comparable !== false && side?.modelPrice != null
+      ? fmtPrice(side.modelPrice)
+      : "—");
   return (
     <div
-      className={`summary ${insight ? "summary--priced" : "summary--empty"}`}
+      className={`summary ${side ? "summary--comparison" : insight ? "summary--priced" : "summary--empty"}`}
     >
       <div
         className="summary__viewport"
@@ -143,7 +101,35 @@ export function ProjectionSummary({
       >
         <div className="summary__group">
           <dl className="summary__readout">
-            {insight ? (
+            {side ? (
+              <>
+                <div className="summary__item summary__item--edge">
+                  <dt className="ds-label">{comparison?.label}</dt>
+                  <dd className="summary__pick">
+                    {spellOutPick(
+                      side.lineDisplay?.side ?? side.sideLabel,
+                      teams
+                    )}
+                  </dd>
+                </div>
+                <div className="summary__item summary__item--book">
+                  <dt className="ds-label">Book</dt>
+                  <dd className="odds-value">
+                    {side.lineDisplay?.book != null
+                      ? `${side.lineDisplay.book} (${side.bookPrice != null ? fmtPrice(side.bookPrice) : "—"})`
+                      : side.bookPrice != null
+                        ? fmtPrice(side.bookPrice)
+                        : "—"}
+                  </dd>
+                </div>
+                <div className="summary__item summary__item--model">
+                  <dt className="ds-label">
+                    {modelProjection != null ? "Model line" : "Model"}
+                  </dt>
+                  <dd className="odds-value">{compactModel}</dd>
+                </div>
+              </>
+            ) : insight ? (
               <>
                 <div className="summary__item summary__item--edge">
                   <dt className="ds-label">Model edge</dt>
@@ -177,9 +163,17 @@ export function ProjectionSummary({
               </div>
             )}
           </dl>
-          {insight && (
+          {(insight || side) && (
             <div className="summary__signal">
-              <EdgeIndicator insight={insight} className="summary__edge" />
+              {insight ? (
+                <EdgeIndicator insight={insight} className="summary__edge" />
+              ) : (
+                <span className="summary__comparison-status">
+                  {modelProjection != null
+                    ? "Projection only"
+                    : "Comparison unavailable"}
+                </span>
+              )}
               {onNextEdge && nextEdgeLabel && (
                 <button
                   type="button"
@@ -189,7 +183,16 @@ export function ProjectionSummary({
                   ref={nextEdgeButtonRef}
                   onClick={onNextEdge}
                 >
-                  <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
+                  {positionLabel && (
+                    <span className="summary__position" aria-hidden="true">
+                      {positionLabel}
+                    </span>
+                  )}
+                  <ChevronRight
+                    size={14}
+                    strokeWidth={1.8}
+                    aria-hidden="true"
+                  />
                 </button>
               )}
             </div>

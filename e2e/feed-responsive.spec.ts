@@ -571,7 +571,7 @@ test.describe("one-line text contracts", () => {
     await gotoFeed(page, 320);
     const clipped = await page.evaluate(() => {
       const el = document.querySelector<HTMLElement>(
-        '.dmf-lgbar[aria-controls="dmf-league-MLB"] .dmf-lgname'
+        "#dmf-league-MLB .dmf-lgname"
       )!;
       return { sw: el.scrollWidth, cw: el.clientWidth, text: el.textContent };
     });
@@ -601,6 +601,14 @@ test.describe("sticky chrome — one offset variable", () => {
           topbarVisible: !!tb && getComputedStyle(tb).display !== "none",
         };
       });
+      if (width < 768) {
+        expect(
+          await page
+            .locator(".dmf-feedhead")
+            .evaluate(el => getComputedStyle(el).position)
+        ).toBe("relative");
+        return;
+      }
       // The sticky feedhead re-anchors exactly at the band's height — no
       // competing literals, no gaps, no overlap.
       if (topbarVisible) {
@@ -628,7 +636,9 @@ test.describe("interactive target floors", () => {
   }) => {
     await gotoFeed(page, 1512);
     const targets = await page.evaluate(() => {
-      const sq = document.querySelector<HTMLElement>(".dmf-sq")!;
+      const sq = document.querySelector<HTMLElement>(
+        ".feed-toolbar__icon-button"
+      )!;
       const sqAfter = getComputedStyle(sq, "::after");
       const lineups = document.querySelector<HTMLElement>(
         ".pregame-pitchers__lineups"
@@ -659,8 +669,7 @@ test.describe("interactive target floors", () => {
           : null,
       };
     });
-    expect(targets.sqBox).toBeGreaterThanOrEqual(28);
-    expect(targets.sqInset).toContain("-9px"); // 28 + 2×9 = 46px effective
+    expect(targets.sqBox).toBeGreaterThanOrEqual(44);
     if (targets.lineupsEffective != null)
       expect(targets.lineupsEffective).toBeGreaterThanOrEqual(43.5);
     if (targets.nextBox) {
@@ -689,29 +698,9 @@ test.describe("theme parity", () => {
       });
       expect(light.columns).toBe(dark.columns);
       expect(light.pageOverflow).toBe(0);
-      // v3 tinted cell: dark #0B241B-family, light #DEF9EF-family. Computed
-      // color may arrive as rgb(...) or color(srgb ...) (color-mix output) —
-      // parse channels and assert the tint's lightness family.
-      const channels = (c: string | null): number[] => {
-        if (!c) return [];
-        const rgb = /rgba?\(([\d.]+), ([\d.]+), ([\d.]+)/.exec(c);
-        if (rgb) return [+rgb[1], +rgb[2], +rgb[3]];
-        const srgb = /color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)/.exec(c);
-        if (srgb) return [+srgb[1] * 255, +srgb[2] * 255, +srgb[3] * 255];
-        return [];
-      };
-      const d = channels(darkChip);
-      const l = channels(lightChip);
-      expect(d, `dark chip parse: ${darkChip}`).toHaveLength(3);
-      expect(l, `light chip parse: ${lightChip}`).toHaveLength(3);
-      expect(Math.max(...d), "dark chip must be a dark mint tint").toBeLessThan(
-        70
-      );
-      expect(d[1], "dark chip green channel leads").toBeGreaterThan(d[0]);
-      expect(
-        Math.min(...l),
-        "light chip must be a light mint tint"
-      ).toBeGreaterThan(190);
+      // Owner September 5: EDGE is a quiet text value without a badge fill.
+      expect(darkChip).toBe("rgba(0, 0, 0, 0)");
+      expect(lightChip).toBe("rgba(0, 0, 0, 0)");
     });
   }
 });

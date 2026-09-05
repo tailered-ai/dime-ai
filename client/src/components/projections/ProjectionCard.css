@@ -49,7 +49,6 @@
 /* Pregame detail makes upcoming MLB cards intentionally richer. Once a game
    leaves scheduled state, its card returns to a shorter, quieter scan target. */
 .projection-card--compact {
-  align-self: start;
   gap: var(--space-sm);
   opacity: 0.72;
   /* FEED-CONTRAST: 0.72 opacity composites the stock secondary/muted tokens
@@ -154,9 +153,14 @@ html:not(.dark) .projection-card--compact .projection-card__status--live {
 @media (min-width: 768px) {
   .matchup__score { font-size: 24px; }
 }
-.matchup__center { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; min-inline-size: 0; }
-/* Line 1 — "SF Giants @ SEA Mariners". The card's identity; wraps, never clips. */
-.matchup__line { font-size: var(--proj-team); font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+.matchup__center { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; min-inline-size: 0; }
+/* Fit the full matchup to the actual lane; canonical abbreviations keep one stable line. */
+.matchup__line { font-size: clamp(0.8125rem, 3.5cqi, 1.25rem); font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; line-height: 1.3; }
+.matchup__line--measure { position: absolute; inline-size: max-content; visibility: hidden; pointer-events: none; }
+@container projcard (max-width: 380px) {
+  .matchup__team { flex-direction: column; gap: 2px; }
+  .matchup__score { order: 1; }
+}
 /* CL-05a (closure audit): --text-muted (3.88:1) fails 4.5:1 at 20px/400; the "@"
    separator must stay legible. --text-secondary (8.6:1 dark / 7.0:1 light) keeps it
    subordinate to the team names while meeting contrast. 2026-08-02 (page law
@@ -676,9 +680,8 @@ html:not([data-theme-mode]) .dmf-root[data-dmf-mode="dark"] .team-logo-box--dark
 .summary { grid-area: summary; display: grid; align-items: center; min-inline-size: 0; padding-block: var(--space-sm); border-block: 1px solid var(--border, #262626); }
 .summary__viewport { display: grid; justify-content: safe center; justify-items: safe center; inline-size: 100%; min-inline-size: 0; overflow-x: auto; overscroll-behavior-inline: contain; scrollbar-width: none; }
 .summary__viewport::-webkit-scrollbar { display: none; }
-.summary--comparison .summary__viewport { justify-content: stretch; justify-items: stretch; gap: var(--space-sm); }
-.summary__comparison-navigation { display: flex; justify-content: flex-end; }
-.projection-card .summary--comparison .summary__next { color: var(--foreground, #fff); box-shadow: none; }
+.summary__comparison-status { color: var(--text-secondary); font-size: var(--proj-meta); white-space: nowrap; }
+.summary__position { font-size: 0.6875rem; font-variant-numeric: tabular-nums; }
 .summary__viewport:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--ring, rgba(69, 224, 168, 0.36)); border-radius: 8px; }
 /* FEED-EDGE-ROW-CLIP v2 (2026-08-02 responsive rebuild, supersedes the
    content-dependent flex-wrap): summary anatomy is DETERMINED BY CARD WIDTH,
@@ -696,22 +699,19 @@ html:not([data-theme-mode]) .dmf-root[data-dmf-mode="dark"] .team-logo-box--dark
 .summary__edge { flex: none; }
 .summary__signal { display: inline-flex; flex: none; flex-wrap: nowrap; align-items: center; justify-content: center; gap: var(--space-xs); min-inline-size: max-content; min-block-size: 44px; }
 .projection-card .summary__next {
-  display: inline-grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   inline-size: 44px;
   block-size: 44px;
   flex: none;
   padding: 0;
   cursor: pointer;
-  color: var(--brand-mint, #45e0a8);
+  color: var(--text-secondary, #a6a6a6);
   background: transparent;
-  border: 1px solid var(--foreground, #fff);
-  border-radius: 10px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transition:
-    background 160ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  border: 0;
+  border-radius: 8px;
 }
 /* Audit DIME-UI-043: focus indication rides `outline` (not the transitioned
    box-shadow) so the ring lands the same frame keyboard focus does. */
@@ -719,7 +719,7 @@ html:not([data-theme-mode]) .dmf-root[data-dmf-mode="dark"] .team-logo-box--dark
   outline: 2px solid var(--ring, rgba(69, 224, 168, 0.36));
   outline-offset: 2px;
 }
-.projection-card .summary__next:active { transform: scale(0.98); }
+.projection-card .summary__next:active { background: var(--row-active); }
 /* A ranked non-actionable ROI strip remains entirely neutral: the arrow is a
    carousel advance, not a model signal. Real-edge arrows retain the mint
    treatment above. (Audit DIME-UI-044: the old white variant focus ring was
@@ -965,12 +965,9 @@ html:not(.dark) .projection-card__live-dot {
    two rows apart instead of centering the block), while the markets
    popover trigger stays `auto`-height and is pushed to the card's bottom edge —
    "VIEW FULL AI MODEL PROJECTIONS" always lands flush with its row-mate's.
-   A row of naturally-equal cards renders IDENTICALLY: grid track sizing
-   bases the row height on the tallest natural card in the row. Lifecycle-
-   compact live/final/postponed cards opt out via align-self:start, so that
-   their richer scheduled row-mates do not re-expand them. For scheduled cards,
-   the tallest card's own `1fr` summary row resolves to exactly the space
-   `auto` would have used — nothing forces it taller than its own content. */
+   Every lifecycle state stretches within its grid row. The tallest card's
+   summary sets the natural height; shorter siblings absorb only that surplus,
+   keeping their detail triggers aligned without a fixed card height. */
 /* 2026-08-02: unconditional (was >=1024px media). The league grid stretches
    row-mates at EVERY multi-column width now (2-up and 3-up are both
    container-driven), so the 1fr summary row + bottom-pinned trigger must
@@ -983,9 +980,6 @@ html:not(.dark) .projection-card__live-dot {
    `.projection-card--scheduled` three-track override is deleted, not restated. */
 .projection-card--scheduled.projection-card--with-pregame {
   grid-template-rows: auto auto auto 1fr auto;
-}
-.projection-card--compact {
-  grid-template-rows: auto auto auto auto;
 }
 .summary-carousel { align-content: center; }
 
@@ -1003,15 +997,8 @@ html:not(.dark) .projection-card__live-dot {
 /* Slides carry the standard .summary (its own border-block keeps the divider
    rhythm identical to the single-edge card — uniform format across slides). */
 @media (hover: hover) and (pointer: fine) {
-  .projection-card .summary__next:hover {
-    background: var(--row-hover, #141414);
-    box-shadow:
-      0 14px 28px -12px rgba(0, 0, 0, 0.55),
-      inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  }
-  .projection-card .summary__next:hover svg { transform: translateX(2px); }
+  .projection-card .summary__next:hover { background: var(--row-hover); color: var(--foreground); }
 }
-.projection-card .summary__next svg { transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1); }
 
 /* On the narrowest three-across desktop cards, keep the pill and its 44px
    ArrowRight fully inside the clipped carousel viewport. Typography and
@@ -1023,7 +1010,6 @@ html:not(.dark) .projection-card__live-dot {
     gap: 2px;
     min-block-size: 2rem;
     padding: 0.25rem;
-    border-inline-start-width: 3px;
   }
   .projection-card .summary__signal .edge-indicator > svg {
     inline-size: 10px;
@@ -1052,7 +1038,7 @@ html:not(.dark) .projection-card__live-dot {
 }
 .projection-card__markets-toggle {
   display: grid;
-  grid-template-columns: 1rem minmax(0, 1fr) 1rem;
+  grid-template-columns: minmax(0, 1fr) 1rem;
   align-items: center;
   gap: var(--space-sm);
   inline-size: 100%;
@@ -1060,14 +1046,14 @@ html:not(.dark) .projection-card__live-dot {
   padding: 0 var(--space-sm);
   cursor: pointer;
   color: var(--text-secondary, #a6a6a6);
-  background: transparent;
-  border: 0;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
   border-radius: 10px;
   font: inherit;
   text-align: center;
 }
 .projection-card__markets-toggle > span {
-  grid-column: 2;
+  grid-column: 1;
   min-inline-size: 0;
   /* One line at EVERY card width (2026-08-02): the label sizes from the card
      container with a 10px floor, so "View full AI model projections" never
@@ -1075,7 +1061,9 @@ html:not(.dark) .projection-card__live-dot {
   white-space: nowrap;
   font-size: clamp(0.625rem, 0.3rem + 1.8cqi, 0.9375rem);
   line-height: 1.2;
-  letter-spacing: 0.05em;
+  letter-spacing: 0;
+  font-weight: 600;
+  text-transform: none;
   /* Text-zoom backstop: the rem floor grows under browser text scaling
      (correctly), so at 200% zoom the complete label may physically exceed the
      lane — ellipsis then, never a second line and never card overflow. The
@@ -1092,15 +1080,15 @@ html:not(.dark) .projection-card__live-dot {
   background: var(--row-hover, #141414);
 }
 .projection-card__markets-icon {
-  grid-column: 3;
+  grid-column: 2;
   inline-size: 1rem;
   block-size: 1rem;
   flex: none;
   color: currentColor;
 }
 .projection-card__markets-toggle[data-state="open"] .projection-card__markets-icon {
-  grid-column: 3;
-  color: var(--brand-mint, #45e0a8);
+  grid-column: 2;
+  color: var(--foreground);
 }
 @container projcard (max-width: 472px) {
   .projection-card__markets-toggle {
@@ -1142,6 +1130,7 @@ html:not(.dark) .projection-card__live-dot {
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--space-md);
+  transform-origin: var(--radix-popover-content-transform-origin);
   color: var(--popover-foreground, #fff);
   background: var(--popover, #141414);
   border-color: var(--border, #262626);
@@ -1156,22 +1145,28 @@ html:not(.dark) .projection-card__live-dot {
   padding: 0 var(--space-xs) var(--space-sm);
   border-block-end: 1px solid var(--border, #262626);
 }
-.projection-card__markets-eyebrow {
-  margin: 0;
-  color: var(--mint-ink, #45e0a8); /* theme-correct mint text token */
-}
 .projection-card__markets-matchup {
   margin: var(--space-2xs) 0 0;
   color: var(--foreground, #fff);
   font-size: var(--proj-body);
   font-weight: 700;
 }
-.projection-card__markets-count {
+.projection-card__markets-close {
+  display: grid;
+  place-items: center;
   flex: none;
-  margin: 0;
-  color: var(--text-secondary, #a6a6a6);
-  font-variant-numeric: tabular-nums;
+  inline-size: 44px;
+  block-size: 44px;
+  margin-block: -8px;
+  padding: 0;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
 }
+.projection-card__markets-close:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.projection-card__markets-close:hover { color: var(--foreground); background: var(--row-hover); }
 .projection-card__market-page {
   min-block-size: 10.5rem;
   padding-block-start: var(--space-sm);
@@ -1253,7 +1248,7 @@ html:not(.dark) .projection-card__live-dot {
 .market-table__flag { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; margin-inline-end: 0.375rem; }
 .market-table tbody td, .market-table tbody th { font-variant-numeric: tabular-nums; }
 .market-table tbody tr + tr th, .market-table tbody tr + tr td { border-block-start: 1px solid var(--border, #262626); }
-.market-table__model--signal { color: var(--brand-mint-foreground); background: var(--brand-mint-surface); box-shadow: inset 3px 0 0 var(--brand-mint, #45e0a8); font-weight: 700; } /* 2026-08-05: token law — raw mint only as var() fallback */
+.market-table__model--signal { color: var(--brand-mint-foreground); background: var(--brand-mint-surface); font-weight: 700; } /* 2026-08-05: token law — raw mint only as var() fallback */
 .market-table__result { text-align: center !important; color: var(--text-secondary, #a6a6a6); border-block-start: 1px solid var(--border, #262626); }
 /* Edge footers (owner directive 2026-07-18): mint CELL, accessible foreground. */
 .market-table__result--edge { color: var(--brand-mint-foreground); background: var(--brand-mint-surface); }
@@ -1292,9 +1287,5 @@ html:not(.dark) .projection-card__live-dot {
   }
 }
 
-/* Full school names share the available lane without pushing the price columns. */
-.projection-card--ncaaf .matchup__line { overflow-wrap: anywhere; }
-.projection-card--ncaaf .summary__readout { grid-template-columns: minmax(0, 1fr) max-content max-content; max-inline-size: 100%; }
-.projection-card--ncaaf .summary__item--edge { min-inline-size: 0; }
-.projection-card--ncaaf .summary__pick { white-space: normal; overflow-wrap: anywhere; }
+/* Keep the scheduled NCAAF model context complete. */
 .projection-card--ncaaf .matchup__venue { white-space: normal; overflow: visible; overflow-wrap: anywhere; text-overflow: clip; }
