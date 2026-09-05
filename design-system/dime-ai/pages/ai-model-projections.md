@@ -525,3 +525,17 @@ treatment.
 - Stream Dime chat answers about the slate token-by-token (existing SSE core)
 - Mobile (<768px): sidebar becomes drawer; reuse frozen-panel MobileGameCard pattern inside the Dime skin
 - Empty state: keep it quiet — mono label + date-advance hint, no illustration
+
+
+## Owner amendment — September 5, 2026: feed controls and compact cards
+
+The owner explicitly requested status, sport/league, conference and game filters, a date calendar, responsive full names/abbreviations across sports, quieter EDGE styling and removal of the unequal-card whitespace. These directions supersede earlier no-filter, always-full-school-name and duplicated mobile-header rules on this page.
+
+- One ordered grid uses a compact summary anatomy for every market state; no inline full-table fallback. Rows stretch naturally and preserve Eastern kickoff order. Expanded market details do not resize the feed grid.
+- Book line and price, actual model projection, and supplied comparison information remain accessible. Price-basis annotations appear only in full projections. Incomparable prices never become an EDGE or silently move to a different threshold.
+- A balanced slate toolbar supplies sport/league, status, source-backed NCAAF conference and searchable game filters. URL query parameters preserve selection/back/forward; upstream filter changes reset dependent selections. Date changes clear the previous game selection.
+- Calendar dates use exact Gregorian date-only arithmetic; Today uses America/New_York. New-date queries never display previous-date placeholders. Same-date polling keeps its cache.
+- Full names fit when space permits, otherwise canonical abbreviations appear. Full accessible names remain available. Team identity, helmets, score hierarchy and current odds are unchanged.
+- League disclosure headers live with their sections at every width. The multi-row toolbar enters normal flow on narrow/short screens to preserve content space. Native keyboard/focus behavior, light/dark themes and reduced motion remain required.
+
+Evidence: `docs/audits/2026-09-05-feed-controls-evidence/`.

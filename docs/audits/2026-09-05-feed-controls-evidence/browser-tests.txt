@@ -1,0 +1,18 @@
+[WebServer] (node:76522) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 9 tests using 1 worker
+
+(node:76534) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/feed-controls.spec.ts:116:1 › composes URL filters, restores back navigation and clears old games on date change (4.1s)
+  ✓  2 e2e/feed-controls.spec.ts:145:1 › calendar keyboard focus and expanded pricing preserve grid geometry (3.9s)
+  ✓  3 e2e/feed-controls.spec.ts:169:3 › compact ordered cards and adaptive names at 320x812 (5.1s)
+  ✓  4 e2e/feed-controls.spec.ts:169:3 › compact ordered cards and adaptive names at 375x812 (6.6s)
+  ✓  5 e2e/feed-controls.spec.ts:169:3 › compact ordered cards and adaptive names at 768x1024 (4.9s)
+  ✓  6 e2e/feed-controls.spec.ts:169:3 › compact ordered cards and adaptive names at 1024x768 (4.5s)
+  ✓  7 e2e/feed-controls.spec.ts:169:3 › compact ordered cards and adaptive names at 1272x827 (4.3s)
+  ✓  8 e2e/feed-controls.spec.ts:169:3 › compact ordered cards and adaptive names at 1440x900 (5.5s)
+  ✓  9 e2e/feed-controls.spec.ts:169:3 › compact ordered cards and adaptive names at 1920x1080 (6.0s)
+
+  9 passed (48.5s)

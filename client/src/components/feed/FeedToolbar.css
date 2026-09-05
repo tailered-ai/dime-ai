@@ -1,0 +1,340 @@
+.feed-toolbar {
+  container: feed-toolbar / inline-size;
+  width: 100%;
+  min-width: 0;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.feed-toolbar__primary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas: "league summary" "date date";
+  gap: 12px 16px;
+  align-items: center;
+}
+.feed-toolbar__league {
+  grid-area: league;
+  min-width: 0;
+}
+.feed-toolbar__date {
+  grid-area: date;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.feed-toolbar__summary {
+  grid-area: summary;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px 12px;
+}
+.feed-toolbar__count {
+  color: var(--muted-foreground);
+  font-size: var(--fs-caption, 0.75rem);
+  font-variant-numeric: tabular-nums;
+}
+.feed-toolbar__filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.feed-toolbar__field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 4px;
+}
+.feed-toolbar__field > label,
+.feed-toolbar__label {
+  color: var(--muted-foreground);
+  font-size: var(--fs-label, 0.75rem);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.feed-toolbar__game {
+  grid-column: 1 / -1;
+}
+.feed-toolbar__select-wrap {
+  position: relative;
+  min-width: 0;
+}
+.feed-toolbar__select-wrap > svg {
+  position: absolute;
+  inset-inline-end: 12px;
+  top: calc(50% - 8px);
+  pointer-events: none;
+}
+.feed-toolbar select,
+.feed-toolbar .feed-toolbar__game-trigger,
+.feed-toolbar .feed-toolbar__date-trigger,
+.feed-toolbar .feed-toolbar__icon-button,
+.feed-toolbar .feed-toolbar__today,
+.feed-toolbar__calendar-footer button {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--foreground);
+  font: 600 var(--fs-body-sm, 0.875rem)/1.4 var(--font-sans);
+  cursor: pointer;
+}
+.feed-toolbar select {
+  appearance: none;
+  width: 100%;
+  padding: 8px 36px 8px 12px;
+  text-overflow: ellipsis;
+}
+.feed-toolbar option {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+.feed-toolbar .feed-toolbar__game-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  width: 100%;
+  text-align: left;
+}
+.feed-toolbar .feed-toolbar__game-trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.feed-toolbar .feed-toolbar__game-trigger svg {
+  flex-shrink: 0;
+}
+.feed-toolbar .feed-toolbar__icon-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  flex: 0 0 44px;
+  background: transparent;
+}
+.feed-toolbar .feed-toolbar__date-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  border-color: transparent;
+  background: transparent;
+  font-size: var(--fs-body, 1rem);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.feed-toolbar .feed-toolbar__today {
+  padding: 8px 12px;
+  background: transparent;
+}
+.feed-toolbar :is(button, select):disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+}
+.feed-toolbar :is(button, select, input):focus-visible,
+.feed-toolbar [cmdk-item][data-selected="true"] {
+  outline: 2px solid var(--mint-ink);
+  outline-offset: 2px;
+}
+.feed-toolbar button:active:not(:disabled) {
+  background: var(--secondary);
+}
+
+.feed-toolbar__popover {
+  z-index: 60;
+  max-width: calc(100vw - 16px);
+  max-height: var(--radix-popover-content-available-height);
+  overflow: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: var(--elev-2);
+  font-family: var(--font-sans);
+  scrollbar-color: var(--muted-foreground) var(--popover);
+}
+.feed-toolbar__calendar {
+  inline-size: min(21rem, calc(100vw - 16px));
+  padding: 12px;
+}
+.feed-toolbar__calendar .rdp-root {
+  position: relative;
+}
+.feed-toolbar__calendar .rdp-month_caption {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding-inline-end: 88px;
+  font-size: var(--fs-body, 1rem);
+  font-weight: 700;
+}
+.feed-toolbar__calendar .rdp-nav {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+}
+.feed-toolbar__calendar .rdp-month_grid {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+.feed-toolbar__calendar .rdp-weekday {
+  font-size: var(--fs-caption, 0.75rem);
+  font-weight: 600;
+  color: var(--muted-foreground);
+  padding-block: 8px;
+}
+.feed-toolbar__calendar .rdp-day {
+  padding: 0;
+  text-align: center;
+}
+.feed-toolbar__calendar
+  :is(.rdp-day_button, .rdp-button_previous, .rdp-button_next) {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: 600 var(--fs-body-sm, 0.875rem) var(--font-sans);
+  cursor: pointer;
+}
+.feed-toolbar__calendar .rdp-chevron {
+  fill: currentColor;
+  width: 18px;
+  height: 18px;
+}
+.feed-toolbar__calendar .rdp-day_button {
+  width: 100%;
+  min-width: 0;
+}
+.feed-toolbar__calendar .rdp-today:not(.rdp-selected) .rdp-day_button {
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+.feed-toolbar__calendar .rdp-selected .rdp-day_button {
+  background: var(--brand-mint);
+  color: var(--primary-foreground);
+}
+.feed-toolbar__calendar .rdp-outside {
+  color: var(--muted-foreground);
+}
+.feed-toolbar__calendar-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.feed-toolbar__calendar-footer span {
+  color: var(--muted-foreground);
+  font-size: var(--fs-caption, 0.75rem);
+}
+.feed-toolbar__calendar-footer button {
+  padding-inline: 12px;
+}
+.feed-toolbar__game-popover {
+  width: max(300px, var(--radix-popover-trigger-width));
+}
+.feed-toolbar__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.feed-toolbar__search svg {
+  flex-shrink: 0;
+}
+.feed-toolbar [cmdk-input] {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+  caret-color: var(--mint-ink);
+}
+.feed-toolbar [cmdk-input]::placeholder {
+  color: var(--muted-foreground);
+}
+.feed-toolbar [cmdk-list] {
+  max-height: min(20rem, 45dvh);
+  overflow: auto;
+  padding: 8px;
+  scroll-padding: 8px;
+}
+.feed-toolbar [cmdk-item] {
+  min-height: 44px;
+  padding: 8px;
+  margin: 2px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: var(--fs-body-sm, 0.875rem);
+  overflow-wrap: anywhere;
+}
+.feed-toolbar [cmdk-item] svg {
+  flex-shrink: 0;
+}
+.feed-toolbar [cmdk-item][data-selected="true"] {
+  background: var(--secondary);
+}
+.feed-toolbar [cmdk-empty] {
+  padding: 16px;
+  font-size: var(--fs-body-sm, 0.875rem);
+  color: var(--muted-foreground);
+}
+
+@container feed-toolbar (min-width: 36rem) {
+  .feed-toolbar__filters {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr);
+  }
+  .feed-toolbar__game {
+    grid-column: auto;
+  }
+}
+@container feed-toolbar (min-width: 52rem) {
+  .feed-toolbar__primary {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas: "league date summary";
+  }
+  .feed-toolbar__league {
+    max-width: 15rem;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .feed-toolbar :is(button, select):not(:disabled):hover {
+    background: var(--secondary);
+  }
+  .feed-toolbar__calendar .rdp-selected .rdp-day_button:hover {
+    background: var(--brand-mint);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feed-toolbar *,
+  .feed-toolbar *::before,
+  .feed-toolbar *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

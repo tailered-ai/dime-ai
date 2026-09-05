@@ -121,7 +121,7 @@ describe("DimeAppShell integration contract", () => {
       /navigate\(resolveRouteHref\(canonical\), \{ replace: true \}\)/
     );
     // Combined feed date navigation emits the sport-neutral canonical slug.
-    expect(feedSource).toMatch(/feedModelPath\("MLB", nextIso\)/);
+    expect(feedSource).toMatch(/feedModelPath\("MLB", nextDate\)/);
     expect(splitsSource).toMatch(
       /setLocation\(resolveRouteHref\(bettingSplitsPath\(sport, selectedDate\)\)\)/
     );

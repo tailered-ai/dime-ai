@@ -32,6 +32,7 @@ export default defineConfig({
       "shared/**/*.spec.ts",
       // Pure client-side units (no DOM, no DB): dime-chat reducer + [EDGE] parser
       "client/src/**/*.test.ts",
+      "client/src/**/*.test.tsx",
       // Release-gate tooling (environment-failure gate, preview scanner)
       "scripts/**/*.test.ts",
     ],

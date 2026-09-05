@@ -1,0 +1,15 @@
+Smoke-testing http://127.0.0.1:5311
+
+  ✅ GET /health → 200 (1682ms) {"status":"ok","ts":1788644888715,"commit":null,"db":{"state
+  ❌ build identity — /health names the commit it is serving (55ms) — commit=null — the running build does not identify itself, so this test cannot tell a fresh deploy from a stale one still serving (Incident 64). Check that RAILWAY_GIT_COMMIT_SHA reaches the runtime.
+  ✅ schema/code agreement — live app_users schema is not behind the code (18ms) schema=unknown
+  ✅ GET / → 200 HTML shell (238ms)
+  ✅ hashed asset → 200 + long-lived cache (17ms) /assets/index-BIcW6vpi.js
+  ✅ GET /api/trpc/<bogus> → tRPC JSON error (API mounted) (586ms) status 404
+  ✅ POST /api/dime/chat unauthenticated → 401 JSON (auth gate) (474ms)
+  ✅ bot UA on / → v2 SEO content (prerender or shell block) (317ms) prerender snapshot
+  ✅ vendored /dime-storage asset → 200 image (no external storage dependency) (95ms)
+  ✅ checkout CSP allows Stripe Embedded (script-src js.stripe.com + frame-src checkout.stripe.com) (17ms) CSP allows Stripe
+  ✅ rate-limit keying resists client-supplied identity headers (1ms) N/A — direct/localhost target has no sanitizing edge; invariant holds only behind the proxy chain
+
+10/11 checks passed

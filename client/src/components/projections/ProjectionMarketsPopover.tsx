@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type MouseEvent } from "react";
-import { PanelsTopLeft } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -83,6 +83,7 @@ export function ProjectionMarketsPopover({
   const marketPanelId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [requestedPage, setRequestedPage] = useState(0);
+  const [open, setOpen] = useState(defaultOpen);
   const marketCount = game.markets.length;
   const { activePage, activeMarket } = projectionMarketPage(
     game.markets,
@@ -104,8 +105,9 @@ export function ProjectionMarketsPopover({
   return (
     <div className="projection-card__markets">
       <Popover
-        defaultOpen={defaultOpen}
+        open={open}
         onOpenChange={open => {
+          setOpen(open);
           if (!open) return;
           setRequestedPage(0);
           onOpen?.();
@@ -118,7 +120,7 @@ export function ProjectionMarketsPopover({
             className="projection-card__markets-toggle ds-label"
           >
             <span>View full AI model projections</span>
-            <PanelsTopLeft
+            <ChevronDown
               className="projection-card__markets-icon"
               aria-hidden="true"
             />
@@ -139,16 +141,18 @@ export function ProjectionMarketsPopover({
         >
           <header className="projection-card__markets-popover-head">
             <div>
-              <p className="projection-card__markets-eyebrow ds-label">
-                AI model projections
-              </p>
               <p className="projection-card__markets-matchup">
                 {game.away.name} @ {game.home.name}
               </p>
             </div>
-            <p className="projection-card__markets-count ds-label">
-              {activePage + 1} of {marketCount}
-            </p>
+            <button
+              type="button"
+              className="projection-card__markets-close"
+              aria-label="Close full model projections"
+              onClick={() => setOpen(false)}
+            >
+              <X size={16} aria-hidden="true" />
+            </button>
           </header>
 
           <div
