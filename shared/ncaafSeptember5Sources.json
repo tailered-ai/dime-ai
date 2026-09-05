@@ -32222,11 +32222,11 @@
       "homeML": "+410"
     },
     "model": {
-      "awaySpread": 12.6,
-      "homeSpread": -12.6,
+      "awaySpread": -12.6,
+      "homeSpread": 12.6,
       "total": 54.4,
-      "awaySpreadOdds": "+1928",
-      "homeSpreadOdds": "-1928",
+      "awaySpreadOdds": "+110",
+      "homeSpreadOdds": "-110",
       "overOdds": "+157",
       "underOdds": "-157",
       "awayML": null,

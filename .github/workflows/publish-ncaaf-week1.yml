@@ -14,6 +14,7 @@ on:
           - september-4-five
           - september-4-dk
           - september-5-dk-model
+          - september-5-okst-correction
       dry_run:
         description: Fetch and validate without writing TiDB
         required: true
@@ -59,6 +60,14 @@ jobs:
             else
               pnpm exec tsx scripts/publishSjsuEmu.mts "${slate_args[@]}" --publish
               pnpm exec tsx scripts/publishSjsuEmu.mts "${slate_args[@]}" --verify
+            fi
+          elif [ "$PUBLISH_SLATE" = "september-5-okst-correction" ]; then
+            pnpm exec tsx scripts/correctNcaafSeptember5Okst.mts --check
+            if [ "$DRY_RUN" = "true" ]; then
+              pnpm exec tsx scripts/correctNcaafSeptember5Okst.mts --dry-run
+            else
+              pnpm exec tsx scripts/correctNcaafSeptember5Okst.mts --apply
+              pnpm exec tsx scripts/correctNcaafSeptember5Okst.mts --verify
             fi
           elif [ "$PUBLISH_SLATE" = "september-5-dk-model" ]; then
             pnpm exec tsx scripts/publishNcaafSeptember5.mts --check
