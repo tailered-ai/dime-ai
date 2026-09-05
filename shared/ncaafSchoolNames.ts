@@ -1,7 +1,7 @@
 /**
- * School display names for the September 3–5 NCAAF slates.
- * Keys remain the existing ESPN/feed identities; names are explicit owner-slate
- * school labels with abbreviations expanded, never inferred by stripping mascots.
+ * School display names for the valid 2026 NCAAF registry and published slates.
+ * Keys remain the existing ESPN/feed identities; names are explicit school
+ * labels with abbreviations expanded, never inferred by stripping mascots.
  * Texas A&M retains the institution's proper name (A&M is part of that name).
  */
 const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
@@ -24,6 +24,7 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
   BGSU: "Bowling Green",
   BOIS: "Boise State",
   BRY: "Bryant",
+  BUFF: "Buffalo",
   BYU: "Brigham Young",
   CAL: "California",
   CCU: "Coastal Carolina",
@@ -36,6 +37,7 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
   COLO: "Colorado",
   CONN: "Connecticut",
   CSU: "Colorado State",
+  DEL: "Delaware",
   DUKE: "Duke",
   DUQ: "Duquesne",
   ECU: "East Carolina",
@@ -46,8 +48,10 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
   FLA: "Florida",
   FOR: "Fordham",
   FRES: "Fresno State",
+  FSU: "Florida State",
   FUR: "Furman",
   GASO: "Georgia Southern",
+  GAST: "Georgia State",
   GT: "Georgia Institute of Technology",
   HAMP: "Hampton",
   HAW: "Hawai'i",
@@ -60,11 +64,14 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
   IU: "Indiana",
   JMU: "James Madison",
   JVST: "Jacksonville State",
+  KENN: "Kennesaw State",
   KENT: "Kent State",
   KSU: "Kansas State",
+  KU: "Kansas",
   LAF: "Lafayette",
   LAM: "Lamar",
   LIB: "Liberty",
+  LOU: "Louisville",
   LSU: "Louisiana State",
   LT: "Louisiana Tech",
   "M-OH": "Miami (Ohio)",
@@ -75,6 +82,9 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
   MERC: "Mercyhurst",
   MIA: "Miami (Florida)",
   MICH: "Michigan",
+  MINN: "Minnesota",
+  MISS: "Mississippi",
+  MIZ: "Missouri",
   MORG: "Morgan State",
   MOST: "Missouri State",
   MRSH: "Marshall",
@@ -85,6 +95,8 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
   MVSU: "Mississippi Valley State",
   NAU: "Northern Arizona",
   NAVY: "Navy",
+  NCSU: "North Carolina State",
+  ND: "Notre Dame",
   NDSU: "North Dakota State",
   NEB: "Nebraska",
   NEV: "Nevada",
@@ -104,6 +116,7 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
   PITT: "Pittsburgh",
   PRST: "Portland State",
   PSU: "Pennsylvania State",
+  PUR: "Purdue",
   RGV: "University of Texas Rio Grande Valley",
   RICE: "Rice",
   RUTG: "Rutgers",
@@ -115,10 +128,12 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
   SEMO: "Southeast Missouri State",
   SHSU: "Sam Houston State",
   SJSU: "San Jose State",
+  SMU: "Southern Methodist",
   STAN: "Stanford",
   SYR: "Syracuse",
   "TA&M": "Texas A&M University",
   TAR: "Tarleton State",
+  TCU: "Texas Christian",
   TEM: "Temple",
   TENN: "Tennessee",
   TEX: "Texas",
@@ -131,12 +146,14 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
   TULN: "Tulane",
   TXST: "Texas State",
   UAB: "University of Alabama at Birmingham",
+  UCF: "University of Central Florida",
   UCLA: "University of California, Los Angeles",
   UGA: "Georgia",
   UK: "Kentucky",
   UL: "University of Louisiana at Lafayette",
   ULM: "University of Louisiana at Monroe",
   UNA: "North Alabama",
+  UNC: "North Carolina",
   UNH: "New Hampshire",
   UNLV: "University of Nevada, Las Vegas",
   UNM: "New Mexico",
@@ -147,15 +164,20 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
   USF: "South Florida",
   USM: "Southern Mississippi",
   USU: "Utah State",
+  UTAH: "Utah",
   UTEP: "University of Texas at El Paso",
   UTSA: "University of Texas at San Antonio",
   UTU: "Utah Tech",
+  UVA: "Virginia",
   VAN: "Vanderbilt",
   VMI: "Virginia Military Institute",
   VT: "Virginia Polytechnic Institute and State University",
   WAKE: "Wake Forest",
+  WASH: "Washington",
+  WIS: "Wisconsin",
   WKU: "Western Kentucky",
   WMU: "Western Michigan",
+  WSU: "Washington State",
   WVU: "West Virginia",
   WYO: "Wyoming",
   YSU: "Youngstown State",
@@ -163,5 +185,8 @@ const NCAAF_SCHOOL_NAMES: Readonly<Record<string, string>> = {
 
 /** Display only: callers must keep their canonical code for IDs and helmet lookup. */
 export function ncaafSchoolName(code: string): string {
-  return NCAAF_SCHOOL_NAMES[code.trim().toUpperCase()] ?? "Unknown school";
+  const normalizedCode = code.trim().toUpperCase();
+  return (
+    NCAAF_SCHOOL_NAMES[normalizedCode] ?? (normalizedCode || "Unknown school")
+  );
 }

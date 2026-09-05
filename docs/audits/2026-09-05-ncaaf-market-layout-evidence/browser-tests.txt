@@ -42,3 +42,20 @@ Running 12 tests using 1 worker
   ✓  12 e2e/ncaaf-september5.spec.ts:263:3 › source audit 1440-dark-source-audit: 68 NCAAF school names and honest market cells (2.0m)
 
   12 passed (3.9m)
+
+Registry follow-up browser confirmation (rebuilt production bundle):
+The first selection used an anchored test-title expression and matched no tests; corrected selection follows.
+[WebServer] (node:64778) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+Error: No tests found
+
+[WebServer] (node:64908) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:64949) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e/ncaaf-september5.spec.ts:263:3 › layout 817-dark: 68 NCAAF school names and honest market cells (12.3s)
+
+  1 passed (17.2s)

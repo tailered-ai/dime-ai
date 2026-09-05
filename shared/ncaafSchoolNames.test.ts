@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import teams from "./ncaafFeedTeams.json" with { type: "json" };
+import registry from "../scripts/data/cfb-2026/teams.json" with { type: "json" };
 import { ncaafSchoolName } from "./ncaafSchoolNames";
 
 const earlierSlates = [
@@ -24,6 +25,22 @@ const earlierSlates = [
 ];
 
 describe("NCAAF school display names", () => {
+  it("covers every accepted 2026 registry and feed code with a distinct full school name", () => {
+    const codes = new Set([
+      ...registry.map(team => team.espnAbbreviation),
+      ...Object.keys(teams),
+      ...earlierSlates,
+    ]);
+    expect(codes.size).toBe(176);
+    const names = Array.from(codes, code => {
+      const name = ncaafSchoolName(code);
+      expect(name, code).not.toBe("Unknown school");
+      expect(name, code).not.toBe(code);
+      return name;
+    });
+    expect(new Set(names).size).toBe(176);
+  });
+
   it("covers every school in the September 3, 4 and 5 slates without falling back to codes", () => {
     const codes = new Set([...Object.keys(teams), ...earlierSlates]);
     expect(codes.size).toBe(154);
@@ -63,6 +80,12 @@ describe("NCAAF school display names", () => {
       OKST: "Oklahoma State",
       OSU: "Ohio State",
       ORST: "Oregon State",
+      NCSU: "North Carolina State",
+      SMU: "Southern Methodist",
+      TCU: "Texas Christian",
+      UCF: "University of Central Florida",
+      MISS: "Mississippi",
+      ND: "Notre Dame",
     };
     for (const [code, name] of Object.entries(expected))
       expect(ncaafSchoolName(code)).toBe(name);
@@ -82,7 +105,9 @@ describe("NCAAF school display names", () => {
   it("normalizes code input and never invents a school for an unknown code", () => {
     expect(ncaafSchoolName(" m-oh ")).toBe("Miami (Ohio)");
     expect(ncaafSchoolName(" utep ")).toBe("University of Texas at El Paso");
-    expect(ncaafSchoolName("UNKNOWN")).toBe("Unknown school");
+    expect(ncaafSchoolName("UNKNOWN")).toBe("UNKNOWN");
+    expect(ncaafSchoolName(" future-code ")).toBe("FUTURE-CODE");
     expect(ncaafSchoolName("")).toBe("Unknown school");
+    expect(ncaafSchoolName("   ")).toBe("Unknown school");
   });
 });
