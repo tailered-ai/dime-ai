@@ -73,11 +73,15 @@ export function TeamLogoMark({ team }: { team: ProjectionTeam }) {
     return <CountryFlag flag={team.flag} countryName={team.name} />;
   }
   if (team.logo) {
-    const [width, height] = MLB_LOGO_DIMENSIONS[team.abbr] ?? [150, 150];
-    const needsDarkOutline = DARK_SURFACE_OUTLINE_TEAMS.has(team.abbr);
+    const isHelmet = team.logo.startsWith("/brand/ncaaf-helmets/sept5-");
+    const [width, height] = isHelmet
+      ? [512, 384]
+      : (MLB_LOGO_DIMENSIONS[team.abbr] ?? [150, 150]);
+    const needsDarkOutline =
+      !isHelmet && DARK_SURFACE_OUTLINE_TEAMS.has(team.abbr);
     return (
       <span
-        className={`team-logo-box${needsDarkOutline ? " team-logo-box--dark-outline" : ""}`}
+        className={`team-logo-box${isHelmet ? " team-logo-box--helmet" : ""}${needsDarkOutline ? " team-logo-box--dark-outline" : ""}`}
       >
         <img
           className="team-logo"

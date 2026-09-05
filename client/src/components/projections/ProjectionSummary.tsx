@@ -1,7 +1,8 @@
 import { ArrowRight } from "lucide-react";
 import { EdgeIndicator } from "./EdgeIndicator";
+import { MarketTable } from "./MarketTable";
 import type { MarketInsight } from "@/lib/gameInsight";
-import type { ProjectionTeam } from "./types";
+import type { ProjectionMarket, ProjectionTeam } from "./types";
 
 /**
  * ProjectionSummary — the card's dominant, 3-second insight (Law v3). Surfaces
@@ -18,6 +19,25 @@ import type { ProjectionTeam } from "./types";
  */
 function fmtPrice(p: number): string {
   return p > 0 ? `+${p}` : `${p}`;
+}
+
+function comparisonNote(market: ProjectionMarket): string | undefined {
+  const projection = market.note
+    ?.split(". ")
+    .find(
+      note =>
+        note.startsWith("Model spread:") || note.startsWith("Model total:")
+    );
+  const basis = market.sides.some(side => side.comparable === false)
+    ? market.sides.some(side => side.modelLineLabel)
+      ? "Odds at the lines shown."
+      : "Model pricing line unavailable."
+    : undefined;
+  return (
+    [projection ? `${projection.replace(/\.$/, "")}.` : undefined, basis]
+      .filter(Boolean)
+      .join(" ") || undefined
+  );
 }
 
 /** Expand a market side label for the readout: O/U → Over/Under, a leading
@@ -40,6 +60,7 @@ export function ProjectionSummary({
   teams = [],
   modelPublished = true,
   comparisonUnavailable = false,
+  comparisonMarkets,
   onNextEdge,
   nextEdgeLabel,
   nextEdgeTabIndex = 0,
@@ -50,6 +71,8 @@ export function ProjectionSummary({
   /** False when the game has NO published model output — see ProjectionGame. */
   modelPublished?: boolean;
   comparisonUnavailable?: boolean;
+  /** Actual NCAAF quotes when different pricing lines prevent edge ranking. */
+  comparisonMarkets?: ProjectionMarket[];
   onNextEdge?: () => void;
   nextEdgeLabel?: string;
   nextEdgeTabIndex?: number;
@@ -70,6 +93,44 @@ export function ProjectionSummary({
     teams.length >= 2 && teams[0]?.name && teams[1]?.name
       ? `Model projection summary: ${teams[0].name} at ${teams[1].name}`
       : "Model projection summary";
+  if (!insight && modelPublished && comparisonMarkets?.length) {
+    return (
+      <div className="summary summary--comparison">
+        <div
+          className="summary__viewport"
+          role="region"
+          aria-label={regionLabel}
+          tabIndex={nextEdgeTabIndex}
+        >
+          {comparisonMarkets.map(market => (
+            <MarketTable
+              key={market.key}
+              market={{
+                ...market,
+                note: comparisonNote(market),
+                resultLabel: undefined,
+                resultIsEdge: false,
+              }}
+            />
+          ))}
+          {onNextEdge && nextEdgeLabel && (
+            <div className="summary__comparison-navigation">
+              <button
+                type="button"
+                className="summary__next"
+                aria-label={nextEdgeLabel}
+                tabIndex={nextEdgeTabIndex}
+                ref={nextEdgeButtonRef}
+                onClick={onNextEdge}
+              >
+                <ArrowRight size={16} strokeWidth={1.8} aria-hidden="true" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       className={`summary ${insight ? "summary--priced" : "summary--empty"}`}

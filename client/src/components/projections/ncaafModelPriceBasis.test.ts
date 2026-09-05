@@ -132,13 +132,12 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     expect(first.find("td").eq(1).text()).toBe("+6.5(-220)");
     expect(first.find("td").eq(1).find(".block").text()).toBe("+6.5");
     expect($(".market-table__row--signal")).toHaveLength(0);
-    expect($("tfoot").text()).toContain(
-      "Book and model lines differ; comparison unavailable."
-    );
+    expect($("tfoot").text()).toContain("Book and model lines differ.");
     const summary = renderToStaticMarkup(
       createElement(ProjectionCard, { game })
     );
-    expect(summary).toContain("Book/model comparison unavailable.");
+    expect(summary).not.toContain("Book/model comparison unavailable.");
+    expect(summary).toContain("summary--comparison");
     expect(summary).not.toContain("Every market is efficiently priced");
     expect(summary).not.toContain("projection-card--pass");
   });
@@ -191,10 +190,22 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
       expect(
         market.sides.every(side => side.modelLineLabel === undefined)
       ).toBe(true);
-      expect(market.note).toBe(
-        "Model pricing line unavailable; comparison unavailable."
-      );
+      expect(market.note).toBe("Model pricing line unavailable.");
     }
+    const $ = load(
+      renderToStaticMarkup(createElement(ProjectionCard, { game }))
+    );
+    expect($(".summary-carousel--comparison").attr("aria-label")).toBe(
+      "3 Book and Model markets"
+    );
+    expect($(".summary-carousel__slide").first().attr("aria-label")).toBe(
+      "Market 1 of 3: Spread; Book and Model values"
+    );
+    expect($(".summary--comparison").text()).toContain(
+      "Model pricing line unavailable."
+    );
+    expect($.html()).not.toContain("priced at their shown lines");
+    expect($.html()).not.toContain("Book and Model pricing lines");
   });
 
   it("uses an owner-bound Book display override without changing the original API fields", () => {
@@ -283,6 +294,74 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     expect(total).toContain("Model total: 54.4.");
     expect(game.markets[0].sides[0].modelLineLabel).toBe("+37");
     expect(game.markets[1].sides[0].modelLineLabel).toBe("O 50.5");
+  });
+
+  it("shows BRY–ARMY Book and Model quotes when every supplied pricing line differs", () => {
+    const { game } = adapted({
+      awayTeam: "BRY",
+      homeTeam: "ARMY",
+      gameStatus: "live",
+      awayBookSpread: "37.5",
+      homeBookSpread: "-37.5",
+      bookTotal: "51.5",
+      awaySpreadOdds: "-108",
+      homeSpreadOdds: "-112",
+      awayModelSpread: "26.7",
+      homeModelSpread: "-26.7",
+      modelTotal: "54.4",
+      modelAwaySpreadOdds: "-289",
+      modelHomeSpreadOdds: "+289",
+      modelOverOdds: "-147",
+      modelUnderOdds: "+147",
+      awayML: null,
+      homeML: null,
+      modelPriceBasis: { awaySpread: 37, homeSpread: -37, total: 50.5 },
+    });
+    const $ = load(
+      renderToStaticMarkup(createElement(ProjectionCard, { game }))
+    );
+    const summary = $(".summary--comparison");
+    expect(summary.find("table")).toHaveLength(2);
+    const slides = $(".summary-carousel--comparison .summary-carousel__slide");
+    expect(slides).toHaveLength(2);
+    expect(
+      slides.toArray().map(slide => $(slide).find("table").length)
+    ).toEqual([1, 1]);
+    expect(slides.first().find("button").attr("aria-label")).toBe(
+      "View next market: Total (2 of 2)"
+    );
+    expect(slides.last().find("button").attr("aria-label")).toBe(
+      "View next market: Spread (1 of 2)"
+    );
+    expect(
+      slides.toArray().map(slide => $(slide).find("button").attr("tabindex"))
+    ).toEqual(["0", "-1"]);
+    expect(
+      summary
+        .find("tbody tr")
+        .toArray()
+        .map(tr =>
+          $(tr)
+            .find("th, td")
+            .toArray()
+            .map(cell => $(cell).text())
+        )
+    ).toEqual([
+      ["BRY +37.5", "-108", "+37(-289)"],
+      ["ARMY -37.5", "-112", "-37(+289)"],
+      ["Over 51.5", "-110", "O 50.5(-147)"],
+      ["Under 51.5", "-110", "U 50.5(+147)"],
+    ]);
+    expect(summary.text()).toContain("Model spread: BRY +26.7 / ARMY -26.7.");
+    expect(summary.text()).toContain("Model total: 54.4.");
+    expect(summary.text()).toContain("Odds at the lines shown.");
+    expect(summary.text()).not.toContain("comparison unavailable");
+    expect(summary.text()).not.toContain("Moneyline");
+    expect(
+      summary.find(".summary__signal, .market-table__row--signal")
+    ).toHaveLength(0);
+    expect(rankedEdges(game)).toEqual([]);
+    expect(rankedNoEdgeCandidates(game)).toEqual([]);
   });
 
   it("does not expose unpublished model values or threshold labels", () => {

@@ -175,7 +175,14 @@ export function ProjectionCard({
       {/* Actionable games rank qualifying edges. Pass games use the same stable
           slot for one best-ROI candidate per market (including negative ROI),
           while every ROI-only badge remains explicitly neutral. */}
-      {displayInsights.length > 1 ? (
+      {game.league === "NCAAF" &&
+      comparisonUnavailable &&
+      game.markets.length > 1 ? (
+        <SummaryCarousel
+          comparisonMarkets={game.markets}
+          teams={[game.away, game.home]}
+        />
+      ) : displayInsights.length > 1 ? (
         <SummaryCarousel
           insights={displayInsights}
           teams={[game.away, game.home]}
@@ -187,6 +194,11 @@ export function ProjectionCard({
           teams={[game.away, game.home]}
           modelPublished={modelPublished}
           comparisonUnavailable={comparisonUnavailable}
+          comparisonMarkets={
+            game.league === "NCAAF" && comparisonUnavailable
+              ? game.markets
+              : undefined
+          }
         />
       )}
 
