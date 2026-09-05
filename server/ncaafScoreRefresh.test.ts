@@ -28,8 +28,23 @@ const temple = {
     { id: "227", abbrev: "URI", isHome: false, score: 14 },
   ],
 };
-const html = (events: unknown[]) =>
-  `window['__espnfitt__']=${JSON.stringify({ page: { content: { scoreboard: { evts: events } } } })};</script>`;
+const scoreboard = (events: any[]) => ({
+  events: events.map(event => ({
+    id: event.id,
+    competitions: [
+      {
+        date: event.date,
+        timeValid: !event.tbd,
+        status: { type: event.status },
+        competitors: event.competitors.map((team: any) => ({
+          team: { id: team.id, abbreviation: team.abbrev },
+          homeAway: team.isHome ? "home" : "away",
+          score: team.score == null ? undefined : String(team.score),
+        })),
+      },
+    ],
+  })),
+});
 
 it("includes NCAAF in the score refresh used by cron and the admin button", () => {
   const source = readFileSync(
@@ -44,7 +59,9 @@ it("includes NCAAF in the score refresh used by cron and the admin button", () =
 });
 
 it("converts UTC kickoff instants to New York time across midnight and DST without using the host timezone", () => {
-  expect(parseNcaafScoreboard(html([temple]), "2026-09-05")[0]).toMatchObject({
+  expect(
+    parseNcaafScoreboard(scoreboard([temple]), "2026-09-05")[0]
+  ).toMatchObject({
     startTimeEst: "14:00",
     gameStatus: "final",
     awayScore: 14,
@@ -59,11 +76,11 @@ it("converts UTC kickoff instants to New York time across midnight and DST witho
     ["2026-03-08T07:30Z", "2026-03-08", "03:30"],
   ]) {
     expect(
-      parseNcaafScoreboard(html([{ ...temple, date: utc }]), date)[0]
+      parseNcaafScoreboard(scoreboard([{ ...temple, date: utc }]), date)[0]
         .startTimeEst
     ).toBe(time);
   }
-  expect(parseNcaafScoreboard(html([temple]), "2026-09-06")).toEqual([]);
+  expect(parseNcaafScoreboard(scoreboard([temple]), "2026-09-06")).toEqual([]);
   expect(ncaafRefreshDates(new Date("2026-09-06T02:00Z"))).toEqual([
     "2026-09-04",
     "2026-09-05",
@@ -84,7 +101,7 @@ it("rejects malformed snapshots and uses provider lifecycle, including delays an
   ).toThrow();
   expect(
     parseNcaafScoreboard(
-      html([
+      scoreboard([
         {
           ...temple,
           competitors: temple.competitors.map(({ score, ...team }) => team),
@@ -103,7 +120,7 @@ it("rejects malformed snapshots and uses provider lifecycle, including delays an
     ["post", "Final/OT", "final"],
   ]) {
     const [event] = parseNcaafScoreboard(
-      html([
+      scoreboard([
         {
           ...temple,
           status: { id: "1", state, description, detail: description },
@@ -114,8 +131,10 @@ it("rejects malformed snapshots and uses provider lifecycle, including delays an
     expect(event.gameStatus).toBe(expected);
   }
   expect(
-    parseNcaafScoreboard(html([{ ...temple, tbd: true }]), "2026-09-05")[0]
-      .startTimeEst
+    parseNcaafScoreboard(
+      scoreboard([{ ...temple, tbd: true }]),
+      "2026-09-05"
+    )[0].startTimeEst
   ).toBe("TBD");
 });
 
@@ -139,11 +158,14 @@ it("repairs the published Temple game, preserves market/provider identity, and s
   });
   const request = vi
     .fn()
-    .mockResolvedValue({ ok: true, text: async () => html([temple]) });
+    .mockResolvedValue({ ok: true, json: async () => scoreboard([temple]) });
   vi.stubGlobal("fetch", request);
   const now = new Date("2026-09-06T02:00Z");
   await Promise.all([refreshNcaafScoresNow(now), refreshNcaafScoresNow(now)]);
   expect(request).toHaveBeenCalledTimes(1);
+  expect(request.mock.calls[0][0]).toBe(
+    "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=20260905&groups=80&limit=400"
+  );
   expect(updateNcaaStartTime).toHaveBeenCalledExactlyOnceWith(123, {
     startTimeEst: "14:00",
     gameStatus: "final",
@@ -154,8 +176,8 @@ it("repairs the published Temple game, preserves market/provider identity, and s
   await refreshNcaafScoresNow(now);
   request.mockResolvedValue({
     ok: true,
-    text: async () =>
-      html([
+    json: async () =>
+      scoreboard([
         {
           ...temple,
           status: {
@@ -188,7 +210,7 @@ it("retains last-known data on provider failure or ambiguous matchups, and ignor
   expect(request).toHaveBeenCalledTimes(2);
   request.mockResolvedValue({
     ok: true,
-    text: async () => html([temple, { ...temple, id: "999" }]),
+    json: async () => scoreboard([temple, { ...temple, id: "999" }]),
   });
   await refreshNcaafScoresNow(now);
   vi.mocked(listGamesByDate).mockResolvedValue([

@@ -6,61 +6,72 @@ const ZONE = "America/New_York";
 const easternDate = (date: Date) =>
   date.toLocaleDateString("en-CA", { timeZone: ZONE });
 const competitor = z.object({
-  id: z.string().regex(/^\d+$/),
-  abbrev: z.string().min(1),
-  isHome: z.boolean(),
-  score: z.number().int().nonnegative().optional(),
+  team: z.object({
+    id: z.string().regex(/^\d+$/),
+    abbreviation: z.string().min(1),
+  }),
+  homeAway: z.enum(["home", "away"]),
+  score: z
+    .union([
+      z.number().int().nonnegative(),
+      z
+        .string()
+        .regex(/^\d+$/)
+        .transform(Number)
+        .pipe(z.number().int().nonnegative()),
+    ])
+    .optional(),
 });
 const eventSchema = z.object({
   id: z.string().regex(/^\d+$/),
-  date: z
-    .string()
-    .regex(/Z$/)
-    .refine(value => Number.isFinite(Date.parse(value))),
-  tbd: z.boolean().optional(),
-  status: z.object({
-    id: z.string(),
-    state: z.string(),
-    description: z.string(),
-    detail: z.string(),
-  }),
-  competitors: z.array(competitor).length(2),
-});
-const envelope = z.object({
-  page: z.object({
-    content: z.object({ scoreboard: z.object({ evts: z.array(z.unknown()) }) }),
-  }),
+  competitions: z
+    .array(
+      z.object({
+        date: z
+          .string()
+          .regex(/Z$/)
+          .refine(value => Number.isFinite(Date.parse(value))),
+        timeValid: z.boolean().optional(),
+        status: z.object({
+          type: z.object({
+            id: z.string(),
+            state: z.string(),
+            description: z.string(),
+            detail: z.string(),
+          }),
+        }),
+        competitors: z.array(competitor).length(2),
+      })
+    )
+    .length(1),
 });
 
-/** ESPN's public page carries the same UTC schedule and lifecycle as its game center. */
-export function parseNcaafScoreboard(html: string, date: string) {
-  const embedded = html.match(
-    /window\['__espnfitt__'\]\s*=\s*(\{[\s\S]+?);\s*(?:window|<\/script>)/
-  );
-  if (!embedded) throw new Error("NCAAF scoreboard data missing");
-  const raw = envelope.parse(JSON.parse(embedded[1])).page.content.scoreboard
-    .evts;
+/** Same ESPN scoreboard JSON endpoint used by the existing football score grader. */
+export function parseNcaafScoreboard(payload: unknown, date: string) {
+  const raw = z.object({ events: z.array(z.unknown()) }).parse(payload).events;
   return raw.flatMap(value => {
     const parsed = eventSchema.safeParse(value);
     if (!parsed.success) return [];
     const event = parsed.data;
-    const kickoff = new Date(event.date);
+    const competition = event.competitions[0];
+    const status = competition.status.type;
+    const kickoff = new Date(competition.date);
     if (easternDate(kickoff) !== date) return [];
-    const away = event.competitors.find(team => !team.isHome);
-    const home = event.competitors.find(team => team.isHome);
-    if (!away || !home || away.id === home.id) return [];
-    const description = event.status.description.toLowerCase();
+    const away = competition.competitors.find(team => team.homeAway === "away");
+    const home = competition.competitors.find(team => team.homeAway === "home");
+    if (!away || !home || away.team.id === home.team.id) return [];
+    const description = status.description.toLowerCase();
     let gameStatus:
       "upcoming" | "live" | "final" | "postponed" | "suspended" | null = null;
     if (/postponed|cancelled|canceled/.test(description))
       gameStatus = "postponed";
     else if (/suspended/.test(description)) gameStatus = "suspended";
     else if (/delayed/.test(description))
-      gameStatus = event.status.state === "pre" ? "upcoming" : "suspended";
-    else if (event.status.state === "post" && /final/.test(description))
+      gameStatus = status.state === "pre" ? "upcoming" : "suspended";
+    else if (status.state === "post" && /final/.test(description))
       gameStatus = "final";
-    else if (event.status.state === "in") gameStatus = "live";
-    else if (event.status.state === "pre" && event.status.id === "1")
+    else if (status.state === "in") gameStatus = "live";
+    else if (status.state === "pre" && status.id === "1")
       gameStatus = "upcoming";
     if (!gameStatus) return [];
     // A completed result without both scores is not a usable final snapshot.
@@ -69,22 +80,23 @@ export function parseNcaafScoreboard(html: string, date: string) {
     return [
       {
         id: event.id,
-        awayTeam: away.abbrev,
-        homeTeam: home.abbrev,
-        startTimeEst: event.tbd
-          ? "TBD"
-          : kickoff.toLocaleTimeString("en-GB", {
-              timeZone: ZONE,
-              hour: "2-digit",
-              minute: "2-digit",
-              hourCycle: "h23",
-            }),
+        awayTeam: away.team.abbreviation,
+        homeTeam: home.team.abbreviation,
+        startTimeEst:
+          competition.timeValid === false
+            ? "TBD"
+            : kickoff.toLocaleTimeString("en-GB", {
+                timeZone: ZONE,
+                hour: "2-digit",
+                minute: "2-digit",
+                hourCycle: "h23",
+              }),
         gameStatus,
         awayScore: away.score ?? null,
         homeScore: home.score ?? null,
         gameClock:
           gameStatus === "live" || gameStatus === "suspended"
-            ? event.status.detail.slice(0, 32)
+            ? status.detail.slice(0, 32)
             : null,
       },
     ];
@@ -119,14 +131,14 @@ async function refreshDates(now: Date): Promise<void> {
       );
       if (!rows.length) continue;
       const response = await fetch(
-        `https://www.espn.com/college-football/scoreboard/_/date/${date.replaceAll("-", "")}/group/80`,
+        `https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=${date.replaceAll("-", "")}&groups=80&limit=400`,
         {
           signal: AbortSignal.timeout(20_000),
         }
       );
       if (!response.ok)
         throw new Error(`NCAAF scoreboard HTTP ${response.status}`);
-      const events = parseNcaafScoreboard(await response.text(), date);
+      const events = parseNcaafScoreboard(await response.json(), date);
       let updated = 0;
       let unmatched = 0;
       for (const row of rows) {
