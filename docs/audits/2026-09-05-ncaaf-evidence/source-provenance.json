@@ -7,7 +7,7 @@
     "modelRunAt": 1788626064481,
     "meaning": "Owner attachment filesystem arrival time is the publication/import marker required by the existing feed; no underlying model run timestamp was supplied or inferred.",
     "sha256": "c9307cbd7b683e053733bc80ce78d75802b12b8d0f57a3f82826917a5ed851ac",
-    "prices": "Owner spread/total prices are conditional on model.basis Book thresholds; no recalculation and no model moneyline or scores supplied."
+    "prices": "Owner spread/total prices are conditional on model.basis Book thresholds. OKST/TLSA spread prices use the separately recorded owner-approved normal-distribution estimate after the favorite correction. No model moneylines or scores were supplied."
   },
   "sources": {
     "an": {
@@ -1380,16 +1380,18 @@
     "VSiN history observation time and retrieval time remain distinct; AN history scrapedAt is explicitly capture time, not provider observation or line movement.",
     "AN Open30 is excluded from this publication.",
     "Current VSiN captions use capture time; no authoritative current provider observation exists.",
-    "UCLA model-comparison Book prices use the explicitly supplied owner -110 prices; primary stored AN DK Book fields and Tools odds retain the original API values. The model-comparison override is separately labeled and bound to this exact model record."
+    "UCLA model-comparison Book prices use the explicitly supplied owner -110 prices; primary stored AN DK Book fields and Tools odds retain the original API values. The model-comparison override is separately labeled and bound to this exact model record.",
+    "OKST/TLSA owner-approved correction changes only its model spreads to -12.6/+12.6 and spread prices to estimated +110/-110 at the original Book -13.5/+13.5 thresholds. The one-row correction workflow must not replay the original 68-game publication."
   ],
   "hashes": {
     "evidence/an/normalized.json": "1e43f3ad29ea079b146f94da65758935fb5f1796dbbaa5a43b4184265638e09c",
     "evidence/schedule/normalized.json": "c001e7e77ad2bf9434ce98f09fa6451d528202d65d6231c73caf88734b321936",
-    "evidence/model/normalized.json": "9707d71e0dba78877255bbf50ac2c2c7989ec31d18a386153f6ca91918c91227",
+    "evidence/model/normalized.json": "4a38c7177da98119e4573479f784cee916e98c3870808993b44ede82ad182319",
     "evidence/vsin/normalized-vsin-dk-september5.json": "196e3ba9e7af67bee6a4ccacef2f03fe616e32c74c6da1f780b96ca83cf22571",
-    "site/shared/ncaafSeptember5Sources.json": "75ad88f43072135735ce6126cab7cbe1409f52c58b9bd63ad2a0e697cab1f352",
+    "site/shared/ncaafSeptember5Sources.json": "f399186bf903097cc6e075739de62ff5bf0b7db23623d896275406c4fc930b47",
     "site/shared/ncaafFeedTeams.json": "6b1ff253020e794eebc42c04e1a4a10854fdfeaaac7b5fb0afe7afbcf6333fc4",
-    "evidence/model/owner-corrections.json": "5c8e82aed01f1d36096044fb6068ee9dcf32fa9028a3387b53017e543a72181e"
+    "evidence/model/owner-corrections.json": "5cc94386a033822eead107a7aad14a01a8d993ab157d4368849d656336445bf2",
+    "evidence/model/okst-price-estimate.json": "a2bf6448208167d7f649ab7b1a8902b5648c84f602003a1779a3edb6df86f5d8"
   },
   "ownerCorrections": [
     {
@@ -1458,6 +1460,94 @@
       ],
       "timestampMeaning": "Time this correction was recorded for publication; not an underlying model-run timestamp.",
       "bookPricePresentation": "The latest owner -110 Book prices apply only in this game\u2019s model comparison. Primary stored AN DK Book odds remain unchanged for the Tools page and API odds history."
+    },
+    {
+      "eventId": 288841,
+      "awayAbbr": "OKST",
+      "homeAbbr": "TLSA",
+      "source": "Latest explicit owner correction: Oklahoma State must be the model favorite",
+      "recordedAt": "2026-09-05T19:22:46.618Z",
+      "bookBasis": {
+        "awaySpread": -13.5,
+        "homeSpread": 13.5,
+        "total": 59,
+        "awaySpreadOdds": "-110",
+        "homeSpreadOdds": "-110",
+        "overOdds": "-110",
+        "underOdds": "-110",
+        "awayMl": null,
+        "homeMl": null
+      },
+      "model": {
+        "awaySpread": -12.6,
+        "homeSpread": 12.6,
+        "total": 54.4,
+        "awaySpreadOdds": "+110",
+        "homeSpreadOdds": "-110",
+        "overOdds": "+157",
+        "underOdds": "-157",
+        "awayMl": null,
+        "homeMl": null
+      },
+      "sourceRows": [
+        {
+          "side": "Oklahoma State",
+          "book": "-13.5",
+          "bookOdds": "-110",
+          "modelLine": "-12.6",
+          "modelOdds": "+110"
+        },
+        {
+          "side": "Tulsa",
+          "book": "+13.5",
+          "bookOdds": "-110",
+          "modelLine": "+12.6",
+          "modelOdds": "-110"
+        },
+        {
+          "side": "Over",
+          "book": "59",
+          "bookOdds": "-110",
+          "modelLine": "54.4",
+          "modelOdds": "+157"
+        },
+        {
+          "side": "Under",
+          "book": "59",
+          "bookOdds": "-110",
+          "modelLine": "54.4",
+          "modelOdds": "-157"
+        }
+      ],
+      "timestampMeaning": "Time the owner correction was recorded; the existing attachment import marker remains unchanged. This is not an underlying model-run timestamp.",
+      "priceStatus": "owner-approved-estimate",
+      "pricingNote": "Owner-approved estimated fair spread prices +110/-110 at OKST -13.5/Tulsa +13.5. Estimate fits a normal margin distribution to the original rounded price +1928 and reprices the corrected OKST -12.6 model direction. This does not recover original model-run parameters. Totals and all Book fields remain unchanged.",
+      "estimate": {
+        "classification": "estimate, not recovered model-run parameters",
+        "basis": "normal spread distribution fitted to the original rounded away price +1928 at old model+12.6 and Book-13.5",
+        "impliedSigma": 15.803008369722386,
+        "correctedAwaySpread": -12.6,
+        "bookAwaySpread": -13.5,
+        "correctedAwayCoverProbability": 0.4772920416967779,
+        "estimatedAwayOdds": 110,
+        "estimatedHomeOdds": -110,
+        "ownerApproval": {
+          "status": "approved",
+          "recordedAt": "2026-09-05T19:59:59.024Z",
+          "question": "Use estimated model prices +110/-110 to finish OKST -12.6/Tulsa +12.6?",
+          "answer": "That is the next fix, yes.",
+          "timestampMeaning": "Time approval was recorded in publication evidence, not an underlying model-run timestamp."
+        },
+        "formula": "sigma = 26.1 / -PhiInverse(100 / (100 + 1928)); corrected P(OKST covers -13.5) = Phi((12.6 - 13.5) / sigma); fair American odds rounded to the nearest integer.",
+        "pushTreatment": "No push at the half-point Book spread. The total market is not recalculated."
+      },
+      "ownerApproval": {
+        "status": "approved",
+        "recordedAt": "2026-09-05T19:59:59.024Z",
+        "question": "Use estimated model prices +110/-110 to finish OKST -12.6/Tulsa +12.6?",
+        "answer": "That is the next fix, yes.",
+        "timestampMeaning": "Time approval was recorded in publication evidence, not an underlying model-run timestamp."
+      }
     }
   ]
 }
