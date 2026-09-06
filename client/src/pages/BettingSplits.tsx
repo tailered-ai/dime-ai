@@ -744,12 +744,21 @@ export default function BettingSplitsPage({
   }, []);
   const splitsAgoLabel = useMemo(() => {
     // A different league's successful job does not establish NCAAF freshness.
-    const captures = selectedSport === "NCAAF"
-      ? sourceGames?.map(game => game.ingestionReceivedAt ? new Date(game.ingestionReceivedAt).getTime() : NaN)
-      : undefined;
-    const timestamp = captures?.length && captures.every(time => Number.isFinite(time) && time <= now)
-      ? Math.min(...captures)
-      : selectedSport === "NCAAF" ? null : lastRefresh?.refreshedAt;
+    const captures =
+      selectedSport === "NCAAF"
+        ? sourceGames?.map(game =>
+            game.ingestionReceivedAt
+              ? new Date(game.ingestionReceivedAt).getTime()
+              : NaN
+          )
+        : undefined;
+    const timestamp =
+      captures?.length &&
+      captures.every(time => Number.isFinite(time) && time <= now)
+        ? Math.min(...captures)
+        : selectedSport === "NCAAF"
+          ? null
+          : lastRefresh?.refreshedAt;
     if (timestamp == null) return "—";
     const diffMs = now - new Date(timestamp).getTime();
     const diffMin = Math.round(diffMs / 60_000);
@@ -1089,7 +1098,9 @@ export default function BettingSplitsPage({
                 {dkSnapshot
                   ? `VSiN DK · ${new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }).format(new Date(dkSnapshot.retrievedAt))} ET`
                   : selectedSport === "NCAAF"
-                    ? splitsAgoLabel === "—" ? "NCAAF capture time unavailable" : `Oldest NCAAF capture ${splitsAgoLabel}`
+                    ? splitsAgoLabel === "—"
+                      ? "NCAAF capture time unavailable"
+                      : `Oldest NCAAF capture ${splitsAgoLabel}`
                     : `Splits synced ${splitsAgoLabel}`}
               </span>
             </div>

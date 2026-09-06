@@ -874,8 +874,12 @@ test.describe("NCAAF Book/Model card summaries", () => {
             }
             const next = slide.locator("button");
             await next.focus();
+            await expect(next).toHaveCSS("width", "44px");
+            await expect(next).toHaveCSS("height", "44px");
+            // Firefox's transformed carousel can report 43.999969px for 44px.
+            // Preserve the exact CSS floor; tolerate only geometry roundoff.
             expect((await next.boundingBox())!.width).toBeGreaterThanOrEqual(
-              44
+              44 - 0.0001
             );
             await page.keyboard.press("Enter");
             await expect(

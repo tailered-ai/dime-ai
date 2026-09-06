@@ -69,7 +69,10 @@ import {
 } from "../shared/mlbTeams";
 import type { InsertGame } from "../drizzle/schema";
 import { refreshNcaafScoresNow } from "./ncaafScoreRefresh";
-import { refreshNcaafMarkets, type NcaafMarketResult } from "./ncaafMarketRefresh";
+import {
+  refreshNcaafMarkets,
+  type NcaafMarketResult,
+} from "./ncaafMarketRefresh";
 
 const INTERVAL_MS = 5 * 60 * 1000; // 5 minutes — all sports refresh cadence (24/7, no time gates)
 
@@ -1769,13 +1772,14 @@ export async function runVsinRefresh(): Promise<RefreshResult | null> {
 
     // Run NBA, NHL, and MLB VSiN refreshes in parallel — each uses independent fetch() sessions
     // with no shared state, so concurrent execution is safe and reduces wall-clock time by ~2/3.
-    const [nbaResult, nhlResult, mlbResult, ncaaf, ncaafTomorrow] = await Promise.all([
-      refreshNba(todayStr, allDates),
-      refreshNhl(todayStr, allDates),
-      refreshMlb(todayStr),
-      refreshNcaafMarkets(todayStr, "today", "auto"),
-      refreshNcaafMarkets(datePst(1), "tomorrow", "auto"),
-    ]);
+    const [nbaResult, nhlResult, mlbResult, ncaaf, ncaafTomorrow] =
+      await Promise.all([
+        refreshNba(todayStr, allDates),
+        refreshNhl(todayStr, allDates),
+        refreshMlb(todayStr),
+        refreshNcaafMarkets(todayStr, "today", "auto"),
+        refreshNcaafMarkets(datePst(1), "tomorrow", "auto"),
+      ]);
     console.log(
       `[VSiNAutoRefresh] NBA refresh complete: updated=${nbaResult.updated} ` +
         `inserted=${nbaResult.inserted} scheduleInserted=${nbaResult.scheduleInserted} ` +
@@ -1836,7 +1840,8 @@ export async function runVsinRefresh(): Promise<RefreshResult | null> {
       mlbInserted: mlbResult.inserted,
       mlbTotal: mlbResult.total,
       gameDate: todayStr,
-      ncaaf, ncaafTomorrow,
+      ncaaf,
+      ncaafTomorrow,
     };
 
     lastRefreshResult = result;
@@ -2010,11 +2015,24 @@ export async function runVsinRefreshManual(
   if (sport === "NCAAF") {
     const ncaaf = await refreshNcaafMarkets(todayStr, "today", "manual");
     const result: RefreshResult = {
-      refreshedAt: new Date().toISOString(), scoresRefreshedAt: lastScoresRefreshedAt,
-      updated: ncaaf.updated, inserted: 0, total: ncaaf.updated + ncaaf.skipped + ncaaf.frozen,
-      nbaUpdated: 0, nbaInserted: 0, nbaScheduleInserted: 0, nbaTotal: 0,
-      nhlUpdated: 0, nhlInserted: 0, nhlScheduleInserted: 0, nhlTotal: 0,
-      mlbUpdated: 0, mlbInserted: 0, mlbTotal: 0, gameDate: todayStr, ncaaf,
+      refreshedAt: new Date().toISOString(),
+      scoresRefreshedAt: lastScoresRefreshedAt,
+      updated: ncaaf.updated,
+      inserted: 0,
+      total: ncaaf.updated + ncaaf.skipped + ncaaf.frozen,
+      nbaUpdated: 0,
+      nbaInserted: 0,
+      nbaScheduleInserted: 0,
+      nbaTotal: 0,
+      nhlUpdated: 0,
+      nhlInserted: 0,
+      nhlScheduleInserted: 0,
+      nhlTotal: 0,
+      mlbUpdated: 0,
+      mlbInserted: 0,
+      mlbTotal: 0,
+      gameDate: todayStr,
+      ncaaf,
     };
     lastRefreshResult = result;
     return result;
@@ -2035,8 +2053,12 @@ export async function runVsinRefreshManual(
     const allDates = dateRange(todayStr, rangeEnd);
 
     // ── Per-sport VSiN splits + schedule refresh ──────────────────────────────────────────
-    const ncaaf = !sport ? await refreshNcaafMarkets(todayStr, "today", "manual") : undefined;
-    const ncaafTomorrow = !sport ? await refreshNcaafMarkets(datePst(1), "tomorrow", "manual") : undefined;
+    const ncaaf = !sport
+      ? await refreshNcaafMarkets(todayStr, "today", "manual")
+      : undefined;
+    const ncaafTomorrow = !sport
+      ? await refreshNcaafMarkets(datePst(1), "tomorrow", "manual")
+      : undefined;
     const doNba = !sport || sport === "NBA";
     const doNhl = !sport || sport === "NHL";
     const doMlb = !sport || sport === "MLB";
@@ -2172,7 +2194,8 @@ export async function runVsinRefreshManual(
       mlbInserted: mlbResult.inserted,
       mlbTotal: mlbResult.total,
       gameDate: todayStr,
-      ncaaf, ncaafTomorrow,
+      ncaaf,
+      ncaafTomorrow,
     };
 
     lastRefreshResult = result;
