@@ -27,11 +27,13 @@ export function clampActiveEdgeIndex(active: number, count: number): number {
 export function SummaryCarousel({
   insights = [],
   comparisonMarkets,
+  modelPublished = true,
   teams = [],
   variant = "edge",
 }: {
   insights?: MarketInsight[];
   comparisonMarkets?: ProjectionMarket[];
+  modelPublished?: boolean;
   teams?: ProjectionTeam[];
   variant?: "edge" | "no-edge";
 }) {
@@ -117,6 +119,7 @@ export function SummaryCarousel({
             <ProjectionSummary
               insight={slide.insight}
               comparisonMarkets={slide.market ? [slide.market] : undefined}
+              modelPublished={modelPublished}
               teams={teams}
               onNextEdge={() => goTo((i + 1) % slides.length, true)}
               nextEdgeLabel={`View next ${

@@ -415,4 +415,78 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
       renderToStaticMarkup(createElement(ProjectionCard, { game }))
     ).toContain("No model projection published for this game.");
   });
+
+  it("populates the summary for owner-supplied lines without inventing fair odds", () => {
+    const { game } = adapted({
+      awayTeam: "WSU",
+      homeTeam: "WASH",
+      awayBookSpread: null,
+      homeBookSpread: null,
+      awaySpreadOdds: null,
+      homeSpreadOdds: null,
+      bookTotal: "51.5",
+      overOdds: "-112",
+      underOdds: "-108",
+      awayModelSpread: "21.1",
+      homeModelSpread: "-21.1",
+      modelTotal: "52.1",
+      modelAwaySpreadOdds: null,
+      modelHomeSpreadOdds: null,
+      modelOverOdds: null,
+      modelUnderOdds: null,
+      modelPriceBasis: undefined,
+      awayML: null,
+      homeML: null,
+    });
+    const $ = load(
+      renderToStaticMarkup(createElement(ProjectionCard, { game }))
+    );
+    const slides = $(".summary-carousel__slide");
+    expect(
+      slides.toArray().map(slide =>
+        $(slide)
+          .find("dd")
+          .toArray()
+          .map(cell => $(cell).text())
+      )
+    ).toEqual([
+      ["Washington State", "— (—)", "+21.1"],
+      ["Washington", "— (—)", "-21.1"],
+      ["Over", "51.5 (-112)", "52.1"],
+      ["Under", "51.5 (-108)", "52.1"],
+    ]);
+    expect($(".edge-indicator")).toHaveLength(0);
+    expect($("article").hasClass("projection-card--pass")).toBe(false);
+    expect($.text()).not.toContain("Every market is efficiently priced");
+  });
+
+  it("keeps Book in the summary when no model has been published", () => {
+    const { game } = adapted({ modelRunAt: null });
+    const $ = load(
+      renderToStaticMarkup(createElement(ProjectionCard, { game }))
+    );
+    expect($(".summary-carousel__slide")).toHaveLength(6);
+    expect(
+      $(".summary__item--book dd")
+        .toArray()
+        .map(cell => $(cell).text())
+    ).toEqual([
+      "+8.5 (-110)",
+      "-8.5 (-110)",
+      "55.5 (-110)",
+      "55.5 (-110)",
+      "+260",
+      "-325",
+    ]);
+    expect(
+      $(".summary__item--model dd")
+        .toArray()
+        .map(cell => $(cell).text())
+    ).toEqual(Array(6).fill("—"));
+    expect($(".summary__comparison-status").first().text()).toBe(
+      "Model unavailable"
+    );
+    expect($(".edge-indicator")).toHaveLength(0);
+    expect($("article").hasClass("projection-card--nomodel")).toBe(true);
+  });
 });
