@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { publication, SLATE, target } from "./publishNcaafSeptember6.mts";
+import {
+  publication,
+  SLATE,
+  target,
+  washingtonOwnerModel,
+} from "./publishNcaafSeptember6.mts";
 import { ncaafHelmet } from "../shared/ncaafHelmets";
 
 function fixture() {
@@ -54,6 +59,55 @@ function fixture() {
   return { an: { league: { name: "ncaaf" }, games }, splits };
 }
 describe("bounded September 6 backend publication", () => {
+  it("publishes only the owner's Washington thresholds, rejects stale targets and permits exact replay", () => {
+    const row = {
+      id: 4350069,
+      ncaaContestId: "288813",
+      awayTeam: "WSU",
+      homeTeam: "WASH",
+      gameDate: "2026-09-06",
+      sport: "NCAAF",
+      publishedToFeed: 1,
+      publishedModel: 0,
+      awayModelSpread: null,
+      homeModelSpread: null,
+      modelTotal: null,
+      modelRunAt: null,
+      modelAwaySpreadOdds: null,
+      modelHomeSpreadOdds: null,
+      modelOverOdds: null,
+      modelUnderOdds: null,
+      modelAwayML: null,
+      modelHomeML: null,
+    };
+    const result = washingtonOwnerModel([row], 1788721800000);
+    expect(result).toEqual({
+      awayModelSpread: "21.1",
+      homeModelSpread: "-21.1",
+      modelTotal: "52.1",
+      publishedModel: 1,
+      modelRunAt: 1788721800000,
+    });
+    expect(
+      washingtonOwnerModel([{ ...row, ...result }], 1788721900000)
+    ).toEqual(result);
+    for (const change of [
+      { id: 4350070 },
+      { homeTeam: "ND" },
+      { gameDate: "2026-09-05" },
+      { modelTotal: "53.0" },
+      { modelOverOdds: "-110" },
+    ])
+      expect(() =>
+        washingtonOwnerModel([{ ...row, ...change }], 1788721800000)
+      ).toThrow();
+    expect(() => washingtonOwnerModel([row, row], 1788721800000)).toThrow();
+    expect(
+      Object.keys(result).some(key =>
+        /book|bets|money|edge|diff|Odds|ML/.test(key)
+      )
+    ).toBe(false);
+  });
   it("keeps missing AN prices unavailable, VSiN zero values and model fields untouched", () => {
     const { an, splits } = fixture();
     const rows = publication(an, splits);

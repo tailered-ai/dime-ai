@@ -16,6 +16,7 @@ on:
           - september-5-dk-model
           - september-5-okst-correction
           - september-6-dk
+          - september-6-washington-model
       dry_run:
         description: Fetch and validate without writing TiDB
         required: true
@@ -77,6 +78,13 @@ jobs:
             else
               pnpm exec tsx scripts/publishNcaafSeptember5.mts --publish
               pnpm exec tsx scripts/publishNcaafSeptember5.mts --verify
+            fi
+          elif [ "$PUBLISH_SLATE" = "september-6-washington-model" ]; then
+            if [ "$DRY_RUN" = "true" ]; then
+              pnpm exec tsx scripts/publishNcaafSeptember6.mts --washington-model-dry-run
+            else
+              pnpm exec tsx scripts/publishNcaafSeptember6.mts --washington-model-publish
+              pnpm exec tsx scripts/publishNcaafSeptember6.mts --washington-model-verify
             fi
           elif [ "$PUBLISH_SLATE" = "september-6-dk" ]; then
             if [ "$DRY_RUN" = "true" ]; then

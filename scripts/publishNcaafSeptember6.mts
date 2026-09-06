@@ -224,8 +224,142 @@ const verify = (row: Row, fields: Row) => {
     else assert.equal(String(row[key]), String(value), key);
 };
 
+/** Owner-supplied September 6 values, not generated odds or a new model run. */
+export function washingtonOwnerModel(rows: Row[], importedAt: number) {
+  assert.equal(rows.length, 1, "Missing or duplicate Washington target");
+  const row = target(rows, SLATE[0])!;
+  assert.equal(row.id, 4350069, "Washington row identity changed");
+  assert.equal(Number(row.publishedToFeed), 1);
+  assert(Number.isSafeInteger(importedAt) && importedAt > 0);
+  const fields = {
+    awayModelSpread: "21.1",
+    homeModelSpread: "-21.1",
+    modelTotal: "52.1",
+    publishedModel: 1,
+  };
+  const replay = Object.entries(fields).every(
+    ([k, v]) => row[k] !== null && Number(row[k]) === Number(v)
+  );
+  if (replay) {
+    assert(Number.isSafeInteger(row.modelRunAt) && row.modelRunAt > 0);
+    return { ...fields, modelRunAt: row.modelRunAt as number };
+  }
+  for (const key of [
+    "awayModelSpread",
+    "homeModelSpread",
+    "modelTotal",
+    "modelRunAt",
+    "modelAwaySpreadOdds",
+    "modelHomeSpreadOdds",
+    "modelOverOdds",
+    "modelUnderOdds",
+    "modelAwayML",
+    "modelHomeML",
+  ])
+    assert.equal(
+      row[key],
+      null,
+      `Existing ${key} changed; review before publishing`
+    );
+  assert.equal(Number(row.publishedModel), 0);
+  // Existing feed publication marker, also used by September 5 imports; not execution time.
+  return { ...fields, modelRunAt: importedAt };
+}
+
+async function publishWashingtonOwnerModel(mode: string) {
+  assert(process.env.DATABASE_URL, "DATABASE_URL unavailable");
+  const db = await mysql.createConnection({
+    uri: process.env.DATABASE_URL,
+    timezone: "Z",
+    ssl: { rejectUnauthorized: true },
+  });
+  try {
+    await db.beginTransaction();
+    const read = async () =>
+      (
+        await db.query<RowDataPacket[]>(
+          "SELECT * FROM games WHERE id = ? OR ncaaContestId = ? OR (gameDate = ? AND sport = ? AND awayTeam = ? AND homeTeam = ?) ORDER BY id FOR UPDATE",
+          [4350069, "288813", DATE, "NCAAF", "WSU", "WASH"]
+        )
+      )[0];
+    const before = await read();
+    const fields = washingtonOwnerModel(before, Date.now());
+    const changed = Object.entries(fields).some(
+      ([k, v]) => before[0][k] === null || Number(before[0][k]) !== Number(v)
+    );
+    if (mode === "--washington-model-verify")
+      assert(!changed, "Owner model not yet published");
+    if (mode === "--washington-model-publish" && changed) {
+      const result = (
+        await db.execute<mysql.ResultSetHeader>(
+          "UPDATE games SET awayModelSpread = ?, homeModelSpread = ?, modelTotal = ?, publishedModel = ?, modelRunAt = ? WHERE id = ? AND ncaaContestId = ? AND gameDate = ? AND sport = ? AND awayTeam = ? AND homeTeam = ? AND modelRunAt IS NULL AND publishedModel = 0",
+          [
+            ...Object.values(fields),
+            4350069,
+            "288813",
+            DATE,
+            "NCAAF",
+            "WSU",
+            "WASH",
+          ]
+        )
+      )[0];
+      assert.equal(result.affectedRows, 1, "Owner model update guard failed");
+      const after = await read();
+      assert.equal(after.length, 1);
+      verify(after[0], fields);
+      const preserved = (row: Row) =>
+        Object.fromEntries(
+          Object.entries(row).filter(
+            ([k]) => !(k in fields) && k !== "updatedAt"
+          )
+        );
+      assert.deepEqual(
+        preserved(after[0]),
+        preserved(before[0]),
+        "Unrequested fields changed"
+      );
+    }
+    if (mode === "--washington-model-publish") {
+      await db.commit();
+      const fresh = await read();
+      verify(target(fresh, SLATE[0])!, fields);
+    } else await db.rollback();
+    console.log(
+      JSON.stringify({
+        operation: mode,
+        event: 288813,
+        rowId: 4350069,
+        source: "PREZ supplied model thresholds",
+        fields,
+        publicationMarkerMeaning: "owner import time, not model execution time",
+        changed: mode === "--washington-model-publish" && changed,
+        pending: mode === "--washington-model-dry-run" && changed,
+        bookAndSplitsPreserved: true,
+      })
+    );
+    console.log("NCAAF_WASHINGTON_OWNER_MODEL_PASS");
+  } catch (error) {
+    await db.rollback();
+    throw error;
+  } finally {
+    await db.end();
+  }
+}
+
 async function main() {
   const [mode, ...extra] = process.argv.slice(2);
+  if (
+    !extra.length &&
+    [
+      "--washington-model-dry-run",
+      "--washington-model-publish",
+      "--washington-model-verify",
+    ].includes(mode)
+  ) {
+    await publishWashingtonOwnerModel(mode);
+    return;
+  }
   assert(
     !extra.length && ["--check", "--dry-run", "--publish"].includes(mode),
     "Choose --check, --dry-run or --publish"
