@@ -2,6 +2,12 @@ import feedTeams from "./ncaafFeedTeams.json";
 
 /** Public helmet assets, shared by the model and betting-splits feeds. */
 const NCAAF_HELMETS: Readonly<Record<string, string>> = {
+  WSU: "/brand/ncaaf-helmets/sept6-washington-state.png",
+  WASH: "/brand/ncaaf-helmets/sept6-washington.png",
+  WIS: "/brand/ncaaf-helmets/sept6-wisconsin.png",
+  ND: "/brand/ncaaf-helmets/sept6-notre-dame.png",
+  LOU: "/brand/ncaaf-helmets/sept6-louisville.png",
+  MISS: "/brand/ncaaf-helmets/sept6-ole-miss.png",
   ACU: "/brand/ncaaf-helmets/sept5-acu-v2.png",
   AFA: "/brand/ncaaf-helmets/sept5-afa-v2.png",
   ALA: "/brand/ncaaf-helmets/sept5-ala-v2.png",
