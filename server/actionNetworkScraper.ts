@@ -41,11 +41,13 @@
 
 import { debugLog } from "./_core/debugLogger";
 
-export type AnSport = "ncaab" | "nba" | "nhl" | "mlb";
+export type AnSport = "ncaab" | "nba" | "nhl" | "mlb" | "ncaaf";
 
 export interface AnGameOdds {
   /** Action Network internal game ID */
   gameId: number;
+  awayTeamId?: number;
+  homeTeamId?: number;
   /** Away team full name, e.g. "Ohio State Buckeyes" */
   awayFullName: string;
   /** Away team abbreviation */
@@ -120,6 +122,8 @@ interface AnV2Team {
 /** A single outcome entry in a v2 market array */
 interface AnV2Outcome {
   book_id: number;
+  event_id?: number;
+  is_alt_market?: boolean;
   side?: "away" | "home" | "over" | "under";
   team_id?: number;
   value?: number;
@@ -154,6 +158,7 @@ interface AnV2Game {
 
 interface AnV2ApiResponse {
   games: AnV2Game[];
+  league?: { name: string };
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -357,6 +362,12 @@ export async function fetchActionNetworkOdds(
     );
 
   const data = (await resp.json()) as AnV2ApiResponse;
+  if (
+    sport === "ncaaf" &&
+    (data?.league?.name !== "ncaaf" || !Array.isArray(data.games))
+  ) {
+    throw new Error("Invalid NCAAF scoreboard identity");
+  }
   const games = data?.games ?? [];
 
   debugLog(
@@ -370,6 +381,16 @@ export async function fetchActionNetworkOdds(
   let skippedNoTeam = 0;
 
   for (const game of games) {
+    if (
+      sport === "ncaaf" &&
+      [game.away_team_id, game.home_team_id].some(
+        id =>
+          !Number.isSafeInteger(id) ||
+          game.teams?.filter(team => team.id === id).length !== 1
+      )
+    ) {
+      throw new Error(`NCAAF event ${game.id}: ambiguous team identities`);
+    }
     // Build team map
     const teamMap = new Map<number, AnV2Team>();
     for (const t of game.teams ?? []) teamMap.set(t.id, t);
@@ -399,6 +420,42 @@ export async function fetchActionNetworkOdds(
     const dkEvent = dkBook?.event;
     const fdEvent = fdBook?.event;
 
+    // NCAAF never substitutes live, alternate, foreign-book or ambiguous prices.
+    const selectDk = (
+      arr: AnV2Outcome[] | undefined,
+      matcher: { side?: string; teamId?: number }
+    ) => {
+      if (sport !== "ncaaf") return findOutcome(arr, matcher);
+      const matches = (arr ?? []).filter(
+        o =>
+          o.book_id === DK_NJ_BOOK_ID &&
+          o.event_id === game.id &&
+          o.period === "event" &&
+          o.is_live !== true &&
+          o.is_alt_market !== true &&
+          Number.isInteger(o.odds) &&
+          Math.abs(o.odds) >= 100 &&
+          (matcher.side
+            ? o.side === matcher.side
+            : o.team_id === matcher.teamId) &&
+          (matcher.side === "away"
+            ? o.team_id === game.away_team_id
+            : matcher.side === "home"
+              ? o.team_id === game.home_team_id
+              : true) &&
+          (matcher.side
+            ? typeof o.value === "number" && Number.isFinite(o.value)
+            : true)
+      );
+      return matches.length === 1 ? matches[0] : undefined;
+    };
+    const dkPoint = (value: number | undefined) =>
+      sport === "ncaaf"
+        ? value != null && Number.isFinite(value)
+          ? value
+          : null
+        : roundHalf(value);
+
     // ── Open line extraction ────────────────────────────────────────────────
     const openSpreadAway = findOutcome(openEvent?.spread, { side: "away" });
     const openSpreadHome = findOutcome(openEvent?.spread, { side: "home" });
@@ -412,20 +469,33 @@ export async function fetchActionNetworkOdds(
     });
 
     // ── DK NJ line extraction ───────────────────────────────────────────────
-    const dkSpreadAway = findOutcome(dkEvent?.spread, { side: "away" });
-    const dkSpreadHome = findOutcome(dkEvent?.spread, { side: "home" });
+    const dkSpreadAway = selectDk(dkEvent?.spread, { side: "away" });
+    const dkSpreadHome = selectDk(dkEvent?.spread, { side: "home" });
 
     // ── FanDuel NJ spread extraction (for NHL puck line fallback) ───────────
     const fdSpreadAway = findOutcome(fdEvent?.spread, { side: "away" });
     const fdSpreadHome = findOutcome(fdEvent?.spread, { side: "home" });
-    const dkTotalOver = findOutcome(dkEvent?.total, { side: "over" });
-    const dkTotalUnder = findOutcome(dkEvent?.total, { side: "under" });
-    const dkMlAway = findOutcome(dkEvent?.moneyline, {
+    const dkTotalOver = selectDk(dkEvent?.total, { side: "over" });
+    const dkTotalUnder = selectDk(dkEvent?.total, { side: "under" });
+    const dkMlAway = selectDk(dkEvent?.moneyline, {
       teamId: game.away_team_id,
     });
-    const dkMlHome = findOutcome(dkEvent?.moneyline, {
+    const dkMlHome = selectDk(dkEvent?.moneyline, {
       teamId: game.home_team_id,
     });
+    if (
+      sport === "ncaaf" &&
+      ((dkSpreadAway &&
+        dkSpreadHome &&
+        dkSpreadAway.value !== -dkSpreadHome.value!) ||
+        (dkTotalOver &&
+          dkTotalUnder &&
+          dkTotalOver.value !== dkTotalUnder.value))
+    ) {
+      throw new Error(
+        `NCAAF event ${game.id}: contradictory DraftKings thresholds`
+      );
+    }
 
     // Log every game with full detail — redirected to DB to avoid stdout noise
     const hasDk = !!(dkSpreadAway || dkTotalOver || dkMlAway);
@@ -452,6 +522,9 @@ export async function fetchActionNetworkOdds(
 
     results.push({
       gameId: game.id,
+      ...(sport === "ncaaf"
+        ? { awayTeamId: game.away_team_id, homeTeamId: game.home_team_id }
+        : {}),
       awayFullName: awayTeam.full_name,
       awayAbbr: awayTeam.abbr,
       awayUrlSlug: awayTeam.url_slug,
@@ -473,11 +546,14 @@ export async function fetchActionNetworkOdds(
       openHomeML: fmtOdds(openMlHome?.odds),
 
       // DraftKings NJ current line (book_id=68)
-      dkAwaySpread: roundHalf(dkSpreadAway?.value),
+      dkAwaySpread: dkPoint(dkSpreadAway?.value),
       dkAwaySpreadOdds: fmtOdds(dkSpreadAway?.odds),
-      dkHomeSpread: roundHalf(dkSpreadHome?.value),
+      dkHomeSpread: dkPoint(dkSpreadHome?.value),
       dkHomeSpreadOdds: fmtOdds(dkSpreadHome?.odds),
-      dkTotal: roundHalf(dkTotalOver?.value),
+      dkTotal: dkPoint(
+        dkTotalOver?.value ??
+          (sport === "ncaaf" ? dkTotalUnder?.value : undefined)
+      ),
       dkOverOdds: fmtOdds(dkTotalOver?.odds),
       dkUnderOdds: fmtOdds(dkTotalUnder?.odds),
       dkAwayML: fmtOdds(dkMlAway?.odds),

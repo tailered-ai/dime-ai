@@ -102,10 +102,22 @@ export function ProjectionCard({
   // `unplayable` out of PASS (pages/ai-model-projections.md, 2026-08-06).
   const modelPublished = game.modelPublished !== false;
   const comparisonUnavailable =
-    modelPublished &&
     displayInsights.length === 0 &&
     game.markets.some(market =>
-      market.sides.some(side => side.comparable === false)
+      market.sides.some(
+        side =>
+          (modelPublished && side.comparable === false) ||
+          // Structured line markets still have useful context without fair odds
+          // (or any model). A missing score is not an efficiently-priced market.
+          (side.lineDisplay != null &&
+            (side.bookPrice != null ||
+              (side.lineDisplay.book != null &&
+                side.lineDisplay.book !== "—") ||
+              (modelPublished &&
+                (side.modelPrice != null ||
+                  (side.lineDisplay.model != null &&
+                    side.lineDisplay.model !== "—")))))
+      )
     );
   const isNoModel = game.status !== "live" && !modelPublished;
   const isPass =
@@ -180,6 +192,7 @@ export function ProjectionCard({
         1 ? (
         <SummaryCarousel
           comparisonMarkets={game.markets}
+          modelPublished={modelPublished}
           teams={[game.away, game.home]}
         />
       ) : displayInsights.length > 1 ? (

@@ -1,0 +1,29 @@
+id: ncaaf-card-book-model-2026-09-06
+surface: { name: NCAAF card summary, kind: feed, mode: operate, change: refine }
+lead: impeccable
+advisors: [Ponytail, Unlazy]
+product:
+  audience: authenticated feed members
+  single_job: compare available Book and Model values without opening details
+  evidence: [owner September 6 screenshots, live NCAAF card DOM]
+content:
+  source: [client/src/pages/DimeModelFeed.tsx, client/src/components/projections/ProjectionCard.tsx]
+  invented_claims: false
+law:
+  - design-system/dime-ai/pages/ai-model-projections.md
+  - design-system/dime-ai/MASTER.md
+  - dime-ai/THREE-COLOR-LAW.md
+  - design-system/dime-ai/TYPOGRAPHY.md
+direction:
+  adjectives: [existing, compact, truthful]
+  signature_element: reuse the Book/Model summary carousel and tokens
+engineering:
+  component_reuse_first: true
+  viewports: [375x812, 768x1024, 1024x768, 1440x900]
+  reduced_motion: required
+  dark_and_light: required
+acceptance:
+  required_states: [line-only model, book-only game, incomparable prices, unavailable data, keyboard navigation]
+  no_horizontal_overflow: true
+  motion_gate: no motion changes planned
+  delivery_gate: focused tests, production build, rendered readback; owner approval before merge

@@ -1,0 +1,224 @@
+{
+  "observedAt": "2026-09-06T19:59:40Z",
+  "date": "2026-09-06",
+  "repository": "tailered-ai/dime-ai",
+  "deployed": {
+    "commit": "b061d836417859ab0de65849a604682425a2138d",
+    "deployment": "f9da4914-afe5-4a72-886d-0c43ccbb9e88",
+    "state": "SUCCESS"
+  },
+  "scope": {
+    "requestedGameCount": 4,
+    "observedPublishedGameCount": 3,
+    "fourthGame": "unidentified; asked owner; no fabricated matchup"
+  },
+  "reads": {
+    "feed": "https://aisportsbettingmodels.com/feed/model/09-06-2026",
+    "games": "GET /api/trpc/games.list; input={json:{gameDate:'2026-09-06',sport:'NCAAF'}}",
+    "splits": "https://aisportsbettingmodels.com/betting-splits/ncaaf-09-06-2026",
+    "history": "authenticated existing browser: expanded every game's ODDS & SPLITS HISTORY; one distinct 09/06 02:54PM ET observation per game",
+    "sourceCommand": "pnpm exec tsx scripts/publishNcaafSeptember6.mts --check",
+    "sourceResult": "NCAAF_SEPTEMBER6_SOURCE_CHECK_PASS",
+    "providerRetrievedAt": "2026-09-06T19:59:21.328Z",
+    "modelEvidence": "Authenticated owner-rendered page plus recorded owner publication. Anonymous games.list intentionally redacts model values; nulls there are not proof of absent models."
+  },
+  "fields": {
+    "splitOrder": [
+      "spreadAwayBetsPct",
+      "spreadAwayMoneyPct",
+      "totalOverBetsPct",
+      "totalOverMoneyPct",
+      "mlAwayBetsPct",
+      "mlAwayMoneyPct"
+    ]
+  },
+  "games": [
+    {
+      "id": 4350069,
+      "away": "WSU",
+      "home": "WASH",
+      "anEvent": 288813,
+      "anAwayTeam": 356,
+      "anHomeTeam": 360,
+      "vsinEvent": "20260906CFB00237",
+      "book": {
+        "awaySpread": null,
+        "homeSpread": null,
+        "awaySpreadOdds": null,
+        "homeSpreadOdds": null,
+        "total": "51.5",
+        "overOdds": "-112",
+        "underOdds": "-108",
+        "awayML": null,
+        "homeML": null
+      },
+      "model": {
+        "awaySpread": "21.1",
+        "homeSpread": "-21.1",
+        "total": "52.1",
+        "fairPrices": null,
+        "source": "owner supplied"
+      },
+      "storedSplits": [
+        35,
+        61,
+        77,
+        73,
+        11,
+        15
+      ],
+      "freshProviderSplits": [
+        37,
+        56,
+        77,
+        74,
+        13,
+        37
+      ],
+      "missing": [
+        "AN DraftKings spread and moneyline quotes",
+        "model fair prices/probabilities; no justified percent edge",
+        "recurring observations after initial publication"
+      ],
+      "liveHistoryMarkets": [
+        "total"
+      ]
+    },
+    {
+      "id": 4350070,
+      "away": "WIS",
+      "home": "ND",
+      "anEvent": 287973,
+      "anAwayTeam": 300,
+      "anHomeTeam": 325,
+      "vsinEvent": "20260906CFB00195",
+      "book": {
+        "awaySpread": "21",
+        "homeSpread": "-21",
+        "awaySpreadOdds": "-105",
+        "homeSpreadOdds": "-115",
+        "total": "46.5",
+        "overOdds": "-108",
+        "underOdds": "-112",
+        "awayML": "+1000",
+        "homeML": "-1800"
+      },
+      "model": {
+        "published": false
+      },
+      "storedSplits": [
+        16,
+        15,
+        71,
+        55,
+        12,
+        23
+      ],
+      "freshProviderSplits": [
+        17,
+        16,
+        71,
+        57,
+        13,
+        24
+      ],
+      "missing": [
+        "published model projections/fair prices",
+        "recurring observations after initial publication"
+      ],
+      "liveHistoryMarkets": [
+        "spread",
+        "total",
+        "moneyline"
+      ]
+    },
+    {
+      "id": 4350071,
+      "away": "LOU",
+      "home": "MISS",
+      "anEvent": 287972,
+      "anAwayTeam": 257,
+      "anHomeTeam": 363,
+      "vsinEvent": "20260906CFB00182",
+      "book": {
+        "awaySpread": "6.5",
+        "homeSpread": "-6.5",
+        "awaySpreadOdds": "-105",
+        "homeSpreadOdds": "-115",
+        "total": "55.5",
+        "overOdds": "-105",
+        "underOdds": "-115",
+        "awayML": "+210",
+        "homeML": "-258"
+      },
+      "model": {
+        "published": false
+      },
+      "storedSplits": [
+        20,
+        21,
+        79,
+        60,
+        18,
+        48
+      ],
+      "freshProviderSplits": [
+        20,
+        21,
+        78,
+        58,
+        18,
+        47
+      ],
+      "missing": [
+        "published model projections/fair prices",
+        "recurring observations after initial publication"
+      ],
+      "liveHistoryMarkets": [
+        "spread",
+        "total",
+        "moneyline"
+      ]
+    }
+  ],
+  "rootCauses": [
+    "Shared projection summary hid unscored/unpublished comparison contexts. Existing PR542 fixes this but remains unmerged.",
+    "Recurring VSiN/AN orchestrator and owner scope omitted NCAAF.",
+    "The generic book/AN writers copy bookTotal into modelTotal; NCAAF must not use that pricing-basis behavior.",
+    "Splits freshness used another sport's global job time.",
+    "History empty-state promised a 10-minute update even without a recorded quote or NCAAF job."
+  ],
+  "automation": {
+    "backgroundIntervalMs": 300000,
+    "githubSchedule": "*/15 * * * *",
+    "inspectedRun": "34051895445",
+    "runState": "pending",
+    "jobsStarted": 0,
+    "qualification": "Does not prove the background worker stopped; the deployed code definitively lacks NCAAF market registration. No job was triggered or approved."
+  },
+  "localChanges": {
+    "modelGeneration": false,
+    "databaseSchemaChanges": false,
+    "newDependencies": false,
+    "path": "existing AN parser + VSiN CFB parser -> exact shared publisher crosswalk -> transaction: games book/splits + existing odds_history -> existing games.list/listForGame -> existing cards/splits/history",
+    "guards": [
+      "exact event/team/date/kickoff identities",
+      "DraftKings 68 full-game non-live non-alternate only",
+      "no Open/Consensus fallback",
+      "preserve model columns",
+      "atomic snapshot and quote update",
+      "parent lock and stale/replayed capture guard",
+      "pregame freeze at kickoff",
+      "explicit unmapped/error reports",
+      "owner-only manual trigger unchanged"
+    ]
+  },
+  "limitations": [
+    "Not merged or deployed; no production data writes or refresh trigger executed.",
+    "Mappings cover the three approved September 6 events, not every future NCAAF slate.",
+    "Missing past provider observations cannot be reconstructed from current quotes.",
+    "Existing history read limit remains 200; this task adds collection to the existing reader, not unlimited historical pagination.",
+    "Existing VSiN schema stores six away/over percentages; opposite-side display uses the existing complementary calculation, not twelve independently archived provider values.",
+    "Deployed transaction, recurring capture and post-deployment browser readback require owner-authorized release."
+  ]
+}

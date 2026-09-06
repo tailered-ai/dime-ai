@@ -364,20 +364,30 @@ const LINEUPS_BY_GAME_ID = {
   }),
 };
 
-async function stubApi(page: Page) {
+async function stubApi(page: Page, ncaafGames?: Record<string, unknown>[]) {
   await page.route("**/api/trpc/**", route => {
     const url = new URL(route.request().url());
     const ops = decodeURIComponent(
       url.pathname.replace(/^.*\/api\/trpc\//, "")
     ).split(",");
-    const body = ops.map(op => {
+    const inputs = JSON.parse(url.searchParams.get("input") ?? "{}");
+    const body = ops.map((op, index) => {
       if (op === "appUsers.me")
         return { result: { data: { json: STUB_USER } } };
+      if (ncaafGames && op === "games.lastRefresh")
+        return {
+          result: { data: { json: { refreshedAt: new Date().toISOString() } } },
+        };
+      if (ncaafGames && op === "oddsHistory.listForGame")
+        return { result: { data: { json: { history: [] } } } };
       if (op === "games.list")
         return {
           result: {
             data: {
-              json: [LONG_PICK_GAME, SHORT_PICK_GAME, PASS_GAME, FINAL_GAME],
+              json:
+                ncaafGames && inputs[index]?.json?.sport === "NCAAF"
+                  ? ncaafGames
+                  : [LONG_PICK_GAME, SHORT_PICK_GAME, PASS_GAME, FINAL_GAME],
             },
           },
         };
@@ -729,4 +739,167 @@ test.describe("text zoom (200%)", () => {
       }
     });
   }
+});
+
+// Recorded September 6 publication shapes, not live provider/certification evidence.
+const SEPTEMBER6_NCAAF = [
+  mlbRow({
+    id: 4350069,
+    sport: "NCAAF",
+    gameDate: "2026-09-06",
+    venue: null,
+    awayTeam: "WSU",
+    homeTeam: "WASH",
+    startTimeEst: "16:00",
+    bookTotal: "51.5",
+    overOdds: "-112",
+    underOdds: "-108",
+    modelRunAt: 1788721833550,
+    awayModelSpread: "21.1",
+    homeModelSpread: "-21.1",
+    modelTotal: "52.1",
+  }),
+  mlbRow({
+    id: 4350070,
+    sport: "NCAAF",
+    gameDate: "2026-09-06",
+    venue: null,
+    awayTeam: "WIS",
+    homeTeam: "ND",
+    startTimeEst: "19:30",
+    modelRunAt: null,
+    awayBookSpread: "21",
+    homeBookSpread: "-21",
+    awaySpreadOdds: "-105",
+    homeSpreadOdds: "-115",
+    bookTotal: "46.5",
+    overOdds: "-108",
+    underOdds: "-112",
+    awayML: "1000",
+    homeML: "-1800",
+  }),
+  mlbRow({
+    id: 4350071,
+    sport: "NCAAF",
+    gameDate: "2026-09-06",
+    venue: null,
+    awayTeam: "LOU",
+    homeTeam: "MISS",
+    startTimeEst: "19:30",
+    modelRunAt: null,
+    awayBookSpread: "6.5",
+    homeBookSpread: "-6.5",
+    awaySpreadOdds: "-105",
+    homeSpreadOdds: "-115",
+    bookTotal: "55.5",
+    overOdds: "-105",
+    underOdds: "-115",
+    awayML: "210",
+    homeML: "-258",
+  }),
+];
+
+test.describe("NCAAF Book/Model card summaries", () => {
+  test("NCAAF splits cannot claim freshness from another sport's job", async ({
+    page,
+  }) => {
+    await stubApi(page, SEPTEMBER6_NCAAF);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${baseURL}/betting-splits/ncaaf-09-06-2026`);
+    await expect(
+      page.getByText("NCAAF capture time unavailable", { exact: true })
+    ).toBeVisible();
+    const games = page.locator('[id^="game-card-"]');
+    await expect(games).toHaveCount(3);
+    for (let i = 0; i < 3; i++) {
+      await games
+        .nth(i)
+        .getByRole("button", { name: "ODDS & SPLITS HISTORY" })
+        .click();
+      await expect(
+        games
+          .nth(i)
+          .getByText("No recorded observations available yet.", { exact: true })
+      ).toBeVisible();
+    }
+  });
+  for (const width of [375, 768, 1024, 1440])
+    for (const theme of ["dark", "light"] as const)
+      test(`${width}px ${theme}: line-only and book-only summaries stay visible`, async ({
+        page,
+      }) => {
+        const errors: string[] = [];
+        page.on("pageerror", error => errors.push(error.message));
+        await stubApi(page, SEPTEMBER6_NCAAF);
+        await page.setViewportSize({
+          width,
+          height: width === 375 ? 812 : 900,
+        });
+        await page.emulateMedia({
+          colorScheme: theme,
+          reducedMotion: "reduce",
+        });
+        await page.addInitScript(
+          mode => localStorage.setItem("dime-theme", mode),
+          theme
+        );
+        await page.goto(`${baseURL}/feed/model/09-06-2026?theme=${theme}`);
+        const cards = page.locator("#dmf-league-NCAAF .projection-card");
+        await expect(cards).toHaveCount(3);
+        for (let i = 0; i < 3; i++) {
+          const card = cards.nth(i);
+          const slides = card.locator(".summary-carousel__slide");
+          const count = i === 0 ? 4 : 6;
+          await expect(slides).toHaveCount(count);
+          await card.scrollIntoViewIfNeeded();
+          for (let j = 0; j < count; j++) {
+            const slide = slides.nth(j);
+            await expect(slide.locator(".summary__item--book dt")).toHaveText(
+              "Book"
+            );
+            const book = slide.locator(".summary__item--book dd");
+            const model = slide.locator(".summary__item--model dd");
+            await expect(book).toBeInViewport();
+            await expect(model).toBeInViewport();
+            if (i === 0)
+              await expect(model).toHaveText(
+                ["+21.1", "-21.1", "52.1", "52.1"][j]
+              );
+            else {
+              await expect(model).toHaveText("—");
+              await expect(
+                slide.locator(".summary__comparison-status")
+              ).toHaveText("Model unavailable");
+              await expect(book).not.toHaveText("—");
+            }
+            const next = slide.locator("button");
+            await next.focus();
+            await expect(next).toHaveCSS("width", "44px");
+            await expect(next).toHaveCSS("height", "44px");
+            // Firefox's transformed carousel can report 43.999969px for 44px.
+            // Preserve the exact CSS floor; tolerate only geometry roundoff.
+            expect((await next.boundingBox())!.width).toBeGreaterThanOrEqual(
+              44 - 0.0001
+            );
+            await page.keyboard.press("Enter");
+            await expect(
+              slides.nth((j + 1) % count).locator("button")
+            ).toBeFocused();
+          }
+          await expect(card.locator(".edge-indicator")).toHaveCount(0);
+          expect(
+            await page.evaluate(
+              () => document.documentElement.scrollWidth - innerWidth
+            )
+          ).toBeLessThanOrEqual(1);
+          await card.scrollIntoViewIfNeeded();
+          await card.screenshot({
+            path: `docs/audits/2026-09-06-ncaaf-card-book-model-evidence/screenshots/${width}-${theme}-${i}.png`,
+          });
+        }
+        await expect(
+          page.locator("#dmf-league-MLB .summary--priced").first()
+        ).toBeAttached();
+        expect(errors).toEqual([]);
+      });
 });

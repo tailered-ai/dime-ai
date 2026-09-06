@@ -76,17 +76,16 @@ export function ProjectionSummary({
     teams.length >= 2 && teams[0]?.name && teams[1]?.name
       ? `Model projection summary: ${teams[0].name} at ${teams[1].name}`
       : "Model projection summary";
-  const comparison =
-    !insight && modelPublished
-      ? comparisonMarkets?.find(market => market.sides.length > 0)
-      : undefined;
+  const comparison = !insight
+    ? comparisonMarkets?.find(market => market.sides.length > 0)
+    : undefined;
   const side = comparison?.sides[0];
   // A projected line is not the threshold that priced model odds. Show the
   // projection alone here; the full table retains the odds and explicit basis.
-  const modelProjection = side?.lineDisplay?.model;
+  const modelProjection = modelPublished ? side?.lineDisplay?.model : undefined;
   const compactModel =
     modelProjection ??
-    (side?.comparable !== false && side?.modelPrice != null
+    (modelPublished && side?.comparable !== false && side?.modelPrice != null
       ? fmtPrice(side.modelPrice)
       : "—");
   return (
@@ -168,10 +167,19 @@ export function ProjectionSummary({
               {insight ? (
                 <EdgeIndicator insight={insight} className="summary__edge" />
               ) : (
-                <span className="summary__comparison-status">
-                  {modelProjection != null
-                    ? "Projection only"
-                    : "Comparison unavailable"}
+                <span
+                  className="summary__comparison-status"
+                  aria-label={
+                    !modelPublished
+                      ? "No model projection published for this game."
+                      : undefined
+                  }
+                >
+                  {!modelPublished
+                    ? "Model unavailable"
+                    : modelProjection != null && modelProjection !== "—"
+                      ? "Projection only"
+                      : "Comparison unavailable"}
                 </span>
               )}
               {onNextEdge && nextEdgeLabel && (
