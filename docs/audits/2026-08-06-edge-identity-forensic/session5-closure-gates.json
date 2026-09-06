@@ -1,0 +1,402 @@
+{
+  "$comment": [
+    "Session #5 closure gate manifest — the AUTHORITATIVE source of gate status and totals.",
+    "",
+    "WHY THIS FILE EXISTS. PR #474 published '32 PASS · 6 BLOCKED · 1 NOT PROVEN' and PR #475",
+    "published '32 PASS · 7 BLOCKED · 0 NOT PROVEN', both over a declared denominator of 39.",
+    "Both aggregates were WRONG. The per-gate rows were individually correct, but the totals",
+    "were hand-maintained prose that nothing verified, and several markdown rows silently",
+    "carried more than one gate ('#467 · #468 · #469', 'Human / agent / pipelines ×3'). A",
+    "recount script written to check them had its own defect — it read '×3 shapes' out of an",
+    "EVIDENCE column as a gate multiplier — so the first correction attempt was also wrong.",
+    "",
+    "The fix is structural, not a corrected number: every gate now has a permanent unique ID,",
+    "status lives in a machine-readable field, and scripts/session5ClosureGates.test.ts fails",
+    "the build if `totals` disagrees with `gates[]`, if an ID repeats, or if a status is not in",
+    "the allowed set. Markdown records must cite this file rather than maintain their own sums.",
+    "",
+    "STATUS VOCABULARY (exact, no synonyms):",
+    "  PASS        — requirement met at the stated evidence class.",
+    "  BLOCKED     — an actual external authority restriction prevents execution. Never a defect.",
+    "  NOT_PROVEN  — not established, and not blocked; e.g. a future window that has not occurred.",
+    "  FAIL        — a real product or code defect. Never relabel a defect as BLOCKED.",
+    "",
+    "EVIDENCE CLASSES: PROD (observed in production) | TEST (proven by a test shown to fail",
+    "against its defect) | INSPECT (read from shipped source or configuration) | NONE."
+  ],
+  "session": 5,
+  "title": "Dime AI Edge, Identity, Security Digest, and MLB Reliability Remediation",
+  "supersedes_aggregates_in": [
+    "docs/audits/2026-08-06-edge-identity-forensic/edge-identity-remediation-final-closure.md (PR #474)",
+    "docs/audits/2026-08-06-edge-identity-forensic/session-5-final-operational-closure-amendment.md (PR #475)"
+  ],
+  "supersedes_note": "Only the ARITHMETIC in those records is superseded. Their per-gate classifications, evidence, and historical verdicts remain accurate and are not rewritten.",
+  "as_of": "2026-08-10T06:20:00Z",
+  "production": {
+    "git_sha": "4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6",
+    "deployment_id": "b8261dc7-4bc2-45f9-9baa-94479813227e",
+    "edge_mode": "log",
+    "health": "ok",
+    "schema": "ok"
+  },
+  "allowed_statuses": ["PASS", "BLOCKED", "NOT_PROVEN", "FAIL"],
+  "gates": [
+    {
+      "gate_id": "G-001",
+      "requirement": "PR #467 merged and present on origin/main",
+      "status": "PASS",
+      "evidence_class": "INSPECT",
+      "evidence_reference": "merge e515bae53; ancestor of origin/main verified",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-002",
+      "requirement": "PR #468 merged and present on origin/main",
+      "status": "PASS",
+      "evidence_class": "INSPECT",
+      "evidence_reference": "merge d6e2902bb; ancestor of origin/main verified",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-003",
+      "requirement": "PR #469 merged and present on origin/main",
+      "status": "PASS",
+      "evidence_class": "INSPECT",
+      "evidence_reference": "merge 3a1396b64; ancestor of origin/main verified",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-004",
+      "requirement": "PR #470 closure record preserved as historical artifact",
+      "status": "PASS",
+      "evidence_class": "INSPECT",
+      "evidence_reference": "merge 538bc5ad3; not rewritten",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-005",
+      "requirement": "PR #471 merged and deployed",
+      "status": "PASS",
+      "evidence_class": "INSPECT",
+      "evidence_reference": "merge 078c42923; deployment 44c6f235 SUCCESS",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-006",
+      "requirement": "PR #474 terminal record merged and deployed",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "merge 4459a2fa3; /health reported that SHA; 22/22 CI",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-007",
+      "requirement": "Weekly digest executed the 2000-row read path in production",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "2026-08-09T13:00:43Z, deployment ff472662, 'Fetching all security events for the last 7 days (limit=2000)'",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-008",
+      "requirement": "Weekly digest 159-row arithmetic reconciles exactly",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "102 allowlisted + 57 threat = 159; day buckets 0+10+0+19+26+2+0 = 57; sampleCapped=false",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-009",
+      "requirement": "Digest markers excluded from generic reads, still retrievable by eventType",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "'Fetched 159 raw events (markers filtered)'; marker lookup set lastWeeklyDigestDate; plus falsification F4",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-010",
+      "requirement": "False TRUNCATED warning on intentional marker lookups is fixed in shipped code",
+      "status": "PASS",
+      "evidence_class": "TEST",
+      "evidence_reference": "server/db.ts:2840 `rows.length === limit && !opts.existenceProbe`; 11/11 tests incl. opt-in-not-inferred; falsification F5. Live caller due 2026-08-10T13:00Z — see G-041.",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-011",
+      "requirement": "Alert budget restored to intended value and probe value never shipped",
+      "status": "PASS",
+      "evidence_class": "INSPECT",
+      "evidence_reference": "production SHA blob 52bbde3e: GLOBAL_ALERT_BUDGET_MAX = 20; 0 occurrences of 100000 (positive control: 3 constant refs); 0 commits on any ref introduced it",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-012",
+      "requirement": "Lost Stream-4 index.ts implementation reconstructed and driving production behaviour",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "index.ts:284 observeWwwRedirectIngress, invoked at :748 before res.redirect; test extracts the shipped function; falsification F7/F8",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-013",
+      "requirement": "Authenticated human access proven before enforcement",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "2026-08-10T05:45:40Z deployment 1967c511: GET analytics.overview,metrics.getSessionMetrics,metrics.getMemberMetrics,metrics.getDurationHistogram,appUsers.me -> status=200; owner-gated procedures returned live data (dau=8 wau=42 mau=60); ip=47.152.167.182 ipSrc=cf-connecting-ip; XFF carried only CF PoP + Railway edge",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-014",
+      "requirement": "Supported agent access path characterized (pre-enforcement)",
+      "status": "PASS",
+      "evidence_class": "INSPECT",
+      "evidence_reference": "3 query shapes + positive control: 0 readers in server/, 0 x-dime-agent handlers, readers are client-side senders only; deploy-smoke success on a6e24841f",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-015",
+      "requirement": "Critical pipelines healthy before enforcement",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "MLB cycles 04:42 and 04:47 errors=0 validation=PASSED; PitcherRolling5 513/513; CheckoutReconcile truncated=false",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-016",
+      "requirement": "Production environment posture known without exposing secret values",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "Railway get-service-config returns variableNames only; EDGE_MODE / EDGE_ORIGIN_SECRET present, EDGE_ORIGIN_SECRET_PREV was absent then configured",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-017",
+      "requirement": "Safe dual-secret rotation posture configured (EDGE_ORIGIN_SECRET_PREV present)",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "EDGE_ORIGIN_SECRET_PREV present in production config as of deployment b8261dc7; primary continuity proven by edgeVerified=true at 2026-08-10T06:10:25Z. SCOPE: value equality with the primary is OWNER-ATTESTED, not cryptographically proven — PREV is not exercised until an actual rotation (runbook Step 2). See G-042.",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-018",
+      "requirement": "EDGE_AGENT_BYPASS_KEY classified (required at Cloudflare/Actions, obsolete on the app service)",
+      "status": "PASS",
+      "evidence_class": "INSPECT",
+      "evidence_reference": "docs/runbooks/edge-secret-rotation.md §0 confirms it never belongs on Railway; 0 server readers with positive control",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-019",
+      "requirement": "Obsolete EDGE_AGENT_BYPASS_KEY removed from the Railway application service only",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "absent from production variableNames as of deployment b8261dc7; Cloudflare and GitHub Actions copies intentionally preserved; real Android user served normally through the change",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-020",
+      "requirement": "Fresh qualifying soak PASS bound to the exact pre-arm deployment",
+      "status": "BLOCKED",
+      "evidence_class": "NONE",
+      "evidence_reference": "edge-soak-report.mjs --db fails closed: 'DATABASE_URL is not set'. Production DATABASE_URL exists only in Actions secrets and was not sought. Must run from a Production-environment workflow.",
+      "dependency": "owner: run repository-defined soak from an authorized production context"
+    },
+    {
+      "gate_id": "G-021",
+      "requirement": "EDGE_MODE=on armed in production",
+      "status": "BLOCKED",
+      "evidence_class": "NONE",
+      "evidence_reference": "Railway set-variables hard-denied in .claude/settings.json; production runtime reports edgeMode=log",
+      "dependency": "G-020"
+    },
+    {
+      "gate_id": "G-022",
+      "requirement": "Authenticated human access proven UNDER enforcement",
+      "status": "BLOCKED",
+      "evidence_class": "NONE",
+      "evidence_reference": "enforcement not active; not inferred from the pre-enforcement result in G-013",
+      "dependency": "G-021"
+    },
+    {
+      "gate_id": "G-023",
+      "requirement": "Supported agent operation proven UNDER enforcement",
+      "status": "BLOCKED",
+      "evidence_class": "NONE",
+      "evidence_reference": "enforcement not active; must not be inferred from CI or from human success",
+      "dependency": "G-021"
+    },
+    {
+      "gate_id": "G-024",
+      "requirement": "Critical pipelines proven UNDER enforcement",
+      "status": "BLOCKED",
+      "evidence_class": "NONE",
+      "evidence_reference": "enforcement not active",
+      "dependency": "G-021"
+    },
+    {
+      "gate_id": "G-025",
+      "requirement": "Direct-origin request without valid edge proof is DENIED",
+      "status": "BLOCKED",
+      "evidence_class": "NONE",
+      "evidence_reference": "structurally impossible under EDGE_MODE=log — the origin serves the request itself. Denial behaviour remains TEST-proven only.",
+      "dependency": "G-021"
+    },
+    {
+      "gate_id": "G-026",
+      "requirement": "Valid Cloudflare path accepted and served",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "CF apex /health 200; CF www /health 308 to apex; edgeVerified=true upstream=172.64.217.174 on deployment b8261dc7",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-027",
+      "requirement": "Partial-bypass detector reachable and executing on live traffic",
+      "status": "BLOCKED",
+      "evidence_class": "NONE",
+      "evidence_reference": "detector deployed (INSPECT) but its observation path does not execute while EDGE_MODE=log; threshold semantics remain TEST-proven via falsification F9",
+      "dependency": "G-021"
+    },
+    {
+      "gate_id": "G-028",
+      "requirement": "Circuit breaker stable in normal production operation",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "no trip and no flap across the observation window under real traffic plus controlled probes; attacker-induced failure modes remain TEST-proven (falsification F10)",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-029",
+      "requirement": "www direct-origin ingress observed and correctly counted, both branches",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "edge-verified -> counted=false reason=edge-verified; direct-origin -> counted=true reason=direct-origin + ANOMALY OBSERVED + insertSecurityEvent Inserted + alert posted; re-proven on b8261dc7 at 06:10:25Z",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-030",
+      "requirement": "Exactly one authoritative MLB scheduler owns the workload",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "'[SKIP] previous cycle still in flight — overlap prevented' at 04:37:17 and 04:42:17, then guard RELEASED: next tick admitted at 04:47:17",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-031",
+      "requirement": "MLB engine concurrency is bounded",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "engine batches serialized 60.32s / 61.37s / 60.37s; queue bound rejects rather than growing (falsification F13)",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-032",
+      "requirement": "MLB date logic is deterministic and calendar-canonical (no 7-hour inversion)",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "'START — 2026-08-10T04:47:17.215Z | date: 2026-08-09'; isModelRunFreshForGameDate fresh across the whole Eastern day (falsification F14)",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-033",
+      "requirement": "Security-event data reconciliation exact, zero unexplained difference",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "see G-008; plus marker leakage 0 and no hidden sample cap",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-034",
+      "requirement": "MLB game-set reconciliation exact, zero unexplained remainder",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "ScheduleSync missing=0; slate 2026-08-10 written=10 then not_yet_modelable=10 on the second cycle (no rewrite); duplicates 0; timezone misclassification 0",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-035",
+      "requirement": "Edge telemetry reconciliation — every controlled probe has an explained outcome",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "6/6 probes at 04:45:36Z explained (4 reached origin, 2 terminated upstream with named causes); subsequent amendment and post-change probes likewise",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-036",
+      "requirement": "Final regression suite green on final origin/main",
+      "status": "PASS",
+      "evidence_class": "TEST",
+      "evidence_reference": "tsc exit 0 (direct invocation, 0 output lines); prettier exit 0; 373/373 across 19 suites; gitleaks no leaks across the Session-5 merge range",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-037",
+      "requirement": "Every critical control demonstrated sensitive to its own defect",
+      "status": "PASS",
+      "evidence_class": "TEST",
+      "evidence_reference": "14/14 GREEN -> deliberate regression -> RED -> restored GREEN, executed in a throwaway worktree; repository residue 0",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-038",
+      "requirement": "Production SHA resolved directly and equals final origin/main",
+      "status": "PASS",
+      "evidence_class": "PROD",
+      "evidence_reference": "/health commit 4d644cf47 = origin/main; deployment identity recorded separately from code identity throughout",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-039",
+      "requirement": "Protected owner files intact — content, permissions, timestamps",
+      "status": "PASS",
+      "evidence_class": "INSPECT",
+      "evidence_reference": "5 x .tmp-* re-hashed at closure, byte-identical, mode and mtime 2026-08-07T05:07:49 unchanged; no git clean / reset --hard / broad rm used",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-040",
+      "requirement": "Repository terminal state — no unintended modifications, no unresolved Session #5 PRs",
+      "status": "PASS",
+      "evidence_class": "INSPECT",
+      "evidence_reference": "0 tracked modifications; 23 untracked owner files preserved; 0 open PRs at each checkpoint",
+      "dependency": null
+    },
+    {
+      "gate_id": "G-041",
+      "requirement": "#471 correct behaviour observed at its first live scheduled caller",
+      "status": "NOT_PROVEN",
+      "evidence_class": "NONE",
+      "evidence_reference": "caller scheduled 2026-08-10T13:00:00Z; as_of this manifest the window has not occurred. Both digest schedulers confirmed registered on the live deployment, which distinguishes 'not yet due' from 'broken'. Requires: resolve the deployment actually serving the window; intentional limit=1 marker lookups emit no TRUNCATED line; marker lookup still functions; genuinely capped queries still warn.",
+      "dependency": "time: 2026-08-10T13:00:00Z"
+    },
+    {
+      "gate_id": "G-042",
+      "requirement": "EDGE_ORIGIN_SECRET_PREV proven to authenticate traffic under an actual rotation",
+      "status": "NOT_PROVEN",
+      "evidence_class": "NONE",
+      "evidence_reference": "By design PREV is redundant while the primary matches, so Step 1 of the rotation runbook cannot exercise it and a typo in PREV is invisible here. Only runbook Step 2 (set EDGE_ORIGIN_SECRET = S_new while Cloudflare still injects S_old) makes PREV load-bearing. Recorded separately from G-017 so that configuration readiness is never mistaken for a completed rotation.",
+      "dependency": "owner: execute rotation runbook Step 2, if and when a rotation is performed"
+    }
+  ],
+  "totals": {
+    "PASS": 33,
+    "BLOCKED": 7,
+    "NOT_PROVEN": 2,
+    "FAIL": 0,
+    "TOTAL": 42
+  },
+  "verdict": "COMPLETE WITH EXPLICIT EXTERNAL BLOCKER",
+  "verdict_rule": "COMPLETE requires FAIL=0 AND BLOCKED=0 AND NOT_PROVEN=0. Any other combination with FAIL=0 is COMPLETE WITH EXPLICIT EXTERNAL BLOCKER. Any FAIL>0 is INCOMPLETE.",
+  "superseded_aggregates": [
+    {
+      "record": "PR #474",
+      "published": "32 PASS · 6 BLOCKED · 1 NOT PROVEN · 0 FAIL over 39",
+      "defect": "hand-maintained sum; denominator understated; several markdown rows silently carried multiple gates"
+    },
+    {
+      "record": "PR #475",
+      "published": "32 PASS · 7 BLOCKED · 0 NOT PROVEN · 0 FAIL over 39",
+      "defect": "same hand-maintained sum, carried forward; the true state at that moment was 30 PASS · 10 BLOCKED · 2 NOT_PROVEN over 42"
+    }
+  ]
+}
