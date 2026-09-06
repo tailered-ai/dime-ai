@@ -68,6 +68,25 @@ function fixture() {
   return { parent, an, vsin };
 }
 
+it("keeps NCAAF diagnostic IDs and provider errors out of public refresh status", async () => {
+  const { parent } = fixture();
+  vi.mocked(listGamesByDate).mockResolvedValue([
+    { ...parent, ncaaContestId: "unknown" },
+    { ...parent, id: 4350070 },
+  ] as any);
+  vi.mocked(fetchActionNetworkOdds).mockRejectedValue(
+    new Error("private provider detail")
+  );
+  const result = await refresh.runVsinRefreshManual("NCAAF");
+  expect(result?.ncaaf?.unmapped).toContain(parent.id);
+  expect(result?.ncaaf?.errors).toContain("private provider detail");
+  const status = refresh.getLastRefreshResult();
+  expect(status).toMatchObject({ refreshedAt: expect.any(String), updated: 0 });
+  expect(status).not.toHaveProperty("ncaaf");
+  expect(status).not.toHaveProperty("ncaafTomorrow");
+  expect(JSON.stringify(status)).not.toContain("private provider detail");
+});
+
 it("routes a NCAAF-only manual refresh to NCAAF rows without refreshing other leagues", async () => {
   vi.mocked(listGamesByDate).mockResolvedValue([]);
   vi.spyOn(console, "log").mockImplementation(() => {});

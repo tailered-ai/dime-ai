@@ -132,8 +132,14 @@ export interface RefreshResult {
 let lastRefreshResult: RefreshResult | null = null;
 let lastScoresRefreshedAt: string = new Date().toISOString();
 
-export function getLastRefreshResult(): RefreshResult | null {
-  return lastRefreshResult;
+export function getLastRefreshResult(): Omit<
+  RefreshResult,
+  "ncaaf" | "ncaafTomorrow"
+> | null {
+  if (!lastRefreshResult) return null;
+  // Public status keeps its original counters/timestamps, not provider diagnostics.
+  const { ncaaf, ncaafTomorrow, ...publicStatus } = lastRefreshResult;
+  return publicStatus;
 }
 
 /**

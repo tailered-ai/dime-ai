@@ -871,7 +871,7 @@ export const appRouter = router({
         const now = new Date().toISOString();
         const oddsResult = result.status === 'fulfilled' ? result.value : null;
         if (sport === "NCAAF" && (!oddsResult?.ncaaf || oddsResult.ncaaf.errors.length || oddsResult.ncaaf.unmapped.length)) {
-          throw new TRPCError({ code: "BAD_GATEWAY", message: "NCAAF refresh incomplete; inspect provider/mapping errors in games.lastRefresh." });
+          throw new TRPCError({ code: "BAD_GATEWAY", message: "NCAAF refresh incomplete; inspect server refresh diagnostics." });
         }
 
         if (result.status === 'rejected') {
