@@ -523,8 +523,7 @@ function MarketHistoryTable({
         className="text-xs py-3 text-center"
         style={{ color: "var(--dime-text-secondary)" }}
       >
-        No snapshots yet — history populates after the next 10-min refresh
-        cycle.
+        No recorded observations available for this market.
       </p>
     );
   }
@@ -642,7 +641,7 @@ function MarketHistoryTable({
         )}
         <thead>
           <tr>
-            <th style={{ ...TH, textAlign: "left" }}>Time&nbsp;(EST)</th>
+            <th style={{ ...TH, textAlign: "left" }}>Time&nbsp;(ET)</th>
             {market === "total" ? (
               <th style={{ ...TH, ...BORDER_L, textAlign: "center" }}>OVER</th>
             ) : (
@@ -907,8 +906,7 @@ export function OddsHistoryPanel({
               className="text-xs text-center py-4"
               style={{ color: "var(--dime-text-secondary)" }}
             >
-              No snapshots yet — history populates after the next 10-min refresh
-              cycle.
+              No recorded observations available yet.
             </p>
           ) : (
             <div className="flex flex-col" style={{ gap: 14 }}>

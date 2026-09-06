@@ -1892,6 +1892,56 @@ export async function updateAnOdds(
 
 // ─── Odds History helpers ─────────────────────────────────────────────────────
 
+/** NCAAF book observations never run the other sports' model-total sync. */
+export async function updateNcaafMarkets(input: {
+  id: number; gameDate: string; eventId: string; awayTeam: string; homeTeam: string;
+  kickoff: number; capturedAt: number; source: "auto" | "manual";
+  snapshot: Omit<Parameters<typeof insertOddsHistory>[3], "lineSource">;
+}): Promise<boolean> {
+  const db = await getDb();
+  if (!db) throw new Error("NCAAF market database unavailable");
+  if (!Number.isSafeInteger(input.capturedAt) || input.capturedAt > Date.now() ||
+      !Number.isFinite(input.kickoff)) throw new Error("Invalid NCAAF capture time");
+  const changed = await db.transaction(async (tx: any) => {
+    const [parent] = await tx.select().from(games).where(eq(games.id, input.id)).limit(1).for("update");
+    if (!parent || parent.sport !== "NCAAF" || parent.gameDate !== input.gameDate ||
+        parent.ncaaContestId !== input.eventId || parent.awayTeam !== input.awayTeam ||
+        parent.homeTeam !== input.homeTeam) throw new Error("NCAAF parent identity changed");
+    if (!parent.publishedToFeed || parent.gameStatus !== "upcoming" || Date.now() >= input.kickoff) return false;
+    const [latest] = await tx.select().from(oddsHistory).where(eq(oddsHistory.gameId, input.id))
+      .orderBy(desc(oddsHistory.scrapedAt), desc(oddsHistory.id)).limit(1);
+    if (latest && Number(latest.scrapedAt) >= input.capturedAt) return false;
+    const s = input.snapshot;
+    const splits = {
+      spreadAwayBetsPct: s.spreadAwayBetsPct ?? null, spreadAwayMoneyPct: s.spreadAwayMoneyPct ?? null,
+      totalOverBetsPct: s.totalOverBetsPct ?? null, totalOverMoneyPct: s.totalOverMoneyPct ?? null,
+      mlAwayBetsPct: s.mlAwayBetsPct ?? null, mlAwayMoneyPct: s.mlAwayMoneyPct ?? null,
+    };
+    await tx.update(games).set({
+      awayBookSpread: s.awaySpread ?? null, homeBookSpread: s.homeSpread ?? null, bookTotal: s.total ?? null,
+      awaySpreadOdds: s.awaySpreadOdds ?? null, homeSpreadOdds: s.homeSpreadOdds ?? null,
+      overOdds: s.overOdds ?? null, underOdds: s.underOdds ?? null,
+      awayML: s.awayML ?? null, homeML: s.homeML ?? null, ...splits, oddsSource: "dk",
+      // Retrieval is not a provider-authored update or a model execution time.
+      providerObservedAt: null, sourceUpdatedAt: null,
+      ingestionReceivedAt: new Date(input.capturedAt), ingestionNormalizedAt: new Date(input.capturedAt),
+      ingestionPersistedAt: new Date(),
+      ingestionPipelineRevision: process.env.RAILWAY_GIT_COMMIT_SHA ?? null,
+      ingestionRunId: `ncaaf-an68-vsin-dk:${input.capturedAt}:${input.eventId}`,
+    }).where(eq(games.id, input.id));
+    await tx.insert(oddsHistory).values({
+      gameId: input.id, sport: "NCAAF", source: input.source, scrapedAt: input.capturedAt, lineSource: "dk",
+      awaySpread: s.awaySpread ?? null, homeSpread: s.homeSpread ?? null, total: s.total ?? null,
+      awaySpreadOdds: s.awaySpreadOdds ?? null, homeSpreadOdds: s.homeSpreadOdds ?? null,
+      overOdds: s.overOdds ?? null, underOdds: s.underOdds ?? null,
+      awayML: s.awayML ?? null, homeML: s.homeML ?? null, ...splits,
+    });
+    return true;
+  });
+  if (changed) invalidateGamesCache();
+  return changed;
+}
+
 /**
  * Insert a snapshot of DK NJ current lines for a game into the odds_history table.
  * Called after every successful AN odds update (auto cron + manual refresh).

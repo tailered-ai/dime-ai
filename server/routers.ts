@@ -843,7 +843,7 @@ export const appRouter = router({
     triggerRefresh: ownerProcedure
       .input(
         z.object({
-          sport: z.enum(["NBA", "NHL", "MLB"]).optional(),
+          sport: z.enum(["NBA", "NHL", "MLB", "NCAAF"]).optional(),
         }).optional()
       )
       .mutation(async ({ input }) => {
@@ -858,13 +858,21 @@ export const appRouter = router({
         // then immediately refresh all scores
         const [result] = await Promise.allSettled([runVsinRefreshManual(sport)]);
 
-        // Always refresh scores regardless of whether VSiN succeeded
-        console.log(`[tRPC][triggerRefresh] Refreshing scores (all sports, always)…`);
-        await refreshAllScoresNow();
+        // A NCAAF-only operation must not mutate another league's scores.
+        console.log(`[tRPC][triggerRefresh] Refreshing scores — scope: ${sportLabel}`);
+        if (sport === "NCAAF") {
+          const { refreshNcaafScoresNow } = await import("./ncaafScoreRefresh");
+          await refreshNcaafScoresNow();
+        } else {
+          await refreshAllScoresNow();
+        }
         console.log(`[tRPC][triggerRefresh] Score refresh complete.`);
 
         const now = new Date().toISOString();
         const oddsResult = result.status === 'fulfilled' ? result.value : null;
+        if (sport === "NCAAF" && (!oddsResult?.ncaaf || oddsResult.ncaaf.errors.length || oddsResult.ncaaf.unmapped.length)) {
+          throw new TRPCError({ code: "BAD_GATEWAY", message: "NCAAF refresh incomplete; inspect provider/mapping errors in games.lastRefresh." });
+        }
 
         if (result.status === 'rejected') {
           console.error(`[tRPC][triggerRefresh] runVsinRefreshManual failed:`, result.reason);

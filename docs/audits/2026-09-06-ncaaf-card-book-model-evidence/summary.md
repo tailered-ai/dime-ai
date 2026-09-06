@@ -1,5 +1,7 @@
 # NCAAF card Book/Model readout
 
+**Continuation:** the subsequent requested backend/provider audit and wiring are recorded in [provider-wiring.md](provider-wiring.md) and [backend-audit.json](backend-audit.json). The rendering-only scope and counts below describe the preceding PR542 revision, not the expanded candidate. Release remains held.
+
 Base: `b061d836417859ab0de65849a604682425a2138d` (includes merged PR541). Scope: rendering only. No database changes, provider refresh, model execution, new dependencies or deployment.
 
 Lead: Impeccable; advisors: Ponytail reuse-first and Unlazy evidence gates. [Brief](brief.yaml).

@@ -374,6 +374,12 @@ async function stubApi(page: Page, ncaafGames?: Record<string, unknown>[]) {
     const body = ops.map((op, index) => {
       if (op === "appUsers.me")
         return { result: { data: { json: STUB_USER } } };
+      if (ncaafGames && op === "games.lastRefresh")
+        return {
+          result: { data: { json: { refreshedAt: new Date().toISOString() } } },
+        };
+      if (ncaafGames && op === "oddsHistory.listForGame")
+        return { result: { data: { json: { history: [] } } } };
       if (op === "games.list")
         return {
           result: {
@@ -794,6 +800,29 @@ const SEPTEMBER6_NCAAF = [
 ];
 
 test.describe("NCAAF Book/Model card summaries", () => {
+  test("NCAAF splits cannot claim freshness from another sport's job", async ({
+    page,
+  }) => {
+    await stubApi(page, SEPTEMBER6_NCAAF);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${baseURL}/betting-splits/ncaaf-09-06-2026`);
+    await expect(
+      page.getByText("NCAAF capture time unavailable", { exact: true })
+    ).toBeVisible();
+    const games = page.locator('[id^="game-card-"]');
+    await expect(games).toHaveCount(3);
+    for (let i = 0; i < 3; i++) {
+      await games
+        .nth(i)
+        .getByRole("button", { name: "ODDS & SPLITS HISTORY" })
+        .click();
+      await expect(
+        games
+          .nth(i)
+          .getByText("No recorded observations available yet.", { exact: true })
+      ).toBeVisible();
+    }
+  });
   for (const width of [375, 768, 1024, 1440])
     for (const theme of ["dark", "light"] as const)
       test(`${width}px ${theme}: line-only and book-only summaries stay visible`, async ({
