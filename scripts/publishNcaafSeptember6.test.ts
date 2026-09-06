@@ -6,6 +6,7 @@ import {
   SLATE,
   target,
   washingtonOwnerModel,
+  louisvilleOwnerModel,
 } from "./publishNcaafSeptember6.mts";
 import { ncaafHelmet } from "../shared/ncaafHelmets";
 
@@ -59,6 +60,64 @@ function fixture() {
   return { an: { league: { name: "ncaaf" }, games }, splits };
 }
 describe("bounded September 6 backend publication", () => {
+  it("publishes Louisville fair lines and moneylines only, with exact identity and replay guards", () => {
+    const row = {
+      id: 4350071,
+      ncaaContestId: "287972",
+      awayTeam: "LOU",
+      homeTeam: "MISS",
+      gameDate: "2026-09-06",
+      sport: "NCAAF",
+      publishedToFeed: 1,
+      publishedModel: 0,
+      awayModelSpread: null,
+      homeModelSpread: null,
+      modelTotal: null,
+      modelRunAt: null,
+      modelAwaySpreadOdds: null,
+      modelHomeSpreadOdds: null,
+      modelOverOdds: null,
+      modelUnderOdds: null,
+      modelAwayML: null,
+      modelHomeML: null,
+      awayBookSpread: "6.5",
+      homeBookSpread: "-6.5",
+      bookTotal: "55.5",
+      awayML: "+210",
+      homeML: "-258",
+    };
+    const before = structuredClone(row);
+    const fields = louisvilleOwnerModel([row], 1788739000000);
+    expect(fields).toEqual({
+      awayModelSpread: "3.9",
+      homeModelSpread: "-3.9",
+      modelTotal: "51.9",
+      modelAwayML: "+172",
+      modelHomeML: "-172",
+      publishedModel: 1,
+      modelRunAt: 1788739000000,
+    });
+    expect(row).toEqual(before);
+    expect(
+      louisvilleOwnerModel([{ ...row, ...fields }], 1788739100000)
+    ).toEqual(fields);
+    for (const change of [
+      { id: 4350070 },
+      { ncaaContestId: "287973" },
+      { homeTeam: "ND" },
+      { gameDate: "2026-09-07" },
+      { modelHomeML: "-180" },
+      { modelOverOdds: "-110" },
+      { publishedToFeed: 0 },
+    ])
+      expect(() =>
+        louisvilleOwnerModel([{ ...row, ...change }], 1788739000000)
+      ).toThrow();
+    expect(() => louisvilleOwnerModel([row, row], 1788739000000)).toThrow();
+    expect(
+      Object.keys(fields).some(key => /book|bets|money|edge|diff/i.test(key))
+    ).toBe(false);
+  });
   it("publishes only the owner's Washington thresholds, rejects stale targets and permits exact replay", () => {
     const row = {
       id: 4350069,

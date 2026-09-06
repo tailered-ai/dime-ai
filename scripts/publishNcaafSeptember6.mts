@@ -189,17 +189,38 @@ const verify = (row: Row, fields: Row) => {
 
 /** Owner-supplied September 6 values, not generated odds or a new model run. */
 export function washingtonOwnerModel(rows: Row[], importedAt: number) {
-  assert.equal(rows.length, 1, "Missing or duplicate Washington target");
-  const row = target(rows, SLATE[0])!;
-  assert.equal(row.id, 4350069, "Washington row identity changed");
-  assert.equal(Number(row.publishedToFeed), 1);
-  assert(Number.isSafeInteger(importedAt) && importedAt > 0);
-  const fields = {
+  return ownerModel(rows, importedAt, SLATE[0], 4350069, {
     awayModelSpread: "21.1",
     homeModelSpread: "-21.1",
     modelTotal: "52.1",
     publishedModel: 1,
-  };
+  });
+}
+
+export function louisvilleOwnerModel(rows: Row[], importedAt: number) {
+  return ownerModel(rows, importedAt, SLATE[2], 4350071, {
+    awayModelSpread: "3.9",
+    homeModelSpread: "-3.9",
+    modelTotal: "51.9",
+    modelAwayML: "+172",
+    modelHomeML: "-172",
+    publishedModel: 1,
+  });
+}
+
+function ownerModel(
+  rows: Row[],
+  importedAt: number,
+  game: (typeof SLATE)[number],
+  id: number,
+  fields: Record<string, string | number>
+) {
+  assert.equal(rows.length, 1, "Missing or duplicate owner-model target");
+  const row = target(rows, game)!;
+  assert.equal(row.id, id, "Owner-model row identity changed");
+  assert.equal(String(row.ncaaContestId), String(game.event));
+  assert.equal(Number(row.publishedToFeed), 1);
+  assert(Number.isSafeInteger(importedAt) && importedAt > 0);
   const replay = Object.entries(fields).every(
     ([k, v]) => row[k] !== null && Number(row[k]) === Number(v)
   );
@@ -229,7 +250,20 @@ export function washingtonOwnerModel(rows: Row[], importedAt: number) {
   return { ...fields, modelRunAt: importedAt };
 }
 
-async function publishWashingtonOwnerModel(mode: string) {
+async function publishOwnerModel(mode: string) {
+  const louisville = mode.startsWith("--louisville-");
+  const game = SLATE[louisville ? 2 : 0];
+  const id = louisville ? 4350071 : 4350069;
+  const prepare = louisville ? louisvilleOwnerModel : washingtonOwnerModel;
+  const identity = [
+    id,
+    String(game.event),
+    DATE,
+    "NCAAF",
+    game.away,
+    game.home,
+  ];
+  const publish = mode.endsWith("-publish");
   assert(process.env.DATABASE_URL, "DATABASE_URL unavailable");
   const db = await mysql.createConnection({
     uri: process.env.DATABASE_URL,
@@ -242,29 +276,25 @@ async function publishWashingtonOwnerModel(mode: string) {
       (
         await db.query<RowDataPacket[]>(
           "SELECT * FROM games WHERE id = ? OR ncaaContestId = ? OR (gameDate = ? AND sport = ? AND awayTeam = ? AND homeTeam = ?) ORDER BY id FOR UPDATE",
-          [4350069, "288813", DATE, "NCAAF", "WSU", "WASH"]
+          identity
         )
       )[0];
     const before = await read();
-    const fields = washingtonOwnerModel(before, Date.now());
+    const fields = prepare(before, Date.now());
     const changed = Object.entries(fields).some(
       ([k, v]) => before[0][k] === null || Number(before[0][k]) !== Number(v)
     );
-    if (mode === "--washington-model-verify")
+    if (mode.endsWith("-verify"))
       assert(!changed, "Owner model not yet published");
-    if (mode === "--washington-model-publish" && changed) {
+    if (publish && changed) {
       const result = (
         await db.execute<mysql.ResultSetHeader>(
-          "UPDATE games SET awayModelSpread = ?, homeModelSpread = ?, modelTotal = ?, publishedModel = ?, modelRunAt = ? WHERE id = ? AND ncaaContestId = ? AND gameDate = ? AND sport = ? AND awayTeam = ? AND homeTeam = ? AND modelRunAt IS NULL AND publishedModel = 0",
-          [
-            ...Object.values(fields),
-            4350069,
-            "288813",
-            DATE,
-            "NCAAF",
-            "WSU",
-            "WASH",
-          ]
+          `UPDATE games SET ${Object.keys(fields)
+            .map(key => `\`${key}\` = ?`)
+            .join(
+              ","
+            )} WHERE id = ? AND ncaaContestId = ? AND gameDate = ? AND sport = ? AND awayTeam = ? AND homeTeam = ? AND modelRunAt IS NULL AND publishedModel = 0`,
+          [...Object.values(fields), ...identity]
         )
       )[0];
       assert.equal(result.affectedRows, 1, "Owner model update guard failed");
@@ -283,25 +313,29 @@ async function publishWashingtonOwnerModel(mode: string) {
         "Unrequested fields changed"
       );
     }
-    if (mode === "--washington-model-publish") {
+    if (publish) {
       await db.commit();
       const fresh = await read();
-      verify(target(fresh, SLATE[0])!, fields);
+      verify(target(fresh, game)!, fields);
     } else await db.rollback();
     console.log(
       JSON.stringify({
         operation: mode,
-        event: 288813,
-        rowId: 4350069,
-        source: "PREZ supplied model thresholds",
+        event: game.event,
+        rowId: id,
+        source: "PREZ supplied model values",
         fields,
         publicationMarkerMeaning: "owner import time, not model execution time",
-        changed: mode === "--washington-model-publish" && changed,
-        pending: mode === "--washington-model-dry-run" && changed,
+        changed: publish && changed,
+        pending: mode.endsWith("-dry-run") && changed,
         bookAndSplitsPreserved: true,
       })
     );
-    console.log("NCAAF_WASHINGTON_OWNER_MODEL_PASS");
+    console.log(
+      louisville
+        ? "NCAAF_LOUISVILLE_OWNER_MODEL_PASS"
+        : "NCAAF_WASHINGTON_OWNER_MODEL_PASS"
+    );
   } catch (error) {
     await db.rollback();
     throw error;
@@ -318,9 +352,12 @@ async function main() {
       "--washington-model-dry-run",
       "--washington-model-publish",
       "--washington-model-verify",
+      "--louisville-model-dry-run",
+      "--louisville-model-publish",
+      "--louisville-model-verify",
     ].includes(mode)
   ) {
-    await publishWashingtonOwnerModel(mode);
+    await publishOwnerModel(mode);
     return;
   }
   assert(
