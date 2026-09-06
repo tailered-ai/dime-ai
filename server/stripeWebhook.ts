@@ -34,6 +34,10 @@ import {
 } from "./db";
 import { PLANS, getPlanByPriceId, computeExpiryMs, normalizePlanId } from "./stripe/products";
 import { getPlanBySlug, getPriceById, computeExpiryMsForPrice, defaultPriceOf } from "./stripe/planStore";
+import {
+  resolveRecurringEntitlement,
+  mapRecurringPrice,
+} from "./stripe/recurringAuthority";
 import { isKnownNonDimePrice, nonDimeReason } from "./stripe/nonDimePrices";
 import { applyPurchaseToPlanQuantity } from "./stripe/planProvisioning";
 import { syncDiscordRoleForUser } from "./discord/discordRoleSync";
@@ -1034,26 +1038,74 @@ async function processWebhookEvent(event: Stripe.Event): Promise<void> {
         break;
       }
 
-      const { slug: subPlan, expiryMs: subExpiryMs } = await resolvePlanExpiry(sub.metadata?.plan_id);
       const subCustomerId = typeof sub.customer === "string" ? sub.customer : (sub.customer as Stripe.Customer).id;
 
-      // planPriceId is deliberately NOT passed: this branch resolves the plan
-      // from `sub.metadata.plan_id` (a slug), which cannot identify WHICH
-      // interval row was bought. Omitting it leaves the value written by
-      // checkout.session.completed intact instead of overwriting it with a guess.
+      // AUTHORITY (Session 3 / PR A): the exact Price this subscription is
+      // billed at NOW governs the plan and interval, and the period Stripe
+      // actually sold governs the expiry.
+      //
+      // What this replaces: `resolvePlanExpiry(sub.metadata?.plan_id)`, which
+      // took a plan SLUG that Stripe never updates on a Portal switch, resolved
+      // it to the plan's DEFAULT price, and re-dated access from the wall clock.
+      // An annual member on a month-default plan was re-dated as monthly, and a
+      // cross-plan switch kept reporting the plan the member had left.
+      //
+      // `subNow.priceId` is the same value the lifecycle ledger already read
+      // above — one read, one meaning.
+      const currentPriceId = subNow.priceId ?? null;
+      // Catalog first, then the legacy static map — see mapRecurringPrice. The
+      // two lookups are passed in rather than called here so that the wiring is
+      // exercised by unit tests: this file sits at the top level of `server/`,
+      // which the patch-coverage gate's `server/**/*.ts` pathspec does not
+      // match, so logic left inline here is measured by nothing.
+      const mappedPrice = await mapRecurringPrice(currentPriceId, {
+        catalog: getPriceById,
+        legacy: getPlanByPriceId,
+      });
+
+      const resolution = resolveRecurringEntitlement({
+        priceId: currentPriceId,
+        mapped: mappedPrice,
+        stripePeriodEndMs: subscriptionPeriodEndMs(sub),
+        existingExpiryMs: subUserBefore?.expiryDate ?? null,
+        nowMs: Date.now(),
+      });
+
+      // Not every event should write. An unmapped Price means we do not
+      // understand this subscription — a reason to stop writing, not to cut off
+      // someone who is paying. A lifetime member is outside the recurring model
+      // entirely. Both preserve existing access and record why.
+      if (resolution.kind !== "apply") {
+        console.warn(`${tag} [STATE] ${resolution.kind} price=${resolution.priceId ?? "(none)"} — ${resolution.reason}`);
+        await recordSubLifecycle("noop", `${resolution.kind}: ${resolution.reason}`, subUserId);
+        console.log(`${tag} [VERIFY] PASS — entitlement preserved, no mutation`);
+        break;
+      }
+
+      if (sub.metadata?.plan_id && sub.metadata.plan_id !== resolution.planId) {
+        console.warn(`${tag} [STATE] metadata.plan_id=${sub.metadata.plan_id} disagrees with current Price ${resolution.priceId} (=${resolution.planId}) — current Price wins`);
+      }
+
       await grantUserAccess({
         userId: subUserId,
         stripeCustomerId: subCustomerId,
         stripeSubscriptionId: sub.id,
-        planId: subPlan,
-        expiryMs: subExpiryMs,
+        planId: resolution.planId,
+        // Omitted entirely when null: a legacy static plan has no plan_prices
+        // row, and nulling a correct id is worse than leaving a stale one.
+        ...(resolution.planPriceId != null ? { planPriceId: resolution.planPriceId } : {}),
+        expiryMs: resolution.expiryMs,
         stripeEventId: event.id,
         eventType: event.type,
         subscriptionStatus: sub.status,
         eventCreatedMs,
       });
-      console.log(`${tag} [OUTPUT] Subscription ${action} processed userId=${subUserId}`);
-      await recordSubLifecycle("granted", `access granted/extended plan=${subPlan}`, subUserId);
+      console.log(
+        `${tag} [OUTPUT] Subscription ${action} processed userId=${subUserId} plan=${resolution.planId}` +
+        ` planPriceId=${resolution.planPriceId ?? "(unchanged)"} expiry=${new Date(resolution.expiryMs).toISOString()}` +
+        ` expirySource=${resolution.expirySource} map=${resolution.mapSource} price=${resolution.priceId}`
+      );
+      await recordSubLifecycle("granted", `plan=${resolution.planId} from ${resolution.mapSource} price; expiry from ${resolution.expirySource}`, subUserId);
       console.log(`${tag} [VERIFY] PASS`);
       break;
     }
