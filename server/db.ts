@@ -201,6 +201,20 @@ export async function getDb() {
   return _db;
 }
 
+/**
+ * Close the shared connection pool. Called only from the graceful-shutdown
+ * path (SIGTERM/SIGINT): node runs as PID 1 in the production container, so
+ * without an explicit handler SIGTERM is ignored outright and every deploy
+ * ends in docker's SIGKILL — severed connections, dropped in-flight work
+ * (DEF-063, found by the P08 cleanroom's profile B).
+ */
+export async function closeDbPool(): Promise<void> {
+  const pool = _pool;
+  _pool = null;
+  _db = null;
+  if (pool) await pool.end();
+}
+
 // ─── Games ───────────────────────────────────────────────────────────────────
 
 /**

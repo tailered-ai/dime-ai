@@ -1,0 +1,41 @@
+
+ RUN  v4.1.10 /Users/danielwalker/src/ai-sports-betting-dime-ai
+
+ ✓ scripts/ci/contract.test.ts > P02.TEST01 — byte-stable regeneration > produces identical bytes, sha, identities and rendering across repeats and wall-clock times 1579ms
+ ✓ scripts/ci/contract.test.ts > P02.TEST01 — byte-stable regeneration > carries no timestamp, run id, absolute path, username or hostname 70ms
+ ✓ scripts/ci/contract.test.ts > P02.TEST02 — required and graduating context mapping > maps every currently required context to exactly one check 2ms
+ ✓ scripts/ci/contract.test.ts > P02.TEST02 — required and graduating context mapping > represents the five graduating contexts WITHOUT marking them required 2ms
+ ✓ scripts/ci/contract.test.ts > P02.TEST02 — required and graduating context mapping > gives every CI-ONLY check an explicit reason and omits no step 7ms
+ ✓ scripts/ci/contract.test.ts > P02.NEG01 — unsupported construct fails closed > aborts with CONTRACT_GENERATION_FAILED and preserves the prior valid artifact 242ms
+ ✓ scripts/ci/contract.test.ts > P02.NEG01 — unsupported construct fails closed > has no implicit ignored class — every observed construct is classified 80ms
+ ✓ scripts/ci/contract.test.ts > P02.NEG02 — workflow changed without regeneration > fails CONTRACT_DRIFT naming the affected workflow 123ms
+ ✓ scripts/ci/contract.test.ts > P02.NEG02 — workflow changed without regeneration > detects a workflow that exists but is not represented 71ms
+ ✓ scripts/ci/contract.test.ts > P02.NEG03 — hand-edited frozen contract > fails the integrity pin for its own declared reason 99ms
+ ✓ scripts/ci/contract.test.ts > P02.NEG04 — required context without a mapped check > fails naming the exact context, with the pin kept valid to isolate the detector 85ms
+ ✓ scripts/ci/contract.test.ts > P02.REG01 — pinned-parser regression over observed construct classes > pins yaml@2.9.0 exactly and resolves that exact version 0ms
+ ✓ scripts/ci/contract.test.ts > P02.REG01 — pinned-parser regression over observed construct classes > applies YAML 1.2 core semantics, not YAML 1.1 1ms
+ ✓ scripts/ci/contract.test.ts > P02.REG01 — pinned-parser regression over observed construct classes > handles strategy/matrix as observed in the corpus 0ms
+ ✓ scripts/ci/contract.test.ts > P02.REG01 — pinned-parser regression over observed construct classes > handles service containers as observed in ci.yml 0ms
+ ✓ scripts/ci/contract.test.ts > P02.REG01 — pinned-parser regression over observed construct classes > preserves expressions verbatim inside values 0ms
+ ✓ scripts/ci/contract.test.ts > P02.REG01 — pinned-parser regression over observed construct classes > preserves multiline run bodies including heredocs 0ms
+ ✓ scripts/ci/contract.test.ts > P02.REG01 — pinned-parser regression over observed construct classes > keeps SHA-pinned uses refs intact and detects permission blocks 1ms
+ ✓ scripts/ci/contract.test.ts > P02.REG01 — pinned-parser regression over observed construct classes > classifies tool requirements from RAW text, not escaped renderings (DEF-018) 0ms
+ ✓ scripts/ci/contract.test.ts > P02.REG01 — pinned-parser regression over observed construct classes > treats artifact and SARIF upload as non-gating side effects (DEF-017) 0ms
+ ✓ scripts/ci/contract.test.ts > P02.T02 — canonicalization rules > sorts mapping keys but never reorders sequences 0ms
+ ✓ scripts/ci/contract.test.ts > P02.T02 — canonicalization rules > keeps null / boolean / number / string distinct 0ms
+ ✓ scripts/ci/contract.test.ts > P02.T02 — canonicalization rules > normalizes CRLF to LF without touching internal content 0ms
+ ✓ scripts/ci/contract.test.ts > P02.T02 — canonicalization rules > never collapses semantically different workflows to the same canonical form 0ms
+ ✓ scripts/ci/contract.test.ts > P02.T02 — canonicalization rules > canonicalizes equal-but-differently-ordered mappings identically 0ms
+ ✓ scripts/ci/contract.test.ts > P02.CONF01 / P02.CONF02 — conformance > the checked-in contract conforms to the current workflow tree 3ms
+ ✓ scripts/ci/contract.test.ts > P02.CONF01 / P02.CONF02 — conformance > CONTRACT.md is byte-identical to a fresh render of the machine contract 1ms
+ ✓ scripts/ci/contract.test.ts > P02.CONF01 / P02.CONF02 — conformance > per-workflow identities are content-based, never path or host based 2ms
+ ✓ scripts/ci/contract.test.ts > P02.AUD01 — runtime YAML isolation > no runtime module parses workflow YAML 5ms
+ ✓ scripts/ci/contract.test.ts > P02.AUD01 — runtime YAML isolation > every YAML allowlist entry is explicit and reasoned 2ms
+ ✓ scripts/ci/contract.test.ts > P02.AUD01 — runtime YAML isolation > detects a runtime module that imports a YAML parser 1ms
+
+ Test Files  1 passed (1)
+      Tests  31 passed (31)
+   Start at  02:47:03
+   Duration  2.61s (transform 47ms, setup 0ms, import 88ms, tests 2.40s, environment 0ms)
+
+SUITE_EXIT=0

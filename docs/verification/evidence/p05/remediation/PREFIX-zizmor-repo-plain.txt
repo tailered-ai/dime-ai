@@ -1,0 +1,14 @@
+error[bot-conditions]: spoofable bot actor check
+  --> .github/workflows/auto-merge-dependabot.yml:27:9
+   |
+22 |     name: Auto-merge Dependabot patch PRs
+   |     ------------------------------------- this job
+...
+27 |     if: github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ actor context may be spoofable
+   |
+   = note: audit confidence → Medium
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#bot-conditions
+
+99 findings (47 ignored, 51 suppressed, 1 safe fixes): 0 informational, 0 low, 0 medium, 1 high

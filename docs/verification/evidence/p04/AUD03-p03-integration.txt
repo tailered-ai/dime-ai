@@ -1,0 +1,6 @@
+[p04-audit] AUD03 findings=0 integrations=4
+[p04-audit]   integration present: makeResult from result.mjs
+[p04-audit]   integration present: classifyAttempts from result.mjs
+[p04-audit]   integration present: JsonlReporter from reporter.mjs
+[p04-audit]   integration present: summarize from reporter.mjs
+[p04-audit] AUD03 PASS — one taxonomy, one reporter, one registry, one ledger

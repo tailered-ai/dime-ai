@@ -1,0 +1,25 @@
+ M FILE .claude/settings.json 3ac663cdee5d2f756a699212aa387376da2033396da46ddc7e3a56dcd7f52a5c
+ M FILE .gitignore a4ad5414340633001b35ea3ccd5c320bb4b2b688a7bfb1e4b3198da8c230fd43
+ M FILE CLAUDE.md f1daf101d091aa23e565528576a327fed3c2128405d8d45d60cb3a19cf049ee3
+?? FILE .claude/scripts/bootstrap-gstack.sh 709c1a75c4325892d5a770a9a1a6dcdd3ed5e0e6c4f545aa386c952df478b521
+?? FILE .tmp-health.mts 79b85ba631a8cdb3cf3b684adec328c9c4e4387f620671e279ef129dcae79cb1
+?? FILE .tmp-load-driver.sh eae1836e69c9788430e4d5d42736b05e4ad9fbd0aeeef44f0e619890dbeb24da
+?? FILE .tmp-load-driver2.sh 05fcb11c33de15f79b5634ab617ab017ad0e25726a872b44a6919ebe441c5f65
+?? FILE .tmp-load-driver3.sh f048f1d7c6ad982dbc071e961d05f71a4eadd1dadfb1e7428b1574d2588f2b4c
+?? FILE .tmp-load-driver4.sh ca5ae48f9a3a3bc07d7d77e4dac704e5be1cc8ddc8d2e39551361fd2f094824d
+?? FILE github-support-gc-request.md edb412a8f2a64d537d08fa5c333d8bc3ff28e04619d61d898b24562e3a57a795
+?? FILE os/handoff/2026-08-07-stripe-pricing-source-of-truth-thesis.md 2ee23d5e9cfa116f4dda7652bd9199fd988322956abf70e052499cce0fabfa60
+?? FILE scripts/generate-rubric-samples.mts c07de22c65fb30b7e9367134c7f3891294220ffba76f7027383a6c329f278d68
+?? FILE scripts/rubric-agreement.mjs 6703bd9b2ed3ce9b06d1e9c3db43e20d0526137693f8d33a0ae7e11df2513698
+?? FILE scripts/rubric-agreement.test.ts db592de43ff4b0a98b45e444074a9eed223943b2d74a2119bcfe182600ea2e00
+?? FILE scripts/run-gated-local.mjs 96b294c09d813ca9146a7e73d48218de4051fedde75b7a30f0c26968bcea3746
+?? FILE scripts/run-gated-local.test.ts a32f524fe65639266141729c271316d33d48199e04133ce3468c7ff878f9f7ea
+?? FILE server/_core/aiCostMeter.test.ts 126939adaf929b1152629f6c7a5a5b62724b93de5d0f69aca28a5f05b47c5fb8
+?? FILE server/_core/aiCostMeter.ts f8e4dc80e2b877729a20ac25b4e2b5c9114f79ef550fc6d4a3756be5f497a89e
+?? DIR server/loop/ files=2 agg=3ed772a39e940e6a972c4f140b8c6f52556b7018946fdcfc965789fe6473746a
+?? FILE server/mlbBacktestIntegrity.test.ts 922f82f117bfca071e5fe417ed63e25cf2b4e59d6e35eb671410e99cde3f9995
+?? FILE server/mlbBacktestIntegrity.ts 60f3cfa9d5cae372d5a8c3a3c77da75949d16d336f9267a8dfa02024a1eb9677
+?? FILE server/mlbClosingLineResolver.ts 11c80c707842d6b0458b94e20ba4f1de19291eef788bfae5fcbe6f84d0cd08a2
+?? FILE server/mlbModelIdentity.ts c9e6c434c1699792c922d228329913f2131a2f081d17b51535459eda28d6b9cf
+?? FILE server/schemaCapabilities.ts fb47d5c11d8e2a7efb0c93a555bd762a2a0f0778da22b7f1ad94989832f00566
+?? DIR shared/loop/ files=4 agg=ee17597b5a6db066d97ec10bc6e0f4ff455e0870c22ff1cd2b3e47b3e02eacef

@@ -1,0 +1,32 @@
+[p06] candidate provisioning: ok=true in 39329ms
+[p06] PASS       .github/workflows/01-pr-proof-contract.yml#format-check  (13.0s, driver exit 0, detector)
+[p06] PASS       .github/workflows/01-pr-proof-contract.yml#proof  (326.3s, driver exit 0, detector)
+[p06] PASS       .github/workflows/03-semgrep.yml#advisory  (90.6s, driver exit 0, detector)
+[p06] PASS       .github/workflows/03-semgrep.yml#blocking  (15.9s, driver exit 0, detector)
+[p06] PASS       .github/workflows/05-workflow-security.yml#zizmor  (0.5s, driver exit 0, detector)
+[p06] PASS       .github/workflows/08-contract-and-data-integrity.yml#contracts  (4.0s, driver exit 0, detector)
+[p06] PASS       .github/workflows/09-artifact-build-and-smoke.yml#artifact  (136.7s, driver exit 0, detector)
+[p06] PASS       .github/workflows/10-ai-eval-critical.yml#deterministic  (7.4s, driver exit 0, detector)
+[p06] FAIL       .github/workflows/12-nightly-verification.yml#full-container-scan  (32.4s, driver exit 20, detector)
+[p06] FAIL       .github/workflows/12-nightly-verification.yml#full-osv  (2.0s, driver exit 20, detector)
+[p06] BLOCKED    .github/workflows/13-tos-notion-context.yml#tos-notion-context  (0.1s, driver exit 32, refusal)
+[p06] PASS       .github/workflows/ci.yml#build  (13.1s, driver exit 0, detector)
+[p06] PASS       .github/workflows/ci.yml#security-audit  (2.0s, driver exit 0, detector)
+[p06] PASS       .github/workflows/ci.yml#typecheck  (14.4s, driver exit 0, detector)
+[p06] FAIL       .github/workflows/dime-llm-validation.yml#validate  (99.9s, driver exit 20, detector)
+[p06] PASS       .github/workflows/edge-arming-gate.yml#validate  (4.1s, driver exit 0, detector)
+[p06] PASS       .github/workflows/gitleaks.yml#gitleaks  (1.8s, driver exit 0, detector)
+[p06] PASS       .github/workflows/tailered-os.yml#test  (42.3s, driver exit 0, detector)
+[p06] cleaned verifier-created image dime-pr:82415a20f4931b9ba1f663ec4d9b2eeaed5dd3c2
+
+CLASS       TOTAL  PASS  FAIL FLAKY   T/O  BLKD  SKIP CIONL   N/A INFRA DRIFT BROKN INCON  BLOCKING
+PARITY        18   14    3    0    0    1    0    0    0    0    0    0    0  no
+HARDENING      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+CLEANROOM      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+ASSURANCE      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+REMOTE         0    0    0    0    0    0    0    0    0    0    0    0    0  no
+AUDIT          0    0    0    0    0    0    0    0    0    0    0    0    0  no
+
+totals: 18 result(s); reconciles=true; blocking classes: none
+
+[p06] mandatory gates: 7; blocking: 0

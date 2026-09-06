@@ -1,0 +1,22 @@
+P03.EV02 — JSONL reporter stream and six-class summary
+
+records written: 12; every record independently parseable and validated
+reconciles (per-class totals == global total): true
+blocking classes: PARITY
+
+--- first 3 raw JSONL records ---
+{"schema_version":"1.0.0","gate_id":".github/workflows/01-pr-proof-contract.yml#format-check","class":"PARITY","status":"PASS","mandatory":false,"attempts":[],"duration_ms":null,"exit_code":0,"evidence_path":"docs/verification/evidence/p03/EV02-reporter-sample.txt","reason":null,"started_at":null,"completed_at":null,"contract_check_id":".github/workflows/01-pr-proof-contract.yml#format-check","runnability":"LOCAL"}
+{"schema_version":"1.0.0","gate_id":".github/workflows/01-pr-proof-contract.yml#proof","class":"PARITY","status":"FAIL","mandatory":true,"attempts":[],"duration_ms":null,"exit_code":1,"evidence_path":"docs/verification/evidence/p03/EV02-reporter-sample.txt","reason":"demonstration reason for FAIL","started_at":null,"completed_at":null,"contract_check_id":".github/workflows/01-pr-proof-contract.yml#proof","runnability":"LOCAL+TOOL"}
+{"schema_version":"1.0.0","gate_id":".github/workflows/02-codeql.yml#analyze","class":"PARITY","status":"FLAKY","mandatory":false,"attempts":[],"duration_ms":null,"exit_code":1,"evidence_path":"docs/verification/evidence/p03/EV02-reporter-sample.txt","reason":"demonstration reason for FLAKY","started_at":null,"completed_at":null,"contract_check_id":".github/workflows/02-codeql.yml#analyze","runnability":"CI-ONLY"}
+
+--- six-class summary ---
+CLASS       TOTAL  PASS  FAIL FLAKY   T/O  BLKD  SKIP CIONL   N/A INFRA DRIFT BROKN INCON  BLOCKING
+PARITY        12    1    1    1    1    1    1    1    1    1    1    1    1  YES
+HARDENING      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+CLEANROOM      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+ASSURANCE      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+REMOTE         0    0    0    0    0    0    0    0    0    0    0    0    0  no
+AUDIT          0    0    0    0    0    0    0    0    0    0    0    0    0  no
+
+totals: 12 result(s); reconciles=true; blocking classes: PARITY
+  PARITY: .github/workflows/01-pr-proof-contract.yml#proof: FAIL | .github/workflows/08-contract-and-data-integrity.yml#contracts: INFRA-FAIL | .github/workflows/10-ai-eval-critical.yml#deterministic: BROKEN-GATE

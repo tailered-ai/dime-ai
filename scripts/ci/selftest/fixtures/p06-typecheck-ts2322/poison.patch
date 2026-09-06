@@ -1,0 +1,10 @@
+diff --git a/server/p06PoisonTypecheck.ts b/server/p06PoisonTypecheck.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+--- /dev/null
++++ b/server/p06PoisonTypecheck.ts
+@@ -0,0 +1,4 @@
++// P06 ASSURANCE poison — a deliberate type violation proving the TypeScript
++// Check gate rejects on the WIRED runner. Inert patch bytes; applied only
++// inside a disposable candidate worktree.
++export const p06PoisonTypecheck: number = "p06-poison-not-a-number";

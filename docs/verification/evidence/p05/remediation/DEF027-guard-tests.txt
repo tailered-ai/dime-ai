@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 /Users/danielwalker/src/ai-sports-betting-dime-ai
+
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  06:01:34
+   Duration  146ms (transform 9ms, setup 0ms, import 15ms, tests 3ms, environment 0ms)
+

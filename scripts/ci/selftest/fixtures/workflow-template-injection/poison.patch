@@ -1,0 +1,18 @@
+diff --git a/.github/workflows/p05-poison-template-injection.yml b/.github/workflows/p05-poison-template-injection.yml
+new file mode 100644
+index 000000000..7e879d98f
+--- /dev/null
++++ b/.github/workflows/p05-poison-template-injection.yml
+@@ -0,0 +1,12 @@
++# P05 ASSURANCE poison — direct interpolation of attacker-controlled
++# issue title into a run block. Detected by zizmor's template-injection
++# audit at High severity. Inert patch bytes only.
++name: p05-poison-template-injection
++on: issues
++permissions: {}
++jobs:
++  poisoned:
++    runs-on: ubuntu-latest
++    steps:
++      - name: interpolate attacker-controlled title
++        run: echo "${{ github.event.issue.title }}"

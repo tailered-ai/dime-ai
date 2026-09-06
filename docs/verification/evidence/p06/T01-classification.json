@@ -1,0 +1,1151 @@
+{
+  "contract_sha256": "17ab9315240d8be9caddff9d54bcfb706269da49e6103aae15864385693a0c51",
+  "generated_at": "2026-08-10T21:29:54.476Z",
+  "rows": [
+    {
+      "gate_id": ".github/workflows/01-pr-proof-contract.yml#format-check",
+      "status_context": "format-check",
+      "required": false,
+      "graduating": false,
+      "contract_job": ".github/workflows/01-pr-proof-contract.yml#format-check",
+      "provisioning_steps": [
+        {
+          "index": 3,
+          "signatures": [
+            "node-deps"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 4,
+          "first_line": "npx prettier --check ."
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 3,
+            "cwd": "."
+          },
+          {
+            "index": 4,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        },
+        {
+          "uses": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        }
+      ],
+      "classification": "LOCAL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "NOT_REQUIRED"
+    },
+    {
+      "gate_id": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "status_context": "01-pr-proof-contract",
+      "required": true,
+      "graduating": false,
+      "contract_job": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "provisioning_steps": [
+        {
+          "index": 3,
+          "signatures": [
+            "node-deps"
+          ]
+        },
+        {
+          "index": 5,
+          "signatures": [
+            "playwright-install"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 4,
+          "first_line": "NODE_OPTIONS=--max-old-space-size=6144 npx tsc --noEmit"
+        },
+        {
+          "index": 6,
+          "first_line": "(npx vitest run --reporter=default --reporter=json --outputFile=vitest-results.json || tru"
+        },
+        {
+          "index": 7,
+          "first_line": "pnpm run build"
+        },
+        {
+          "index": 8,
+          "first_line": "node - <<'EOF'"
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 3,
+            "cwd": "."
+          },
+          {
+            "index": 4,
+            "cwd": "."
+          },
+          {
+            "index": 5,
+            "cwd": "."
+          },
+          {
+            "index": 6,
+            "cwd": "."
+          },
+          {
+            "index": 7,
+            "cwd": "."
+          },
+          {
+            "index": 8,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        },
+        {
+          "uses": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        },
+        {
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "disposition": "CI plumbing; carries no candidate verdict"
+        }
+      ],
+      "classification": "LOCAL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/03-semgrep.yml#advisory",
+      "status_context": "03-semgrep-advisory",
+      "required": false,
+      "graduating": false,
+      "contract_job": ".github/workflows/03-semgrep.yml#advisory",
+      "provisioning_steps": [
+        {
+          "index": 1,
+          "signatures": [
+            "pipx-install"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 2,
+          "first_line": "set +e"
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 1,
+            "cwd": "."
+          },
+          {
+            "index": 2,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [
+        {
+          "id": "semgrep",
+          "version": "1.172.0",
+          "mode": "host-recognized",
+          "derived_from": "03-semgrep.yml env SEMGREP_VERSION"
+        }
+      ],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        }
+      ],
+      "classification": "LOCAL+TOOL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "NOT_REQUIRED"
+    },
+    {
+      "gate_id": ".github/workflows/03-semgrep.yml#blocking",
+      "status_context": "03-semgrep-blocking",
+      "required": false,
+      "graduating": true,
+      "contract_job": ".github/workflows/03-semgrep.yml#blocking",
+      "provisioning_steps": [
+        {
+          "index": 1,
+          "signatures": [
+            "pipx-install"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 2,
+          "first_line": "semgrep scan --config .semgrep/ server client/src shared scripts --severity ERROR --error"
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 1,
+            "cwd": "."
+          },
+          {
+            "index": 2,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [
+        {
+          "id": "semgrep",
+          "version": "1.172.0",
+          "mode": "host-recognized",
+          "derived_from": "03-semgrep.yml env SEMGREP_VERSION"
+        }
+      ],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        }
+      ],
+      "classification": "LOCAL+TOOL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/05-workflow-security.yml#zizmor",
+      "status_context": "05-workflow-security",
+      "required": true,
+      "graduating": false,
+      "contract_job": ".github/workflows/05-workflow-security.yml#zizmor",
+      "provisioning_steps": [
+        {
+          "index": 1,
+          "signatures": [
+            "pipx-install"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 2,
+          "first_line": "zizmor --min-severity high --format sarif .github/workflows/ > zizmor.sarif"
+        },
+        {
+          "index": 4,
+          "first_line": "zizmor --min-severity high --format plain .github/workflows/"
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 1,
+            "cwd": "."
+          },
+          {
+            "index": 2,
+            "cwd": "."
+          },
+          {
+            "index": 4,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [
+        {
+          "id": "zizmor",
+          "version": "1.29.0",
+          "mode": "host-recognized",
+          "derived_from": "05-workflow-security.yml env ZIZMOR_VERSION"
+        }
+      ],
+      "network_required": false,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3",
+          "disposition": "CI plumbing (uploads findings to GitHub code scanning); the finding itself is produced by the scanner step, which IS reproduced locally"
+        }
+      ],
+      "classification": "LOCAL+TOOL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/08-contract-and-data-integrity.yml#contracts",
+      "status_context": "08-contract-and-data-integrity",
+      "required": true,
+      "graduating": false,
+      "contract_job": ".github/workflows/08-contract-and-data-integrity.yml#contracts",
+      "provisioning_steps": [
+        {
+          "index": 3,
+          "signatures": [
+            "node-deps"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 4,
+          "first_line": "BASE=\"origin/${BASE_BRANCH}\""
+        },
+        {
+          "index": 5,
+          "first_line": "npx vitest run scripts/migration-journal-integrity.test.ts \\"
+        },
+        {
+          "index": 6,
+          "first_line": "BASE=\"origin/${BASE_BRANCH}\""
+        },
+        {
+          "index": 7,
+          "first_line": "python3 - <<'EOF'"
+        },
+        {
+          "index": 8,
+          "first_line": "npx vitest run server/_core/dimePlatformKnowledge.test.ts"
+        },
+        {
+          "index": 9,
+          "first_line": "node scripts/check-federation-docs.mjs"
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 3,
+            "cwd": "."
+          },
+          {
+            "index": 4,
+            "cwd": "."
+          },
+          {
+            "index": 5,
+            "cwd": "."
+          },
+          {
+            "index": 6,
+            "cwd": "."
+          },
+          {
+            "index": 7,
+            "cwd": "."
+          },
+          {
+            "index": 8,
+            "cwd": "."
+          },
+          {
+            "index": 9,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        },
+        {
+          "uses": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        }
+      ],
+      "classification": "LOCAL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/09-artifact-build-and-smoke.yml#artifact",
+      "status_context": "09-artifact-build-and-smoke",
+      "required": false,
+      "graduating": true,
+      "contract_job": ".github/workflows/09-artifact-build-and-smoke.yml#artifact",
+      "provisioning_steps": [],
+      "detector_steps": [
+        {
+          "index": 1,
+          "first_line": "docker build -t dime-pr:${{ github.sha }} ."
+        },
+        {
+          "index": 7,
+          "first_line": "docker run -d --name dime-smoke -p 3910:3000 \\"
+        },
+        {
+          "index": 8,
+          "first_line": "node scripts/smoke-deploy.mjs http://127.0.0.1:3910"
+        },
+        {
+          "index": 9,
+          "first_line": "CODE=$(curl -s -o /tmp/chat.json -w '%{http_code}' -X POST http://127.0.0.1:3910/api/dime/"
+        },
+        {
+          "index": 10,
+          "first_line": "docker rm -f dime-smoke || true"
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 1,
+            "cwd": "."
+          },
+          {
+            "index": 7,
+            "cwd": "."
+          },
+          {
+            "index": 8,
+            "cwd": "."
+          },
+          {
+            "index": 9,
+            "cwd": "."
+          },
+          {
+            "index": 10,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [
+        {
+          "id": "trivy",
+          "version": "0.70.0",
+          "mode": "owned-reused",
+          "derived_from": "09/12 workflows → trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 input default v0.70.0"
+        },
+        {
+          "id": "syft",
+          "version": "1.42.3",
+          "mode": "owned-reused",
+          "derived_from": "09-artifact → sbom-action@e22c389904149dbc22b58101806040fa8d37a610 dist VERSION7 v1.42.3"
+        }
+      ],
+      "network_required": true,
+      "service_or_container_required": true,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25",
+          "disposition": "verdict-bearing; reproduced by a governed-trivy adapter derived from the pinned action's own input→CLI mapping"
+        },
+        {
+          "uses": "aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25",
+          "disposition": "verdict-bearing; reproduced by a governed-trivy adapter derived from the pinned action's own input→CLI mapping"
+        },
+        {
+          "uses": "github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3",
+          "disposition": "CI plumbing (uploads findings to GitHub code scanning); the finding itself is produced by the scanner step, which IS reproduced locally"
+        },
+        {
+          "uses": "anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610",
+          "disposition": "verdict-bearing (generation); reproduced by a governed-syft adapter"
+        },
+        {
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "disposition": "CI plumbing; carries no candidate verdict"
+        }
+      ],
+      "classification": "LOCAL+TOOL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "NOT_REQUIRED"
+    },
+    {
+      "gate_id": ".github/workflows/10-ai-eval-critical.yml#deterministic",
+      "status_context": "10-ai-eval-critical",
+      "required": true,
+      "graduating": false,
+      "contract_job": ".github/workflows/10-ai-eval-critical.yml#deterministic",
+      "provisioning_steps": [
+        {
+          "index": 3,
+          "signatures": [
+            "node-deps"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 4,
+          "first_line": "env -u DATABASE_URL npx vitest run \\"
+        },
+        {
+          "index": 5,
+          "first_line": "env -u DATABASE_URL npx vitest run server/_core/dimeAgent.env.test.ts"
+        },
+        {
+          "index": 6,
+          "first_line": "env -u DATABASE_URL npx vitest run \\"
+        },
+        {
+          "index": 7,
+          "first_line": "env -u DATABASE_URL npx vitest run \\"
+        },
+        {
+          "index": 8,
+          "first_line": "node -e '"
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 3,
+            "cwd": "."
+          },
+          {
+            "index": 4,
+            "cwd": "."
+          },
+          {
+            "index": 5,
+            "cwd": "."
+          },
+          {
+            "index": 6,
+            "cwd": "."
+          },
+          {
+            "index": 7,
+            "cwd": "."
+          },
+          {
+            "index": 8,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        },
+        {
+          "uses": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        }
+      ],
+      "classification": "LOCAL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/12-nightly-verification.yml#full-container-scan",
+      "status_context": "full-container-scan",
+      "required": false,
+      "graduating": false,
+      "contract_job": ".github/workflows/12-nightly-verification.yml#full-container-scan",
+      "provisioning_steps": [],
+      "detector_steps": [
+        {
+          "index": 1,
+          "first_line": "docker build -t dime-nightly:latest ."
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 1,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [
+        {
+          "id": "trivy",
+          "version": "0.70.0",
+          "mode": "owned-reused",
+          "derived_from": "09/12 workflows → trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 input default v0.70.0"
+        }
+      ],
+      "network_required": true,
+      "service_or_container_required": true,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25",
+          "disposition": "verdict-bearing; reproduced by a governed-trivy adapter derived from the pinned action's own input→CLI mapping"
+        }
+      ],
+      "classification": "LOCAL+TOOL",
+      "reason_code": null,
+      "executed_status": "FAIL",
+      "executed_reason": "DETECTOR_FAILED: step 2.1 exit 1: trivy image --format table --severity CRITICAL,HIGH,MEDIUM --exit-code 1 --scanners vuln,s",
+      "assurance_state": "NOT_REQUIRED"
+    },
+    {
+      "gate_id": ".github/workflows/12-nightly-verification.yml#full-osv",
+      "status_context": "full-osv-scan",
+      "required": false,
+      "graduating": false,
+      "contract_job": ".github/workflows/12-nightly-verification.yml#full-osv",
+      "provisioning_steps": [
+        {
+          "index": 1,
+          "signatures": [
+            "download"
+          ]
+        }
+      ],
+      "detector_steps": [],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 1,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [
+        {
+          "id": "osv-scanner@full-osv",
+          "version": "2.2.4",
+          "mode": "owned-reused",
+          "derived_from": "12-nightly-verification.yml#full-osv provisioning-step release URL"
+        }
+      ],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        }
+      ],
+      "classification": "LOCAL+TOOL",
+      "reason_code": null,
+      "executed_status": "FAIL",
+      "executed_reason": "DETECTOR_FAILED: step 1 exit 2: osv-scanner scan --lockfile pnpm-lock.yaml --lockfile ml/dime-1.0/uv.lock \\",
+      "assurance_state": "NOT_REQUIRED"
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#build",
+      "status_context": "Build & Preview Gate",
+      "required": false,
+      "graduating": false,
+      "contract_job": ".github/workflows/ci.yml#build",
+      "provisioning_steps": [
+        {
+          "index": 3,
+          "signatures": [
+            "node-deps"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 4,
+          "first_line": "pnpm run build:client"
+        },
+        {
+          "index": 5,
+          "first_line": "node scripts/verify-preview-production.mjs dist/public"
+        },
+        {
+          "index": 6,
+          "first_line": "pnpm run check:bundle"
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 3,
+            "cwd": "."
+          },
+          {
+            "index": 4,
+            "cwd": "."
+          },
+          {
+            "index": 5,
+            "cwd": "."
+          },
+          {
+            "index": 6,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        },
+        {
+          "uses": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        }
+      ],
+      "classification": "LOCAL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "NOT_REQUIRED"
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#security-audit",
+      "status_context": "Security Audit",
+      "required": true,
+      "graduating": false,
+      "contract_job": ".github/workflows/ci.yml#security-audit",
+      "provisioning_steps": [
+        {
+          "index": 3,
+          "signatures": [
+            "privilege-escalation",
+            "download"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 2,
+          "first_line": "node scripts/check-github-actions-security.mjs"
+        },
+        {
+          "index": 4,
+          "first_line": "echo \"[INPUT] Scanning pnpm-lock.yaml with osv-scanner...\""
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 2,
+            "cwd": "."
+          },
+          {
+            "index": 3,
+            "cwd": "."
+          },
+          {
+            "index": 4,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [
+        {
+          "id": "osv-scanner@security-audit",
+          "version": "2.4.0",
+          "mode": "host-recognized",
+          "derived_from": "ci.yml#security-audit provisioning-step release URL"
+        }
+      ],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        },
+        {
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "disposition": "CI plumbing; carries no candidate verdict"
+        }
+      ],
+      "classification": "LOCAL+TOOL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#typecheck",
+      "status_context": "TypeScript Check",
+      "required": true,
+      "graduating": false,
+      "contract_job": ".github/workflows/ci.yml#typecheck",
+      "provisioning_steps": [
+        {
+          "index": 3,
+          "signatures": [
+            "node-deps"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 4,
+          "first_line": "echo \"[INPUT] Running tsc --noEmit on full project...\""
+        },
+        {
+          "index": 5,
+          "first_line": "pnpm run pi:audit"
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 3,
+            "cwd": "."
+          },
+          {
+            "index": 4,
+            "cwd": "."
+          },
+          {
+            "index": 5,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        },
+        {
+          "uses": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        },
+        {
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "disposition": "CI plumbing; carries no candidate verdict"
+        }
+      ],
+      "classification": "LOCAL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/dime-llm-validation.yml#validate",
+      "status_context": "Dime LLM Validation",
+      "required": false,
+      "graduating": false,
+      "contract_job": ".github/workflows/dime-llm-validation.yml#validate",
+      "provisioning_steps": [
+        {
+          "index": 3,
+          "signatures": [
+            "uv-sync"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 4,
+          "first_line": "uv run ruff format --check ."
+        },
+        {
+          "index": 5,
+          "first_line": "uv run python scripts/validate_data.py"
+        },
+        {
+          "index": 6,
+          "first_line": "audit_dir=\"$(mktemp -d)\""
+        },
+        {
+          "index": 7,
+          "first_line": "echo \"PASS: source, schemas, fixtures, prompts, tools, and audits validated.\""
+        }
+      ],
+      "effective_cwd": {
+        "job_default": "ml/dime-1.0",
+        "per_step": [
+          {
+            "index": 3,
+            "cwd": "ml/dime-1.0"
+          },
+          {
+            "index": 4,
+            "cwd": "ml/dime-1.0"
+          },
+          {
+            "index": 5,
+            "cwd": "ml/dime-1.0"
+          },
+          {
+            "index": 6,
+            "cwd": "ml/dime-1.0"
+          },
+          {
+            "index": 7,
+            "cwd": "ml/dime-1.0"
+          }
+        ]
+      },
+      "job_env": {
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "HF_DATASETS_OFFLINE": "1",
+        "DATASETS_OFFLINE": "1"
+      },
+      "secret_sites": [],
+      "required_tools": [],
+      "network_required": false,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "disposition": "toolchain setup — uv toolchain owns this locally"
+        },
+        {
+          "uses": "astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e",
+          "disposition": "toolchain setup — governed uv owns this locally"
+        }
+      ],
+      "classification": "LOCAL",
+      "reason_code": null,
+      "executed_status": "FAIL",
+      "executed_reason": "DETECTOR_FAILED: step 4 exit 1: uv run ruff format --check .",
+      "assurance_state": "NOT_REQUIRED"
+    },
+    {
+      "gate_id": ".github/workflows/edge-arming-gate.yml#validate",
+      "status_context": "Authorization record contract (offline)",
+      "required": false,
+      "graduating": false,
+      "contract_job": ".github/workflows/edge-arming-gate.yml#validate",
+      "provisioning_steps": [
+        {
+          "index": 3,
+          "signatures": [
+            "node-deps"
+          ]
+        }
+      ],
+      "detector_steps": [
+        {
+          "index": 4,
+          "first_line": "npx vitest run scripts/edge-soak-report.test.ts scripts/edge-arming-gate.test.ts"
+        },
+        {
+          "index": 5,
+          "first_line": "set -uo pipefail"
+        }
+      ],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": [
+          {
+            "index": 3,
+            "cwd": "."
+          },
+          {
+            "index": 4,
+            "cwd": "."
+          },
+          {
+            "index": 5,
+            "cwd": "."
+          }
+        ]
+      },
+      "job_env": null,
+      "secret_sites": [],
+      "required_tools": [],
+      "network_required": true,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        },
+        {
+          "uses": "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+          "disposition": "toolchain setup — measured capability owns this locally"
+        }
+      ],
+      "classification": "LOCAL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "NOT_REQUIRED"
+    },
+    {
+      "gate_id": ".github/workflows/gitleaks.yml#gitleaks",
+      "status_context": "Secret Scan (gitleaks)",
+      "required": true,
+      "graduating": false,
+      "contract_job": ".github/workflows/gitleaks.yml#gitleaks",
+      "provisioning_steps": [],
+      "detector_steps": [],
+      "effective_cwd": {
+        "job_default": null,
+        "per_step": []
+      },
+      "job_env": null,
+      "secret_sites": [
+        {
+          "where": ".steps[1].env.GITHUB_TOKEN",
+          "refs": [
+            "${{ secrets.GITHUB_TOKEN }}"
+          ]
+        }
+      ],
+      "required_tools": [
+        {
+          "id": "gitleaks",
+          "version": "8.24.3",
+          "mode": "owned-reused",
+          "derived_from": "gitleaks.yml → gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e dist (GITLEAKS_VERSION || \"8.24.3\")"
+        }
+      ],
+      "network_required": false,
+      "service_or_container_required": false,
+      "marketplace_actions": [
+        {
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "disposition": "candidate materialization — P01 owns this locally"
+        },
+        {
+          "uses": "gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e",
+          "disposition": "verdict-bearing; reproduced by a faithful adapter using the pinned action's exact argv and gitleaks version"
+        }
+      ],
+      "classification": "LOCAL+TOOL",
+      "reason_code": null,
+      "executed_status": "PASS",
+      "executed_reason": null,
+      "assurance_state": "PROVEN"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+P07 DB-parity blocker evidence
+
+Contract requirement (ci.yml#db-tests):
+  services: {"mysql":{"image":"mysql:8","env":{"MYSQL_ALLOW_EMPTY_PASSWORD":"1","MYSQL_DATABASE":"dime_test"},"ports":["3306:3306"],"options":"--health-cmd=\"mysqladmin ping -h 127.0.0.1 --silent\" --health-interval=5s --health-timeout=5s --health-retries=20"}}
+  env keys: ["DATABASE_URL","DB_TESTS","NODE_ENV"]
+
+Container runtime probe:
+  docker binary: /usr/local/bin/docker
+  docker daemon: 
+  podman: ABSENT
+  trivy: ABSENT
+
+Local MySQL server:
+  mysql client: /opt/homebrew/opt/mysql-client/bin/mysql
+  mysqld running on 3306: NO
+
+Ambient DB env: DATABASE_URL=absent
+
+Conclusion: the contract's DB stage requires a mysql:8 SERVICE CONTAINER.
+No container runtime is reachable, and no verifier-owned digest-pinned
+MySQL can be started. Per the frozen P07 rules, DB parity must not be
+faked or substituted with an unrelated local daemon.

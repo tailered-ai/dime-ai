@@ -1,0 +1,20 @@
+{
+  "schema": "ci-verify/images.pinned.v1",
+  "decision": "DEC-001=RECORD_ONLY — digests recorded, FROM never edited",
+  "dockerfile_bases": [
+    {
+      "ref": "node:22-bookworm-slim",
+      "resolved_digest": "node@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436"
+    }
+  ],
+  "mysql_fixture": {
+    "mysql_image": "mysql:8",
+    "resolved_digest_tail": "4bb78d37fe8a23eb857fd3fb",
+    "server_version": "8.4.11",
+    "durable_log": {
+      "path": "docs/verification/evidence/p07/T22-acceptance-p07.log",
+      "sha256": "0b40d19bc23c67d9a22cc8e62f5bca884e8de1d4ce41b218a37c6e874ff0c590"
+    }
+  },
+  "recorded_at": "2026-08-12T09:02:49.036Z"
+}

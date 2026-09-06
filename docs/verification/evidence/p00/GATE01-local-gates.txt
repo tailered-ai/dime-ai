@@ -1,0 +1,27 @@
+P00 GATE + LOCAL-GATE EVIDENCE
+pwd=/Users/danielwalker/src/ai-sports-betting-dime-ai  branch=feat/ci-verify-control-plane  HEAD=4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6
+
+### tsc --noEmit (full project, NODE_OPTIONS=--max-old-space-size=6144)
+TSC_EXIT=0  (scripts/ci/*.mjs are outside tsconfig include; *.test.ts excluded)
+
+### check-github-actions-security.mjs
+{"status":"PASS","workflowsChecked":40,"compositesChecked":0,"actionReferences":120,"productionSecretReferences":25,"failures":[]}
+
+### vitest scripts/ subset
+ Test Files  31 passed (31)
+      Tests  413 passed (413)
+   Start at  01:31:19
+   Duration  16.91s (transform 2.59s, setup 0ms, import 5.29s, tests 51.37s, environment 2ms)
+
+
+### prettier --check scripts/ci/
+Checking formatting...
+All matched files use Prettier code style!
+
+### prettier --check . — 26 warnings, ALL untracked pre-existing files
+None are under scripts/ci/ or docs/verification/. CI checks out a clean tree
+and never sees them. This is an observed instance of the local-vs-CI
+divergence class; it is NOT caused by this branch.
+
+### ledger verify
+[ledger] VERIFY OK — no tampering, drift, or stale evidence

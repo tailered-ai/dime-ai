@@ -1,0 +1,66 @@
+
+ RUN  v4.1.10 /Users/danielwalker/src/ai-sports-betting-dime-ai
+
+ ✓ scripts/ci/p03.test.ts > P03.TEST01 — exhaustive 12 x 6 reduction matrix > covers all 72 status/class combinations with exact expected behaviour 21ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST01 — exhaustive 12 x 6 reduction matrix > distinguishes mandatory from advisory without hiding advisory results 1ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST01 — exhaustive 12 x 6 reduction matrix > orders terminal severity so aggregation can never downgrade 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST01 — exhaustive 12 x 6 reduction matrix > invariants — no transformation can improve the verdict > adding a failure never makes a summary greener 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST01 — exhaustive 12 x 6 reduction matrix > invariants — no transformation can improve the verdict > PASS -> FLAKY cannot improve acceptance 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST01 — exhaustive 12 x 6 reduction matrix > invariants — no transformation can improve the verdict > PASS -> FAIL cannot improve acceptance 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST01 — exhaustive 12 x 6 reduction matrix > invariants — no transformation can improve the verdict > BROKEN_GATE forces verifier-broken semantics from any class 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST01 — exhaustive 12 x 6 reduction matrix > invariants — no transformation can improve the verdict > a malformed status throws rather than becoming N/A 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST01 — exhaustive 12 x 6 reduction matrix > invariants — no transformation can improve the verdict > class omission cannot create PASS 1ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST01 — exhaustive 12 x 6 reduction matrix > normalizes external spellings at exactly one boundary 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST02 — all six classes render even when empty > renders all six classes for: all empty 2ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST02 — all six classes render even when empty > renders all six classes for: only PARITY 1ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST02 — all six classes render even when empty > renders all six classes for: only AUDIT 1ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST02 — all six classes render even when empty > renders all six classes for: mixed classes 1ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST02 — all six classes render even when empty > renders all six classes for: CI_ONLY only 1ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST02 — all six classes render even when empty > renders all six classes for: FLAKY only 1ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST02 — all six classes render even when empty > an empty HARDENING registry renders explicitly rather than vanishing 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST02 — all six classes render even when empty > progress uses closed/total, never an invented percentage 0ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG01 — FLAKY cannot reduce to PASS > classifies fail-then-pass as FLAKY and preserves the failing attempt 0ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG01 — FLAKY cannot reduce to PASS > refuses to construct a PASS result whose history contains a failure 0ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG01 — FLAKY cannot reduce to PASS > blocks acceptance when a mandatory gate is FLAKY 0ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG02 — PARITY registry mutation forbidden > refuses append, delete, replacement and reclassification 10ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG02 — PARITY registry mutation forbidden > refuses to build when the contract does not match its pin 2ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG02 — PARITY registry mutation forbidden > raises rather than repairing an upstream contract defect 2ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG02 — PARITY registry mutation forbidden > rejects duplicate HARDENING ids and a wrong class 0ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG03 — PASS without verifiable evidence refused > refuses PASS with no evidence declared 3ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG03 — PASS without verifiable evidence refused > refuses PASS when the evidence path does not exist 1ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG03 — PASS without verifiable evidence refused > refuses PASS when the evidence file is empty 1ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG03 — PASS without verifiable evidence refused > refuses evidence pointing at a live control-plane artifact 1ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG04 / P03.NEG05 — ledger tampering and render divergence > detects canonical-byte tampering via the integrity pin 5ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG04 / P03.NEG05 — ledger tampering and render divergence > detects rendered-markdown divergence from canonical JSON 5ms
+ ✓ scripts/ci/p03.test.ts > P03.NEG04 / P03.NEG05 — ledger tampering and render divergence > the on-disk ledger matches its pin 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > a missing mandatory result cannot summarize green 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > duplicate gate ids do not overwrite each other 1ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > a later PASS cannot erase an earlier attempt 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > CI_ONLY is never counted as a locally executed PASS 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > INCONCLUSIVE and BLOCKED are never rendered as PASS 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > INFRA_FAIL stays distinct from FAIL 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > BROKEN_GATE cannot be downgraded by aggregation with many passes 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > CONTRACT_DRIFT remains independently visible 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > an unknown status fails the reporter rather than falling back 1ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > truncated JSONL cannot summarize green 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > summary counts reconcile exactly to raw records 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > advisory AUDIT success cannot hide a mandatory PARITY failure 0ms
+ ✓ scripts/ci/p03.test.ts > P03.TEST03 — false-green adversarial suite > negative durations and bad exit codes are rejected 0ms
+ ✓ scripts/ci/p03.test.ts > P03.T07 — ledger integration > records gate results append-only and refuses duplicates 1ms
+ ✓ scripts/ci/p03.test.ts > P03.T07 — ledger integration > keeps the system terminal state separate from phase acceptance 0ms
+ ✓ scripts/ci/p03.test.ts > P03.T07 — ledger integration > summarizes six classes from the ledger, including empty ones 1ms
+ ✓ scripts/ci/p03.test.ts > P03.T07 — ledger integration > preserves the full ACCEPT(P) predicate — no regression to unit closure only 1ms
+ ✓ scripts/ci/p03.test.ts > P03.CONF01 / P03.AUD01 / P03.AUD02 > CONF01 — the rendered ledger is byte-identical to a fresh render 4ms
+ ✓ scripts/ci/p03.test.ts > P03.CONF01 / P03.AUD01 / P03.AUD02 > CONF01 — the render exposes all six classes 4ms
+ ✓ scripts/ci/p03.test.ts > P03.CONF01 / P03.AUD01 / P03.AUD02 > AUD01 — the PARITY registry is a faithful projection of the contract 3ms
+ ✓ scripts/ci/p03.test.ts > P03.CONF01 / P03.AUD01 / P03.AUD02 > AUD01 — DEF-017 and DEF-018 regressions are anchored 1ms
+ ✓ scripts/ci/p03.test.ts > P03.CONF01 / P03.AUD01 / P03.AUD02 > AUD02 — no P03 runtime module parses workflow YAML 6ms
+ ✓ scripts/ci/p03.test.ts > P03.CONF01 / P03.AUD01 / P03.AUD02 > AUD02 — a runtime module importing YAML is detected, and control restores 1ms
+ ✓ scripts/ci/p03.test.ts > P03.CONF01 / P03.AUD01 / P03.AUD02 > registries expose all six classes, PARITY derived only from the contract 1ms
+
+ Test Files  1 passed (1)
+      Tests  56 passed (56)
+   Start at  03:20:15
+   Duration  364ms (transform 96ms, setup 0ms, import 152ms, tests 93ms, environment 0ms)
+
+SUITE_EXIT=0

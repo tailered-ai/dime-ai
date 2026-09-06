@@ -1,0 +1,25 @@
+{
+  "schema_version": "p06-1.0.0",
+  "fixture_id": "p06-typecheck-ts2322",
+  "expected_gate": ".github/workflows/ci.yml#typecheck",
+  "poison_mode": "patch",
+  "expected_status": "FAIL",
+  "expected_failed_step": 4,
+  "expected_reason": [
+    {
+      "source": "step_stdout",
+      "regex": "p06PoisonTypecheck\\.ts\\(\\d+,\\d+\\): error TS2322"
+    },
+    {
+      "source": "step_stdout",
+      "regex": "\\[OUTPUT\\] FAIL — TypeScript errors detected"
+    },
+    { "source": "result_reason", "regex": "DETECTOR_FAILED: step 4" }
+  ],
+  "control_expectation": { "status": "PASS" },
+  "allowed_execution_artifacts": ["typecheck-report.txt"],
+  "timeout_ms": 900000,
+  "notes": [
+    "P05 proves the same gate under its own framework. This fixture re-proves it through the WIRED P06 runner, so the proof exercises the same execution path production results come from (per-step contract cwd, provisioning/detector separation, governed PATH, journal-lifted verdict)."
+  ]
+}

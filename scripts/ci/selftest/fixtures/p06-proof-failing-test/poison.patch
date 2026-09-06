@@ -1,0 +1,16 @@
+diff --git a/server/p06ProofAssurancePoison.test.ts b/server/p06ProofAssurancePoison.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+--- /dev/null
++++ b/server/p06ProofAssurancePoison.test.ts
+@@ -0,0 +1,10 @@
++// P06 ASSURANCE poison — a deterministic test failure proving the
++// pr-proof-contract gate can reject. Inert patch bytes only; applied
++// exclusively inside a disposable candidate worktree.
++import { describe, it, expect } from "vitest";
++
++describe("p06 proof assurance poison", () => {
++  it("fails deterministically so the proof contract must reject", () => {
++    expect("p06-proof-poison-armed").toBe("this-can-never-match");
++  });
++});

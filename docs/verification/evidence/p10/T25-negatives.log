@@ -1,0 +1,14 @@
+=== NEG03: scripts/ci edited since issuance (uncommitted verify-ordering fix) ===
+{
+  "status": "VOID",
+  "field": "head_sha",
+  "reason": "DIRTY_TRACKED_FILES"
+}
+exit=2
+
+=== NEG03: scripts/ci committed since issuance ===
+{
+  "status": "VOID",
+  "field": "verifier_hash"
+}
+exit=2

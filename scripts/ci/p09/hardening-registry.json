@@ -1,0 +1,33 @@
+{
+  "schema": "ci-verify/hardening-registry.v1",
+  "law": "HARDENING results are never merged into the PARITY verdict (P09.AUD01). They gate operational blind spots the merge contract cannot see; a HARDENING red blocks per its own mode, and a HARDENING green never launders a PARITY red.",
+  "gates": [
+    {
+      "id": "deploy-order",
+      "unit": "P09.T02",
+      "mode": "BLOCKING (DEC-002)",
+      "detects": "new drizzle/*.sql in the candidate diff without a db-push.yml receipt — the 2026-08-05 #370 auth-outage class",
+      "receipt_env": "CI_VERIFY_DBPUSH_RUN_ID"
+    },
+    {
+      "id": "schema-type-drift",
+      "unit": "P09.T03",
+      "mode": "BLOCKING",
+      "detects": "schema TS vs committed migration snapshots disagreement — presence OR column type (the migration-0134 class SchemaGuard cannot see); oracle is drizzle-kit generate as a required no-op"
+    },
+    {
+      "id": "knip",
+      "unit": "P09.T04",
+      "mode": "RATCHET",
+      "detects": "dead files/exports/types in the scoped tree (initial scope: scripts/ci/** — the verifier polices itself first); knip@5.44.0 + typescript peer pinned to the repo devDependency",
+      "config": "scripts/ci/p09/knip.json"
+    },
+    {
+      "id": "a11y",
+      "unit": "P09.T05",
+      "mode": "RATCHET",
+      "detects": "serious/critical WCAG 2.0 A/AA violations on the BUILT client's public routes via vendored axe-core 4.10.3 (sha256-pinned) + Playwright; baselined findings are recorded, never hidden, and new violations red",
+      "baseline": "scripts/ci/p09/a11y-baseline.json"
+    }
+  ]
+}

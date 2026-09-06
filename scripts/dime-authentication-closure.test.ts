@@ -474,7 +474,11 @@ test("authentication bundle generation is deterministic and closes local imports
     await makeWritable(root);
     await rm(root, { recursive: true, force: true });
   }
-});
+  // 120s: this test copies process.execPath and runs bundle-generation
+  // subprocesses whose own execFile budget is 30s — the 15s default bound
+  // cannot contain the work it already declares, and under full-suite
+  // parallelism it timed out while passing isolated in 2.3s (DEF-061).
+}, 120_000);
 
 test("authentication candidate can be rebuilt at the same hardened path", async () => {
   const unresolvedRoot = await mkdtemp(
@@ -543,4 +547,4 @@ test("authentication candidate can be rebuilt at the same hardened path", async 
     await makeWritable(root);
     await rm(root, { recursive: true, force: true });
   }
-});
+}, 120_000); // same heavy profile as the closure test above (DEF-061)

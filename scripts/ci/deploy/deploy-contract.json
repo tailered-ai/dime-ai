@@ -1,0 +1,246 @@
+{
+  "schema": "ci-verify/deployment-contract.v1",
+  "version": 1,
+  "frozen_at": "2026-08-13T08:30:00Z",
+  "repository": "tailered-ai/dime-ai",
+  "protected_branch": "main",
+  "required_contexts_source": "derived at plan time from the frozen workflow contract (scripts/ci/contract-conformance.mjs); never hand-listed here",
+  "artifact": {
+    "type": "docker-image",
+    "dockerfile": "Dockerfile",
+    "build_command": ["docker", "build", "-t", "<tag>", "."],
+    "build_timeout_ms": 2700000,
+    "port": 3000,
+    "start_cmd": ["node", "dist/index.js"],
+    "identity": {
+      "law": "nothing is baked into the image; identity is the runtime env chain read by server/_core/buildIdentity.ts",
+      "runtime_env_chain": [
+        "RAILWAY_GIT_COMMIT_SHA",
+        "GIT_COMMIT_SHA",
+        "SOURCE_COMMIT",
+        "GITHUB_SHA"
+      ],
+      "health_commit_field": "commit",
+      "expected_commit_gate": "scripts/smoke-deploy.mjs (argv[1]=base URL, env EXPECTED_COMMIT)"
+    }
+  },
+  "process": {
+    "runtime": "node 22 as PID 1",
+    "port_env": "PORT",
+    "workers": "none (single process; background jobs in-process; DISABLE_BACKGROUND_JOBS=1 law for any extra replica)",
+    "jobs": "CronJobRunner in-process; overlap guard is per-process memory — numReplicas MUST stay 1 without a distributed lock"
+  },
+  "health": {
+    "path": "/health",
+    "healthy_status": 200,
+    "unhealthy_status": 503,
+    "gates_status": [
+      "db circuit CLOSED",
+      "no CONFIRMED app_users schema mismatch"
+    ],
+    "reports_not_gating": [
+      "integrations.discord",
+      "integrations.billingAlerts",
+      "integrations.stripeWebhook"
+    ],
+    "timeout_s": 300,
+    "poll_interval_ms": 2000
+  },
+  "readiness_smoke": {
+    "command": ["node", "scripts/smoke-deploy.mjs", "<base_url>"],
+    "env_required": ["EXPECTED_COMMIT"],
+    "asserts": [
+      "GET /health 200",
+      "build identity matches EXPECTED_COMMIT",
+      "schema/code agreement",
+      "GET / 200 HTML shell",
+      "hashed asset cacheable",
+      "tRPC JSON error shape",
+      "POST /api/dime/chat unauthenticated 401 JSON",
+      "bot UA SEO content",
+      "vendored storage asset",
+      "checkout CSP",
+      "rate-limit keying"
+    ]
+  },
+  "shutdown": {
+    "signal": "SIGTERM",
+    "grace_period_s": 25,
+    "expected_exit_code": 0,
+    "drain": ["server.close", "closeIdleConnections", "closeDbPool"],
+    "internal_deadline_s": 15
+  },
+  "migration": {
+    "law": "db-push.yml runs BEFORE any dependent code deploy (deploy-order hazard #370)",
+    "apply_workflow": ".github/workflows/db-push.yml (workflow_dispatch-only, environment: Production)",
+    "apply_command": "pnpm db:push (drizzle-kit generate + reconciled-migrate MODE=apply CONFIRM=RECONCILE)",
+    "fixture_replay_command": "pnpm db:migrate:reconciled",
+    "receipt": {
+      "mechanism": "CI_VERIFY_DBPUSH_RUN_ID env var carrying a db-push.yml run id",
+      "gate": "scripts/ci/p09/run-p09.mjs deployOrderGate (BLOCKING per DEC-002)",
+      "trigger": "any added drizzle/*.sql between base and head",
+      "known_limit": "receipt is local/deterministic; operator verifies the run id targets this branch (recorded residual risk)"
+    },
+    "drift_oracle": "drizzle-kit generate must be a no-op against the committed chain (p09 schemaDriftGate)",
+    "rollback_limit": "no automatic schema rollback; migrations are forward-only (0000-0134); application rollback requires backward-compatible schema",
+    "chain": "drizzle/ forward-only, journal-validated by scripts/reconciled-migrate.mjs (hash+timestamp multiset, fails closed)"
+  },
+  "targets": {
+    "discovery": "provider from repository metadata (railway.json) + recorded read-only live snapshot; ambiguity blocks",
+    "production": {
+      "provider": "railway",
+      "project_id": "8dd7341d-702c-48c7-90df-5c19a4f04913",
+      "project_name": "stunning-creativity",
+      "environment_id": "787f3113-17ab-47d9-9819-1268aeb09b3e",
+      "environment_name": "production",
+      "service_id": "a46ea921-5c5d-4225-9254-92f742e95b51",
+      "service_name": "ai-sports-betting-dime-ai",
+      "region": "sfo",
+      "replicas": 1,
+      "source_branch": "main",
+      "auto_deploy": "push to main deploys (merge to main IS a production deploy)",
+      "domains": [
+        "aisportsbettingmodels.com",
+        "www.aisportsbettingmodels.com",
+        "ai-sports-betting-dime-ai-production.up.railway.app"
+      ],
+      "builder_note": "repo railway.json pins DOCKERFILE; live service config read 2026-08-13 reported builder RAILPACK/V3 — railway.json takes precedence when present; divergence recorded as residual risk",
+      "execution": "REFUSED_WITHOUT_AUTHORIZATION_RECEIPT; production execution is NOT enabled in this qualification",
+      "snapshot_recorded_at": "2026-08-13T07:55:00Z",
+      "snapshot_deployment": {
+        "id": "5bb7e28b-951a-4b3c-8252-ad8365658198",
+        "status": "SUCCESS",
+        "commit": "249bf314c131e0f34aa0f1aae393411e4e8c8d55",
+        "created_at": "2026-08-11T22:29:00Z"
+      },
+      "snapshot_prior_deployment": {
+        "id": "95076095-52a5-485a-85b3-20d18a21e6b9",
+        "status": "REMOVED",
+        "commit": "44c1374233a46f68ef75d87e737f9358209ba61e"
+      }
+    },
+    "rehearsal": {
+      "provider": "local-docker",
+      "existing": true,
+      "unique": true,
+      "why": "the Railway project has NO non-production environment (verified read-only 2026-08-13); creating one is prohibited (create no infrastructure). The local Docker daemon + repo Dockerfile + digest-bound MySQL fixture are the existing, verified non-production target (the p08 cleanroom).",
+      "ownership_label": "ci-verify-owner",
+      "ports": {
+        "mysql": 3306,
+        "prior": 3921,
+        "candidate": 3922,
+        "rollback": 3923
+      },
+      "database": "disposable MySQL fixture, digest recorded in docs/verification/evidence/p08/P08-ENTRY.json; migrations replayed via pnpm db:migrate:reconciled"
+    }
+  },
+  "variables": {
+    "law": "names only; values are never captured, printed, or persisted",
+    "production_names": [
+      "ADDITIONAL_ALLOWED_ORIGINS",
+      "ANALYTICS_INGEST_SECRET",
+      "ANTHROPIC_API_KEY",
+      "APP_SESSION_SECRET",
+      "BILLING_ALERT_DISCORD_WEBHOOK_URL",
+      "CRON_SECRET",
+      "DATABASE_URL",
+      "DIME_AI_MAX",
+      "DIME_AI_PRO",
+      "DIME_AI_SHARP",
+      "DIME_AI_SUB",
+      "DIME_AI_TEAM",
+      "DIME_AI_URL",
+      "DIME_ANSWER_ROUTING_V1_ENABLED",
+      "DIME_CHAT_TRACE_V1_ENABLED",
+      "DIME_MODEL_TIMEOUT_MS",
+      "DIME_MODEL_VERSION",
+      "DISCORD_BOT_TOKEN",
+      "DISCORD_CLIENT_ID",
+      "DISCORD_CLIENT_SECRET",
+      "DISCORD_GUILD_ID",
+      "DISCORD_PUBLIC_KEY",
+      "DISCORD_ROLE_AI_MODEL_SUB",
+      "EDGE_MODE",
+      "EDGE_ORIGIN_SECRET",
+      "EDGE_ORIGIN_SECRET_PREV",
+      "GMAIL_APP_PASSWORD",
+      "KENPOM_EMAIL",
+      "KENPOM_PASSWORD",
+      "MLB_MARKET_GATE_MODE",
+      "PORT",
+      "PUBLIC_ORIGIN",
+      "SCHEMA_GUARD_FATAL",
+      "STRIPE_PRICE_ANNUAL",
+      "STRIPE_PRICE_MONTHLY",
+      "STRIPE_PRICE_OPERATOR_MONTHLY",
+      "STRIPE_PRICE_PRO_MONTHLY",
+      "STRIPE_PRICE_SHARP_MONTHLY",
+      "STRIPE_SECRET_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "USER_ACTIVITY_BACKEND_URL",
+      "VITE_STRIPE_PUBLISHABLE_KEY",
+      "VSIN_EMAIL",
+      "VSIN_PASSWORD"
+    ],
+    "rehearsal_names": [
+      "DATABASE_URL",
+      "APP_SESSION_SECRET",
+      "PORT",
+      "NODE_ENV",
+      "RAILWAY_GIT_COMMIT_SHA"
+    ]
+  },
+  "rollout": {
+    "strategy": "single-replica cutover behind /health gating (previous deploy keeps serving on 503)",
+    "blast_radius": "entire service (1 replica)",
+    "thresholds": {
+      "restart_policy": "ON_FAILURE max 3",
+      "healthcheck_timeout_s": 300
+    },
+    "post_deploy_verification": "deploy-smoke.yml on push (240s settle, 3 attempts) via the Cloudflare-fronted origin with x-dime-agent bypass; never the raw Railway origin",
+    "rollback": {
+      "mechanism": "redeploy the prior successful artifact (Railway prior deployment / local prior image)",
+      "automatic": false,
+      "known_limit": "no automatic production rollback exists; /health 503 keeping the previous deploy is the only automatic protection"
+    }
+  },
+  "authorization": {
+    "law": "production execution requires a receipt; no receipt means refusal; this qualification NEVER executes production",
+    "receipt_schema": {
+      "schema": "ci-verify/deploy-authorization.v1",
+      "required_fields": [
+        "authorizer",
+        "target",
+        "source_head",
+        "artifact_digest",
+        "readiness_certificate_sha256",
+        "window",
+        "blast_radius",
+        "rollout",
+        "prior_deployment",
+        "rollback_plan",
+        "stop_conditions",
+        "expires_at"
+      ],
+      "authorizer_must_be_human": true
+    }
+  },
+  "freshness": {
+    "readiness_certificate_max_age_hours": 24,
+    "security_scan_max_age_hours": 24,
+    "target_snapshot_max_age_hours": 168,
+    "pr_certificate_must_verify": true
+  },
+  "leases": {
+    "law": "one active deployment operation per target; lease binds target, candidate, artifact, run, operator, expiry, idempotency key",
+    "dir": ".ci-verify/deploy/lease",
+    "ttl_ms": 5400000
+  },
+  "evidence": {
+    "schema": "ci-verify/deploy-evidence.v1",
+    "dir": ".ci-verify/deploy",
+    "durable_dir": "docs/verification/evidence/deploy",
+    "retention": "journals and certificates are append-only; failed evidence is never overwritten",
+    "forbidden": "secret values, tokens, passwords, .env contents, raw customer data"
+  }
+}

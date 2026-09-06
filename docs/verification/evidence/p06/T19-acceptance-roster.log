@@ -1,0 +1,33 @@
+[p06] candidate provisioning: ok=true in 25722ms
+[p06] PASS       .github/workflows/01-pr-proof-contract.yml#format-check  (15.7s, driver exit 0, detector)
+[p06] PASS       .github/workflows/01-pr-proof-contract.yml#proof  (420.0s, driver exit 0, detector)
+[p06] PASS       .github/workflows/03-semgrep.yml#advisory  (74.1s, driver exit 0, detector)
+[p06] PASS       .github/workflows/03-semgrep.yml#blocking  (18.7s, driver exit 0, detector)
+[p06] PASS       .github/workflows/05-workflow-security.yml#zizmor  (0.6s, driver exit 0, detector)
+[p06] PASS       .github/workflows/08-contract-and-data-integrity.yml#contracts  (3.8s, driver exit 0, detector)
+[p06] PASS       .github/workflows/09-artifact-build-and-smoke.yml#artifact  (138.1s, driver exit 0, detector)
+[p06] PASS       .github/workflows/10-ai-eval-critical.yml#deterministic  (9.3s, driver exit 0, detector)
+[p06] FAIL       .github/workflows/12-nightly-verification.yml#full-container-scan  (33.5s, driver exit 20, detector)
+[p06] FAIL       .github/workflows/12-nightly-verification.yml#full-osv  (2.3s, driver exit 20, detector)
+[p06] BLOCKED    .github/workflows/13-tos-notion-context.yml#tos-notion-context  (0.1s, driver exit 32, refusal)
+[p06] PASS       .github/workflows/ci.yml#build  (9.2s, driver exit 0, detector)
+[p06] PASS       .github/workflows/ci.yml#security-audit  (3.1s, driver exit 0, detector)
+[p06] PASS       .github/workflows/ci.yml#typecheck  (21.3s, driver exit 0, detector)
+[p06] FAIL       .github/workflows/dime-llm-validation.yml#validate  (97.0s, driver exit 20, detector)
+[p06] PASS       .github/workflows/edge-arming-gate.yml#validate  (1.8s, driver exit 0, detector)
+[p06] PASS       .github/workflows/gitleaks.yml#gitleaks  (0.6s, driver exit 0, detector)
+[p06] PASS       .github/workflows/tailered-os.yml#test  (81.9s, driver exit 0, detector)
+[p06] cleaned verifier-created image dime-pr:abdba3d461bf817c8e825512b9031cf263862fa1
+[p06] cleaned verifier-created image dime-nightly:latest
+
+CLASS       TOTAL  PASS  FAIL FLAKY   T/O  BLKD  SKIP CIONL   N/A INFRA DRIFT BROKN INCON  BLOCKING
+PARITY        18   14    3    0    0    1    0    0    0    0    0    0    0  no
+HARDENING      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+CLEANROOM      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+ASSURANCE      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+REMOTE         0    0    0    0    0    0    0    0    0    0    0    0    0  no
+AUDIT          0    0    0    0    0    0    0    0    0    0    0    0    0  no
+
+totals: 18 result(s); reconciles=true; blocking classes: none
+
+[p06] mandatory gates: 7; blocking: 0

@@ -1,11 +1,79 @@
 # Control plane — rulesets, merge queue, CODEOWNERS
 
-Current live state (re-verified 2026-08-05, post-merge): ruleset
-**`main-protection` (id 18701573, active)** with `pull_request`,
-`required_status_checks`, `non_fast_forward`, `deletion`; classic branch
-protection with strict checks, 1 approval + code-owner + last-push approval,
-stale-approval dismissal, conversation resolution, `enforce_admins`,
-force-push/deletion blocked.
+## Current live state — measured 2026-08-10 (DEC-003 / DEF-002)
+
+**Ruleset `main-protection` (id 18701573, active) is the SOLE authoritative
+enforcement surface on `main`. Classic branch protection is ABSENT. The merge
+queue is NOT enabled.**
+
+Measured with an `admin: true` token; every negative was reproduced from
+independent endpoints before being recorded. Raw output and interpretation:
+`docs/verification/evidence/p00/T02-required-contexts.md`,
+`.../T01-merge-queue.md`, and the `raw/` transcripts beside them.
+
+| Property | Live value | Probe |
+| --- | --- | --- |
+| Ruleset 18701573 | `active`, rules `deletion`, `non_fast_forward`, `pull_request`, `required_status_checks` | `gh api repos/tailered-ai/dime-ai/rulesets/18701573` |
+| Classic branch protection | **ABSENT** — HTTP 404 "Branch not protected" | `gh api .../branches/main/protection` |
+| Is the 404 a permissions artifact? | **No** — token reports `admin=true` | `gh api repos/tailered-ai/dime-ai --jq .permissions` |
+| Is `main` protected at all? | Yes — `branches/main.protected = true`, by the ruleset | `gh api .../branches/main` |
+| Org-level rulesets | **NONE** | `gh api '.../rulesets?includes_parents=true'` and `.../rules/branches/main` |
+| Merge queue | **NOT enabled** — `mergeQueue` is `null`, no `merge_queue` rule | GraphQL `repository.mergeQueue(branch:"main")` |
+| Strict policy | `strict_required_status_checks_policy: true` | ruleset payload |
+| Bypass actors | `[]`, `current_user_can_bypass: "never"` | ruleset payload |
+
+### Required status checks ENFORCED TODAY — 9, each pinned to `integration_id: 15368`
+
+```
+Security Audit
+TypeScript Check
+Vitest
+Secret Scan (gitleaks)
+01-pr-proof-contract
+05-workflow-security
+06-dependency-review
+08-contract-and-data-integrity
+10-ai-eval-critical
+```
+
+### Still GRADUATING — 5 of the 14-context end state
+
+```
+02-codeql
+03-semgrep-blocking
+07-coverage-patch
+09-artifact-build-and-smoke
+11-artifact-attestation
+```
+
+### `pull_request` rule — live parameters
+
+| Parameter | Live value |
+| --- | --- |
+| `required_approving_review_count` | **0** |
+| `require_code_owner_review` | false |
+| `require_last_push_approval` | false |
+| `dismiss_stale_reviews_on_push` | false |
+| `required_review_thread_resolution` | false |
+| `allowed_merge_methods` | merge, squash, rebase |
+
+This is recorded as measurement, not as a finding of vulnerability. A
+0-approval policy is consistent with single-maintainer operation — requiring an
+approval that cannot exist would wedge every merge. The ruleset remains strict,
+blocks force-push and deletion, and has no bypass actors.
+
+> **SUPERSEDED — the block below described the state as of 2026-08-05 and is
+> retained as history, not as current fact.** It asserted a dual-surface
+> geometry (ruleset + classic protection) with four contexts, one approval,
+> code-owner review, last-push approval, stale-approval dismissal, conversation
+> resolution, and `enforce_admins`. None of that is live as of 2026-08-10: the
+> classic surface is gone and the ruleset now carries nine contexts. The
+> divergence was found by P00.T02 of the `ci:verify` control plane and tracked
+> as DEF-002; DEC-003 resolved it as **DOCUMENT_LIVE_STATE** — this document was
+> corrected to match reality, and **no repository protection was created,
+> restored, or altered.**
+
+### Historical record — 2026-08-05 (superseded, retained for audit)
 
 > **DRIFT FOUND AND CLOSED 2026-08-05.** `main` is guarded by *two independent*
 > mechanisms, and they had drifted apart: **`Secret Scan (gitleaks)` was
@@ -80,7 +148,11 @@ gh api repos/tailered-ai/dime-ai/rulesets/18701573 > ruleset.json
 gh api -X PUT repos/tailered-ai/dime-ai/rulesets/18701573 --input ruleset.json
 ```
 
-Classic protection mirror (strict=true stays):
+Classic protection mirror — **NOT APPLICABLE as of 2026-08-10.** Classic branch
+protection is absent (404 with an `admin` token), so there is no second surface
+to mirror. The command below is retained only for the case where an owner
+decision later restores that surface; running it today would *create* classic
+protection, which is a protection change and must be an explicit owner action:
 
 ```bash
 gh api -X PATCH repos/tailered-ai/dime-ai/branches/main/protection/required_status_checks \
@@ -90,13 +162,19 @@ gh api -X PATCH repos/tailered-ai/dime-ai/branches/main/protection/required_stat
     08-contract-and-data-integrity 09-artifact-build-and-smoke 10-ai-eval-critical 11-artifact-attestation)
 ```
 
-### Merge queue
+### Merge queue — NOT enabled (measured 2026-08-10)
 
-Enable on `main` (Settings → Rules → ruleset → "Require merge queue", or
-`gh api` ruleset `merge_queue` rule). This eliminates the stale-branch races
-observed on 2026-08-05 (PR #359 went stale twice under strict checks while
-#357/#358 merged). Every required workflow in this framework declares
-`merge_group` for exactly this reason. Recommended params for a solo repo:
+`repository.mergeQueue(branch:"main")` returns `null` and ruleset 18701573
+carries no `merge_queue` rule. **The `merge_group:` triggers declared by 10
+workflows are therefore inert — they cannot fire in the current
+configuration.** The combined branch+base state is verified only by the
+`pull_request` event, which checks out `refs/pull/N/merge`.
+
+Enabling it remains an open owner option (Settings → Rules → ruleset →
+"Require merge queue", or a `merge_queue` rule via `gh api`). It would
+eliminate the stale-branch races observed on 2026-08-05 (PR #359 went stale
+twice under strict checks while #357/#358 merged), which is why every required
+workflow already declares `merge_group`. Recommended params for a solo repo:
 `grouping_strategy: ALLGREEN`, `max_entries_to_build: 2`, merge method: merge.
 
 ### Signed commits

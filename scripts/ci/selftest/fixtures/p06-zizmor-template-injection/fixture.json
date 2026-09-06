@@ -1,0 +1,18 @@
+{
+  "schema_version": "p06-1.0.0",
+  "fixture_id": "p06-zizmor-template-injection",
+  "expected_gate": ".github/workflows/05-workflow-security.yml#zizmor",
+  "poison_mode": "patch",
+  "expected_status": "FAIL",
+  "expected_failed_step": 4,
+  "expected_reason": [
+    { "source": "step_stdout", "regex": "template-injection" },
+    { "source": "result_reason", "regex": "DETECTOR_FAILED: step 4" }
+  ],
+  "control_expectation": { "status": "PASS" },
+  "allowed_execution_artifacts": ["zizmor.sarif"],
+  "timeout_ms": 300000,
+  "notes": [
+    "Targets step 4 deliberately. Step 2 is the SARIF-emitting tier that exits 0 even with high findings (the DEF-023 defect); step 4 is the plain-format enforcement step added to remediate it. A proof that lands on step 4 re-verifies that remediation on the wired runner."
+  ]
+}

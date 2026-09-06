@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "format-check-violation",
+  "expected_gate": ".github/workflows/01-pr-proof-contract.yml#format-check",
+  "target_contract_id": ".github/workflows/01-pr-proof-contract.yml#format-check",
+  "target_class": "PARITY",
+  "applicability": "seed",
+  "expected_status": "FAIL",
+  "expected_reason": [
+    {
+      "source": "stderr",
+      "regex": "\\[warn\\] server/p05-poison-format\\.ts"
+    },
+    {
+      "source": "stderr",
+      "regex": "Code style issues found"
+    }
+  ],
+  "control_expectation": {
+    "status": "PASS"
+  },
+  "required_execution_mode": "host",
+  "command_step_indexes": [4],
+  "expected_changed_paths": ["server/p05-poison-format.ts"],
+  "allowed_execution_artifacts": [],
+  "timeout_ms": 300000,
+  "fixture_sha256": "05b4cd6468686e2bd38c3ca50a6c272748d974c9e304ed7478abc03debd28f70"
+}

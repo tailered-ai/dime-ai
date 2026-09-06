@@ -1,0 +1,696 @@
+{
+  "generated_against_head": "d07a1c3877adb8846330ab06c57652befb5b55ad",
+  "counts": {
+    "UNRELATED_PREEXISTING": 29,
+    "GENERATED_EVIDENCE": 48,
+    "P05_AUTHORIZED_UNCOMMITTED": 21
+  },
+  "rows": [
+    {
+      "state": " M",
+      "path": ".claude/settings.json",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "3ac663cdee5d2f756a699212aa387376da2033396da46ddc7e3a56dcd7f52a5c"
+    },
+    {
+      "state": " M",
+      "path": ".gitignore",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "a4ad5414340633001b35ea3ccd5c320bb4b2b688a7bfb1e4b3198da8c230fd43"
+    },
+    {
+      "state": " M",
+      "path": "CLAUDE.md",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "f1daf101d091aa23e565528576a327fed3c2128405d8d45d60cb3a19cf049ee3"
+    },
+    {
+      "state": " M",
+      "path": "docs/verification/CI-VERIFY-EXECUTION-LEDGER.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "68aa0e0a5a2a04b6fc630abcb99ccfa7d306a29bb7aee6041585262e28c97474"
+    },
+    {
+      "state": " M",
+      "path": "docs/verification/ci-verify-ledger.json",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "3d544024b2a1b395facc7302eb51dcad74f69dfa5ace0184db4678333d27c696"
+    },
+    {
+      "state": " M",
+      "path": "docs/verification/ci-verify-ledger.sha256",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "39c53959d19a3a51c968ba65863113f7cee792d54c620172587722776bc82914"
+    },
+    {
+      "state": " M",
+      "path": "scripts/ci/blueprint.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "8200d81f2645d7f26a870889581a02175c4cfec5d0b53f8720a7e921db55caed"
+    },
+    {
+      "state": " M",
+      "path": "scripts/ci/contract-conformance.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "c1c8dae7c416dc260791b4e8efecfffaec9468c6f8ef1b385f20632ece10a8e6"
+    },
+    {
+      "state": " M",
+      "path": "scripts/ci/ledger.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "bfc19fe6d0ab8bd669367e9c292e1ddc753f4239b2bad677f934bbb149f98e49"
+    },
+    {
+      "state": " M",
+      "path": "scripts/ci/p03-audit.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "0e20c3dd7797d46f658f350691d3c4fabc426cfe617734564418458cff1dcb24"
+    },
+    {
+      "state": " M",
+      "path": "scripts/ci/provenance-audit.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "0d4beb7cdf5a7edf80d4fdb4f3e3969a8d414a532a5d6148629abb67042d71c1"
+    },
+    {
+      "state": "??",
+      "path": ".claude/scripts/bootstrap-gstack.sh",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "709c1a75c4325892d5a770a9a1a6dcdd3ed5e0e6c4f545aa386c952df478b521"
+    },
+    {
+      "state": "??",
+      "path": ".tmp-health.mts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "79b85ba631a8cdb3cf3b684adec328c9c4e4387f620671e279ef129dcae79cb1"
+    },
+    {
+      "state": "??",
+      "path": ".tmp-load-driver.sh",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "eae1836e69c9788430e4d5d42736b05e4ad9fbd0aeeef44f0e619890dbeb24da"
+    },
+    {
+      "state": "??",
+      "path": ".tmp-load-driver2.sh",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "05fcb11c33de15f79b5634ab617ab017ad0e25726a872b44a6919ebe441c5f65"
+    },
+    {
+      "state": "??",
+      "path": ".tmp-load-driver3.sh",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "f048f1d7c6ad982dbc071e961d05f71a4eadd1dadfb1e7428b1574d2588f2b4c"
+    },
+    {
+      "state": "??",
+      "path": ".tmp-load-driver4.sh",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "ca5ae48f9a3a3bc07d7d77e4dac704e5be1cc8ddc8d2e39551361fd2f094824d"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/AMD-006-rationale.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "8d6febf1b86c5c6c91952a098336e254449e570fbc213c03daf3f21cce2655be"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/AUD01-AUD02-audits.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "f1d5a48129165708bd860e75851d29eec0e9116bb037f02d7a9d986925a4a524"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/CP01-checkpoint.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "1a5009ba0682234ba3386fe382c2b14c8590ffe8d8402c610b3f5087dda2ac10"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/DEF-022.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "735ed276e86b8ac3d3d43d3d45967cefae128b852e3213c6a5324a65f1f08df0"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/DEF-023-finding.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "c47c1ae2f501fd716c7c8de7a8353387b4b849590bd5b3b1878ca08df54bf463"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/DEF-024.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "a543ab8077fed001036282d7f2294f7cd209941ce811b89a32a26523864234dc"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/DEF-025.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "5eb33700ff0f270b906dc25a3164d6ef32dda499605c38353152e609a41350bb"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/DEF-026.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "5bc8b0526d6c88a3b3f1f7ed465d3a951dfadd879c8df8b3285925a8c4491538"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/EV-P05-snapshot.json",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "cf37769d9383bb97511a22bcd2cdb19c9e3b44d0eab7e930c4554be56f52c5bd"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/EV02-coverage-map.tsv",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "e800975dcbe7129f2c522c2624de7a04589a2957e5a3a999ff7aa20c9a1a3371"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/P05-suite.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "919769ab9a5a36a22047344f1f0bc24344d6950737d1b4f2c659539f0a9a19d0"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/P05-validation-sweep.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "72cf4564a50675259c16c9a6c43046c986f933bf88457871b26422e045d08b00"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/T01-T07-implementation.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "4edb99e86f207e0e589a866eb46bb792c4ac6f497f10fcde6bf57b79b1a6bae1"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/assurance.json",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "0986a75a9cd25547bbe20106d3c55de2414cc626533d868d94b2ad4f7d1ac2a6"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/assurance.json.sha256",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "09bc60dfef2b15c86fbaeb5f89769f5bc38ffc1d2d8fa1766de2f34cc6d482ff"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/raw/DEF-023-zizmor-plain.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "3ff81e624e06b94c3120781af32616d73b470d40999c31300e367cc94f6644dc"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/raw/DEF-023-zizmor-sarif.json",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "f42a871ddf78c7b7619749773d674ff49549805bc94d04860e51adf74118d5f9"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/raw/assurance-run.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "4ba7b944831f9d47d3b4bbdf83864389acd3b72be13c588b667e425f5f583b13"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/AMD-007-rationale.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "204cb972a8fd320b0f800442aac367e8e575cd8ae8f0df24463c5b887d0354f0"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/AMD-008-rationale.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "bc57b41ebf1343902eec36af76afb4f48083b3ace69d44ab0bbd16eed62306cb"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/AMD-009-rationale.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "101a2f2c6fe9578d2202ca3f7e2e5ec34ce4fdb023561d5c9737e38a0b1febee"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/BLOCKER-main-advanced.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "8f98269979b884598d33dbc8f1075f24e16df25119680da1425f1de6b0ab34d3"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/CP02-checkpoint.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "bf3692d404df3b6c855cb3132e4adbcff4968c3157efafac119f97a4a741c3c5"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/CP03-checkpoint.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "3272fd4ce86f6910358f2b71b0307e540ba95b96fd6435d91f42a545002102ab"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/DEC-mechanism-selection.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "89d33c4d2cb2be1c67562dcad4b226c0fa75f8f42d78253836079ae6a210c22a"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/DEF-023-closure.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "16bc17b125381256d3bdda00518b3602b8392ecfedf9f607ac4179cd6af76b5c"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/DEF-027-closure.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "3bcadff174bea94f5289193853480b5968e144cfa4a2b1c4e37f4b23a09922d1"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/DEF-027.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "a7e7af54c903c8a42adface72c87a3217ce9ffb1d687bc88df528a73147bcff4"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/DEF-028.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "08d84856ae20dc3fa5aebdb0c73ae150714003f87227755ebb37da528389838a"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/DEF-029.md",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "c94494e91c9a728884f962ea656a1442a00dc4d0ff4af04c725632b18cbd5ef8"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/DEF027-guard-tests.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "6e4a14d2d07c4398210a371d905f511c0c36044a0a84feb978feffde502c23f3"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/DRIFT-after-dependabot-fix.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "df6b206dbc5762dcd422540d38a0cac5c9ef5db301e820d75e4c90d9427474f9"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/DRIFT-before-regeneration.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "654f31e91d6372c8b087c1d5a22ddd174130c0ea38976dddca31043bb17e4949"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/EV-P05-CP03-snapshot.json",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "dac116fc783df2e0eb9e98f45f69c61d98294414f104a05bd0ce00eb59d315b0"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/POSTFIX-DEF027-clean-plain.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "0182e4395ba9cb8d8617fee627e998dbf3095b38a95f49d464493b3597ee726e"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/POSTFIX-DEF027-clean-sarif.json",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "d4c80549ac63aa81789411129d51088bc85b6c8dee28a05897163dddfaa7060d"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/POSTFIX-zizmor-PROVEN.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "4978058d48e5eaa878412ce6c27c80157515521a188f8fa583df0745a2935b36"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/POSTFIX-zizmor-cycle.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "0e420ebcdb5bd05767e7d685977b68728a8fe6c98b6cf0c44ac73a6af0171573"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/PREFIX-05-workflow-security.yml",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "c40e7194b599f0491cff79f052750d1fb395ba136e56275b0488bd0bc81567bb"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/PREFIX-DEF027-clean-plain.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "52a1d4e00a7da30338a44c6257b4b0b87ef337d90b09e68251b77a6acde4cd57"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/PREFIX-auto-merge-dependabot.yml",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "ec503bf7147b4694556cbe58a6d4841cd32eba67dea7005d185c368201204aea"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/PREFIX-zizmor-repo-plain.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "52a1d4e00a7da30338a44c6257b4b0b87ef337d90b09e68251b77a6acde4cd57"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/remediation/PREFIX-zizmor-repo-sarif.json",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "c09ade0b7749f4a084f2143bd8c4068d03858ca23bb47ff25f43f2d0e6403e67"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/unrelated-fingerprint-end.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "bc2418a16d8ffc1649ec0c37e64c7ac6c9687f599c00027182fcaffb940165a6"
+    },
+    {
+      "state": "??",
+      "path": "docs/verification/evidence/p05/unrelated-fingerprint-start.txt",
+      "class": "GENERATED_EVIDENCE",
+      "files": 1,
+      "sha256": "bc2418a16d8ffc1649ec0c37e64c7ac6c9687f599c00027182fcaffb940165a6"
+    },
+    {
+      "state": "??",
+      "path": "github-support-gc-request.md",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "edb412a8f2a64d537d08fa5c333d8bc3ff28e04619d61d898b24562e3a57a795"
+    },
+    {
+      "state": "??",
+      "path": "os/handoff/2026-08-07-stripe-pricing-source-of-truth-thesis.md",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "2ee23d5e9cfa116f4dda7652bd9199fd988322956abf70e052499cce0fabfa60"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/assurance.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "d6533d77e958162dfd54917245ba69d60c250dccb7b4e52613f2116be4102d01"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/coverage.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "bd0fefecce54c9c1c85d7554d3f4383272751373e566abb4f617a680fe2a5aad"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/fixture.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "c1e4c62674870367cfc5a45ff128a882749a408a70d373211f16fa92fd373c16"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/fixtures-driver.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "7ad0d3118c09d3f2248cc793de57fac9130d3093cc08c6a4367db62ca39f4fad"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/fixtures/drizzle-meta-stray/expect.json",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "22ced8aea4edbf74ef16b39b84e0f8c1feb394376aeedab3f3cdb31d5977f622"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/fixtures/drizzle-meta-stray/poison.patch",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "3393bf981d65e2bee0e8ab2b061e85adedf90fd25ff15ec232ff0c949b01e182"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/fixtures/format-check-violation/expect.json",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "14130b1655f607de7874548d3282a87c28c165a26359ee3e5665762112e05c70"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/fixtures/format-check-violation/poison.patch",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "05b4cd6468686e2bd38c3ca50a6c272748d974c9e304ed7478abc03debd28f70"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/fixtures/typecheck-ts2322/expect.json",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "85661ff33803eba219f7abaa7025c97d5a638c0d43039493bee2247c07764610"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/fixtures/typecheck-ts2322/poison.patch",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "4129e1815e8edcb152996d6837eff185a54852c28591b726966cb5193d2f00bd"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/fixtures/workflow-template-injection/expect.json",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "cb9664dce25c81e42ed143e385669289f9c6b5fff96f9e839541dd255b0df851"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/fixtures/workflow-template-injection/poison.patch",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "e97a8c13be9c0e985a6367d8b728bb5ac28e541984727f1578be7cbfe5c8c3c1"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/graduated.json",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "d0bd38adb3ff8add6982b45bfb8ad14332c6020508c48e0aa5865a533bb7d235"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/p05-audit.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "608e42853f79f27daf783c13a81570c099e87156c98b0e83eba1ab512291f002"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/p05.test.ts",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "849589e7522b914c5cb63f339a31c6f3d4fbae89754a1b337774d28e2650ef48"
+    },
+    {
+      "state": "??",
+      "path": "scripts/ci/selftest/placement.mjs",
+      "class": "P05_AUTHORIZED_UNCOMMITTED",
+      "files": 1,
+      "sha256": "07e8277dd31518ce18b9c40c620baa1fdad50d46b78f826bb0069f89b5959351"
+    },
+    {
+      "state": "??",
+      "path": "scripts/generate-rubric-samples.mts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "c07de22c65fb30b7e9367134c7f3891294220ffba76f7027383a6c329f278d68"
+    },
+    {
+      "state": "??",
+      "path": "scripts/rubric-agreement.mjs",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "6703bd9b2ed3ce9b06d1e9c3db43e20d0526137693f8d33a0ae7e11df2513698"
+    },
+    {
+      "state": "??",
+      "path": "scripts/rubric-agreement.test.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "db592de43ff4b0a98b45e444074a9eed223943b2d74a2119bcfe182600ea2e00"
+    },
+    {
+      "state": "??",
+      "path": "scripts/run-gated-local.mjs",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "96b294c09d813ca9146a7e73d48218de4051fedde75b7a30f0c26968bcea3746"
+    },
+    {
+      "state": "??",
+      "path": "scripts/run-gated-local.test.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "a32f524fe65639266141729c271316d33d48199e04133ce3468c7ff878f9f7ea"
+    },
+    {
+      "state": "??",
+      "path": "server/_core/aiCostMeter.test.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "126939adaf929b1152629f6c7a5a5b62724b93de5d0f69aca28a5f05b47c5fb8"
+    },
+    {
+      "state": "??",
+      "path": "server/_core/aiCostMeter.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "f8e4dc80e2b877729a20ac25b4e2b5c9114f79ef550fc6d4a3756be5f497a89e"
+    },
+    {
+      "state": "??",
+      "path": "server/loop/projectionLoop.test.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "1ce20c31dec5e9f8b182c0b2cc3c544dc722e5f1a1c85261329c12e61f86ac37"
+    },
+    {
+      "state": "??",
+      "path": "server/loop/projectionLoop.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "d9bcf9e10ba2e697a07acbe310e23c0be77b7941de8f6489a0db5bb5b395048a"
+    },
+    {
+      "state": "??",
+      "path": "server/mlbBacktestIntegrity.test.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "922f82f117bfca071e5fe417ed63e25cf2b4e59d6e35eb671410e99cde3f9995"
+    },
+    {
+      "state": "??",
+      "path": "server/mlbBacktestIntegrity.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "60f3cfa9d5cae372d5a8c3a3c77da75949d16d336f9267a8dfa02024a1eb9677"
+    },
+    {
+      "state": "??",
+      "path": "server/mlbClosingLineResolver.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "11c80c707842d6b0458b94e20ba4f1de19291eef788bfae5fcbe6f84d0cd08a2"
+    },
+    {
+      "state": "??",
+      "path": "server/mlbModelIdentity.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "c9e6c434c1699792c922d228329913f2131a2f081d17b51535459eda28d6b9cf"
+    },
+    {
+      "state": "??",
+      "path": "server/schemaCapabilities.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "fb47d5c11d8e2a7efb0c93a555bd762a2a0f0778da22b7f1ad94989832f00566"
+    },
+    {
+      "state": "??",
+      "path": "shared/loop/envelope.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "d95d8ec40f9d8b9e27f7a8197ead9bbf4da44b3aaf8bdd1e5776a3618f591e5f"
+    },
+    {
+      "state": "??",
+      "path": "shared/loop/ledger.test.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "974449fd97cfa74352f9734489eea2c9406e5e044f73e414bb10b45f925d8641"
+    },
+    {
+      "state": "??",
+      "path": "shared/loop/ledger.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "cf496f5d11c85c906eaf18db87b1ae2ed01bc5d15c03410cbda958b84862ad29"
+    },
+    {
+      "state": "??",
+      "path": "shared/loop/queries.ts",
+      "class": "UNRELATED_PREEXISTING",
+      "files": 1,
+      "sha256": "d66c495bc45c80e4c83b0a3491253519396d2bed02a07c1eea9f4e09f3782c7f"
+    }
+  ]
+}

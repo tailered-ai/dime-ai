@@ -1,0 +1,27 @@
+### A. check-patch-coverage.mjs — the changed-line diff pathspec (authoritative)
+42:const diff = execFileSync(
+43-  "git",
+44-  [
+45-    "diff",
+46-    "--unified=0",
+47-    `${BASE}...HEAD`,
+48-    "--",
+49-    "server/**/*.ts",
+50-    "shared/**/*.ts",
+51-  ],
+52-  { encoding: "utf8", maxBuffer: 64e6 }
+53-);
+54-const changed = new Map(); // file -> Set(lines)
+
+### B. 07-coverage-patch.yml — coverage.include flags
+2:# server/shared lines, 100% on money/auth paths (scripts/check-patch-coverage.mjs).
+37:          npx vitest run --coverage --coverage.provider=v8 \
+38:            --coverage.reporter=json --coverage.include='server/**' \
+39:            --coverage.include='shared/**' \
+46:        run: node scripts/check-patch-coverage.mjs
+
+### C. does the pathspec or include list mention scripts/ ?
+0
+2:# server/shared lines, 100% on money/auth paths (scripts/check-patch-coverage.mjs).
+42:          node scripts/check-environment-failures.mjs --profile=ci --actor="$GITHUB_ACTOR" \
+46:        run: node scripts/check-patch-coverage.mjs

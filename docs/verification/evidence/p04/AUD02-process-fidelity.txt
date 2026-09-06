@@ -1,0 +1,7 @@
+[p04-audit] AUD02 static_suppression_findings=0 spawn_paths=3 spawn_findings=0 runtime_probes=5
+[p04-audit]   probe piped-producer-failure: exit=1 ok=true — DEF-007 regression anchor: a piped $? once produced a false PASS; under GHA-default pipefail the producer's failure survives the pipe
+[p04-audit]   probe mid-pipeline-exit-code: exit=7 ok=true — pipefail surfaces the leftmost failing producer's code
+[p04-audit]   probe subshell-failure: exit=1 ok=true — a subshell failure is not lost by the wrapper
+[p04-audit]   probe errexit-mid-script: exit=1 ok=true — -e stops the script at the failing command (GHA semantics)
+[p04-audit]   probe deliberate-contract-suppression: exit=0 ok=true — a contract that suppresses its own failure exits 0 BY ITS OWN declaration — the audit records the choice; the runner does not second-guess the contract, and the static leg forbids the executor from ADDING such suppression itself
+[p04-audit] AUD02 PASS — exit codes are captured directly on every path

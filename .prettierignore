@@ -52,6 +52,26 @@ shared/dime/platform_knowledge_v1.json
 ml/
 patches/
 
+# ci:verify control plane — checksum-pinned state, its integrity pin, its
+# generated view, and the evidence artifacts hashed into it. Same rule as
+# platform_knowledge_v1.json above: these bytes ARE the hash, so reformatting
+# them would trip LEDGER_TAMPERED / RENDER_DRIFT / STALE_EVIDENCE in
+# `node scripts/ci/ledger.mjs verify`. Source under scripts/ci/ is NOT
+# excluded and stays fully format-gated.
+docs/verification/ci-verify-ledger.json
+docs/verification/ci-verify-ledger.sha256
+docs/verification/CI-VERIFY-EXECUTION-LEDGER.md
+docs/verification/evidence/
+
+# P02 frozen contract, its integrity pin, and the document rendered from it.
+# The BYTES of contract.frozen.json are the value contract.sha256 pins, and
+# CONTRACT.md is byte-compared against a fresh render (P02.CONF02). Letting
+# prettier reformat any of them would trip CONTRACT_DRIFT / DOC_DRIFT on a
+# purely cosmetic change. Source under scripts/ci/ stays fully format-gated.
+scripts/ci/contract.frozen.json
+scripts/ci/contract.sha256
+docs/verification/CONTRACT.md
+
 # Vendored / pinned upstream trees — formatting breaks provenance against
 # the pinned upstream commits recorded in CLAUDE.md / skills-lock.json.
 .claude/
@@ -157,3 +177,7 @@ server/wc2026/wc2026Ingester.ts
 # vendored/upstream-styled sources; root prettier must not restyle it, and
 # `pnpm format` must never rewrite the cloudflare-os submodule working tree.
 platform/tailered-os/
+
+# P09 vendored accessibility engine (axe-core, sha256-pinned in vendor/VENDOR.md):
+# restyling a hash-pinned vendored file would break its provenance pin.
+scripts/ci/p09/vendor/

@@ -1,0 +1,12 @@
+[p08] candidate e35cd5841c9e on base 249bf314c131
+[p08] provisioned: true in 23013ms
+[p08] T01/T02 image identities recorded
+[p08] T03 build: true (166.4s) id=226ff58f353f
+[p08] T04 trivy CRITICAL/fixable: PASS
+[p08] T05 sbom: PASS (1191 packages)
+[p08] T06 profile A round 1: PASS {"health_up":true,"health_polls":3,"smoke_ok":true,"smoke_tail":"te) (836ms) \n  ✅ bot UA on / → v2 SEO content (prerender or shell block) (657ms) prerender snapshot\n  ✅ vendored /dime-storage asset → 200 image (no external storage dependency) (128ms) \n  ✅ checkout CSP allows Stripe Embedded (script-src js.stripe.com + frame-src checkout.stripe.com) (563ms) CSP allows Stripe\n  ✅ rate-limit keying resists client-supplied identity headers (0ms) N/A — direct/localhost target has no sanitizing edge; invariant holds only behind the proxy chain\n\n11/11 checks passed\n","chat_status":"401","chat_structured_401":true,"no_crash_loop":true,"listen_line":true,"no_secret_leak":true,"stopped_within_grace":true,"exit_code":0}
+[p08] T07 profile B round 1: PASS {"mysql_ready":true,"migrations_ok":true,"health_up":true,"smoke_ok":true,"smoke_tail":"th gate) (45ms) \n  ✅ bot UA on / → v2 SEO content (prerender or shell block) (6ms) prerender snapshot\n  ✅ vendored /dime-storage asset → 200 image (no external storage dependency) (40ms) \n  ✅ checkout CSP allows Stripe Embedded (script-src js.stripe.com + frame-src checkout.stripe.com) (19ms) CSP allows Stripe\n  ✅ rate-limit keying resists client-supplied identity headers (0ms) N/A — direct/localhost target has no sanitizing edge; invariant holds only behind the proxy chain\n\n11/11 checks passed\n","no_crash_loop":true,"listen_line":true,"no_secret_leak":true,"no_unhandled_rejection":true,"stopped_within_grace":true,"graceful_exit_0":true,"db_connections_closed":true}
+[p08] NEG01 broken Dockerfile rejected: true
+[p08] NEG02 wrong EXPECTED_COMMIT rejected: true
+[p08] NEG03 mysql killed mid-run → INFRA-FAIL(SYNTHETIC)
+[p08] CLN01 zero residue: true

@@ -1,0 +1,169 @@
+bScheduleHistory][GAME] ARI @ PIT (anId=292272) | date=2026-07-28 status=complete | score=8–7 | RL=-1.5(+150) ML=-108/-112 TOT=9(O:-119 U:-102) | result: ARI W ATS=PIT COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292273 — teams[] order mismatch corrected: teams[0]=DET(id=195) but away_team_id=187 → AWAY=BAL HOME=DET
+[MlbScheduleHistory][GAME] BAL @ DET (anId=292273) | date=2026-07-28 status=complete | score=0–14 | RL=+1.5(-163) ML=+123/-145 TOT=9(O:-112 U:-107) | result: DET W ATS=DET COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292274 — teams[] order mismatch corrected: teams[0]=TB(id=189) but away_team_id=200 → AWAY=TEX HOME=TB
+[MlbScheduleHistory][GAME] TEX @ TB (anId=292274) | date=2026-07-28 status=complete | score=4–1 | RL=+1.5(-148) ML=+144/-175 TOT=8(O:-120 U:-101) | result: TEX W ATS=TEX COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292275 — teams[] order mismatch corrected: teams[0]=WSH(id=216) but away_team_id=188 → AWAY=TOR HOME=WSH
+[MlbScheduleHistory][GAME] TOR @ WSH (anId=292275) | date=2026-07-28 status=complete | score=6–8 | RL=+1.5(-182) ML=+112/-135 TOT=9(O:+100 U:-120) | result: WSH W ATS=WSH COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292276 — teams[] order mismatch corrected: teams[0]=NYM(id=213) but away_team_id=215 → AWAY=ATL HOME=NYM
+[MlbScheduleHistory][GAME] ATL @ NYM (anId=292276) | date=2026-07-28 status=postponed | score=0–0 | RL=-1.5(+109) ML=-163/+135 TOT=7.5(O:-107 U:-113)
+[MlbScheduleHistory][GAME] CLE @ CIN (anId=292277) | date=2026-07-28 status=complete | score=0–2 | RL=-1.5(+113) ML=-144/+119 TOT=9(O:-103 U:-117) | result: CIN W ATS=CIN COV O/U=UNDER
+[MlbScheduleHistory][GAME] KC @ MIN (anId=292278) | date=2026-07-28 status=complete | score=2–3 | RL=+1.5(-132) ML=+158/-193 TOT=9(O:-112 U:-108) | result: MIN W ATS=KC COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292279 — teams[] order mismatch corrected: teams[0]=CWS(id=194) but away_team_id=191 → AWAY=NYY HOME=CWS
+[MlbScheduleHistory][GAME] NYY @ CWS (anId=292279) | date=2026-07-28 status=complete | score=3–2 | RL=-1.5(+137) ML=-125/+104 TOT=8(O:-102 U:-118) | result: NYY W ATS=CWS COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292280 — teams[] order mismatch corrected: teams[0]=STL(id=207) but away_team_id=206 → AWAY=CHC HOME=STL
+[MlbScheduleHistory][GAME] CHC @ STL (anId=292280) | date=2026-07-28 status=complete | score=10–2 | RL=-1.5(+148) ML=-108/-112 TOT=8.5(O:-119 U:-101) | result: CHC W ATS=CHC COV O/U=OVER
+[MlbScheduleHistory][GAME] HOU @ LAA (anId=292281) | date=2026-07-28 status=complete | score=3–2 | RL=-1.5(+144) ML=-110/-109 TOT=8.5(O:-105 U:-114) | result: HOU W ATS=LAA COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292282 — teams[] order mismatch corrected: teams[0]=ATH(id=201) but away_team_id=190 → AWAY=BOS HOME=ATH
+[MlbScheduleHistory][GAME] BOS @ ATH (anId=292282) | date=2026-07-28 status=complete | score=3–4 | RL=-1.5(-101) ML=-157/+130 TOT=10.5(O:-111 U:-108) | result: ATH W ATS=ATH COV O/U=UNDER
+[MlbScheduleHistory][GAME] COL @ SD (anId=292283) | date=2026-07-28 status=complete | score=7–8 | RL=+1.5(-109) ML=+198/-245 TOT=8(O:-112 U:-107) | result: SD W ATS=COL COV O/U=OVER
+[MlbScheduleHistory][GAME] MIL @ SF (anId=292284) | date=2026-07-28 status=complete | score=8–2 | RL=-1.5(+122) ML=-150/+124 TOT=7.5(O:+102 U:-123) | result: MIL W ATS=MIL COV O/U=OVER
+[MlbScheduleHistory][GAME] SEA @ LAD (anId=292285) | date=2026-07-28 status=complete | score=7–6 | RL=+1.5(-103) ML=+193/-238 TOT=9.5(O:+100 U:-121) | result: SEA W ATS=SEA COV O/U=OVER
+[MlbScheduleHistory][FETCH] date=20260728 processed 16 games: 16 valid | 16 with full odds | 0 without DK odds | 0 skipped (no team data)
+[MlbScheduleHistory][UPSERT] Upserting 16 records into mlb_schedule_history
+[MlbScheduleHistory][UPSERT] Batch 1: upserted 16 records (total so far: 16)
+[MlbScheduleHistory][UPSERT] Complete — 16 records upserted
+[MlbScheduleHistory][REFRESH] date=20260728 COMPLETE — fetched=16 upserted=16 skipped=0
+[STATE] WSH (Nationals Park) 2025: runs=791 games=81 avgRpg=9.765
+[MlbScheduleHistory][REFRESH] Starting refresh for date=20260727
+[MlbScheduleHistory][FETCH] Requesting AN v1 API | date=20260727 | URL: https://api.actionnetwork.com/web/v1/scoreboard/mlb?period=game&bookIds=68&date=20260727
+[MlbScheduleHistory][FETCH] AN v1 API returned 12 games for date=20260727
+[MlbScheduleHistory][GAME] SEA @ TEX (anId=292218) | date=2026-07-27 status=complete | score=3–7 | RL=-1.5(+135) ML=-126/+104 TOT=8(O:-116 U:-104) | result: TEX W ATS=TEX COV O/U=OVER
+[MlbScheduleHistory][GAME] ARI @ PIT (anId=292219) | date=2026-07-27 status=complete | score=2–3 | RL=-1.5(+156) ML=-104/-115 TOT=9.5(O:-112 U:-107) | result: PIT W ATS=PIT COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292220 — teams[] order mismatch corrected: teams[0]=DET(id=195) but away_team_id=187 → AWAY=BAL HOME=DET
+[MlbScheduleHistory][GAME] BAL @ DET (anId=292220) | date=2026-07-27 status=complete | score=8–5 | RL=+1.5(-194) ML=+108/-130 TOT=8.5(O:-102 U:-118) | result: BAL W ATS=BAL COV O/U=OVER
+[MlbScheduleHistory][GAME] PHI @ MIA (anId=292221) | date=2026-07-27 status=complete | score=7–8 | RL=-1.5(-120) ML=-205/+167 TOT=8(O:+100 U:-120) | result: MIA W ATS=MIA COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292222 — teams[] order mismatch corrected: teams[0]=WSH(id=216) but away_team_id=188 → AWAY=TOR HOME=WSH
+[MlbScheduleHistory][GAME] TOR @ WSH (anId=292222) | date=2026-07-27 status=complete | score=3–2 | RL=+1.5(-186) ML=+104/-126 TOT=10(O:-112 U:-108) | result: TOR W ATS=TOR COV O/U=UNDER
+[MlbScheduleHistory][GAME] CLE @ CIN (anId=292223) | date=2026-07-27 status=postponed | score=0–0 | RL=+1.5(-149) ML=+133/-161 TOT=9(O:-105 U:-115)
+[MlbScheduleHistory][FIX] Game id=292224 — teams[] order mismatch corrected: teams[0]=NYM(id=213) but away_team_id=215 → AWAY=ATL HOME=NYM
+[MlbScheduleHistory][GAME] ATL @ NYM (anId=292224) | date=2026-07-27 status=complete | score=3–14 | RL=-1.5(+153) ML=-105/-114 TOT=8.5(O:-123 U:+102) | result: NYM W ATS=NYM COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292225 — teams[] order mismatch corrected: teams[0]=CWS(id=194) but away_team_id=191 → AWAY=NYY HOME=CWS
+[MlbScheduleHistory][GAME] NYY @ CWS (anId=292225) | date=2026-07-27 status=complete | score=9–5 | RL=-1.5(+118) ML=-144/+119 TOT=8.5(O:-102 U:-118) | result: NYY W ATS=NYY COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292226 — teams[] order mismatch corrected: teams[0]=STL(id=207) but away_team_id=206 → AWAY=CHC HOME=STL
+[MlbScheduleHistory][GAME] CHC @ STL (anId=292226) | date=2026-07-27 status=complete | score=7–3 | RL=-1.5(+128) ML=-124/+103 TOT=9.5(O:-102 U:-118) | result: CHC W ATS=CHC COV O/U=OVER
+[MlbScheduleHistory][GAME] HOU @ LAA (anId=292227) | date=2026-07-27 status=complete | score=6–4 | RL=-1.5(+158) ML=-106/-113 TOT=8.5(O:-115 U:-105) | result: HOU W ATS=HOU COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292228 — teams[] order mismatch corrected: teams[0]=ATH(id=201) but away_team_id=190 → AWAY=BOS HOME=ATH
+[MlbScheduleHistory][GAME] BOS @ ATH (anId=292228) | date=2026-07-27 status=complete | score=4–2 | RL=-1.5(-124) ML=-205/+167 TOT=10(O:-107 U:-112) | result: BOS W ATS=BOS COV O/U=UNDER
+[MlbScheduleHistory][GAME] MIL @ SF (anId=292229) | date=2026-07-27 status=complete | score=0–3 | RL=-1.5(+119) ML=-137/+114 TOT=8.5(O:-109 U:-110) | result: SF W ATS=SF COV O/U=UNDER
+[MlbScheduleHistory][FETCH] date=20260727 processed 12 games: 12 valid | 12 with full odds | 0 without DK odds | 0 skipped (no team data)
+[MlbScheduleHistory][UPSERT] Upserting 12 records into mlb_schedule_history
+[MlbScheduleHistory][UPSERT] Batch 1: upserted 12 records (total so far: 12)
+[MlbScheduleHistory][UPSERT] Complete — 12 records upserted
+[MlbScheduleHistory][REFRESH] date=20260727 COMPLETE — fetched=12 upserted=12 skipped=0
+[STATE] WSH (Nationals Park) 2026: runs=677 games=61 avgRpg=11.098
+
+[STEP] Computing league-wide avg RPG per season...
+[STATE] League 2024: totalRuns=19930 totalGames=2262 avgRpg=8.8108
+[STATE] League 2025: totalRuns=21610 totalGames=2429 avgRpg=8.8967
+[STATE] League 2026: totalRuns=15527 totalGames=1735 avgRpg=8.9493
+
+[STEP] Computing per-venue park factors and upserting...
+[STATE] ATH: pf2024=N/A pf2025=1.1282 pf2026=1.3093 → 3yr=1.2414
+[STATE] ATL: pf2024=0.8842 pf2025=1.0033 pf2026=0.9949 → 3yr=0.9752
+[STATE] ARI: pf2024=1.2176 pf2025=1.0990 pf2026=0.9945 → 3yr=1.0705
+[STATE] BAL: pf2024=1.0159 pf2025=1.0449 pf2026=1.0129 → 3yr=1.0231
+[STATE] BOS: pf2024=1.0630 pf2025=1.0089 pf2026=0.9256 → 3yr=0.9781
+[STATE] CHC: pf2024=0.8337 pf2025=0.9974 pf2026=1.0511 → 3yr=0.9915
+[STATE] CIN: pf2024=1.0425 pf2025=0.9741 pf2026=0.9721 → 3yr=0.9868
+[STATE] CLE: pf2024=0.9832 pf2025=0.8964 pf2026=0.9507 → 3yr=0.9409
+[STATE] COL: pf2024=1.2097 pf2025=1.3169 pf2026=1.2689 → 3yr=1.2715
+[STATE] CWS: pf2024=0.8886 pf2025=0.9547 pf2026=0.9848 → 3yr=0.9566
+[STATE] DET: pf2024=0.9264 pf2025=1.0435 pf2026=0.9267 → 3yr=0.9617
+[STATE] HOU: pf2024=1.0033 pf2025=0.9242 pf2026=1.0284 → 3yr=0.9921
+[STATE] KC: pf2024=1.0257 pf2025=0.8451 pf2026=1.0701 → 3yr=0.9937
+[STATE] LAA: pf2024=1.0173 pf2025=1.0630 pf2026=0.8865 → 3yr=0.9656
+[STATE] LAD: pf2024=1.0087 pf2025=1.1101 pf2026=0.9556 → 3yr=1.0126
+[STATE] MIA: pf2024=1.1658 pf2025=0.9630 pf2026=0.8903 → 3yr=0.9672
+[STATE] MIL: pf2024=0.9668 pf2025=0.9533 pf2026=0.9560 → 3yr=0.9574
+[STATE] MIN: pf2024=1.0705 pf2025=1.0678 pf2026=1.0038 → 3yr=1.0363
+[STATE] NYM: pf2024=1.0030 pf2025=1.0271 pf2026=0.9981 → 3yr=1.0078
+[STATE] NYY: pf2024=1.0453 pf2025=1.0172 pf2026=0.9817 → 3yr=1.0051
+[STATE] PHI: pf2024=1.0229 pf2025=1.0602 pf2026=1.0669 → 3yr=1.0561
+[STATE] PIT: pf2024=1.0243 pf2025=0.8493 pf2026=1.1789 → 3yr=1.0491
+[STATE] SD: pf2024=0.9931 pf2025=0.8867 pf2026=0.8759 → 3yr=0.9026
+[STATE] SEA: pf2024=0.7861 pf2025=0.9117 pf2026=0.8236 → 3yr=0.8425
+[STATE] SF: pf2024=0.9402 pf2025=0.9492 pf2026=0.9382 → 3yr=0.9419
+[STATE] STL: pf2024=0.9472 pf2025=0.9547 pf2026=0.9094 → 3yr=0.9306
+[STATE] TB: pf2024=N/A pf2025=0.9852 pf2026=N/A → 3yr=0.9852
+[STATE] TEX: pf2024=0.9122 pf2025=0.8007 pf2026=0.9223 → 3yr=0.8838
+[STATE] TOR: pf2024=1.0215 pf2025=1.0657 pf2026=0.9324 → 3yr=0.9902
+[STATE] WSH: pf2024=0.9864 pf2025=1.0977 pf2026=1.2401 → 3yr=1.1467
+
+[OUTPUT] Park factor seeder complete
+[OUTPUT] inserted=30 updated=0 errors=0
+
+[VERIFY] Top 5 hitter-friendly parks:
+  COL (Coors Field): 3yr=1.2715 | 2024=1.2097 2025=1.3169 2026=1.2689
+  ATH (Sutter Health Park): 3yr=1.2414 | 2024=N/A 2025=1.1282 2026=1.3093
+  WSH (Nationals Park): 3yr=1.1467 | 2024=0.9864 2025=1.0977 2026=1.2401
+  ARI (Chase Field): 3yr=1.0705 | 2024=1.2176 2025=1.0990 2026=0.9945
+  PHI (Citizens Bank Park): 3yr=1.0561 | 2024=1.0229 2025=1.0602 2026=1.0669
+[VERIFY] Top 5 pitcher-friendly parks:
+  SEA (T-Mobile Park): 3yr=0.8425 | 2024=0.7861 2025=0.9117 2026=0.8236
+  TEX (Globe Life Field): 3yr=0.8838 | 2024=0.9122 2025=0.8007 2026=0.9223
+  SD (Petco Park): 3yr=0.9026 | 2024=0.9931 2025=0.8867 2026=0.8759
+  STL (Busch Stadium): 3yr=0.9306 | 2024=0.9472 2025=0.9547 2026=0.9094
+  CLE (Progressive Field): 3yr=0.9409 | 2024=0.9832 2025=0.8964 2026=0.9507
+[VERIFY] PASS — Coors Field ranked #1 with pf3yr=1.2715
+[VERIFY] PASS — 30 park factors seeded with 0 errors
+[ParkFactors] Weekly refresh: inserted=30 updated=0 errors=0
+[MlbScheduleHistory][REFRESH] Starting refresh for date=20260726
+[MlbScheduleHistory][FETCH] Requesting AN v1 API | date=20260726 | URL: https://api.actionnetwork.com/web/v1/scoreboard/mlb?period=game&bookIds=68&date=20260726
+[STATE] Progress: 610/6762 (9.0%) | umpires tracked: 84 | errors: 0
+[MlbScheduleHistory][FETCH] AN v1 API returned 15 games for date=20260726
+[MlbScheduleHistory][GAME] CLE @ TB (anId=292201) | date=2026-07-26 status=complete | score=0–1 | RL=+1.5(-207) ML=+103/-125 TOT=6.5(O:-122 U:+101) | result: TB W ATS=CLE COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292202 — teams[] order mismatch corrected: teams[0]=PIT(id=203) but away_team_id=206 → AWAY=CHC HOME=PIT
+[MlbScheduleHistory][GAME] CHC @ PIT (anId=292202) | date=2026-07-26 status=complete | score=7–8 | RL=+1.5(-175) ML=+119/-144 TOT=9(O:-108 U:-112) | result: PIT W ATS=CHC COV O/U=OVER
+[MlbScheduleHistory][GAME] TOR @ BOS (anId=292203) | date=2026-07-26 status=complete | score=1–6 | RL=+1.5(-186) ML=+122/-147 TOT=7.5(O:-112 U:-108) | result: BOS W ATS=BOS COV O/U=UNDER
+[MlbScheduleHistory][GAME] ATL @ BAL (anId=292204) | date=2026-07-26 status=complete | score=3–2 | RL=-1.5(+149) ML=-114/-105 TOT=9(O:+101 U:-122) | result: ATL W ATS=BAL COV O/U=UNDER
+[MlbScheduleHistory][GAME] ARI @ WSH (anId=292205) | date=2026-07-26 status=complete | score=7–10 | RL=-1.5(+130) ML=-117/-103 TOT=10(O:-115 U:-105) | result: WSH W ATS=WSH COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292206 — teams[] order mismatch corrected: teams[0]=MIA(id=214) but away_team_id=211 → AWAY=SD HOME=MIA
+[MlbScheduleHistory][GAME] SD @ MIA (anId=292206) | date=2026-07-26 status=complete | score=5–3 | RL=-1.5(+159) ML=-102/-115 TOT=8.5(O:-114 U:-105) | result: SD W ATS=SD COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292207 — teams[] order mismatch corrected: teams[0]=NYM(id=213) but away_team_id=204 → AWAY=LAD HOME=NYM
+[MlbScheduleHistory][GAME] LAD @ NYM (anId=292207) | date=2026-07-26 status=complete | score=3–8 | RL=-1.5(+109) ML=-155/+128 TOT=8.5(O:-114 U:-105) | result: NYM W ATS=NYM COV O/U=OVER
+[MlbScheduleHistory][GAME] KC @ DET (anId=292208) | date=2026-07-26 status=complete | score=5–4 | RL=+1.5(-127) ML=+157/-192 TOT=9(O:-109 U:-111) | result: KC W ATS=KC COV O/U=PUSH
+[MlbScheduleHistory][GAME] HOU @ CWS (anId=292209) | date=2026-07-26 status=complete | score=3–12 | RL=-1.5(+161) ML=+102/-123 TOT=9(O:-111 U:-109) | result: CWS W ATS=CWS COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292210 — teams[] order mismatch corrected: teams[0]=MIL(id=208) but away_team_id=210 → AWAY=COL HOME=MIL
+[MlbScheduleHistory][GAME] COL @ MIL (anId=292210) | date=2026-07-26 status=complete | score=2–11 | RL=+1.5(+135) ML=+290/-373 TOT=8(O:-108 U:-112) | result: MIL W ATS=MIL COV O/U=OVER
+[MlbScheduleHistory][GAME] ATH @ MIN (anId=292211) | date=2026-07-26 status=complete | score=8–11 | RL=+1.5(-150) ML=+135/-163 TOT=10(O:-105 U:-114) | result: MIN W ATS=MIN COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292212 — teams[] order mismatch corrected: teams[0]=STL(id=207) but away_team_id=202 → AWAY=CIN HOME=STL
+[MlbScheduleHistory][GAME] CIN @ STL (anId=292212) | date=2026-07-26 status=complete | score=5–3 | RL=+1.5(-185) ML=+113/-136 TOT=8.5(O:-114 U:-105) | result: CIN W ATS=CIN COV O/U=UNDER
+[MlbScheduleHistory][GAME] SEA @ TEX (anId=292213) | date=2026-07-26 status=complete | score=6–4 | RL=-1.5(+171) ML=-103/-117 TOT=7(O:-123 U:+102) | result: SEA W ATS=SEA COV O/U=OVER
+[MlbScheduleHistory][GAME] LAA @ SF (anId=292214) | date=2026-07-26 status=complete | score=4–3 | RL=-1.5(+139) ML=-126/+104 TOT=8.5(O:-106 U:-113) | result: LAA W ATS=SF COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292215 — teams[] order mismatch corrected: teams[0]=PHI(id=212) but away_team_id=191 → AWAY=NYY HOME=PHI
+[MlbScheduleHistory][GAME] NYY @ PHI (anId=292215) | date=2026-07-26 status=complete | score=4–11 | RL=+1.5(-117) ML=+177/-218 TOT=8.5(O:-102 U:-118) | result: PHI W ATS=PHI COV O/U=OVER
+[MlbScheduleHistory][FETCH] date=20260726 processed 15 games: 15 valid | 15 with full odds | 0 without DK odds | 0 skipped (no team data)
+[MlbScheduleHistory][UPSERT] Upserting 15 records into mlb_schedule_history
+[MlbScheduleHistory][UPSERT] Batch 1: upserted 15 records (total so far: 15)
+[MlbScheduleHistory][UPSERT] Complete — 15 records upserted
+[MlbScheduleHistory][REFRESH] date=20260726 COMPLETE — fetched=15 upserted=15 skipped=0
+[MlbScheduleHistory][REFRESH] Starting refresh for date=20260725
+[MlbScheduleHistory][FETCH] Requesting AN v1 API | date=20260725 | URL: https://api.actionnetwork.com/web/v1/scoreboard/mlb?period=game&bookIds=68&date=20260725
+[MlbScheduleHistory][FETCH] AN v1 API returned 15 games for date=20260725
+[MlbScheduleHistory][GAME] KC @ DET (anId=292164) | date=2026-07-25 status=complete | score=3–2 | RL=+1.5(-145) ML=+141/-171 TOT=8(O:-105 U:-115) | result: KC W ATS=KC COV O/U=UNDER
+[MlbScheduleHistory][GAME] LAA @ SF (anId=292165) | date=2026-07-25 status=complete | score=2–9 | RL=+1.5(-180) ML=+113/-136 TOT=9(O:-111 U:-109) | result: SF W ATS=SF COV O/U=OVER
+[MlbScheduleHistory][GAME] ARI @ WSH (anId=292166) | date=2026-07-25 status=complete | score=3–5 | RL=+1.5(-171) ML=+113/-136 TOT=9(O:-115 U:-105) | result: WSH W ATS=WSH COV O/U=UNDER
+[MlbScheduleHistory][GAME] TOR @ BOS (anId=292167) | date=2026-07-25 status=complete | score=6–0 | RL=-1.5(+170) ML=-104/-116 TOT=7(O:-123 U:+102) | result: TOR W ATS=TOR COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292168 — teams[] order mismatch corrected: teams[0]=MIA(id=214) but away_team_id=211 → AWAY=SD HOME=MIA
+[MlbScheduleHistory][GAME] SD @ MIA (anId=292168) | date=2026-07-25 status=complete | score=7–2 | RL=+1.5(-176) ML=+123/-148 TOT=8(O:-110 U:-110) | result: SD W ATS=SD COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292169 — teams[] order mismatch corrected: teams[0]=PHI(id=212) but away_team_id=191 → AWAY=NYY HOME=PHI
+[MlbScheduleHistory][GAME] NYY @ PHI (anId=292169) | date=2026-07-25 status=complete | score=3–1 | RL=-1.5(+130) ML=-126/+104 TOT=9(O:-110 U:-110) | result: NYY W ATS=NYY COV O/U=UNDER
+[MlbScheduleHistory][GAME] CLE @ TB (anId=292170) | date=2026-07-25 status=complete | score=0–3 | RL=-1.5(+162) ML=-105/-114 TOT=8(O:-108 U:-112) | result: TB W ATS=TB COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292171 — teams[] order mismatch corrected: teams[0]=PIT(id=203) but away_team_id=206 → AWAY=CHC HOME=PIT
+[MlbScheduleHistory][GAME] CHC @ PIT (anId=292171) | date=2026-07-25 status=complete | score=11–0 | RL=+1.5(-206) ML=+107/-128 TOT=7.5(O:-114 U:-106) | result: CHC W ATS=CHC COV O/U=OVER
+[MlbScheduleHistory][GAME] ATL @ BAL (anId=292172) | date=2026-07-25 status=complete | score=2–3 | RL=-1.5(+160) ML=-105/-115 TOT=9(O:-110 U:-110) | result: BAL W ATS=BAL COV O/U=UNDER
+[MlbScheduleHistory][GAME] HOU @ CWS (anId=292173) | date=2026-07-25 status=complete | score=4–1 | RL=+1.5(-203) ML=+100/-121 TOT=8.5(O:-115 U:-105) | result: HOU W ATS=HOU COV O/U=UNDER
+[MlbScheduleHistory][FIX] Game id=292174 — teams[] order mismatch corrected: teams[0]=MIL(id=208) but away_team_id=210 → AWAY=COL HOME=MIL
+[MlbScheduleHistory][GAME] COL @ MIL (anId=292174) | date=2026-07-25 status=complete | score=5–8 | RL=+1.5(-103) ML=+197/-244 TOT=9(O:-110 U:-110) | result: MIL W ATS=MIL COV O/U=OVER
+[MlbScheduleHistory][GAME] ATH @ MIN (anId=292175) | date=2026-07-25 status=complete | score=0–2 | RL=+1.5(-155) ML=+123/-149 TOT=10(O:-109 U:-110) | result: MIN W ATS=MIN COV O/U=UNDER
+[MlbScheduleHistory][GAME] SEA @ TEX (anId=292176) | date=2026-07-25 status=complete | score=1–7 | RL=-1.5(+154) ML=-108/-111 TOT=7(O:-124 U:+103) | result: TEX W ATS=TEX COV O/U=OVER
+[MlbScheduleHistory][FIX] Game id=292177 — teams[] order mismatch corrected: teams[0]=NYM(id=213) but away_team_id=204 → AWAY=LAD HOME=NYM
+[MlbScheduleHistory][GAME] LAD @ NYM (anId=292177) | date=2026-07-25 status=complete | score=4–3 | RL=-1.5(+109) ML=-161/+133 TOT=7(O:-119 U:-102) | result: LAD W ATS=NYM COV O/U=PUSH
+[MlbScheduleHistory][FIX] Game id=292178 — teams[] order mismatch corrected: teams[0]=STL(id=207) but away_team_id=202 → AWAY=CIN HOME=STL
+[MlbScheduleHistory][GAME] CIN @ STL (anId=292178) | date=2026-07-25 status=complete | score=0–7 | RL=-1.5(+147) ML=-115/-104 TOT=8(O:-104 U:-116) | result: STL W ATS=STL COV O/U=UNDER
+[MlbScheduleHistory][FETCH] date=20260725 processed 15 games: 15 valid | 15 with full odds | 0 without DK odds | 0 skipped (no team data)
+[MlbScheduleHistory][UPSERT] Upserting 15 records into mlb_schedule_history
+[MlbScheduleHistory][UPSERT] Batch 1: upserted 15 records (total so far: 15)
+[MlbScheduleHistory][UPSERT] Complete — 15 records upserted
+[MlbScheduleHistory][REFRESH] date=20260725 COMPLETE — fetched=15 upserted=15 skipped=0

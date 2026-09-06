@@ -1,0 +1,36 @@
+P04 validation sweep — every command with its DIRECT exit code
+(2026-08-10, branch feat/ci-verify-control-plane, HEAD 1fa8e215)
+
+P04 suite (post-format)                npx vitest run scripts/ci/p04.test.ts          -> exit 0  (52/52)
+P04 suite consecutive flake check      3 further full runs                            -> exit 0,0,0  (52/52 each; plus the evidence pass: 5 consecutive green)
+Full scripts surface                   npx vitest run scripts/                        -> exit 0  (35 files, 587/587: PB 35, P01 20, P02 31, P03 56, P04 52 + tooling)
+TypeScript                             NODE_OPTIONS=--max-old-space-size=6144 tsc --noEmit -> exit 0
+Prettier                               npx prettier --check scripts/ci/               -> exit 0
+Ledger verify                          node scripts/ci/ledger.mjs verify              -> exit 0
+Contract conformance                   node scripts/ci/contract-conformance.mjs verify -> exit 0  (40 workflows, 51 checks, 9 required)
+CONTRACT.md render + doc check         render; doc                                    -> exit 0, 0  (byte-identical re-render, git diff empty)
+P02 YAML isolation audit               contract-conformance.mjs audit                 -> exit 0
+Registry build + fidelity              node scripts/ci/registry.mjs                   -> exit 0  (47 PARITY entries)
+P03 audits (fidelity + YAML)           node scripts/ci/p03-audit.mjs                  -> exit 0  (scans the six NEW P04 modules as other-runtime: zero YAML violations)
+P01 provenance audit                   node scripts/ci/provenance-audit.mjs           -> exit 0
+P04 audits (AUD01+AUD02+AUD03)         node scripts/ci/p04-audit.mjs <scratch>        -> exit 0  (runtime probes: false|tee=1, (exit 7)|cat=7, (false)=1, errexit=1, false||true=0)
+Actions security contract              node scripts/check-github-actions-security.mjs -> exit 0  (40 workflows, 25 production secret refs, 0 failures)
+Federation docs                        node scripts/check-federation-docs.mjs         -> exit 0
+Frozen install (established mode)      pnpm install --frozen-lockfile --ignore-scripts -> exit 0
+  (bare --frozen-lockfile fails on the PRE-EXISTING macOS PEP 668 postinstall
+   issue; P04 adds zero dependencies — package.json and pnpm-lock.yaml are
+   untouched — so per the authorization this is not a P04 regression. The
+   --ignore-scripts mode is the P02/P03-established deterministic mode.)
+
+Residue (bounded, delta-based per DEF-013):
+  ps -axwwE marked processes           0 real (2 raw hits were the grep's own argv — self-match, classified)
+  .ci-verify/lanes                     0 lock dirs
+  .ci-verify/exec                      absent (all executor test runs used isolated scratch roots)
+  .ci-verify/runs                      2 dirs PRE-DATING P04 entry (pids 22880/53536, earlier sessions);
+                                       P04's own snapshot runs (pid 73656+) both disposed -> P04 delta = 0
+  held ports                           0 (heldPorts() drained in-suite)
+
+Unrelated working tree: 25 entries at start, 25 at end, fingerprint files
+byte-IDENTICAL (docs/verification/evidence/p04/unrelated-fingerprint-{start,end}.txt),
+including the historically self-mutating .claude/scripts/bootstrap-gstack.sh
+(709c1a75 at both ends). Zero unrelated mutations during P04.

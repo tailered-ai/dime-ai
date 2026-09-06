@@ -1,0 +1,2 @@
+[conformance] FAIL
+  - CONTRACT_DRIFT: .github/workflows/05-workflow-security.yml changed without contract regeneration (contract c40e7194b599, actual 7bf7f454f7fa)
