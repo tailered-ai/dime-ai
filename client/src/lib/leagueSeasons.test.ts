@@ -14,13 +14,24 @@ describe("leagueSeasons", () => {
   });
 
   it("offers NCAAF, NHL, and NBA through the winter, without MLB", () => {
-    expect(inSeasonLeagues("2026-01-15")).toEqual(["NCAAF", "NHL", "NBA"]);
-    expect(inSeasonLeagues("2025-12-25")).toEqual(["NCAAF", "NHL", "NBA"]);
+    expect(inSeasonLeagues("2026-01-15")).toEqual([
+      "NCAAF",
+      "NFL",
+      "NHL",
+      "NBA",
+    ]);
+    expect(inSeasonLeagues("2025-12-25")).toEqual([
+      "NCAAF",
+      "NFL",
+      "NHL",
+      "NBA",
+    ]);
   });
 
   it("overlaps all four leagues in late October (World Series window)", () => {
     expect(inSeasonLeagues("2026-10-20")).toEqual([
       "NCAAF",
+      "NFL",
       "MLB",
       "NHL",
       "NBA",

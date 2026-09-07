@@ -31,6 +31,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { FeedToolbar } from "@/components/feed/FeedToolbar";
 import { DEFAULT_FEED_FILTERS, easternToday, feedFilterOptions, filterFeedItems, isValidFeedDate, type FeedFilters } from "@/lib/feedNavigation";
 import { ProjectionCard } from "@/components/projections/ProjectionCard";
+import { FootballFreshness } from "@/components/FootballFreshness";
+import type { FootballMarketState } from "@shared/footballMarkets";
 import { presentationToProjectionGame } from "@/components/projections/fromPresentation";
 import {
   mlbLineupToProjectionPregame,
@@ -53,7 +55,7 @@ import {
   EDGE_THRESHOLD_PP,
   type ThreeWayOdds,
 } from "@/lib/edgeUtils";
-import { feedModelPath, bettingSplitsPath, toFeedSlugDate } from "@/lib/feedRoutes";
+import { feedModelPath, bettingSplitsPath, toFeedSlugDate, preserveFootballContext } from "@/lib/feedRoutes";
 import "./dimeModelFeed.css";
 
 // ─── Normalized card model (adapters below map tRPC rows into this) ─────────
@@ -93,6 +95,8 @@ interface FeedCardSpec {
   status: GameStatus;
   /** Numeric DB identity for batched source-specific reads. */
   sourceGameId?: number;
+  footballState?: FootballMarketState | null;
+  footballKickoff?: number | null;
   liveLabel?: string | null;
   timeLabel: string;
   away: TeamSpec;
@@ -430,7 +434,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
               (tablet/desktop have no bottom tab bar; non-owners never do) */}
           {!props.embeddedInShell && (
             <nav className="dmf-nav" aria-label="Dime surfaces">
-              <Link href={bettingSplitsPath(filters.league === "MLB" ? "MLB" : "NCAAF", isoDate)} className="dmf-navlink">Splits</Link>
+              <Link href={preserveFootballContext(bettingSplitsPath(filters.league === "MLB" ? "MLB" : filters.league === "NFL" ? "NFL" : "NCAAF", isoDate), feedModelPath("MLB", isoDate), search)} className="dmf-navlink">Splits</Link>
               <Link href="/chat" className="dmf-navlink">Chat</Link>
               <Link href="/profile" className="dmf-navlink">Profile</Link>
             </nav>
@@ -526,6 +530,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
                     return (
                       <ProjectionCard
                         key={g.id}
+                        sourceStatus={(section.key === "NCAAF" || section.key === "NFL") ? <FootballFreshness state={g.footballState} kickoff={g.footballKickoff} /> : undefined}
                         game={{
                           ...projectionGame,
                           modelPublished: g.modelPublished,
@@ -826,7 +831,7 @@ function footballRowToCard(g: MlbRow, league: "NCAAF" | "NFL"): FeedCardSpec {
   const basis = hasModel ? g.modelPriceBasis : null;
   const unknownBasis = hasModel && g.modelPriceBasis === null;
   const spreadComparable = awaySp != null && homeSp != null && !unknownBasis && (!basis || (basis.awaySpread === awaySp && basis.homeSpread === homeSp));
-  const spreadBookPrices = basis && spreadComparable ? g.modelBookPrices : null;
+  const spreadBookPrices = !g.footballMarketState?.an_dk && basis && spreadComparable ? g.modelBookPrices : null;
   const spread = twoWayCol(
     "Spread",
     { label: awaySp == null ? awayName : `${awayName} ${fmtLine(awaySp)}`, crest: awayCrest, book: n(spreadBookPrices?.awaySpreadOdds ?? g.awaySpreadOdds), model: M(n(g.modelAwaySpreadOdds)), modelLineLabel: basis ? fmtLine(basis.awaySpread) : undefined, comparable: spreadComparable },
@@ -837,7 +842,7 @@ function footballRowToCard(g: MlbRow, league: "NCAAF" | "NFL"): FeedCardSpec {
   const underBasis = basis?.underTotal ?? basis?.total;
   const overComparable = totalLine != null && !unknownBasis && (!basis || overBasis === totalLine);
   const underComparable = totalLine != null && !unknownBasis && (!basis || underBasis === totalLine);
-  const totalBookPrices = basis && overComparable && underComparable ? g.modelBookPrices : null;
+  const totalBookPrices = !g.footballMarketState?.an_dk && basis && overComparable && underComparable ? g.modelBookPrices : null;
   const total = twoWayCol(
     "Total",
     { label: totalLine == null ? "OVER" : `O ${totalLine}`, book: n(totalBookPrices?.overOdds ?? g.overOdds), model: M(n(g.modelOverOdds)), modelLineLabel: basis && overBasis != null ? `O ${overBasis}` : undefined, comparable: overComparable },
@@ -880,7 +885,7 @@ function footballRowToCard(g: MlbRow, league: "NCAAF" | "NFL"): FeedCardSpec {
   ml.rows.forEach((side, index) => {
     side.lineDisplay = { side: [awayName, homeName][index] };
   });
-  const markets = league === "NCAAF" && [n(g.awayML), n(g.homeML), M(n(g.modelAwayML)), M(n(g.modelHomeML))].every(value => value == null)
+  const markets = league === "NCAAF" && !g.footballScheduleId && [n(g.awayML), n(g.homeML), M(n(g.modelAwayML)), M(n(g.modelHomeML))].every(value => value == null)
     ? [spread, total]
     : [spread, total, ml];
   let best: BestPick | null = null;
@@ -889,6 +894,8 @@ function footballRowToCard(g: MlbRow, league: "NCAAF" | "NFL"): FeedCardSpec {
     id: String(g.id ?? `${awayAbbr}-${homeAbbr}-${g.gameDate ?? ""}-${g.startTimeEst ?? ""}`),
     status,
     sourceGameId: Number.isInteger(g.id) ? g.id : undefined,
+    footballState: g.footballMarketState,
+    footballKickoff: g.footballBinding?.kickoff,
     liveLabel: status === "live" ? `LIVE${g.gameClock ? ` · ${g.gameClock}` : ""}` : null,
     timeLabel: status === "suspended" ? "SUSPENDED" : status === "postponed" ? "POSTPONED" : status === "final" ? "FINAL" : formatGameTime(g.startTimeEst),
     away: { name: awayName, crest: awayCrest, score: ["live", "final", "suspended"].includes(status) && g.awayScore != null ? String(g.awayScore) : null },

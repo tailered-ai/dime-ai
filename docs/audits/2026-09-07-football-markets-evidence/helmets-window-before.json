@@ -1,0 +1,2268 @@
+{
+  "window": [
+    "2026-09-07",
+    "2026-09-08",
+    "2026-09-09",
+    "2026-09-10",
+    "2026-09-11",
+    "2026-09-12",
+    "2026-09-13"
+  ],
+  "noLogoFallbacks": true,
+  "leagues": [
+    {
+      "sport": "NCAAF",
+      "sourceUrl": "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=20260907-20260913&groups=80&limit=1000",
+      "receivedAt": 1788790215675,
+      "responseSha256": "903d1ff6c929c69a4a7d5a5dc107866b1e5b4d1e7517193e08647bed3f8400f8",
+      "gameCount": 87,
+      "unresolved": [],
+      "teams": [
+        {
+          "code": "AFA",
+          "id": 2005,
+          "name": "Air Force Falcons",
+          "games": [
+            "espn:ncaaf:2026:401864502"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-afa-v2.png",
+          "sha256": "ac63688a399a66c8e73655d70368c19a97b33986427b4d7cd9ccafdb1dd0672c",
+          "status": "helmet"
+        },
+        {
+          "code": "AKR",
+          "id": 2006,
+          "name": "Akron Zips",
+          "games": [
+            "espn:ncaaf:2026:401866412"
+          ],
+          "path": "/brand/ncaaf-helmets/akron-clean.png",
+          "sha256": "1c60481d25d7e129830c2124b351a324dd9d448cc1bf110b0fe409e53a681774",
+          "status": "helmet"
+        },
+        {
+          "code": "ALA",
+          "id": 333,
+          "name": "Alabama Crimson Tide",
+          "games": [
+            "espn:ncaaf:2026:401856674"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ala-v2.png",
+          "sha256": "d012896b6a0ece67acf9573ba69a49547e87ed47ac3fbb08b4f6e6d622a81888",
+          "status": "helmet"
+        },
+        {
+          "code": "ALST",
+          "id": 2011,
+          "name": "Alabama State Hornets",
+          "games": [
+            "espn:ncaaf:2026:401868326"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "APP",
+          "id": 2026,
+          "name": "App State Mountaineers",
+          "games": [
+            "espn:ncaaf:2026:401864571"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-app-v2.png",
+          "sha256": "896c7200ae180d6ff19d7088a25a8fa08c0776f18182f8d9114a96efb21d1890",
+          "status": "helmet"
+        },
+        {
+          "code": "ARIZ",
+          "id": 12,
+          "name": "Arizona Wildcats",
+          "games": [
+            "espn:ncaaf:2026:401856810"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ariz-v2.png",
+          "sha256": "b580b2a7eab7a3eb19655e7fe672e9cd86906d53fb604027efa6a1805185b178",
+          "status": "helmet"
+        },
+        {
+          "code": "ARK",
+          "id": 8,
+          "name": "Arkansas Razorbacks",
+          "games": [
+            "espn:ncaaf:2026:401856670"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ark-v2.png",
+          "sha256": "9abd09c1edf4a7335270a881037dcdab1b045a288d0b9ecedce7fe560924959c",
+          "status": "helmet"
+        },
+        {
+          "code": "ARMY",
+          "id": 349,
+          "name": "Army Black Knights",
+          "games": [
+            "espn:ncaaf:2026:401862702"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-army-v2.png",
+          "sha256": "ec358c62e46802bd90038b510362e6ab760a22f92b7516c286a0db11f17c307d",
+          "status": "helmet"
+        },
+        {
+          "code": "ARST",
+          "id": 2032,
+          "name": "Arkansas State Red Wolves",
+          "games": [
+            "espn:ncaaf:2026:401868241"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-arst-v2.png",
+          "sha256": "c8faa8de187bfa48753f97ee2d00fbfdd91d967d5a3d03238c85338cb2e58af5",
+          "status": "helmet"
+        },
+        {
+          "code": "ASU",
+          "id": 9,
+          "name": "Arizona State Sun Devils",
+          "games": [
+            "espn:ncaaf:2026:401856683"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-asu-v2.png",
+          "sha256": "15717b8f649efc0ec53417644be029b58f46d48959e8291aae3167092a938681",
+          "status": "helmet"
+        },
+        {
+          "code": "AUB",
+          "id": 2,
+          "name": "Auburn Tigers",
+          "games": [
+            "espn:ncaaf:2026:401856671"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-aub-v2.png",
+          "sha256": "ecc543bae2b43526b6807208830844740fff70e086afbdf406c0a0eed9cdec9b",
+          "status": "helmet"
+        },
+        {
+          "code": "BALL",
+          "id": 2050,
+          "name": "Ball State Cardinals",
+          "games": [
+            "espn:ncaaf:2026:401866413"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ball-v2.png",
+          "sha256": "4bcee96dd5ffc197b515f0c07d2b223a1ddb90f931b1557e17f3c29e7f162169",
+          "status": "helmet"
+        },
+        {
+          "code": "BAY",
+          "id": 239,
+          "name": "Baylor Bears",
+          "games": [
+            "espn:ncaaf:2026:401856784"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-bay-v2.png",
+          "sha256": "4cebd45e7e9a4303684a2ea2a69a535c2edaa586aa2d5572c4704293dc8444b2",
+          "status": "helmet"
+        },
+        {
+          "code": "BC",
+          "id": 103,
+          "name": "Boston College Eagles",
+          "games": [
+            "espn:ncaaf:2026:401858214"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-bc-v2.png",
+          "sha256": "afefb99bf37f670bba4c4cbd8dfddbea65cba051a25a87c33417e33e9bc96bf1",
+          "status": "helmet"
+        },
+        {
+          "code": "BGSU",
+          "id": 189,
+          "name": "Bowling Green Falcons",
+          "games": [
+            "espn:ncaaf:2026:401858441"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-bgsu-v2.png",
+          "sha256": "d99aa7e8e99d02db88ab29c0d92e6f54e74e38d20e6ed6a44cf48b5c325b26ce",
+          "status": "helmet"
+        },
+        {
+          "code": "BOIS",
+          "id": 68,
+          "name": "Boise State Broncos",
+          "games": [
+            "espn:ncaaf:2026:401860881"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-bois-v2.png",
+          "sha256": "4081bab207a5cb7bb3a86bce97032bee22897f37e2e008705547f05aea262cbe",
+          "status": "helmet"
+        },
+        {
+          "code": "BUFF",
+          "id": 2084,
+          "name": "Buffalo Bulls",
+          "games": [
+            "espn:ncaaf:2026:401866414"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "BYU",
+          "id": 252,
+          "name": "BYU Cougars",
+          "games": [
+            "espn:ncaaf:2026:401856810"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-byu-v2.png",
+          "sha256": "1fe95554dc1d6be9b798f977f03c19d8f551b1a4ba2e44e0476ca34818083acf",
+          "status": "helmet"
+        },
+        {
+          "code": "CAL",
+          "id": 25,
+          "name": "California Golden Bears",
+          "games": [
+            "espn:ncaaf:2026:401858216"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-cal-v2.png",
+          "sha256": "68b439392ea7fd82f5c95e7c83fb423ef641a291d7bdbe846295a9537c1f4e99",
+          "status": "helmet"
+        },
+        {
+          "code": "CAM",
+          "id": 2097,
+          "name": "Campbell Fighting Camels",
+          "games": [
+            "espn:ncaaf:2026:401856672"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "CCSU",
+          "id": 2115,
+          "name": "Central Connecticut Blue Devils",
+          "games": [
+            "espn:ncaaf:2026:401866419"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "CCU",
+          "id": 324,
+          "name": "Coastal Carolina Chanticleers",
+          "games": [
+            "espn:ncaaf:2026:401868008"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ccu-v2.png",
+          "sha256": "fca6526d48329e5a54bed4be9ac5e6b6b1c77e92e6d941a9d342ace10d40b972",
+          "status": "helmet"
+        },
+        {
+          "code": "CIN",
+          "id": 2132,
+          "name": "Cincinnati Bearcats",
+          "games": [
+            "espn:ncaaf:2026:401856786"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-cin-v2.png",
+          "sha256": "efb735a1d7079db40ed510eb49cf845e15deeacdd83f23d2f8f23c8801e1657e",
+          "status": "helmet"
+        },
+        {
+          "code": "CLEM",
+          "id": 228,
+          "name": "Clemson Tigers",
+          "games": [
+            "espn:ncaaf:2026:401858219"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-clem-v2.png",
+          "sha256": "41e8fb0ec4ea31dfb6117409b28d264dab2af312fe6cbf5590f4027442d43951",
+          "status": "helmet"
+        },
+        {
+          "code": "CLT",
+          "id": 2429,
+          "name": "Charlotte 49ers",
+          "games": [
+            "espn:ncaaf:2026:401856676"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-clt-v2.png",
+          "sha256": "25a6e7eadbfd227fcc875d71a9885df9785ffdb7fd42573487363a6f3f1ce0a8",
+          "status": "helmet"
+        },
+        {
+          "code": "CMU",
+          "id": 2117,
+          "name": "Central Michigan Chippewas",
+          "games": [
+            "espn:ncaaf:2026:401866415"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-cmu-v2.png",
+          "sha256": "9f12060c941f5a3c058c515b3c15930f8ff6e6dc1649aae7a184bb430b1e59bd",
+          "status": "helmet"
+        },
+        {
+          "code": "COLG",
+          "id": 2142,
+          "name": "Colgate Raiders",
+          "games": [
+            "espn:ncaaf:2026:401866415"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "COLO",
+          "id": 38,
+          "name": "Colorado Buffaloes",
+          "games": [
+            "espn:ncaaf:2026:401856785"
+          ],
+          "path": "/brand/ncaaf-helmets/colorado-clean.png",
+          "sha256": "c01b18265875dd8b280812dba6f874aa6ad62edf06295ed0c06c9608fac35b83",
+          "status": "helmet"
+        },
+        {
+          "code": "CONN",
+          "id": 41,
+          "name": "UConn Huskies",
+          "games": [
+            "espn:ncaaf:2026:401858444"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-conn-v2.png",
+          "sha256": "8e1dc01be92173df9b7942dd2b41e1b5bcb987c2abda732fd69f99a18885a41a",
+          "status": "helmet"
+        },
+        {
+          "code": "CP",
+          "id": 13,
+          "name": "Cal Poly Mustangs",
+          "games": [
+            "espn:ncaaf:2026:401864504"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "CSU",
+          "id": 36,
+          "name": "Colorado State Rams",
+          "games": [
+            "espn:ncaaf:2026:401860882"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-csu-v2.png",
+          "sha256": "f18a624cb2cfd65c1b0c825c513a7c6cef60dc76b0dd61d837cb9ba5bdcc3e2f",
+          "status": "helmet"
+        },
+        {
+          "code": "DEL",
+          "id": 48,
+          "name": "Delaware Blue Hens",
+          "games": [
+            "espn:ncaaf:2026:401856684"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "DUKE",
+          "id": 150,
+          "name": "Duke Blue Devils",
+          "games": [
+            "espn:ncaaf:2026:401858217"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-duke-v2.png",
+          "sha256": "744e4d6c45c4176d51c593a5aa8d34de2e4a5d25fcace1a7176802489666b563",
+          "status": "helmet"
+        },
+        {
+          "code": "ECU",
+          "id": 151,
+          "name": "East Carolina Pirates",
+          "games": [
+            "espn:ncaaf:2026:401864571"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ecu-v2.png",
+          "sha256": "9c8f5da726ec7619b808a90e115f2a441ff9afdfef1167272444e7ed1656539d",
+          "status": "helmet"
+        },
+        {
+          "code": "EMU",
+          "id": 2199,
+          "name": "Eastern Michigan Eagles",
+          "games": [
+            "espn:ncaaf:2026:401858440"
+          ],
+          "path": "/brand/ncaaf-helmets/eastern-michigan-clean.png",
+          "sha256": "d8291cc2133636af3d2dec22bd43fb71105e81d8ffcb26f878b2199e147d1fd4",
+          "status": "helmet"
+        },
+        {
+          "code": "ETSU",
+          "id": 2193,
+          "name": "East Tennessee State Buccaneers",
+          "games": [
+            "espn:ncaaf:2026:401858218"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "FAMU",
+          "id": 50,
+          "name": "Florida A&M Rattlers",
+          "games": [
+            "espn:ncaaf:2026:401858213"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "FAU",
+          "id": 2226,
+          "name": "Florida Atlantic Owls",
+          "games": [
+            "espn:ncaaf:2026:401862703"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-fau-v2.png",
+          "sha256": "9f7d02667169e6ed6feb61665a6f8488d11810f4c557ac01c3153bf5d658a6e9",
+          "status": "helmet"
+        },
+        {
+          "code": "FIU",
+          "id": 2229,
+          "name": "Florida International Panthers",
+          "games": [
+            "espn:ncaaf:2026:401866414"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-fiu-v2.png",
+          "sha256": "65362626042d34571a00e4e2900985820950568540af011479122473938b626f",
+          "status": "helmet"
+        },
+        {
+          "code": "FLA",
+          "id": 57,
+          "name": "Florida Gators",
+          "games": [
+            "espn:ncaaf:2026:401856672"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-fla-v2.png",
+          "sha256": "7cf66b18677bc4f14c1a3478edf68d99b799f641aecafaf57602de1cffbd972b",
+          "status": "helmet"
+        },
+        {
+          "code": "FOR",
+          "id": 2230,
+          "name": "Fordham Rams",
+          "games": [
+            "espn:ncaaf:2026:401868008"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-for-v2.png",
+          "sha256": "a83dcf18a09fa6a71b45d596db2365164544ff97e05eba609690274f1834e253",
+          "status": "helmet"
+        },
+        {
+          "code": "FRES",
+          "id": 278,
+          "name": "Fresno State Bulldogs",
+          "games": [
+            "espn:ncaaf:2026:401860883"
+          ],
+          "path": "/brand/ncaaf-helmets/fresno-state-clean.png",
+          "sha256": "b0d9b5c5a2967240fd823fbafa1cbd09736bde1bf83ef5c3e94ad64d71aaeb32",
+          "status": "helmet"
+        },
+        {
+          "code": "FSU",
+          "id": 52,
+          "name": "Florida State Seminoles",
+          "games": [
+            "espn:ncaaf:2026:401858212"
+          ],
+          "path": "/brand/ncaaf-helmets/sept7-fsu.png",
+          "sha256": "55b2c5a0aa540d7cf1f4cb8c473c6b99f05d9ed2374a11b7b1c2c59f0d6afa60",
+          "status": "helmet"
+        },
+        {
+          "code": "GASO",
+          "id": 290,
+          "name": "Georgia Southern Eagles",
+          "games": [
+            "espn:ncaaf:2026:401858219"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-gaso-v2.png",
+          "sha256": "a64ca3bd88422bf7b4a98456bd55305128a42f1799a60258556e7f11a2551917",
+          "status": "helmet"
+        },
+        {
+          "code": "GAST",
+          "id": 2247,
+          "name": "Georgia State Panthers",
+          "games": [
+            "espn:ncaaf:2026:401869955"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "GRAM",
+          "id": 2755,
+          "name": "Grambling Tigers",
+          "games": [
+            "espn:ncaaf:2026:401856789"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "GT",
+          "id": 59,
+          "name": "Georgia Tech Yellow Jackets",
+          "games": [
+            "espn:ncaaf:2026:401856681"
+          ],
+          "path": "/brand/ncaaf-helmets/georgia-tech-clean.png",
+          "sha256": "f892c2c790f0aff3ae5a14f7034b96a261c933b8223665ddaa6150f1c770eb88",
+          "status": "helmet"
+        },
+        {
+          "code": "GWEB",
+          "id": 2241,
+          "name": "Gardner-Webb Runnin' Bulldogs",
+          "games": [
+            "espn:ncaaf:2026:401868187"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "HAW",
+          "id": 62,
+          "name": "Hawai'i Rainbow Warriors",
+          "games": [
+            "espn:ncaaf:2026:401864578"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-haw-v2.png",
+          "sha256": "d023aa71be29b5e25d6d8ec59183a0bda5d353ccb3c9625380f8a628b6844a15",
+          "status": "helmet"
+        },
+        {
+          "code": "HC",
+          "id": 107,
+          "name": "Holy Cross Crusaders",
+          "games": [
+            "espn:ncaaf:2026:401866417"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "HOU",
+          "id": 248,
+          "name": "Houston Cougars",
+          "games": [
+            "espn:ncaaf:2026:401856787"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-hou-v2.png",
+          "sha256": "a2dd95e485b1344e4973ecc47232290b9f1c24f9c6a7af840af6891b7daf3b3f",
+          "status": "helmet"
+        },
+        {
+          "code": "HOW",
+          "id": 47,
+          "name": "Howard Bison",
+          "games": [
+            "espn:ncaaf:2026:401858439"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "ILL",
+          "id": 356,
+          "name": "Illinois Fighting Illini",
+          "games": [
+            "espn:ncaaf:2026:401858217"
+          ],
+          "path": "/brand/ncaaf-helmets/illinois-clean.png",
+          "sha256": "aa41d6ee96e73715b973dfbf9b518213c8e1c41651580e0b14df0c0abe2231e8",
+          "status": "helmet"
+        },
+        {
+          "code": "ILST",
+          "id": 2287,
+          "name": "Illinois State Redbirds",
+          "games": [
+            "espn:ncaaf:2026:401864503"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "IOWA",
+          "id": 2294,
+          "name": "Iowa Hawkeyes",
+          "games": [
+            "espn:ncaaf:2026:401856788"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-iowa-v2.png",
+          "sha256": "deaa59d3c13003daa89888fca123ceb1ec21799c77abfe2494cc7e7087c3101a",
+          "status": "helmet"
+        },
+        {
+          "code": "ISU",
+          "id": 66,
+          "name": "Iowa State Cyclones",
+          "games": [
+            "espn:ncaaf:2026:401856788"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-isu-v2.png",
+          "sha256": "6705209cd209f354e3798f7a0be58083678d53a82c83b05e99aa98630f0eb818",
+          "status": "helmet"
+        },
+        {
+          "code": "IU",
+          "id": 84,
+          "name": "Indiana Hoosiers",
+          "games": [
+            "espn:ncaaf:2026:401858439"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-iu-v2.png",
+          "sha256": "461a0d98f1dec1c62e3a74efe5be758f041c9125c152a4d6cfe31c0022972eef",
+          "status": "helmet"
+        },
+        {
+          "code": "JMU",
+          "id": 256,
+          "name": "James Madison Dukes",
+          "games": [
+            "espn:ncaaf:2026:401867929"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-jmu-v2.png",
+          "sha256": "6f663ec51df0acfe8ad237269e214c10b51f82a6fc702e4251213712be22f7b0",
+          "status": "helmet"
+        },
+        {
+          "code": "JVST",
+          "id": 55,
+          "name": "Jacksonville State Gamecocks",
+          "games": [
+            "espn:ncaaf:2026:401866418"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-jvst-v2.png",
+          "sha256": "a46cb79f220570d9c3b62923a7e69f2352b8d213ebbd409b0f08481a73996d15",
+          "status": "helmet"
+        },
+        {
+          "code": "KENN",
+          "id": 338,
+          "name": "Kennesaw State Owls",
+          "games": [
+            "espn:ncaaf:2026:401869955"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "KENT",
+          "id": 2309,
+          "name": "Kent State Golden Flashes",
+          "games": [
+            "espn:ncaaf:2026:401866416"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-kent-v2.png",
+          "sha256": "7ed531b0399f6594b1170f33134d231d2d9eefbbed69c51a26c19f0692d091c1",
+          "status": "helmet"
+        },
+        {
+          "code": "KSU",
+          "id": 2306,
+          "name": "Kansas State Wildcats",
+          "games": [
+            "espn:ncaaf:2026:401856781"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ksu-v2.png",
+          "sha256": "6cd344b417b49757b7b957840e8458595852e44be44d3dd254a81af3bd6ccaba",
+          "status": "helmet"
+        },
+        {
+          "code": "KU",
+          "id": 2305,
+          "name": "Kansas Jayhawks",
+          "games": [
+            "espn:ncaaf:2026:401856678"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "LIB",
+          "id": 2335,
+          "name": "Liberty Flames",
+          "games": [
+            "espn:ncaaf:2026:401868187"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-lib-v2.png",
+          "sha256": "8db7766919b0f435e2c96efb4252ee3f25ec377af1fe7c421d10c2809e0b6fc2",
+          "status": "helmet"
+        },
+        {
+          "code": "LIN",
+          "id": 2815,
+          "name": "Lindenwood Lions",
+          "games": [
+            "espn:ncaaf:2026:401871046"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "LOU",
+          "id": 97,
+          "name": "Louisville Cardinals",
+          "games": [
+            "espn:ncaaf:2026:401858215"
+          ],
+          "path": "/brand/ncaaf-helmets/sept6-louisville.png",
+          "sha256": "14b6e5a110d5bf6dcacb7d048777ebfdbf23af0927190fccfd5b893c3a2045db",
+          "status": "helmet"
+        },
+        {
+          "code": "LSU",
+          "id": 99,
+          "name": "LSU Tigers",
+          "games": [
+            "espn:ncaaf:2026:401867796"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-lsu-v2.png",
+          "sha256": "65cb3ec8bfe85b445dacce68650c76d69640aa64a0d55601088ed8bcbd183db2",
+          "status": "helmet"
+        },
+        {
+          "code": "LT",
+          "id": 2348,
+          "name": "Louisiana Tech Bulldogs",
+          "games": [
+            "espn:ncaaf:2026:401867796"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-lt-v2.png",
+          "sha256": "6875e3f00aaa05e87adafc91003777a127a563880cea578cd7d4493db9aa74b9",
+          "status": "helmet"
+        },
+        {
+          "code": "M-OH",
+          "id": 193,
+          "name": "Miami (OH) RedHawks",
+          "games": [
+            "espn:ncaaf:2026:401866417"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-m-oh-v2.png",
+          "sha256": "74bb9c3fdbddb680ca50f450a73b106481cb7b692aa32a994da3e2d997ee2418",
+          "status": "helmet"
+        },
+        {
+          "code": "MASS",
+          "id": 113,
+          "name": "Massachusetts Minutemen",
+          "games": [
+            "espn:ncaaf:2026:401866420"
+          ],
+          "path": "/brand/ncaaf-helmets/mass-clean.png",
+          "sha256": "ff82f2cf962415bffeccba06f055927fb70b24757dd24f97606432afbced1ca5",
+          "status": "helmet"
+        },
+        {
+          "code": "MD",
+          "id": 120,
+          "name": "Maryland Terrapins",
+          "games": [
+            "espn:ncaaf:2026:401858444"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-md-v2.png",
+          "sha256": "93fcc39006ec6ffd8c86946cfcbac107754d7826eb7f0a43bd5eb21131a095a0",
+          "status": "helmet"
+        },
+        {
+          "code": "MEM",
+          "id": 235,
+          "name": "Memphis Tigers",
+          "games": [
+            "espn:ncaaf:2026:401860881"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-mem-v2.png",
+          "sha256": "a98e7f274e2723184d4e171106355df640310a7370cde3c1ca2b2043ed64eb56",
+          "status": "helmet"
+        },
+        {
+          "code": "MERC",
+          "id": 2385,
+          "name": "Mercyhurst Lakers",
+          "games": [
+            "espn:ncaaf:2026:401865252"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-merc-v2.png",
+          "sha256": "7928772ea9dde2dfdf574fbf513d171fa98c0791d73dfb1ce6bbbbb4d88beed0",
+          "status": "helmet"
+        },
+        {
+          "code": "MIA",
+          "id": 2390,
+          "name": "Miami Hurricanes",
+          "games": [
+            "espn:ncaaf:2026:401858213"
+          ],
+          "path": "/brand/ncaaf-helmets/miami-clean.png",
+          "sha256": "5f9d95ef325d67aebf8bdbc80a64106e0e4b1f9de1ed8d4bcb2bec5f29f8b817",
+          "status": "helmet"
+        },
+        {
+          "code": "MICH",
+          "id": 130,
+          "name": "Michigan Wolverines",
+          "games": [
+            "espn:ncaaf:2026:401856679"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-mich-v2.png",
+          "sha256": "27d7b8689a6ff77d67072022f114a9192822d70ab7c110f2fe0cab3c770d8d1d",
+          "status": "helmet"
+        },
+        {
+          "code": "MINN",
+          "id": 135,
+          "name": "Minnesota Golden Gophers",
+          "games": [
+            "espn:ncaaf:2026:401856677"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "MISS",
+          "id": 145,
+          "name": "Ole Miss Rebels",
+          "games": [
+            "espn:ncaaf:2026:401856676"
+          ],
+          "path": "/brand/ncaaf-helmets/sept6-ole-miss.png",
+          "sha256": "0246372b76303362931bb9b43175a1e00655a0884218448c13eb71dbe0797e08",
+          "status": "helmet"
+        },
+        {
+          "code": "MIZ",
+          "id": 142,
+          "name": "Missouri Tigers",
+          "games": [
+            "espn:ncaaf:2026:401856678"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "MONM",
+          "id": 2405,
+          "name": "Monmouth Hawks",
+          "games": [
+            "espn:ncaaf:2026:401866421"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "MOST",
+          "id": 2623,
+          "name": "Missouri State Bears",
+          "games": [
+            "espn:ncaaf:2026:401871046"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-most-v2.png",
+          "sha256": "07934802a0ac1c8cb24781e20c737022a30150d035b30ac1604ee713f473abeb",
+          "status": "helmet"
+        },
+        {
+          "code": "MRSH",
+          "id": 276,
+          "name": "Marshall Thundering Herd",
+          "games": [
+            "espn:ncaaf:2026:401871045"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-mrsh-v2.png",
+          "sha256": "c12846b2daec459071b82def917508b63229cb28c08a0a81b4498f0627c9bf23",
+          "status": "helmet"
+        },
+        {
+          "code": "MSST",
+          "id": 344,
+          "name": "Mississippi State Bulldogs",
+          "games": [
+            "espn:ncaaf:2026:401856677"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-msst-v2.png",
+          "sha256": "6e64252daa6f9bc2ae7f6f2cbd2a5b4e982338b19f9a0427b51b9c49e92f8a23",
+          "status": "helmet"
+        },
+        {
+          "code": "MSU",
+          "id": 127,
+          "name": "Michigan State Spartans",
+          "games": [
+            "espn:ncaaf:2026:401858440"
+          ],
+          "path": "/brand/ncaaf-helmets/michigan-state-clean.png",
+          "sha256": "05ed4d95e4288ecc8a1beb0423107e5bdf613e8321f89cdd81a956ca4e0f834c",
+          "status": "helmet"
+        },
+        {
+          "code": "MTST",
+          "id": 147,
+          "name": "Montana State Bobcats",
+          "games": [
+            "espn:ncaaf:2026:401864500"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "MTSU",
+          "id": 2393,
+          "name": "Middle Tennessee Blue Raiders",
+          "games": [
+            "espn:ncaaf:2026:401871045"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-mtsu-v2.png",
+          "sha256": "aea7ede692cf3ab1a1a800e905731f21d9e3f14038f6b969f37af3715232ed13",
+          "status": "helmet"
+        },
+        {
+          "code": "NAVY",
+          "id": 2426,
+          "name": "Navy Midshipmen",
+          "games": [
+            "espn:ncaaf:2026:401862703"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-navy-v2.png",
+          "sha256": "76e71e62a718720b6f8321fce26f1387db09efc93dc0e41988a203595b3ea551",
+          "status": "helmet"
+        },
+        {
+          "code": "NCSU",
+          "id": 152,
+          "name": "NC State Wolfpack",
+          "games": [
+            "espn:ncaaf:2026:401858222"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "ND",
+          "id": 87,
+          "name": "Notre Dame Fighting Irish",
+          "games": [
+            "espn:ncaaf:2026:401859184"
+          ],
+          "path": "/brand/ncaaf-helmets/sept6-notre-dame.png",
+          "sha256": "352736eeddb124940103c89ff3ad57c62a42168163fe191519d44d178837876c",
+          "status": "helmet"
+        },
+        {
+          "code": "NDSU",
+          "id": 2449,
+          "name": "North Dakota State Bison",
+          "games": [
+            "espn:ncaaf:2026:401864502"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ndsu-v2.png",
+          "sha256": "7d26cfcbc3ebe8601b993242d7efcbbb64ed8bb5b1f91600fb279b8eca433b10",
+          "status": "helmet"
+        },
+        {
+          "code": "NEB",
+          "id": 158,
+          "name": "Nebraska Cornhuskers",
+          "games": [
+            "espn:ncaaf:2026:401858441"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-neb-v2.png",
+          "sha256": "76ff5cffd4426579dc790475112f65b49e5ad58975ed791291a3ab9d61f366d3",
+          "status": "helmet"
+        },
+        {
+          "code": "NEV",
+          "id": 2440,
+          "name": "Nevada Wolf Pack",
+          "games": [
+            "espn:ncaaf:2026:401864500"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-nev-v2.png",
+          "sha256": "77ae940677aa96149a4c18b8ed775b09f395de834badc8853bc6aac8c048593f",
+          "status": "helmet"
+        },
+        {
+          "code": "NIU",
+          "id": 2459,
+          "name": "Northern Illinois Huskies",
+          "games": [
+            "espn:ncaaf:2026:401864503"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-niu-v2.png",
+          "sha256": "b24ce77edb1add6d71752969135fbb4f39fbf1b0ce6b552342886aa2bdc7c793",
+          "status": "helmet"
+        },
+        {
+          "code": "NMSU",
+          "id": 166,
+          "name": "New Mexico State Aggies",
+          "games": [
+            "espn:ncaaf:2026:401864578"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-nmsu-v2.png",
+          "sha256": "8a7974fbead885326b3161f07c5f671013552a8406a77f5748910808e434e50a",
+          "status": "helmet"
+        },
+        {
+          "code": "NORF",
+          "id": 2450,
+          "name": "Norfolk State Spartans",
+          "games": [
+            "espn:ncaaf:2026:401858220"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-norf-v2.png",
+          "sha256": "31c7178143be2263321e1f01b1d2fe05a34d8b07f7567c69cecb763d134d8da8",
+          "status": "helmet"
+        },
+        {
+          "code": "ODU",
+          "id": 295,
+          "name": "Old Dominion Monarchs",
+          "games": [
+            "espn:ncaaf:2026:401858221"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-odu-v2.png",
+          "sha256": "61d63e5df154125e1ad4dc8aecfd8dfe4563023ad21771a7306570ec3c658af2",
+          "status": "helmet"
+        },
+        {
+          "code": "OHIO",
+          "id": 195,
+          "name": "Ohio Bobcats",
+          "games": [
+            "espn:ncaaf:2026:401866418"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ohio-v2.png",
+          "sha256": "7c0bcdc2b0440fb310ec69fb516aa34c65ab656d1de6b80bc74c7e5e70eee446",
+          "status": "helmet"
+        },
+        {
+          "code": "OKST",
+          "id": 197,
+          "name": "Oklahoma State Cowboys",
+          "games": [
+            "espn:ncaaf:2026:401856782"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-okst-v2.png",
+          "sha256": "78965f3fd617c3b5c3720abcd6cd6ab5e4e3ad0ba942ca1734e4957a2938bf43",
+          "status": "helmet"
+        },
+        {
+          "code": "ORE",
+          "id": 2483,
+          "name": "Oregon Ducks",
+          "games": [
+            "espn:ncaaf:2026:401856782"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ore-v2.png",
+          "sha256": "3badd220b4923e3d6aaf7c44e2711e2e60cce85a726a28c1fbd8ed652e4750f7",
+          "status": "helmet"
+        },
+        {
+          "code": "ORST",
+          "id": 204,
+          "name": "Oregon State Beavers",
+          "games": [
+            "espn:ncaaf:2026:401856783"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-orst-v2.png",
+          "sha256": "86e11c953f6ef246243b4355b4d8635eb7a2c74cb8d10ca8b85d581993982998",
+          "status": "helmet"
+        },
+        {
+          "code": "OSU",
+          "id": 194,
+          "name": "Ohio State Buckeyes",
+          "games": [
+            "espn:ncaaf:2026:401856682"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-osu-v2.png",
+          "sha256": "7d520434d9ed3890206c3a01f01969c2a7a5c7b2f2e619efb379787757488e0f",
+          "status": "helmet"
+        },
+        {
+          "code": "OU",
+          "id": 201,
+          "name": "Oklahoma Sooners",
+          "games": [
+            "espn:ncaaf:2026:401856679"
+          ],
+          "path": "/brand/ncaaf-helmets/oklahoma-clean.png",
+          "sha256": "585ad4b9f51e5368a4e3760a26449c06971844fdb1ffef2e6d89b0a3ce9b4860",
+          "status": "helmet"
+        },
+        {
+          "code": "PITT",
+          "id": 221,
+          "name": "Pittsburgh Panthers",
+          "games": [
+            "espn:ncaaf:2026:401856790"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-pitt-v2.png",
+          "sha256": "f91456e3b209c4afaebd4093e35f185bc403bed2e6272447caa2be5f9352ef42",
+          "status": "helmet"
+        },
+        {
+          "code": "PSU",
+          "id": 213,
+          "name": "Penn State Nittany Lions",
+          "games": [
+            "espn:ncaaf:2026:401858442"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-psu-v2.png",
+          "sha256": "a74c5b2c9cd29e5801d8dbccb0194744a2a3c4b47a08672c034632a9e5bfdbf3",
+          "status": "helmet"
+        },
+        {
+          "code": "PUR",
+          "id": 2509,
+          "name": "Purdue Boilermakers",
+          "games": [
+            "espn:ncaaf:2026:401858224"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "PV",
+          "id": 2504,
+          "name": "Prairie View A&M Panthers",
+          "games": [
+            "espn:ncaaf:2026:401856784"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "RICE",
+          "id": 242,
+          "name": "Rice Owls",
+          "games": [
+            "espn:ncaaf:2026:401859184"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-rice-v2.png",
+          "sha256": "744d3f3d743d0c248a171ca9585d8371f891ec6f5f91c3dfcc1cd8cdbb6fdfdf",
+          "status": "helmet"
+        },
+        {
+          "code": "RICH",
+          "id": 257,
+          "name": "Richmond Spiders",
+          "games": [
+            "espn:ncaaf:2026:401858222"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "RMU",
+          "id": 2523,
+          "name": "Robert Morris Colonials",
+          "games": [
+            "espn:ncaaf:2026:401866412"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "RUTG",
+          "id": 164,
+          "name": "Rutgers Scarlet Knights",
+          "games": [
+            "espn:ncaaf:2026:401858214"
+          ],
+          "path": "/brand/ncaaf-helmets/rutgers-clean.png",
+          "sha256": "88dd2af578fff043418e84b9c37099cd3d99f8db4e709ccf394dd7d04cefdff1",
+          "status": "helmet"
+        },
+        {
+          "code": "SAC",
+          "id": 16,
+          "name": "Sacramento State Hornets",
+          "games": [
+            "espn:ncaaf:2026:401860883"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-sac-v2.png",
+          "sha256": "3809e6c44affd2da078833536df417a95ab71cbdbe07d5e606279289736ace02",
+          "status": "helmet"
+        },
+        {
+          "code": "SC",
+          "id": 2579,
+          "name": "South Carolina Gamecocks",
+          "games": [
+            "espn:ncaaf:2026:401856680"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-sc-v2.png",
+          "sha256": "78c50c2b8a7dfc93d1cc77537adc81be033ecafac722aa9d388e6a4712df3567",
+          "status": "helmet"
+        },
+        {
+          "code": "SDSU",
+          "id": 21,
+          "name": "San Diego State Aztecs",
+          "games": [
+            "espn:ncaaf:2026:401858443"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-sdsu-v2.png",
+          "sha256": "5f8f46633dceaf40da9ea45453494f0bfad117e9a74b683fa0ce0af149304e35",
+          "status": "helmet"
+        },
+        {
+          "code": "SHSU",
+          "id": 2534,
+          "name": "Sam Houston Bearkats",
+          "games": [
+            "espn:ncaaf:2026:401862707"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-shsu-v2.png",
+          "sha256": "31602e77ffc6dd7cb2c6c7f4915ca091298cfab70734d656e3278e61a8dcb7eb",
+          "status": "helmet"
+        },
+        {
+          "code": "SHU",
+          "id": 2529,
+          "name": "Sacred Heart Pioneers",
+          "games": [
+            "espn:ncaaf:2026:401866420"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "SJSU",
+          "id": 23,
+          "name": "San José State Spartans",
+          "games": [
+            "espn:ncaaf:2026:401864504"
+          ],
+          "path": "/brand/ncaaf-helmets/san-jose-state-clean.png",
+          "sha256": "997503351ae8580592b2e3c28ee54b6e9024852ae4ba89fc74cb1e1732870c62",
+          "status": "helmet"
+        },
+        {
+          "code": "SMU",
+          "id": 2567,
+          "name": "SMU Mustangs",
+          "games": [
+            "espn:ncaaf:2026:401858212",
+            "espn:ncaaf:2026:401858223"
+          ],
+          "path": "/brand/ncaaf-helmets/sept7-smu.png",
+          "sha256": "3c3cbd97e112946e22b60d16916cf06fe1dccbbb0e5bac4cfe5dbb0ce5f11b78",
+          "status": "helmet"
+        },
+        {
+          "code": "SOU",
+          "id": 2582,
+          "name": "Southern Jaguars",
+          "games": [
+            "espn:ncaaf:2026:401856787"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "STBK",
+          "id": 2619,
+          "name": "Stony Brook Seawolves",
+          "games": [
+            "espn:ncaaf:2026:401866413"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "SUU",
+          "id": 253,
+          "name": "Southern Utah Thunderbirds",
+          "games": [
+            "espn:ncaaf:2026:401860882"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "SYR",
+          "id": 183,
+          "name": "Syracuse Orange",
+          "games": [
+            "espn:ncaaf:2026:401858216"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-syr-v2.png",
+          "sha256": "3c6f174a683bda262f97c12c52d1c64c4c55928c7ac8eee405581db0aa4e4f12",
+          "status": "helmet"
+        },
+        {
+          "code": "TA&M",
+          "id": 245,
+          "name": "Texas A&M Aggies",
+          "games": [
+            "espn:ncaaf:2026:401856683"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ta&m-v2.png",
+          "sha256": "8cb29f1c418f3a45060d29694714131da4d3efaf01df785e02c87dd4664e02f5",
+          "status": "helmet"
+        },
+        {
+          "code": "TCU",
+          "id": 2628,
+          "name": "TCU Horned Frogs",
+          "games": [
+            "espn:ncaaf:2026:401856789"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "TEM",
+          "id": 218,
+          "name": "Temple Owls",
+          "games": [
+            "espn:ncaaf:2026:401858442"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-tem-v2.png",
+          "sha256": "4460c9ca3dc13bd0f30ab90ee62c812277214afcb470471f94ba5e2f20791437",
+          "status": "helmet"
+        },
+        {
+          "code": "TENN",
+          "id": 2633,
+          "name": "Tennessee Volunteers",
+          "games": [
+            "espn:ncaaf:2026:401856681"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-tenn-v2.png",
+          "sha256": "3c4d3cebd30dd61289f0133cbd8d3215fa852f43625c18374e51f166113c4498",
+          "status": "helmet"
+        },
+        {
+          "code": "TEX",
+          "id": 251,
+          "name": "Texas Longhorns",
+          "games": [
+            "espn:ncaaf:2026:401856682"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-tex-v2.png",
+          "sha256": "8b818f0fcf1efb9a2e64358978b0aae7ae5a65b057c9f279d77428dddfee7bf6",
+          "status": "helmet"
+        },
+        {
+          "code": "TLSA",
+          "id": 202,
+          "name": "Tulsa Golden Hurricane",
+          "games": [
+            "espn:ncaaf:2026:401862707"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-tlsa-v2.png",
+          "sha256": "6ae519fecb31276a2198fd4d0c16b7463e4de1fefad42b27bd901369c996fd45",
+          "status": "helmet"
+        },
+        {
+          "code": "TOL",
+          "id": 2649,
+          "name": "Toledo Rockets",
+          "games": [
+            "espn:ncaaf:2026:401866419"
+          ],
+          "path": "/brand/ncaaf-helmets/toledo-clean.png",
+          "sha256": "b179c3cd696dfadc470876510a49549a9082e8bed43f1cf8747a25ae7350b64e",
+          "status": "helmet"
+        },
+        {
+          "code": "TOW",
+          "id": 119,
+          "name": "Towson Tigers",
+          "games": [
+            "espn:ncaaf:2026:401856680"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-tow-v2.png",
+          "sha256": "9141a74ea6b5e1e64b06e8b6979c76972b12856a5f2de4036254f4b17522edd0",
+          "status": "helmet"
+        },
+        {
+          "code": "TROY",
+          "id": 2653,
+          "name": "Troy Trojans",
+          "games": [
+            "espn:ncaaf:2026:401868326"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-troy-v2.png",
+          "sha256": "8cea07c79838a7c44f6a8fba667b07fbb9d7452858f528b91510ae8433e212ef",
+          "status": "helmet"
+        },
+        {
+          "code": "TTU",
+          "id": 2641,
+          "name": "Texas Tech Red Raiders",
+          "games": [
+            "espn:ncaaf:2026:401856783"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ttu-v2.png",
+          "sha256": "58005add492b8b82bb44b7ded9ba447efd7dc77605f5f2d8619b3b9a18d552b9",
+          "status": "helmet"
+        },
+        {
+          "code": "TULN",
+          "id": 2655,
+          "name": "Tulane Green Wave",
+          "games": [
+            "espn:ncaaf:2026:401864575"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-tuln-v2.png",
+          "sha256": "3c31da2a542679ac0ca02f6220b8c5c08ee5e49cf4cfd70a1b3c0c51240f78b7",
+          "status": "helmet"
+        },
+        {
+          "code": "TXSO",
+          "id": 2640,
+          "name": "Texas Southern Tigers",
+          "games": [
+            "espn:ncaaf:2026:401864505"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "TXST",
+          "id": 326,
+          "name": "Texas State Bobcats",
+          "games": [
+            "espn:ncaaf:2026:401860884"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-txst-v2.png",
+          "sha256": "b0b950de5e8a85809bee708fdcf65ae0214a20fba2f2bc205214e23b6063916c",
+          "status": "helmet"
+        },
+        {
+          "code": "UAB",
+          "id": 5,
+          "name": "UAB Blazers",
+          "games": [
+            "espn:ncaaf:2026:401862708"
+          ],
+          "path": "/brand/ncaaf-helmets/uab-clean.png",
+          "sha256": "656607b698059c46f19ca95e98b38ceaa23f8e679a85bc475b0e4c4dced9e282",
+          "status": "helmet"
+        },
+        {
+          "code": "UCD",
+          "id": 302,
+          "name": "UC Davis Aggies",
+          "games": [
+            "espn:ncaaf:2026:401858223"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "UCF",
+          "id": 2116,
+          "name": "UCF Knights",
+          "games": [
+            "espn:ncaaf:2026:401856790"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "UCLA",
+          "id": 26,
+          "name": "UCLA Bruins",
+          "games": [
+            "espn:ncaaf:2026:401858443"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ucla-v2.png",
+          "sha256": "e5e8aea26675a855426c50088f9d62cdb305e09f6f78419c33662df572864582",
+          "status": "helmet"
+        },
+        {
+          "code": "UGA",
+          "id": 61,
+          "name": "Georgia Bulldogs",
+          "games": [
+            "espn:ncaaf:2026:401856673"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-uga-v2.png",
+          "sha256": "4e62c257215fc54bdb8d0be72b6381f73939f298303a8475909c360ca91062d0",
+          "status": "helmet"
+        },
+        {
+          "code": "UK",
+          "id": 96,
+          "name": "Kentucky Wildcats",
+          "games": [
+            "espn:ncaaf:2026:401856674"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-uk-v2.png",
+          "sha256": "051ce651f0b8dc83210d21466119093bd2ff572c94e60d6fcdfbbd0569df97bc",
+          "status": "helmet"
+        },
+        {
+          "code": "UL",
+          "id": 309,
+          "name": "Louisiana Ragin' Cajuns",
+          "games": [
+            "espn:ncaaf:2026:401858445"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ul-v2.png",
+          "sha256": "43128534287e60939ab69309b6da914d6c9d8becbbcec1f5f99bc4e20bb82a03",
+          "status": "helmet"
+        },
+        {
+          "code": "ULM",
+          "id": 2433,
+          "name": "UL Monroe Warhawks",
+          "games": [
+            "espn:ncaaf:2026:401862708"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-ulm-v2.png",
+          "sha256": "b3c5d84cd0e7ff5aefd2ec792cbc4a19fe8ca58f1f446866e28d7d3403d52db9",
+          "status": "helmet"
+        },
+        {
+          "code": "UNC",
+          "id": 153,
+          "name": "North Carolina Tar Heels",
+          "games": [
+            "espn:ncaaf:2026:401858218"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "UNCO",
+          "id": 2458,
+          "name": "Northern Colorado Bears",
+          "games": [
+            "espn:ncaaf:2026:401864506"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "UNLV",
+          "id": 2439,
+          "name": "UNLV Rebels",
+          "games": [
+            "espn:ncaaf:2026:401862705"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-unlv-v2.png",
+          "sha256": "d2ebfe260b63151ab2ff26c0f22ef8012d1e50f28487a059322b8dc3f8de2282",
+          "status": "helmet"
+        },
+        {
+          "code": "UNM",
+          "id": 167,
+          "name": "New Mexico Lobos",
+          "games": [
+            "espn:ncaaf:2026:401865252"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-unm-v2.png",
+          "sha256": "32e5370ca0f6a3d3a3266f3d78f645b892d523dd50c28922949fc6c04e9f394a",
+          "status": "helmet"
+        },
+        {
+          "code": "UNT",
+          "id": 249,
+          "name": "North Texas Mean Green",
+          "games": [
+            "espn:ncaaf:2026:401862705"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-unt-v2.png",
+          "sha256": "43125d9077e527b37f141f34b5c507d82e8232ac9bc52844eeccec1e7c8a8df5",
+          "status": "helmet"
+        },
+        {
+          "code": "USA",
+          "id": 6,
+          "name": "South Alabama Jaguars",
+          "games": [
+            "espn:ncaaf:2026:401864575"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-usa-v2.png",
+          "sha256": "2f5366e626dc2d7a3b767c372b31f803a27300dfdac7e44a483a2d92f6d3494a",
+          "status": "helmet"
+        },
+        {
+          "code": "USC",
+          "id": 30,
+          "name": "USC Trojans",
+          "games": [
+            "espn:ncaaf:2026:401858445"
+          ],
+          "path": "/brand/ncaaf-helmets/usc-clean.png",
+          "sha256": "7268aa0868a0488b87b4b27c61104ac05ad1e5441b71761cbda7395f4481f542",
+          "status": "helmet"
+        },
+        {
+          "code": "USF",
+          "id": 58,
+          "name": "South Florida Bulls",
+          "games": [
+            "espn:ncaaf:2026:401862702"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-usf-v2.png",
+          "sha256": "ff547f40bb8fdf19ccaf16071cb8a4cab8677b9637d7f3b180d5db8e7582650d",
+          "status": "helmet"
+        },
+        {
+          "code": "USM",
+          "id": 2572,
+          "name": "Southern Miss Golden Eagles",
+          "games": [
+            "espn:ncaaf:2026:401856671"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-usm-v2.png",
+          "sha256": "3a6959bfb1c26555f70b7f24d609da27e4a59edd82a3156fb8ec3512f69a2e54",
+          "status": "helmet"
+        },
+        {
+          "code": "USU",
+          "id": 328,
+          "name": "Utah State Aggies",
+          "games": [
+            "espn:ncaaf:2026:401858446"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-usu-v2.png",
+          "sha256": "305e243ceab6b0a767ce3492a676b25615fa1df33eb3284adaf9f340fbd80e03",
+          "status": "helmet"
+        },
+        {
+          "code": "UTAH",
+          "id": 254,
+          "name": "Utah Utes",
+          "games": [
+            "espn:ncaaf:2026:401856670"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "UTEP",
+          "id": 2638,
+          "name": "UTEP Miners",
+          "games": [
+            "espn:ncaaf:2026:401864505"
+          ],
+          "path": "/brand/ncaaf-helmets/utep-clean.png",
+          "sha256": "1a60c8d1885556d33ed63ed2b4c7073b757bb16f2a8ff343f41676355e41e29f",
+          "status": "helmet"
+        },
+        {
+          "code": "UTM",
+          "id": 2630,
+          "name": "UT Martin Skyhawks",
+          "games": [
+            "espn:ncaaf:2026:401856791"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "UTSA",
+          "id": 2636,
+          "name": "UTSA Roadrunners",
+          "games": [
+            "espn:ncaaf:2026:401860884"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-utsa-v2.png",
+          "sha256": "4783cc19c38ca90af7a2f798d16b42af044f53e89e4d29d214b7a784712a5ee7",
+          "status": "helmet"
+        },
+        {
+          "code": "UVA",
+          "id": 258,
+          "name": "Virginia Cavaliers",
+          "games": [
+            "espn:ncaaf:2026:401858220"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "VAN",
+          "id": 238,
+          "name": "Vanderbilt Commodores",
+          "games": [
+            "espn:ncaaf:2026:401856684"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-van-v2.png",
+          "sha256": "0d1e558da73520bcbcca22738cd7a6fabcfbef73c8f993448e479223f0c9336f",
+          "status": "helmet"
+        },
+        {
+          "code": "VILL",
+          "id": 222,
+          "name": "Villanova Wildcats",
+          "games": [
+            "espn:ncaaf:2026:401858215"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "VT",
+          "id": 259,
+          "name": "Virginia Tech Hokies",
+          "games": [
+            "espn:ncaaf:2026:401858221"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-vt-v2.png",
+          "sha256": "cb6be1b4c8c060e402a533e69fa6f6c20f007edb199511e06df697c0f85f9331",
+          "status": "helmet"
+        },
+        {
+          "code": "WAG",
+          "id": 2681,
+          "name": "Wagner Seahawks",
+          "games": [
+            "espn:ncaaf:2026:401867929"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "WAKE",
+          "id": 154,
+          "name": "Wake Forest Demon Deacons",
+          "games": [
+            "espn:ncaaf:2026:401858224"
+          ],
+          "path": "/brand/ncaaf-helmets/wake-forest-clean.png",
+          "sha256": "449357444d9d87fe94d41b237f966fbc115a0ae8f30ad7440dce6147df62a142",
+          "status": "helmet"
+        },
+        {
+          "code": "WASH",
+          "id": 264,
+          "name": "Washington Huskies",
+          "games": [
+            "espn:ncaaf:2026:401858446"
+          ],
+          "path": "/brand/ncaaf-helmets/sept6-washington.png",
+          "sha256": "fdb3b0d3ab5e4b4fbc99c720b8ef6e49c23938ad9a1ff3507c21d7a6402b0c5d",
+          "status": "helmet"
+        },
+        {
+          "code": "WCU",
+          "id": 2717,
+          "name": "Western Carolina Catamounts",
+          "games": [
+            "espn:ncaaf:2026:401856786"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "WEB",
+          "id": 2692,
+          "name": "Weber State Wildcats",
+          "games": [
+            "espn:ncaaf:2026:401856785"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "WES",
+          "id": 2698,
+          "name": "West Georgia Wolves",
+          "games": [
+            "espn:ncaaf:2026:401868241"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "WIS",
+          "id": 275,
+          "name": "Wisconsin Badgers",
+          "games": [
+            "espn:ncaaf:2026:401858447"
+          ],
+          "path": "/brand/ncaaf-helmets/sept6-wisconsin.png",
+          "sha256": "ebbdfda057f1397beb9e311356a24058e55ea6ffd3b21ebc8d6f59fabb240904",
+          "status": "helmet"
+        },
+        {
+          "code": "WIU",
+          "id": 2710,
+          "name": "Western Illinois Leathernecks",
+          "games": [
+            "espn:ncaaf:2026:401858447"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "WKU",
+          "id": 98,
+          "name": "Western Kentucky Hilltoppers",
+          "games": [
+            "espn:ncaaf:2026:401856673"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-wku-v2.png",
+          "sha256": "5b523c226e68f812fcf06750ac33d7e465ef4f6e9c6d48b17d183474b5a2eed7",
+          "status": "helmet"
+        },
+        {
+          "code": "WMU",
+          "id": 2711,
+          "name": "Western Michigan Broncos",
+          "games": [
+            "espn:ncaaf:2026:401866421"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-wmu-v2.png",
+          "sha256": "d8d5d1ea9832957cf2401c594b413d7a13380e87d99d1c2238b424e7e02185ba",
+          "status": "helmet"
+        },
+        {
+          "code": "WOF",
+          "id": 2747,
+          "name": "Wofford Terriers",
+          "games": [
+            "espn:ncaaf:2026:401866416"
+          ],
+          "path": null,
+          "sha256": null,
+          "status": "missing"
+        },
+        {
+          "code": "WSU",
+          "id": 265,
+          "name": "Washington State Cougars",
+          "games": [
+            "espn:ncaaf:2026:401856781"
+          ],
+          "path": "/brand/ncaaf-helmets/sept6-washington-state.png",
+          "sha256": "fccd155100b75e0af82ff1936f872507227b2c93a6ec10cbb3a1c16d33a2453c",
+          "status": "helmet"
+        },
+        {
+          "code": "WVU",
+          "id": 277,
+          "name": "West Virginia Mountaineers",
+          "games": [
+            "espn:ncaaf:2026:401856791"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-wvu-v2.png",
+          "sha256": "2b12999c6b096782b203d7c19c26e3a7c53cee5ffbbf94621427794c3df3e598",
+          "status": "helmet"
+        },
+        {
+          "code": "WYO",
+          "id": 2751,
+          "name": "Wyoming Cowboys",
+          "games": [
+            "espn:ncaaf:2026:401864506"
+          ],
+          "path": "/brand/ncaaf-helmets/sept5-wyo-v2.png",
+          "sha256": "d92efb995a6907de7ab4ea12c251413c1812d7f1f82451f86cec3d32a1ce8d83",
+          "status": "helmet"
+        }
+      ]
+    },
+    {
+      "sport": "NFL",
+      "sourceUrl": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=20260907-20260913&limit=1000",
+      "receivedAt": 1788790215877,
+      "responseSha256": "5a0741bb12c0b141f3c3c2291a73a1e54413874c73857ba9ada4912a2b7dcd37",
+      "gameCount": 15,
+      "unresolved": [],
+      "teams": [
+        {
+          "code": "ARI",
+          "id": 22,
+          "name": "Arizona Cardinals",
+          "games": [
+            "espn:nfl:2026:401872926"
+          ],
+          "path": "/brand/nfl-helmets/ARI.webp",
+          "sha256": "09942ac7c8bef62f636576265ca2e1af2f4d6ee30b52bd072590568571de2c67",
+          "status": "helmet"
+        },
+        {
+          "code": "ATL",
+          "id": 1,
+          "name": "Atlanta Falcons",
+          "games": [
+            "espn:nfl:2026:401872658"
+          ],
+          "path": "/brand/nfl-helmets/ATL.webp",
+          "sha256": "80a73155e4f9b2821012aa66caadb8fd3b615d3f9566cbacacbc79ac037c251c",
+          "status": "helmet"
+        },
+        {
+          "code": "BAL",
+          "id": 33,
+          "name": "Baltimore Ravens",
+          "games": [
+            "espn:nfl:2026:401872659"
+          ],
+          "path": "/brand/nfl-helmets/BAL.webp",
+          "sha256": "9bac534d29a09c2b1e4d18e6d1f716e6127c6574403b9a2eb9d696ef35212a92",
+          "status": "helmet"
+        },
+        {
+          "code": "BUF",
+          "id": 2,
+          "name": "Buffalo Bills",
+          "games": [
+            "espn:nfl:2026:401872660"
+          ],
+          "path": "/brand/nfl-helmets/BUF.webp",
+          "sha256": "c47e1fac431510231941b207959971f93b6fc9507ec7cdc9dfd00e0bd83e35bd",
+          "status": "helmet"
+        },
+        {
+          "code": "CAR",
+          "id": 29,
+          "name": "Carolina Panthers",
+          "games": [
+            "espn:nfl:2026:401872661"
+          ],
+          "path": "/brand/nfl-helmets/CAR.webp",
+          "sha256": "0003667be520b1a117388bbed327e6e2df7653de479eac5ada3c9118753e4774",
+          "status": "helmet"
+        },
+        {
+          "code": "CHI",
+          "id": 3,
+          "name": "Chicago Bears",
+          "games": [
+            "espn:nfl:2026:401872661"
+          ],
+          "path": "/brand/nfl-helmets/CHI.webp",
+          "sha256": "648911908863aaf110583a5a455363ab770943c9a06729c9ac2838a321910376",
+          "status": "helmet"
+        },
+        {
+          "code": "CIN",
+          "id": 4,
+          "name": "Cincinnati Bengals",
+          "games": [
+            "espn:nfl:2026:401872925"
+          ],
+          "path": "/brand/nfl-helmets/CIN.webp",
+          "sha256": "af684fe5612d017f56c3b07ef373121a3ba6c8296868531550b6411fcfb96374",
+          "status": "helmet"
+        },
+        {
+          "code": "CLE",
+          "id": 5,
+          "name": "Cleveland Browns",
+          "games": [
+            "espn:nfl:2026:401872922"
+          ],
+          "path": "/brand/nfl-helmets/CLE.webp",
+          "sha256": "084b22308a6bd21975d807b72cd1f27a8e3150a31edc840b8854c8823d4e6dd2",
+          "status": "helmet"
+        },
+        {
+          "code": "DAL",
+          "id": 6,
+          "name": "Dallas Cowboys",
+          "games": [
+            "espn:nfl:2026:401872930"
+          ],
+          "path": "/brand/nfl-helmets/DAL.webp",
+          "sha256": "a2d4055301e29d3fbde36cd443a467edf42fbe1c03b8d7ee6bd6439e8bfe20dc",
+          "status": "helmet"
+        },
+        {
+          "code": "DET",
+          "id": 8,
+          "name": "Detroit Lions",
+          "games": [
+            "espn:nfl:2026:401872923"
+          ],
+          "path": "/brand/nfl-helmets/DET.webp",
+          "sha256": "dcb0d529f41423661cdb9e310527165ac75340803321a2f93c263910edb0a55c",
+          "status": "helmet"
+        },
+        {
+          "code": "GB",
+          "id": 9,
+          "name": "Green Bay Packers",
+          "games": [
+            "espn:nfl:2026:401872927"
+          ],
+          "path": "/brand/nfl-helmets/GB.webp",
+          "sha256": "b1ba9b71da0ba46292fc3f451f1e7d7dff2c44634f0720992f85799830c4dd84",
+          "status": "helmet"
+        },
+        {
+          "code": "HOU",
+          "id": 34,
+          "name": "Houston Texans",
+          "games": [
+            "espn:nfl:2026:401872660"
+          ],
+          "path": "/brand/nfl-helmets/HOU.webp",
+          "sha256": "3e8b4949e783836815d80e783d843bffbd2d75ab4d43f7124bce9288e28b4ed0",
+          "status": "helmet"
+        },
+        {
+          "code": "IND",
+          "id": 11,
+          "name": "Indianapolis Colts",
+          "games": [
+            "espn:nfl:2026:401872659"
+          ],
+          "path": "/brand/nfl-helmets/IND.webp",
+          "sha256": "0ba8af676c1e4d5d76d1e2b5c98ef64da1ab5e2f52f30f2f0bc2f6929f7ce0e1",
+          "status": "helmet"
+        },
+        {
+          "code": "JAX",
+          "id": 30,
+          "name": "Jacksonville Jaguars",
+          "games": [
+            "espn:nfl:2026:401872922"
+          ],
+          "path": "/brand/nfl-helmets/JAX.webp",
+          "sha256": "28db912963db77e5bb3e111fe13e586d9bc573cd709f54c9ad57be4968514498",
+          "status": "helmet"
+        },
+        {
+          "code": "LAC",
+          "id": 24,
+          "name": "Los Angeles Chargers",
+          "games": [
+            "espn:nfl:2026:401872926"
+          ],
+          "path": "/brand/nfl-helmets/LAC.webp",
+          "sha256": "e16cd806fe7dfc9e486f412e313222337bd2185c82e24efd55b03859841dbafb",
+          "status": "helmet"
+        },
+        {
+          "code": "LAR",
+          "id": 14,
+          "name": "Los Angeles Rams",
+          "games": [
+            "espn:nfl:2026:401872657"
+          ],
+          "path": "/brand/nfl-helmets/LAR.webp",
+          "sha256": "8fddaec9eff9dc69e8a1c4c34dfc26ccbb5ca862fd1eeea55db426da0063a0a6",
+          "status": "helmet"
+        },
+        {
+          "code": "LV",
+          "id": 13,
+          "name": "Las Vegas Raiders",
+          "games": [
+            "espn:nfl:2026:401872928"
+          ],
+          "path": "/brand/nfl-helmets/LV.webp",
+          "sha256": "c9330f5e9723f8844621b5e9b00ce56b578521ae7f8552b83244ba222c1fbefb",
+          "status": "helmet"
+        },
+        {
+          "code": "MIA",
+          "id": 15,
+          "name": "Miami Dolphins",
+          "games": [
+            "espn:nfl:2026:401872928"
+          ],
+          "path": "/brand/nfl-helmets/MIA.webp",
+          "sha256": "91a4d5ee1b83f97099abbfb2974aa810fdf307659a4f97e68c69a0c1ee3feec4",
+          "status": "helmet"
+        },
+        {
+          "code": "MIN",
+          "id": 16,
+          "name": "Minnesota Vikings",
+          "games": [
+            "espn:nfl:2026:401872927"
+          ],
+          "path": "/brand/nfl-helmets/MIN.webp",
+          "sha256": "f5f34749d3f785af9a3879e888ee6d4d58b3232635d86ec6e90e795c5bc3507b",
+          "status": "helmet"
+        },
+        {
+          "code": "NE",
+          "id": 17,
+          "name": "New England Patriots",
+          "games": [
+            "espn:nfl:2026:401872656"
+          ],
+          "path": "/brand/nfl-helmets/NE.webp",
+          "sha256": "d9eb3bf1a36322df39559f8c0397b6f25c373222ee4fee9bc9b87829ffcec1ba",
+          "status": "helmet"
+        },
+        {
+          "code": "NO",
+          "id": 18,
+          "name": "New Orleans Saints",
+          "games": [
+            "espn:nfl:2026:401872923"
+          ],
+          "path": "/brand/nfl-helmets/NO.webp",
+          "sha256": "09c21089f8fd04b36f68c1bd1755cab6f3f4371e550e827007bb96b9619e7345",
+          "status": "helmet"
+        },
+        {
+          "code": "NYG",
+          "id": 19,
+          "name": "New York Giants",
+          "games": [
+            "espn:nfl:2026:401872930"
+          ],
+          "path": "/brand/nfl-helmets/NYG.webp",
+          "sha256": "51cf85415cbaa82245566a9c51be386c41e16543963c2e64e910beae0503de42",
+          "status": "helmet"
+        },
+        {
+          "code": "NYJ",
+          "id": 20,
+          "name": "New York Jets",
+          "games": [
+            "espn:nfl:2026:401872924"
+          ],
+          "path": "/brand/nfl-helmets/NYJ.webp",
+          "sha256": "689987bef4c614df3aea20926345bb8cd984663ea03b6b1dae31aeafaca447a2",
+          "status": "helmet"
+        },
+        {
+          "code": "PHI",
+          "id": 21,
+          "name": "Philadelphia Eagles",
+          "games": [
+            "espn:nfl:2026:401872929"
+          ],
+          "path": "/brand/nfl-helmets/PHI.webp",
+          "sha256": "2cbfdb98cf1c06ef8b509c23b1412f207730c937bad735570021df73ab9e8600",
+          "status": "helmet"
+        },
+        {
+          "code": "PIT",
+          "id": 23,
+          "name": "Pittsburgh Steelers",
+          "games": [
+            "espn:nfl:2026:401872658"
+          ],
+          "path": "/brand/nfl-helmets/PIT.webp",
+          "sha256": "b94ee700d9a2f8754ed82c49740c63aeebb70c7224b7df4936da0c3d1836cae2",
+          "status": "helmet"
+        },
+        {
+          "code": "SEA",
+          "id": 26,
+          "name": "Seattle Seahawks",
+          "games": [
+            "espn:nfl:2026:401872656"
+          ],
+          "path": "/brand/nfl-helmets/SEA.webp",
+          "sha256": "80286fb724185e953b5bde0d6e060e3561bf816dc6164a6d946d1a60185e3652",
+          "status": "helmet"
+        },
+        {
+          "code": "SF",
+          "id": 25,
+          "name": "San Francisco 49ers",
+          "games": [
+            "espn:nfl:2026:401872657"
+          ],
+          "path": "/brand/nfl-helmets/SF.webp",
+          "sha256": "64bb6fa456bc15ac09d7e7cccbc5fc8fe3224579b17be3fbae09d640f0325ba6",
+          "status": "helmet"
+        },
+        {
+          "code": "TB",
+          "id": 27,
+          "name": "Tampa Bay Buccaneers",
+          "games": [
+            "espn:nfl:2026:401872925"
+          ],
+          "path": "/brand/nfl-helmets/TB.webp",
+          "sha256": "8aecbb7b149a062d96d0e97f1e62dfb7df19d62f1029cced8239a5399dbf1cad",
+          "status": "helmet"
+        },
+        {
+          "code": "TEN",
+          "id": 10,
+          "name": "Tennessee Titans",
+          "games": [
+            "espn:nfl:2026:401872924"
+          ],
+          "path": "/brand/nfl-helmets/TEN.webp",
+          "sha256": "903460772e79b9c772a637d9d4861210ec1cf97384f1ae28d82a978473eb0a68",
+          "status": "helmet"
+        },
+        {
+          "code": "WSH",
+          "id": 28,
+          "name": "Washington Commanders",
+          "games": [
+            "espn:nfl:2026:401872929"
+          ],
+          "path": "/brand/nfl-helmets/WSH.webp",
+          "sha256": "700201c89052eed7d649a2a13945a3a475e0384051494084a9d1cad724b2625e",
+          "status": "helmet"
+        }
+      ]
+    }
+  ]
+}

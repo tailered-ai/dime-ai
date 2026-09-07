@@ -1,0 +1,603 @@
+{
+  "head": "9fe59f13235d77df98e560e6df1929aec4613ec2",
+  "recordedAt": "2026-09-07T14:53:57.761Z",
+  "candidateContentSha256": "1da5c45e9d9c55c06eb10fe0a2f9a50d5988e36bb99b6b1bf04df5fc8b425c64",
+  "files": [
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-alst.png",
+      "sha256": "07d24962e728df67dfc6494064938abb75de386dd566618727275c52bc70894b"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-buff.png",
+      "sha256": "3b24375481e11efb8fe0c006f438a177514a4b41e74cbcc78da18c8949e11680"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-cam.png",
+      "sha256": "709a3cfeb52d337145e4c27803889663823b80a87be5176f891876611452c431"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-ccsu.png",
+      "sha256": "500eafd845245b3618e45ebd49a48c3d6acd386a30965c4d3ff74c88b57af02f"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-colg.png",
+      "sha256": "4791529d7d8acd2c6555b33e0bdcdeaf1c4acfb0c1f98ae8b6090316a27e64e5"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-cp.png",
+      "sha256": "716882d73a4452dc16d007f42dc1889f5aa83df1e63ef44e6cb675c45c8b276e"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-del.png",
+      "sha256": "03ae6a97d94282c62433e1002af630483efa4d96307c0968097811407f32eccd"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-etsu.png",
+      "sha256": "b92dc56c8b43351d491a53ffd6a23475271964c94241f791abeb6c2648d7eac3"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-famu.png",
+      "sha256": "159b8157e7fb5f4d98c19c9ab4ace1f0429057e84ba4dad209a6494b9aedf970"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-fsu.png",
+      "sha256": "55b2c5a0aa540d7cf1f4cb8c473c6b99f05d9ed2374a11b7b1c2c59f0d6afa60"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-gast.png",
+      "sha256": "3022b9b0c66a2de4582a5eff3bec2617c40a54f305757f711753d5fc5f01a1cd"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-gram.png",
+      "sha256": "696ae72acc4e00a5dfbd628cf0b4a1412cadb11cf7372c88df7d070ed53d01cb"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-gweb.png",
+      "sha256": "ec192dec789dd10e6c7cd4a4ba1d899011be8a732b5c1e70973c0d4c8fa6c5d3"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-hc.png",
+      "sha256": "e83ee62cbd0b9bd3e11cc94d114ab899758e7472ad23b3491eb9c6ad4ee8672b"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-how.png",
+      "sha256": "10036d561396e457677e1b427e178eb73dab17e75ce86e63db9ffd974f1c400f"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-ilst.png",
+      "sha256": "01cecb9ee98abecc1fc22d6a38148af8bd6fcac414d7104a9607c5c26062ade5"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-kenn.png",
+      "sha256": "a24135a056bd9962ddc85f55624637e073ae512581f49fd22c4b06eddaf50608"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-ku.png",
+      "sha256": "784e0591877537a359e4b2ef9c7e6211879a5d156c1856f32ee9312431787cea"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-lin.png",
+      "sha256": "0b2507f8d20ad957cfb6f7b0084b325905432ecd1454495785b965c14a853917"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-minn.png",
+      "sha256": "2677fe92389209ca36ed5170cfa53dc520a47c4c676c2da7b1153175cf2b813f"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-miz.png",
+      "sha256": "a260b3f0378923f040eca55adf830e4c744e756f82a068ad61865e069c70755b"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-monm.png",
+      "sha256": "fe9458595694e1857308e4d9346652dc69c02bfa84100797182393d62fb4c13f"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-mtst.png",
+      "sha256": "e9f880b0de40ce970b368aad91c337df6015644f3d1873a6c197f4131264ea93"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-ncsu.png",
+      "sha256": "d5d5ad99e890072b45977c03d0e039a2b4a46bb610d8b50adc0380b03d832f98"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-pur.png",
+      "sha256": "1bc8458dab74a2c124be5c611bac72c981fd769628cdbd003ac545c2dac469c9"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-pv.png",
+      "sha256": "67a5be04f8cdbefcb57d003d82a733f4a9f05b10b359e0595d4591c946e92443"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-rich.png",
+      "sha256": "1cfa79f48b050e4c0a725da3bc4661d30236965be8dea0c089bbf98f1ea00bfa"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-rmu.png",
+      "sha256": "65a923b31a918fbce6dd9fe4a3e2171ef4d0ec42d050781b0fb8d79cee2e5fed"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-shu.png",
+      "sha256": "7fcad31889e07a3acd36b630cc7f778e50b50f81768d79b68a41c62f283141cd"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-smu.png",
+      "sha256": "3c3cbd97e112946e22b60d16916cf06fe1dccbbb0e5bac4cfe5dbb0ce5f11b78"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-sou.png",
+      "sha256": "92032ce1d9d272b87ccf9f9a4fd77001582fa57113fe5acc718576d431cab507"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-stbk.png",
+      "sha256": "cfb13b500a510611247da2658b475ff62af120a8c90ee89b52d1f914054bb21b"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-suu.png",
+      "sha256": "9fef0228a14f87725a08e653e8d6a295b5a68a7e2e9f58404dd229fa8d703f09"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-tcu.png",
+      "sha256": "de637fc9cee089dcb54a332157d63bc50741e2ff5b0e9e396c01b1d70c9be4a1"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-txso.png",
+      "sha256": "f3e2a2bf40fd67a48f1292b2ddf5f7980b2a6bd83c2c277b111f73378f58fe6a"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-ucd.png",
+      "sha256": "b695996ab4f63f58c9bb8e4197b55f0d5988375f2d58eb401c6c19e61f321e34"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-ucf.png",
+      "sha256": "e17f82ef00eb60ee65bc0836e9df1729a3453fa16af3a9a23a82ac66c1e41c05"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-unc.png",
+      "sha256": "7284f8fd83519b995a4fdb39a69ae9a5f64f250a5916f2f5a1111f8e8a74796f"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-unco.png",
+      "sha256": "bfe6d799111b833ae1db518b6134326591df57ddd5417516f089e38651c7c45c"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-utah.png",
+      "sha256": "4eabd2391d9a6147c52ee4f79a4e1f46f21b510e8203ffb67e1368875832fe91"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-utm.png",
+      "sha256": "4d9329b66233e3cbc9513e5174ab4dc353827e232a57c15a2022b6c630f179f3"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-uva.png",
+      "sha256": "6ff812481e84584ea4113b0cd6d9d4c368897543868872bfe9f7dac67ec1df19"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-vill.png",
+      "sha256": "026966b41878b4a9bbb099ca99a7354ddd94e981a11be861e254810c37ffc5c3"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-wag.png",
+      "sha256": "725602c64b735a9bf210dee268212b827f56fada56fac1731ea7869e24a6c188"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-wcu.png",
+      "sha256": "659f9a4d661299b44bcb8600865ef56ad598bf84220b4ab4798488b7a2657409"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-web.png",
+      "sha256": "bbefb55d9686c48c7d0f3acc5d346cf3a64daae38a608cf4a2a4fa94323fcef9"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-wes.png",
+      "sha256": "58a82a8440b147e7f13ca3f694d6632026054e37e62bc49cd9e401c0a9c3d1cf"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-wiu.png",
+      "sha256": "061c3078064e65590e98ba44a1e6906f1233f49afb03ab776ac63972fd3366a8"
+    },
+    {
+      "path": "client/public/brand/ncaaf-helmets/sept7-wof.png",
+      "sha256": "970be5a4bab757300a63daaa01ed34309e2a180c585981432fb87230685b5bfb"
+    },
+    {
+      "path": "client/src/App.tsx",
+      "sha256": "44ddffdc7b671e60940e255f74dccafff1afebbbe6d135a8551657bca76b0ef0"
+    },
+    {
+      "path": "client/src/components/BettingSplitsPanel.tsx",
+      "sha256": "b50c52fb83b0d2d8e0c4266152a3b8da2a05e76d09768ea63bac5f78359bc36b"
+    },
+    {
+      "path": "client/src/components/FootballFreshness.tsx",
+      "sha256": "0e0023e73fc4f4535d8328ea909d18944cabef5774e86d2aee56823d215d73f7"
+    },
+    {
+      "path": "client/src/components/GameCard.tsx",
+      "sha256": "f681b3f9b261fe4c8f5ffb4090ed4b17c9672ee37ee792c84a006f1deef8c651"
+    },
+    {
+      "path": "client/src/components/OddsHistoryPanel.tsx",
+      "sha256": "4c666884bd7874ee272a5e6212a5a50e1cfdf2b0d3ea5b8231e5ddaf2d5269cd"
+    },
+    {
+      "path": "client/src/components/ncaafSeptember5Markets.test.ts",
+      "sha256": "140a911b310ae912018abad3ce1bbedeb6bb14c54e7cb4712cc5594fd7868b9e"
+    },
+    {
+      "path": "client/src/components/projections/ProjectionCard.tsx",
+      "sha256": "912606e9606cf29875cf7e67813912a2c4097a390f9cdfcbae508c04380b7256"
+    },
+    {
+      "path": "client/src/features/mobileNav/MobileFloatingNav.tsx",
+      "sha256": "41df626941e7325ca43b4c95448761330d1b724c84ddfa0ad1b6f735df1f410a"
+    },
+    {
+      "path": "client/src/features/mobileNav/mobileFloatingNav.test.ts",
+      "sha256": "505039beab92cfb590e854ce8c2c70e500ec3edf4633e8a16f5ee83bc7dde610"
+    },
+    {
+      "path": "client/src/lib/feedRoutes.test.ts",
+      "sha256": "7722ae2ebecb7c9ad08550639b3dfe26bb2792721f2284d3cd811ae3b66ba75c"
+    },
+    {
+      "path": "client/src/lib/feedRoutes.ts",
+      "sha256": "8b0d578c9e07d98a7b901bc65aa19711853f584c9b4a8becce7c8c3a19ba28e6"
+    },
+    {
+      "path": "client/src/lib/leagueSeasons.test.ts",
+      "sha256": "870aeca14efaabbc6a02c3b3747c736245c43f55f0f6d7708fbe476e20c3a067"
+    },
+    {
+      "path": "client/src/lib/leagueSeasons.ts",
+      "sha256": "7c917868382eb565950e65bf3eef18b3f87e23c8c78d71636d08bc9630728688"
+    },
+    {
+      "path": "client/src/pages/BettingSplits.tsx",
+      "sha256": "e6848608499f7703f884329e05d3d21184e4437922371df6803142dc95689c2a"
+    },
+    {
+      "path": "client/src/pages/DimeModelFeed.tsx",
+      "sha256": "76c9878268da3aaa7799dab582d8cfbf4b3a93fd3ea6c3bdbaffe22fe1def7d6"
+    },
+    {
+      "path": "client/src/pages/dime-chat/DimeChatPage.tsx",
+      "sha256": "6be809c41535c75996702f8a0306bb7a761610c87ca892a91bcc8d52f298cfaf"
+    },
+    {
+      "path": "client/src/pages/dime-shell/DimeAppShell.test.ts",
+      "sha256": "bcf0253cb9fe2b167080e949b2696deaf992e0e152323194b96f67d2d2fa3cee"
+    },
+    {
+      "path": "client/src/pages/dimeModelFeed.test.ts",
+      "sha256": "ef143bb0081751cb380b5b20231af40dd2f91a33362297e98311ff0e2ae2b0f8"
+    },
+    {
+      "path": "drizzle/0135_football_market_provenance.sql",
+      "sha256": "efd5728424240865e246112cf22c36a410d751b06239b8ab49a5a027ebf6f130"
+    },
+    {
+      "path": "drizzle/meta/0135_snapshot.json",
+      "sha256": "c9e5997f32dbaeb51ed58cac84c909ef806bd0dfa255f46a45a6d4a4615e67bc"
+    },
+    {
+      "path": "drizzle/meta/_journal.json",
+      "sha256": "bcc98a376608bd7475156eeec9387356a0f6e9f32a52afb4c638590127561c60"
+    },
+    {
+      "path": "drizzle/schema.ts",
+      "sha256": "caa9fb841fc7881c8b6d92ae4fd70c5672d693dc8ff63245e1eeb893c8b89550"
+    },
+    {
+      "path": "e2e/football-market-automation.spec.ts",
+      "sha256": "f7da153d7cb475ec24d933c27f4a78afa6bb3dca609ea39d0349f826ee31c3e6"
+    },
+    {
+      "path": "scripts/checkFootballHelmets.mts",
+      "sha256": "35e9812a4872a40740033b1488b84b6015ad89623f08828c2f333c41e13b92ea"
+    },
+    {
+      "path": "scripts/seedCfb2026.mts",
+      "sha256": "87e36ce3dbab49a4bc7ce937946988a459f2dffb1d21ba64134970e16b47d7d0"
+    },
+    {
+      "path": "scripts/seedNfl2026.mts",
+      "sha256": "9eb63b576a92854b270e44f9f62114fea04481ca3c4fd1131c3c570383103a8b"
+    },
+    {
+      "path": "server/actionNetworkScraper.ncaaf.test.ts",
+      "sha256": "72a940903b3b38c7c8e55f4ddcd632cb95a2b6016e4c7a1d2a3278a0520edd06"
+    },
+    {
+      "path": "server/actionNetworkScraper.ts",
+      "sha256": "b030783712d888995fbd7948bfd5c09a368b2b74acd6f528d183526867511e0c"
+    },
+    {
+      "path": "server/betGradingHealth.ts",
+      "sha256": "08c6068d885b77d66a09f93270071a3500bc8ca4a68eea4f1a6dd0f022a27774"
+    },
+    {
+      "path": "server/cron/cronRoutes.ts",
+      "sha256": "c979f1e799f363fcb4b74a49d8dea633f919fad5a8601403a9d93deaf0b16028"
+    },
+    {
+      "path": "server/db.ncaafMarkets.test.ts",
+      "sha256": "2e83159bc3835331d2dd589e697c8c1c26ac06d9a99fa033bf208c2fa97b87f3"
+    },
+    {
+      "path": "server/db.oddsHistoryPage.test.ts",
+      "sha256": "92c2fb5b5402965fe59a72fa3e6ba03e45d423d7be370ff07a62b45ecc426367"
+    },
+    {
+      "path": "server/db.ts",
+      "sha256": "e1739729ef2b59ec811b05a20233748b2c385eafc85b83415bc8b4452e6ee209"
+    },
+    {
+      "path": "server/footballMarketCycle.test.ts",
+      "sha256": "7aa7ac774af52036e7897d040ceb35ca3f152b046833be55a8e47d1657eb9a49"
+    },
+    {
+      "path": "server/footballSchedule.test.ts",
+      "sha256": "858a55d9a901e64815014c75ef49a3c1bc282ea9a2d650d27c559965f7941889"
+    },
+    {
+      "path": "server/footballSchedule.ts",
+      "sha256": "8eb81a8227e7b0871fa5b6a3c4cf9fc534d9cbaf6fc2dc307925cc70df01105a"
+    },
+    {
+      "path": "server/legacyRedirects.test.ts",
+      "sha256": "4c36440118e6be68d43905da7089710ca318b8bd783e2ba4797917317458518d"
+    },
+    {
+      "path": "server/ncaafFeedGate.test.ts",
+      "sha256": "153649f2ee037a4cfbdc9813e523f6fa8f7c65cc01f957c328ef13dff03da8fb"
+    },
+    {
+      "path": "server/ncaafMarketRefresh.ts",
+      "sha256": "1c913573c8217422a035cf2b88029afb803bff5a3e1201421689426754347b71"
+    },
+    {
+      "path": "server/ncaafScoreRefresh.test.ts",
+      "sha256": "a70a03f03cd51dbbaee45d9c08a70c047a40d9061e31f4472123b47d477af84f"
+    },
+    {
+      "path": "server/ncaafScoreRefresh.ts",
+      "sha256": "d805698a8ea5e1f6502a3d35d827c36945be05ab5fc628e99ef826bddb63b988"
+    },
+    {
+      "path": "server/routers.ts",
+      "sha256": "34bab5358713beb88d670840e43f5b5d7064968b0e15db054d4cf71f3bb74336"
+    },
+    {
+      "path": "server/vsinAutoRefresh.ts",
+      "sha256": "46c42bf9b6e511c88ed413164e6d813f389acdf0b5e0eac973a9d35579770d6b"
+    },
+    {
+      "path": "server/vsinBettingSplitsScraper.test.ts",
+      "sha256": "b1d4607d76a8f30787c9082f0e463f92bbc2521b86928cf9a3f3f94e382057e6"
+    },
+    {
+      "path": "server/vsinBettingSplitsScraper.ts",
+      "sha256": "0aa4a6dda564c80b5bf253f5bee6508713548bfbfab0470aa216f1467ae52f74"
+    },
+    {
+      "path": "shared/footballMarkets.ts",
+      "sha256": "36e1393259138f58d0a06a83347f0c51d6dafedbc3914be05c6afd2ad12f56ab"
+    },
+    {
+      "path": "shared/ncaafHelmets.test.ts",
+      "sha256": "31bf9e918ee4d2f06600391c8d6d44eba47028f6a3fd6c15499d7927abbaa6cd"
+    },
+    {
+      "path": "shared/ncaafHelmets.ts",
+      "sha256": "42a0ee63bbfe132b9f1e81ae928d06c9844b33fc45753be9e31292c1e62c90e9"
+    },
+    {
+      "path": "shared/teamColors.ts",
+      "sha256": "ce8d6109d67823da26525c780f5c4246c1815f3e74a82b11f1c18c6c4f7393b0"
+    },
+    {
+      "path": "docs/audits/2026-09-07-football-markets-evidence/helmets-window-complete.json",
+      "sha256": "352ac50cf140d7342574d4eb2d3fd7d39f37faf9fc1ca5ebd82b919e730a2ed1"
+    },
+    {
+      "path": "docs/audits/2026-09-07-football-markets-evidence/helmet-generation.json",
+      "sha256": "eb69653470e318e6b7c83ef12927d58bed2200b3c1b6f379c6a56529f8799204"
+    }
+  ],
+  "nflHelmetCount": 32,
+  "nflDistinctAssetCount": 32,
+  "nflHelmets": [
+    {
+      "code": "BUF",
+      "name": "Buffalo Bills",
+      "path": "client/public/brand/nfl-helmets/BUF.webp",
+      "sha256": "c47e1fac431510231941b207959971f93b6fc9507ec7cdc9dfd00e0bd83e35bd"
+    },
+    {
+      "code": "MIA",
+      "name": "Miami Dolphins",
+      "path": "client/public/brand/nfl-helmets/MIA.webp",
+      "sha256": "91a4d5ee1b83f97099abbfb2974aa810fdf307659a4f97e68c69a0c1ee3feec4"
+    },
+    {
+      "code": "NE",
+      "name": "New England Patriots",
+      "path": "client/public/brand/nfl-helmets/NE.webp",
+      "sha256": "d9eb3bf1a36322df39559f8c0397b6f25c373222ee4fee9bc9b87829ffcec1ba"
+    },
+    {
+      "code": "NYJ",
+      "name": "New York Jets",
+      "path": "client/public/brand/nfl-helmets/NYJ.webp",
+      "sha256": "689987bef4c614df3aea20926345bb8cd984663ea03b6b1dae31aeafaca447a2"
+    },
+    {
+      "code": "BAL",
+      "name": "Baltimore Ravens",
+      "path": "client/public/brand/nfl-helmets/BAL.webp",
+      "sha256": "9bac534d29a09c2b1e4d18e6d1f716e6127c6574403b9a2eb9d696ef35212a92"
+    },
+    {
+      "code": "CIN",
+      "name": "Cincinnati Bengals",
+      "path": "client/public/brand/nfl-helmets/CIN.webp",
+      "sha256": "af684fe5612d017f56c3b07ef373121a3ba6c8296868531550b6411fcfb96374"
+    },
+    {
+      "code": "CLE",
+      "name": "Cleveland Browns",
+      "path": "client/public/brand/nfl-helmets/CLE.webp",
+      "sha256": "084b22308a6bd21975d807b72cd1f27a8e3150a31edc840b8854c8823d4e6dd2"
+    },
+    {
+      "code": "PIT",
+      "name": "Pittsburgh Steelers",
+      "path": "client/public/brand/nfl-helmets/PIT.webp",
+      "sha256": "b94ee700d9a2f8754ed82c49740c63aeebb70c7224b7df4936da0c3d1836cae2"
+    },
+    {
+      "code": "HOU",
+      "name": "Houston Texans",
+      "path": "client/public/brand/nfl-helmets/HOU.webp",
+      "sha256": "3e8b4949e783836815d80e783d843bffbd2d75ab4d43f7124bce9288e28b4ed0"
+    },
+    {
+      "code": "IND",
+      "name": "Indianapolis Colts",
+      "path": "client/public/brand/nfl-helmets/IND.webp",
+      "sha256": "0ba8af676c1e4d5d76d1e2b5c98ef64da1ab5e2f52f30f2f0bc2f6929f7ce0e1"
+    },
+    {
+      "code": "JAX",
+      "name": "Jacksonville Jaguars",
+      "path": "client/public/brand/nfl-helmets/JAX.webp",
+      "sha256": "28db912963db77e5bb3e111fe13e586d9bc573cd709f54c9ad57be4968514498"
+    },
+    {
+      "code": "TEN",
+      "name": "Tennessee Titans",
+      "path": "client/public/brand/nfl-helmets/TEN.webp",
+      "sha256": "903460772e79b9c772a637d9d4861210ec1cf97384f1ae28d82a978473eb0a68"
+    },
+    {
+      "code": "DEN",
+      "name": "Denver Broncos",
+      "path": "client/public/brand/nfl-helmets/DEN.webp",
+      "sha256": "e0b07e63d1cec223e26285ef23fd6843b3ad8e1bc4263a42b3adfbfdf1c64893"
+    },
+    {
+      "code": "KC",
+      "name": "Kansas City Chiefs",
+      "path": "client/public/brand/nfl-helmets/KC.webp",
+      "sha256": "0571b0aaac511394f8512a5f5fa4ce7067b46c7472437bcfc62121a5d79d4553"
+    },
+    {
+      "code": "LV",
+      "name": "Las Vegas Raiders",
+      "path": "client/public/brand/nfl-helmets/LV.webp",
+      "sha256": "c9330f5e9723f8844621b5e9b00ce56b578521ae7f8552b83244ba222c1fbefb"
+    },
+    {
+      "code": "LAC",
+      "name": "Los Angeles Chargers",
+      "path": "client/public/brand/nfl-helmets/LAC.webp",
+      "sha256": "e16cd806fe7dfc9e486f412e313222337bd2185c82e24efd55b03859841dbafb"
+    },
+    {
+      "code": "DAL",
+      "name": "Dallas Cowboys",
+      "path": "client/public/brand/nfl-helmets/DAL.webp",
+      "sha256": "a2d4055301e29d3fbde36cd443a467edf42fbe1c03b8d7ee6bd6439e8bfe20dc"
+    },
+    {
+      "code": "NYG",
+      "name": "New York Giants",
+      "path": "client/public/brand/nfl-helmets/NYG.webp",
+      "sha256": "51cf85415cbaa82245566a9c51be386c41e16543963c2e64e910beae0503de42"
+    },
+    {
+      "code": "PHI",
+      "name": "Philadelphia Eagles",
+      "path": "client/public/brand/nfl-helmets/PHI.webp",
+      "sha256": "2cbfdb98cf1c06ef8b509c23b1412f207730c937bad735570021df73ab9e8600"
+    },
+    {
+      "code": "WSH",
+      "name": "Washington Commanders",
+      "path": "client/public/brand/nfl-helmets/WSH.webp",
+      "sha256": "700201c89052eed7d649a2a13945a3a475e0384051494084a9d1cad724b2625e"
+    },
+    {
+      "code": "CHI",
+      "name": "Chicago Bears",
+      "path": "client/public/brand/nfl-helmets/CHI.webp",
+      "sha256": "648911908863aaf110583a5a455363ab770943c9a06729c9ac2838a321910376"
+    },
+    {
+      "code": "DET",
+      "name": "Detroit Lions",
+      "path": "client/public/brand/nfl-helmets/DET.webp",
+      "sha256": "dcb0d529f41423661cdb9e310527165ac75340803321a2f93c263910edb0a55c"
+    },
+    {
+      "code": "GB",
+      "name": "Green Bay Packers",
+      "path": "client/public/brand/nfl-helmets/GB.webp",
+      "sha256": "b1ba9b71da0ba46292fc3f451f1e7d7dff2c44634f0720992f85799830c4dd84"
+    },
+    {
+      "code": "MIN",
+      "name": "Minnesota Vikings",
+      "path": "client/public/brand/nfl-helmets/MIN.webp",
+      "sha256": "f5f34749d3f785af9a3879e888ee6d4d58b3232635d86ec6e90e795c5bc3507b"
+    },
+    {
+      "code": "ATL",
+      "name": "Atlanta Falcons",
+      "path": "client/public/brand/nfl-helmets/ATL.webp",
+      "sha256": "80a73155e4f9b2821012aa66caadb8fd3b615d3f9566cbacacbc79ac037c251c"
+    },
+    {
+      "code": "CAR",
+      "name": "Carolina Panthers",
+      "path": "client/public/brand/nfl-helmets/CAR.webp",
+      "sha256": "0003667be520b1a117388bbed327e6e2df7653de479eac5ada3c9118753e4774"
+    },
+    {
+      "code": "NO",
+      "name": "New Orleans Saints",
+      "path": "client/public/brand/nfl-helmets/NO.webp",
+      "sha256": "09c21089f8fd04b36f68c1bd1755cab6f3f4371e550e827007bb96b9619e7345"
+    },
+    {
+      "code": "TB",
+      "name": "Tampa Bay Buccaneers",
+      "path": "client/public/brand/nfl-helmets/TB.webp",
+      "sha256": "8aecbb7b149a062d96d0e97f1e62dfb7df19d62f1029cced8239a5399dbf1cad"
+    },
+    {
+      "code": "ARI",
+      "name": "Arizona Cardinals",
+      "path": "client/public/brand/nfl-helmets/ARI.webp",
+      "sha256": "09942ac7c8bef62f636576265ca2e1af2f4d6ee30b52bd072590568571de2c67"
+    },
+    {
+      "code": "LAR",
+      "name": "Los Angeles Rams",
+      "path": "client/public/brand/nfl-helmets/LAR.webp",
+      "sha256": "8fddaec9eff9dc69e8a1c4c34dfc26ccbb5ca862fd1eeea55db426da0063a0a6"
+    },
+    {
+      "code": "SF",
+      "name": "San Francisco 49ers",
+      "path": "client/public/brand/nfl-helmets/SF.webp",
+      "sha256": "64bb6fa456bc15ac09d7e7cccbc5fc8fe3224579b17be3fbae09d640f0325ba6"
+    },
+    {
+      "code": "SEA",
+      "name": "Seattle Seahawks",
+      "path": "client/public/brand/nfl-helmets/SEA.webp",
+      "sha256": "80286fb724185e953b5bde0d6e060e3561bf816dc6164a6d946d1a60185e3652"
+    }
+  ]
+}

@@ -33,12 +33,14 @@ const WEBHOOK_TIMEOUT_MS = 5_000;
 const RATE_LIMIT_MS = 60 * 60 * 1000;
 const lastSentAt = new Map<string, number>();
 
-export type GradingAlertKind = "STUCK_BETS" | "GRADING_ERRORS" | "NO_MATCH";
+export type GradingAlertKind = "STUCK_BETS" | "GRADING_ERRORS" | "NO_MATCH" | "FOOTBALL_INTEGRITY" | "FOOTBALL_STALE";
 
 const EMBED_COLOR: Record<GradingAlertKind, number> = {
   STUCK_BETS: 0xed4245,     // red — user-visible money is unsettled
   GRADING_ERRORS: 0xed4245,
   NO_MATCH: 0xfaa61a,       // amber — early warning, not yet user-visible
+  FOOTBALL_INTEGRITY: 0xed4245,
+  FOOTBALL_STALE: 0xfaa61a,
 };
 
 export interface StuckBet {
@@ -127,10 +129,11 @@ export function describeNoMatch(
 }
 
 /** True when this kind may send now (and records the send). Exported for tests. */
-export function takeRateLimitSlot(kind: GradingAlertKind, now = Date.now()): boolean {
-  const last = lastSentAt.get(kind);
+export function takeRateLimitSlot(kind: GradingAlertKind, now = Date.now(), scope = ""): boolean {
+  const key = scope ? `${kind}:${scope}` : kind;
+  const last = lastSentAt.get(key);
   if (last !== undefined && now - last < RATE_LIMIT_MS) return false;
-  lastSentAt.set(kind, now);
+  lastSentAt.set(key, now);
   return true;
 }
 
@@ -151,10 +154,10 @@ function webhookUrl(): string | null {
  * Raise a grading alert. Always logs; delivery is best-effort and never throws,
  * because an alerting failure must not break the thing it is watching.
  */
-export async function gradingAlert(kind: GradingAlertKind, description: string): Promise<void> {
+export async function gradingAlert(kind: GradingAlertKind, description: string, scope = ""): Promise<void> {
   console.warn(`${TAG}[${kind}] ${description.split("\n")[0]}`);
 
-  if (!takeRateLimitSlot(kind)) {
+  if (!takeRateLimitSlot(kind, Date.now(), scope)) {
     console.log(`${TAG}[${kind}] [TRANSPORT] suppressed by rate limit (${RATE_LIMIT_MS / 60000}m window)`);
     return;
   }
@@ -169,7 +172,7 @@ export async function gradingAlert(kind: GradingAlertKind, description: string):
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         embeds: [{
-          title: `🎯 BET GRADING — ${kind}`,
+          title: `${kind.startsWith("FOOTBALL_") ? "FOOTBALL FEED" : "🎯 BET GRADING"} — ${kind}`,
           description: description.slice(0, 3900),
           color: EMBED_COLOR[kind],
           footer: { text: `Dime AI · Bet Grading Monitor · ${kind}` },

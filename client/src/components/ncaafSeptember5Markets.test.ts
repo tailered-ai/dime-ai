@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { load } from "cheerio";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BettingSplitsPanel } from "./BettingSplitsPanel";
+import { FootballFreshness } from "./FootballFreshness";
 import {
   OddsHistoryPanel,
   marketCells,
@@ -18,7 +19,12 @@ const queries = vi.hoisted(() => ({
 vi.mock("@/lib/trpc", () => ({
   trpc: {
     oddsHistory: {
-      listForGame: { useQuery: queries.history },
+      listForGame: {
+        useInfiniteQuery: (...args: any[]) => {
+          const result = queries.history(...args);
+          return { ...result, data: { pages: [result.data] } };
+        },
+      },
       listForDemoGame: { useQuery: queries.history },
     },
     teamColors: { getForGame: { useQuery: queries.colors } },
@@ -85,6 +91,25 @@ beforeEach(() => {
 });
 
 describe("September 5 NCAAF Book prices and independently rounded splits", () => {
+  it("keeps provider labels internal in history and freshness displays", () => {
+    const html = renderToStaticMarkup(
+      createElement(OddsHistoryPanel, {
+        gameId: 1,
+        sport: "NCAAF",
+        awayTeam: "LIB",
+        homeTeam: "JMU",
+        activeMarket: "spread",
+        demo: true,
+      })
+    );
+    expect(history.sourceLabel).toBe("VSiN DK");
+    expect(load(html).text()).not.toContain("VSiN DK");
+    const freshness = renderToStaticMarkup(
+      createElement(FootballFreshness, {})
+    );
+    expect(load(freshness).text()).toContain("Splits:");
+    expect(load(freshness).text()).not.toContain("VSiN");
+  });
   it("renders AN spread and total juice beside all three current split markets", () => {
     const $ = load(render());
     const columns = $("[data-market-col]");
@@ -173,7 +198,7 @@ describe("September 5 NCAAF Book prices and independently rounded splits", () =>
       "/brand/ncaaf-helmets/sept5-semo-v2.png"
     );
     expect(queries.history).toHaveBeenCalledWith(
-      { gameId: 4350031 },
+      { gameId: 4350031, limit: 200 },
       expect.any(Object)
     );
     expect(queries.colors).toHaveBeenCalledWith(
@@ -226,8 +251,8 @@ describe("September 5 NCAAF Book prices and independently rounded splits", () =>
 
   it("keeps missing and unopened pairs unavailable while retaining legacy inverse fallback", () => {
     expect(resolveSplitPair(0, 0, false)).toEqual([null, null]);
-    expect(resolveSplitPair(0, null, false)).toEqual([null, null]);
-    expect(resolveSplitPair(null, 100, false)).toEqual([null, null]);
+    expect(resolveSplitPair(0, null, false)).toEqual([0, null]);
+    expect(resolveSplitPair(null, 100, false)).toEqual([null, 100]);
     expect(resolveSplitPair(0, 100, true)).toEqual([0, 100]);
     expect(resolveSplitPair(51, undefined, false)).toEqual([51, 49]);
     expect(

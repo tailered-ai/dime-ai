@@ -11,6 +11,7 @@
 
 import { useState } from "react";
 import { ncaafSchoolName } from "@shared/ncaafSchoolNames";
+import { footballTeamName } from "@shared/footballMarkets";
 import { useIsMdUp } from "@/hooks/useIsMdUp";
 import { trpc } from "@/lib/trpc";
 import { getGameTeamColorsClient } from "@shared/teamColors";
@@ -323,7 +324,9 @@ function LabeledBar({
               color: "var(--dime-text-secondary, #ffffff)",
             }}
           >
-            —
+            {awayPct == null && homePct == null
+              ? "Unavailable"
+              : `${awayPct == null ? "Unavailable" : `${awayPct}%`} / ${homePct == null ? "Unavailable" : `${homePct}%`}`}
           </span>
         </div>
       </div>
@@ -928,7 +931,9 @@ function SplitBar({
               color: "var(--dime-text-secondary, #ffffff)",
             }}
           >
-            —
+            {awayPct == null && homePct == null
+              ? "Unavailable"
+              : `${awayPct == null ? "Unavailable" : `${awayPct}%`} / ${homePct == null ? "Unavailable" : `${homePct}%`}`}
           </span>
         </div>
       )}
@@ -1190,14 +1195,14 @@ export function BettingSplitsPanel({
   const homeSpread = toNum(game.homeBookSpread);
   const bookTotal = toNum(game.bookTotal);
 
-  const isNcaaf = sport === "NCAAF";
+  const isNcaaf = sport === "NCAAF" || sport === "NFL";
   // College display names wrap in the existing market-label rows. Keep the
   // canonical team keys above for colors, and professional abbreviations intact.
   const awayAbbr = isNcaaf
-    ? ncaafSchoolName(game.awayTeam)
+    ? footballTeamName(sport, game.awayTeam)
     : (colors?.away?.abbrev ?? awayAbbrProp ?? awayLabel);
   const homeAbbr = isNcaaf
-    ? ncaafSchoolName(game.homeTeam)
+    ? footballTeamName(sport, game.homeTeam)
     : (colors?.home?.abbrev ?? homeAbbrProp ?? homeLabel);
   const priceLabel = (price: string | null | undefined) => {
     if (!isNcaaf || price == null || price.trim() === "") return "";

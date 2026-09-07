@@ -1,0 +1,35 @@
+{
+  "capturedGames": 31,
+  "pilot": {
+    "gameId": "20260909NFL00061",
+    "sport": "NFL",
+    "awayVsinSlug": "new-england-patriots",
+    "homeVsinSlug": "seattle-seahawks",
+    "awayName": "New England Patriots",
+    "homeName": "Seattle Seahawks",
+    "spreadAwayMoneyPct": 26,
+    "spreadAwayBetsPct": 48,
+    "totalOverMoneyPct": 50,
+    "totalOverBetsPct": 51,
+    "mlAwayMoneyPct": 45,
+    "mlAwayBetsPct": 25,
+    "spreadHomeMoneyPct": 74,
+    "spreadHomeBetsPct": 52,
+    "totalUnderMoneyPct": 50,
+    "totalUnderBetsPct": 49,
+    "mlHomeMoneyPct": 55,
+    "mlHomeBetsPct": 75,
+    "gameDate": "2026-09-09",
+    "splitLines": {
+      "awaySpread": "+3.5",
+      "homeSpread": "-3.5",
+      "total": "44.5"
+    },
+    "provenance": {
+      "sourceUrl": "https://data.vsin.com/betting-splits/?source=DK&sport=NFL",
+      "receivedAt": 1788787394176,
+      "sourceUpdatedAt": null,
+      "responseSha256": "a0048aed9742c37c723e6e8981d24e7c73c0fc1d56a5203bb2353a0767fc9c65"
+    }
+  }
+}

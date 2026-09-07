@@ -1,4 +1,6 @@
 import { presentNcaafDk, presentNcaafDkHistory } from "../shared/ncaafSeptember4Dk";
+import { listOddsHistoryPage } from "./db";
+import { presentFootballMarkets } from "../shared/footballMarkets";
 import { presentNcaafSeptember6 } from "../shared/ncaafSeptember6";
 import { presentNcaafSeptember5, presentNcaafSeptember5History, DATE as NCAAF_SEPT5_DATE } from "../shared/ncaafSeptember5";
 import NCAAF_FEED_TEAMS from "../shared/ncaafFeedTeams.json";
@@ -303,7 +305,7 @@ export const appRouter = router({
         //   MLB (111 games × 175 fields): 425KB → ~250KB
         //   NHL/NBA (fewer games, fewer fields): proportionally smaller
         // Cache stores full Game objects; stripping happens at the wire layer only.
-        const stripped = filtered.map(g => stripSportNullFields(presentNcaafSeptember6(presentNcaafSeptember5(presentNcaafDk(presentNcaafSeptember4(g))))));
+        const stripped = filtered.map(g => stripSportNullFields(presentFootballMarkets(presentNcaafSeptember6(presentNcaafSeptember5(presentNcaafDk(presentNcaafSeptember4(g)))))));
 
         // IP gating (Phase 3): the model projections/edges are the paid product.
         // Anonymous callers get commodity fields only (schedule, book lines,
@@ -354,7 +356,8 @@ export const appRouter = router({
           // and a cache could serve pre-gate bytes after a flip. When not
           // enforcing, the input is byte-identical to before this change.
           const etag = createHash('md5')
-            .update(JSON.stringify(gated.map(g => ({ id: g.id, modelRunAt: g.modelRunAt, gameStatus: g.gameStatus }))))
+            .update(JSON.stringify(gated.map(g => ({ id: g.id, modelRunAt: g.modelRunAt, gameStatus: g.gameStatus,
+              ...(g.sport === "NFL" || g.sport === "NCAAF" ? { football: g.footballMarketState, kickoff: g.footballBinding?.kickoff, awayScore: g.awayScore, homeScore: g.homeScore } : {}) }))))
             .update(enforceMarketGates ? JSON.stringify(marketGates) : '')
             .digest('hex')
             .slice(0, 16);
@@ -384,7 +387,7 @@ export const appRouter = router({
      * the full range of available dates.
      */
     getAvailableDates: publicProcedure
-      .input(z.object({ sport: zodSport }))
+      .input(z.object({ sport: z.enum(["MLB", "NBA", "NHL", "NCAAF", "NFL"]) }))
       .query(async ({ input }) => {
         // [tRPC][games.getAvailableDates] — hot path log silenced (fires every 5min per user)
         const dates = await getAvailableDates(input.sport);
@@ -849,7 +852,7 @@ export const appRouter = router({
     triggerRefresh: ownerProcedure
       .input(
         z.object({
-          sport: z.enum(["NBA", "NHL", "MLB", "NCAAF"]).optional(),
+          sport: z.enum(["NBA", "NHL", "MLB", "NCAAF", "NFL"]).optional(),
         }).optional()
       )
       .mutation(async ({ input }) => {
@@ -869,6 +872,9 @@ export const appRouter = router({
         if (sport === "NCAAF") {
           const { refreshNcaafScoresNow } = await import("./ncaafScoreRefresh");
           await refreshNcaafScoresNow();
+        } else if (sport === "NFL") {
+          const { refreshFootballScoresNow } = await import("./ncaafScoreRefresh");
+          await refreshFootballScoresNow("NFL");
         } else {
           await refreshAllScoresNow();
         }
@@ -878,6 +884,11 @@ export const appRouter = router({
         const oddsResult = result.status === 'fulfilled' ? result.value : null;
         if (sport === "NCAAF" && (!oddsResult?.ncaaf || oddsResult.ncaaf.errors.length || oddsResult.ncaaf.unmapped.length)) {
           throw new TRPCError({ code: "BAD_GATEWAY", message: "NCAAF refresh incomplete; inspect server refresh diagnostics." });
+        }
+        if (sport === "NFL" || sport === "NCAAF") {
+          const football = sport === "NFL" ? oddsResult?.nfl : oddsResult?.ncaaf;
+          if (!football || football.errors.length || football.unmapped.length || ("disabled" in football && football.disabled))
+            throw new TRPCError({ code: "BAD_GATEWAY", message: `${sport} refresh incomplete or disabled; inspect server refresh diagnostics.` });
         }
 
         if (result.status === 'rejected') {
@@ -1143,19 +1154,30 @@ export const appRouter = router({
      * Machine path does not impersonate a human user.
      */
     listForGame: sportsReadProcedure
-      .input(z.object({ gameId: z.number().int().positive() }))
+      .input(z.object({ gameId: z.number().int().positive(), limit: z.number().int().min(1).max(200).optional(), cursor: z.object({ scrapedAt: z.number().int().nonnegative().safe(), id: z.number().int().positive().safe() }).nullish() }))
       .query(async ({ input, ctx }) => {
         console.log(
           `[tRPC][oddsHistory.listForGame] AUTHED principal=${ctx.sportsPrincipal} gameId=${input.gameId}`
         );
-        const rows = await listOddsHistory(input.gameId);
+        const page = await listOddsHistoryPage(input.gameId, input);
+        const rows = page.history;
         // Bind imported source labels to the actual parent event as well as its observation.
         const game = rows.some(row => row.sport === "NCAAF")
           ? (await listGamesByDate(NCAAF_SEPT5_DATE, "NCAAF")).find(game => game.id === input.gameId)
           : undefined;
-        const history = rows.map(row => presentNcaafSeptember5History(presentNcaafDkHistory(presentNcaafSeptember4History(row)), game));
+        const history = rows.map(row => row.providerObservation ? {
+          ...row, ...row.providerObservation.snapshot,
+          sourceLabel: row.provider === "an_dk" ? "Action Network DK" : "VSiN DK",
+          sourceNote: row.provider === "an_dk" ? "DraftKings pregame prices observed through Action Network." : "DraftKings ticket and handle percentages observed through VSiN; prices are collected separately through Action Network.",
+          spreadHomeBetsPct: row.providerObservation.snapshot.spreadHomeBetsPct ?? null,
+          spreadHomeMoneyPct: row.providerObservation.snapshot.spreadHomeMoneyPct ?? null,
+          totalUnderBetsPct: row.providerObservation.snapshot.totalUnderBetsPct ?? null,
+          totalUnderMoneyPct: row.providerObservation.snapshot.totalUnderMoneyPct ?? null,
+          mlHomeBetsPct: row.providerObservation.snapshot.mlHomeBetsPct ?? null,
+          mlHomeMoneyPct: row.providerObservation.snapshot.mlHomeMoneyPct ?? null,
+        } : presentNcaafSeptember5History(presentNcaafDkHistory(presentNcaafSeptember4History(row)), game));
         const hasDkHistory = history.some(row => row.sourceLabel === "VSiN DK");
-        return { history: hasDkHistory ? history.filter(row => row.sourceLabel !== "AN Open") : history };
+        return { history: hasDkHistory ? history.filter(row => row.sourceLabel !== "AN Open") : history, nextCursor: page.nextCursor };
       }),
 
     /**

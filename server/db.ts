@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, isNotNull, isNull, lte, ne, notInArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or, sql } from "drizzle-orm";
 import {
   APP_USER_DEPENDENT_TABLES,
   AppUserHasDataError,
@@ -44,6 +44,8 @@ import {
   truncateForTextColumn,
 } from "./_core/securityEventLimits";
 import { logSafe } from "./_core/logSafe";
+import { createHash } from "node:crypto";
+import { footballBookFields, footballSplitFields, type FootballBinding, type FootballMarketState, type FootballObservation, type FootballSport } from "../shared/footballMarkets";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _db: any = null;
@@ -453,7 +455,7 @@ export async function getAvailableDates(sport: string): Promise<string[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const conditions: any[] = [];
   conditions.push(eq(games.sport, sport));
-  conditions.push(ne(games.gameStatus, 'postponed'));
+  if (sport !== "NFL" && sport !== "NCAAF") conditions.push(ne(games.gameStatus, 'postponed'));
 
   // MLB: apply the same 7-day rolling window used by listGames so the calendar
   // shows the same date range as the feed.
@@ -472,6 +474,8 @@ export async function getAvailableDates(sport: string): Promise<string[]> {
     const plusSeven = new Date(windowStartMs + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     conditions.push(gte(games.gameDate, todayUtc));
     conditions.push(lte(games.gameDate, plusSeven));
+  } else if (sport === 'NCAAF' || sport === 'NFL') {
+    conditions.push(eq(games.publishedToFeed, true));
   } else {
     // Non-MLB: only include games that have live VSiN odds (same gate as listGames)
     conditions.push(or(isNotNull(games.awayBookSpread), isNotNull(games.bookTotal)));
@@ -1894,6 +1898,142 @@ export async function updateAnOdds(
 
 // ─── Odds History helpers ─────────────────────────────────────────────────────
 
+/** Season publisher: insert schedule-only rows or bind/update the exact existing row. */
+export async function reconcileFootballSchedule(sport: FootballSport, rows: InsertGame[], signal?: AbortSignal) {
+  if (new Set(rows.map(row => row.footballScheduleId)).size !== rows.length || rows.some(row => row.sport !== sport || !row.footballScheduleId?.startsWith(`espn:${sport.toLowerCase()}:`) || row.footballBinding?.scheduleKey !== row.footballScheduleId)) throw new Error("Invalid football schedule identities");
+  const db = await getDb();
+  if (!db) throw new Error("Football schedule database unavailable");
+  const result = await db.transaction(async (tx: any) => {
+    signal?.throwIfAborted();
+    const existing: Game[] = await tx.select().from(games).where(eq(games.sport, sport)).for("update");
+    const result = { inserted: 0, bound: 0 };
+    for (const row of rows) {
+      signal?.throwIfAborted();
+      const eventId = row.footballScheduleId!.split(":").at(-1)!;
+      const matches = existing.filter(g => g.footballScheduleId === row.footballScheduleId ||
+        (!g.footballScheduleId && (g.ingestionRunId?.startsWith(`espn:${sport.toLowerCase()}:`) && g.ingestionRunId.endsWith(`:${eventId}`) ||
+          g.gameDate === row.gameDate && g.awayTeam === row.awayTeam && g.homeTeam === row.homeTeam)));
+      if (matches.length > 1) throw new Error(`Duplicate football schedule identity ${row.footballScheduleId}`);
+      const parent = matches[0];
+      if (!parent) {
+        // No model, price, split, or score columns enter this insert.
+        await tx.insert(games).values({ fileId: 0, sport, gameDate: row.gameDate, startTimeEst: row.startTimeEst,
+          awayTeam: row.awayTeam, homeTeam: row.homeTeam, publishedToFeed: true, publishedModel: false,
+          gameStatus: row.gameStatus, footballScheduleId: row.footballScheduleId, footballBinding: row.footballBinding });
+        result.inserted++;
+        continue;
+      }
+      if (parent.awayTeam !== row.awayTeam || parent.homeTeam !== row.homeTeam) throw new Error("Football schedule participant identity changed");
+      if ((parent.footballBinding?.scheduleReceivedAt ?? 0) > (row.footballBinding?.scheduleReceivedAt ?? 0)) continue;
+      const binding = { ...parent.footballBinding, ...row.footballBinding } as FootballBinding;
+      // Scores/lifecycle are owned by the existing score updater; never reset a final to pregame.
+      const patch = { footballScheduleId: row.footballScheduleId, footballBinding: binding,
+        ...(parent.gameStatus === "upcoming" || parent.gameStatus === "postponed" ? { gameDate: row.gameDate, startTimeEst: row.startTimeEst,
+          ...(row.gameStatus === "upcoming" || row.gameStatus === "postponed" ? { gameStatus: row.gameStatus } : {}) } : {}) };
+      await tx.update(games).set(patch).where(eq(games.id, parent.id));
+      result.bound++;
+    }
+    signal?.throwIfAborted();
+    return result;
+  });
+  invalidateGamesCache();
+  return result;
+}
+
+/** Only exact source joins may establish a crosswalk; later revisions cannot silently change it. */
+export async function bindFootballProvider(id: number, expected: FootballBinding, provider: "an_dk" | "vsin_dk", identity: NonNullable<FootballBinding["an"] | FootballBinding["vsin"]>, signal?: AbortSignal): Promise<FootballBinding> {
+  const db = await getDb();
+  if (!db) throw new Error("Football binding database unavailable");
+  const key = provider === "an_dk" ? "an" : "vsin";
+  return db.transaction(async (tx: any) => {
+    const [parent]: [Game | undefined] = await tx.select().from(games).where(eq(games.id, id)).limit(1).for("update");
+    signal?.throwIfAborted();
+    const binding = parent?.footballBinding;
+    if (!binding || parent?.footballScheduleId !== expected.scheduleKey || binding.scheduleRevision !== expected.scheduleRevision || binding.kickoff !== expected.kickoff ||
+        parent.awayTeam !== expected.awayTeam || parent.homeTeam !== expected.homeTeam ||
+        (binding[key] && JSON.stringify(binding[key]) !== JSON.stringify(identity))) throw new Error("Football provider identity changed");
+    const updated = { ...binding, [key]: identity };
+    await tx.update(games).set({ footballBinding: updated, [provider === "an_dk" ? "footballAnEventId" : "footballVsinGameId"]: String(identity.eventId) }).where(eq(games.id, id));
+    signal?.throwIfAborted();
+    return updated;
+  });
+}
+
+/** One verified provider per transaction; the existing parent lock serializes overlapping writers. */
+export async function updateFootballMarket(input: {
+  id: number; sport: FootballSport; binding: FootballBinding;
+  observation: FootballObservation; source: "auto" | "manual"; signal?: AbortSignal;
+}): Promise<boolean> {
+  input.signal?.throwIfAborted();
+  const o = input.observation, b = input.binding;
+  if (!["NFL", "NCAAF"].includes(input.sport) || !["an_dk", "vsin_dk"].includes(o.provider) ||
+      !Number.isSafeInteger(o.receivedAt) || o.receivedAt <= 0 || o.receivedAt > Date.now() ||
+      (o.sourceUpdatedAt !== null && (!Number.isSafeInteger(o.sourceUpdatedAt) || o.sourceUpdatedAt > o.receivedAt)) ||
+      !/^[a-f0-9]{64}$/.test(o.responseSha256)) throw new Error("Invalid football observation provenance");
+  const url = new URL(o.sourceUrl);
+  if (url.protocol !== "https:" || url.username || url.password || (o.provider === "an_dk"
+    ? url.hostname !== "api.actionnetwork.com" || url.pathname !== `/web/v2/scoreboard/${input.sport.toLowerCase()}` || url.searchParams.get("periods") !== "event" || !url.searchParams.get("bookIds")?.split(",").includes("68")
+    : url.hostname !== "data.vsin.com" || url.pathname !== "/betting-splits/" || url.searchParams.get("source") !== "DK" || url.searchParams.get("sport") !== (input.sport === "NFL" ? "NFL" : "CFB"))) throw new Error("Invalid football provider URL");
+  const allowed: readonly string[] = o.provider === "an_dk" ? Object.keys(footballBookFields) : footballSplitFields;
+  for (const [key, value] of Object.entries(o.snapshot)) {
+    if (!allowed.includes(key)) throw new Error(`Foreign football snapshot field: ${key}`);
+    if (value === null) continue;
+    if (o.provider === "vsin_dk") {
+      if (typeof value !== "number" || !Number.isInteger(value) || value < 0 || value > 100) throw new Error("Invalid football split");
+    } else if (typeof value !== "string" || !/^[+-]?\d+(?:\.\d+)?$/.test(value) || value.length > 16 ||
+      ((key.endsWith("Odds") || key.endsWith("ML")) && (!Number.isInteger(Number(value)) || Math.abs(Number(value)) < 100))) throw new Error("Invalid football price");
+  }
+  if (o.snapshot.awaySpread != null && o.snapshot.homeSpread != null && Number(o.snapshot.awaySpread) !== -Number(o.snapshot.homeSpread)) throw new Error("Contradictory football spreads");
+  for (const key of footballSplitFields.filter(key => key.includes("Away") || key.includes("Over"))) {
+    const other = key.replace("Away", "Home").replace("Over", "Under") as typeof footballSplitFields[number];
+    const a = o.snapshot[key], b = o.snapshot[other];
+    if (a != null && b != null && Math.abs(a + b - 100) > 1) throw new Error("Contradictory football split percentages");
+  }
+  const db = await getDb();
+  if (!db) throw new Error("Football market database unavailable");
+  const changed = await db.transaction(async (tx: any) => {
+    const [parent]: [Game | undefined] = await tx.select().from(games).where(eq(games.id, input.id)).limit(1).for("update");
+    input.signal?.throwIfAborted();
+    const locked = parent?.footballBinding;
+    const eventId = o.provider === "an_dk" ? locked?.an?.eventId : locked?.vsin?.eventId;
+    if (!parent || parent.sport !== input.sport || parent.footballScheduleId !== b.scheduleKey ||
+        !locked || locked.scheduleRevision !== b.scheduleRevision || locked.kickoff !== b.kickoff ||
+        parent.awayTeam !== b.awayTeam || parent.homeTeam !== b.homeTeam || String(eventId) !== o.eventId)
+      throw new Error("Football parent/provider identity changed");
+    if (!parent.publishedToFeed || parent.gameStatus !== "upcoming" || b.kickoff == null || Date.now() >= b.kickoff) return false;
+    const previous = parent.footballMarketState?.[o.provider];
+    if (previous && (previous.receivedAt >= o.receivedAt || (previous.sourceUpdatedAt !== null && o.sourceUpdatedAt !== null && previous.sourceUpdatedAt > o.sourceUpdatedAt))) return false;
+    const replayKey = createHash("sha256").update(JSON.stringify([input.id, o.provider, o.eventId, o.receivedAt, o.sourceUpdatedAt, o.responseSha256])).digest("hex");
+    const missing = allowed.filter(key => o.snapshot[key as keyof typeof o.snapshot] == null);
+    const state: FootballMarketState = { ...parent.footballMarketState, [o.provider]: { ...o, missing } };
+    const patch: Partial<InsertGame> = { footballMarketState: state };
+    const history: Record<string, unknown> = {};
+    if (o.provider === "an_dk") {
+      // Keep complete price/threshold groups together. The partial raw observation remains in JSON/history.
+      for (const group of [["awaySpread", "awaySpreadOdds", "homeSpread", "homeSpreadOdds"], ["total", "overOdds", "underOdds"], ["awayML", "homeML"]] as const) {
+        if (group.every(key => o.snapshot[key] != null)) for (const key of group) Object.assign(patch, { [footballBookFields[key]]: o.snapshot[key] });
+      }
+      if (Object.keys(patch).length > 1) patch.oddsSource = "dk";
+      for (const key of Object.keys(footballBookFields) as (keyof typeof footballBookFields)[]) history[key] = o.snapshot[key] ?? null;
+    } else {
+      // Legacy columns only have away/over; independently captured counterparts remain in provider JSON.
+      for (const key of footballSplitFields.filter(key => key.includes("Away") || key.includes("Over"))) {
+        history[key] = o.snapshot[key] ?? null;
+        if (o.snapshot[key] != null) Object.assign(patch, { [key]: o.snapshot[key] });
+      }
+    }
+    await tx.update(games).set(patch).where(eq(games.id, input.id));
+    input.signal?.throwIfAborted();
+    await tx.insert(oddsHistory).values({ gameId: input.id, sport: input.sport, source: input.source,
+      scrapedAt: o.receivedAt, lineSource: "dk", provider: o.provider, replayKey, providerObservation: o, ...history });
+    // Abort before transaction completion rolls both writes back; never release a lock with detached writes.
+    input.signal?.throwIfAborted();
+    return true;
+  });
+  if (changed) invalidateGamesCache();
+  return changed;
+}
+
 /** NCAAF book observations never run the other sports' model-total sync. */
 export async function updateNcaafMarkets(input: {
   id: number; gameDate: string; eventId: string; awayTeam: string; homeTeam: string;
@@ -2059,6 +2199,19 @@ export async function insertOddsHistory(
  * List all odds history snapshots for a game, newest first.
  * Returns at most 200 rows to avoid unbounded result sets.
  */
+export async function listOddsHistoryPage(gameId: number, input: { cursor?: { scrapedAt: number; id: number } | null; limit?: number } = {}) {
+  const limit = input.limit ?? 200, cursor = input.cursor;
+  if (!Number.isInteger(limit) || limit < 1 || limit > 200) throw new Error("Invalid history page size");
+  if (cursor && (!Number.isSafeInteger(cursor.scrapedAt) || cursor.scrapedAt < 0 || !Number.isSafeInteger(cursor.id) || cursor.id < 1)) throw new Error("Invalid history cursor");
+  const db = await getDb();
+  if (!db) throw new Error("Odds history database unavailable");
+  const rows: OddsHistoryRow[] = await db.select().from(oddsHistory).where(and(eq(oddsHistory.gameId, gameId),
+    cursor ? or(lt(oddsHistory.scrapedAt, cursor.scrapedAt), and(eq(oddsHistory.scrapedAt, cursor.scrapedAt), lt(oddsHistory.id, cursor.id))) : undefined
+  )).orderBy(desc(oddsHistory.scrapedAt), desc(oddsHistory.id)).limit(limit + 1);
+  const history = rows.slice(0, limit), last = history.at(-1);
+  return { history, nextCursor: rows.length > limit && last ? { scrapedAt: last.scrapedAt, id: last.id } : null };
+}
+
 export async function listOddsHistory(gameId: number): Promise<OddsHistoryRow[]> {
   const db = await getDb();
   if (!db) {

@@ -24,7 +24,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { useTheme } from "../../contexts/ThemeContext";
 import {
   chatReducer,
@@ -72,7 +72,11 @@ import {
   isPrezAccount,
   type SidebarUser,
 } from "./sidebarIdentity";
-import { bettingSplitsPath, feedModelPath } from "@/lib/feedRoutes";
+import {
+  bettingSplitsPath,
+  feedModelPath,
+  preserveFootballContext,
+} from "@/lib/feedRoutes";
 // Sidebar icon vocabulary (owner directive 2026-07-21): distinctive Lucide
 // picks over the generic ChatGPT pair — TextSearch/PanelLeft* for the header
 // controls, one semantic mark per nav destination, Ellipsis/Trash2/Eraser for
@@ -359,7 +363,8 @@ function DimeSidebar({
       /* no-op */
     }
   };
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
+  const search = useSearch();
   const logoutMutation = trpc.appUsers.logout.useMutation();
 
   const goTo = (href: string) => {
@@ -586,7 +591,7 @@ function DimeSidebar({
             row set. */}
         {(phone ? NAV_ROWS.filter(row => row.pane === "chat") : NAV_ROWS).map(
           row => {
-            const href = row.href();
+            const href = preserveFootballContext(row.href(), location, search);
             const active = row.pane === activePane;
             const RowIcon = row.icon;
             return href === "#" ? (

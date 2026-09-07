@@ -24,7 +24,8 @@ import {
   nflVenues,
 } from "../drizzle/nfl.schema.js";
 import { deriveKickoffDate } from "../shared/kickoffDate.js";
-import { getDb } from "../server/db.js";
+import { getDb, reconcileFootballSchedule } from "../server/db.js";
+import { fetchFootballSchedule } from "../server/footballSchedule.js";
 
 const TAG = "[SeedNfl2026]";
 const DRY_RUN = process.argv.includes("--dry-run");
@@ -37,6 +38,28 @@ const chunk = <T,>(arr: T[], n: number): T[][] =>
   );
 
 async function main() {
+  if (process.argv.includes("--feed-season")) {
+    const season = Number(
+      process.argv.find(arg => arg.startsWith("--season="))?.split("=")[1] ??
+        2026
+    );
+    const schedule = await fetchFootballSchedule(
+      "NFL",
+      `${season}0801-${season + 1}0220`,
+      season
+    );
+    console.log(
+      JSON.stringify({
+        sourceUrl: schedule.sourceUrl,
+        responseSha256: schedule.responseSha256,
+        rows: schedule.rows.length,
+        unresolved: schedule.unresolved,
+      })
+    );
+    if (!DRY_RUN)
+      console.log(await reconcileFootballSchedule("NFL", schedule.rows));
+    return;
+  }
   const venues = load("venues.json");
   const teams = load("teams.json");
   const games = load("games.json");

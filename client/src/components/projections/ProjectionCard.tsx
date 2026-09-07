@@ -6,6 +6,7 @@ import { ProjectionSummary } from "./ProjectionSummary";
 import { SummaryCarousel } from "./SummaryCarousel";
 import type { ProjectionGame } from "./types";
 import "./ProjectionCard.css";
+import type { ReactNode } from "react";
 
 /**
  * ProjectionCard — one game, structured for a 3-second decision (Law v3).
@@ -70,12 +71,14 @@ export function ProjectionCard({
   game,
   defaultMarketsOpen = false,
   onOpen,
+  sourceStatus,
 }: {
   game: ProjectionGame;
   defaultMarketsOpen?: boolean;
   /** Fired when the user opens the market popover (analytics; presentational
    *  component stays pure — the caller owns the emit). Fire-and-forget. */
   onOpen?: () => void;
+  sourceStatus?: ReactNode;
 }) {
   const edges = rankedEdges(game);
   const fallbackCandidates =
@@ -220,6 +223,7 @@ export function ProjectionCard({
         defaultOpen={defaultMarketsOpen}
         onOpen={onOpen}
       />
+      {sourceStatus}
     </article>
   );
 }

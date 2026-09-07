@@ -7,6 +7,7 @@ import {
   parseBettingSplitsPath,
   parseSplitsSport,
   legacyFeedRedirectTarget,
+  preserveFootballContext,
 } from "./feedRoutes";
 
 const SLUG_RE = /^\/feed\/model\/\d{2}-\d{2}-\d{4}$/;
@@ -14,6 +15,38 @@ const SPLITS_SLUG_RE =
   /^\/betting-splits\/(ncaaf|mlb|nhl|nba)-\d{2}-\d{2}-\d{4}$/;
 
 describe("feedRoutes — canonical path builders", () => {
+  it("keeps the football slate and game through Feed/Splits/back/direct links", () => {
+    expect(
+      preserveFootballContext(
+        "/betting-splits/NCAAF",
+        "/feed/model/09-09-2026",
+        "league=NFL&game=4380001"
+      )
+    ).toBe("/betting-splits/nfl-09-09-2026?game=4380001");
+    expect(
+      preserveFootballContext(
+        "/feed/model/mlb",
+        "/betting-splits/nfl-09-09-2026",
+        "game=4380001"
+      )
+    ).toBe("/feed/model/09-09-2026?game=4380001&league=NFL");
+    expect(
+      preserveFootballContext("/chat", "/feed/model/09-09-2026", "league=NFL")
+    ).toBe("/chat");
+    expect(
+      preserveFootballContext(
+        "/betting-splits/NCAAF",
+        "/feed/model/09-09-2026",
+        "league=MLB"
+      )
+    ).toBe("/betting-splits/NCAAF");
+  });
+  it("round-trips the NFL pilot date without switching leagues", () => {
+    expect(parseBettingSplitsPath("nfl-09-09-2026")).toEqual({
+      sport: "NFL",
+      isoDate: "2026-09-09",
+    });
+  });
   it("toFeedSlugDate converts YYYY-MM-DD to MM-DD-YYYY", () => {
     expect(toFeedSlugDate("2026-07-11")).toBe("07-11-2026");
     expect(toFeedSlugDate("2026-01-02")).toBe("01-02-2026");

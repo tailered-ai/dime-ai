@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import { fetchActionNetworkOdds } from "./actionNetworkScraper";
+import { fetchActionNetworkOdds, type AnSport } from "./actionNetworkScraper";
 
 vi.mock("./_core/debugLogger", () => ({ debugLog: vi.fn() }));
 afterEach(() => {
@@ -45,17 +45,17 @@ const event = (spread: unknown[]) => ({
     "30": { event: { spread: [quote({ book_id: 30, value: 17 })] } },
   },
 });
-async function read(spread: unknown[]) {
+async function read(spread: unknown[], sport: AnSport = "ncaaf") {
   vi.stubGlobal(
     "fetch",
     vi.fn(
       async () =>
         new Response(
-          JSON.stringify({ league: { name: "ncaaf" }, games: [event(spread)] })
+          JSON.stringify({ league: { name: sport }, games: [event(spread)] })
         )
     )
   );
-  return (await fetchActionNetworkOdds("ncaaf" as any, "2026-09-06"))[0];
+  return (await fetchActionNetworkOdds(sport, "2026-09-06"))[0];
 }
 
 it("keeps missing NCAAF DraftKings prices unavailable instead of selecting live/alternate/foreign outcomes", async () => {
@@ -70,6 +70,45 @@ it("keeps missing NCAAF DraftKings prices unavailable instead of selecting live/
   ]) {
     expect((await read([quote(invalid)])).dkAwaySpread).toBeNull();
   }
+});
+
+it("uses the same strict pregame DraftKings contract for NFL without rounding model-independent book thresholds", async () => {
+  for (const invalid of [
+    { is_live: true },
+    { is_alt_market: true },
+    { book_id: 30 },
+    { event_id: 999 },
+    { team_id: 360 },
+    { period: "first_half" },
+    { type: "total" },
+    { odds: 0 },
+  ])
+    expect((await read([quote(invalid)], "nfl")).dkAwaySpread).toBeNull();
+  expect(await read([quote({ value: 3.25, odds: 125 })], "nfl")).toMatchObject({
+    awayTeamId: 356,
+    homeTeamId: 360,
+    dkAwaySpread: 3.25,
+    dkAwaySpreadOdds: "+125",
+    provenance: {
+      sourceUrl: expect.stringContaining("/nfl?"),
+      responseSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
+    },
+  });
+  expect((await read([quote(), quote()], "nfl")).dkAwaySpread).toBeNull();
+});
+
+it("stops a football authorization failure without retries and respects cancellation", async () => {
+  const fetcher = vi.fn(async () => new Response("denied", { status: 403 }));
+  vi.stubGlobal("fetch", fetcher);
+  await expect(fetchActionNetworkOdds("nfl", "2026-09-09")).rejects.toThrow(
+    "403"
+  );
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  fetcher.mockClear();
+  await expect(
+    fetchActionNetworkOdds("nfl", "2026-09-09", AbortSignal.abort())
+  ).rejects.toThrow();
+  expect(fetcher).not.toHaveBeenCalled();
 });
 
 it("rejects ambiguous NCAAF outcomes rather than choosing the first price", async () => {

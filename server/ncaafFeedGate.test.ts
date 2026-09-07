@@ -41,14 +41,14 @@ describe("NCAAF feed gates", () => {
 
   it("parses CFB rows from the shared VSiN table", async () => {
     const badge = (value: number) => `<span class="sp-badge">${value}%</span>`;
-    const away = `<tr class="sp-row"><td><button data-gamecode="20260903CFB00206"></button><a class="sp-team-link" href="/cfb/teams/massachusetts-minutemen">Massachusetts Minutemen</a></td><td></td><td></td><td>${badge(87)}</td><td>${badge(89)}</td><td></td><td>${badge(30)}</td><td>${badge(23)}</td><td></td><td>${badge(50)}</td><td>${badge(6)}</td></tr>`;
-    const home = `<tr class="sp-row"><td><a class="sp-team-link" href="/cfb/teams/rutgers-scarlet-knights">Rutgers Scarlet Knights</a></td>${"<td></td>".repeat(10)}</tr>`;
+    const away = `<tr class="sp-row"><td><button data-gamecode="20260903CFB00206"></button><a class="sp-team-link" href="/college-football/teams/massachusetts-minutemen">Massachusetts Minutemen</a></td><td></td><td></td><td>${badge(87)}</td><td>${badge(89)}</td><td></td><td>${badge(30)}</td><td>${badge(23)}</td><td></td><td>${badge(50)}</td><td>${badge(6)}</td></tr>`;
+    const home = `<tr class="sp-row"><td><a class="sp-team-link" href="/college-football/teams/rutgers-scarlet-knights">Rutgers Scarlet Knights</a></td>${"<td></td>".repeat(10)}</tr>`;
     vi.stubGlobal(
       "fetch",
       vi.fn(
         async () =>
           new Response(
-            `<table class="sp-table"><thead><tr><th class="sp-sport-name">CFB</th></tr></thead><tbody>${away}${home}</tbody></table>`,
+            `<table class="sp-table"><thead><tr class="sp-source-dk"><th class="sp-sport-name"><a href="/college-football/games/?gamedate=2026-09-03">CFB</a></th>${["Spread", "Handle", "Bets", "Total", "Handle", "Bets", "Money", "Handle", "Bets"].map(label => `<th>${label}</th>`).join("")}</tr></thead><tbody>${away}${home}</tbody></table>`,
             { status: 200 }
           )
       )

@@ -148,13 +148,14 @@ function StandaloneSplitsRoute({
   const parsed = parseBettingSplitsPath(sportSegment, dateSegment);
   const canonical = canonicalBettingSplitsPath(sportSegment, dateSegment);
 
-  if (!parsed?.isoDate || window.location.pathname !== canonical) {
+  const suppliedPath = `/betting-splits/${sportSegment ?? ""}${dateSegment ? `/${dateSegment}` : ""}`;
+  if (!parsed?.isoDate || suppliedPath !== canonical) {
     // The canonical redirect stamps a date onto every URL, which would make an
     // application-guessed date indistinguishable from a deliberate deep link.
     // Carry the provenance across the redirect on the history entry.
     return (
       <Redirect
-        to={canonical}
+        to={`${canonical}${window.location.search}`}
         replace
         state={{
           splitsDateSource: parsed?.isoDate ? "url-explicit" : "app-default",

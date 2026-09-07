@@ -1,0 +1,35 @@
+{
+  "capturedGames": 54,
+  "pilot": {
+    "gameId": "20260907CFB00153",
+    "sport": "CFB",
+    "awayVsinSlug": "smu-mustangs",
+    "homeVsinSlug": "florida-st-seminoles",
+    "awayName": "SMU Mustangs",
+    "homeName": "Florida ST Seminoles",
+    "spreadAwayMoneyPct": 75,
+    "spreadAwayBetsPct": 76,
+    "totalOverMoneyPct": 65,
+    "totalOverBetsPct": 77,
+    "mlAwayMoneyPct": 60,
+    "mlAwayBetsPct": 60,
+    "spreadHomeMoneyPct": 25,
+    "spreadHomeBetsPct": 24,
+    "totalUnderMoneyPct": 35,
+    "totalUnderBetsPct": 23,
+    "mlHomeMoneyPct": 40,
+    "mlHomeBetsPct": 40,
+    "gameDate": "2026-09-07",
+    "splitLines": {
+      "awaySpread": "-3",
+      "homeSpread": "+3",
+      "total": "53.5"
+    },
+    "provenance": {
+      "sourceUrl": "https://data.vsin.com/betting-splits/?source=DK&sport=CFB",
+      "receivedAt": 1788787393931,
+      "sourceUpdatedAt": null,
+      "responseSha256": "f5e47e6d68900d20f64b2fec305cd4b164d2cf621a38c594430b7e29224ef569"
+    }
+  }
+}

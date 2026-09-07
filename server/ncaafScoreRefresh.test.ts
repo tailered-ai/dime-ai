@@ -5,6 +5,8 @@ import {
   ncaafRefreshDates,
   parseNcaafScoreboard,
   refreshNcaafScoresNow,
+  parseFootballScoreboard,
+  refreshFootballScoresNow,
 } from "./ncaafScoreRefresh";
 
 vi.mock("./db", () => ({
@@ -15,6 +17,56 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.resetAllMocks();
+});
+
+it("exposes namespaced schedule inputs and lets NFL use the same score parser", async () => {
+  const payload = scoreboard([
+    {
+      ...temple,
+      id: "401872656",
+      date: "2026-09-10T00:20Z",
+      competitors: [
+        { id: "17", abbrev: "NE", isHome: false, score: 0 },
+        { id: "26", abbrev: "SEA", isHome: true, score: 3 },
+      ],
+    },
+  ]);
+  expect(parseFootballScoreboard(payload)[0]).toMatchObject({
+    id: "401872656",
+    awayEspnId: 17,
+    homeEspnId: 26,
+    gameDate: "2026-09-09",
+    kickoff: Date.parse("2026-09-10T00:20Z"),
+    awayScore: 0,
+  });
+  vi.mocked(listGamesByDate).mockImplementation(async date =>
+    date === "2026-09-09"
+      ? ([
+          {
+            id: 4380001,
+            sport: "NFL",
+            awayTeam: "NE",
+            homeTeam: "SEA",
+            publishedToFeed: true,
+            gameStatus: "live",
+            footballBinding: { scheduleKey: "espn:nfl:2026:401872656" },
+          },
+        ] as any)
+      : []
+  );
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => ({ ok: true, json: async () => payload }))
+  );
+  await refreshFootballScoresNow("NFL", new Date("2026-09-10T02:00Z"));
+  expect(fetch).toHaveBeenCalledWith(
+    expect.stringContaining("/football/nfl/scoreboard?dates=20260909"),
+    expect.any(Object)
+  );
+  expect(updateNcaaStartTime).toHaveBeenCalledWith(
+    4380001,
+    expect.objectContaining({ awayScore: 0, homeScore: 3 })
+  );
 });
 
 // Minimal fields from ESPN's September 5 Rhode Island–Temple result.
