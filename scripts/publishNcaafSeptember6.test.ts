@@ -7,6 +7,7 @@ import {
   target,
   washingtonOwnerModel,
   louisvilleOwnerModel,
+  wisconsinOwnerModel,
 } from "./publishNcaafSeptember6.mts";
 import { ncaafHelmet } from "../shared/ncaafHelmets";
 
@@ -60,6 +61,60 @@ function fixture() {
   return { an: { league: { name: "ncaaf" }, games }, splits };
 }
 describe("bounded September 6 backend publication", () => {
+  it("publishes Wisconsin prices at 21 while retaining the independent 22.7 projection and replay identity", () => {
+    const row = {
+      id: 4350070,
+      ncaaContestId: "287973",
+      awayTeam: "WIS",
+      homeTeam: "ND",
+      gameDate: "2026-09-06",
+      sport: "NCAAF",
+      publishedToFeed: 1,
+      publishedModel: 0,
+      awayModelSpread: null,
+      homeModelSpread: null,
+      modelTotal: null,
+      modelRunAt: null,
+      modelAwaySpreadOdds: null,
+      modelHomeSpreadOdds: null,
+      modelOverOdds: null,
+      modelUnderOdds: null,
+      modelAwayML: null,
+      modelHomeML: null,
+      awayBookSpread: "21.0",
+      homeBookSpread: "-21.0",
+      bookTotal: "46.5",
+    };
+    const before = structuredClone(row);
+    const fields = wisconsinOwnerModel([row], 1788746000000);
+    expect(fields).toEqual({
+      awayModelSpread: "22.7",
+      homeModelSpread: "-22.7",
+      modelAwaySpreadOdds: "+125",
+      modelHomeSpreadOdds: "-125",
+      modelOverOdds: "+106",
+      modelUnderOdds: "-106",
+      modelAwayML: "+1010",
+      modelHomeML: "-1010",
+      publishedModel: 1,
+      modelRunAt: 1788746000000,
+    });
+    expect(row).toEqual(before);
+    expect(wisconsinOwnerModel([{ ...row, ...fields }], 1788746100000)).toEqual(
+      fields
+    );
+    for (const change of [
+      { id: 4350071 },
+      { ncaaContestId: "287972" },
+      { gameDate: "2026-09-05" },
+      { modelHomeSpreadOdds: "-110" },
+      { modelTotal: "46.6" },
+    ])
+      expect(() =>
+        wisconsinOwnerModel([{ ...row, ...change }], 1788746000000)
+      ).toThrow();
+    expect(() => wisconsinOwnerModel([row, row], 1788746000000)).toThrow();
+  });
   it("publishes Louisville fair lines and moneylines only, with exact identity and replay guards", () => {
     const row = {
       id: 4350071,

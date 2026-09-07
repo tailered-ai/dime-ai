@@ -12,6 +12,7 @@ import {
   rankedEdges,
   rankedNoEdgeCandidates,
 } from "./ProjectionCard";
+import { presentNcaafSeptember6 } from "../../../../shared/ncaafSeptember6";
 
 const row = {
   id: 1,
@@ -82,6 +83,59 @@ function adapted(overrides: Partial<typeof row> = {}) {
 }
 
 describe("NCAAF model odds priced at the supplied attachment lines", () => {
+  it("keeps Wisconsin owner total prices at their distinct thresholds instead of relabelling Under 46.6", () => {
+    const input = presentNcaafSeptember6({
+      ...row,
+      id: 4350070,
+      gameDate: "2026-09-06",
+      ncaaContestId: "287973",
+      awayTeam: "WIS",
+      homeTeam: "ND",
+      publishedModel: 1,
+      modelRunAt: 1788746000000,
+      awayModelSpread: "22.7",
+      homeModelSpread: "-22.7",
+      modelTotal: null,
+      modelAwaySpreadOdds: "+125",
+      modelHomeSpreadOdds: "-125",
+      modelOverOdds: "+106",
+      modelUnderOdds: "-106",
+      modelAwayML: "+1010",
+      modelHomeML: "-1010",
+      awayBookSpread: "21.0",
+      homeBookSpread: "-21.0",
+      bookTotal: "46.5",
+    });
+    const card = ncaafRowToCard(input as never);
+    const game = presentationToProjectionGame(sportAdapters.NCAAF(card));
+    expect(
+      game.markets[0].sides.map(s => [s.modelPrice, s.comparable])
+    ).toEqual([
+      [125, true],
+      [-125, true],
+    ]);
+    expect(
+      game.markets[1].sides.map(s => [
+        s.modelPrice,
+        s.modelLineLabel,
+        s.comparable,
+      ])
+    ).toEqual([
+      [106, "O 46.5", true],
+      [-106, "U 46.6", false],
+    ]);
+    const $ = load(
+      renderToStaticMarkup(
+        createElement(MarketTable, { market: game.markets[1] })
+      )
+    );
+    expect($("tbody tr").eq(0).find("td").eq(1).text()).toContain("46.5(+106)");
+    expect($("tbody tr").eq(1).find("td").eq(1).text()).toContain("46.5(—)");
+    expect($("tbody tr").eq(1).find("td").eq(1).text()).toContain(
+      "U 46.6: -106"
+    );
+    expect(game.markets[2].sides.map(s => s.modelPrice)).toEqual([1010, -1010]);
+  });
   it("shows the Book threshold in both columns and keeps the projection separate", () => {
     const input = {
       ...uclaRow,
@@ -194,13 +248,13 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     expect(first.find("th").text()).toBe("Liberty");
     expect(first.find("td").eq(0).text()).toBe("+8.5(-110)");
     expect(first.find("td").eq(1).text()).toBe(
-      "+8.5(—)Pricing unavailable at this line"
+      "+8.5(—)Pricing unavailable at this line · Model at +6.5: -220"
     );
     expect(first.find("td").eq(1).find(".market-table__line").text()).toBe(
       "+8.5"
     );
     expect(first.find("td").eq(1).find(".market-table__basis").text()).toBe(
-      "Pricing unavailable at this line"
+      "Pricing unavailable at this line · Model at +6.5: -220"
     );
     expect($(".market-table__row--signal")).toHaveLength(0);
     expect($("tfoot").text()).toBe("Comparison unavailable");
@@ -385,13 +439,13 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     );
     expect(spread("tbody tr").first().find("th").text()).toBe("Bryant");
     expect(spread("tbody tr").first().find("td").eq(1).text()).toBe(
-      "+8.5(—)Pricing unavailable at this line"
+      "+8.5(—)Pricing unavailable at this line · Model at +37: -220"
     );
     expect(spread("tbody tr").last().find("td").eq(1).text()).toBe(
-      "-8.5(—)Pricing unavailable at this line"
+      "-8.5(—)Pricing unavailable at this line · Model at -37: +220"
     );
     expect(total("tbody tr").first().find("td").eq(1).text()).toBe(
-      "55.5(—)Pricing unavailable at this line"
+      "55.5(—)Pricing unavailable at this line · Model at O 50.5: -220"
     );
     expect(spread("tfoot").text()).toBe("Comparison unavailable");
     expect(total("tfoot").text()).toBe("Comparison unavailable");

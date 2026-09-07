@@ -860,6 +860,68 @@ test.describe("NCAAF Book/Model card summaries", () => {
       await page.keyboard.press("Escape");
       await expect(trigger).toBeFocused();
     });
+  for (const width of [375, 1440])
+    test(`${width}px: Wisconsin preserves all supplied model prices and separate total thresholds`, async ({
+      page,
+    }) => {
+      await stubApi(page, [
+        {
+          ...SEPTEMBER6_NCAAF[1],
+          modelRunAt: 1788746000000,
+          publishedModel: true,
+          awayModelSpread: "22.7",
+          homeModelSpread: "-22.7",
+          modelTotal: null,
+          modelAwaySpreadOdds: "+125",
+          modelHomeSpreadOdds: "-125",
+          modelOverOdds: "+106",
+          modelUnderOdds: "-106",
+          modelAwayML: "+1010",
+          modelHomeML: "-1010",
+          modelPriceBasis: {
+            awaySpread: 21,
+            homeSpread: -21,
+            total: null,
+            overTotal: 46.5,
+            underTotal: 46.6,
+          },
+        },
+      ]);
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`${baseURL}/feed/model/09-06-2026`);
+      const card = page.locator("#dmf-league-NCAAF .projection-card");
+      await expect(card).toContainText("Notre Dame -22.7");
+      await card
+        .getByRole("button", { name: "View full AI model projections" })
+        .click();
+      const dialog = page.getByRole("dialog", {
+        name: "Wisconsin at Notre Dame model projections",
+      });
+      for (const [market, expected] of [
+        ["Spread", ["+21(+125)", "-21(-125)"]],
+        [
+          "Total",
+          [
+            "46.5(+106)",
+            "46.5(—)Pricing unavailable at this line · Model at U 46.6: -106",
+          ],
+        ],
+        ["Moneyline", ["+1010", "-1010"]],
+      ] as const) {
+        if (market !== "Spread")
+          await dialog
+            .getByRole("link", {
+              name: new RegExp(`Show ${market} projections`, "i"),
+            })
+            .click();
+        const rows = dialog.locator("tbody tr");
+        await expect(rows).toHaveCount(2);
+        for (let side = 0; side < 2; side++)
+          await expect(rows.nth(side).locator("td").nth(1)).toHaveText(
+            expected[side]
+          );
+      }
+    });
   test("NCAAF splits cannot claim freshness from another sport's job", async ({
     page,
   }) => {

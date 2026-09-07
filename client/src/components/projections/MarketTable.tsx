@@ -100,6 +100,8 @@ export function MarketTable({ market }: { market: ProjectionMarket }) {
                     {side.comparable === false && side.modelPrice != null && (
                       <span className="market-table__basis">
                         Pricing unavailable at this line
+                        {side.modelLineLabel &&
+                          ` · Model at ${side.modelLineLabel}: ${fmtPrice(side.modelPrice)}`}
                       </span>
                     )}
                   </>

@@ -1,4 +1,5 @@
 import { presentNcaafDk, presentNcaafDkHistory } from "../shared/ncaafSeptember4Dk";
+import { presentNcaafSeptember6 } from "../shared/ncaafSeptember6";
 import { presentNcaafSeptember5, presentNcaafSeptember5History, DATE as NCAAF_SEPT5_DATE } from "../shared/ncaafSeptember5";
 import NCAAF_FEED_TEAMS from "../shared/ncaafFeedTeams.json";
 import { TRPCError } from "@trpc/server";
@@ -297,7 +298,7 @@ export const appRouter = router({
         //   MLB (111 games × 175 fields): 425KB → ~250KB
         //   NHL/NBA (fewer games, fewer fields): proportionally smaller
         // Cache stores full Game objects; stripping happens at the wire layer only.
-        const stripped = filtered.map(g => stripSportNullFields(presentNcaafSeptember5(presentNcaafDk(presentNcaafSeptember4(g)))));
+        const stripped = filtered.map(g => stripSportNullFields(presentNcaafSeptember6(presentNcaafSeptember5(presentNcaafDk(presentNcaafSeptember4(g))))));
 
         // IP gating (Phase 3): the model projections/edges are the paid product.
         // Anonymous callers get commodity fields only (schedule, book lines,

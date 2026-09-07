@@ -548,7 +548,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
 
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 type MlbRow = RouterOutputs["games"]["list"][number] & {
-  modelPriceBasis?: { awaySpread: number; homeSpread: number; total: number } | null;
+  modelPriceBasis?: { awaySpread: number; homeSpread: number; total: number | null; overTotal?: number; underTotal?: number } | null;
   modelBookPrices?: { awaySpreadOdds: string; homeSpreadOdds: string; overOdds: string; underOdds: string } | null;
 };
 type WcMatch = RouterOutputs["wc2026"]["matchesByDate"][number];
@@ -815,12 +815,15 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     { label: homeSp == null ? homeName : `${homeName} ${fmtLine(homeSp)}`, crest: homeCrest, book: n(spreadBookPrices?.homeSpreadOdds ?? g.homeSpreadOdds), model: M(n(g.modelHomeSpreadOdds)), modelLineLabel: basis ? fmtLine(basis.homeSpread) : undefined, comparable: spreadComparable },
   );
   const totalLine = n(g.bookTotal);
-  const totalComparable = totalLine != null && !unknownBasis && (!basis || basis.total === totalLine);
-  const totalBookPrices = basis && totalComparable ? g.modelBookPrices : null;
+  const overBasis = basis?.overTotal ?? basis?.total;
+  const underBasis = basis?.underTotal ?? basis?.total;
+  const overComparable = totalLine != null && !unknownBasis && (!basis || overBasis === totalLine);
+  const underComparable = totalLine != null && !unknownBasis && (!basis || underBasis === totalLine);
+  const totalBookPrices = basis && overComparable && underComparable ? g.modelBookPrices : null;
   const total = twoWayCol(
     "Total",
-    { label: totalLine == null ? "OVER" : `O ${totalLine}`, book: n(totalBookPrices?.overOdds ?? g.overOdds), model: M(n(g.modelOverOdds)), modelLineLabel: basis ? `O ${basis.total}` : undefined, comparable: totalComparable },
-    { label: totalLine == null ? "UNDER" : `U ${totalLine}`, book: n(totalBookPrices?.underOdds ?? g.underOdds), model: M(n(g.modelUnderOdds)), modelLineLabel: basis ? `U ${basis.total}` : undefined, comparable: totalComparable },
+    { label: totalLine == null ? "OVER" : `O ${totalLine}`, book: n(totalBookPrices?.overOdds ?? g.overOdds), model: M(n(g.modelOverOdds)), modelLineLabel: basis && overBasis != null ? `O ${overBasis}` : undefined, comparable: overComparable },
+    { label: totalLine == null ? "UNDER" : `U ${totalLine}`, book: n(totalBookPrices?.underOdds ?? g.underOdds), model: M(n(g.modelUnderOdds)), modelLineLabel: basis && underBasis != null ? `U ${underBasis}` : undefined, comparable: underComparable },
   );
   const awayWp = n(g.modelAwayWinPct);
   const homeWp = n(g.modelHomeWinPct);
@@ -847,7 +850,7 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     };
   });
   total.rows.forEach((side, index) => {
-    const priceLine = unknownBasis ? "line unavailable" : String(basis?.total ?? totalLine ?? "—");
+    const priceLine = unknownBasis ? "line unavailable" : String((index === 0 ? overBasis : underBasis) ?? totalLine ?? "—");
     const projectedTotal = projectionLine(g.modelTotal, false);
     side.lineDisplay = {
       side: index === 0 ? "Over" : "Under",
