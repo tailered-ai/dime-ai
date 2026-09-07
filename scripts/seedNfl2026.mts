@@ -11,7 +11,12 @@ import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { games as feedGames } from "../drizzle/schema.js";
+import {
+  buildNflWeek1FeedRows,
+  planNflWeek1Insertions,
+} from "./nflWeek1Feed.js";
 import {
   nflGames,
   nflPlayers,
@@ -51,11 +56,39 @@ async function main() {
     );
   }
   if (DRY_RUN) {
+    if (process.argv.includes("--feed-week1"))
+      console.log(JSON.stringify(buildNflWeek1FeedRows(games, teams, venues)));
     console.log(`${TAG}[STEP] dry-run: inputs validated, skipping DB writes`);
     return;
   }
   const db = await getDb();
   if (!db) throw new Error(`${TAG} DATABASE_URL not set — cannot seed`);
+
+  if (process.argv.includes("--feed-week1")) {
+    const rows = buildNflWeek1FeedRows(games, teams, venues);
+    // Single writer: run through seed-nfl.yml's non-cancelling concurrency group.
+    // Existing rows are verified, never overwritten (including scores/prices).
+    await db.transaction(async tx => {
+      const existing = await tx
+        .select()
+        .from(feedGames)
+        .where(eq(feedGames.sport, "NFL"))
+        .for("update");
+      for (const row of planNflWeek1Insertions(rows, existing)) {
+        await tx.insert(feedGames).values(row);
+      }
+      const verified = await tx
+        .select()
+        .from(feedGames)
+        .where(eq(feedGames.sport, "NFL"));
+      if (planNflWeek1Insertions(rows, verified).length)
+        throw new Error("NFL Feed verification failed");
+    });
+    console.log(
+      `${TAG}[OUTPUT] NFL Feed Week 1: 16 unique published games verified; existing prices/scores untouched`
+    );
+    return;
+  }
 
   console.log(`${TAG}[STEP] upserting ${venues.length} venues`);
   for (const batch of chunk(venues, 200)) {

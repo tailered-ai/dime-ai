@@ -1,8 +1,13 @@
-name: Seed NFL 2026 (populate nfl_* tables)
+name: Seed NFL 2026
 
 on:
   workflow_dispatch:
     inputs:
+      target:
+        description: "Existing NFL corpus or Week 1 AI Model Projections Feed"
+        type: choice
+        options: [corpus, feed-week1]
+        default: corpus
       dry_run:
         description: "Validate seed files without writing to the database"
         type: boolean
@@ -10,6 +15,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: nfl-2026-seed-single-writer
+  cancel-in-progress: false
 
 jobs:
   seed-nfl:
@@ -28,9 +37,9 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Seed NFL 2026 data
-        run: pnpm exec tsx scripts/seedNfl2026.mts ${{ inputs.dry_run && '--dry-run' || '' }}
+        run: pnpm exec tsx scripts/seedNfl2026.mts ${{ inputs.dry_run && '--dry-run' || '' }} ${{ inputs.target == 'feed-week1' && '--feed-week1' || '' }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}

@@ -218,6 +218,12 @@ html:not(.dark) .projection-card--compact .projection-card__status--live {
   block-size: calc(100% * 384 / 366);
   flex: none;
 }
+/* September 6 artwork already fills its 4:3 canvas; do not crop it. */
+.team-logo-box.team-logo-box--helmet-natural {
+  block-size: 3.5rem;
+  inline-size: calc(3.5rem * 4 / 3);
+}
+.team-logo-box--helmet-natural .team-logo { block-size: 100%; }
 /* A crisp alpha-following keyline, not a rectangular image border. Dark is
    the black surface; Light keeps the original mark. (Two-mode system,
    2026-07-31 — the retired "system" selectors are gone.) */
@@ -1289,3 +1295,18 @@ html:not(.dark) .projection-card__live-dot {
 
 /* Keep the scheduled NCAAF model context complete. */
 .projection-card--ncaaf .matchup__venue { white-space: normal; overflow: visible; overflow-wrap: anywhere; text-overflow: clip; }
+
+/* NCAAF mobile matchup: keep the helmets near the names, with scores below. */
+@media (max-width: 767.98px) {
+  .projection-card--ncaaf .matchup__grid,
+  .projection-card:has(.team-logo-box--nfl-helmet) .matchup__grid {
+    inline-size: min(100%, 26rem);
+    justify-self: center;
+  }
+  .projection-card--ncaaf .matchup__team,
+  .projection-card:has(.team-logo-box--nfl-helmet) .matchup__team { flex-direction: column; gap: 2px; }
+  .projection-card--ncaaf .matchup__score,
+  .projection-card:has(.team-logo-box--nfl-helmet) .matchup__score { order: 1; }
+}
+.team-logo-box--nfl-helmet { width: 3.5rem; height: 3.5rem; aspect-ratio: 1; }
+.team-logo-box--nfl-helmet .team-logo { width: 100%; height: 100%; object-fit: contain; }

@@ -87,10 +87,10 @@ describe("compact feed card adaptation", () => {
       ).toEqual([
         "Bryant",
         "+37.5 (-108)",
-        "+26.7",
+        "+37.5 (—)",
         "Army",
         "-37.5 (-112)",
-        "-26.7",
+        "-37.5 (—)",
       ]);
       expect($("table, .market-table__basis, .edge-indicator")).toHaveLength(0);
       expect($(".summary--comparison").text()).not.toMatch(/at [+-]37|289/);
@@ -106,7 +106,7 @@ describe("compact feed card adaptation", () => {
       )
     );
     expect($("tbody tr").first().find("td").eq(1).text()).toBe(
-      "+37.5(—)Pricing unavailable at this line · Model at +37: -289"
+      "+37.5(—)Fair projection: +26.7Pricing unavailable at this line · Model at +37: -289"
     );
     expect($("tfoot").text()).toBe("Comparison unavailable");
     expect($(".market-table__row--signal")).toHaveLength(0);
@@ -135,7 +135,7 @@ describe("compact feed card adaptation", () => {
     const $ = render(game);
     expect($(".summary__item--model dd").first().text()).toBe("—");
     expect($(".summary__comparison-status").first().text()).toBe(
-      "Comparison unavailable"
+      "Model pricing unavailable"
     );
     expect($(".summary").text()).not.toContain("-289");
   });

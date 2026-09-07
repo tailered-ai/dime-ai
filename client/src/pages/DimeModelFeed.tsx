@@ -44,6 +44,7 @@ import type {
 import { sportAdapters } from "@/lib/sport/presentation";
 import { ncaafSchoolName } from "@shared/ncaafSchoolNames";
 import { ncaafHelmet } from "@shared/ncaafHelmets";
+import nflTeams from "../../../scripts/data/nfl-2026/teams.json";
 import { MLB_BY_ABBREV } from "@shared/mlbTeams";
 import { formatGameTime, timeToMinutes } from "@/lib/gameUtils";
 import {
@@ -163,19 +164,19 @@ function SkeletonRow() {
 export function parseFeedModelPath(
   sportSeg: string | undefined,
   dateSeg: string | undefined,
-): { sport: "MLB" | "WC" | "NCAAF"; isoDate: string | null } | null {
+): { sport: "MLB" | "WC" | "NCAAF" | "NFL"; isoDate: string | null } | null {
   let sport = (sportSeg ?? "").toLowerCase();
   let date = dateSeg ?? "";
   if (!date && /^\d{2}-\d{2}-\d{4}$/.test(sport)) {
     date = sport;
     sport = "mlb";
   }
-  if (!date && /^(mlb|wc|ncaaf)-\d{2}-\d{2}-\d{4}$/.test(sport)) {
+  if (!date && /^(mlb|wc|ncaaf|nfl)-\d{2}-\d{2}-\d{4}$/.test(sport)) {
     date = sport.slice(sport.indexOf("-") + 1);
     sport = sport.slice(0, sport.indexOf("-"));
   }
-  if (sport !== "mlb" && sport !== "wc" && sport !== "ncaaf") return null;
-  const sportCode = sport === "mlb" ? ("MLB" as const) : sport === "wc" ? ("WC" as const) : ("NCAAF" as const);
+  if (sport !== "mlb" && sport !== "wc" && sport !== "ncaaf" && sport !== "nfl") return null;
+  const sportCode = sport.toUpperCase() as "MLB" | "WC" | "NCAAF" | "NFL";
   if (!date) return { sport: sportCode, isoDate: null };
   const m = /^(\d{2})-(\d{2})-(\d{4})$/.exec(date);
   if (!m) return null;
@@ -191,9 +192,10 @@ export function parseFeedModelPath(
  *  text. MLB uses the actual current mark (navy/red, owner directive
  *  2026-07-21) — official mlbstatic league SVG with the bundled recolored mark
  *  as offline fallback before hiding. */
-function LeagueMark({ league }: { league: "WC" | "MLB" | "NCAAF" }) {
+function LeagueMark({ league }: { league: "WC" | "MLB" | "NCAAF" | "NFL" }) {
+  if (league === "NFL") return <span className="dmf-lglogo dmf-micro" aria-hidden="true">NFL</span>;
   if (league === "NCAAF") {
-    return <span className="dmf-lglogo dmf-micro" aria-hidden="true">CFB</span>;
+    return <span className="dmf-lglogo dmf-lglogo--cfp" aria-hidden="true"><img src="/brand/cfp-logo.svg" width="120" height="54" alt="" loading="lazy" /></span>;
   }
   return (
     <span className={`dmf-lglogo${league === "MLB" ? " dmf-lglogo--mlb" : ""}`} aria-hidden="true">
@@ -297,7 +299,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
   const needsSportCanonicalize =
     parsed !== null &&
     parsed.isoDate !== null &&
-    /^(mlb|wc|ncaaf)(?:-|$)/i.test(props.sport ?? "");
+    /^(mlb|wc|ncaaf|nfl)(?:-|$)/i.test(props.sport ?? "");
   useEffect(() => {
     if (needsDateCanonicalize || needsSportCanonicalize) {
       navigate(resolveRouteHref(feedModelPath("MLB", parsed?.isoDate ?? today) + (search ? `?${search}` : "")), { replace: true });
@@ -428,7 +430,7 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
               (tablet/desktop have no bottom tab bar; non-owners never do) */}
           {!props.embeddedInShell && (
             <nav className="dmf-nav" aria-label="Dime surfaces">
-              <Link href={bettingSplitsPath()} className="dmf-navlink">Splits</Link>
+              <Link href={bettingSplitsPath(filters.league === "MLB" ? "MLB" : "NCAAF", isoDate)} className="dmf-navlink">Splits</Link>
               <Link href="/chat" className="dmf-navlink">Chat</Link>
               <Link href="/profile" className="dmf-navlink">Profile</Link>
             </nav>
@@ -517,7 +519,9 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
                       ? sportAdapters.SOCCER(g, { competition: "World Cup" })
                       : section.key === "NCAAF"
                         ? sportAdapters.NCAAF(g, { competition: "NCAAF" })
-                        : sportAdapters.MLB(g, { competition: "MLB" });
+                        : section.key === "NFL"
+                          ? sportAdapters.NFL(g, { competition: "NFL" })
+                          : sportAdapters.MLB(g, { competition: "MLB" });
                     const projectionGame = presentationToProjectionGame(model);
                     return (
                       <ProjectionCard
@@ -790,12 +794,26 @@ export function mlbRowToCard(
 
 /** NCAAF uses the shared games row, but compares book prices only to fair prices. */
 export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
+  return footballRowToCard(g, "NCAAF");
+}
+
+export function nflRowToCard(g: MlbRow): FeedCardSpec {
+  return footballRowToCard(g, "NFL");
+}
+
+function footballRowToCard(g: MlbRow, league: "NCAAF" | "NFL"): FeedCardSpec {
   const awayAbbr = (g.awayTeam ?? "").toUpperCase();
   const homeAbbr = (g.homeTeam ?? "").toUpperCase();
-  const awayName = ncaafSchoolName(awayAbbr);
-  const homeName = ncaafSchoolName(homeAbbr);
-  const awayCrest: CrestSpec = { code: awayAbbr.slice(0, 4), url: ncaafHelmet(awayAbbr) };
-  const homeCrest: CrestSpec = { code: homeAbbr.slice(0, 4), url: ncaafHelmet(homeAbbr) };
+  const name = (abbr: string) => league === "NFL"
+    ? nflTeams.find(team => team.abbreviation === abbr)?.displayName ?? abbr
+    : ncaafSchoolName(abbr);
+  const helmet = (abbr: string) => league === "NFL"
+    ? nflTeams.some(team => team.abbreviation === abbr) ? `/brand/nfl-helmets/${abbr}.webp` : null
+    : ncaafHelmet(abbr);
+  const awayName = name(awayAbbr);
+  const homeName = name(homeAbbr);
+  const awayCrest: CrestSpec = { code: awayAbbr.slice(0, 4), url: helmet(awayAbbr) };
+  const homeCrest: CrestSpec = { code: homeAbbr.slice(0, 4), url: helmet(homeAbbr) };
   const status: GameStatus =
     g.gameStatus === "live" ? "live" :
     g.gameStatus === "final" ? "final" :
@@ -862,7 +880,7 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
   ml.rows.forEach((side, index) => {
     side.lineDisplay = { side: [awayName, homeName][index] };
   });
-  const markets = n(g.awayML) == null && n(g.homeML) == null
+  const markets = league === "NCAAF" && [n(g.awayML), n(g.homeML), M(n(g.modelAwayML)), M(n(g.modelHomeML))].every(value => value == null)
     ? [spread, total]
     : [spread, total, ml];
   let best: BestPick | null = null;
@@ -871,13 +889,13 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     id: String(g.id ?? `${awayAbbr}-${homeAbbr}-${g.gameDate ?? ""}-${g.startTimeEst ?? ""}`),
     status,
     sourceGameId: Number.isInteger(g.id) ? g.id : undefined,
-    liveLabel: status === "live" ? "LIVE" : null,
+    liveLabel: status === "live" ? `LIVE${g.gameClock ? ` · ${g.gameClock}` : ""}` : null,
     timeLabel: status === "suspended" ? "SUSPENDED" : status === "postponed" ? "POSTPONED" : status === "final" ? "FINAL" : formatGameTime(g.startTimeEst),
-    away: { name: awayName, crest: awayCrest },
-    home: { name: homeName, crest: homeCrest },
-    meta: g.neutralSite ? "NCAAF · Neutral site" : "NCAAF",
+    away: { name: awayName, crest: awayCrest, score: ["live", "final", "suspended"].includes(status) && g.awayScore != null ? String(g.awayScore) : null },
+    home: { name: homeName, crest: homeCrest, score: ["live", "final", "suspended"].includes(status) && g.homeScore != null ? String(g.homeScore) : null },
+    meta: g.neutralSite ? `${league} · Neutral site` : league,
     venueLine: hasModel
-      ? `Model: ${homeName} ${fmtLine(n(g.homeModelSpread) ?? 0)} · Total ${n(g.modelTotal) ?? "—"}`
+      ? `Model: ${homeName} ${projectionLine(g.homeModelSpread)} · Total ${n(g.modelTotal) ?? "—"}`
       : g.venue || null,
     markets,
     modelPublished: hasModel,
@@ -1193,7 +1211,7 @@ export function slateStatusRank(card: Pick<FeedCardSpec, "status">): number {
 
 /** One league group in the combined slate. */
 export interface FeedSection {
-  key: "WC" | "MLB" | "NCAAF";
+  key: "WC" | "MLB" | "NCAAF" | "NFL";
   /** Full spelled-out league name for the collapsible header (owner directive
    *  2026-07-18: no game counts in the header — the name owns the width). */
   label: string;
@@ -1206,9 +1224,11 @@ export function buildFeedSections(
   wcCards: FeedCardSpec[],
   mlbCards: FeedCardSpec[],
   ncaafCards: FeedCardSpec[] = [],
+  nflCards: FeedCardSpec[] = [],
 ): FeedSection[] {
   const sections: FeedSection[] = [];
-  if (ncaafCards.length > 0) sections.push({ key: "NCAAF", label: "College Football (NCAAF)", cards: ncaafCards });
+  if (ncaafCards.length > 0) sections.push({ key: "NCAAF", label: "College Football", cards: ncaafCards });
+  if (nflCards.length > 0) sections.push({ key: "NFL", label: "National Football League", cards: nflCards });
   if (wcCards.length > 0) sections.push({ key: "WC", label: "2026 FIFA World Cup", cards: wcCards });
   if (mlbCards.length > 0) sections.push({ key: "MLB", label: "Major League Baseball (MLB)", cards: mlbCards });
   return sections;
@@ -1243,6 +1263,10 @@ function useFeedCards(
       refetchInterval: 60 * 1000,
       staleTime: 60 * 1000,
     },
+  );
+  const nflQuery = trpc.games.list.useQuery(
+    { sport: "NFL", gameDate: isoDate },
+    { enabled: !!isoDate, refetchOnWindowFocus: false, refetchInterval: 60_000, staleTime: 60_000 },
   );
   const scheduledMlbGameIds = useMemo(
     () =>
@@ -1283,20 +1307,24 @@ function useFeedCards(
       .sort((a, b) => timeToMinutes(a.startTimeEst) - timeToMinutes(b.startTimeEst))
       .map((game) => mlbRowToCard(game, lineupByGameId[game.id]))
       .sort((a, b) => slateStatusRank(a) - slateStatusRank(b));
-    return buildFeedSections(wcCards, mlbCards, ncaafCards);
-  }, [wcQuery.data, mlbQuery.data, mlbLineupsQuery.data, ncaafQuery.data, isoDate]);
+    const nflCards = [...((nflQuery.data ?? []) as MlbRow[])]
+      .sort((a, b) => timeToMinutes(a.startTimeEst) - timeToMinutes(b.startTimeEst))
+      .map(nflRowToCard);
+    return buildFeedSections(wcCards, mlbCards, ncaafCards, nflCards);
+  }, [wcQuery.data, mlbQuery.data, mlbLineupsQuery.data, ncaafQuery.data, nflQuery.data, isoDate]);
 
   // Date is part of every query key. Never render a previous date as placeholder
   // data; same-date cache remains available during the regular background poll.
-  const isLoading = wcQuery.isLoading || ncaafQuery.isLoading || mlbQuery.isLoading;
+  const isLoading = wcQuery.isLoading || ncaafQuery.isLoading || mlbQuery.isLoading || nflQuery.isLoading;
   const gamesCount = sections.reduce((n, s) => n + s.cards.length, 0);
   // Outage surface (audit D-FEED-ERROR / page law "query errors must be
   // surfaced"): with no data to show and every league query failed, the feed
   // must say so instead of claiming an empty slate.
-  const isError = mlbQuery.isError || ncaafQuery.isError || wcQuery.isError;
+  const isError = mlbQuery.isError || ncaafQuery.isError || wcQuery.isError || nflQuery.isError;
   const retry = () => {
     void mlbQuery.refetch();
     void ncaafQuery.refetch();
+    void nflQuery.refetch();
     void wcQuery.refetch();
   };
   return { sections, isLoading, gamesCount, isError, retry };

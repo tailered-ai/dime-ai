@@ -81,7 +81,7 @@ it("keeps NCAAF diagnostic IDs and provider errors out of public refresh status"
   expect(result?.ncaaf?.unmapped).toContain(parent.id);
   expect(result?.ncaaf?.errors).toContain("private provider detail");
   const status = refresh.getLastRefreshResult();
-  expect(status).toMatchObject({ refreshedAt: expect.any(String), updated: 0 });
+  expect(status).toMatchObject({ refreshedAt: expect.any(String), updated: 1 });
   expect(status).not.toHaveProperty("ncaaf");
   expect(status).not.toHaveProperty("ncaafTomorrow");
   expect(JSON.stringify(status)).not.toContain("private provider detail");
@@ -156,14 +156,38 @@ it("rejects wrong or duplicate provider identities and changed kickoffs", async 
   expect(updateNcaafMarkets).not.toHaveBeenCalled();
 });
 
-it("retains prior data on provider failure and freezes live or unmapped games", async () => {
+it.each(["an", "vsin"] as const)(
+  "refreshes the healthy provider when %s is unavailable",
+  async failed => {
+    fixture();
+    vi.mocked(
+      failed === "an" ? fetchActionNetworkOdds : scrapeVsinBettingSplits
+    ).mockRejectedValueOnce(new Error("provider outage"));
+    const result = await refreshNcaafMarkets(DATE, "today", "auto");
+    expect(result).toMatchObject({ updated: 1, errors: ["provider outage"] });
+    expect(updateNcaafMarkets).toHaveBeenCalledWith(
+      expect.objectContaining({
+        providers: { an: failed !== "an", vsin: failed !== "vsin" },
+        snapshot: expect.objectContaining(
+          failed === "an" ? { spreadAwayBetsPct: 0 } : { total: "51.5" }
+        ),
+      })
+    );
+  }
+);
+
+it("does not write on a complete provider outage and freezes live or unmapped games", async () => {
   fixture();
+  vi.mocked(fetchActionNetworkOdds).mockRejectedValueOnce(
+    new Error("AN outage")
+  );
   vi.mocked(scrapeVsinBettingSplits).mockRejectedValueOnce(
-    new Error("provider outage")
+    new Error("VSiN outage")
   );
-  expect((await refreshNcaafMarkets(DATE, "today", "auto")).errors).toContain(
-    "provider outage"
-  );
+  expect(await refreshNcaafMarkets(DATE, "today", "auto")).toMatchObject({
+    updated: 0,
+    errors: ["AN outage", "VSiN outage"],
+  });
   const { parent } = fixture();
   parent.gameStatus = "live";
   expect(await refreshNcaafMarkets(DATE, "today", "auto")).toMatchObject({

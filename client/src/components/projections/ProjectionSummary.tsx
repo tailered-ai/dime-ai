@@ -16,8 +16,8 @@ import type { ProjectionMarket, ProjectionTeam } from "./types";
  * ("Yankees ML", "Under 9"), so spellOutPick is the safety net for any label
  * that still arrives compact.
  */
-function fmtPrice(p: number): string {
-  if (!Number.isFinite(p)) return "—";
+function fmtPrice(p: number | null | undefined): string {
+  if (typeof p !== "number" || !Number.isFinite(p)) return "—";
   return p > 0 ? `+${p}` : `${p}`;
 }
 
@@ -80,14 +80,18 @@ export function ProjectionSummary({
     ? comparisonMarkets?.find(market => market.sides.length > 0)
     : undefined;
   const side = comparison?.sides[0];
-  // A projected line is not the threshold that priced model odds. Show the
-  // projection alone here; the full table retains the odds and explicit basis.
-  const modelProjection = modelPublished ? side?.lineDisplay?.model : undefined;
+  // Like the full table, compare at the Book threshold. A fair projection
+  // is not a probability or a price; it remains separately labeled in details.
+  const modelPrice =
+    modelPublished &&
+    side?.comparable !== false &&
+    side?.lineDisplay?.book !== "—"
+      ? side?.modelPrice
+      : null;
   const compactModel =
-    modelProjection ??
-    (modelPublished && side?.comparable !== false && side?.modelPrice != null
-      ? fmtPrice(side.modelPrice)
-      : "—");
+    side?.lineDisplay?.book != null
+      ? `${side.lineDisplay.book} (${fmtPrice(modelPrice)})`
+      : fmtPrice(modelPrice);
   return (
     <div
       className={`summary ${side ? "summary--comparison" : insight ? "summary--priced" : "summary--empty"}`}
@@ -122,9 +126,7 @@ export function ProjectionSummary({
                   </dd>
                 </div>
                 <div className="summary__item summary__item--model">
-                  <dt className="ds-label">
-                    {modelProjection != null ? "Model line" : "Model"}
-                  </dt>
+                  <dt className="ds-label">Model</dt>
                   <dd className="odds-value">{compactModel}</dd>
                 </div>
               </>
@@ -177,8 +179,8 @@ export function ProjectionSummary({
                 >
                   {!modelPublished
                     ? "Model unavailable"
-                    : modelProjection != null && modelProjection !== "—"
-                      ? "Projection only"
+                    : modelPrice == null
+                      ? "Model pricing unavailable"
                       : "Comparison unavailable"}
                 </span>
               )}

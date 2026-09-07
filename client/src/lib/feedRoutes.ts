@@ -12,7 +12,7 @@
  */
 import { todayUTC } from "@/components/CalendarPicker";
 
-export type FeedSport = "MLB" | "WC" | "NCAAF";
+export type FeedSport = "MLB" | "WC" | "NCAAF" | "NFL";
 export type SplitsSport = "NCAAF" | "MLB" | "NHL" | "NBA";
 
 const SPLITS_SPORTS: readonly SplitsSport[] = ["NCAAF", "MLB", "NHL", "NBA"];

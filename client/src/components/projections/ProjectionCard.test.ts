@@ -92,6 +92,53 @@ describe("TeamLogoMark — whitespace-free optical sizing and dark contrast", ()
     expect(cardCss).toContain(".team-logo-box--mono { aspect-ratio: 1; }");
   });
 
+  it("recognizes all six September 6 helmets without applying the September 5 crop", () => {
+    for (const school of [
+      "washington-state",
+      "washington",
+      "wisconsin",
+      "notre-dame",
+      "louisville",
+      "ole-miss",
+    ]) {
+      const html = renderToStaticMarkup(
+        createElement(TeamLogoMark, {
+          team: {
+            abbr: school,
+            name: school,
+            logo: `/brand/ncaaf-helmets/sept6-${school}.png`,
+            color: null,
+          },
+        })
+      );
+      expect(html).toContain("team-logo-box--helmet-natural");
+      expect(html).toContain('width="1448" height="1086"');
+      expect(html).not.toContain("team-logo-box--dark-outline");
+    }
+    expect(cardCss).toMatch(
+      /\.team-logo-box\.team-logo-box--helmet-natural\s*\{[^}]*block-size:\s*3\.5rem;[^}]*inline-size:\s*calc\(3\.5rem \* 4 \/ 3\);/
+    );
+    expect(cardCss).toMatch(
+      /\.team-logo-box--helmet-natural \.team-logo\s*\{[^}]*block-size:\s*100%;/
+    );
+  });
+
+  it("centers a bounded NCAAF mobile matchup and stacks scores without changing MLB", () => {
+    const mobileNcaaf = cardCss.slice(
+      cardCss.indexOf("/* NCAAF mobile matchup")
+    );
+    expect(mobileNcaaf).toMatch(/@media \(max-width: 767\.98px\)/);
+    expect(mobileNcaaf).toMatch(
+      /\.projection-card--ncaaf \.matchup__grid[^{}]*\{[^}]*inline-size:\s*min\(100%, 26rem\);[^}]*justify-self:\s*center;/
+    );
+    expect(mobileNcaaf).toMatch(
+      /\.projection-card--ncaaf \.matchup__team[^{}]*\{[^}]*flex-direction:\s*column;/
+    );
+    expect(mobileNcaaf).toMatch(
+      /\.projection-card--ncaaf \.matchup__score[^{}]*\{[^}]*order:\s*1;/
+    );
+  });
+
   it("outlines only allowlisted dark marks on Dark and never Light (two-mode, 2026-07-31)", () => {
     expect(renderLogo("NYY")).toContain("team-logo-box--dark-outline");
     expect(renderLogo("CHC")).not.toContain("team-logo-box--dark-outline");
@@ -646,7 +693,7 @@ describe("ProjectionCard — unplayable cards carry no mint (owner directive 202
     // The pick, the percentage and the popover trigger all still render.
     expect(html).toContain("Under 7"); // the fixture's edge side, spelled out
     expect(html).toContain("edge-indicator");
-    expect(html).toContain("View full AI model projections");
+    expect(html).toContain("View full AI Model Projections");
     // The lifecycle state still leads the card's accessible name (2026-08-05),
     // so the announcement and the visual continue to agree.
     expect(html).toContain('aria-label="Giants at Mariners, POSTPONED"');
@@ -905,7 +952,7 @@ describe("ProjectionCard — matchup block format (owner directive 2026-07-17)",
     expect(marketHtml).toContain(">Book<");
     expect(marketHtml).toContain(">Model<");
     expect(marketHtml).not.toMatch(/Sportsbook price|Model fair price/);
-    expect(html).toContain("View full AI model projections");
+    expect(html).toContain("View full AI Model Projections");
     expect(html).toContain('aria-haspopup="dialog"');
     expect(html).not.toContain("<details");
   });
@@ -1737,7 +1784,7 @@ describe("ProjectionCard — market-trigger hover (Round 4 Wave 3, item 7)", () 
     expect(cardCss).toMatch(
       /\.projection-card__markets-toggle \{[^}]*cursor: pointer;/
     );
-    expect(render(mlbFixture())).toContain("View full AI model projections");
+    expect(render(mlbFixture())).toContain("View full AI Model Projections");
     expect(render(mlbFixture())).toContain("projection-card__markets-icon");
     expect(render(mlbFixture())).not.toContain("projection-card__markets-chev");
     expect(render(mlbFixture())).not.toContain("<summary");

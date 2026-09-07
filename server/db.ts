@@ -310,13 +310,15 @@ export async function listGames(opts?: { sport?: string; gameDate?: string; forc
   // including mixed-sport queries where opts.sport is absent.
   conditions.push(or(
     eq(games.sport, 'NCAAF'),
+    eq(games.sport, 'NFL'),
     and(ne(games.gameStatus, 'postponed'), ne(games.gameStatus, 'suspended')),
   )!);
 
   // Public feed: show all games that have live VSiN odds (regardless of publishedToFeed)
   // MLB games are seeded from the schedule and may not have odds yet — show them regardless
   if (opts?.sport !== 'MLB') {
-    conditions.push(or(isNotNull(games.awayBookSpread), isNotNull(games.bookTotal))!);
+    // An explicitly published NCAAF game remains visible during a provider outage.
+    conditions.push(or(isNotNull(games.awayBookSpread), isNotNull(games.bookTotal), and(inArray(games.sport, ['NCAAF', 'NFL']), eq(games.publishedToFeed, true)))!);
   }
 
   const rows = await db
@@ -1896,8 +1898,11 @@ export async function updateAnOdds(
 export async function updateNcaafMarkets(input: {
   id: number; gameDate: string; eventId: string; awayTeam: string; homeTeam: string;
   kickoff: number; capturedAt: number; source: "auto" | "manual";
+  providers?: { an: boolean; vsin: boolean };
   snapshot: Omit<Parameters<typeof insertOddsHistory>[3], "lineSource">;
 }): Promise<boolean> {
+  const providers = input.providers ?? { an: true, vsin: true };
+  if (!providers.an && !providers.vsin) throw new Error("No verified NCAAF provider observation");
   const db = await getDb();
   if (!db) throw new Error("NCAAF market database unavailable");
   if (!Number.isSafeInteger(input.capturedAt) || input.capturedAt > Date.now() ||
@@ -1912,29 +1917,35 @@ export async function updateNcaafMarkets(input: {
       .orderBy(desc(oddsHistory.scrapedAt), desc(oddsHistory.id)).limit(1);
     if (latest && Number(latest.scrapedAt) >= input.capturedAt) return false;
     const s = input.snapshot;
-    const splits = {
+    const splits = providers.vsin ? {
       spreadAwayBetsPct: s.spreadAwayBetsPct ?? null, spreadAwayMoneyPct: s.spreadAwayMoneyPct ?? null,
       totalOverBetsPct: s.totalOverBetsPct ?? null, totalOverMoneyPct: s.totalOverMoneyPct ?? null,
       mlAwayBetsPct: s.mlAwayBetsPct ?? null, mlAwayMoneyPct: s.mlAwayMoneyPct ?? null,
-    };
+    } : {};
     await tx.update(games).set({
-      awayBookSpread: s.awaySpread ?? null, homeBookSpread: s.homeSpread ?? null, bookTotal: s.total ?? null,
-      awaySpreadOdds: s.awaySpreadOdds ?? null, homeSpreadOdds: s.homeSpreadOdds ?? null,
-      overOdds: s.overOdds ?? null, underOdds: s.underOdds ?? null,
-      awayML: s.awayML ?? null, homeML: s.homeML ?? null, ...splits, oddsSource: "dk",
+      // Omit an unavailable provider's columns under the existing lock; never replay stale values.
+      ...(providers.an ? {
+        awayBookSpread: s.awaySpread ?? null, homeBookSpread: s.homeSpread ?? null, bookTotal: s.total ?? null,
+        awaySpreadOdds: s.awaySpreadOdds ?? null, homeSpreadOdds: s.homeSpreadOdds ?? null,
+        overOdds: s.overOdds ?? null, underOdds: s.underOdds ?? null,
+        awayML: s.awayML ?? null, homeML: s.homeML ?? null, oddsSource: "dk",
+      } : {}), ...splits,
       // Retrieval is not a provider-authored update or a model execution time.
       providerObservedAt: null, sourceUpdatedAt: null,
       ingestionReceivedAt: new Date(input.capturedAt), ingestionNormalizedAt: new Date(input.capturedAt),
       ingestionPersistedAt: new Date(),
       ingestionPipelineRevision: process.env.RAILWAY_GIT_COMMIT_SHA ?? null,
-      ingestionRunId: `ncaaf-an68-vsin-dk:${input.capturedAt}:${input.eventId}`,
+      ingestionRunId: `ncaaf-${[providers.an && "an68", providers.vsin && "vsin-dk"].filter(Boolean).join("-")}:${input.capturedAt}:${input.eventId}`,
     }).where(eq(games.id, input.id));
     await tx.insert(oddsHistory).values({
       gameId: input.id, sport: "NCAAF", source: input.source, scrapedAt: input.capturedAt, lineSource: "dk",
-      awaySpread: s.awaySpread ?? null, homeSpread: s.homeSpread ?? null, total: s.total ?? null,
-      awaySpreadOdds: s.awaySpreadOdds ?? null, homeSpreadOdds: s.homeSpreadOdds ?? null,
-      overOdds: s.overOdds ?? null, underOdds: s.underOdds ?? null,
-      awayML: s.awayML ?? null, homeML: s.homeML ?? null, ...splits,
+      // A partial read is a partial observation, not a fresh combined provider snapshot.
+      ...(providers.an ? {
+        awaySpread: s.awaySpread ?? null, homeSpread: s.homeSpread ?? null, total: s.total ?? null,
+        awaySpreadOdds: s.awaySpreadOdds ?? null, homeSpreadOdds: s.homeSpreadOdds ?? null,
+        overOdds: s.overOdds ?? null, underOdds: s.underOdds ?? null,
+        awayML: s.awayML ?? null, homeML: s.homeML ?? null,
+      } : {}), ...splits,
     });
     return true;
   });

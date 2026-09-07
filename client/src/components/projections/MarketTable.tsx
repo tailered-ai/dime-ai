@@ -97,6 +97,12 @@ export function MarketTable({ market }: { market: ProjectionMarket }) {
                         ? `(${fmtPrice(modelPrice)})`
                         : fmtPrice(modelPrice)}
                     </span>
+                    {side.lineDisplay.model != null &&
+                      side.lineDisplay.model !== "—" && (
+                        <span className="market-table__basis">
+                          Fair projection: {side.lineDisplay.model}
+                        </span>
+                      )}
                     {side.comparable === false && side.modelPrice != null && (
                       <span className="market-table__basis">
                         Pricing unavailable at this line

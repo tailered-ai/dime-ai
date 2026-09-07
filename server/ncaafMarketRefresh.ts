@@ -82,42 +82,63 @@ async function refresh(
         console.warn("[NCAAFMarkets] Incomplete refresh", result);
       return result;
     }
-    const [an, vsin] = await Promise.all([
+    const [anRead, vsinRead] = await Promise.allSettled([
       fetchActionNetworkOdds("ncaaf", date),
       scrapeVsinBettingSplits(view, "CFB"),
     ]);
+    for (const read of [anRead, vsinRead]) {
+      if (read.status === "rejected")
+        result.errors.push(
+          read.reason instanceof Error
+            ? read.reason.message
+            : "Provider read failed"
+        );
+    }
+    const an = anRead.status === "fulfilled" ? anRead.value : null;
+    const vsin = vsinRead.status === "fulfilled" ? vsinRead.value : null;
+    if (!an && !vsin) {
+      console.warn("[NCAAFMarkets] Incomplete refresh", result);
+      return result;
+    }
     const capturedAt = Date.now();
     for (const { row, mapping: m } of eligible) {
       try {
-        const prices = an.filter(g => g.gameId === m.event);
-        const splits = vsin.filter(g => g.gameId === m.vsin);
+        const prices = an?.filter(g => g.gameId === m.event) ?? [];
+        const splits = vsin?.filter(g => g.gameId === m.vsin) ?? [];
         const a = prices[0],
           v = splits[0];
         if (
-          prices.length !== 1 ||
-          !a ||
-          a.awayTeamId !== m.awayId ||
-          a.homeTeamId !== m.homeId ||
-          Date.parse(a.startTime) !== Date.parse(m.utc) ||
-          splits.length !== 1 ||
-          !v ||
-          v.sport !== "CFB" ||
-          v.awayVsinSlug !== m.awaySlug ||
-          v.homeVsinSlug !== m.homeSlug
+          (an &&
+            (prices.length !== 1 ||
+              !a ||
+              a.awayTeamId !== m.awayId ||
+              a.homeTeamId !== m.homeId ||
+              Date.parse(a.startTime) !== Date.parse(m.utc))) ||
+          (vsin &&
+            (splits.length !== 1 ||
+              !v ||
+              v.sport !== "CFB" ||
+              v.awayVsinSlug !== m.awaySlug ||
+              v.homeVsinSlug !== m.homeSlug))
         )
           throw new Error("provider identity/kickoff mismatch");
-        if (a.status !== "scheduled" || capturedAt >= Date.parse(m.utc)) {
+        if (
+          (a && a.status !== "scheduled") ||
+          capturedAt >= Date.parse(m.utc)
+        ) {
           result.frozen++;
           continue;
         }
-        const percentages = {
-          spreadAwayBetsPct: v.spreadAwayBetsPct,
-          spreadAwayMoneyPct: v.spreadAwayMoneyPct,
-          totalOverBetsPct: v.totalOverBetsPct,
-          totalOverMoneyPct: v.totalOverMoneyPct,
-          mlAwayBetsPct: v.mlAwayBetsPct,
-          mlAwayMoneyPct: v.mlAwayMoneyPct,
-        };
+        const percentages = v
+          ? {
+              spreadAwayBetsPct: v.spreadAwayBetsPct,
+              spreadAwayMoneyPct: v.spreadAwayMoneyPct,
+              totalOverBetsPct: v.totalOverBetsPct,
+              totalOverMoneyPct: v.totalOverMoneyPct,
+              mlAwayBetsPct: v.mlAwayBetsPct,
+              mlAwayMoneyPct: v.mlAwayMoneyPct,
+            }
+          : {};
         for (const value of Object.values(percentages)) {
           if (
             value !== null &&
@@ -136,16 +157,21 @@ async function refresh(
           kickoff: Date.parse(m.utc),
           capturedAt,
           source,
+          providers: { an: !!a, vsin: !!v },
           snapshot: {
-            awaySpread: point(a.dkAwaySpread),
-            homeSpread: point(a.dkHomeSpread),
-            total: point(a.dkTotal),
-            awaySpreadOdds: a.dkAwaySpreadOdds ?? null,
-            homeSpreadOdds: a.dkHomeSpreadOdds ?? null,
-            overOdds: a.dkOverOdds ?? null,
-            underOdds: a.dkUnderOdds ?? null,
-            awayML: a.dkAwayML ?? null,
-            homeML: a.dkHomeML ?? null,
+            ...(a
+              ? {
+                  awaySpread: point(a.dkAwaySpread),
+                  homeSpread: point(a.dkHomeSpread),
+                  total: point(a.dkTotal),
+                  awaySpreadOdds: a.dkAwaySpreadOdds ?? null,
+                  homeSpreadOdds: a.dkHomeSpreadOdds ?? null,
+                  overOdds: a.dkOverOdds ?? null,
+                  underOdds: a.dkUnderOdds ?? null,
+                  awayML: a.dkAwayML ?? null,
+                  homeML: a.dkHomeML ?? null,
+                }
+              : {}),
             ...percentages,
           },
         });

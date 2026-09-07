@@ -35,8 +35,27 @@ import path from "node:path";
 import http from "node:http";
 import https from "node:https";
 import os from "node:os";
+import { buildNflWeek1FeedRows } from "../scripts/nflWeek1Feed";
 
 const REPO_ROOT = process.cwd();
+const nflSchedule = JSON.parse(
+  fs.readFileSync(
+    path.join(REPO_ROOT, "scripts/data/nfl-2026/games.json"),
+    "utf8"
+  )
+);
+const nflTeams = JSON.parse(
+  fs.readFileSync(
+    path.join(REPO_ROOT, "scripts/data/nfl-2026/teams.json"),
+    "utf8"
+  )
+);
+const nflVenues = JSON.parse(
+  fs.readFileSync(
+    path.join(REPO_ROOT, "scripts/data/nfl-2026/venues.json"),
+    "utf8"
+  )
+);
 const PREFERRED_PORT = 5311;
 const SESSION_SECRET = "testsecret";
 const GAME_DATE = "2026-07-23";
@@ -364,7 +383,11 @@ const LINEUPS_BY_GAME_ID = {
   }),
 };
 
-async function stubApi(page: Page, ncaafGames?: Record<string, unknown>[]) {
+async function stubApi(
+  page: Page,
+  ncaafGames?: Record<string, unknown>[],
+  nflGames: Record<string, unknown>[] = []
+) {
   await page.route("**/api/trpc/**", route => {
     const url = new URL(route.request().url());
     const ops = decodeURIComponent(
@@ -385,9 +408,13 @@ async function stubApi(page: Page, ncaafGames?: Record<string, unknown>[]) {
           result: {
             data: {
               json:
-                ncaafGames && inputs[index]?.json?.sport === "NCAAF"
-                  ? ncaafGames
-                  : [LONG_PICK_GAME, SHORT_PICK_GAME, PASS_GAME, FINAL_GAME],
+                inputs[index]?.json?.sport === "NFL"
+                  ? nflGames.filter(
+                      g => g.gameDate === inputs[index]?.json?.gameDate
+                    )
+                  : ncaafGames && inputs[index]?.json?.sport === "NCAAF"
+                    ? ncaafGames
+                    : [LONG_PICK_GAME, SHORT_PICK_GAME, PASS_GAME, FINAL_GAME],
             },
           },
         };
@@ -799,6 +826,79 @@ const SEPTEMBER6_NCAAF = [
   }),
 ];
 
+test.describe("NFL Week 1 feed", () => {
+  for (const width of [375, 1440]) {
+    test(`${width}px: all 16 games, 32 helmets and three markets on their correct dates`, async ({
+      page,
+    }) => {
+      const games = buildNflWeek1FeedRows(nflSchedule, nflTeams, nflVenues).map(
+        (g, i) => ({ ...g, id: 900000 + i })
+      );
+      await stubApi(page, [], games);
+      await page.setViewportSize({ width, height: 1000 });
+      for (const date of [...new Set(games.map(g => g.gameDate))]) {
+        const [year, month, day] = date.split("-");
+        await page.goto(`${baseURL}/feed/model/nfl-${month}-${day}-${year}`);
+        await expect(page).toHaveURL(
+          new RegExp(`/feed/model/${month}-${day}-${year}$`)
+        );
+        const section = page.locator("#dmf-league-NFL");
+        const rows = games.filter(g => g.gameDate === date);
+        const cards = section.locator(".projection-card");
+        await expect(cards).toHaveCount(rows.length);
+        for (let i = 0; i < rows.length; i++) {
+          const card = cards.nth(i);
+          await card.scrollIntoViewIfNeeded();
+          for (const abbr of [rows[i].awayTeam, rows[i].homeTeam]) {
+            const img = card.locator(
+              `img[src="/brand/nfl-helmets/${abbr}.webp"]`
+            );
+            await expect(img).toHaveCount(1);
+            await expect
+              .poll(() =>
+                img.evaluate(
+                  (el: HTMLImageElement) => el.complete && el.naturalWidth > 0
+                )
+              )
+              .toBe(true);
+          }
+          await expect(card).toContainText("No model projection published");
+        }
+        const trigger = cards
+          .first()
+          .getByRole("button", { name: "View full AI Model Projections" });
+        await trigger.click();
+        const dialog = page.getByRole("dialog");
+        await expect(dialog).toBeVisible();
+        for (const market of ["Total", "Moneyline"]) {
+          await dialog
+            .getByRole("link", {
+              name: new RegExp(`Show ${market} projections`),
+            })
+            .click();
+          await expect(dialog.locator("tbody tr")).toHaveCount(2);
+          await expect(dialog).toContainText("Comparison unavailable");
+        }
+        await page.keyboard.press("Escape");
+        await expect(trigger).toBeFocused();
+        expect(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth <= window.innerWidth
+          )
+        ).toBe(true);
+        await page.evaluate(() =>
+          window.scrollTo({ top: 0, behavior: "instant" })
+        );
+        await page.screenshot({
+          path: `docs/audits/2026-09-07-nfl-week1-evidence/${width}-${date}.png`,
+        });
+      }
+      await page.goto(`${baseURL}/feed/model/09-12-2026`);
+      await expect(page.locator("#dmf-league-NFL")).toHaveCount(0);
+    });
+  }
+});
+
 test.describe("NCAAF Book/Model card summaries", () => {
   for (const width of [375, 1440])
     test(`${width}px: model detail compares the same book thresholds`, async ({
@@ -822,7 +922,7 @@ test.describe("NCAAF Book/Model card summaries", () => {
       await expect(card).toHaveCount(1);
       await expect(card).toContainText("Mississippi -3.9 · Total 51.9");
       const trigger = card.getByRole("button", {
-        name: "View full AI model projections",
+        name: "View full AI Model Projections",
       });
       await trigger.click();
       const dialog = page.getByRole("dialog", {
@@ -892,13 +992,19 @@ test.describe("NCAAF Book/Model card summaries", () => {
       const card = page.locator("#dmf-league-NCAAF .projection-card");
       await expect(card).toContainText("Notre Dame -22.7");
       await card
-        .getByRole("button", { name: "View full AI model projections" })
+        .getByRole("button", { name: "View full AI Model Projections" })
         .click();
       const dialog = page.getByRole("dialog", {
         name: "Wisconsin at Notre Dame model projections",
       });
       for (const [market, expected] of [
-        ["Spread", ["+21(+125)", "-21(-125)"]],
+        [
+          "Spread",
+          [
+            "+21(+125)Fair projection: +22.7",
+            "-21(-125)Fair projection: -22.7",
+          ],
+        ],
         [
           "Total",
           [
@@ -922,29 +1028,44 @@ test.describe("NCAAF Book/Model card summaries", () => {
           );
       }
     });
-  test("NCAAF splits cannot claim freshness from another sport's job", async ({
-    page,
-  }) => {
-    await stubApi(page, SEPTEMBER6_NCAAF);
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto(`${baseURL}/betting-splits/ncaaf-09-06-2026`);
-    await expect(
-      page.getByText("NCAAF capture time unavailable", { exact: true })
-    ).toBeVisible();
-    const games = page.locator('[id^="game-card-"]');
-    await expect(games).toHaveCount(3);
-    for (let i = 0; i < 3; i++) {
-      await games
-        .nth(i)
-        .getByRole("button", { name: "ODDS & SPLITS HISTORY" })
-        .click();
+  for (const provider of ["an68", "vsin-dk", "an68-vsin-dk"])
+    test(`NCAAF splits require actual VSiN freshness: ${provider}`, async ({
+      page,
+    }) => {
+      // An AN-only success must not relabel the retained VSiN percentages as fresh.
+      const capturedAt = Date.now();
+      await stubApi(
+        page,
+        SEPTEMBER6_NCAAF.map((row, index) => ({
+          ...row,
+          ingestionReceivedAt: new Date(capturedAt).toISOString(),
+          ingestionRunId: `ncaaf-${provider}:${capturedAt}:${[288813, 287973, 287972][index]}`,
+        }))
+      );
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(`${baseURL}/betting-splits/ncaaf-09-06-2026`);
       await expect(
-        games
-          .nth(i)
-          .getByText("No recorded observations available yet.", { exact: true })
+        page.getByText(
+          provider === "an68"
+            ? "NCAAF capture time unavailable"
+            : /Oldest NCAAF capture (just now|1 min ago)/,
+          { exact: true }
+        )
       ).toBeVisible();
-    }
-  });
+      const games = page.locator('[id^="game-card-"]');
+      await expect(games).toHaveCount(3);
+      for (let i = 0; i < 3; i++) {
+        await games
+          .nth(i)
+          .getByRole("button", { name: "ODDS & SPLITS HISTORY" })
+          .click();
+        await expect(
+          games.nth(i).getByText("No recorded observations available yet.", {
+            exact: true,
+          })
+        ).toBeVisible();
+      }
+    });
   for (const width of [375, 768, 1024, 1440])
     for (const theme of ["dark", "light"] as const)
       test(`${width}px ${theme}: line-only and book-only summaries stay visible`, async ({
@@ -952,7 +1073,15 @@ test.describe("NCAAF Book/Model card summaries", () => {
       }) => {
         const errors: string[] = [];
         page.on("pageerror", error => errors.push(error.message));
-        await stubApi(page, SEPTEMBER6_NCAAF);
+        await stubApi(
+          page,
+          SEPTEMBER6_NCAAF.map((row, index) => ({
+            ...row,
+            gameStatus: "final",
+            awayScore: [10, 13, 38][index],
+            homeScore: [24, 41, 41][index],
+          }))
+        );
         await page.setViewportSize({
           width,
           height: width === 375 ? 812 : 900,
@@ -968,12 +1097,50 @@ test.describe("NCAAF Book/Model card summaries", () => {
         await page.goto(`${baseURL}/feed/model/09-06-2026?theme=${theme}`);
         const cards = page.locator("#dmf-league-NCAAF .projection-card");
         await expect(cards).toHaveCount(3);
+        await expect(page.locator("#dmf-league-NCAAF .dmf-lgname")).toHaveText(
+          "College Football"
+        );
+        const logo = page.locator(
+          '#dmf-league-NCAAF img[src="/brand/cfp-logo.svg"]'
+        );
+        await expect(logo).toBeVisible();
+        await expect(logo).toHaveJSProperty("naturalWidth", 120);
         for (let i = 0; i < 3; i++) {
           const card = cards.nth(i);
           const slides = card.locator(".summary-carousel__slide");
           const count = i === 0 ? 4 : 6;
           await expect(slides).toHaveCount(count);
           await card.scrollIntoViewIfNeeded();
+          await expect(card.locator(".matchup__score")).toHaveText(
+            [
+              ["10", "24"],
+              ["13", "41"],
+              ["38", "41"],
+            ][i]
+          );
+          await expect(
+            card.getByRole("button", {
+              name: "View full AI Model Projections",
+              exact: true,
+            })
+          ).toBeVisible();
+          const helmets = card.locator(
+            ".team-logo-box--helmet-natural .team-logo"
+          );
+          await expect(helmets).toHaveCount(2);
+          for (const helmet of await helmets.all()) {
+            await expect(helmet).toHaveJSProperty("naturalWidth", 1448);
+            const box = (await helmet.boundingBox())!;
+            const rem = await page.evaluate(() =>
+              parseFloat(getComputedStyle(document.documentElement).fontSize)
+            );
+            expect(box.height).toBeCloseTo(3.5 * rem, 1);
+            expect(box.width).toBeCloseTo((3.5 * rem * 1448) / 1086, 1);
+          }
+          if (width === 375)
+            expect(
+              (await card.locator(".matchup__grid").boundingBox())!.width
+            ).toBeLessThanOrEqual(416);
           for (let j = 0; j < count; j++) {
             const slide = slides.nth(j);
             await expect(slide.locator(".summary__item--book dt")).toHaveText(
@@ -985,10 +1152,16 @@ test.describe("NCAAF Book/Model card summaries", () => {
             await expect(model).toBeInViewport();
             if (i === 0)
               await expect(model).toHaveText(
-                ["+21.1", "-21.1", "52.1", "52.1"][j]
+                ["51.5 (—)", "51.5 (—)", "— (—)", "— (—)"][j]
               );
             else {
-              await expect(model).toHaveText("—");
+              await expect(model).toHaveText(
+                i === 1
+                  ? ["+21 (—)", "-21 (—)", "46.5 (—)", "46.5 (—)", "—", "—"][j]
+                  : ["+6.5 (—)", "-6.5 (—)", "55.5 (—)", "55.5 (—)", "—", "—"][
+                      j
+                    ]
+              );
               await expect(
                 slide.locator(".summary__comparison-status")
               ).toHaveText("Model unavailable");
@@ -1016,7 +1189,7 @@ test.describe("NCAAF Book/Model card summaries", () => {
           ).toBeLessThanOrEqual(1);
           await card.scrollIntoViewIfNeeded();
           await card.screenshot({
-            path: `docs/audits/2026-09-06-ncaaf-card-book-model-evidence/screenshots/${width}-${theme}-${i}.png`,
+            path: `docs/audits/2026-09-07-ncaaf-feed-evidence/screenshots/${width}-${theme}-${i}.png`,
           });
         }
         await expect(

@@ -14,7 +14,7 @@ import { zodGameDate, zodSport } from "./securityMiddleware";
  */
 export const gamesListInput = z
   .object({
-    sport: zodSport.optional(),
+    sport: zodSport.or(z.literal("NFL")).optional(),
     gameDate: zodGameDate.optional(),
     gameStatus: z.enum(["upcoming", "live", "final"]).optional(),
   })

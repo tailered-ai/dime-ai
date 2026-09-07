@@ -126,11 +126,51 @@ it("rejects a changed parent, freezes started games, and skips replay/older obse
   expect(await updateNcaafMarkets(input)).toBe(false);
   expect(state.patch).toBeNull();
 });
-it("propagates history failure so the transaction rolls back rather than reporting success", async () => {
-  state.fail = true;
-  await expect(updateNcaafMarkets(input)).rejects.toThrow(
-    "history write failed"
-  );
-  expect(state.rollbacks).toBe(1);
+it.each(["an", "vsin"] as const)(
+  "only changes and records observed fields when %s alone succeeded",
+  async provider => {
+    state.row.bookTotal = "49.5";
+    state.row.totalOverBetsPct = 65;
+    expect(
+      await updateNcaafMarkets({
+        ...input,
+        providers: { an: provider === "an", vsin: provider === "vsin" },
+      })
+    ).toBe(true);
+    if (provider === "an") {
+      expect(state.patch.bookTotal).toBe("51.5");
+      expect(state.patch).not.toHaveProperty("totalOverBetsPct");
+      expect(state.inserted).not.toHaveProperty("spreadAwayBetsPct");
+      expect(state.patch.ingestionRunId).toContain("ncaaf-an68:");
+    } else {
+      expect(state.patch.spreadAwayBetsPct).toBe(0);
+      expect(state.patch).not.toHaveProperty("bookTotal");
+      expect(state.patch).not.toHaveProperty("oddsSource");
+      expect(state.inserted).not.toHaveProperty("total");
+      expect(state.patch.ingestionRunId).toContain("ncaaf-vsin-dk:");
+    }
+    expect(Object.keys(state.patch).some(key => /model/i.test(key))).toBe(
+      false
+    );
+  }
+);
+it("rejects an observation without any verified provider", async () => {
+  await expect(
+    updateNcaafMarkets({ ...input, providers: { an: false, vsin: false } })
+  ).rejects.toThrow(/provider/);
   expect(state.patch).toBeNull();
 });
+it.each(["both", "an", "vsin"] as const)(
+  "rolls back %s provider changes when history fails",
+  async provider => {
+    state.fail = true;
+    await expect(
+      updateNcaafMarkets({
+        ...input,
+        providers: { an: provider !== "vsin", vsin: provider !== "an" },
+      })
+    ).rejects.toThrow("history write failed");
+    expect(state.rollbacks).toBe(1);
+    expect(state.patch).toBeNull();
+  }
+);
