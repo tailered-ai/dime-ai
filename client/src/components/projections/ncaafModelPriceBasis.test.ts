@@ -82,6 +82,62 @@ function adapted(overrides: Partial<typeof row> = {}) {
 }
 
 describe("NCAAF model odds priced at the supplied attachment lines", () => {
+  it("shows the Book threshold in both columns and keeps the projection separate", () => {
+    const input = {
+      ...uclaRow,
+      awayTeam: "LOU",
+      homeTeam: "MISS",
+      awayBookSpread: "6.5",
+      homeBookSpread: "-6.5",
+      bookTotal: "55.5",
+      awayModelSpread: "3.9",
+      homeModelSpread: "-3.9",
+      modelTotal: "51.9",
+      modelAwaySpreadOdds: null,
+      modelHomeSpreadOdds: null,
+      modelOverOdds: null,
+      modelUnderOdds: null,
+      modelPriceBasis: undefined,
+      modelBookPrices: undefined,
+    };
+    const before = structuredClone(input);
+    const card = ncaafRowToCard(input as never);
+    const game = presentationToProjectionGame(sportAdapters.NCAAF(card));
+    expect(card.venueLine).toBe("Model: Mississippi -3.9 · Total 51.9");
+    for (const [index, lines] of [
+      [0, ["+6.5", "-6.5"]],
+      [1, ["55.5", "55.5"]],
+    ] as const) {
+      const $ = load(
+        renderToStaticMarkup(
+          createElement(MarketTable, { market: game.markets[index] })
+        )
+      );
+      $("tbody tr").each((i, tr) => {
+        expect($(tr).find("td").eq(0).find(".market-table__line").text()).toBe(
+          lines[i]
+        );
+        expect($(tr).find("td").eq(1).find(".market-table__line").text()).toBe(
+          lines[i]
+        );
+        expect($(tr).find("td").eq(1).find(".market-table__price").text()).toBe(
+          "(—)"
+        );
+      });
+      expect($("tfoot").text()).toBe("Comparison unavailable");
+    }
+    expect(input).toEqual(before);
+    const priced = presentationToProjectionGame(
+      sportAdapters.NCAAF(ncaafRowToCard(uclaRow as never))
+    );
+    const $ = load(
+      renderToStaticMarkup(
+        createElement(MarketTable, { market: priced.markets[0] })
+      )
+    );
+    expect($("tbody tr").first().find("td").eq(1).text()).toBe("-2.5(-153)");
+  });
+
   it("preserves the current Book and original model prices while retaining each model threshold", () => {
     const { card, model, game } = adapted();
     expect(card.venueLine).toBe("Model: James Madison -5.123 · Total 49.456");
@@ -137,15 +193,17 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     const first = $("tbody tr").first();
     expect(first.find("th").text()).toBe("Liberty");
     expect(first.find("td").eq(0).text()).toBe("+8.5(-110)");
-    expect(first.find("td").eq(1).text()).toBe("+5.123(-220)at +6.5");
+    expect(first.find("td").eq(1).text()).toBe(
+      "+8.5(—)Pricing unavailable at this line"
+    );
     expect(first.find("td").eq(1).find(".market-table__line").text()).toBe(
-      "+5.123"
+      "+8.5"
     );
     expect(first.find("td").eq(1).find(".market-table__basis").text()).toBe(
-      "at +6.5"
+      "Pricing unavailable at this line"
     );
     expect($(".market-table__row--signal")).toHaveLength(0);
-    expect($("tfoot").text()).toBe("NO EDGE");
+    expect($("tfoot").text()).toBe("Comparison unavailable");
     const summary = renderToStaticMarkup(
       createElement(ProjectionCard, { game })
     );
@@ -298,7 +356,7 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
           )
         );
         if (!matches) {
-          expect($("tfoot").text()).toBe("NO EDGE");
+          expect($("tfoot").text()).toBe("Comparison unavailable");
           expect($(".market-table__row--signal")).toHaveLength(0);
         } else expect($("tfoot").text()).toMatch(/^EDGE \+\d+\.\d+%$/);
       }
@@ -306,7 +364,7 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
   );
 
   it("keeps the actual live model projection accessible separately from the model price threshold", () => {
-    const { game } = adapted({
+    const { game, card } = adapted({
       awayTeam: "BRY",
       homeTeam: "ARMY",
       gameStatus: "live",
@@ -327,16 +385,17 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     );
     expect(spread("tbody tr").first().find("th").text()).toBe("Bryant");
     expect(spread("tbody tr").first().find("td").eq(1).text()).toBe(
-      "+26.7(-220)at +37"
+      "+8.5(—)Pricing unavailable at this line"
     );
     expect(spread("tbody tr").last().find("td").eq(1).text()).toBe(
-      "-26.7(+220)at -37"
+      "-8.5(—)Pricing unavailable at this line"
     );
     expect(total("tbody tr").first().find("td").eq(1).text()).toBe(
-      "54.4(-220)at 50.5"
+      "55.5(—)Pricing unavailable at this line"
     );
-    expect(spread("tfoot").text()).toBe("NO EDGE");
-    expect(total("tfoot").text()).toBe("NO EDGE");
+    expect(spread("tfoot").text()).toBe("Comparison unavailable");
+    expect(total("tfoot").text()).toBe("Comparison unavailable");
+    expect(card.venueLine).toBe("Model: Army -26.7 · Total 54.4");
     expect(game.markets[0].sides[0].modelLineLabel).toBe("+37");
     expect(game.markets[1].sides[0].modelLineLabel).toBe("O 50.5");
   });

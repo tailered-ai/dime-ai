@@ -800,6 +800,66 @@ const SEPTEMBER6_NCAAF = [
 ];
 
 test.describe("NCAAF Book/Model card summaries", () => {
+  for (const width of [375, 1440])
+    test(`${width}px: model detail compares the same book thresholds`, async ({
+      page,
+    }) => {
+      await stubApi(page, [
+        {
+          ...SEPTEMBER6_NCAAF[2],
+          modelRunAt: 1788739217019,
+          publishedModel: true,
+          awayModelSpread: "3.9",
+          homeModelSpread: "-3.9",
+          modelTotal: "51.9",
+          modelAwayML: "+172",
+          modelHomeML: "-172",
+        },
+      ]);
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`${baseURL}/feed/model/09-06-2026`);
+      const card = page.locator("#dmf-league-NCAAF .projection-card");
+      await expect(card).toHaveCount(1);
+      await expect(card).toContainText("Mississippi -3.9 · Total 51.9");
+      const trigger = card.getByRole("button", {
+        name: "View full AI model projections",
+      });
+      await trigger.click();
+      const dialog = page.getByRole("dialog", {
+        name: "Louisville at Mississippi model projections",
+      });
+      for (const [market, lines, prices] of [
+        ["Spread", ["+6.5", "-6.5"], ["(-105)", "(-115)"]],
+        ["Total", ["55.5", "55.5"], ["(-105)", "(-115)"]],
+      ] as const) {
+        if (market === "Total")
+          await dialog
+            .getByRole("link", { name: /Show Total projections/ })
+            .click();
+        const rows = dialog.locator("tbody tr");
+        await expect(rows).toHaveCount(2);
+        for (let side = 0; side < 2; side++) {
+          const cells = rows.nth(side).locator("td");
+          await expect(cells.nth(0).locator(".market-table__line")).toHaveText(
+            lines[side]
+          );
+          await expect(cells.nth(1).locator(".market-table__line")).toHaveText(
+            lines[side]
+          );
+          await expect(cells.nth(0).locator(".market-table__price")).toHaveText(
+            prices[side]
+          );
+          await expect(cells.nth(1).locator(".market-table__price")).toHaveText(
+            "(—)"
+          );
+        }
+        await expect(dialog.locator("tfoot")).toHaveText(
+          "Comparison unavailable"
+        );
+      }
+      await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+    });
   test("NCAAF splits cannot claim freshness from another sport's job", async ({
     page,
   }) => {

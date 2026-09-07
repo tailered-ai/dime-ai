@@ -32,7 +32,9 @@ export function MarketTable({ market }: { market: ProjectionMarket }) {
   const resultLabel = showLines
     ? best > 0
       ? `EDGE ${best < 0.1 ? "<0.1" : `+${best.toFixed(1)}`}%`
-      : "NO EDGE"
+      : scored.length > 0 && scored.every(Boolean)
+        ? "NO EDGE"
+        : "Comparison unavailable"
     : market.resultLabel;
   const resultIsEdge = showLines ? best > 0 : market.resultIsEdge;
 
@@ -51,6 +53,12 @@ export function MarketTable({ market }: { market: ProjectionMarket }) {
       <tbody>
         {market.sides.map((side, i) => {
           const isSignal = i === signalIdx;
+          // Compare the same contract as MLB; projections stay in the card header.
+          const modelLine = side.lineDisplay?.book;
+          const modelPrice =
+            side.comparable === false || modelLine === "—"
+              ? null
+              : side.modelPrice;
           return (
             <tr
               key={side.sideLabel}
@@ -81,21 +89,17 @@ export function MarketTable({ market }: { market: ProjectionMarket }) {
               >
                 {side.lineDisplay ? (
                   <>
-                    {side.lineDisplay.model != null && (
-                      <span className="market-table__line">
-                        {side.lineDisplay.model}
-                      </span>
+                    {modelLine != null && (
+                      <span className="market-table__line">{modelLine}</span>
                     )}
                     <span className="market-table__price">
-                      {side.lineDisplay.model != null
-                        ? `(${fmtPrice(side.modelPrice)})`
-                        : fmtPrice(side.modelPrice)}
+                      {modelLine != null
+                        ? `(${fmtPrice(modelPrice)})`
+                        : fmtPrice(modelPrice)}
                     </span>
-                    {side.modelPrice != null && side.lineDisplay.priceAt && (
+                    {side.comparable === false && side.modelPrice != null && (
                       <span className="market-table__basis">
-                        {side.lineDisplay.priceAt === "line unavailable"
-                          ? "Pricing line unavailable"
-                          : `at ${side.lineDisplay.priceAt}`}
+                        Pricing unavailable at this line
                       </span>
                     )}
                   </>

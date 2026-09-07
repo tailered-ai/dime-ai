@@ -807,7 +807,7 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
   const homeSp = n(g.homeBookSpread);
   const basis = hasModel ? g.modelPriceBasis : null;
   const unknownBasis = hasModel && g.modelPriceBasis === null;
-  const spreadComparable = !unknownBasis && (!basis || (basis.awaySpread === awaySp && basis.homeSpread === homeSp));
+  const spreadComparable = awaySp != null && homeSp != null && !unknownBasis && (!basis || (basis.awaySpread === awaySp && basis.homeSpread === homeSp));
   const spreadBookPrices = basis && spreadComparable ? g.modelBookPrices : null;
   const spread = twoWayCol(
     "Spread",
@@ -815,7 +815,7 @@ export function ncaafRowToCard(g: MlbRow): FeedCardSpec {
     { label: homeSp == null ? homeName : `${homeName} ${fmtLine(homeSp)}`, crest: homeCrest, book: n(spreadBookPrices?.homeSpreadOdds ?? g.homeSpreadOdds), model: M(n(g.modelHomeSpreadOdds)), modelLineLabel: basis ? fmtLine(basis.homeSpread) : undefined, comparable: spreadComparable },
   );
   const totalLine = n(g.bookTotal);
-  const totalComparable = !unknownBasis && (!basis || basis.total === totalLine);
+  const totalComparable = totalLine != null && !unknownBasis && (!basis || basis.total === totalLine);
   const totalBookPrices = basis && totalComparable ? g.modelBookPrices : null;
   const total = twoWayCol(
     "Total",

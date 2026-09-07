@@ -162,21 +162,16 @@ async function checkMarket(
       : market === "total"
         ? [String(source.book.total), String(source.book.total)]
         : [null, null];
-  const projections =
+  const differs =
     market === "spread"
-      ? [signed(source.model.awaySpread), signed(source.model.homeSpread)]
+      ? source.model.basis.awaySpread !== source.book.awaySpread ||
+        source.model.basis.homeSpread !== source.book.homeSpread ||
+        source.book.awaySpread == null ||
+        source.book.homeSpread == null
       : market === "total"
-        ? [String(source.model.total), String(source.model.total)]
-        : [null, null];
-  const basis =
-    market === "spread"
-      ? [
-          signed(source.model.basis.awaySpread),
-          signed(source.model.basis.homeSpread),
-        ]
-      : market === "total"
-        ? [String(source.model.basis.total), String(source.model.basis.total)]
-        : [null, null];
+        ? source.model.basis.total !== source.book.total ||
+          source.book.total == null
+        : false;
   for (let side = 0; side < 2; side++) {
     const row = rows.nth(side);
     await expect(row.locator("th")).toHaveText(
@@ -199,26 +194,19 @@ async function checkMarket(
         `(${book[side] ?? "—"})`
       );
       await expect(modelCell.locator(".market-table__line")).toHaveText(
-        projections[side]!
+        bookLines[side]!
       );
       await expect(modelCell.locator(".market-table__price")).toHaveText(
-        `(${model[side] ?? "—"})`
+        `(${!differs ? (model[side] ?? "—") : "—"})`
       );
-      if (model[side] != null && basis[side] !== projections[side])
+      if (model[side] != null && differs)
         await expect(modelCell.locator(".market-table__basis")).toHaveText(
-          `at ${basis[side]}`
+          "Pricing unavailable at this line"
         );
       else
         await expect(modelCell.locator(".market-table__basis")).toHaveCount(0);
     }
   }
-  const differs =
-    market === "spread"
-      ? source.model.basis.awaySpread !== source.book.awaySpread ||
-        source.model.basis.homeSpread !== source.book.homeSpread
-      : market === "total"
-        ? source.model.basis.total !== source.book.total
-        : false;
   const implied = (price: string) => {
     const odds = Number(price);
     return odds < 0 ? -odds / (-odds + 100) : 100 / (odds + 100);
@@ -232,7 +220,12 @@ async function checkMarket(
   await expect(dialog.locator(".market-table tfoot")).toHaveText(
     edge > 0
       ? `EDGE ${edge < 0.1 ? "<0.1" : `+${edge.toFixed(1)}`}%`
-      : "NO EDGE"
+      : market !== "ml" &&
+          (differs ||
+            book.some(price => price == null) ||
+            model.some(price => price == null))
+        ? "Comparison unavailable"
+        : "NO EDGE"
   );
   if (differs || edge === 0) {
     await expect(dialog.locator(".market-table__row--signal")).toHaveCount(0);
@@ -352,7 +345,7 @@ for (const { width, theme, fullAudit, reducedMotion } of scenarios) {
     ).toContainText("54.4");
     await expect(
       comparison.locator('.summary__viewport[tabindex="0"]')
-    ).toContainText("at 50.5");
+    ).not.toContainText("at 50.5");
     const returnToSpread = comparison.getByRole("button", {
       name: "View next market: Spread (1 of 2)",
       exact: true,
