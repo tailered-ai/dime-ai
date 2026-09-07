@@ -1,0 +1,46 @@
+{
+  "recordedAt": "2026-09-07T14:57:51.086Z",
+  "candidateContentSha256": "1da5c45e9d9c55c06eb10fe0a2f9a50d5988e36bb99b6b1bf04df5fc8b425c64",
+  "mismatches": [],
+  "builtHelmetFiles": 205,
+  "builtHelmetScope": "173 NCAAF window teams plus all 32 NFL teams; independently rechecked after build",
+  "builtMismatches": [],
+  "logs": [
+    {
+      "path": "final-focused-recheck.log",
+      "createdAt": "2026-09-07T14:34:49.205Z",
+      "lastOutputAt": "2026-09-07T14:34:58.851Z",
+      "sha256": "7205e8a6dc2a46e07297c5edd39053f800be8fa5377fc30860edc0fec7c36642"
+    },
+    {
+      "path": "full-suite-verified.log",
+      "createdAt": "2026-09-07T14:35:16.483Z",
+      "lastOutputAt": "2026-09-07T14:44:46.921Z",
+      "sha256": "ce68ac7f3dda3f09bd9b095f6cdfd76956cb54b4f3a0b8ff29663dd7c421ea61"
+    },
+    {
+      "path": "browser-readiness-final.log",
+      "createdAt": "2026-09-07T14:47:53.530Z",
+      "lastOutputAt": "2026-09-07T14:53:34.030Z",
+      "sha256": "d172bf7681c80c4c6ace3955dd7186284bb5d1f8711e5b650c322b39f3bfb8d6"
+    },
+    {
+      "path": "types-verified.log",
+      "createdAt": "2026-09-07T14:53:59.359Z",
+      "lastOutputAt": "2026-09-07T14:54:00.559Z",
+      "sha256": "e6dccd8f55b34c9438e03474b60cf4c8c2af73b895a5cd22c73f95a6589e4087"
+    },
+    {
+      "path": "build-verified.log",
+      "createdAt": "2026-09-07T14:56:38.293Z",
+      "lastOutputAt": "2026-09-07T14:57:04.083Z",
+      "sha256": "275cf6bb5285419c31a916e99c075a73a17a44058af57b7bbb45563e1ae9522a"
+    },
+    {
+      "path": "runtime-preflight-final.log",
+      "createdAt": "2026-09-07T14:36:44.179Z",
+      "lastOutputAt": "2026-09-07T14:36:46.473Z",
+      "sha256": "4750f084403f8ae76c5c5bcf136b58de7d0fd9d5a07365695e7e278d992d899f"
+    }
+  ]
+}

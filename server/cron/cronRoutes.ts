@@ -75,10 +75,14 @@ import {
 } from "./mlbLoopJobs";
 import { mountDateJob } from "./mountDateJob";
 import { pushCustomerSnapshot } from "./customerSync";
+import { getFootballRefreshStatus } from "../ncaafMarketRefresh";
 
 // One runner per job — module-level so the run-lock survives across requests.
 const vsinRunner = new CronJobRunner("vsin-odds", async () => {
-  await runVsinRefresh();
+  const result = await runVsinRefresh();
+  if (!result) throw new Error("Refresh did not complete; retry after the active cycle settles");
+  if (Object.values(getFootballRefreshStatus()).some(status => !status.disabled && !status.ok))
+    throw new Error("Football ingestion incomplete; inspect provider completion status");
 });
 
 const scoresRunner = new CronJobRunner("scores", async () => {
@@ -325,6 +329,7 @@ export function registerCronRoutes(app: Express): void {
     if (!requireCronSecret(req, res, "status")) return;
     res.status(200).json({
       ok: true,
+      football: getFootballRefreshStatus(),
       jobs: {
         "vsin-odds": vsinRunner.state,
         scores: scoresRunner.state,

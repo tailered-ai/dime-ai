@@ -71,6 +71,8 @@ import type { InsertGame } from "../drizzle/schema";
 import { refreshNcaafScoresNow } from "./ncaafScoreRefresh";
 import {
   refreshNcaafMarkets,
+  runFootballMarketCycle,
+  getFootballRefreshStatus,
   type NcaafMarketResult,
 } from "./ncaafMarketRefresh";
 
@@ -108,6 +110,7 @@ function resolveNhlVsinSlug(rawSlug: string) {
 }
 
 export interface RefreshResult {
+  nfl?: NcaafMarketResult;
   ncaaf?: NcaafMarketResult;
   ncaafTomorrow?: NcaafMarketResult;
   refreshedAt: string; // ISO timestamp of last VSiN odds/splits refresh
@@ -132,14 +135,15 @@ export interface RefreshResult {
 let lastRefreshResult: RefreshResult | null = null;
 let lastScoresRefreshedAt: string = new Date().toISOString();
 
-export function getLastRefreshResult(): Omit<
-  RefreshResult,
-  "ncaaf" | "ncaafTomorrow"
-> | null {
+export function getLastRefreshResult():
+  | (Omit<RefreshResult, "ncaaf" | "ncaafTomorrow" | "nfl"> & {
+      football: ReturnType<typeof getFootballRefreshStatus>;
+    })
+  | null {
   if (!lastRefreshResult) return null;
   // Public status keeps its original counters/timestamps, not provider diagnostics.
-  const { ncaaf, ncaafTomorrow, ...publicStatus } = lastRefreshResult;
-  return publicStatus;
+  const { ncaaf, ncaafTomorrow, nfl, ...publicStatus } = lastRefreshResult;
+  return { ...publicStatus, football: getFootballRefreshStatus() };
 }
 
 /**
@@ -1778,13 +1782,18 @@ export async function runVsinRefresh(): Promise<RefreshResult | null> {
 
     // Run NBA, NHL, and MLB VSiN refreshes in parallel — each uses independent fetch() sessions
     // with no shared state, so concurrent execution is safe and reduces wall-clock time by ~2/3.
-    const [nbaResult, nhlResult, mlbResult, ncaaf, ncaafTomorrow] =
+    const [nbaResult, nhlResult, mlbResult, ncaaf, ncaafTomorrow, football] =
       await Promise.all([
         refreshNba(todayStr, allDates),
         refreshNhl(todayStr, allDates),
         refreshMlb(todayStr),
-        refreshNcaafMarkets(todayStr, "today", "auto"),
-        refreshNcaafMarkets(datePst(1), "tomorrow", "auto"),
+        process.env.FOOTBALL_MARKETS_MODE == null
+          ? refreshNcaafMarkets(todayStr, "today", "auto")
+          : undefined,
+        process.env.FOOTBALL_MARKETS_MODE == null
+          ? refreshNcaafMarkets(datePst(1), "tomorrow", "auto")
+          : undefined,
+        runFootballMarketCycle("auto"),
       ]);
     console.log(
       `[VSiNAutoRefresh] NBA refresh complete: updated=${nbaResult.updated} ` +
@@ -1846,8 +1855,9 @@ export async function runVsinRefresh(): Promise<RefreshResult | null> {
       mlbInserted: mlbResult.inserted,
       mlbTotal: mlbResult.total,
       gameDate: todayStr,
-      ncaaf,
+      ncaaf: football.NCAAF?.disabled ? ncaaf : football.NCAAF,
       ncaafTomorrow,
+      nfl: football.NFL,
     };
 
     lastRefreshResult = result;
@@ -1993,6 +2003,7 @@ export async function refreshAllScoresNow(): Promise<void> {
     refreshNhlScores(),
     refreshMlbScoresNow(),
     refreshNcaafScoresNow(),
+    import("./ncaafScoreRefresh").then(m => m.refreshFootballScoresNow("NFL")),
   ]);
   lastScoresRefreshedAt = new Date().toISOString();
   // Patch scoresRefreshedAt into the last refresh result so the UI can show it
@@ -2014,12 +2025,15 @@ export async function refreshAllScoresNow(): Promise<void> {
  *                are refreshed.
  */
 export async function runVsinRefreshManual(
-  sport?: "NBA" | "NHL" | "MLB" | "NCAAF"
+  sport?: "NBA" | "NHL" | "MLB" | "NCAAF" | "NFL"
 ): Promise<RefreshResult | null> {
   const todayStr = datePst();
   const sportLabel = sport ?? "ALL";
-  if (sport === "NCAAF") {
-    const ncaaf = await refreshNcaafMarkets(todayStr, "today", "manual");
+  if (sport === "NCAAF" || sport === "NFL") {
+    const ncaaf =
+      sport === "NFL"
+        ? (await runFootballMarketCycle("manual", ["NFL"])).NFL!
+        : await refreshNcaafMarkets(todayStr, "today", "manual");
     const result: RefreshResult = {
       refreshedAt: new Date().toISOString(),
       scoresRefreshedAt: lastScoresRefreshedAt,
@@ -2038,7 +2052,7 @@ export async function runVsinRefreshManual(
       mlbInserted: 0,
       mlbTotal: 0,
       gameDate: todayStr,
-      ncaaf,
+      ...(sport === "NFL" ? { nfl: ncaaf } : { ncaaf }),
     };
     lastRefreshResult = result;
     return result;
@@ -2059,12 +2073,15 @@ export async function runVsinRefreshManual(
     const allDates = dateRange(todayStr, rangeEnd);
 
     // ── Per-sport VSiN splits + schedule refresh ──────────────────────────────────────────
-    const ncaaf = !sport
-      ? await refreshNcaafMarkets(todayStr, "today", "manual")
-      : undefined;
-    const ncaafTomorrow = !sport
-      ? await refreshNcaafMarkets(datePst(1), "tomorrow", "manual")
-      : undefined;
+    const football = !sport ? await runFootballMarketCycle("manual") : {};
+    const ncaaf =
+      !sport && process.env.FOOTBALL_MARKETS_MODE == null
+        ? await refreshNcaafMarkets(todayStr, "today", "manual")
+        : undefined;
+    const ncaafTomorrow =
+      !sport && process.env.FOOTBALL_MARKETS_MODE == null
+        ? await refreshNcaafMarkets(datePst(1), "tomorrow", "manual")
+        : undefined;
     const doNba = !sport || sport === "NBA";
     const doNhl = !sport || sport === "NHL";
     const doMlb = !sport || sport === "MLB";
@@ -2200,8 +2217,9 @@ export async function runVsinRefreshManual(
       mlbInserted: mlbResult.inserted,
       mlbTotal: mlbResult.total,
       gameDate: todayStr,
-      ncaaf,
+      ncaaf: football.NCAAF?.disabled ? ncaaf : football.NCAAF,
       ncaafTomorrow,
+      nfl: football.NFL,
     };
 
     lastRefreshResult = result;

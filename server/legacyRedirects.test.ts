@@ -170,7 +170,9 @@ describe("Legacy slug eradication — navigation hooks", () => {
     expect(tabsSrc).not.toMatch(/window\.location\.href/);
     expect(tabsSrc).not.toMatch(/tab\.path\.includes\("\?"\)/);
     // Real links: destinations render as wouter <Link> anchors, not buttons.
-    expect(tabsSrc).toMatch(/import \{ Link, useLocation \} from "wouter"/);
+    expect(tabsSrc).toMatch(
+      /import \{ Link, useLocation, useSearch \} from "wouter"/
+    );
   });
 
   it("login returnPath uses the shared viewport-aware default, never /splits", () => {

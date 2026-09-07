@@ -7,7 +7,7 @@
  *   https://data.vsin.com/betting-splits/?source=DK&view=tomorrow (tomorrow's games)
  *
  * Both URLs serve ALL sports (MLB, NBA, NHL, CBB, CFB) from a single unified page.
- * NO other VSIN URLs are used for betting splits. No sport-specific subpages.
+ * Football additionally uses source=DK&sport=CFB/NFL for all posted dates.
  * No auth required — data is publicly accessible.
  *
  * ─── sp-table row structure (11 <td> cells per game row, 0-indexed) ───────────
@@ -30,8 +30,9 @@
  */
 
 import * as cheerio from "cheerio";
+import { createHash } from "node:crypto";
 
-export type VsinSplitsSport = "NBA" | "CBB" | "CFB" | "NHL" | "MLB";
+export type VsinSplitsSport = "NBA" | "CBB" | "CFB" | "NHL" | "MLB" | "NFL";
 
 export interface VsinSplitsGame {
   /** VSiN game ID, e.g. "20260330MLB00008" */
@@ -58,6 +59,25 @@ export interface VsinSplitsGame {
   mlAwayMoneyPct: number | null;
   /** % of ML bets on away team (0-100), null if not available */
   mlAwayBetsPct: number | null;
+  gameDate?: string;
+  spreadHomeMoneyPct?: number | null;
+  spreadHomeBetsPct?: number | null;
+  totalUnderMoneyPct?: number | null;
+  totalUnderBetsPct?: number | null;
+  mlHomeMoneyPct?: number | null;
+  mlHomeBetsPct?: number | null;
+  /** VSiN market thresholds are split context, never Action Network prices. */
+  splitLines?: {
+    awaySpread: string | null;
+    homeSpread: string | null;
+    total: string | null;
+  };
+  provenance?: {
+    sourceUrl: string;
+    receivedAt: number;
+    sourceUpdatedAt: number | null;
+    responseSha256: string;
+  };
 }
 
 // ── The ONLY two URLs used for VSIN betting splits ───────────────────────────
@@ -112,6 +132,7 @@ function detectSportFromGameId(gameId: string): VsinSplitsSport | null {
   if (code === "CFB") return "CFB";
   if (code === "NHL") return "NHL";
   if (code === "MLB") return "MLB";
+  if (code === "NFL") return "NFL";
   return null;
 }
 
@@ -125,8 +146,11 @@ function parseAllSpTables(
   filterSport?: VsinSplitsSport
 ): VsinSplitsGame[] {
   const tables = $("table.sp-table");
+  const football = filterSport === "NFL" || filterSport === "CFB";
 
   if (!tables.length) {
+    if (football)
+      throw new Error(`${logTag}: unknown football splits structure`);
     // Fallback: check for legacy freezetable format
     const legacyTable = $("table.freezetable");
     if (legacyTable.length) {
@@ -146,6 +170,28 @@ function parseAllSpTables(
 
   tables.each((_i, table) => {
     const sportHeader = $(table).find("th.sp-sport-name").text().trim();
+    if (football) {
+      $(table)
+        .children("thead")
+        .each((_index, head) => {
+          const labels = $(head)
+            .find("th")
+            .slice(1)
+            .map(
+              (_i, el) => $(el).find(".sp-full").first().text() || $(el).text()
+            )
+            .get()
+            .map(s => s.trim());
+          if (
+            !$(head).find(".sp-source-dk").length ||
+            labels.join(",") !==
+              "Spread,Handle,Bets,Total,Handle,Bets,Money,Handle,Bets"
+          )
+            throw new Error(
+              `${logTag}: unverified bookmaker or market columns`
+            );
+        });
+    }
     const blockSport = sportHeader.includes("NBA")
       ? "NBA"
       : sportHeader.includes("MLB")
@@ -170,6 +216,8 @@ function parseAllSpTables(
       .each((_j, row) => {
         gameRows.push($(row));
       });
+    if (football && gameRows.length % 2)
+      throw new Error(`${logTag}: incomplete team row pair`);
 
     console.log(
       `${blockTag} Found ${gameRows.length} sp-row rows (${Math.floor(gameRows.length / 2)} games)`
@@ -186,6 +234,8 @@ function parseAllSpTables(
       const gameId =
         awayRow.find("button[data-gamecode]").attr("data-gamecode") ?? "";
       if (!gameId) {
+        if (football)
+          throw new Error(`${logTag}: missing football event identity`);
         console.warn(`${blockTag} Row pair ${i}: no data-gamecode, skipping`);
         skipped++;
         continue;
@@ -194,6 +244,8 @@ function parseAllSpTables(
       // Detect sport from game ID
       const sport = detectSportFromGameId(gameId);
       if (!sport) {
+        if (football)
+          throw new Error(`${logTag}: invalid football event identity`);
         console.warn(
           `${blockTag} Game ${gameId}: unrecognized sport code, skipping`
         );
@@ -205,12 +257,36 @@ function parseAllSpTables(
       if (filterSport && sport !== filterSport) {
         continue; // silently skip — different sport block
       }
+      const gameDate = `${gameId.slice(0, 4)}-${gameId.slice(4, 6)}-${gameId.slice(6, 8)}`;
+      const head = awayRow.closest("tbody").prevAll("thead").first();
+      const headerLink = head.find("th.sp-sport-name a").first().attr("href");
+      const headerDate = headerLink
+        ? new URL(headerLink, "https://data.vsin.com").searchParams.get(
+            "gamedate"
+          )
+        : null;
+      if (
+        football &&
+        (awayRow.parent().get(0) !== homeRow.parent().get(0) ||
+          headerDate !== gameDate ||
+          !Number.isFinite(Date.parse(gameDate)) ||
+          new Date(gameDate).toISOString().slice(0, 10) !== gameDate ||
+          homeRow
+            .find("[data-gamecode]")
+            .toArray()
+            .some(el => $(el).attr("data-gamecode") !== gameId) ||
+          allResults.some(g => g.gameId === gameId))
+      )
+        throw new Error(
+          `${logTag}: mismatched/duplicate football event or date ${gameId}`
+        );
 
       // Extract team slugs and names
       const awayLink = awayRow.find("a.sp-team-link").first();
       const homeLink = homeRow.find("a.sp-team-link").first();
 
       if (!awayLink.length || !homeLink.length) {
+        if (football) throw new Error(`${logTag}: missing football team link`);
         console.warn(
           `${blockTag} Game ${gameId}: missing sp-team-link, skipping`
         );
@@ -220,10 +296,26 @@ function parseAllSpTables(
 
       const awayName = awayLink.text().trim();
       const homeName = homeLink.text().trim();
+      if (football) {
+        const prefix =
+          filterSport === "NFL" ? "/nfl/teams/" : "/college-football/teams/";
+        if (
+          [awayLink, homeLink].some(
+            link =>
+              !new URL(
+                link.attr("href") ?? "",
+                "https://data.vsin.com"
+              ).pathname.startsWith(prefix)
+          )
+        )
+          throw new Error(`${logTag}: mismatched football team sport`);
+      }
       const awayVsinSlug = extractVsinSlug(awayLink.attr("href") ?? "");
       const homeVsinSlug = extractVsinSlug(homeLink.attr("href") ?? "");
 
       if (!awayVsinSlug || !homeVsinSlug) {
+        if (football)
+          throw new Error(`${logTag}: missing football team identity`);
         console.warn(
           `${blockTag} Game ${gameId}: empty slug (away="${awayVsinSlug}" home="${homeVsinSlug}"), skipping`
         );
@@ -233,6 +325,14 @@ function parseAllSpTables(
 
       // Validate column count
       const awayTds = awayRow.find("td");
+      const homeTds = homeRow.find("td");
+      if (
+        football &&
+        (awayTds.length !== 11 ||
+          homeTds.length !== 11 ||
+          awayVsinSlug === homeVsinSlug)
+      )
+        throw new Error(`${logTag}: invalid football team rows`);
       if (awayTds.length < 11) {
         console.warn(
           `${blockTag} Game ${gameId}: expected 11 tds, got ${awayTds.length}, skipping`
@@ -251,6 +351,72 @@ function parseAllSpTables(
       const totalOverBetsPct = extractPctFromTd($, awayTds.eq(7));
       const mlAwayMoneyPct = extractPctFromTd($, awayTds.eq(9));
       const mlAwayBetsPct = extractPctFromTd($, awayTds.eq(10));
+      const home = football
+        ? {
+            spreadHomeMoneyPct: extractPctFromTd($, homeTds.eq(3)),
+            spreadHomeBetsPct: extractPctFromTd($, homeTds.eq(4)),
+            totalUnderMoneyPct: extractPctFromTd($, homeTds.eq(6)),
+            totalUnderBetsPct: extractPctFromTd($, homeTds.eq(7)),
+            mlHomeMoneyPct: extractPctFromTd($, homeTds.eq(9)),
+            mlHomeBetsPct: extractPctFromTd($, homeTds.eq(10)),
+          }
+        : {};
+      const footballPercentages: Record<string, number | null> = {};
+      if (football) {
+        const pairs = [
+          [3, "spreadAwayMoneyPct", "spreadHomeMoneyPct"],
+          [4, "spreadAwayBetsPct", "spreadHomeBetsPct"],
+          [6, "totalOverMoneyPct", "totalUnderMoneyPct"],
+          [7, "totalOverBetsPct", "totalUnderBetsPct"],
+          [9, "mlAwayMoneyPct", "mlHomeMoneyPct"],
+          [10, "mlAwayBetsPct", "mlHomeBetsPct"],
+        ] as const;
+        for (const [col, awayKey, homeKey] of pairs) {
+          const values = [awayTds, homeTds].map(tds => {
+            const raw = tds
+              .eq(col)
+              .find(".sp-badge")
+              .first()
+              .clone()
+              .find("span")
+              .remove()
+              .end()
+              .text()
+              .trim();
+            if (!raw || raw === "—" || raw === "-") return null;
+            if (!/^\d{1,3}%$/.test(raw) || Number(raw.slice(0, -1)) > 100)
+              throw new Error(`${logTag}: invalid football percentage`);
+            return Number(raw.slice(0, -1));
+          });
+          // VSiN posts 0/0 placeholders for unavailable markets; 0/100 remains a real observation.
+          if (values[0] === 0 && values[1] === 0) values.fill(null);
+          // Independently rounded provider sides can sum to 99/101; never fabricate the counterpart.
+          if (
+            values[0] !== null &&
+            values[1] !== null &&
+            Math.abs(values[0] + values[1] - 100) > 1
+          )
+            throw new Error(
+              `${logTag}: contradictory football percentages for ${gameId}`
+            );
+          footballPercentages[awayKey] = values[0];
+          footballPercentages[homeKey] = values[1];
+        }
+      }
+      const line = (tds: typeof awayTds, i: number) => {
+        const raw = tds.eq(i).find(".sp-badge").first().text().trim();
+        return /^[+-]?\d+(?:\.\d+)?$/.test(raw) ? raw : null;
+      };
+      if (
+        football &&
+        ((line(awayTds, 2) != null &&
+          line(homeTds, 2) != null &&
+          Number(line(awayTds, 2)) !== -Number(line(homeTds, 2))) ||
+          (line(awayTds, 5) != null &&
+            line(homeTds, 5) != null &&
+            Number(line(awayTds, 5)) !== Number(line(homeTds, 5))))
+      )
+        throw new Error(`${logTag}: contradictory football split thresholds`);
 
       console.log(
         `${blockTag} ✅ ${gameId} | ${sport} | ${awayName} @ ${homeName}` +
@@ -272,6 +438,18 @@ function parseAllSpTables(
         totalOverBetsPct,
         mlAwayMoneyPct,
         mlAwayBetsPct,
+        ...(football
+          ? {
+              ...home,
+              ...footballPercentages,
+              gameDate,
+              splitLines: {
+                awaySpread: line(awayTds, 2),
+                homeSpread: line(homeTds, 2),
+                total: line(awayTds, 5),
+              },
+            }
+          : {}),
       });
 
       processed++;
@@ -294,25 +472,50 @@ function parseAllSpTables(
  * @param filterSport - Optional: only return games for this sport
  */
 export async function scrapeVsinBettingSplits(
-  view: "today" | "tomorrow" = "today",
-  filterSport?: VsinSplitsSport
+  view: "today" | "tomorrow" | "sport" = "today",
+  filterSport?: VsinSplitsSport,
+  signal?: AbortSignal
 ): Promise<VsinSplitsGame[]> {
-  const url = view === "today" ? VSIN_TODAY_URL : VSIN_TOMORROW_URL;
+  signal?.throwIfAborted();
+  if (view === "sport" && filterSport !== "CFB" && filterSport !== "NFL")
+    throw new Error("Sport view requires a football league");
+  const url =
+    view === "sport"
+      ? `https://data.vsin.com/betting-splits/?source=DK&sport=${filterSport}`
+      : view === "today"
+        ? VSIN_TODAY_URL
+        : VSIN_TOMORROW_URL;
   const logTag = `[VSiNSplits][${view}${filterSport ? `/${filterSport}` : ""}]`;
   console.log(`${logTag} Fetching ${url} ...`);
   const startTime = Date.now();
 
   const resp = await fetch(url, {
     headers: HEADERS,
-    signal: AbortSignal.timeout(15_000),
+    signal: AbortSignal.any([
+      AbortSignal.timeout(15_000),
+      ...(signal ? [signal] : []),
+    ]),
   });
   if (!resp.ok) {
-    throw new Error(`${logTag} HTTP ${resp.status} fetching ${url}`);
+    throw Object.assign(
+      new Error(`${logTag} HTTP ${resp.status} fetching ${url}`),
+      { status: resp.status, retryAfter: resp.headers.get("retry-after") }
+    );
   }
   const html = await resp.text();
+  signal?.throwIfAborted();
   const $ = cheerio.load(html);
 
   const results = parseAllSpTables($, logTag, filterSport);
+  if (filterSport === "CFB" || filterSport === "NFL") {
+    const provenance = {
+      sourceUrl: url,
+      receivedAt: Date.now(),
+      sourceUpdatedAt: null,
+      responseSha256: createHash("sha256").update(html).digest("hex"),
+    };
+    for (const game of results) game.provenance = provenance;
+  }
 
   console.log(
     `${logTag} ✅ DONE — ${results.length} games parsed in ${Date.now() - startTime}ms`

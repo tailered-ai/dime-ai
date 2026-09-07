@@ -14,7 +14,8 @@ import { fileURLToPath } from "node:url";
 import { sql } from "drizzle-orm";
 import { cfbGames, cfbPlayers, cfbTeams } from "../drizzle/cfb.schema.js";
 import { etKickoffToUtc } from "../shared/cfbKickoff.js";
-import { getDb } from "../server/db.js";
+import { getDb, reconcileFootballSchedule } from "../server/db.js";
+import { fetchFootballSchedule } from "../server/footballSchedule.js";
 
 const TAG = "[SeedCfb2026]";
 const DRY_RUN = process.argv.includes("--dry-run");
@@ -27,6 +28,28 @@ const chunk = <T,>(arr: T[], n: number): T[][] =>
   );
 
 async function main() {
+  if (process.argv.includes("--feed-season")) {
+    const season = Number(
+      process.argv.find(arg => arg.startsWith("--season="))?.split("=")[1] ??
+        2026
+    );
+    const schedule = await fetchFootballSchedule(
+      "NCAAF",
+      `${season}0801-${season + 1}0220`,
+      season
+    );
+    console.log(
+      JSON.stringify({
+        sourceUrl: schedule.sourceUrl,
+        responseSha256: schedule.responseSha256,
+        rows: schedule.rows.length,
+        unresolved: schedule.unresolved,
+      })
+    );
+    if (!DRY_RUN)
+      console.log(await reconcileFootballSchedule("NCAAF", schedule.rows));
+    return;
+  }
   const teams = load("teams.json");
   const games = load("games.json");
   const players = load("players.json");

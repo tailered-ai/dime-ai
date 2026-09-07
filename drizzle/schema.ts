@@ -5,6 +5,7 @@ import {
   double,
   index,
   int,
+  json,
   mediumtext,
   mysqlEnum,
   mysqlTable,
@@ -15,6 +16,7 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
+import type { FootballBinding, FootballMarketState, FootballObservation } from "../shared/footballMarkets";
 
 /**
  * Core user table backing auth flow.
@@ -1119,6 +1121,12 @@ export const games = mysqlTable("games", {
   }),
   /** Stable identifier for the ingestion run that produced the row. */
   ingestionRunId: varchar("ingestion_run_id", { length: 160 }),
+  /** Namespaced source identity; never infer AN IDs from ESPN/FBSchedules IDs. */
+  footballScheduleId: varchar("football_schedule_id", { length: 100 }),
+  footballAnEventId: varchar("football_an_event_id", { length: 32 }),
+  footballVsinGameId: varchar("football_vsin_game_id", { length: 40 }),
+  footballBinding: json("football_binding").$type<FootballBinding>(),
+  footballMarketState: json("football_market_state").$type<FootballMarketState>(),
 
   // ─── Outcome Ingestion + Brier Scores (populated by mlbOutcomeIngestor after game final) ──
   /**
@@ -1203,6 +1211,9 @@ export const games = mysqlTable("games", {
    * by upsert paths (the 2026-07-17 TB@BOS incident class).
    */
   uniqMatchup: uniqueIndex("games_matchup_unique").on(t.gameDate, t.awayTeam, t.homeTeam, t.gameNumber),
+  uniqFootballSchedule: uniqueIndex("games_football_schedule_unique").on(t.footballScheduleId),
+  uniqFootballAn: uniqueIndex("games_football_an_unique").on(t.sport, t.footballAnEventId),
+  uniqFootballVsin: uniqueIndex("games_football_vsin_unique").on(t.footballVsinGameId),
   /**
    * Canonical provider identity: at most ONE row per MLB gamePk. Multiple
    * NULLs are permitted by MySQL/TiDB unique-index semantics (non-MLB sports
@@ -1469,8 +1480,15 @@ export const oddsHistory = mysqlTable("odds_history", {
   // Moneyline splits
   mlAwayBetsPct: tinyint("mlAwayBetsPct"),
   mlAwayMoneyPct: tinyint("mlAwayMoneyPct"),
+  provider: varchar("provider", { length: 16 }),
+  replayKey: varchar("replay_key", { length: 64 }),
+  /** The exact partial provider observation, including independently observed home/under splits. */
+  providerObservation: json("provider_observation").$type<FootballObservation>(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, t => ({
+  replay: uniqueIndex("odds_history_replay_unique").on(t.replayKey),
+  gameCursor: index("odds_history_game_cursor").on(t.gameId, t.scrapedAt, t.id),
+}));
 
 export type OddsHistoryRow = typeof oddsHistory.$inferSelect;
 export type InsertOddsHistory = typeof oddsHistory.$inferInsert;

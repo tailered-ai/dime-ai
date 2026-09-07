@@ -13,9 +13,15 @@
 import { todayUTC } from "@/components/CalendarPicker";
 
 export type FeedSport = "MLB" | "WC" | "NCAAF" | "NFL";
-export type SplitsSport = "NCAAF" | "MLB" | "NHL" | "NBA";
+export type SplitsSport = "NCAAF" | "NFL" | "MLB" | "NHL" | "NBA";
 
-const SPLITS_SPORTS: readonly SplitsSport[] = ["NCAAF", "MLB", "NHL", "NBA"];
+const SPLITS_SPORTS: readonly SplitsSport[] = [
+  "NCAAF",
+  "NFL",
+  "MLB",
+  "NHL",
+  "NBA",
+];
 
 /** YYYY-MM-DD → MM-DD-YYYY (the feed slug date form). */
 export function toFeedSlugDate(iso: string): string {
@@ -47,6 +53,33 @@ export function bettingSplitsPath(
 ): string {
   const iso = isoDate ?? todayUTC();
   return `/betting-splits/${sport.toLowerCase()}-${toFeedSlugDate(iso)}`;
+}
+
+/** Carry football's explicit slate/game between the existing surfaces; unrelated navigation is unchanged. */
+export function preserveFootballContext(
+  target: string,
+  pathname: string,
+  search: string
+): string {
+  if (!/^\/(?:feed\/model|betting-splits)\//.test(target)) return target;
+  const params = new URLSearchParams(search);
+  const split = parseBettingSplitsPath(pathname.split("/")[2]);
+  const date =
+    split?.isoDate ??
+    slugDateToIso(
+      pathname.match(/^\/feed\/model\/(\d{2}-\d{2}-\d{4})$/)?.[1] ?? ""
+    );
+  const league = split?.sport ?? params.get("league");
+  if (!date || (league !== "NFL" && league !== "NCAAF")) return target;
+  const query = new URLSearchParams(target.split("?")[1]);
+  const game = params.get("game");
+  if (game && /^[1-9]\d*$/.test(game)) query.set("game", game);
+  const feed = target.startsWith("/feed/model/");
+  if (feed) query.set("league", league);
+  return (
+    (feed ? feedModelPath(league, date) : bettingSplitsPath(league, date)) +
+    (query.size ? `?${query}` : "")
+  );
 }
 
 /** Validates a /betting-splits/:sport route segment (case-insensitive). */

@@ -624,7 +624,7 @@ export function getTeamColors(
   dbSlug: string,
   sport?: string
 ): TeamColorEntry | null {
-  if (sport === "NCAAF") return null; // College aliases must not inherit pro-team colors.
+  if (sport === "NCAAF" || sport === "NFL") return null; // Football aliases must not inherit another sport's colors.
   return ALL_COLORS.get(dbSlug) ?? null;
 }
 

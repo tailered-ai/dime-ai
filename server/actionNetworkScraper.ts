@@ -40,14 +40,22 @@
  */
 
 import { debugLog } from "./_core/debugLogger";
+import { createHash } from "node:crypto";
+import { setTimeout as delay } from "node:timers/promises";
 
-export type AnSport = "ncaab" | "nba" | "nhl" | "mlb" | "ncaaf";
+export type AnSport = "ncaab" | "nba" | "nhl" | "mlb" | "ncaaf" | "nfl";
 
 export interface AnGameOdds {
   /** Action Network internal game ID */
   gameId: number;
   awayTeamId?: number;
   homeTeamId?: number;
+  provenance?: {
+    sourceUrl: string;
+    receivedAt: number;
+    sourceUpdatedAt: number | null;
+    responseSha256: string;
+  };
   /** Away team full name, e.g. "Ohio State Buckeyes" */
   awayFullName: string;
   /** Away team abbreviation */
@@ -283,8 +291,11 @@ const AN_HEADERS = {
  */
 export async function fetchActionNetworkOdds(
   sport: AnSport,
-  date: string
+  date: string,
+  signal?: AbortSignal
 ): Promise<AnGameOdds[]> {
+  signal?.throwIfAborted();
+  const football = sport === "ncaaf" || sport === "nfl";
   // Convert YYYY-MM-DD → YYYYMMDD for the API
   const dateParam = date.replace(/-/g, "");
 
@@ -323,11 +334,20 @@ export async function fetchActionNetworkOdds(
       );
       const r = await fetch(url, {
         headers: AN_HEADERS,
-        signal: AbortSignal.timeout(15_000),
+        signal: AbortSignal.any([
+          AbortSignal.timeout(15_000),
+          ...(signal ? [signal] : []),
+        ]),
       });
       if (!r.ok) {
-        throw new Error(
-          `[ActionNetwork][v2] HTTP ${r.status} for ${sport} ${date}`
+        throw Object.assign(
+          new Error(
+            `[ActionNetwork][v2] HTTP ${r.status} for ${sport} ${date}`
+          ),
+          {
+            status: r.status,
+            retryAfter: r.headers.get("retry-after"),
+          }
         );
       }
       debugLog(
@@ -338,6 +358,17 @@ export async function fetchActionNetworkOdds(
       resp = r;
       break;
     } catch (err) {
+      signal?.throwIfAborted();
+      // A denied/rate-limited football request stops the cycle; never hammer the provider.
+      if (
+        football &&
+        err &&
+        typeof err === "object" &&
+        "status" in err &&
+        Number(err.status) >= 400 &&
+        Number(err.status) < 500
+      )
+        throw err;
       const errMsg = err instanceof Error ? err.message : String(err);
       if (attempt < MAX_ATTEMPTS) {
         const delayMs = RETRY_DELAYS_MS[attempt - 1];
@@ -347,7 +378,7 @@ export async function fetchActionNetworkOdds(
           `[ActionNetwork][v2] ${sport.toUpperCase()} ${date}: attempt ${attempt}/${MAX_ATTEMPTS} FAILED — ` +
             `retrying in ${delayMs}ms | error: ${errMsg}`
         );
-        await new Promise(resolve => setTimeout(resolve, delayMs));
+        await delay(delayMs, undefined, { signal });
       } else {
         console.error(
           `[ActionNetwork][v2] ${sport.toUpperCase()} ${date}: ALL ${MAX_ATTEMPTS} attempts FAILED | last error: ${errMsg}`
@@ -361,12 +392,20 @@ export async function fetchActionNetworkOdds(
       `[ActionNetwork][v2] No response after ${MAX_ATTEMPTS} attempts for ${sport} ${date}`
     );
 
-  const data = (await resp.json()) as AnV2ApiResponse;
+  const body = await resp.text();
+  signal?.throwIfAborted();
+  const data = JSON.parse(body) as AnV2ApiResponse;
+  const provenance = {
+    sourceUrl: url,
+    receivedAt: Date.now(),
+    sourceUpdatedAt: null,
+    responseSha256: createHash("sha256").update(body).digest("hex"),
+  };
   if (
-    sport === "ncaaf" &&
-    (data?.league?.name !== "ncaaf" || !Array.isArray(data.games))
+    football &&
+    (data?.league?.name !== sport || !Array.isArray(data.games))
   ) {
-    throw new Error("Invalid NCAAF scoreboard identity");
+    throw new Error(`Invalid ${sport.toUpperCase()} scoreboard identity`);
   }
   const games = data?.games ?? [];
 
@@ -382,12 +421,16 @@ export async function fetchActionNetworkOdds(
 
   for (const game of games) {
     if (
-      sport === "ncaaf" &&
-      [game.away_team_id, game.home_team_id].some(
-        id =>
-          !Number.isSafeInteger(id) ||
-          game.teams?.filter(team => team.id === id).length !== 1
-      )
+      football &&
+      (!Number.isSafeInteger(game.id) ||
+        game.away_team_id === game.home_team_id ||
+        !Number.isFinite(Date.parse(game.start_time)) ||
+        games.filter(g => g.id === game.id).length !== 1 ||
+        [game.away_team_id, game.home_team_id].some(
+          id =>
+            !Number.isSafeInteger(id) ||
+            game.teams?.filter(team => team.id === id).length !== 1
+        ))
     ) {
       throw new Error(`NCAAF event ${game.id}: ambiguous team identities`);
     }
@@ -425,12 +468,18 @@ export async function fetchActionNetworkOdds(
       arr: AnV2Outcome[] | undefined,
       matcher: { side?: string; teamId?: number }
     ) => {
-      if (sport !== "ncaaf") return findOutcome(arr, matcher);
+      if (!football) return findOutcome(arr, matcher);
       const matches = (arr ?? []).filter(
         o =>
           o.book_id === DK_NJ_BOOK_ID &&
           o.event_id === game.id &&
           o.period === "event" &&
+          o.type ===
+            (matcher.side === "over" || matcher.side === "under"
+              ? "total"
+              : matcher.side
+                ? "spread"
+                : "moneyline") &&
           o.is_live !== true &&
           o.is_alt_market !== true &&
           Number.isInteger(o.odds) &&
@@ -450,7 +499,7 @@ export async function fetchActionNetworkOdds(
       return matches.length === 1 ? matches[0] : undefined;
     };
     const dkPoint = (value: number | undefined) =>
-      sport === "ncaaf"
+      football
         ? value != null && Number.isFinite(value)
           ? value
           : null
@@ -484,7 +533,7 @@ export async function fetchActionNetworkOdds(
       teamId: game.home_team_id,
     });
     if (
-      sport === "ncaaf" &&
+      football &&
       ((dkSpreadAway &&
         dkSpreadHome &&
         dkSpreadAway.value !== -dkSpreadHome.value!) ||
@@ -522,8 +571,12 @@ export async function fetchActionNetworkOdds(
 
     results.push({
       gameId: game.id,
-      ...(sport === "ncaaf"
-        ? { awayTeamId: game.away_team_id, homeTeamId: game.home_team_id }
+      ...(football
+        ? {
+            awayTeamId: game.away_team_id,
+            homeTeamId: game.home_team_id,
+            provenance,
+          }
         : {}),
       awayFullName: awayTeam.full_name,
       awayAbbr: awayTeam.abbr,
@@ -551,8 +604,7 @@ export async function fetchActionNetworkOdds(
       dkHomeSpread: dkPoint(dkSpreadHome?.value),
       dkHomeSpreadOdds: fmtOdds(dkSpreadHome?.odds),
       dkTotal: dkPoint(
-        dkTotalOver?.value ??
-          (sport === "ncaaf" ? dkTotalUnder?.value : undefined)
+        dkTotalOver?.value ?? (football ? dkTotalUnder?.value : undefined)
       ),
       dkOverOdds: fmtOdds(dkTotalOver?.odds),
       dkUnderOdds: fmtOdds(dkTotalUnder?.odds),

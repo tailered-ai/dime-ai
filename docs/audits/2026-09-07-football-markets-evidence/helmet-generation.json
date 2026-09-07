@@ -1,0 +1,311 @@
+{
+  "mode": "builtin_imagegen",
+  "window": [
+    "2026-09-07",
+    "2026-09-13"
+  ],
+  "originalsPreserved": true,
+  "description": "Generated team helmet illustrations, not certified game-day uniform depictions. Existing helmets reused; no logo fallbacks.",
+  "promptTemplate": "team => `Use case: product-mockup. Asset type: transparent PNG American football helmet for small sports Feed cards. Generate one photorealistic ${team} football helmet in the team's recognizable classic football helmet design and official team colors, with their recognizable team emblem as a precise side decal. Single helmet facing right, slight three-quarter angle showing its left side and facemask; complete uncut silhouette; centered square canvas with tight 6% clear padding. Realistic shell, facemask, hardware, padding and chinstrap, clean soft studio highlights, sharp emblem readable at small size. Genuinely transparent alpha background, no ground plane, no shadow outside helmet, no person, no caption, no added words except actual helmet markings, no extra objects, no printed checkerboard. Professional broadcast helmet asset, matching existing photorealistic helmet cutouts. Keep the complete helmet and decals inside the canvas.`",
+  "wagnerCorrection": {
+    "prompt": "Create a photorealistic Wagner COLLEGE Seahawks football HELMET using the attached Wagner college eagle emblem as its precise side decal. This is Wagner College in Staten Island, not the Seattle NFL Seahawks. Helmet shell is bright white with Wagner dark forest green (#00483A) facemask and a narrow forest green center stripe. The side decal must reproduce the attached white, silver and forest-green Wagner eagle silhouette, not Seattle's bird or colors. Single complete helmet facing right, slight three-quarter angle showing its left side, centered on a square canvas with 6% clear padding. Realistic shell, facemask, hardware, padding and chinstrap; no person or extra objects. Truly transparent alpha background, no ground, no external shadow, no checkerboard, no added captions. This is a cutout helmet asset for the Feed, not a standalone logo.",
+    "reference": "https://a.espncdn.com/i/teamlogos/ncaa/500/2681.png",
+    "rejectedSource": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-8ff9d01a-afdd-4b7a-abfb-8498b7ae71e5.png"
+  },
+  "assets": [
+    {
+      "code": "FAMU",
+      "name": "Florida A&M Rattlers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-0aac5a2b-72d0-4ca8-a184-971e0cf80b6f.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-famu.png"
+    },
+    {
+      "code": "VILL",
+      "name": "Villanova Wildcats",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-78fabe8d-bfb1-4e8f-8874-ed8b569316fe.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-vill.png"
+    },
+    {
+      "code": "UVA",
+      "name": "Virginia Cavaliers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-99bf21c5-fe8c-4321-8b4c-37a210685d3f.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-uva.png"
+    },
+    {
+      "code": "NCSU",
+      "name": "NC State Wolfpack",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-ec68d664-981f-4d72-9855-bb75ca6b044a.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-ncsu.png"
+    },
+    {
+      "code": "RICH",
+      "name": "Richmond Spiders",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-92abf953-6f78-457c-9f1c-6a81d991a5cd.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-rich.png"
+    },
+    {
+      "code": "KU",
+      "name": "Kansas Jayhawks",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-2216d47c-c188-4d0c-8b48-6184dcd67eb2.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-ku.png"
+    },
+    {
+      "code": "MIZ",
+      "name": "Missouri Tigers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-1530d6ba-5b52-4a1e-b554-e0f5df32ed63.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-miz.png"
+    },
+    {
+      "code": "HOW",
+      "name": "Howard Bison",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-e0b68c10-8472-4b33-9161-9fd3b04acd43.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-how.png"
+    },
+    {
+      "code": "UNC",
+      "name": "North Carolina Tar Heels",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-7cd7f7a3-2c10-4d87-8295-2f2def547f1c.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-unc.png"
+    },
+    {
+      "code": "ETSU",
+      "name": "East Tennessee State Buccaneers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-02d86f5d-7bd7-43ba-b27e-870245f6999d.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-etsu.png"
+    },
+    {
+      "code": "PUR",
+      "name": "Purdue Boilermakers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-48ad4138-c62d-4f62-8c63-6fbb8b5fefac.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-pur.png"
+    },
+    {
+      "code": "WOF",
+      "name": "Wofford Terriers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-847f8ee2-5346-48a5-8e1b-9acc84b9dcbc.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-wof.png"
+    },
+    {
+      "code": "UTM",
+      "name": "UT Martin Skyhawks",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-00703eba-2618-4645-816a-f388936eed87.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-utm.png"
+    },
+    {
+      "code": "COLG",
+      "name": "Colgate Raiders",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-f085f881-049a-46be-8429-ccf4a9f2cb46.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-colg.png"
+    },
+    {
+      "code": "HC",
+      "name": "Holy Cross Crusaders",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-738f4118-6716-4ef2-9af4-29a3480bee69.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-hc.png"
+    },
+    {
+      "code": "STBK",
+      "name": "Stony Brook Seawolves",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-71d86da1-5e19-46ed-ab32-af213b1a2d47.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-stbk.png"
+    },
+    {
+      "code": "MINN",
+      "name": "Minnesota Golden Gophers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-b494bb59-cdb6-4245-8c1e-8c5b4067e5ba.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-minn.png"
+    },
+    {
+      "code": "WEB",
+      "name": "Weber State Wildcats",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-8488efb0-c06c-4c73-990d-43780fc27d16.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-web.png"
+    },
+    {
+      "code": "UCF",
+      "name": "UCF Knights",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-9b70ee59-b8a0-46d6-beda-3f18655db406.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-ucf.png"
+    },
+    {
+      "code": "RMU",
+      "name": "Robert Morris Colonials",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-2610540b-de8a-41cf-810d-9a05b9d3d5cc.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-rmu.png"
+    },
+    {
+      "code": "CCSU",
+      "name": "Central Connecticut Blue Devils",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-e13ba8bf-26b9-4984-894a-73487ab122e8.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-ccsu.png"
+    },
+    {
+      "code": "SHU",
+      "name": "Sacred Heart Pioneers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-6ad4e05f-713c-4a8d-bf78-a760306a6049.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-shu.png"
+    },
+    {
+      "code": "WAG",
+      "name": "Wagner Seahawks",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-13b3a7af-3ff7-4a68-8394-04a6bb3d466a.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-wag.png"
+    },
+    {
+      "code": "UCD",
+      "name": "UC Davis Aggies",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-0488395c-79c5-4ff9-8c90-ccd09b7fa98b.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-ucd.png"
+    },
+    {
+      "code": "UNCO",
+      "name": "Northern Colorado Bears",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-ca29329f-3ba5-4846-bc17-5bd7feea5340.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-unco.png"
+    },
+    {
+      "code": "ALST",
+      "name": "Alabama State Hornets",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-f800a093-4cfe-4adf-bba3-eae1910d94eb.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-alst.png"
+    },
+    {
+      "code": "DEL",
+      "name": "Delaware Blue Hens",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-d62e0471-5edf-4a51-af8e-22b40517c832.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-del.png"
+    },
+    {
+      "code": "CAM",
+      "name": "Campbell Fighting Camels",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-004a889a-2186-419a-a0b4-91a06f2c41eb.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-cam.png"
+    },
+    {
+      "code": "BUFF",
+      "name": "Buffalo Bulls",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-ef8b0e51-893a-4bd5-9dde-068caece77e8.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-buff.png"
+    },
+    {
+      "code": "GWEB",
+      "name": "Gardner-Webb Runnin' Bulldogs",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-9b71b216-fdab-4cf0-b328-fd2088657d76.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-gweb.png"
+    },
+    {
+      "code": "MONM",
+      "name": "Monmouth Hawks",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-b65a0010-f65f-48fd-82c0-e6a67b600a88.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-monm.png"
+    },
+    {
+      "code": "SOU",
+      "name": "Southern Jaguars",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-334b6cd6-ae10-4587-a7b6-8237bef980d2.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-sou.png"
+    },
+    {
+      "code": "WCU",
+      "name": "Western Carolina Catamounts",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-0f4e02d1-be17-45bf-8162-6d3734e9633e.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-wcu.png"
+    },
+    {
+      "code": "SUU",
+      "name": "Southern Utah Thunderbirds",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-ec7b848a-9a77-4cdd-9655-46fa80621ae5.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-suu.png"
+    },
+    {
+      "code": "ILST",
+      "name": "Illinois State Redbirds",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-b5f5afe9-c3f6-47c8-aa5c-52a3a33ac678.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-ilst.png"
+    },
+    {
+      "code": "WES",
+      "name": "West Georgia Wolves",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-d91b304f-408b-40e4-8e20-032304ef980e.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-wes.png"
+    },
+    {
+      "code": "KENN",
+      "name": "Kennesaw State Owls",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-e05dc10f-4499-4aed-b9c4-e97ac929d1d0.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-kenn.png"
+    },
+    {
+      "code": "GAST",
+      "name": "Georgia State Panthers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-688b1e7e-0b8f-4fac-93d5-fcb8511257b3.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-gast.png"
+    },
+    {
+      "code": "LIN",
+      "name": "Lindenwood Lions",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-19388360-723f-4c1b-b9c5-f02cc2528523.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-lin.png"
+    },
+    {
+      "code": "WIU",
+      "name": "Western Illinois Leathernecks",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-8f194284-0e5c-40c4-a9f9-f4499324dd87.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-wiu.png"
+    },
+    {
+      "code": "PV",
+      "name": "Prairie View A&M Panthers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-88c47e99-1522-4b9a-a65b-75d530a64a1c.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-pv.png"
+    },
+    {
+      "code": "TCU",
+      "name": "TCU Horned Frogs",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-c1072661-b602-4aba-9f99-a19ecf0ebeab.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-tcu.png"
+    },
+    {
+      "code": "GRAM",
+      "name": "Grambling Tigers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-8fa7344d-14c5-4f0b-97d8-d5798dce1ff7.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-gram.png"
+    },
+    {
+      "code": "CP",
+      "name": "Cal Poly Mustangs",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-8bbd8a1a-e69c-410c-8c80-93e606165e24.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-cp.png"
+    },
+    {
+      "code": "TXSO",
+      "name": "Texas Southern Tigers",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-602fd90d-7922-4173-97c6-ed34dfe762de.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-txso.png"
+    },
+    {
+      "code": "UTAH",
+      "name": "Utah Utes",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-9bc8ccd7-3a07-43b5-b648-a1639a97224f.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-utah.png"
+    },
+    {
+      "code": "MTST",
+      "name": "Montana State Bobcats",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-50d2e154-c0bf-417c-88e6-3bc2d9916477.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-mtst.png"
+    },
+    {
+      "code": "FSU",
+      "name": "Florida State Seminoles",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-be7c5f9c-0e3b-45d9-b1fb-71630dbb6555.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-fsu.png"
+    },
+    {
+      "code": "SMU",
+      "name": "SMU Mustangs",
+      "source": "/Users/danielwalker/.codex/generated_images/01a06dbb-0449-7af2-b364-3e6893d85f00/exec-c3d90f4f-f055-4525-8284-ef3e6531f1c3.png",
+      "target": "client/public/brand/ncaaf-helmets/sept7-smu.png"
+    }
+  ]
+}

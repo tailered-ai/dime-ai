@@ -73,7 +73,7 @@ describe("DimeModelFeed — NCAAF route", () => {
   });
 
   it("keeps Splits on the selected slate and uses the official CFP mark", () => {
-    expect(src).toContain('bettingSplitsPath(filters.league === "MLB" ? "MLB" : "NCAAF", isoDate)');
+    expect(src).toContain('bettingSplitsPath(filters.league === "MLB" ? "MLB" : filters.league === "NFL" ? "NFL" : "NCAAF", isoDate)');
     expect(src).toContain('src="/brand/cfp-logo.svg"');
     expect(src).not.toContain('aria-hidden="true">CFB</span>');
   });

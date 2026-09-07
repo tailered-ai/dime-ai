@@ -1,7 +1,54 @@
-import feedTeams from "./ncaafFeedTeams.json";
-
 /** Public helmet assets, shared by the model and betting-splits feeds. */
 const NCAAF_HELMETS: Readonly<Record<string, string>> = {
+  FAMU: "/brand/ncaaf-helmets/sept7-famu.png",
+  VILL: "/brand/ncaaf-helmets/sept7-vill.png",
+  UVA: "/brand/ncaaf-helmets/sept7-uva.png",
+  NCSU: "/brand/ncaaf-helmets/sept7-ncsu.png",
+  RICH: "/brand/ncaaf-helmets/sept7-rich.png",
+  KU: "/brand/ncaaf-helmets/sept7-ku.png",
+  MIZ: "/brand/ncaaf-helmets/sept7-miz.png",
+  HOW: "/brand/ncaaf-helmets/sept7-how.png",
+  UNC: "/brand/ncaaf-helmets/sept7-unc.png",
+  ETSU: "/brand/ncaaf-helmets/sept7-etsu.png",
+  PUR: "/brand/ncaaf-helmets/sept7-pur.png",
+  WOF: "/brand/ncaaf-helmets/sept7-wof.png",
+  UTM: "/brand/ncaaf-helmets/sept7-utm.png",
+  COLG: "/brand/ncaaf-helmets/sept7-colg.png",
+  HC: "/brand/ncaaf-helmets/sept7-hc.png",
+  STBK: "/brand/ncaaf-helmets/sept7-stbk.png",
+  MINN: "/brand/ncaaf-helmets/sept7-minn.png",
+  WEB: "/brand/ncaaf-helmets/sept7-web.png",
+  UCF: "/brand/ncaaf-helmets/sept7-ucf.png",
+  RMU: "/brand/ncaaf-helmets/sept7-rmu.png",
+  CCSU: "/brand/ncaaf-helmets/sept7-ccsu.png",
+  SHU: "/brand/ncaaf-helmets/sept7-shu.png",
+  WAG: "/brand/ncaaf-helmets/sept7-wag.png",
+  UCD: "/brand/ncaaf-helmets/sept7-ucd.png",
+  UNCO: "/brand/ncaaf-helmets/sept7-unco.png",
+  ALST: "/brand/ncaaf-helmets/sept7-alst.png",
+  DEL: "/brand/ncaaf-helmets/sept7-del.png",
+  CAM: "/brand/ncaaf-helmets/sept7-cam.png",
+  BUFF: "/brand/ncaaf-helmets/sept7-buff.png",
+  GWEB: "/brand/ncaaf-helmets/sept7-gweb.png",
+  MONM: "/brand/ncaaf-helmets/sept7-monm.png",
+  SOU: "/brand/ncaaf-helmets/sept7-sou.png",
+  WCU: "/brand/ncaaf-helmets/sept7-wcu.png",
+  SUU: "/brand/ncaaf-helmets/sept7-suu.png",
+  ILST: "/brand/ncaaf-helmets/sept7-ilst.png",
+  WES: "/brand/ncaaf-helmets/sept7-wes.png",
+  KENN: "/brand/ncaaf-helmets/sept7-kenn.png",
+  GAST: "/brand/ncaaf-helmets/sept7-gast.png",
+  LIN: "/brand/ncaaf-helmets/sept7-lin.png",
+  WIU: "/brand/ncaaf-helmets/sept7-wiu.png",
+  PV: "/brand/ncaaf-helmets/sept7-pv.png",
+  TCU: "/brand/ncaaf-helmets/sept7-tcu.png",
+  GRAM: "/brand/ncaaf-helmets/sept7-gram.png",
+  CP: "/brand/ncaaf-helmets/sept7-cp.png",
+  TXSO: "/brand/ncaaf-helmets/sept7-txso.png",
+  UTAH: "/brand/ncaaf-helmets/sept7-utah.png",
+  MTST: "/brand/ncaaf-helmets/sept7-mtst.png",
+  FSU: "/brand/ncaaf-helmets/sept7-fsu.png",
+  SMU: "/brand/ncaaf-helmets/sept7-smu.png",
   WSU: "/brand/ncaaf-helmets/sept6-washington-state.png",
   WASH: "/brand/ncaaf-helmets/sept6-washington.png",
   WIS: "/brand/ncaaf-helmets/sept6-wisconsin.png",
@@ -166,6 +213,4 @@ const NCAAF_HELMETS: Readonly<Record<string, string>> = {
 };
 
 export const ncaafHelmet = (abbr: string): string | null =>
-  NCAAF_HELMETS[abbr] ??
-  (feedTeams as Record<string, { logo: string }>)[abbr]?.logo ??
-  null;
+  NCAAF_HELMETS[abbr] ?? null;

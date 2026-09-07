@@ -6,10 +6,11 @@
  */
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { CalendarX, Loader2, Search, X } from "lucide-react"; // 2026-08-05: lab flask was off-domain for an empty slate
 import { CalendarPicker, todayUTC } from "@/components/CalendarPicker";
 import { bettingSplitsPath } from "@/lib/feedRoutes";
+import { footballHelmet, footballTeamName } from "@shared/footballMarkets";
 import { useTrackAction } from "@/lib/analytics";
 import {
   resolveSplitsServerDate,
@@ -25,7 +26,7 @@ const CDN_NBA =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663397752079/MW3FicTy7ae3qrm8dx8Lua/icon-nba_3fa4f508.png";
 
 // League pill logos — rendered only for in-season leagues (see leagueSeasons).
-const LEAGUE_LOGOS: Record<SplitsLeague, string> = {
+const LEAGUE_LOGOS: Partial<Record<SplitsLeague, string>> = {
   NCAAF:
     "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-football-college.png",
   MLB: "https://www.mlbstatic.com/team-logos/league-on-dark/1.svg",
@@ -107,11 +108,23 @@ function formatDateShort(dateStr: string): string {
 }
 
 // ─── Team Logo Badge ──────────────────────────────────────────────────────────
-function TeamBadge({ slug, size = 32 }: { slug: string; size?: number }) {
-  const nba = getNbaTeamByDbSlug(slug);
-  const nhl = !nba ? (NHL_BY_DB_SLUG.get(slug) ?? null) : null;
-  const mlb = !nba && !nhl ? (MLB_BY_ABBREV.get(slug) ?? null) : null;
-  const logo = nba?.logoUrl ?? nhl?.logoUrl ?? mlb?.logoUrl;
+function TeamBadge({
+  slug,
+  size = 32,
+  sport,
+}: {
+  slug: string;
+  size?: number;
+  sport?: string;
+}) {
+  const football = sport === "NFL" || sport === "NCAAF";
+  const nba = football ? null : getNbaTeamByDbSlug(slug);
+  const nhl = !football && !nba ? (NHL_BY_DB_SLUG.get(slug) ?? null) : null;
+  const mlb =
+    !football && !nba && !nhl ? (MLB_BY_ABBREV.get(slug) ?? null) : null;
+  const logo = football
+    ? footballHelmet(sport, slug)
+    : (nba?.logoUrl ?? nhl?.logoUrl ?? mlb?.logoUrl);
   const initials = (
     nba?.name ??
     nhl?.name ??
@@ -172,7 +185,7 @@ export function SearchResultRow({
   game: GameRow;
   onClick: () => void;
 }) {
-  const isNcaaf = game.sport === "NCAAF";
+  const isNcaaf = game.sport === "NCAAF" || game.sport === "NFL";
   const awayNba = isNcaaf ? null : getNbaTeamByDbSlug(game.awayTeam);
   const homeNba = isNcaaf ? null : getNbaTeamByDbSlug(game.homeTeam);
   const awayNhl =
@@ -188,7 +201,7 @@ export function SearchResultRow({
       ? (MLB_BY_ABBREV.get(game.homeTeam) ?? null)
       : null;
   const awaySchool = isNcaaf
-    ? ncaafSchoolName(game.awayTeam)
+    ? footballTeamName(game.sport!, game.awayTeam)
     : (awayNba?.city ??
       awayNhl?.city ??
       awayMlb?.city ??
@@ -196,7 +209,7 @@ export function SearchResultRow({
   const awayNick =
     awayNba?.nickname ?? awayNhl?.nickname ?? awayMlb?.nickname ?? "";
   const homeSchool = isNcaaf
-    ? ncaafSchoolName(game.homeTeam)
+    ? footballTeamName(game.sport!, game.homeTeam)
     : (homeNba?.city ??
       homeNhl?.city ??
       homeMlb?.city ??
@@ -236,7 +249,7 @@ export function SearchResultRow({
           className="flex items-center gap-2"
           style={{ flex: "1 1 0", minWidth: 0 }}
         >
-          <TeamBadge slug={game.awayTeam} size={32} />
+          <TeamBadge slug={game.awayTeam} size={32} sport={game.sport!} />
           <div className="flex flex-col" style={{ minWidth: 0 }}>
             {/* xs/sm: abbreviation only — never truncates */}
             <span
@@ -341,7 +354,7 @@ export function SearchResultRow({
               </span>
             )}
           </div>
-          <TeamBadge slug={game.homeTeam} size={32} />
+          <TeamBadge slug={game.homeTeam} size={32} sport={game.sport!} />
         </div>
       </div>
     </button>
@@ -376,6 +389,7 @@ export default function BettingSplitsPage({
   embeddedInShell = false,
 }: BettingSplitsPageProps) {
   const [, setLocation] = useLocation();
+  const routeSearch = useSearch();
   const trackAction = useTrackAction();
   const [showAgeModal, setShowAgeModal] = useState(false);
   // Sport is seeded from the canonical route (/betting-splits/:sport) and the
@@ -558,21 +572,9 @@ export default function BettingSplitsPage({
   // first in-season league with a replace navigation — no history spam.
   const seasonDate = serverDateData?.effectiveDate ?? todayUTC();
   const activeLeagues = useMemo(
-    () => inSeasonLeagues(seasonDate),
-    [seasonDate]
+    () => Array.from(new Set([...inSeasonLeagues(seasonDate), selectedSport])),
+    [seasonDate, selectedSport]
   );
-  useEffect(() => {
-    if (activeLeagues.includes(selectedSport)) return;
-    const fallback = activeLeagues[0];
-    if (!fallback) return;
-    // Drop the requested date too: an off-season deep link's date belongs to
-    // the dead league's calendar — land on the fallback league's live slate.
-    setSelectedSportState(fallback);
-    setSelectedDateState(todayUTC());
-    setLocation(resolveRouteHref(bettingSplitsPath(fallback)), {
-      replace: true,
-    });
-  }, [activeLeagues, selectedSport, setLocation, resolveRouteHref]);
 
   const { data: availableDatesData } = trpc.games.getAvailableDates.useQuery(
     { sport: selectedSport },
@@ -628,7 +630,7 @@ export default function BettingSplitsPage({
     b: NonNullable<typeof allGames>[number]
   ): number => {
     // NCAAF stays in Eastern kickoff order as games move through their lifecycle.
-    if (a?.sport === "NCAAF" && b?.sport === "NCAAF")
+    if ((a?.sport === "NCAAF" || a?.sport === "NFL") && a.sport === b?.sport)
       return sortableMinutes(a.startTimeEst) - sortableMinutes(b.startTimeEst);
     const statusOrder = (s: string | null | undefined) =>
       s === "live" ? 0 : s === "upcoming" ? 1 : s === "final" ? 2 : 3;
@@ -745,19 +747,23 @@ export default function BettingSplitsPage({
   const splitsAgoLabel = useMemo(() => {
     // A different league's successful job does not establish NCAAF freshness.
     const captures =
-      selectedSport === "NCAAF"
-        ? sourceGames?.map(game =>
-            game.ingestionReceivedAt &&
-            /^ncaaf-(?:an68-)?vsin-dk:\d+:\d+$/.test(game.ingestionRunId ?? "")
-              ? new Date(game.ingestionReceivedAt).getTime()
-              : NaN
+      selectedSport === "NCAAF" || selectedSport === "NFL"
+        ? sourceGames?.map(
+            game =>
+              game.footballMarketState?.vsin_dk?.receivedAt ??
+              (game.ingestionReceivedAt &&
+              /^ncaaf-(?:an68-)?vsin-dk:\d+:\d+$/.test(
+                game.ingestionRunId ?? ""
+              )
+                ? new Date(game.ingestionReceivedAt).getTime()
+                : NaN)
           )
         : undefined;
     const timestamp =
       captures?.length &&
       captures.every(time => Number.isFinite(time) && time <= now)
         ? Math.min(...captures)
-        : selectedSport === "NCAAF"
+        : selectedSport === "NCAAF" || selectedSport === "NFL"
           ? null
           : lastRefresh?.refreshedAt;
     if (timestamp == null) return "—";
@@ -779,8 +785,11 @@ export default function BettingSplitsPage({
         const awayNba = getNbaTeamByDbSlug(game.awayTeam);
         const homeNba = getNbaTeamByDbSlug(game.homeTeam);
         const terms = [
-          ...(game.sport === "NCAAF"
-            ? [ncaafSchoolName(game.awayTeam), ncaafSchoolName(game.homeTeam)]
+          ...(game.sport === "NCAAF" || game.sport === "NFL"
+            ? [
+                footballTeamName(game.sport, game.awayTeam),
+                footballTeamName(game.sport, game.homeTeam),
+              ]
             : []),
           awayNba?.name ?? "",
           awayNba?.nickname ?? "",
@@ -819,6 +828,11 @@ export default function BettingSplitsPage({
   );
 
   const scrollToGame = (gameId: number) => {
+    setLocation(
+      resolveRouteHref(
+        `${bettingSplitsPath(selectedSport, selectedDate)}?game=${gameId}`
+      )
+    );
     setSearchFocused(false);
     setSearchQuery("");
     const reducedMotion = window.matchMedia(
@@ -868,6 +882,14 @@ export default function BettingSplitsPage({
     }, 120);
   };
 
+  useEffect(() => {
+    const game = new URLSearchParams(routeSearch).get("game");
+    if (!game || !/^[1-9]\d*$/.test(game) || gamesLoading) return;
+    document
+      .getElementById(`game-card-${game}`)
+      ?.scrollIntoView({ behavior: "auto", block: "center" });
+  }, [routeSearch, gamesLoading, selectedSport, selectedDate]);
+
   return (
     <div className="bs-page bg-background">
       {showAgeModal && (
@@ -902,7 +924,7 @@ export default function BettingSplitsPage({
         {/* Row 2: Unified filter bar — DATE | NBA | Search */}
         <div
           ref={searchRef}
-          className="relative px-3 pt-1 pb-1 flex items-center gap-2"
+          className="relative px-3 pt-1 pb-1 flex flex-wrap items-center gap-2"
         >
           {/* DATE picker — calendar dropdown */}
           <CalendarPicker
@@ -922,23 +944,25 @@ export default function BettingSplitsPage({
               data-active={selectedSport === league}
               className="bs-pill flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[13px] font-semibold tracking-wide transition-all flex-shrink-0 cursor-pointer"
             >
-              <img
-                src={LEAGUE_LOGOS[league]}
-                alt=""
-                width={12}
-                height={12}
-                style={{
-                  objectFit: "contain",
-                  opacity: selectedSport === league ? 1 : 0.5,
-                  flexShrink: 0,
-                }}
-              />
+              {LEAGUE_LOGOS[league] && (
+                <img
+                  src={LEAGUE_LOGOS[league]}
+                  alt=""
+                  width={12}
+                  height={12}
+                  style={{
+                    objectFit: "contain",
+                    opacity: selectedSport === league ? 1 : 0.5,
+                    flexShrink: 0,
+                  }}
+                />
+              )}
               {league}
             </button>
           ))}
 
           {/* Search bar — takes remaining space */}
-          <div className="flex-1 min-w-0">
+          <div className="basis-full sm:basis-auto flex-1 min-w-0">
             <div
               className="bs-search flex items-center gap-2 px-2.5 py-1.5 rounded-full border"
               data-focused={searchFocused}
@@ -1073,11 +1097,13 @@ export default function BettingSplitsPage({
               >
                 {selectedSport === "NCAAF"
                   ? "NCAAF FOOTBALL"
-                  : selectedSport === "MLB"
-                    ? "MLB BASEBALL"
-                    : selectedSport === "NHL"
-                      ? "NHL HOCKEY"
-                      : "NBA BASKETBALL"}
+                  : selectedSport === "NFL"
+                    ? "NFL FOOTBALL"
+                    : selectedSport === "MLB"
+                      ? "MLB BASEBALL"
+                      : selectedSport === "NHL"
+                        ? "NHL HOCKEY"
+                        : "NBA BASKETBALL"}
               </span>
             </div>
             {/* 2026-08-05: splitsAgoLabel was computed but never rendered —
@@ -1097,11 +1123,11 @@ export default function BettingSplitsPage({
                 }}
               >
                 {dkSnapshot
-                  ? `VSiN DK · ${new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }).format(new Date(dkSnapshot.retrievedAt))} ET`
-                  : selectedSport === "NCAAF"
+                  ? `Updated · ${new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" }).format(new Date(dkSnapshot.retrievedAt))} ET`
+                  : selectedSport === "NCAAF" || selectedSport === "NFL"
                     ? splitsAgoLabel === "—"
-                      ? "NCAAF capture time unavailable"
-                      : `Oldest NCAAF capture ${splitsAgoLabel}`
+                      ? `${selectedSport} capture time unavailable`
+                      : `Oldest ${selectedSport} capture ${splitsAgoLabel}`
                     : `Splits synced ${splitsAgoLabel}`}
               </span>
             </div>

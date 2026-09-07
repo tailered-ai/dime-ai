@@ -49,6 +49,7 @@ import { useId, useState } from "react";
 import { ChevronDown, Clock, RefreshCw } from "lucide-react";
 import { ncaafSchoolName } from "@shared/ncaafSchoolNames";
 import { ncaafHelmet } from "@shared/ncaafHelmets";
+import { footballHelmet, footballTeamName } from "@shared/footballMarkets";
 import { trpc } from "@/lib/trpc";
 import { useIsMdUp } from "@/hooks/useIsMdUp";
 // The panel's .ohp-* styles ride whichever chunk renders it (NOT the chat
@@ -172,6 +173,13 @@ function fmtPct(val: number | null | undefined): string {
 // ── Row type ───────────────────────────────────────────────────────────────────
 
 type HistoryRow = {
+  providerObservation?: {
+    splitLines?: {
+      awaySpread: string | null;
+      homeSpread: string | null;
+      total: string | null;
+    };
+  } | null;
   sourceNote?: string;
   sourceLabel?: string;
   isOpening?: boolean;
@@ -209,9 +217,9 @@ export function resolveSplitPair(
   pending: boolean
 ): [number | null, number | null] {
   if (opposite !== undefined) {
-    return value == null || opposite === null || (value === 0 && opposite === 0)
+    return value === 0 && opposite === 0
       ? [null, null]
-      : [value, opposite];
+      : [value ?? null, opposite];
   }
   return pending || value == null ? [null, null] : [value, 100 - value];
 }
@@ -320,7 +328,8 @@ export function marketCells(
       betsB,
       moneyA,
       moneyB,
-      pending: betsA == null && moneyA == null,
+      pending:
+        betsA == null && moneyA == null && betsB == null && moneyB == null,
     };
   };
   if (market === "spread") {
@@ -331,8 +340,14 @@ export function marketCells(
         row.spreadHomeBetsPct,
         row.spreadHomeMoneyPct
       ),
-      lineA: fmtSpread(row.awaySpread, row.awaySpreadOdds),
-      lineB: fmtSpread(row.homeSpread, row.homeSpreadOdds),
+      lineA: fmtSpread(
+        row.awaySpread ?? row.providerObservation?.splitLines?.awaySpread,
+        row.awaySpreadOdds
+      ),
+      lineB: fmtSpread(
+        row.homeSpread ?? row.providerObservation?.splitLines?.homeSpread,
+        row.homeSpreadOdds
+      ),
     };
   }
   if (market === "total") {
@@ -343,8 +358,14 @@ export function marketCells(
         row.totalUnderBetsPct,
         row.totalUnderMoneyPct
       ),
-      lineA: fmtOver(row.total, row.overOdds),
-      lineB: fmtUnder(row.total, row.underOdds),
+      lineA: fmtOver(
+        row.total ?? row.providerObservation?.splitLines?.total,
+        row.overOdds
+      ),
+      lineB: fmtUnder(
+        row.total ?? row.providerObservation?.splitLines?.total,
+        row.underOdds
+      ),
     };
   }
   return {
@@ -512,10 +533,10 @@ function MarketHistoryTable({
   const openRows = rawRows.filter(r => r.isOpening || r.lineSource === "open");
   const dkRows = rawRows.filter(r => !r.isOpening && r.lineSource !== "open");
   const pinnedOpenRow = openRows.find(r => hasMarketValue(r, market)) ?? null;
-  const rows = deduplicateRows(
-    dkRows.filter(r => hasMarketValue(r, market)),
-    market
-  );
+  const observedRows = dkRows.filter(r => hasMarketValue(r, market));
+  const rows = fullSchoolNames
+    ? observedRows
+    : deduplicateRows(observedRows, market);
 
   if (rows.length === 0 && !pinnedOpenRow) {
     return (
@@ -547,7 +568,7 @@ function MarketHistoryTable({
       >
         <td style={{ ...TD, ...TD_TIME, textAlign: "left" }}>
           {fmtTimestamp(row.scrapedAt)}
-          {row.sourceLabel && (
+          {row.sourceLabel && row.sourceLabel !== "VSiN DK" && (
             <span className="block text-[10px]">{row.sourceLabel}</span>
           )}
         </td>
@@ -732,7 +753,7 @@ export function OddsHistoryPanel({
   demo = false,
 }: OddsHistoryPanelProps) {
   const [open, setOpen] = useState(demo);
-  const isNcaaf = sport === "NCAAF";
+  const isNcaaf = sport === "NCAAF" || sport === "NFL";
   const bodyId = useId();
 
   // Tablet + desktop show every market together; mobile follows the toggle.
@@ -742,12 +763,13 @@ export function OddsHistoryPanel({
     : [activeMarket];
 
   // ── Data fetch (lazy — only when panel is expanded) ────────────────────────
-  const gatedQuery = trpc.oddsHistory.listForGame.useQuery(
-    { gameId },
+  const gatedQuery = trpc.oddsHistory.listForGame.useInfiniteQuery(
+    { gameId, limit: 200 },
     {
       enabled: !demo && (enabled ?? true) && open,
       staleTime: 30_000,
       refetchInterval: 30_000, // auto-poll every 30s when panel is open — keeps odds history current
+      getNextPageParam: page => page.nextCursor ?? undefined,
     }
   );
   // The demo game is a completed, pinned matchup: fetch once, never poll.
@@ -755,7 +777,7 @@ export function OddsHistoryPanel({
     enabled: demo && (enabled ?? true) && open,
     staleTime: Infinity,
   });
-  const { data, isLoading, error } = demo ? demoQuery : gatedQuery;
+  const { isLoading, error } = demo ? demoQuery : gatedQuery;
 
   // ── Team colors + logos (try MLB → NHL → NBA) ──────────────────────────────
   const { data: colorsMlb } = trpc.teamColors.getForGame.useQuery(
@@ -789,16 +811,24 @@ export function OddsHistoryPanel({
         ? colorsNba
         : colorsMlb;
 
-  const awayLogo = isNcaaf ? ncaafHelmet(awayTeam) : colors?.away?.logoUrl;
-  const homeLogo = isNcaaf ? ncaafHelmet(homeTeam) : colors?.home?.logoUrl;
+  const awayLogo = isNcaaf
+    ? footballHelmet(sport!, awayTeam)
+    : colors?.away?.logoUrl;
+  const homeLogo = isNcaaf
+    ? footballHelmet(sport!, homeTeam)
+    : colors?.home?.logoUrl;
   const awayAbbrev = isNcaaf
-    ? ncaafSchoolName(awayTeam)
+    ? footballTeamName(sport!, awayTeam)
     : (colors?.away?.abbrev ?? awayTeam);
   const homeAbbrev = isNcaaf
-    ? ncaafSchoolName(homeTeam)
+    ? footballTeamName(sport!, homeTeam)
     : (colors?.home?.abbrev ?? homeTeam);
 
-  const rawRows = (data?.history ?? []) as HistoryRow[];
+  const rawRows = (
+    demo
+      ? (demoQuery.data?.history ?? [])
+      : (gatedQuery.data?.pages.flatMap(page => page.history) ?? [])
+  ) as HistoryRow[];
 
   // ── Logging ────────────────────────────────────────────────────────────────
   if (open && !isLoading && !error && rawRows.length > 0) {
@@ -894,12 +924,20 @@ export function OddsHistoryPanel({
               <RefreshCw size={13} className="animate-spin" />
               <span className="text-xs">Loading history…</span>
             </div>
-          ) : error ? (
+          ) : error && !rawRows.length ? (
             <p
               className="text-xs text-center py-4"
               style={{ color: "var(--dime-text-secondary)" }}
             >
-              Failed to load odds &amp; splits history.
+              History unavailable. Sign in if needed, then{" "}
+              <button
+                type="button"
+                className="underline min-h-11"
+                onClick={() => void (demo ? demoQuery : gatedQuery).refetch()}
+              >
+                Retry history
+              </button>
+              .
             </p>
           ) : rawRows.length === 0 ? (
             <p
@@ -960,6 +998,31 @@ export function OddsHistoryPanel({
                   />
                 </div>
               ))}
+              {!demo && (
+                <div className="flex flex-col items-center gap-2">
+                  <p className="ds-caption" aria-live="polite">
+                    {rawRows.length} recorded observations loaded.
+                  </p>
+                  {gatedQuery.isFetchNextPageError && (
+                    <p role="status" className="ds-caption">
+                      Older observations could not load. Your loaded history is
+                      retained; try again.
+                    </p>
+                  )}
+                  {gatedQuery.hasNextPage && (
+                    <button
+                      type="button"
+                      className="ds-label border rounded-md px-4 min-h-11"
+                      disabled={gatedQuery.isFetching}
+                      onClick={() => void gatedQuery.fetchNextPage()}
+                    >
+                      {gatedQuery.isFetchingNextPage
+                        ? "Loading older observations…"
+                        : "Load older observations"}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

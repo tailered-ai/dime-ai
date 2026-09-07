@@ -50,7 +50,9 @@ describe("Navigation semantics", () => {
   });
 
   it("destinations are real wouter <Link> anchors, not buttons or manual navigation", () => {
-    expect(navSrc).toMatch(/import \{ Link, useLocation \} from "wouter"/);
+    expect(navSrc).toMatch(
+      /import \{ Link, useLocation, useSearch \} from "wouter"/
+    );
     expect(navSrc).toMatch(/<Link\s/);
     expect(navSrc).not.toMatch(/window\.location/);
     expect(navSrc).not.toMatch(/<button/);

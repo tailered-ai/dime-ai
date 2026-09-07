@@ -36,7 +36,8 @@
  */
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
+import { preserveFootballContext } from "@/lib/feedRoutes";
 import { MOBILE_NAV_TABS, type MobileNavTabId } from "./config";
 import { getActiveTabId } from "./activeTab";
 import { mobileNavLogger } from "./logger";
@@ -67,6 +68,7 @@ function DimeWordmark({ decorative = false }: { decorative?: boolean }) {
 
 export function MobileFloatingNav() {
   const [location] = useLocation();
+  const search = useSearch();
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const activeTabId = getActiveTabId(location);
 
@@ -163,12 +165,13 @@ export function MobileFloatingNav() {
       <nav className="mfn-nav" aria-label="Main navigation">
         <div className="mfn-grid">
           {MOBILE_NAV_TABS.map(tab => {
+            const path = preserveFootballContext(tab.path, location, search);
             const isActive = activeTabId === tab.id;
             const isChat = tab.id === "chat";
             return (
               <Link
                 key={tab.id}
-                href={tab.path}
+                href={path}
                 // Re-tapping the active destination (e.g. Feed from a dated
                 // URL back to /feed/model/mlb) replaces instead of pushing —
                 // no history pile-up (behavior carried over from the old bar).
@@ -187,7 +190,7 @@ export function MobileFloatingNav() {
                 }
                 data-testid={`tab-${tab.id}`}
                 data-active={isActive}
-                onClick={() => handleTap(tab.id, tab.path, isActive)}
+                onClick={() => handleTap(tab.id, path, isActive)}
               >
                 {isChat ? (
                   // The credits readout (directive 2026-07-29) returns when the

@@ -138,8 +138,9 @@ describe("DimeAppShell integration contract", () => {
     // a dated canonical URL alone cannot distinguish a deliberate deep link
     // from an application default, and auto-advance may only move defaults.
     expect(appSource).toMatch(
-      /<Redirect[\s\S]*?to=\{canonical\}[\s\S]*?replace[\s\S]*?splitsDateSource:[\s\S]*?"url-explicit"[\s\S]*?"app-default"[\s\S]*?\/>/
+      /<Redirect[\s\S]*?to=\{`\$\{canonical\}\$\{window\.location\.search\}`\}[\s\S]*?replace[\s\S]*?splitsDateSource:[\s\S]*?"url-explicit"[\s\S]*?"app-default"[\s\S]*?\/>/
     );
+    expect(appSource).toContain("suppliedPath !== canonical");
     expect(shellSource).toMatch(
       /navigate\(resolveRouteHref\(canonical\), \{ replace: true \}\)/
     );
