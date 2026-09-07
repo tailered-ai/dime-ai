@@ -41,6 +41,7 @@ import { getDiscordClient } from "../discord/bot";
 import { notifyOwner } from "../_core/notification";
 import { getCachedAppUser, getCachedAppUserEntry, setCachedAppUser, invalidateCachedAppUser } from "../dbCircuitBreaker";
 import { resolveOwnerIdentity } from "../ownerAuth";
+import { getManagementSession } from "../remoteAdmin/managementSession";
 import { getDb } from "../db";
 import {
   discordInviteTokens,
@@ -132,11 +133,12 @@ export async function verifyAppUserToken(token: string) {
 // DB-resilient: falls back to in-memory user cache when DB is unavailable
 export const ownerProcedure = publicProcedure.use(async ({ ctx, next }) => {
   const token = getAppCookie(ctx.req);
-  if (!token) {
+  const managementSession = await getManagementSession(ctx.req);
+  if (!token && !managementSession) {
     console.log(`[AppAuth] ownerProcedure: REJECTED — no app_session cookie`);
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
   }
-  const payload = await verifyAppUserToken(token);
+  const payload = managementSession ?? await verifyAppUserToken(token!);
   if (!payload) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid session" });
 
   // ── Load user from DB (authoritative source for role) ──────────────────────
@@ -666,8 +668,9 @@ export const appUsersRouter = router({
 
   me: publicProcedure.query(async ({ ctx }) => {
     const token = getAppCookie(ctx.req);
-    if (!token) return null;
-    const payload = await verifyAppUserToken(token);
+    const managementSession = await getManagementSession(ctx.req);
+    if (!token && !managementSession) return null;
+    const payload = managementSession ?? await verifyAppUserToken(token!);
     if (!payload) return null;
 
     // [PERF] Fast path: serve from 5-minute circuit-breaker cache before hitting DB.
