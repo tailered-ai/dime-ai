@@ -93,6 +93,22 @@ describe("PREZ management proof", () => {
       expect(db.getAppUserByUsername).not.toHaveBeenCalled();
     }
   );
+  it("binds GET inputs and rejects additional query parameters", async () => {
+    const input = JSON.stringify({ json: { search: "prez" } });
+    const valid = request("appUsers.listUsers", "GET", input);
+    valid.req.originalUrl += `?input=${encodeURIComponent(input)}`;
+    expect(await getManagementSession(valid.req)).toMatchObject({ userId: 9 });
+    const changed = request("appUsers.listUsers", "GET", input);
+    changed.req.originalUrl += `?input=${encodeURIComponent("changed")}`;
+    await expect(getManagementSession(changed.req)).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+    const extra = request();
+    extra.req.originalUrl += "?batch=1";
+    await expect(getManagementSession(extra.req)).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+  });
   it("binds mutations to their exact inputs", async () => {
     const valid = request("appUsers.updateUser", "POST", {
       json: { id: 20, hasAccess: true },
