@@ -281,8 +281,13 @@ test("calendar keyboard focus and expanded pricing preserve grid geometry", asyn
   });
   await expect(dialog).toBeVisible();
   await expect(dialog.locator(".market-table__basis").first()).toHaveText(
-    "at +37"
+    "Pricing unavailable at this line"
   );
+  const cells = dialog.locator("tbody tr").first().locator("td");
+  await expect(cells.nth(0).locator(".market-table__line")).toHaveText("+37.5");
+  await expect(cells.nth(1).locator(".market-table__line")).toHaveText("+37.5");
+  await expect(cells.nth(1).locator(".market-table__price")).toHaveText("(—)");
+  await expect(dialog.locator("tfoot")).toHaveText("Comparison unavailable");
   expect((await first.boundingBox())?.height).toBe(before?.height);
   await page.screenshot({ path: `${output}/projections.png` });
   await dialog

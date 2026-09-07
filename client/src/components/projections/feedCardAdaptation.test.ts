@@ -99,16 +99,16 @@ describe("compact feed card adaptation", () => {
     }
   );
 
-  it("retains original model odds and explicit pricing basis in the full market table", () => {
+  it("uses the book threshold without relabelling odds priced at another line", () => {
     const $ = load(
       renderToStaticMarkup(
         createElement(MarketTable, { market: fixture().markets[0] })
       )
     );
     expect($("tbody tr").first().find("td").eq(1).text()).toBe(
-      "+26.7(-289)at +37"
+      "+37.5(—)Pricing unavailable at this line"
     );
-    expect($("tfoot").text()).toBe("NO EDGE");
+    expect($("tfoot").text()).toBe("Comparison unavailable");
     expect($(".market-table__row--signal")).toHaveLength(0);
   });
 

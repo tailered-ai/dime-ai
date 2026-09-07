@@ -37,7 +37,7 @@ const render = (value: ProjectionMarket) =>
   load(renderToStaticMarkup(createElement(MarketTable, { market: value })));
 
 describe("NCAAF Book and projection columns", () => {
-  it("keeps the school, actual projection, Book line and price basis distinct", () => {
+  it("compares the same Book line and withholds a price from another basis", () => {
     const $ = render(market(-105, 165, false));
     expect($("tbody th").text()).toBe("Miami (Ohio)");
     expect($("tbody td").eq(0).find(".market-table__line").text()).toBe(
@@ -47,24 +47,22 @@ describe("NCAAF Book and projection columns", () => {
       "(-105)"
     );
     expect($("tbody td").eq(1).find(".market-table__line").text()).toBe(
-      "+20.9"
+      "+16.5"
     );
-    expect($("tbody td").eq(1).find(".market-table__price").text()).toBe(
-      "(+165)"
-    );
+    expect($("tbody td").eq(1).find(".market-table__price").text()).toBe("(—)");
     expect($("tbody td").eq(1).find(".market-table__basis").text()).toBe(
-      "at +16"
+      "Pricing unavailable at this line"
     );
-    expect($("tfoot").text()).toBe("NO EDGE");
+    expect($("tfoot").text()).toBe("Comparison unavailable");
   });
   it.each([
     [-110, -111, true, "EDGE +0.2%"],
     [-100, -100.1, true, "EDGE <0.1%"],
     [-110, -110, true, "NO EDGE"],
     [-115, -110, true, "NO EDGE"],
-    [-110, -300, false, "NO EDGE"],
-    [null, -300, true, "NO EDGE"],
-    [-110, null, true, "NO EDGE"],
+    [-110, -300, false, "Comparison unavailable"],
+    [null, -300, true, "Comparison unavailable"],
+    [-110, null, true, "Comparison unavailable"],
   ] as const)(
     "footer scores only positive comparable quotes (%s/%s)",
     (book, model, comparable, expected) => {
@@ -78,10 +76,10 @@ describe("NCAAF Book and projection columns", () => {
       );
     }
   );
-  it("keeps a supplied projection visible when its quote is absent", () => {
+  it("keeps the comparison at the Book line when its model quote is absent", () => {
     const $ = render(market(-110, null));
     expect($("tbody td").eq(1).find(".market-table__line").text()).toBe(
-      "+20.9"
+      "+16.5"
     );
     expect($("tbody td").eq(1).find(".market-table__price").text()).toBe("(—)");
     expect($(".market-table__basis")).toHaveLength(0);
