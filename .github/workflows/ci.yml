@@ -100,7 +100,7 @@ jobs:
 
       - name: "[OUTPUT] Upload audit report as artifact"
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: security-audit-report
           path: osv-report.json
@@ -166,7 +166,7 @@ jobs:
 
       - name: "[OUTPUT] Upload typecheck report as artifact"
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: typecheck-report
           path: typecheck-report.txt
@@ -211,7 +211,7 @@ jobs:
 
       - name: "[OUTPUT] Upload test + gate reports as artifacts"
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: test-report
           path: |
@@ -301,7 +301,7 @@ jobs:
 
       - name: "[OUTPUT] Upload DB test report"
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: db-test-report
           path: db-test-report.txt
