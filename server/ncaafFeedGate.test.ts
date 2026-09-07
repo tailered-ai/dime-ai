@@ -6,6 +6,32 @@ import { isValidGame } from "./routers";
 afterEach(() => vi.unstubAllGlobals());
 
 describe("NCAAF feed gates", () => {
+  it("keeps every NFL Week 1 matchup in the feed and rejects non-NFL teams", () => {
+    const matchups = [
+      ["NE", "SEA"],
+      ["SF", "LAR"],
+      ["ATL", "PIT"],
+      ["BAL", "IND"],
+      ["BUF", "HOU"],
+      ["CHI", "CAR"],
+      ["CLE", "JAX"],
+      ["NO", "DET"],
+      ["NYJ", "TEN"],
+      ["TB", "CIN"],
+      ["ARI", "LAC"],
+      ["GB", "MIN"],
+      ["MIA", "LV"],
+      ["WSH", "PHI"],
+      ["DAL", "NYG"],
+      ["DEN", "KC"],
+    ];
+    expect(
+      matchups.filter(([away, home]) => isValidGame(away, home, "NFL"))
+    ).toEqual(matchups);
+    expect(isValidGame("MASS", "SEA", "NFL")).toBe(false);
+    expect(isValidGame("NE", "NOTATEAM", "NFL")).toBe(false);
+  });
+
   it("accepts NCAAF but not an unapproved sport", () => {
     expect(zodSport.parse("NCAAF")).toBe("NCAAF");
     expect(() => zodSport.parse("NFL")).toThrow();
