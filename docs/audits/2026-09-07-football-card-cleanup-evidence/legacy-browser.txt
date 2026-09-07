@@ -1,0 +1,385 @@
+[WebServer] (node:92900) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:92907) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 375 dark: five cards, centered control, scaled sidebar and DK history (9.7s)
+(node:93009) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 [chromium] › e2e/ncaaf-september5.spec.ts:256:3 › layout 375-dark: 68 NCAAF school names and honest market cells (2.1s)
+(node:93030) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 [chromium] › e2e/ncaaf-september5.spec.ts:256:3 › layout 375-dark-reduced-motion: 68 NCAAF school names and honest market cells (2.1s)
+
+
+  1) [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 375 dark: five cards, centered control, scaled sidebar and DK history 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#dmf-league-NCAAF article.projection-card').nth(1)
+    Expected substring: "Model: MSU -7.36"
+    Received string:    "8:00 PM ETToledo @ Michigan StateToledo @ Michigan StateNCAAFModel: Michigan State -7.36 · Total 51.06Model edgeToledo +10Book-110Model-138Edge+5.6%1/3Model edgeToledo MLBook+310Model+241Edge+4.9%2/3Model edgeOver 48.5Book-110Model-129Edge+4.0%3/3View full AI Model Projections"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('#dmf-league-NCAAF article.projection-card').nth(1)
+        14 × locator resolved to <article aria-label="Toledo at Michigan State, 8:00 PM ET" data-loc="client/src/components/projections/ProjectionCard.tsx:156" class="projection-card ds-cq projection-card--scheduled projection-card--ncaaf">…</article>
+           - unexpected value "8:00 PM ETToledo @ Michigan StateToledo @ Michigan StateNCAAFModel: Michigan State -7.36 · Total 51.06Model edgeToledo +10Book-110Model-138Edge+5.6%1/3Model edgeToledo MLBook+310Model+241Edge+4.9%2/3Model edgeOver 48.5Book-110Model-129Edge+4.0%3/3View full AI Model Projections"
+
+
+      115 |       await expect(cards).toHaveCount(5);
+      116 |       await expect(page.locator("article.projection-card")).toHaveCount(5);
+    > 117 |       await expect(cards.nth(1)).toContainText("Model: MSU -7.36");
+          |                                  ^
+      118 |       await expect(cards.nth(1)).toContainText("+241");
+      119 |       const contexts = cards.locator(".matchup__context");
+      120 |       for (const text of await contexts.allTextContents())
+        at /Users/danielwalker/Documents/ChatGPT/Migration/football-market-automation/e2e/ncaaf-dk-polish.spec.ts:117:34
+
+    Error Context: test-results/ncaaf-dk-polish-375-dark-f-cb6a5-aled-sidebar-and-DK-history-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ncaaf-dk-polish-375-dark-f-cb6a5-aled-sidebar-and-DK-history-chromium/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ncaaf-dk-polish-375-dark-f-cb6a5-aled-sidebar-and-DK-history-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › e2e/ncaaf-september5.spec.ts:256:3 › layout 375-dark: 68 NCAAF school names and honest market cells 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  0
+    + Received  + 68
+
+      Array [
+    +   null,
+        "Bryant @ Army",
+    +   null,
+        "Coastal Carolina @ West Virginia",
+    +   null,
+        "East Carolina @ Alabama",
+    +   null,
+        "Lafayette @ Connecticut",
+    +   null,
+        "Liberty @ James Madison",
+    +   null,
+        "New Hampshire @ Syracuse",
+    +   null,
+        "North Texas @ Indiana",
+    +   null,
+        "Ohio @ Nebraska",
+    +   null,
+        "Oregon State @ Houston",
+    +   null,
+        "Tarleton State @ Bowling Green",
+    +   null,
+        "Ball State @ Ohio State",
+    +   null,
+        "Miami (Ohio) @ Pittsburgh",
+    +   null,
+        "Kent State @ South Carolina",
+    +   null,
+        "Duquesne @ Air Force",
+    +   null,
+        "Southeast Missouri State @ Iowa State",
+    +   null,
+        "Youngstown State @ Kentucky",
+    +   null,
+        "Rhode Island @ Temple",
+    +   null,
+        "Tennessee State @ Georgia",
+    +   null,
+        "Baylor @ Auburn",
+    +   null,
+        "Boise State @ Oregon",
+    +   null,
+        "Boston College @ Cincinnati",
+    +   null,
+        "Furman @ Tennessee",
+    +   null,
+        "Maine @ Appalachian State",
+    +   null,
+        "Marshall @ Pennsylvania State",
+    +   null,
+        "Texas State @ Texas",
+    +   null,
+        "The Citadel @ Charlotte",
+    +   null,
+        "Towson @ Navy",
+    +   null,
+        "Fordham @ North Dakota State",
+    +   null,
+        "Tulane @ Duke",
+    +   null,
+        "University of Texas Rio Grande Valley @ University of Texas at San Antonio",
+    +   null,
+        "Oklahoma State @ Tulsa",
+    +   null,
+        "North Alabama @ Arkansas",
+    +   null,
+        "Northern Illinois @ Iowa",
+    +   null,
+        "Alcorn State @ Southern Mississippi",
+    +   null,
+        "Norfolk State @ Old Dominion",
+    +   null,
+        "Wyoming @ Colorado State",
+    +   null,
+        "Abilene Christian @ Texas Tech",
+    +   null,
+        "Arkansas State @ Memphis",
+    +   null,
+        "Austin Peay @ Vanderbilt",
+    +   null,
+        "Charleston Southern @ Georgia Southern",
+    +   null,
+        "Eastern Kentucky @ Jacksonville State",
+    +   null,
+        "Florida International @ South Florida",
+    +   null,
+        "Houston Christian @ Rice",
+    +   null,
+        "Idaho State @ Utah State",
+    +   null,
+        "Missouri State @ Texas A&M University",
+    +   null,
+        "Murray State @ Middle Tennessee State",
+    +   null,
+        "Nicholls State @ Kansas State",
+    +   null,
+        "Southeastern Louisiana @ South Alabama",
+    +   null,
+        "Sam Houston State @ Troy",
+    +   null,
+        "Clemson @ Louisiana State",
+    +   null,
+        "Northwestern State @ Louisiana Tech",
+    +   null,
+        "University of Louisiana at Monroe @ Mississippi State",
+    +   null,
+        "Virginia Military Institute @ Virginia Polytechnic Institute and State University",
+    +   null,
+        "Western Michigan @ Michigan",
+    +   null,
+        "Florida Atlantic @ Florida",
+    +   null,
+        "Hampton @ Maryland",
+    +   null,
+        "Lamar @ University of Louisiana at Lafayette",
+    +   null,
+        "South Dakota State @ Northwestern",
+    +   null,
+        "Utah Tech @ Brigham Young",
+    +   null,
+        "Mercyhurst @ New Mexico State",
+    +   null,
+        "Northern Arizona @ Arizona",
+    +   null,
+        "Portland State @ San Diego State",
+    +   null,
+        "Central Michigan @ New Mexico",
+    +   null,
+        "Mississippi Valley State @ Sacramento State",
+    +   null,
+        "Morgan State @ Arizona State",
+    +   null,
+        "University of Nevada, Las Vegas @ Hawai'i",
+    +   null,
+        "University of California, Los Angeles @ California",
+    +   null,
+        "Western Kentucky @ Nevada",
+      ]
+
+      280 |           elements.map(element => element.getAttribute("title"))
+      281 |         )
+    > 282 |     ).toEqual(
+          |       ^
+      283 |       chronologicalGames.map(
+      284 |         game =>
+      285 |           `${ncaafSchoolName(game.awayTeam)} @ ${ncaafSchoolName(game.homeTeam)}`
+        at /Users/danielwalker/Documents/ChatGPT/Migration/football-market-automation/e2e/ncaaf-september5.spec.ts:282:7
+
+    Error Context: test-results/ncaaf-september5-layout-37-8e208-mes-and-honest-market-cells-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ncaaf-september5-layout-37-8e208-mes-and-honest-market-cells-chromium/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ncaaf-september5-layout-37-8e208-mes-and-honest-market-cells-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › e2e/ncaaf-september5.spec.ts:256:3 › layout 375-dark-reduced-motion: 68 NCAAF school names and honest market cells 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  0
+    + Received  + 68
+
+      Array [
+    +   null,
+        "Bryant @ Army",
+    +   null,
+        "Coastal Carolina @ West Virginia",
+    +   null,
+        "East Carolina @ Alabama",
+    +   null,
+        "Lafayette @ Connecticut",
+    +   null,
+        "Liberty @ James Madison",
+    +   null,
+        "New Hampshire @ Syracuse",
+    +   null,
+        "North Texas @ Indiana",
+    +   null,
+        "Ohio @ Nebraska",
+    +   null,
+        "Oregon State @ Houston",
+    +   null,
+        "Tarleton State @ Bowling Green",
+    +   null,
+        "Ball State @ Ohio State",
+    +   null,
+        "Miami (Ohio) @ Pittsburgh",
+    +   null,
+        "Kent State @ South Carolina",
+    +   null,
+        "Duquesne @ Air Force",
+    +   null,
+        "Southeast Missouri State @ Iowa State",
+    +   null,
+        "Youngstown State @ Kentucky",
+    +   null,
+        "Rhode Island @ Temple",
+    +   null,
+        "Tennessee State @ Georgia",
+    +   null,
+        "Baylor @ Auburn",
+    +   null,
+        "Boise State @ Oregon",
+    +   null,
+        "Boston College @ Cincinnati",
+    +   null,
+        "Furman @ Tennessee",
+    +   null,
+        "Maine @ Appalachian State",
+    +   null,
+        "Marshall @ Pennsylvania State",
+    +   null,
+        "Texas State @ Texas",
+    +   null,
+        "The Citadel @ Charlotte",
+    +   null,
+        "Towson @ Navy",
+    +   null,
+        "Fordham @ North Dakota State",
+    +   null,
+        "Tulane @ Duke",
+    +   null,
+        "University of Texas Rio Grande Valley @ University of Texas at San Antonio",
+    +   null,
+        "Oklahoma State @ Tulsa",
+    +   null,
+        "North Alabama @ Arkansas",
+    +   null,
+        "Northern Illinois @ Iowa",
+    +   null,
+        "Alcorn State @ Southern Mississippi",
+    +   null,
+        "Norfolk State @ Old Dominion",
+    +   null,
+        "Wyoming @ Colorado State",
+    +   null,
+        "Abilene Christian @ Texas Tech",
+    +   null,
+        "Arkansas State @ Memphis",
+    +   null,
+        "Austin Peay @ Vanderbilt",
+    +   null,
+        "Charleston Southern @ Georgia Southern",
+    +   null,
+        "Eastern Kentucky @ Jacksonville State",
+    +   null,
+        "Florida International @ South Florida",
+    +   null,
+        "Houston Christian @ Rice",
+    +   null,
+        "Idaho State @ Utah State",
+    +   null,
+        "Missouri State @ Texas A&M University",
+    +   null,
+        "Murray State @ Middle Tennessee State",
+    +   null,
+        "Nicholls State @ Kansas State",
+    +   null,
+        "Southeastern Louisiana @ South Alabama",
+    +   null,
+        "Sam Houston State @ Troy",
+    +   null,
+        "Clemson @ Louisiana State",
+    +   null,
+        "Northwestern State @ Louisiana Tech",
+    +   null,
+        "University of Louisiana at Monroe @ Mississippi State",
+    +   null,
+        "Virginia Military Institute @ Virginia Polytechnic Institute and State University",
+    +   null,
+        "Western Michigan @ Michigan",
+    +   null,
+        "Florida Atlantic @ Florida",
+    +   null,
+        "Hampton @ Maryland",
+    +   null,
+        "Lamar @ University of Louisiana at Lafayette",
+    +   null,
+        "South Dakota State @ Northwestern",
+    +   null,
+        "Utah Tech @ Brigham Young",
+    +   null,
+        "Mercyhurst @ New Mexico State",
+    +   null,
+        "Northern Arizona @ Arizona",
+    +   null,
+        "Portland State @ San Diego State",
+    +   null,
+        "Central Michigan @ New Mexico",
+    +   null,
+        "Mississippi Valley State @ Sacramento State",
+    +   null,
+        "Morgan State @ Arizona State",
+    +   null,
+        "University of Nevada, Las Vegas @ Hawai'i",
+    +   null,
+        "University of California, Los Angeles @ California",
+    +   null,
+        "Western Kentucky @ Nevada",
+      ]
+
+      280 |           elements.map(element => element.getAttribute("title"))
+      281 |         )
+    > 282 |     ).toEqual(
+          |       ^
+      283 |       chronologicalGames.map(
+      284 |         game =>
+      285 |           `${ncaafSchoolName(game.awayTeam)} @ ${ncaafSchoolName(game.homeTeam)}`
+        at /Users/danielwalker/Documents/ChatGPT/Migration/football-market-automation/e2e/ncaaf-september5.spec.ts:282:7
+
+    Error Context: test-results/ncaaf-september5-layout-37-ec269-mes-and-honest-market-cells-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/ncaaf-september5-layout-37-ec269-mes-and-honest-market-cells-chromium/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/ncaaf-september5-layout-37-ec269-mes-and-honest-market-cells-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [chromium] › e2e/ncaaf-dk-polish.spec.ts:101:5 › 375 dark: five cards, centered control, scaled sidebar and DK history 
+    [chromium] › e2e/ncaaf-september5.spec.ts:256:3 › layout 375-dark: 68 NCAAF school names and honest market cells 
+    [chromium] › e2e/ncaaf-september5.spec.ts:256:3 › layout 375-dark-reduced-motion: 68 NCAAF school names and honest market cells 

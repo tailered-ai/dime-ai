@@ -74,7 +74,13 @@ describe("DimeModelFeed — NCAAF route", () => {
 
   it("keeps Splits on the selected slate and uses the official CFP mark", () => {
     expect(src).toContain('bettingSplitsPath(filters.league === "MLB" ? "MLB" : filters.league === "NFL" ? "NFL" : "NCAAF", isoDate)');
-    expect(src).toContain('src="/brand/cfp-logo.svg"');
+    expect(src).toContain('src="/brand/cfp-football-3d.svg"');
+    expect(src).not.toContain("FootballFreshness");
+    const emblem = load(fs.readFileSync("client/public/brand/cfp-football-3d.svg", "utf8"), { xmlMode: true });
+    expect(emblem("svg").attr("viewBox")).toBe("74 -4 50 62");
+    expect(emblem("path")).toHaveLength(5); // football outline and four laces; no CFP lettering
+    expect(emblem("rect,text,image")).toHaveLength(0); // no painted background or bitmap
+    expect(emblem("feSpecularLighting")).toHaveLength(1);
     expect(src).not.toContain('aria-hidden="true">CFB</span>');
   });
   it("shows the selected Circa SJSU–EMU snapshot without inventing model prices", () => {

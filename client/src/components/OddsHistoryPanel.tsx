@@ -568,9 +568,6 @@ function MarketHistoryTable({
       >
         <td style={{ ...TD, ...TD_TIME, textAlign: "left" }}>
           {fmtTimestamp(row.scrapedAt)}
-          {row.sourceLabel && row.sourceLabel !== "VSiN DK" && (
-            <span className="block text-[10px]">{row.sourceLabel}</span>
-          )}
         </td>
         <td style={{ ...TD, ...TD_LINE, ...BORDER_L, textAlign: "center" }}>
           {cells.lineA}
@@ -948,21 +945,6 @@ export function OddsHistoryPanel({
             </p>
           ) : (
             <div className="flex flex-col" style={{ gap: 14 }}>
-              {Array.from(
-                new Set(
-                  rawRows.flatMap(row =>
-                    row.sourceNote ? [row.sourceNote] : []
-                  )
-                )
-              ).map(note => (
-                <p
-                  key={note}
-                  className="text-xs"
-                  style={{ color: "var(--dime-text-secondary)" }}
-                >
-                  {note}
-                </p>
-              ))}
               {markets.map(market => (
                 <div key={market} className="flex flex-col" style={{ gap: 6 }}>
                   {/* Section label — only needed when several markets stack.

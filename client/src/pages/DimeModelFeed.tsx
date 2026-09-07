@@ -31,7 +31,6 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { FeedToolbar } from "@/components/feed/FeedToolbar";
 import { DEFAULT_FEED_FILTERS, easternToday, feedFilterOptions, filterFeedItems, isValidFeedDate, type FeedFilters } from "@/lib/feedNavigation";
 import { ProjectionCard } from "@/components/projections/ProjectionCard";
-import { FootballFreshness } from "@/components/FootballFreshness";
 import type { FootballMarketState } from "@shared/footballMarkets";
 import { presentationToProjectionGame } from "@/components/projections/fromPresentation";
 import {
@@ -199,7 +198,7 @@ export function parseFeedModelPath(
 function LeagueMark({ league }: { league: "WC" | "MLB" | "NCAAF" | "NFL" }) {
   if (league === "NFL") return <span className="dmf-lglogo dmf-micro" aria-hidden="true">NFL</span>;
   if (league === "NCAAF") {
-    return <span className="dmf-lglogo dmf-lglogo--cfp" aria-hidden="true"><img src="/brand/cfp-logo.svg" width="120" height="54" alt="" loading="lazy" /></span>;
+    return <span className="dmf-lglogo dmf-lglogo--cfp" aria-hidden="true"><img src="/brand/cfp-football-3d.svg" width="50" height="62" alt="" loading="lazy" /></span>;
   }
   return (
     <span className={`dmf-lglogo${league === "MLB" ? " dmf-lglogo--mlb" : ""}`} aria-hidden="true">
@@ -530,7 +529,6 @@ export default function DimeModelFeed(props: DimeModelFeedProps) {
                     return (
                       <ProjectionCard
                         key={g.id}
-                        sourceStatus={(section.key === "NCAAF" || section.key === "NFL") ? <FootballFreshness state={g.footballState} kickoff={g.footballKickoff} /> : undefined}
                         game={{
                           ...projectionGame,
                           modelPublished: g.modelPublished,
