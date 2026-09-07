@@ -13,6 +13,11 @@ import {
   rankedNoEdgeCandidates,
 } from "./ProjectionCard";
 import { presentNcaafSeptember6 } from "../../../../shared/ncaafSeptember6";
+import {
+  presentSmuFsuModel,
+  SMU_FSU_MODEL,
+  SMU_FSU_KEY,
+} from "../../../../server/smuFsuModel";
 
 const row = {
   id: 1,
@@ -83,6 +88,42 @@ function adapted(overrides: Partial<typeof row> = {}) {
 }
 
 describe("NCAAF model odds priced at the supplied attachment lines", () => {
+  it("renders SMU totals at AN 54.5 without relabeling supplied -1 spread odds as -2.5", () => {
+    const input = presentSmuFsuModel({
+      ...row,
+      ...SMU_FSU_MODEL,
+      gameDate: "2026-09-07",
+      awayTeam: "SMU",
+      homeTeam: "FSU",
+      footballScheduleId: SMU_FSU_KEY,
+      publishedModel: true,
+      modelRunAt: 1788796800000,
+      awayBookSpread: "-2.5",
+      homeBookSpread: "2.5",
+      bookTotal: "54.5",
+      footballMarketState: { an_dk: { snapshot: { total: "54.5" } } },
+    });
+    const game = presentationToProjectionGame(
+      sportAdapters.NCAAF(ncaafRowToCard(input as never))
+    );
+    expect(
+      game.markets[0].sides.map(s => [s.modelPrice, s.comparable])
+    ).toEqual([
+      [105, false],
+      [-105, false],
+    ]);
+    expect(
+      game.markets[1].sides.map(s => [
+        s.modelPrice,
+        s.modelLineLabel,
+        s.comparable,
+      ])
+    ).toEqual([
+      [117, "O 54.5", true],
+      [-117, "U 54.5", true],
+    ]);
+    expect(game.markets[2].sides.map(s => s.modelPrice)).toEqual([-112, 112]);
+  });
   it("keeps Wisconsin owner total prices at their distinct thresholds instead of relabelling Under 46.6", () => {
     const input = presentNcaafSeptember6({
       ...row,
