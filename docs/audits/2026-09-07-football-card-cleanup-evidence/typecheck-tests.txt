@@ -1,0 +1,13 @@
+
+> ai-sports-betting@1.0.0 check /Users/danielwalker/Documents/ChatGPT/Migration/football-market-automation
+> tsc --noEmit
+
+
+ RUN  v4.1.10 /Users/danielwalker/Documents/ChatGPT/Migration/football-market-automation
+
+
+ Test Files  4 passed (4)
+      Tests  180 passed (180)
+   Start at  09:36:49
+   Duration  5.90s (transform 2.11s, setup 0ms, import 7.74s, tests 737ms, environment 0ms)
+

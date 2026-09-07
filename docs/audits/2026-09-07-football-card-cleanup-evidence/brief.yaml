@@ -1,0 +1,22 @@
+id: football-card-cleanup-2026-09-07
+surface: {name: football Feed and Splits, kind: feed, mode: operate, change: refine}
+lead: impeccable
+advisors: [verification-before-completion]
+product:
+  audience: Dime members
+  single_job: Read game markets and betting splits without repeated provider commentary
+  evidence: [Owner's exact removal request and CFP football-only 3D transparent request]
+direction:
+  preserve: Existing cards, market tables, percentages, time formatting, stored provenance, polling and auth
+  remove: Card provenance paragraphs, history source explanations, source labels under TIME (ET)
+  signature_element: Existing CFP football silhouette rendered with shallow 3D depth and transparent holes
+engineering:
+  component_reuse_first: true
+  viewports: [375, 768, 1024, 1440]
+  dark_and_light: true
+  reduced_motion: true
+acceptance:
+  - None of the requested copy appears on cards or history
+  - All three NCAAF split markets retain independent ticket and handle values including zero
+  - CFP icon is football-only, 3D, alpha-transparent and legible at header size
+  - Existing browser integration and focused checks pass freshly

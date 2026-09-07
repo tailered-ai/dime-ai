@@ -449,7 +449,7 @@ for (const { width, theme, fullAudit, reducedMotion } of scenarios) {
         .locator('[id^="game-card-"]')
         .evaluateAll(elements => elements.map(element => element.id))
     ).toEqual(chronologicalGames.map(game => `game-card-${game.id}`));
-    await expect(page.locator(".bs-header")).toContainText("VSiN DK");
+    await expect(page.locator(".bs-header")).not.toContainText("VSiN DK");
     const first = page.locator(`#game-card-${games[0].id}`);
     if (width >= 768) {
       for (const [index, source] of SOURCES.entries()) {
@@ -477,15 +477,14 @@ for (const { width, theme, fullAudit, reducedMotion } of scenarios) {
     await noOverflow(page);
     await page.screenshot({ path: `${output}/splits-${scenario}.png` });
     await first.getByRole("button", { name: /ODDS.*SPLITS HISTORY/i }).click();
-    await expect(
-      first.getByText("AN DK", { exact: true }).first()
-    ).toBeVisible();
+    await expect(first.getByText("AN DK", { exact: true }).first()).toHaveCount(
+      0
+    );
     await expect(
       first.getByText("VSiN DK", { exact: true }).first()
-    ).toBeVisible();
+    ).toHaveCount(0);
     const rounded = first
       .locator("tr")
-      .filter({ hasText: "VSiN DK" })
       .filter({ hasText: "13%" })
       .filter({ hasText: "88%" });
     await expect(rounded.first()).toBeVisible();

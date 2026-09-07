@@ -234,7 +234,7 @@ for (const width of [375, 768, 1024, 1440])
       await card.getByRole("button", { name: /ODDS.*SPLITS HISTORY/i }).click();
       await expect(
         card.getByText("VSiN DK", { exact: true }).first()
-      ).toBeVisible();
+      ).toHaveCount(0);
       const opening = card.locator("tr").filter({ hasText: "07/15" }).first();
       await expect(opening).toContainText("0%");
       await expect(opening).toContainText("100%");

@@ -1,0 +1,17 @@
+[WebServer] (node:93399) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 8 tests using 1 worker
+
+(node:93411) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › e2e/football-market-automation.spec.ts:150:5 › 375 dark: both pilots preserve book markets, navigation and all history pages (8.9s)
+  ✓  2 [chromium] › e2e/football-market-automation.spec.ts:150:5 › 375 light: both pilots preserve book markets, navigation and all history pages (8.1s)
+  ✓  3 [chromium] › e2e/football-market-automation.spec.ts:150:5 › 768 dark: both pilots preserve book markets, navigation and all history pages (8.5s)
+  ✓  4 [chromium] › e2e/football-market-automation.spec.ts:150:5 › 768 light: both pilots preserve book markets, navigation and all history pages (7.8s)
+  ✓  5 [chromium] › e2e/football-market-automation.spec.ts:150:5 › 1024 dark: both pilots preserve book markets, navigation and all history pages (8.2s)
+  ✓  6 [chromium] › e2e/football-market-automation.spec.ts:150:5 › 1024 light: both pilots preserve book markets, navigation and all history pages (8.2s)
+  ✓  7 [chromium] › e2e/football-market-automation.spec.ts:150:5 › 1440 dark: both pilots preserve book markets, navigation and all history pages (8.0s)
+  ✓  8 [chromium] › e2e/football-market-automation.spec.ts:150:5 › 1440 light: both pilots preserve book markets, navigation and all history pages (8.4s)
+
+  8 passed (1.1m)

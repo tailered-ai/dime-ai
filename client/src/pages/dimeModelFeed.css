@@ -118,9 +118,8 @@
 .dmf-leaguehead:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--dmf-ring); }
 .dmf-lglogo { display: inline-grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px; }
 .dmf-lglogo img { max-width: 100%; max-height: 100%; object-fit: contain; }
-/* Official white CFP wordmark retains its dark backing in both themes. */
-.dmf-lglogo.dmf-lglogo--cfp { width: 60px; height: 30px; flex: 0 0 60px; background: var(--dmf-page); padding: 2px; }
-.dmf-root[data-dmf-theme="light"] .dmf-lglogo--cfp { background: var(--dmf-t1); }
+/* Football-only CFP emblem preserves transparency in both themes. */
+.dmf-lglogo.dmf-lglogo--cfp { width: 36px; height: 44px; flex: 0 0 36px; }
 /* WC emblem is theme-keyed: black FIFA wordmark on light, white on dark. */
 .dmf-root[data-dmf-theme="light"] .dmf-lglogo-dark { display: none; }
 .dmf-root:not([data-dmf-theme="light"]) .dmf-lglogo-light { display: none; }

@@ -1101,10 +1101,10 @@ test.describe("NCAAF Book/Model card summaries", () => {
           "College Football"
         );
         const logo = page.locator(
-          '#dmf-league-NCAAF img[src="/brand/cfp-logo.svg"]'
+          '#dmf-league-NCAAF img[src="/brand/cfp-football-3d.svg"]'
         );
         await expect(logo).toBeVisible();
-        await expect(logo).toHaveJSProperty("naturalWidth", 120);
+        await expect(logo).toHaveJSProperty("naturalWidth", 50);
         for (let i = 0; i < 3; i++) {
           const card = cards.nth(i);
           const slides = card.locator(".summary-carousel__slide");

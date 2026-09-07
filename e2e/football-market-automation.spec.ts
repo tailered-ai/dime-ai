@@ -107,7 +107,11 @@ async function stub(page: Page) {
           scrapedAt: 1788780000000 - i * 300000,
           source: "auto",
           lineSource: "dk",
-          sourceLabel: "VSiN DK",
+          sourceLabel: i % 2 ? "VSiN DK" : "Action Network DK",
+          sourceNote:
+            i % 2
+              ? "DraftKings ticket and handle percentages observed through VSiN; prices are collected separately through Action Network."
+              : "DraftKings pregame prices observed through Action Network.",
           awaySpread: "3.5",
           homeSpread: "-3.5",
           awaySpreadOdds: "-105",
@@ -166,12 +170,22 @@ for (const width of [375, 768, 1024, 1440])
         );
         // Cold Vite transforms can outlast the default five-second assertion.
         await expect(card).toHaveCount(1, { timeout: 30_000 });
-        await expect(card).toContainText("Action Network DK");
+        await expect(card).not.toContainText("Action Network DK");
+        await expect(card).not.toContainText("Split thresholds");
         await expect(card).not.toContainText("VSiN DK");
         await expect(card).toContainText("-105");
+        if (pilot.sport === "NCAAF") {
+          const logo = page.locator('img[src="/brand/cfp-football-3d.svg"]');
+          await expect(logo).toBeVisible();
+          await expect(logo).toHaveJSProperty("naturalWidth", 50);
+          await expect(logo.locator("..")).toHaveCSS(
+            "background-color",
+            "rgba(0, 0, 0, 0)"
+          );
+        }
         await card.scrollIntoViewIfNeeded();
         await page.screenshot({
-          path: `docs/audits/2026-09-07-football-markets-evidence/screenshots/${pilot.sport}-model-${width}-${theme}.png`,
+          path: `docs/audits/2026-09-07-football-card-cleanup-evidence/screenshots/${pilot.sport}-model-${width}-${theme}.png`,
         });
         const toggle = card.getByRole("button", {
           name: /View full AI Model Projections/i,
@@ -213,7 +227,7 @@ for (const width of [375, 768, 1024, 1440])
           .toBeGreaterThan(0);
         await splitCard.scrollIntoViewIfNeeded();
         await page.screenshot({
-          path: `docs/audits/2026-09-07-football-markets-evidence/screenshots/${pilot.sport}-splits-${width}-${theme}.png`,
+          path: `docs/audits/2026-09-07-football-card-cleanup-evidence/screenshots/${pilot.sport}-splits-${width}-${theme}.png`,
         });
         await splitCard.getByRole("button", { name: /history/i }).click();
         await expect(
@@ -227,6 +241,12 @@ for (const width of [375, 768, 1024, 1440])
           .click();
         await expect(splitCard).toContainText("451");
         await expect(splitCard).not.toContainText("VSiN DK");
+        await expect(splitCard).not.toContainText("Action Network DK");
+        await expect(splitCard).not.toContainText("DraftKings pregame prices");
+        await expect(splitCard).not.toContainText(
+          "DraftKings ticket and handle"
+        );
+        await expect(splitCard).not.toContainText("Split thresholds");
         await expect(
           splitCard.getByRole("button", { name: /Load older observations/i })
         ).toHaveCount(0);
@@ -251,7 +271,7 @@ for (const width of [375, 768, 1024, 1440])
           JSON.stringify(overflow.elements)
         ).toBeLessThanOrEqual(1);
         await page.screenshot({
-          path: `docs/audits/2026-09-07-football-markets-evidence/screenshots/${pilot.sport}-${width}-${theme}.png`,
+          path: `docs/audits/2026-09-07-football-card-cleanup-evidence/screenshots/${pilot.sport}-${width}-${theme}.png`,
           fullPage: false,
         });
         await page.goBack();

@@ -3,7 +3,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { load } from "cheerio";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BettingSplitsPanel } from "./BettingSplitsPanel";
-import { FootballFreshness } from "./FootballFreshness";
 import {
   OddsHistoryPanel,
   marketCells,
@@ -91,25 +90,38 @@ beforeEach(() => {
 });
 
 describe("September 5 NCAAF Book prices and independently rounded splits", () => {
-  it("keeps provider labels internal in history and freshness displays", () => {
-    const html = renderToStaticMarkup(
-      createElement(OddsHistoryPanel, {
-        gameId: 1,
-        sport: "NCAAF",
-        awayTeam: "LIB",
-        homeTeam: "JMU",
-        activeMarket: "spread",
-        demo: true,
-      })
-    );
-    expect(history.sourceLabel).toBe("VSiN DK");
-    expect(load(html).text()).not.toContain("VSiN DK");
-    const freshness = renderToStaticMarkup(
-      createElement(FootballFreshness, {})
-    );
-    expect(load(freshness).text()).toContain("Splits:");
-    expect(load(freshness).text()).not.toContain("VSiN");
-  });
+  it.each(["VSiN DK", "Action Network DK"])(
+    "keeps %s labels and source notes internal in history",
+    sourceLabel => {
+      queries.history.mockReturnValue({
+        data: {
+          history: [
+            {
+              ...history,
+              sourceLabel,
+              sourceNote:
+                "DraftKings pregame prices observed through Action Network.",
+            },
+          ],
+        },
+        isLoading: false,
+        error: null,
+      });
+      const html = renderToStaticMarkup(
+        createElement(OddsHistoryPanel, {
+          gameId: 1,
+          sport: "NCAAF",
+          awayTeam: "LIB",
+          homeTeam: "JMU",
+          activeMarket: "spread",
+          demo: true,
+        })
+      );
+      expect(history.sourceLabel).toBe("VSiN DK");
+      expect(load(html).text()).not.toContain(sourceLabel);
+      expect(load(html).text()).not.toContain("DraftKings pregame prices");
+    }
+  );
   it("renders AN spread and total juice beside all three current split markets", () => {
     const $ = load(render());
     const columns = $("[data-market-col]");

@@ -57,7 +57,6 @@ import { trpc } from "@/lib/trpc";
 import { useAppAuth } from "@/_core/hooks/useAppAuth";
 import { BettingSplitsPanel } from "./BettingSplitsPanel";
 import { OddsHistoryPanel } from "./OddsHistoryPanel";
-import { FootballFreshness } from "./FootballFreshness";
 import MlbLast5Panel from "./MlbLast5Panel";
 import RecentSchedulePanel from "./RecentSchedulePanel";
 import SituationalResultsPanel from "./SituationalResultsPanel";
@@ -5083,12 +5082,6 @@ function GameCardInner({
                 borderBottom: "1px solid hsl(var(--border))",
               }}
             >
-              {isNcaaf && (
-                <FootballFreshness
-                  state={game.footballMarketState}
-                  kickoff={game.footballBinding?.kickoff}
-                />
-              )}
               <OddsHistoryPanel
                 sport={game.sport}
                 gameId={game.id}
