@@ -18,6 +18,7 @@ on:
           - september-6-dk
           - september-6-washington-model
           - september-6-louisville-model
+          - september-6-wisconsin-model
       dry_run:
         description: Fetch and validate without writing TiDB
         required: true
@@ -80,10 +81,12 @@ jobs:
               pnpm exec tsx scripts/publishNcaafSeptember5.mts --publish
               pnpm exec tsx scripts/publishNcaafSeptember5.mts --verify
             fi
-          elif [ "$PUBLISH_SLATE" = "september-6-washington-model" ] || [ "$PUBLISH_SLATE" = "september-6-louisville-model" ]; then
+          elif [ "$PUBLISH_SLATE" = "september-6-washington-model" ] || [ "$PUBLISH_SLATE" = "september-6-louisville-model" ] || [ "$PUBLISH_SLATE" = "september-6-wisconsin-model" ]; then
             model="washington"
             if [ "$PUBLISH_SLATE" = "september-6-louisville-model" ]; then
               model="louisville"
+            elif [ "$PUBLISH_SLATE" = "september-6-wisconsin-model" ]; then
+              model="wisconsin"
             fi
             if [ "$DRY_RUN" = "true" ]; then
               pnpm exec tsx scripts/publishNcaafSeptember6.mts "--${model}-model-dry-run"

@@ -51,7 +51,7 @@ describe("NCAAF Book and projection columns", () => {
     );
     expect($("tbody td").eq(1).find(".market-table__price").text()).toBe("(—)");
     expect($("tbody td").eq(1).find(".market-table__basis").text()).toBe(
-      "Pricing unavailable at this line"
+      "Pricing unavailable at this line · Model at +16: +165"
     );
     expect($("tfoot").text()).toBe("Comparison unavailable");
   });

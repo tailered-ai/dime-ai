@@ -106,7 +106,7 @@ describe("compact feed card adaptation", () => {
       )
     );
     expect($("tbody tr").first().find("td").eq(1).text()).toBe(
-      "+37.5(—)Pricing unavailable at this line"
+      "+37.5(—)Pricing unavailable at this line · Model at +37: -289"
     );
     expect($("tfoot").text()).toBe("Comparison unavailable");
     expect($(".market-table__row--signal")).toHaveLength(0);

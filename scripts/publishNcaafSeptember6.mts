@@ -7,7 +7,7 @@ import {
   type VsinSplitsGame,
 } from "../server/vsinBettingSplitsScraper";
 
-import { DATE, SLATE } from "../shared/ncaafSeptember6";
+import { DATE, SLATE, WISCONSIN_OWNER_MODEL } from "../shared/ncaafSeptember6";
 export { DATE, SLATE };
 const splitKeys = [
   "spreadAwayBetsPct",
@@ -208,6 +208,16 @@ export function louisvilleOwnerModel(rows: Row[], importedAt: number) {
   });
 }
 
+export function wisconsinOwnerModel(rows: Row[], importedAt: number) {
+  assert.equal(rows.length, 1, "Missing or duplicate owner-model target");
+  assert.equal(
+    rows[0].modelTotal,
+    null,
+    "Independent projected total was not supplied"
+  );
+  return ownerModel(rows, importedAt, SLATE[1], 4350070, WISCONSIN_OWNER_MODEL);
+}
+
 function ownerModel(
   rows: Row[],
   importedAt: number,
@@ -251,10 +261,15 @@ function ownerModel(
 }
 
 async function publishOwnerModel(mode: string) {
-  const louisville = mode.startsWith("--louisville-");
-  const game = SLATE[louisville ? 2 : 0];
-  const id = louisville ? 4350071 : 4350069;
-  const prepare = louisville ? louisvilleOwnerModel : washingtonOwnerModel;
+  const model = mode.split("-")[2];
+  const index = model === "louisville" ? 2 : model === "wisconsin" ? 1 : 0;
+  const game = SLATE[index];
+  const id = 4350069 + index;
+  const prepare = [
+    washingtonOwnerModel,
+    wisconsinOwnerModel,
+    louisvilleOwnerModel,
+  ][index];
   const identity = [
     id,
     String(game.event),
@@ -325,17 +340,25 @@ async function publishOwnerModel(mode: string) {
         rowId: id,
         source: "PREZ supplied model values",
         fields,
+        ...(model === "wisconsin"
+          ? {
+              pricingBasis: {
+                awaySpread: 21,
+                homeSpread: -21,
+                overTotal: 46.5,
+                underTotal: 46.6,
+              },
+              modelTotalMeaning:
+                "No independent projected total supplied; separate pricing thresholds retained",
+            }
+          : {}),
         publicationMarkerMeaning: "owner import time, not model execution time",
         changed: publish && changed,
         pending: mode.endsWith("-dry-run") && changed,
         bookAndSplitsPreserved: true,
       })
     );
-    console.log(
-      louisville
-        ? "NCAAF_LOUISVILLE_OWNER_MODEL_PASS"
-        : "NCAAF_WASHINGTON_OWNER_MODEL_PASS"
-    );
+    console.log(`NCAAF_${model.toUpperCase()}_OWNER_MODEL_PASS`);
   } catch (error) {
     await db.rollback();
     throw error;
@@ -355,6 +378,9 @@ async function main() {
       "--louisville-model-dry-run",
       "--louisville-model-publish",
       "--louisville-model-verify",
+      "--wisconsin-model-dry-run",
+      "--wisconsin-model-publish",
+      "--wisconsin-model-verify",
     ].includes(mode)
   ) {
     await publishOwnerModel(mode);
