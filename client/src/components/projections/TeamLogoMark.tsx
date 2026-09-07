@@ -74,14 +74,23 @@ export function TeamLogoMark({ team }: { team: ProjectionTeam }) {
   }
   if (team.logo) {
     const isHelmet = team.logo.startsWith("/brand/ncaaf-helmets/sept5-");
-    const [width, height] = isHelmet
-      ? [512, 384]
-      : (MLB_LOGO_DIMENSIONS[team.abbr] ?? [150, 150]);
+    const isNaturalHelmet = team.logo.startsWith("/brand/ncaaf-helmets/sept6-");
+    const isNflHelmet = team.logo.startsWith("/brand/nfl-helmets/");
+    const [width, height] = isNflHelmet
+      ? [320, 320]
+      : isNaturalHelmet
+        ? [1448, 1086]
+        : isHelmet
+          ? [512, 384]
+          : (MLB_LOGO_DIMENSIONS[team.abbr] ?? [150, 150]);
     const needsDarkOutline =
-      !isHelmet && DARK_SURFACE_OUTLINE_TEAMS.has(team.abbr);
+      !isHelmet &&
+      !isNaturalHelmet &&
+      !isNflHelmet &&
+      DARK_SURFACE_OUTLINE_TEAMS.has(team.abbr);
     return (
       <span
-        className={`team-logo-box${isHelmet ? " team-logo-box--helmet" : ""}${needsDarkOutline ? " team-logo-box--dark-outline" : ""}`}
+        className={`team-logo-box${isHelmet ? " team-logo-box--helmet" : ""}${isNaturalHelmet ? " team-logo-box--helmet-natural" : ""}${isNflHelmet ? " team-logo-box--nfl-helmet" : ""}${needsDarkOutline ? " team-logo-box--dark-outline" : ""}`}
       >
         <img
           className="team-logo"

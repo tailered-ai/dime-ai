@@ -52,6 +52,31 @@ const css = fs.readFileSync(
 const flatCss = css.replace(/\s+/g, " ");
 
 describe("DimeModelFeed — NCAAF route", () => {
+  it.each(["live", "final", "suspended"])("passes real %s scores, including zero, through the NCAAF adapter", (gameStatus) => {
+    const card = ncaafRowToCard({ awayTeam: "WSU", homeTeam: "WASH", gameStatus, awayScore: 0, homeScore: 24, gameClock: "Q4 02:10" } as never);
+    expect([card.away.score, card.home.score]).toEqual(["0", "24"]);
+    const game = presentationToProjectionGame(sportAdapters.NCAAF(card, { competition: "NCAAF" }));
+    expect([game.away.score, game.home.score]).toEqual([0, 24]);
+    expect(card.liveLabel).toBe(gameStatus === "live" ? "LIVE · Q4 02:10" : null);
+    expect(ncaafRowToCard({ gameStatus } as never).away.score).toBeNull();
+  });
+
+  it("does not invent scheduled scores or a missing fair margin", () => {
+    const card = ncaafRowToCard({ awayTeam: "WSU", homeTeam: "WASH", gameStatus: "upcoming", awayScore: 0, homeScore: 0, modelRunAt: 1, modelTotal: "52.1" } as never);
+    expect([card.away.score, card.home.score]).toEqual([null, null]);
+    expect(card.venueLine).toBe("Model: Washington — · Total 52.1");
+  });
+
+  it("retains a published model moneyline when the book has no quote", () => {
+    const card = ncaafRowToCard({ awayTeam: "LOU", homeTeam: "MISS", modelRunAt: 1, modelAwayML: "172", modelHomeML: "-172" } as never);
+    expect(card.markets[2].rows.map(row => [row.book, row.model])).toEqual([["—", "+172"], ["—", "-172"]]);
+  });
+
+  it("keeps Splits on the selected slate and uses the official CFP mark", () => {
+    expect(src).toContain('bettingSplitsPath(filters.league === "MLB" ? "MLB" : "NCAAF", isoDate)');
+    expect(src).toContain('src="/brand/cfp-logo.svg"');
+    expect(src).not.toContain('aria-hidden="true">CFB</span>');
+  });
   it("shows the selected Circa SJSU–EMU snapshot without inventing model prices", () => {
     const card = ncaafRowToCard({ awayTeam: "SJSU", homeTeam: "EMU", modelRunAt: 1, awayBookSpread: "1", homeBookSpread: "-1", bookTotal: "55", awaySpreadOdds: "-110", homeSpreadOdds: "-110", overOdds: "-110", underOdds: "-110", homeModelSpread: "-2.3", modelTotal: "54.7", awayML: "+100", homeML: "-120", modelAwayML: "+130", modelHomeML: "-130", ingestionPipelineRevision: "vsin-circa-selected-sjsu-emu-20260904" } as never);
     expect(card.meta).toBe("NCAAF");
@@ -111,7 +136,7 @@ describe("DimeModelFeed — NCAAF route", () => {
       const card = ncaafRowToCard(exact as never);
       expect(card.venueLine).toBe(`Model: ${ncaafSchoolName(game.home)} ${-game.modelSpread > 0 ? "+" : ""}${-game.modelSpread} · Total ${game.modelTotal}`);
       const projection = presentationToProjectionGame(sportAdapters.NCAAF(card, { competition: "NCAAF" }));
-      expect(projection.markets.map(m => m.label)).toEqual(game.away === "UTEP" ? ["Spread", "Total"] : ["Spread", "Total", "Moneyline"]);
+      expect(projection.markets.map(m => m.label)).toEqual(["Spread", "Total", "Moneyline"]);
       for (const [index, odds] of [game.spreadOdds, game.totalOdds].entries()) {
         const market = projection.markets[index];
         expect(market.sides.map(side => side.modelPrice)).toEqual(odds);
@@ -433,7 +458,7 @@ describe("DimeModelFeed — routes", () => {
   });
 
   it("parseFeedModelPath accepts slug and split forms", () => {
-    expect(src).toMatch(/\^\(mlb\|wc\|ncaaf\)-\\d\{2\}-\\d\{2\}-\\d\{4\}\$/);
+    expect(src).toMatch(/\^\(mlb\|wc\|ncaaf\|nfl\)-\\d\{2\}-\\d\{2\}-\\d\{4\}\$/);
     expect(parseFeedModelPath("09-03-2026", undefined)).toEqual({
       sport: "MLB",
       isoDate: "2026-09-03",
@@ -505,7 +530,7 @@ describe("DimeModelFeed — combined slate (owner directive 2026-07-18)", () => 
     );
     expect(sections.map((s) => s.key)).toEqual(["NCAAF", "WC", "MLB"]);
     // Full spelled-out league names own the header width (2026-07-18).
-    expect(sections[0].label).toBe("College Football (NCAAF)");
+    expect(sections[0].label).toBe("College Football");
     expect(sections[1].label).toBe("2026 FIFA World Cup");
     expect(sections[2].label).toBe("Major League Baseball (MLB)");
     expect(sections[0].cards.map((c) => c.id)).toEqual(["ncaaf-1"]);
@@ -525,7 +550,7 @@ describe("DimeModelFeed — combined slate (owner directive 2026-07-18)", () => 
     expect(src).not.toContain("placeholderData:");
     expect(src).toContain("<FeedToolbar");
     expect(src).toMatch(/sport: "NCAAF"[\s\S]*?enabled: !!isoDate,/);
-    expect(src).toContain("buildFeedSections(wcCards, mlbCards, ncaafCards)");
+    expect(src).toContain("buildFeedSections(wcCards, mlbCards, ncaafCards, nflCards)");
   });
 
   it("league sections are collapsible containers with logo + full name, no counts", () => {

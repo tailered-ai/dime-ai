@@ -119,7 +119,7 @@ export function ProjectionMarketsPopover({
             type="button"
             className="projection-card__markets-toggle ds-label"
           >
-            <span>View full AI model projections</span>
+            <span>View full AI Model Projections</span>
             <ChevronDown
               className="projection-card__markets-icon"
               aria-hidden="true"

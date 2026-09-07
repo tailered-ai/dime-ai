@@ -189,7 +189,12 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
         createElement(MarketTable, { market: priced.markets[0] })
       )
     );
-    expect($("tbody tr").first().find("td").eq(1).text()).toBe("-2.5(-153)");
+    const modelCell = $("tbody tr").first().find("td").eq(1);
+    expect(modelCell.find(".market-table__line").text()).toBe("-2.5");
+    expect(modelCell.find(".market-table__price").text()).toBe("(-153)");
+    expect(modelCell.find(".market-table__basis").text()).toBe(
+      "Fair projection: -6.7"
+    );
   });
 
   it("preserves the current Book and original model prices while retaining each model threshold", () => {
@@ -248,13 +253,13 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     expect(first.find("th").text()).toBe("Liberty");
     expect(first.find("td").eq(0).text()).toBe("+8.5(-110)");
     expect(first.find("td").eq(1).text()).toBe(
-      "+8.5(—)Pricing unavailable at this line · Model at +6.5: -220"
+      "+8.5(—)Fair projection: +5.123Pricing unavailable at this line · Model at +6.5: -220"
     );
     expect(first.find("td").eq(1).find(".market-table__line").text()).toBe(
       "+8.5"
     );
     expect(first.find("td").eq(1).find(".market-table__basis").text()).toBe(
-      "Pricing unavailable at this line · Model at +6.5: -220"
+      "Fair projection: +5.123Pricing unavailable at this line · Model at +6.5: -220"
     );
     expect($(".market-table__row--signal")).toHaveLength(0);
     expect($("tfoot").text()).toBe("Comparison unavailable");
@@ -334,7 +339,7 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     expect($(".summary--comparison .market-table__basis")).toHaveLength(0);
     expect(
       $(".summary--comparison .summary__item--model dd").first().text()
-    ).toBe("+5.123");
+    ).toBe("+38.5 (—)");
     expect($(".summary--comparison .edge-indicator")).toHaveLength(0);
     expect($.html()).not.toContain("priced at their shown lines");
     expect($.html()).not.toContain("Book and Model pricing lines");
@@ -439,13 +444,13 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
     );
     expect(spread("tbody tr").first().find("th").text()).toBe("Bryant");
     expect(spread("tbody tr").first().find("td").eq(1).text()).toBe(
-      "+8.5(—)Pricing unavailable at this line · Model at +37: -220"
+      "+8.5(—)Fair projection: +26.7Pricing unavailable at this line · Model at +37: -220"
     );
     expect(spread("tbody tr").last().find("td").eq(1).text()).toBe(
-      "-8.5(—)Pricing unavailable at this line · Model at -37: +220"
+      "-8.5(—)Fair projection: -26.7Pricing unavailable at this line · Model at -37: +220"
     );
     expect(total("tbody tr").first().find("td").eq(1).text()).toBe(
-      "55.5(—)Pricing unavailable at this line · Model at O 50.5: -220"
+      "55.5(—)Fair projection: 54.4Pricing unavailable at this line · Model at O 50.5: -220"
     );
     expect(spread("tfoot").text()).toBe("Comparison unavailable");
     expect(total("tfoot").text()).toBe("Comparison unavailable");
@@ -499,10 +504,10 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
           .map(cell => $(cell).text())
       )
     ).toEqual([
-      ["Bryant", "+37.5 (-108)", "+26.7"],
-      ["Army", "-37.5 (-112)", "-26.7"],
-      ["Over", "51.5 (-110)", "54.4"],
-      ["Under", "51.5 (-110)", "54.4"],
+      ["Bryant", "+37.5 (-108)", "+37.5 (—)"],
+      ["Army", "-37.5 (-112)", "-37.5 (—)"],
+      ["Over", "51.5 (-110)", "51.5 (—)"],
+      ["Under", "51.5 (-110)", "51.5 (—)"],
     ]);
     expect(summary.text()).not.toContain("at +37");
     expect(summary.text()).not.toContain("-289");
@@ -563,10 +568,10 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
           .map(cell => $(cell).text())
       )
     ).toEqual([
-      ["Washington State", "— (—)", "+21.1"],
-      ["Washington", "— (—)", "-21.1"],
-      ["Over", "51.5 (-112)", "52.1"],
-      ["Under", "51.5 (-108)", "52.1"],
+      ["Over", "51.5 (-112)", "51.5 (—)"],
+      ["Under", "51.5 (-108)", "51.5 (—)"],
+      ["Washington State", "— (—)", "— (—)"],
+      ["Washington", "— (—)", "— (—)"],
     ]);
     expect($(".edge-indicator")).toHaveLength(0);
     expect($("article").hasClass("projection-card--pass")).toBe(false);
@@ -595,7 +600,7 @@ describe("NCAAF model odds priced at the supplied attachment lines", () => {
       $(".summary__item--model dd")
         .toArray()
         .map(cell => $(cell).text())
-    ).toEqual(Array(6).fill("—"));
+    ).toEqual(["+8.5 (—)", "-8.5 (—)", "55.5 (—)", "55.5 (—)", "—", "—"]);
     expect($(".summary__comparison-status").first().text()).toBe(
       "Model unavailable"
     );

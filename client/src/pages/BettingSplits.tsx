@@ -747,7 +747,8 @@ export default function BettingSplitsPage({
     const captures =
       selectedSport === "NCAAF"
         ? sourceGames?.map(game =>
-            game.ingestionReceivedAt
+            game.ingestionReceivedAt &&
+            /^ncaaf-(?:an68-)?vsin-dk:\d+:\d+$/.test(game.ingestionRunId ?? "")
               ? new Date(game.ingestionReceivedAt).getTime()
               : NaN
           )

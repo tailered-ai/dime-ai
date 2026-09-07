@@ -67,7 +67,8 @@ async function stub(page: Page, ncaafReady?: Promise<void>) {
       if (operation === "appUsers.me") json = user;
       if (operation === "games.list")
         json =
-          input[index]?.json?.gameDate !== DATE
+          input[index]?.json?.gameDate !== DATE ||
+          input[index]?.json?.sport === "NFL"
             ? []
             : input[index]?.json?.sport === "NCAAF"
               ? games
@@ -273,7 +274,7 @@ test("calendar keyboard focus and expanded pricing preserve grid geometry", asyn
   ).toHaveCount(0);
   const before = await first.boundingBox();
   const trigger = first.getByRole("button", {
-    name: "View full AI model projections",
+    name: "View full AI Model Projections",
   });
   await trigger.click();
   const dialog = page.getByRole("dialog", {

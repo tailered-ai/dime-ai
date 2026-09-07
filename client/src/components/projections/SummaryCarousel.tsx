@@ -16,7 +16,8 @@ export function clampActiveEdgeIndex(active: number, count: number): number {
  * so the first visible edge is always the strongest. No-action games instead
  * show one best canonical no-vig ROI side per market, ranked highest → lowest,
  * with a neutral ROI-only value on every slide. Unranked comparisons use
- * one compact slide per side so no supplied Book/model context is lost.
+ * one compact slide per side so no supplied Book/model context is lost,
+ * with available Book prices first and source order retained within each group.
  *
  * Mechanics per brand law: native scroll-snap (momentum swipe on touch,
  * trackpad/scroll on desktop, interruptible by design) plus one compact,
@@ -47,7 +48,10 @@ export function SummaryCarousel({
         label: `${market.label}: ${side.lineDisplay?.side ?? side.sideLabel}`,
         market: { ...market, sides: [side] },
         insight: null,
-      })))
+      }))).sort((a, b) =>
+        Number(Number.isFinite(b.market.sides[0].bookPrice)) -
+        Number(Number.isFinite(a.market.sides[0].bookPrice))
+      )
     : insights.map(insight => ({ key: `${insight.marketKey}-${insight.sideLabel}`, label: insight.sideLabel, market: undefined, insight }));
   const activeIndex = clampActiveEdgeIndex(active, slides.length);
   const isNoEdgeRanking = variant === "no-edge";

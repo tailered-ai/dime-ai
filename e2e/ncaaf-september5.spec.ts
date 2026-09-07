@@ -408,7 +408,7 @@ for (const { width, theme, fullAudit, reducedMotion } of scenarios) {
         ];
     for (const [index, source] of checked.entries()) {
       const button = sourceCard(cards, source).getByRole("button", {
-        name: "View full AI model projections",
+        name: "View full AI Model Projections",
       });
       await button.scrollIntoViewIfNeeded();
       await button.focus();
