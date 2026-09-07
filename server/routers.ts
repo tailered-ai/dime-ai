@@ -100,9 +100,11 @@ import { NBA_VALID_DB_SLUGS, NBA_TEAMS } from "@shared/nbaTeams";
 import { NHL_VALID_DB_SLUGS, NHL_TEAMS } from "@shared/nhlTeams";
 import { MLB_VALID_DB_SLUGS, MLB_VALID_ABBREVS } from "@shared/mlbTeams";
 import CFB_TEAMS from "../scripts/data/cfb-2026/teams.json";
+import NFL_TEAMS from "../scripts/data/nfl-2026/teams.json";
 import { createHash } from 'node:crypto';
 
 const NCAAF_VALID_ABBREVS = new Set([...CFB_TEAMS.map((team) => team.espnAbbreviation), ...Object.keys(NCAAF_FEED_TEAMS)]);
+const NFL_VALID_ABBREVS = new Set(NFL_TEAMS.map((team) => team.abbreviation));
 
 /**
  * Strip fields that are always null for the given sport from the game object.
@@ -210,6 +212,9 @@ export function isValidGame(awayTeam: string, homeTeam: string, sport?: string |
   }
   if (sport === "NCAAF") {
     return NCAAF_VALID_ABBREVS.has(awayTeam) && NCAAF_VALID_ABBREVS.has(homeTeam);
+  }
+  if (sport === "NFL") {
+    return NFL_VALID_ABBREVS.has(awayTeam) && NFL_VALID_ABBREVS.has(homeTeam);
   }
   // Unknown sport: fall back to MARCH_MADNESS registry
   return MARCH_MADNESS_DB_SLUGS.has(awayTeam) && MARCH_MADNESS_DB_SLUGS.has(homeTeam);
