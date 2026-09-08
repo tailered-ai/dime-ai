@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, lte, ne, notInArray, or, sql, type SQL } from "drizzle-orm";
 import {
   APP_USER_DEPENDENT_TABLES,
   AppUserHasDataError,
@@ -251,11 +251,17 @@ export async function insertGames(rows: InsertGame[]) {
   invalidateGamesCache();
 }
 
-export async function listGames(opts?: { sport?: string; gameDate?: string; forceRefresh?: boolean }): Promise<Game[]> {
+export async function listGames(opts?: {
+  sport?: string;
+  gameDate?: string;
+  forceRefresh?: boolean;
+  limit?: number;
+  offset?: number;
+}): Promise<Game[]> {
   // ─── Cache lookup ─────────────────────────────────────────────────────────────────
   // Cache key encodes all query dimensions so different sport/date combos
   // are cached independently. forceRefresh bypasses cache (used by admin refresh).
-  const cacheKey = `${opts?.sport ?? 'ALL'}:${opts?.gameDate ?? 'ROLLING'}`;
+  const cacheKey = `${opts?.sport ?? 'ALL'}:${opts?.gameDate ?? 'ROLLING'}:${opts?.limit ?? 'ALL'}:${opts?.offset ?? 0}`;
   if (!opts?.forceRefresh) {
     const cached = _gamesListCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now()) {
@@ -269,7 +275,7 @@ export async function listGames(opts?: { sport?: string; gameDate?: string; forc
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const conditions = [];
+  const conditions: (SQL | undefined)[] = [];
 
   if (opts?.gameDate) {
     // Specific date requested — return only that date
@@ -323,11 +329,27 @@ export async function listGames(opts?: { sport?: string; gameDate?: string; forc
     conditions.push(or(isNotNull(games.awayBookSpread), isNotNull(games.bookTotal), and(inArray(games.sport, ['NCAAF', 'NFL']), eq(games.publishedToFeed, true)))!);
   }
 
-  const rows = await db
-    .select()
-    .from(games)
-    .where(and(...conditions))
-    .orderBy(games.gameDate, games.sortOrder);
+  // Paginated reads must order the complete dataset before SQL LIMIT/OFFSET.
+  // Match the existing presentation order, including a unique id tie-breaker.
+  const readRows = () => {
+    const query = db
+      .select()
+      .from(games)
+      .where(and(...conditions));
+    if (opts?.limit === undefined) {
+      return query.orderBy(games.gameDate, games.sortOrder);
+    }
+    return query
+      .orderBy(
+        games.gameDate,
+        sql`CASE WHEN ${games.startTimeEst} IS NULL OR ${games.startTimeEst} IN ('', 'TBD') THEN '99:00' ELSE ${games.startTimeEst} END`,
+        sql`COALESCE(${games.sortOrder}, 9999)`,
+        games.id,
+      )
+      .limit(opts.limit)
+      .offset(opts.offset ?? 0);
+  };
+  const rows = await readRows();
 
   // Gate model projections: only expose model fields when the owner has approved them.
   // NBA/NHL/MLB games bypass this gate — their model data is always returned as-is.
@@ -359,6 +381,12 @@ export async function listGames(opts?: { sport?: string; gameDate?: string; forc
   //   1. Retry once after 200ms — catches transient connection issues
   //   2. If retry also returns 0, serve last-known-good result (if within 30min TTL)
   //   3. Never write an empty result to the primary cache — forces immediate retry on next request
+  if (result.length === 0 && opts?.limit !== undefined) {
+    // An empty page is a valid end of pagination, never stale fallback data.
+    _gamesListCache.set(cacheKey, { data: result, expiresAt: Date.now() + GAMES_LIST_TTL_MS });
+    _cacheCounters.gamesMiss++;
+    return result;
+  }
   if (result.length === 0) {
     const lastGood = _lastGoodCache.get(cacheKey);
     const lastGoodAge = lastGood ? Date.now() - lastGood.storedAt : Infinity;
@@ -368,11 +396,7 @@ export async function listGames(opts?: { sport?: string; gameDate?: string; forc
     await new Promise(r => setTimeout(r, 200));
     let retryResult: Game[] = [];
     try {
-      const retryRows = await db
-        .select()
-        .from(games)
-        .where(and(...conditions))
-        .orderBy(games.gameDate, games.sortOrder);
+      const retryRows = await readRows();
       const retryGated: Game[] = retryRows.map((row: Game): Game => {
         if (row.sport !== 'NCAAM') return row;
         if (row.publishedModel) return row;
