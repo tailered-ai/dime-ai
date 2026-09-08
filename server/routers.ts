@@ -7,7 +7,7 @@ import { presentNcaafSeptember5, presentNcaafSeptember5History, DATE as NCAAF_SE
 import NCAAF_FEED_TEAMS from "../shared/ncaafFeedTeams.json";
 import { TRPCError } from "@trpc/server";
 import { presentNcaafSeptember4, presentNcaafSeptember4History } from "../shared/ncaafSeptember4";
-import { gamesListInput } from "./gamesListInput";
+import { gamesListInput, gamesNextOffset } from "./gamesListInput";
 import {
   applyMlbMarketGatesToGame,
   applyMlbMarketGatesToHrProp,
@@ -295,6 +295,10 @@ export const appRouter = router({
       .query(async ({ input, ctx }) => {
         // [tRPC][games.list] — hot path log silenced (fires every 60s per user)
         const games = await listGames(input ?? {});
+        const nextOffset = gamesNextOffset(input, games.length);
+        if (nextOffset !== undefined) {
+          ctx.res.setHeader("X-Dime-Next-Offset", String(nextOffset));
+        }
         // Filter by the appropriate registry based on sport
         let filtered = games.filter(g => isValidGame(g.awayTeam, g.homeTeam, g.sport));
         // Filter by game status if provided
