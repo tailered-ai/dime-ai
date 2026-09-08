@@ -115,7 +115,7 @@
     "nanoid": "^6.0.1",
     "next-themes": "^0.4.6",
     "node-html-parser": "^9.0.1",
-    "nodemailer": "^9.0.3",
+    "nodemailer": "^10.0.0",
     "playwright": "^1.62.1",
     "playwright-extra": "^4.3.6",
     "puppeteer-extra": "^3.3.6",
