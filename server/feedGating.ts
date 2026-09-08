@@ -32,13 +32,21 @@ export async function isRequestAuthenticated(req: Request): Promise<boolean> {
 }
 
 /**
- * games.list PREZ ungating only: cookie subscriber OR Tailered OS machine principal.
+ * games.list PREZ ungating only: cookie subscriber, Tailered OS machine principal, or signed PREZ management read.
  * Do NOT use for props/WC feeds — keep those cookie-only via isRequestAuthenticated.
  */
 export async function isGamesListAuthenticated(req: Request): Promise<boolean> {
   try {
     const { isMachineSportsReadRequest } = await import("./_core/machineAuth");
     if (isMachineSportsReadRequest(req)) return true;
+    if (req.headers["x-tailered-management-signature"]) {
+      const path = new URL(req.originalUrl, "https://aisportsbettingmodels.com").pathname;
+      if (req.method !== "GET" || path !== "/api/trpc/games.list") return false;
+      // This public procedure does not run ownerProcedure: verify once here.
+      // The proof resolver rechecks the current PREZ owner and consumes its nonce.
+      const { getManagementSession } = await import("./remoteAdmin/managementSession");
+      return (await getManagementSession(req)) !== null;
+    }
     return await isRequestAuthenticated(req);
   } catch {
     return false;
@@ -47,7 +55,7 @@ export async function isGamesListAuthenticated(req: Request): Promise<boolean> {
 
 /** Cache key must include machine headers so anon public responses never serve to S2S. */
 export const GATED_FEED_VARY =
-  "Cookie, Authorization, x-tailered-sports-secret";
+  "Cookie, Authorization, x-tailered-sports-secret, x-tailered-management-signature";
 
 /**
  * Is this request from the OWNER? Used only by the MLB per-market publication

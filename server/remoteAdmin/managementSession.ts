@@ -1,4 +1,4 @@
-/** PREZ's Tailered session authorizes only the copied User Management procedures.
+/** PREZ's Tailered session authorizes the explicit User Management and read-only ADMIN procedures.
  * The existing sync secret signs a purpose-bound, short-lived request; no Dime
  * cookie or login credential is created, returned, or stored by this channel.
  */
@@ -12,6 +12,15 @@ export const MANAGEMENT_METHODS: Record<string, string> = {
   "appUsers.me": "GET",
   "appUsers.listUsers": "GET",
   "subscriptionPlans.list": "GET",
+  "metrics.getSessionMetrics": "GET",
+  "metrics.getMemberMetrics": "GET",
+  "analytics.overview": "GET",
+  "waitlist.list": "GET",
+  "waitlist.stats": "GET",
+  "games.list": "GET",
+  "mlbBacktest.getRollingAccuracy": "GET",
+  "adminModelStatus.mlb": "GET",
+  "adminModelStatus.nhl": "GET",
   "appUsers.createUser": "POST",
   "appUsers.updateUser": "POST",
   "appUsers.deleteUser": "POST",
