@@ -162,15 +162,42 @@ describe("PREZ management proof", () => {
 
 // The shared ADMIN session adds only these existing read procedures.
 describe("operational management reads", () => {
-  const reads = ["metrics.getSessionMetrics", "metrics.getMemberMetrics", "analytics.overview", "waitlist.list", "waitlist.stats", "subscriptionPlans.list", "games.list", "mlbBacktest.getRollingAccuracy", "adminModelStatus.mlb", "adminModelStatus.nhl"];
-  it.each(reads)("authorizes the signed GET %s for fresh PREZ", async procedure => {
-    const { req } = request(procedure);
-    expect(await getManagementSession(req)).toMatchObject({ userId: 9, role: "owner" });
-  });
+  const reads = [
+    "metrics.getSessionMetrics",
+    "metrics.getMemberMetrics",
+    "analytics.overview",
+    "waitlist.list",
+    "waitlist.stats",
+    "subscriptionPlans.list",
+    "games.list",
+    "mlbBacktest.getRollingAccuracy",
+    "adminModelStatus.mlb",
+    "adminModelStatus.nhl",
+  ];
+  it.each(reads)(
+    "authorizes the signed GET %s for fresh PREZ",
+    async procedure => {
+      const { req } = request(procedure);
+      expect(await getManagementSession(req)).toMatchObject({
+        userId: 9,
+        role: "owner",
+      });
+    }
+  );
   it.each(reads)("never authorizes POST %s", async procedure => {
-    await expect(getManagementSession(request(procedure, "POST", {}).req)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+    await expect(
+      getManagementSession(request(procedure, "POST", {}).req)
+    ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
-  it.each(["waitlist.updateStatus", "subscriptionPlans.create", "games.publishAll", "mlbBacktest.runForDate", "metrics.openSession"])("does not add adjacent mutation %s", async procedure => {
-    await expect(getManagementSession(request(procedure, "POST", {}).req)).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+  it.each([
+    "waitlist.updateStatus",
+    "subscriptionPlans.create",
+    "games.publishAll",
+    "mlbBacktest.runForDate",
+    "metrics.openSession",
+  ])("does not add adjacent mutation %s", async procedure => {
+    await expect(
+      getManagementSession(request(procedure, "POST", {}).req)
+    ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
   });
 });

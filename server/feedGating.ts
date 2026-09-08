@@ -40,11 +40,13 @@ export async function isGamesListAuthenticated(req: Request): Promise<boolean> {
     const { isMachineSportsReadRequest } = await import("./_core/machineAuth");
     if (isMachineSportsReadRequest(req)) return true;
     if (req.headers["x-tailered-management-signature"]) {
-      const path = new URL(req.originalUrl, "https://aisportsbettingmodels.com").pathname;
+      const path = new URL(req.originalUrl, "https://aisportsbettingmodels.com")
+        .pathname;
       if (req.method !== "GET" || path !== "/api/trpc/games.list") return false;
       // This public procedure does not run ownerProcedure: verify once here.
       // The proof resolver rechecks the current PREZ owner and consumes its nonce.
-      const { getManagementSession } = await import("./remoteAdmin/managementSession");
+      const { getManagementSession } =
+        await import("./remoteAdmin/managementSession");
       return (await getManagementSession(req)) !== null;
     }
     return await isRequestAuthenticated(req);
