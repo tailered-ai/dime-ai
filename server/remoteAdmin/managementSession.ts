@@ -36,7 +36,10 @@ const WINDOW_MS = 60_000;
 const usedNonces = new Map<string, number>();
 
 /** Resolve a signed request to the current, enabled, Discord-linked PREZ owner. */
-export async function getManagementSession(req: Request) {
+export async function getManagementSession(
+  req: Request,
+  requiredProcedure?: string
+) {
   const signature = req.headers["x-tailered-management-signature"];
   if (!signature) return null; // The existing Dime cookie flow stays authoritative otherwise.
   const deny = () =>
@@ -59,6 +62,7 @@ export async function getManagementSession(req: Request) {
     Math.abs(now - sentAt) > WINDOW_MS ||
     !/^[0-9a-f-]{36}$/.test(nonce) ||
     MANAGEMENT_METHODS[procedure] !== req.method ||
+    (requiredProcedure !== undefined && procedure !== requiredProcedure) ||
     url.pathname !== `/api/trpc/${procedure}` ||
     Array.from(url.searchParams.keys()).some(key => key !== "input")
   )
