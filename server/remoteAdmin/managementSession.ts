@@ -1,4 +1,4 @@
-/** PREZ's Tailered session authorizes only the copied User Management procedures.
+/** PREZ's Tailered session authorizes the explicit User Management and read-only ADMIN procedures.
  * The existing sync secret signs a purpose-bound, short-lived request; no Dime
  * cookie or login credential is created, returned, or stored by this channel.
  */
@@ -12,6 +12,15 @@ export const MANAGEMENT_METHODS: Record<string, string> = {
   "appUsers.me": "GET",
   "appUsers.listUsers": "GET",
   "subscriptionPlans.list": "GET",
+  "metrics.getSessionMetrics": "GET",
+  "metrics.getMemberMetrics": "GET",
+  "analytics.overview": "GET",
+  "waitlist.list": "GET",
+  "waitlist.stats": "GET",
+  "games.list": "GET",
+  "mlbBacktest.getRollingAccuracy": "GET",
+  "adminModelStatus.mlb": "GET",
+  "adminModelStatus.nhl": "GET",
   "appUsers.createUser": "POST",
   "appUsers.updateUser": "POST",
   "appUsers.deleteUser": "POST",
@@ -27,7 +36,10 @@ const WINDOW_MS = 60_000;
 const usedNonces = new Map<string, number>();
 
 /** Resolve a signed request to the current, enabled, Discord-linked PREZ owner. */
-export async function getManagementSession(req: Request) {
+export async function getManagementSession(
+  req: Request,
+  requiredProcedure?: string
+) {
   const signature = req.headers["x-tailered-management-signature"];
   if (!signature) return null; // The existing Dime cookie flow stays authoritative otherwise.
   const deny = () =>
@@ -50,6 +62,7 @@ export async function getManagementSession(req: Request) {
     Math.abs(now - sentAt) > WINDOW_MS ||
     !/^[0-9a-f-]{36}$/.test(nonce) ||
     MANAGEMENT_METHODS[procedure] !== req.method ||
+    (requiredProcedure !== undefined && procedure !== requiredProcedure) ||
     url.pathname !== `/api/trpc/${procedure}` ||
     Array.from(url.searchParams.keys()).some(key => key !== "input")
   )

@@ -244,7 +244,7 @@ describe("setGatedCacheHeaders — cache-leak fix (Phase 4)", () => {
     setGatedCacheHeaders(res, true);
     expect(res.headers["Cache-Control"]).toBe("private, no-store");
     expect(res.headers["Vary"]).toBe(
-      "Cookie, Authorization, x-tailered-sports-secret"
+      "Cookie, Authorization, x-tailered-sports-secret, x-tailered-management-signature"
     );
   });
 
@@ -255,7 +255,7 @@ describe("setGatedCacheHeaders — cache-leak fix (Phase 4)", () => {
       "public, max-age=30, stale-while-revalidate=60"
     );
     expect(res.headers["Vary"]).toBe(
-      "Cookie, Authorization, x-tailered-sports-secret"
+      "Cookie, Authorization, x-tailered-sports-secret, x-tailered-management-signature"
     );
   });
 
