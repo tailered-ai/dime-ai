@@ -1,0 +1,4025 @@
+{
+  "class": "PARITY",
+  "source": "scripts/ci/contract.frozen.json",
+  "contract_sha256": "58087d2a8262064658cac283703777dce60e414f323fbb5f8b54fb6885e172d5",
+  "contract_schema_version": "1.0.0",
+  "parser_version": "yaml@2.9.0",
+  "canonicalizer_version": "1.0.0",
+  "entries": [
+    {
+      "gate_id": ".github/workflows/01-pr-proof-contract.yml#format-check",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/01-pr-proof-contract.yml#format-check",
+      "workflow": ".github/workflows/01-pr-proof-contract.yml",
+      "job_id": "format-check",
+      "status_context": "format-check",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 5,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": null,
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": null,
+          "id": null,
+          "uses": null,
+          "run": "npx prettier --check .",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 10,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "workflow": ".github/workflows/01-pr-proof-contract.yml",
+      "job_id": "proof",
+      "status_context": "01-pr-proof-contract",
+      "required": true,
+      "graduating": false,
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "playwright-browsers"
+      ],
+      "ci_only_reasons": [],
+      "step_count": 10,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Frozen install — mutable dependency installs are forbidden",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Static types (strict)",
+          "id": null,
+          "uses": null,
+          "run": "NODE_OPTIONS=--max-old-space-size=6144 npx tsc --noEmit",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[STEP] Playwright chromium — perf/harness.smoke.test.ts runs it (mirrors ci.yml)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm exec playwright install --with-deps chromium",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "[STEP] Gated vitest — env-gate fails on zero-collected / unexcused skips",
+          "id": null,
+          "uses": null,
+          "run": "(npx vitest run --reporter=default --reporter=json --outputFile=vitest-results.json || true)\nnode scripts/check-environment-failures.mjs --profile=ci --actor=\"$GITHUB_ACTOR\" \\\n  --input=vitest-results.json --report=env-gate-report.json\nPASSED=$(node -e \"const r=require('./vitest-results.json');console.log(r.numPassedTests)\")\nif [ \"$PASSED\" -lt 1000 ]; then\n  echo \"::error::Only $PASSED tests passed — collection collapse; failing closed\"; exit 1\nfi\necho \"TESTS_PASSED=$PASSED\" >> \"$GITHUB_ENV\"\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 7,
+          "name": "[STEP] Production build + preview-production gate + bundle budget",
+          "id": null,
+          "uses": null,
+          "run": "pnpm run build\nnode scripts/check-bundle-budget.mjs dist/public\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 8,
+          "name": "[STEP] Emit proof-contract.json",
+          "id": null,
+          "uses": null,
+          "run": "node - <<'EOF'\nconst { execSync } = require(\"node:child_process\");\nconst { createHash } = require(\"node:crypto\");\nconst fs = require(\"node:fs\");\nconst sha256 = (p) => createHash(\"sha256\").update(fs.readFileSync(p)).digest(\"hex\");\nconst sh = (c) => execSync(c, { encoding: \"utf8\" }).trim();\n// dist digest: deterministic tar of the built artifact tree\nexecSync(\"tar --sort=name --mtime='UTC 2020-01-01' -cf /tmp/dist.tar dist\");\nconst proof = {\n  schema_version: \"1.0\",\n  commit_sha: process.env.GITHUB_SHA,\n  head_sha: process.env.PR_HEAD_SHA || process.env.GITHUB_SHA,\n  tree_sha: sh(\"git rev-parse HEAD^{tree}\"),\n  workflow_sha: process.env.GITHUB_WORKFLOW_SHA,\n  run_id: process.env.GITHUB_RUN_ID,\n  runtime_versions: {\n    node: sh(\"node --version\"),\n    pnpm: sh(\"pnpm --version\"),\n    typescript: require(\"typescript/package.json\").version,\n    vitest: require(\"vitest/package.json\").version,\n  },\n  dependency_lock_hashes: {\n    \"pnpm-lock.yaml\": sha256(\"pnpm-lock.yaml\"),\n    \"ml/dime-1.0/uv.lock\": sha256(\"ml/dime-1.0/uv.lock\"),\n  },\n  artifact_digests: {\n    \"dist.tar\": sha256(\"/tmp/dist.tar\"),\n    \"dist/index.js\": sha256(\"dist/index.js\"),\n  },\n  checks: [\n    { name: \"frozen-install\", outcome: \"passed\" },\n    { name: \"tsc\", outcome: \"passed\" },\n    { name: \"vitest-gated\", outcome: \"passed\", tests_passed: Number(process.env.TESTS_PASSED) },\n    { name: \"build+preview-gate+bundle-budget\", outcome: \"passed\" },\n  ],\n  outcome: \"passed\",\n};\nfs.writeFileSync(\"proof-contract.json\", JSON.stringify(proof, null, 2));\nconsole.log(JSON.stringify(proof, null, 2));\nEOF\n",
+          "with": null,
+          "env": {
+            "PR_HEAD_SHA": "${{ github.event.pull_request.head.sha }}"
+          },
+          "if": null
+        },
+        {
+          "index": 9,
+          "name": null,
+          "id": null,
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "run": null,
+          "with": {
+            "name": "proof-contract",
+            "path": "proof-contract.json",
+            "if-no-files-found": "error"
+          },
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 25,
+      "mandatory": true
+    },
+    {
+      "gate_id": ".github/workflows/02-codeql.yml#analyze",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/02-codeql.yml#analyze",
+      "workflow": ".github/workflows/02-codeql.yml",
+      "job_id": "analyze",
+      "status_context": "02-codeql",
+      "required": false,
+      "graduating": true,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "github/codeql-action/init: CodeQL database creation is a GitHub code-scanning capability",
+        "github/codeql-action/analyze: CodeQL analysis + alert attribution is GitHub-side"
+      ],
+      "step_count": 4,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": {
+            "ref": "${{ inputs.baseline == true && 'main' || '' }}"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "Resolve analyzed commit (baseline mode labels the upload as main)",
+          "id": "target",
+          "uses": null,
+          "run": "echo \"sha=$(git rev-parse HEAD)\" >> \"$GITHUB_OUTPUT\"\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "github/codeql-action/init@c4dd10e44af883a891fe31ced449bcb4a6728b9b",
+          "run": null,
+          "with": {
+            "languages": "${{ matrix.language }}",
+            "queries": "security-extended"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": null,
+          "id": null,
+          "uses": "github/codeql-action/analyze@c4dd10e44af883a891fe31ced449bcb4a6728b9b",
+          "run": null,
+          "with": {
+            "category": "/language:${{ matrix.language }}",
+            "ref": "${{ inputs.baseline == true && 'refs/heads/main' || '' }}",
+            "sha": "${{ inputs.baseline == true && steps.target.outputs.sha || '' }}"
+          },
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read",
+        "security-events": "write"
+      },
+      "strategy": {
+        "fail-fast": false,
+        "matrix": {
+          "language": [
+            "javascript-typescript",
+            "python"
+          ]
+        }
+      },
+      "if": null,
+      "timeout_minutes": 30,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/03-semgrep.yml#advisory",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/03-semgrep.yml#advisory",
+      "workflow": ".github/workflows/03-semgrep.yml",
+      "job_id": "advisory",
+      "status_context": "03-semgrep-advisory",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "semgrep"
+      ],
+      "ci_only_reasons": [],
+      "step_count": 3,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "Install pinned semgrep",
+          "id": null,
+          "uses": null,
+          "run": "pipx install \"semgrep==${SEMGREP_VERSION}\"",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "Registry packs + WARNING rules (advisory; calibrate then graduate)",
+          "id": null,
+          "uses": null,
+          "run": "set +e\nsemgrep scan --config .semgrep/ --config p/typescript --config p/python \\\n  --config p/security-audit server client/src shared scripts --error\ncode=$?\nset -e\n# Exit 1 = findings (advisory: warn, pass). Anything else non-zero =\n# the SCAN ITSELF failed — fail closed, never report success.\nif [ \"$code\" -eq 0 ]; then exit 0\nelif [ \"$code\" -eq 1 ]; then\n  echo \"::warning::advisory semgrep findings above — review, do not ignore\"; exit 0\nelse\n  echo \"::error::semgrep scan error (exit $code) — failing closed\"; exit \"$code\"\nfi\n",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 15,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/03-semgrep.yml#blocking",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/03-semgrep.yml#blocking",
+      "workflow": ".github/workflows/03-semgrep.yml",
+      "job_id": "blocking",
+      "status_context": "03-semgrep-blocking",
+      "required": false,
+      "graduating": true,
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "semgrep"
+      ],
+      "ci_only_reasons": [],
+      "step_count": 3,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "Install pinned semgrep",
+          "id": null,
+          "uses": null,
+          "run": "pipx install \"semgrep==${SEMGREP_VERSION}\"",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[GATE] Custom ERROR-severity rules (org policy: hard block)",
+          "id": null,
+          "uses": null,
+          "run": "semgrep scan --config .semgrep/ server client/src shared scripts --severity ERROR --error",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 15,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/05-workflow-security.yml#zizmor",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/05-workflow-security.yml#zizmor",
+      "workflow": ".github/workflows/05-workflow-security.yml",
+      "job_id": "zizmor",
+      "status_context": "05-workflow-security",
+      "required": true,
+      "graduating": false,
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "zizmor"
+      ],
+      "ci_only_reasons": [],
+      "step_count": 4,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "Install pinned zizmor",
+          "id": null,
+          "uses": null,
+          "run": "pipx install \"zizmor==${ZIZMOR_VERSION}\"",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[GATE] zizmor — blocking at high severity, SARIF for the security tab",
+          "id": null,
+          "uses": null,
+          "run": "zizmor --min-severity high --format sarif .github/workflows/ > zizmor.sarif\n# zizmor exits non-zero when findings >= min-severity exist; a scan\n# crash also exits non-zero. Either way this step fails — fail-closed.\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": null,
+          "id": null,
+          "uses": "github/codeql-action/upload-sarif@c4dd10e44af883a891fe31ced449bcb4a6728b9b",
+          "run": null,
+          "with": {
+            "sarif_file": "zizmor.sarif",
+            "category": "zizmor"
+          },
+          "env": null,
+          "if": "always()"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read",
+        "security-events": "write"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 10,
+      "mandatory": true
+    },
+    {
+      "gate_id": ".github/workflows/06-dependency-review.yml#dependency-review",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/06-dependency-review.yml#dependency-review",
+      "workflow": ".github/workflows/06-dependency-review.yml",
+      "job_id": "dependency-review",
+      "status_context": "06-dependency-review",
+      "required": true,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "actions/dependency-review-action: compares PR dependency graphs via the GitHub API"
+      ],
+      "step_count": 3,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48",
+          "run": null,
+          "with": {
+            "fail-on-severity": "high",
+            "allow-licenses": "MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, Unlicense, CC0-1.0, CC-BY-4.0, Python-2.0, BlueOak-1.0.0, Zlib",
+            "comment-summary-in-pr": "on-failure"
+          },
+          "env": null,
+          "if": "github.event_name == 'pull_request'"
+        },
+        {
+          "index": 2,
+          "name": "merge_group pass-through",
+          "id": null,
+          "uses": null,
+          "run": "echo \"dependency review runs on the PR; merge_group inherits the PR verdict\"",
+          "with": null,
+          "env": null,
+          "if": "github.event_name != 'pull_request'"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 10,
+      "mandatory": true
+    },
+    {
+      "gate_id": ".github/workflows/07-coverage-patch.yml#coverage",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/07-coverage-patch.yml#coverage",
+      "workflow": ".github/workflows/07-coverage-patch.yml",
+      "job_id": "coverage",
+      "status_context": "07-coverage-patch",
+      "required": false,
+      "graduating": true,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 6,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": {
+            "fetch-depth": 0
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": null,
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Vitest with v8 coverage (server+shared, DB-free profile)",
+          "id": null,
+          "uses": null,
+          "run": "npx vitest run --coverage --coverage.provider=v8 \\\n  --coverage.reporter=json --coverage.include='server/**' \\\n  --coverage.include='shared/**' \\\n  --exclude 'perf/**' \\\n  --reporter=default --reporter=json --outputFile=vitest-results.json || true\nnode scripts/check-environment-failures.mjs --profile=ci --actor=\"$GITHUB_ACTOR\" \\\n  --input=vitest-results.json --report=env-gate-report.json\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[GATE] Patch coverage floors",
+          "id": null,
+          "uses": null,
+          "run": "node scripts/check-patch-coverage.mjs",
+          "with": null,
+          "env": {
+            "BASE_REF": "origin/${{ github.event.pull_request.base.ref || 'main' }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 20,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/08-contract-and-data-integrity.yml#contracts",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/08-contract-and-data-integrity.yml#contracts",
+      "workflow": ".github/workflows/08-contract-and-data-integrity.yml",
+      "job_id": "contracts",
+      "status_context": "08-contract-and-data-integrity",
+      "required": true,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 10,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": {
+            "fetch-depth": 0
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": null,
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[GATE] Destructive migration lint — new SQL dropping data needs a plan file",
+          "id": null,
+          "uses": null,
+          "run": "BASE=\"origin/${BASE_BRANCH}\"\nNEW_SQL=$(git diff --name-only --diff-filter=A \"$BASE\"...HEAD -- 'drizzle/*.sql' || true)\n[ -z \"$NEW_SQL\" ] && { echo \"no new migrations\"; exit 0; }\nFAIL=0\nfor f in $NEW_SQL; do\n  if grep -inE '^\\s*(DROP\\s+TABLE|DROP\\s+COLUMN|TRUNCATE)|ALTER\\s+TABLE\\s+\\S+\\s+DROP\\s' \"$f\"; then\n    PLAN=\"docs/verification/migration-plans/$(basename \"$f\" .sql).md\"\n    if [ ! -f \"$PLAN\" ]; then\n      echo \"::error file=$f::destructive statement without approved plan $PLAN\"\n      FAIL=1\n    fi\n  fi\ndone\nexit $FAIL\n",
+          "with": null,
+          "env": {
+            "BASE_BRANCH": "${{ github.event.pull_request.base.ref || 'main' }}"
+          },
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[GATE] Migration journal + meta hygiene + dockerignore build-context",
+          "id": null,
+          "uses": null,
+          "run": "npx vitest run scripts/migration-journal-integrity.test.ts \\\n  scripts/drizzle-meta-hygiene.test.ts \\\n  scripts/dockerignore-build-context.test.ts\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "[GATE] Immutable-migration check — history files must never be edited",
+          "id": null,
+          "uses": null,
+          "run": "BASE=\"origin/${BASE_BRANCH}\"\nMODIFIED=$(git diff --name-only --diff-filter=MD \"$BASE\"...HEAD -- 'drizzle/*.sql' || true)\nif [ -n \"$MODIFIED\" ]; then\n  echo \"::error::applied migration files modified or deleted: $MODIFIED\"\n  exit 1\nfi\n",
+          "with": null,
+          "env": {
+            "BASE_BRANCH": "${{ github.event.pull_request.base.ref || 'main' }}"
+          },
+          "if": null
+        },
+        {
+          "index": 7,
+          "name": "[GATE] AI-surface governed manifests — repo-side checksum re-verify",
+          "id": null,
+          "uses": null,
+          "run": "python3 - <<'EOF'\nimport hashlib, json, sys\nfrom pathlib import Path\nroot = Path(\"ml/dime-1.0/evidence/manifests/phase1-observability-closure-v1\")\nclosure = json.loads((root / \"closure.json\").read_text())\nbad, notes = [], []\nfor e in closure[\"evidence\"]:\n    p = Path(e[\"artifact\"])\n    inside_ml = e[\"artifact\"].startswith(\"ml/\")\n    if not p.is_file():\n        # A missing artifact breaks the closure regardless of tree.\n        bad.append(f\"MISSING {e['artifact']}\"); continue\n    h = hashlib.sha256(p.read_bytes()).hexdigest()\n    if h != e[\"sha256\"]:\n        if inside_ml:\n            # Governed evidence tree is immutable — drift blocks.\n            bad.append(\n                f\"DRIFT {e['artifact']} pinned={e['sha256'][:12]} actual={h[:12]}\"\n            )\n        else:\n            # Out-of-tree artifacts (drizzle/schema.ts, server tests,\n            # package.json) are POINT-IN-TIME references: the closure\n            # proves what they were when the evidence was frozen, but\n            # they legitimately evolve (2026-08-05: #370's lockout\n            # migration changed drizzle/schema.ts and correctly so —\n            # schema rides db-push law, not evidence law). Drift here\n            # is informational; existence stays mandatory.\n            notes.append(\n                f\"note: out-of-tree reference evolved since closure: \"\n                f\"{e['artifact']} pinned={e['sha256'][:12]} actual={h[:12]}\"\n            )\nfor line in (root / \"SHA256SUMS\").read_text().splitlines():\n    digest, rel = line.split(\"  \", 1)\n    h = hashlib.sha256((root / rel).read_bytes()).hexdigest()\n    if h != digest:\n        bad.append(f\"SUMS-DRIFT {rel}\")\nfor n in notes:\n    print(n)\nif bad:\n    print(\"\\n\".join(bad)); sys.exit(1)\nprint(f\"{len(closure['evidence'])} evidence pins verified \"\n      f\"({len(notes)} out-of-tree references noted) + SHA256SUMS verified\")\nEOF\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 8,
+          "name": "[GATE] Platform-knowledge catalog integrity (runtime prompt hash source)",
+          "id": null,
+          "uses": null,
+          "run": "npx vitest run server/_core/dimePlatformKnowledge.test.ts",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 9,
+          "name": "[GATE] Federation docs — no dangling paths, ordinals, schema drift, or dead routing",
+          "id": null,
+          "uses": null,
+          "run": "node scripts/check-federation-docs.mjs\nnpx vitest run scripts/check-federation-docs.test.ts\n",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 15,
+      "mandatory": true
+    },
+    {
+      "gate_id": ".github/workflows/09-artifact-build-and-smoke.yml#artifact",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/09-artifact-build-and-smoke.yml#artifact",
+      "workflow": ".github/workflows/09-artifact-build-and-smoke.yml",
+      "job_id": "artifact",
+      "status_context": "09-artifact-build-and-smoke",
+      "required": false,
+      "graduating": true,
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "docker",
+        "trivy"
+      ],
+      "ci_only_reasons": [],
+      "step_count": 11,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Build the production image exactly as Railway does",
+          "id": null,
+          "uses": null,
+          "run": "docker build -t dime-pr:${{ github.sha }} .\ndocker image inspect dime-pr:${{ github.sha }} --format 'digest-less local build: {{.Id}}' | tee image-id.txt\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Trivy SARIF for the security tab (non-gating pass)",
+          "id": null,
+          "uses": "aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25",
+          "run": null,
+          "with": {
+            "image-ref": "dime-pr:${{ github.sha }}",
+            "format": "sarif",
+            "output": "trivy.sarif",
+            "severity": "CRITICAL,HIGH",
+            "exit-code": "0",
+            "ignore-unfixed": true,
+            "scanners": "vuln,secret,misconfig"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[GATE] Trivy blocking gate — CRITICAL fixable only, human-readable verdict",
+          "id": null,
+          "uses": "aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25",
+          "run": null,
+          "with": {
+            "image-ref": "dime-pr:${{ github.sha }}",
+            "format": "table",
+            "severity": "CRITICAL",
+            "exit-code": "1",
+            "ignore-unfixed": true,
+            "scanners": "vuln,secret,misconfig",
+            "skip-setup-trivy": true
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": null,
+          "id": null,
+          "uses": "github/codeql-action/upload-sarif@c4dd10e44af883a891fe31ced449bcb4a6728b9b",
+          "run": null,
+          "with": {
+            "sarif_file": "trivy.sarif",
+            "category": "trivy-image"
+          },
+          "env": null,
+          "if": "always()"
+        },
+        {
+          "index": 5,
+          "name": "[STEP] SBOM (SPDX) for the built image",
+          "id": null,
+          "uses": "anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610",
+          "run": null,
+          "with": {
+            "image": "dime-pr:${{ github.sha }}",
+            "format": "spdx-json",
+            "output-file": "sbom.spdx.json",
+            "upload-artifact": false
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": null,
+          "id": null,
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "run": null,
+          "with": {
+            "name": "image-sbom",
+            "path": "sbom.spdx.json",
+            "if-no-files-found": "error"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 7,
+          "name": "[STEP] Ephemeral boot — crash-guard holds with a dead DB, /health serves",
+          "id": null,
+          "uses": null,
+          "run": "docker run -d --name dime-smoke -p 3910:3000 \\\n  -e NODE_ENV=production -e PORT=3000 \\\n  -e APP_SESSION_SECRET=\"$(head -c 48 /dev/zero | base64)\" \\\n  -e DATABASE_URL=\"mysql://u:p@127.0.0.1:3306/db\" \\\n  -e PUBLIC_ORIGIN=\"https://ai-sports-betting-dime-ai-production.up.railway.app\" \\\n  -e DISABLE_BACKGROUND_JOBS=1 \\\n  -e RAILWAY_GIT_COMMIT_SHA=\"${{ github.sha }}\" \\\n  dime-pr:${{ github.sha }}\nfor i in $(seq 1 40); do\n  if curl -sf http://127.0.0.1:3910/health >/dev/null; then echo \"up after ${i} polls\"; break; fi\n  if [ \"$i\" = \"40\" ]; then echo \"::error::container never became healthy\"; docker logs dime-smoke | tail -50; exit 1; fi\n  sleep 3\ndone\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 8,
+          "name": "[GATE] Full smoke suite against the running container",
+          "id": null,
+          "uses": null,
+          "run": "node scripts/smoke-deploy.mjs http://127.0.0.1:3910",
+          "with": null,
+          "env": {
+            "EXPECTED_COMMIT": "${{ github.sha }}"
+          },
+          "if": null
+        },
+        {
+          "index": 9,
+          "name": "[GATE] Synthetic critical transaction — checkout page + Stripe CSP + auth gates",
+          "id": null,
+          "uses": null,
+          "run": "# deterministic critical-path probes beyond the smoke suite:\n# 1. structured 401 (not 500, not HTML) from the chat SSE gate\nCODE=$(curl -s -o /tmp/chat.json -w '%{http_code}' -X POST http://127.0.0.1:3910/api/dime/chat \\\n  -H 'content-type: application/json' -d '{\"messages\":[{\"role\":\"user\",\"content\":\"x\"}]}')\n[ \"$CODE\" = \"401\" ] || { echo \"::error::chat gate returned $CODE\"; exit 1; }\nnode -e \"const b=require('/tmp/chat.json'); if(!b.error) process.exit(1)\"\n# 2. logs/metrics initialized: the server printed its listen line\ndocker logs dime-smoke 2>&1 | grep -q \"Server listening\" || { echo \"::error::no listen line in logs\"; exit 1; }\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 10,
+          "name": "[STEP] Destroy ephemeral environment",
+          "id": null,
+          "uses": null,
+          "run": "docker rm -f dime-smoke || true",
+          "with": null,
+          "env": null,
+          "if": "always()"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read",
+        "security-events": "write"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 30,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/10-ai-eval-critical.yml#deterministic",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/10-ai-eval-critical.yml#deterministic",
+      "workflow": ".github/workflows/10-ai-eval-critical.yml",
+      "job_id": "deterministic",
+      "status_context": "10-ai-eval-critical",
+      "required": true,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 9,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": null,
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[GATE] Provider pin + model access + runtime wiring (no unauthorized providers)",
+          "id": null,
+          "uses": null,
+          "run": "env -u DATABASE_URL npx vitest run \\\n  server/dimeChatProviderFreeze.test.ts \\\n  server/dime1ProviderWiring.test.ts \\\n  server/dimeModelAccess.test.ts \\\n  server/_core/dimeRuntimeReadiness.test.ts \\\n  server/_core/dimeChatModel.test.ts\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[GATE] Agent env isolation — secrets can never reach the model subprocess",
+          "id": null,
+          "uses": null,
+          "run": "env -u DATABASE_URL npx vitest run server/_core/dimeAgent.env.test.ts",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "[GATE] Verdict schemas + tool contracts — model output cannot bypass validation",
+          "id": null,
+          "uses": null,
+          "run": "env -u DATABASE_URL npx vitest run \\\n  server/_core/dimeAnswerRouting.test.ts \\\n  server/_core/dime1AnswerRouting.integration.test.ts \\\n  server/_core/dimeChatContext.test.ts \\\n  server/_core/dimePlatformKnowledge.test.ts\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 7,
+          "name": "[GATE] Trace/audit emission + pricing attestation",
+          "id": null,
+          "uses": null,
+          "run": "env -u DATABASE_URL npx vitest run \\\n  server/dimeChatTrace.test.ts \\\n  server/_core/dimeTraceObservability.test.ts \\\n  server/_core/dimePricingAttestation.test.ts\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 8,
+          "name": "[GATE] Prompt integrity — system prompts carry their pinned contracts",
+          "id": null,
+          "uses": null,
+          "run": "# prompt-content assertions live in dimeChatModel.test.ts (above);\n# here: the platform-knowledge catalog hashes cleanly (the hash is\n# embedded into runtime prompts + Trace events)\nnode -e '\n  const { createHash } = require(\"node:crypto\");\n  const fs = require(\"node:fs\");\n  const raw = fs.readFileSync(\"shared/dime/platform_knowledge_v1.json\");\n  JSON.parse(raw); // must be valid JSON\n  console.log(\"platform_knowledge sha256:\", createHash(\"sha256\").update(raw).digest(\"hex\"));\n'\n",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 20,
+      "mandatory": true
+    },
+    {
+      "gate_id": ".github/workflows/11-artifact-attestation.yml#attest",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/11-artifact-attestation.yml#attest",
+      "workflow": ".github/workflows/11-artifact-attestation.yml",
+      "job_id": "attest",
+      "status_context": "11-artifact-attestation",
+      "required": false,
+      "graduating": true,
+      "runnability": "CI-ONLY",
+      "required_tools": [
+        "docker"
+      ],
+      "ci_only_reasons": [
+        "actions/attest-build-provenance: requires GitHub OIDC provenance signing"
+      ],
+      "step_count": 6,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Build image (same Dockerfile Railway builds)",
+          "id": "build",
+          "uses": null,
+          "run": "docker build -t ghcr.io/${{ github.repository }}/verify:${{ github.sha }} .\necho \"image=ghcr.io/${{ github.repository }}/verify:${{ github.sha }}\" >> \"$GITHUB_OUTPUT\"\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Push to GHCR (merge/main only — digests must be registry-real to attest)",
+          "id": "push",
+          "uses": null,
+          "run": "echo \"$GH_TOKEN\" | docker login ghcr.io -u \"$GH_ACTOR\" --password-stdin\ndocker push \"${{ steps.build.outputs.image }}\"\nDIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' \"${{ steps.build.outputs.image }}\" | cut -d@ -f2)\necho \"digest=$DIGEST\" >> \"$GITHUB_OUTPUT\"\n",
+          "with": null,
+          "env": {
+            "GH_ACTOR": "${{ github.actor }}",
+            "GH_TOKEN": "${{ secrets.GITHUB_TOKEN }}"
+          },
+          "if": "github.event_name != 'pull_request'"
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Attest build provenance (SLSA build-level pattern)",
+          "id": null,
+          "uses": "actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a",
+          "run": null,
+          "with": {
+            "subject-name": "ghcr.io/${{ github.repository }}/verify",
+            "subject-digest": "${{ steps.push.outputs.digest }}",
+            "push-to-registry": true
+          },
+          "env": null,
+          "if": "github.event_name != 'pull_request'"
+        },
+        {
+          "index": 4,
+          "name": "[GATE] Verify the attestation we just created (deploy precondition drill)",
+          "id": null,
+          "uses": null,
+          "run": "gh attestation verify \\\n  oci://ghcr.io/${{ github.repository }}/verify@${{ steps.push.outputs.digest }} \\\n  --repo \"${{ github.repository }}\"\n",
+          "with": null,
+          "env": {
+            "GH_TOKEN": "${{ secrets.GITHUB_TOKEN }}"
+          },
+          "if": "github.event_name != 'pull_request'"
+        },
+        {
+          "index": 5,
+          "name": "[GATE] PR mode — build must succeed; attestation deferred to merge",
+          "id": null,
+          "uses": null,
+          "run": "echo \"image built from PR SHA ${{ github.sha }}; provenance is attested on the merge SHA\"",
+          "with": null,
+          "env": null,
+          "if": "github.event_name == 'pull_request'"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read",
+        "id-token": "write",
+        "attestations": "write",
+        "packages": "write"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 30,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/12-nightly-verification.yml#dependency-release-age",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/12-nightly-verification.yml#dependency-release-age",
+      "workflow": ".github/workflows/12-nightly-verification.yml",
+      "job_id": "dependency-release-age",
+      "status_context": "dependency-release-age-audit",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 4,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "Flag direct deps updated upstream in the last 14 days (supply-chain wave detector)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile\nnode -e '\n  const { execSync } = require(\"node:child_process\");\n  const pkg = require(\"./package.json\");\n  const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });\n  const cutoff = Date.now() - 14 * 864e5;\n  const young = [];\n  for (const d of deps) {\n    try {\n      const t = JSON.parse(execSync(`npm view ${d} time --json`, { stdio: [\"ignore\", \"pipe\", \"ignore\"] }));\n      const versions = Object.entries(t).filter(([k]) => ![\"created\", \"modified\"].includes(k));\n      const latest = versions[versions.length - 1];\n      if (latest && Date.parse(latest[1]) > cutoff) young.push(`${d}@${latest[0]} (${latest[1]})`);\n    } catch {}\n  }\n  console.log(`packages with releases in the last 14 days: ${young.length}`);\n  for (const y of young) console.log(\"  \" + y);\n'\n",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 10,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/12-nightly-verification.yml#full-container-scan",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/12-nightly-verification.yml#full-container-scan",
+      "workflow": ".github/workflows/12-nightly-verification.yml",
+      "job_id": "full-container-scan",
+      "status_context": "full-container-scan",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "docker",
+        "trivy"
+      ],
+      "ci_only_reasons": [],
+      "step_count": 3,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": null,
+          "run": "docker build -t dime-nightly:latest .",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "Trivy full severity sweep (incl. MEDIUM; nightly only)",
+          "id": null,
+          "uses": "aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25",
+          "run": null,
+          "with": {
+            "image-ref": "dime-nightly:latest",
+            "format": "table",
+            "severity": "CRITICAL,HIGH,MEDIUM",
+            "exit-code": "1",
+            "ignore-unfixed": false,
+            "scanners": "vuln,secret,misconfig,license"
+          },
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 30,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/12-nightly-verification.yml#full-osv",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/12-nightly-verification.yml#full-osv",
+      "workflow": ".github/workflows/12-nightly-verification.yml",
+      "job_id": "full-osv",
+      "status_context": "full-osv-scan",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "osv-scanner"
+      ],
+      "ci_only_reasons": [],
+      "step_count": 2,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "OSV full scan (lockfiles, all ecosystems) — fail-closed via checker",
+          "id": null,
+          "uses": null,
+          "run": "curl -sSfL https://github.com/google/osv-scanner/releases/download/v2.2.4/osv-scanner_linux_amd64 \\\n  -o /usr/local/bin/osv-scanner\n# release-binary checksum pin (refresh alongside the version bump)\necho \"$OSV_SHA256  /usr/local/bin/osv-scanner\" | sha256sum -c -\nchmod +x /usr/local/bin/osv-scanner\nosv-scanner scan --lockfile pnpm-lock.yaml --lockfile ml/dime-1.0/uv.lock \\\n  --format=json --output=osv-report.json || true\nnode scripts/check-osv-scan.mjs osv-report.json\n",
+          "with": null,
+          "env": {
+            "OSV_SHA256": "7702cd1e5d9f5059dd9570f4ad967f27d3c5f5391b371ec937b384c238177f55"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 15,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/12-nightly-verification.yml#mutation-diff",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/12-nightly-verification.yml#mutation-diff",
+      "workflow": ".github/workflows/12-nightly-verification.yml",
+      "job_id": "mutation-diff",
+      "status_context": "full-mutation",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 5,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": null,
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "Stryker on the money/settlement core (advisory; score published in run log)",
+          "id": null,
+          "uses": null,
+          "run": "npx --yes @stryker-mutator/core@9 run stryker.conf.json || {\n  echo \"::warning::mutation score below configured break threshold — review survivors above\";\n  exit 1;\n}\n",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 120,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/12-nightly-verification.yml#scorecard",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/12-nightly-verification.yml#scorecard",
+      "workflow": ".github/workflows/12-nightly-verification.yml",
+      "job_id": "scorecard",
+      "status_context": "openssf-scorecard",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "ossf/scorecard-action: queries GitHub repository metadata and publishes results"
+      ],
+      "step_count": 3,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": {
+            "persist-credentials": false
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a",
+          "run": null,
+          "with": {
+            "results_file": "scorecard.sarif",
+            "results_format": "sarif",
+            "publish_results": true
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "github/codeql-action/upload-sarif@c4dd10e44af883a891fe31ced449bcb4a6728b9b",
+          "run": null,
+          "with": {
+            "sarif_file": "scorecard.sarif",
+            "category": "scorecard"
+          },
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": {
+        "contents": "read",
+        "security-events": "write",
+        "id-token": "write"
+      },
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 15,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/auto-merge-dependabot.yml#auto-merge",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/auto-merge-dependabot.yml#auto-merge",
+      "workflow": ".github/workflows/auto-merge-dependabot.yml",
+      "job_id": "auto-merge",
+      "status_context": "Auto-merge Dependabot patch PRs",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "dependabot/fetch-metadata: reads Dependabot PR metadata from the GitHub API"
+      ],
+      "step_count": 4,
+      "steps": [
+        {
+          "index": 0,
+          "name": "Fetch Dependabot metadata",
+          "id": "meta",
+          "uses": "dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98",
+          "run": null,
+          "with": {
+            "github-token": "${{ secrets.GITHUB_TOKEN }}"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "Log PR metadata",
+          "id": null,
+          "uses": null,
+          "run": "echo \"[INPUT] PR number:        $PR_NUMBER\"\necho \"[INPUT] PR title:         $PR_TITLE\"\necho \"[INPUT] Dependency name:  $DEP_NAMES\"\necho \"[INPUT] Update type:      $UPDATE_TYPE\"\necho \"[INPUT] Semver change:    $NEW_VERSION (was $PREV_VERSION)\"\necho \"[STATE] Ecosystem:        $ECOSYSTEM\"\necho \"[STATE] Actor:            $ACTOR\"\n",
+          "with": null,
+          "env": {
+            "PR_NUMBER": "${{ github.event.pull_request.number }}",
+            "PR_TITLE": "${{ github.event.pull_request.title }}",
+            "DEP_NAMES": "${{ steps.meta.outputs.dependency-names }}",
+            "UPDATE_TYPE": "${{ steps.meta.outputs.update-type }}",
+            "NEW_VERSION": "${{ steps.meta.outputs.new-version }}",
+            "PREV_VERSION": "${{ steps.meta.outputs.previous-version }}",
+            "ECOSYSTEM": "${{ steps.meta.outputs.package-ecosystem }}",
+            "ACTOR": "${{ github.actor }}"
+          },
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "Enable auto-merge for patch update",
+          "id": null,
+          "uses": null,
+          "run": "echo \"[STEP] Enabling auto-merge (squash) for PR #${PR_NUMBER}...\"\ngh pr merge \"$PR_NUMBER\" \\\n  --auto \\\n  --squash \\\n  --subject \"chore(deps): ${PR_TITLE}\" \\\n  --body \"Auto-merged by Dependabot auto-merge workflow. Patch-level update. All CI checks passed.\"\necho \"[OUTPUT] Auto-merge enabled — will merge once CI passes\"\necho \"[VERIFY] PASS — PR #${PR_NUMBER} queued for auto-merge\"\n",
+          "with": null,
+          "env": {
+            "PR_NUMBER": "${{ github.event.pull_request.number }}",
+            "PR_TITLE": "${{ github.event.pull_request.title }}",
+            "GH_TOKEN": "${{ secrets.GITHUB_TOKEN }}"
+          },
+          "if": "steps.meta.outputs.update-type == 'version-update:semver-patch'"
+        },
+        {
+          "index": 3,
+          "name": "Skip non-patch update",
+          "id": null,
+          "uses": null,
+          "run": "echo \"[STEP] Skipping auto-merge — update type is not patch-level\"\necho \"[STATE] update-type: ${{ steps.meta.outputs.update-type }}\"\necho \"[STATE] Dependency: ${{ steps.meta.outputs.dependency-names }}\"\necho \"[STATE] ${{ steps.meta.outputs.previous-version }} → ${{ steps.meta.outputs.new-version }}\"\necho \"[OUTPUT] Manual review required for minor/major updates\"\necho \"[VERIFY] SKIP — no action taken\"\n",
+          "with": null,
+          "env": null,
+          "if": "steps.meta.outputs.update-type != 'version-update:semver-patch'"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": "github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'",
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#build",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/ci.yml#build",
+      "workflow": ".github/workflows/ci.yml",
+      "job_id": "build",
+      "status_context": "Build & Preview Gate",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 7,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout repository",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Setup pnpm",
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Setup Node.js 22",
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Install dependencies (frozen lockfile)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Build production client",
+          "id": null,
+          "uses": null,
+          "run": "pnpm run build:client",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[VERIFY] Preview activation is dead in production output",
+          "id": null,
+          "uses": null,
+          "run": "node scripts/verify-preview-production.mjs dist/public",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "[VERIFY] Bundle budget",
+          "id": null,
+          "uses": null,
+          "run": "pnpm run check:bundle",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": "typecheck",
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#db-tests",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/ci.yml#db-tests",
+      "workflow": ".github/workflows/ci.yml",
+      "job_id": "db-tests",
+      "status_context": "DB Tests",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 7,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout repository",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Setup pnpm",
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Setup Node.js 22",
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Install dependencies (frozen lockfile)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Replay reconciled migration chain on the isolated database",
+          "id": null,
+          "uses": null,
+          "run": "pnpm db:migrate:reconciled",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[STEP] Run the ten real-database suites",
+          "id": null,
+          "uses": null,
+          "run": "pnpm exec vitest run --no-file-parallelism \\\n  server/appUsers.login.test.ts \\\n  server/appUsers.register.test.ts \\\n  server/completeAccountSetup.test.ts \\\n  server/passwordReset.test.ts \\\n  server/tokenVersion.db.test.ts \\\n  server/mlbDoubleheader.db.test.ts \\\n  server/betTrackerParlay.db.test.ts \\\n  server/betTrackerParlayRecovery.db.test.ts \\\n  server/betTrackerLifecycle.db.test.ts \\\n  server/betTrackerStats.db.test.ts \\\n  --reporter=verbose 2>&1 | tee db-test-report.txt\nexit ${PIPESTATUS[0]}\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "[OUTPUT] Upload DB test report",
+          "id": null,
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "run": null,
+          "with": {
+            "name": "db-test-report",
+            "path": "db-test-report.txt",
+            "retention-days": 30
+          },
+          "env": null,
+          "if": "always()"
+        }
+      ],
+      "needs": "typecheck",
+      "env": {
+        "DATABASE_URL": "mysql://root@127.0.0.1:3306/dime_test",
+        "DB_TESTS": "1",
+        "NODE_ENV": "test"
+      },
+      "defaults": null,
+      "services": {
+        "mysql": {
+          "image": "mysql:8",
+          "env": {
+            "MYSQL_ALLOW_EMPTY_PASSWORD": "1",
+            "MYSQL_DATABASE": "dime_test"
+          },
+          "ports": [
+            "3306:3306"
+          ],
+          "options": "--health-cmd=\"mysqladmin ping -h 127.0.0.1 --silent\" --health-interval=5s --health-timeout=5s --health-retries=20"
+        }
+      },
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#security-audit",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/ci.yml#security-audit",
+      "workflow": ".github/workflows/ci.yml",
+      "job_id": "security-audit",
+      "status_context": "Security Audit",
+      "required": true,
+      "graduating": false,
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "osv-scanner"
+      ],
+      "ci_only_reasons": [],
+      "step_count": 6,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout repository",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Setup Node.js 22",
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[VERIFY] Enforce GitHub Actions security contract",
+          "id": null,
+          "uses": null,
+          "run": "node scripts/check-github-actions-security.mjs",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Install osv-scanner",
+          "id": null,
+          "uses": null,
+          "run": "curl \\\n  --fail \\\n  --silent \\\n  --show-error \\\n  --location \\\n  --proto '=https' \\\n  --tlsv1.2 \\\n  --output osv-scanner \\\n  \"https://github.com/google/osv-scanner/releases/download/v2.4.0/osv-scanner_linux_amd64\"\necho \"15314940c10d26af9c6649f150b8a47c1262e8fc7e17b1d1029b0e479e8ed8a0  osv-scanner\" \\\n  | sha256sum --check --strict -\nchmod 0755 osv-scanner\nsudo install -m 0755 osv-scanner /usr/local/bin/osv-scanner\nosv-scanner --version\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Run osv-scanner — fail on new HIGH or CRITICAL CVEs",
+          "id": null,
+          "uses": null,
+          "run": "echo \"[INPUT] Scanning pnpm-lock.yaml with osv-scanner...\"\nosv-scanner scan source --lockfile=pnpm-lock.yaml --config=osv-scanner.toml \\\n  --format=json --output-file=osv-report.json || true\nnode scripts/check-osv-scan.mjs --input=osv-report.json\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[OUTPUT] Upload audit report as artifact",
+          "id": null,
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "run": null,
+          "with": {
+            "name": "security-audit-report",
+            "path": "osv-report.json",
+            "retention-days": 30
+          },
+          "env": null,
+          "if": "always()"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": true
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#test",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/ci.yml#test",
+      "workflow": ".github/workflows/ci.yml",
+      "job_id": "test",
+      "status_context": "Vitest",
+      "required": true,
+      "graduating": false,
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "playwright-browsers"
+      ],
+      "ci_only_reasons": [],
+      "step_count": 7,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout repository",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Setup pnpm",
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Setup Node.js 22",
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Install dependencies (frozen lockfile)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Install Chromium for perf smoke tests",
+          "id": null,
+          "uses": null,
+          "run": "pnpm exec playwright install --with-deps chromium",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[STEP] Run gated Vitest suite — zero failures, no undeclared skips",
+          "id": null,
+          "uses": null,
+          "run": "pnpm run test:gated:ci 2>&1 | tee test-report.txt\nexit ${PIPESTATUS[0]}\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "[OUTPUT] Upload test + gate reports as artifacts",
+          "id": null,
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "run": null,
+          "with": {
+            "name": "test-report",
+            "path": "test-report.txt\nenv-gate-report.json\nvitest-results.json\n",
+            "retention-days": 30
+          },
+          "env": null,
+          "if": "always()"
+        }
+      ],
+      "needs": "typecheck",
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": true
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#typecheck",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/ci.yml#typecheck",
+      "workflow": ".github/workflows/ci.yml",
+      "job_id": "typecheck",
+      "status_context": "TypeScript Check",
+      "required": true,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 7,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout repository",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Setup pnpm",
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Setup Node.js 22",
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Install dependencies (frozen lockfile)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Run TypeScript compiler — zero errors required",
+          "id": null,
+          "uses": null,
+          "run": "echo \"[INPUT] Running tsc --noEmit on full project...\"\nnpx tsc --noEmit 2>&1 | tee typecheck-report.txt\nEXIT_CODE=${PIPESTATUS[0]}\necho \"[STATE] TypeScript exit code: $EXIT_CODE\"\nif [ $EXIT_CODE -ne 0 ]; then\n  echo \"[OUTPUT] FAIL — TypeScript errors detected\"\n  cat typecheck-report.txt\n  echo \"[VERIFY] Fix all type errors before merging\"\n  exit $EXIT_CODE\nfi\necho \"[OUTPUT] PASS — TypeScript: 0 errors\"\necho \"[VERIFY] Full project type-checks clean\"\n",
+          "with": null,
+          "env": {
+            "NODE_OPTIONS": "--max-old-space-size=6144"
+          },
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[VERIFY] pi harness audit — foundation integrity gate",
+          "id": null,
+          "uses": null,
+          "run": "pnpm run pi:audit",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "[OUTPUT] Upload typecheck report as artifact",
+          "id": null,
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "run": null,
+          "with": {
+            "name": "typecheck-report",
+            "path": "typecheck-report.txt",
+            "retention-days": 30
+          },
+          "env": null,
+          "if": "always()"
+        }
+      ],
+      "needs": "security-audit",
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": true
+    },
+    {
+      "gate_id": ".github/workflows/cron-bet-grade.yml#fire",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/cron-bet-grade.yml#fire",
+      "workflow": ".github/workflows/cron-bet-grade.yml",
+      "job_id": "fire",
+      "status_context": "Trigger bet grading",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): CRON_SECRET"
+      ],
+      "step_count": 3,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[STEP] Preflight — verify required secrets are present",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nif [ -z \"${RAILWAY_APP_URL:-}\" ]; then\n  echo \"::error::RAILWAY_APP_URL variable is not set\"; exit 1\nfi\nif [ -z \"${CRON_SECRET:-}\" ]; then\n  echo \"::error::CRON_SECRET secret is not set\"; exit 1\nfi\necho \"[PREFLIGHT] app url + secret present\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "CRON_SECRET": "${{ secrets.CRON_SECRET }}"
+          },
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Resolve which endpoint this run should hit",
+          "id": "route",
+          "uses": null,
+          "run": "set -euo pipefail\nif [ \"${SCHEDULE:-}\" = \"15 8 * * *\" ] || [ \"${MANUAL_SWEEP:-false}\" = \"true\" ]; then\n  echo \"job=bet-grade-sweep\" >> \"$GITHUB_OUTPUT\"\nelse\n  echo \"job=bet-grade\" >> \"$GITHUB_OUTPUT\"\nfi\n",
+          "with": null,
+          "env": {
+            "SCHEDULE": "${{ github.event.schedule }}",
+            "MANUAL_SWEEP": "${{ github.event.inputs.sweep }}"
+          },
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] POST /api/cron/${{ steps.route.outputs.job }} (secret never printed)",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nURL=\"${RAILWAY_APP_URL%/}/api/cron/${JOB}\"\necho \"[INPUT] POST $URL at $(date -u +%FT%TZ)\"\nBODY_FILE=\"$(mktemp)\"\nCODE=$(curl -sS -o \"$BODY_FILE\" -w '%{http_code}' \\\n  --max-time 60 --retry 2 --retry-delay 5 --retry-connrefused \\\n  -X POST \"$URL\" \\\n  -H \"Authorization: Bearer ${CRON_SECRET}\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"User-Agent: gh-actions-cron/${JOB}\")\necho \"[OUTPUT] HTTP $CODE\"\necho \"[OUTPUT] body: $(cat \"$BODY_FILE\")\"\nif [ \"$CODE\" -lt 200 ] || [ \"$CODE\" -ge 300 ]; then\n  echo \"::error::${JOB} trigger failed with HTTP $CODE\"\n  exit 1\nfi\necho \"[VERIFY] PASS — ${JOB} accepted (HTTP $CODE)\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "CRON_SECRET": "${{ secrets.CRON_SECRET }}",
+            "JOB": "${{ steps.route.outputs.job }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/cron-mlb-canonical-refresh.yml#refresh",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/cron-mlb-canonical-refresh.yml#refresh",
+      "workflow": ".github/workflows/cron-mlb-canonical-refresh.yml",
+      "job_id": "refresh",
+      "status_context": "Refresh canonical MLB DB (delta)",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): DATABASE_URL"
+      ],
+      "step_count": 6,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "run": null,
+          "with": {
+            "python-version": "3.12"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "Install dependencies",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "Run nightly canonical delta refresh",
+          "id": null,
+          "uses": null,
+          "run": "npx tsx scripts/mlb-etl/refresh_canonical.mts",
+          "with": null,
+          "env": {
+            "DATABASE_URL": "${{ secrets.DATABASE_URL }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/cron-mlb-cycle.yml#fire",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/cron-mlb-cycle.yml#fire",
+      "workflow": ".github/workflows/cron-mlb-cycle.yml",
+      "job_id": "fire",
+      "status_context": "Trigger /api/cron/mlb-cycle",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): CRON_SECRET"
+      ],
+      "step_count": 2,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[STEP] Preflight — verify required secrets are present",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nif [ -z \"${RAILWAY_APP_URL:-}\" ]; then\n  echo \"::error::RAILWAY_APP_URL secret is not set\"; exit 1\nfi\nif [ -z \"${CRON_SECRET:-}\" ]; then\n  echo \"::error::CRON_SECRET secret is not set\"; exit 1\nfi\necho \"[PREFLIGHT] secrets present\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "CRON_SECRET": "${{ secrets.CRON_SECRET }}"
+          },
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] POST /api/cron/mlb-cycle (secret never printed)",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nURL=\"${RAILWAY_APP_URL%/}/api/cron/mlb-cycle\"\necho \"[INPUT] POST $URL at $(date -u +%FT%TZ)\"\nBODY_FILE=\"$(mktemp)\"\nCODE=$(curl -sS -o \"$BODY_FILE\" -w '%{http_code}' \\\n  --max-time 60 --retry 2 --retry-delay 5 --retry-connrefused \\\n  -X POST \"$URL\" \\\n  -H \"Authorization: Bearer ${CRON_SECRET}\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"User-Agent: gh-actions-cron/mlb-cycle\")\necho \"[OUTPUT] HTTP $CODE\"\necho \"[OUTPUT] body: $(cat \"$BODY_FILE\")\"\nif [ \"$CODE\" -lt 200 ] || [ \"$CODE\" -ge 300 ]; then\n  echo \"::error::mlb-cycle trigger failed with HTTP $CODE\"\n  exit 1\nfi\necho \"[VERIFY] PASS — mlb-cycle accepted (HTTP $CODE)\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "CRON_SECRET": "${{ secrets.CRON_SECRET }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/cron-scores.yml#fire",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/cron-scores.yml#fire",
+      "workflow": ".github/workflows/cron-scores.yml",
+      "job_id": "fire",
+      "status_context": "Trigger /api/cron/scores",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): CRON_SECRET"
+      ],
+      "step_count": 2,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[STEP] Preflight — verify required secrets are present",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nif [ -z \"${RAILWAY_APP_URL:-}\" ]; then\n  echo \"::error::RAILWAY_APP_URL secret is not set\"; exit 1\nfi\nif [ -z \"${CRON_SECRET:-}\" ]; then\n  echo \"::error::CRON_SECRET secret is not set\"; exit 1\nfi\necho \"[PREFLIGHT] secrets present\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "CRON_SECRET": "${{ secrets.CRON_SECRET }}"
+          },
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] POST /api/cron/scores (secret never printed)",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nURL=\"${RAILWAY_APP_URL%/}/api/cron/scores\"\necho \"[INPUT] POST $URL at $(date -u +%FT%TZ)\"\nBODY_FILE=\"$(mktemp)\"\nCODE=$(curl -sS -o \"$BODY_FILE\" -w '%{http_code}' \\\n  --max-time 60 --retry 2 --retry-delay 5 --retry-connrefused \\\n  -X POST \"$URL\" \\\n  -H \"Authorization: Bearer ${CRON_SECRET}\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"User-Agent: gh-actions-cron/scores\")\necho \"[OUTPUT] HTTP $CODE\"\necho \"[OUTPUT] body: $(cat \"$BODY_FILE\")\"\nif [ \"$CODE\" -lt 200 ] || [ \"$CODE\" -ge 300 ]; then\n  echo \"::error::scores trigger failed with HTTP $CODE\"\n  exit 1\nfi\necho \"[VERIFY] PASS — scores accepted (HTTP $CODE)\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "CRON_SECRET": "${{ secrets.CRON_SECRET }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/cron-stripe-reconcile.yml#fire",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/cron-stripe-reconcile.yml#fire",
+      "workflow": ".github/workflows/cron-stripe-reconcile.yml",
+      "job_id": "fire",
+      "status_context": "Trigger /api/cron/stripe-reconcile",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): CRON_SECRET"
+      ],
+      "step_count": 2,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[STEP] Preflight — verify required secrets are present",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nif [ -z \"${RAILWAY_APP_URL:-}\" ]; then\n  echo \"::error::RAILWAY_APP_URL secret is not set\"; exit 1\nfi\nif [ -z \"${CRON_SECRET:-}\" ]; then\n  echo \"::error::CRON_SECRET secret is not set\"; exit 1\nfi\necho \"[PREFLIGHT] secrets present\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "CRON_SECRET": "${{ secrets.CRON_SECRET }}"
+          },
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] POST /api/cron/stripe-reconcile (secret never printed)",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nURL=\"${RAILWAY_APP_URL%/}/api/cron/stripe-reconcile\"\necho \"[INPUT] POST $URL at $(date -u +%FT%TZ)\"\nBODY_FILE=\"$(mktemp)\"\nCODE=$(curl -sS -o \"$BODY_FILE\" -w '%{http_code}' \\\n  --max-time 60 --retry 2 --retry-delay 5 --retry-connrefused \\\n  -X POST \"$URL\" \\\n  -H \"Authorization: Bearer ${CRON_SECRET}\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"User-Agent: gh-actions-cron/stripe-reconcile\")\necho \"[OUTPUT] HTTP $CODE\"\necho \"[OUTPUT] body: $(cat \"$BODY_FILE\")\"\nif [ \"$CODE\" -lt 200 ] || [ \"$CODE\" -ge 300 ]; then\n  echo \"::error::stripe-reconcile failed with HTTP $CODE\"\n  exit 1\nfi\necho \"[VERIFY] PASS — reconcile completed (HTTP $CODE)\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "CRON_SECRET": "${{ secrets.CRON_SECRET }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/cron-vsin-odds.yml#fire",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/cron-vsin-odds.yml#fire",
+      "workflow": ".github/workflows/cron-vsin-odds.yml",
+      "job_id": "fire",
+      "status_context": "Trigger /api/cron/vsin-odds",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): CRON_SECRET"
+      ],
+      "step_count": 2,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[STEP] Preflight — verify required secrets are present",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nif [ -z \"${RAILWAY_APP_URL:-}\" ]; then\n  echo \"::error::RAILWAY_APP_URL secret is not set\"; exit 1\nfi\nif [ -z \"${CRON_SECRET:-}\" ]; then\n  echo \"::error::CRON_SECRET secret is not set\"; exit 1\nfi\necho \"[PREFLIGHT] secrets present; target host: ${RAILWAY_APP_URL%%/*}//$(echo \"$RAILWAY_APP_URL\" | sed -E 's#https?://##' | cut -d/ -f1)\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "CRON_SECRET": "${{ secrets.CRON_SECRET }}"
+          },
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] POST /api/cron/vsin-odds (secret never printed)",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nURL=\"${RAILWAY_APP_URL%/}/api/cron/vsin-odds\"\necho \"[INPUT] POST $URL at $(date -u +%FT%TZ)\"\nBODY_FILE=\"$(mktemp)\"\nCODE=$(curl -sS -o \"$BODY_FILE\" -w '%{http_code}' \\\n  --max-time 60 --retry 2 --retry-delay 5 --retry-connrefused \\\n  -X POST \"$URL\" \\\n  -H \"Authorization: Bearer ${CRON_SECRET}\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"User-Agent: gh-actions-cron/vsin-odds\")\necho \"[OUTPUT] HTTP $CODE\"\necho \"[OUTPUT] body: $(cat \"$BODY_FILE\")\"\nif [ \"$CODE\" -lt 200 ] || [ \"$CODE\" -ge 300 ]; then\n  echo \"::error::vsin-odds trigger failed with HTTP $CODE\"\n  exit 1\nfi\necho \"[VERIFY] PASS — vsin-odds accepted (HTTP $CODE)\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "CRON_SECRET": "${{ secrets.CRON_SECRET }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/db-push.yml#db-push",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/db-push.yml#db-push",
+      "workflow": ".github/workflows/db-push.yml",
+      "job_id": "db-push",
+      "status_context": "db-push",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): DATABASE_URL"
+      ],
+      "step_count": 5,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "Install dependencies",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "Run db:push",
+          "id": null,
+          "uses": null,
+          "run": "pnpm db:push",
+          "with": null,
+          "env": {
+            "DATABASE_URL": "${{ secrets.DATABASE_URL }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/db-reconcile-migrations.yml#reconcile",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/db-reconcile-migrations.yml#reconcile",
+      "workflow": ".github/workflows/db-reconcile-migrations.yml",
+      "job_id": "reconcile",
+      "status_context": "Baseline __drizzle_migrations",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): DATABASE_URL"
+      ],
+      "step_count": 7,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "Guard — apply requires typed confirmation",
+          "id": null,
+          "uses": null,
+          "run": "echo \"::error::apply mode requires the 'confirm' input to be exactly RECONCILE.\"\nexit 1\n",
+          "with": null,
+          "env": null,
+          "if": "${{ inputs.mode == 'apply' && inputs.confirm != 'RECONCILE' }}"
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "Install dependencies",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "Reconcile (${{ inputs.mode }})",
+          "id": null,
+          "uses": null,
+          "run": "node scripts/reconcile-migrations.mjs",
+          "with": null,
+          "env": {
+            "DATABASE_URL": "${{ secrets.DATABASE_URL }}",
+            "MODE": "${{ inputs.mode }}",
+            "CONFIRM": "${{ inputs.confirm }}"
+          },
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "Verify current migration plan without writes",
+          "id": null,
+          "uses": null,
+          "run": "pnpm db:migrate:plan",
+          "with": null,
+          "env": {
+            "DATABASE_URL": "${{ secrets.DATABASE_URL }}"
+          },
+          "if": "${{ inputs.mode == 'apply' }}"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/deploy-smoke.yml#smoke",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/deploy-smoke.yml#smoke",
+      "workflow": ".github/workflows/deploy-smoke.yml",
+      "job_id": "smoke",
+      "status_context": "smoke",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): EDGE_AGENT_BYPASS_KEY"
+      ],
+      "step_count": 4,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "Wait for deploy to settle (push only)",
+          "id": null,
+          "uses": null,
+          "run": "sleep 240",
+          "with": null,
+          "env": null,
+          "if": "github.event_name == 'push'"
+        },
+        {
+          "index": 3,
+          "name": "Smoke test live origin (retry x3)",
+          "id": null,
+          "uses": null,
+          "run": "if [ -z \"${EDGE_AGENT_BYPASS_KEY}\" ]; then\n  echo \"::warning::EDGE_AGENT_BYPASS_KEY is empty — document routes will 403 through the production edge. Set the repo secret.\"\nelse\n  echo \"trusted-agent key present (value hidden) — document routes waved through the edge\"\nfi\nfor i in 1 2 3; do\n  node scripts/smoke-deploy.mjs \"$ORIGIN\" && exit 0\n  echo \"attempt $i failed; retrying in 60s\"; sleep 60\ndone\nexit 1\n",
+          "with": null,
+          "env": {
+            "ORIGIN": "${{ github.event.inputs.origin || 'https://aisportsbettingmodels.com' }}",
+            "EDGE_AGENT_BYPASS_KEY": "${{ secrets.EDGE_AGENT_BYPASS_KEY }}",
+            "SMOKE_EDGE": "${{ github.event.inputs.edge }}",
+            "SMOKE_ORIGIN_URL": "${{ github.event.inputs.edge == 'cloudflare' && 'https://ai-sports-betting-dime-ai-production.up.railway.app' || '' }}",
+            "EXPECTED_COMMIT": "${{ github.event_name == 'push' && github.sha || '' }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 15,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/dime-llm-validation.yml#validate",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/dime-llm-validation.yml#validate",
+      "workflow": ".github/workflows/dime-llm-validation.yml",
+      "job_id": "validate",
+      "status_context": "Dime LLM Validation",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 8,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout repository",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Setup Python 3.12",
+          "id": null,
+          "uses": "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+          "run": null,
+          "with": {
+            "python-version": "3.12"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Setup pinned uv",
+          "id": null,
+          "uses": "astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e",
+          "run": null,
+          "with": {
+            "version": "0.11.32",
+            "enable-cache": true,
+            "cache-dependency-glob": "ml/dime-1.0/uv.lock"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Synchronize frozen CPU dependencies",
+          "id": null,
+          "uses": null,
+          "run": "uv lock --check\nuv sync --frozen --dev\nuv pip check\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Format, lint, compile, and test",
+          "id": null,
+          "uses": null,
+          "run": "uv run ruff format --check .\nuv run ruff check .\nuv run python -m compileall -q src scripts infrastructure\nuv run pytest -q\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[STEP] Validate public data and contracts",
+          "id": null,
+          "uses": null,
+          "run": "uv run python scripts/validate_data.py\nuv run python scripts/validate_governed_json.py\nuv run python scripts/validate_foundation_control.py\nuv run python scripts/validate_foundation_data_factory.py\nuv run python scripts/prepare_reviewer_runtime.py --check\nuv run python scripts/validate_reviewer_signer_iac.py\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "[STEP] Reproduce deterministic starter audits",
+          "id": null,
+          "uses": null,
+          "run": "audit_dir=\"$(mktemp -d)\"\ntrap 'rm -rf \"${audit_dir}\"' EXIT\nuv run python scripts/audit_curriculum.py \\\n  --report \"${audit_dir}/curriculum-audit.json\"\nuv run python scripts/audit_evaluation_program.py \\\n  --report \"${audit_dir}/evaluation-program-audit.json\"\ncmp \"${audit_dir}/curriculum-audit.json\" \\\n  evidence/audits/starter-v1.2.0/curriculum-audit.json\ncmp \"${audit_dir}/evaluation-program-audit.json\" \\\n  evidence/audits/starter-v1.2.0/evaluation-program-audit.json\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 7,
+          "name": "[OUTPUT] Confirm CPU-only non-release validation",
+          "id": null,
+          "uses": null,
+          "run": "echo \"PASS: source, schemas, fixtures, prompts, tools, and audits validated.\"\necho \"NOT EXECUTED: model/tokenizer download, GPU tests, training, publishing, or serving.\"\n",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": {
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "HF_DATASETS_OFFLINE": "1",
+        "DATASETS_OFFLINE": "1"
+      },
+      "defaults": {
+        "run": {
+          "working-directory": "ml/dime-1.0"
+        }
+      },
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/edge-arming-gate.yml#enforce",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/edge-arming-gate.yml#enforce",
+      "workflow": ".github/workflows/edge-arming-gate.yml",
+      "job_id": "enforce",
+      "status_context": "Armed production must carry a valid authorization",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 3,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "Enforce the arming gate against live production posture",
+          "id": null,
+          "uses": null,
+          "run": "set -uo pipefail\n# `|| status=$?`, not a bare call followed by `$?`: GitHub runs `run:`\n# blocks under `bash -e`, so a bare failing call would abort the step\n# before the remedy text below could be printed. Consuming the failure\n# with `||` suppresses -e while still capturing the exit code, and the\n# step still ends with `exit \"$status\"` — the gate's verdict, unaltered.\nstatus=0\nnode scripts/edge-arming-gate.mjs enforce \\\n  --origin=\"$ORIGIN\" \\\n  --record=docs/runbooks/edge-arming-authorization.json || status=$?\nif [ \"$status\" -ne 0 ]; then\n  echo \"::error::Edge arming gate FAILED. Either production is armed without a\"\n  echo \"::error::qualifying soak authorization, or its posture could not be read.\"\n  echo \"::error::Remedy A (always available, never gated): set EDGE_MODE=log.\"\n  echo \"::error::Remedy B: run a >=60min log-mode soak, then\"\n  echo \"::error::  node scripts/edge-arming-gate.mjs authorize --evidence=... --origin=\\$ORIGIN\"\n  echo \"::error::and land the record through a reviewed PR.\"\nfi\nexit \"$status\"\n",
+          "with": null,
+          "env": {
+            "ORIGIN": "${{ inputs.origin || 'https://ai-sports-betting-dime-ai-production.up.railway.app' }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": "github.event_name != 'pull_request'",
+      "timeout_minutes": 10,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/edge-arming-gate.yml#validate",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/edge-arming-gate.yml#validate",
+      "workflow": ".github/workflows/edge-arming-gate.yml",
+      "job_id": "validate",
+      "status_context": "Authorization record contract (offline)",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 6,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "Install dependencies (frozen lockfile)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "Gate unit tests (the gate must be capable of failing)",
+          "id": null,
+          "uses": null,
+          "run": "npx vitest run scripts/edge-soak-report.test.ts scripts/edge-arming-gate.test.ts",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "Validate the committed authorization record, if one exists",
+          "id": null,
+          "uses": null,
+          "run": "set -uo pipefail\nif [ ! -f docs/runbooks/edge-arming-authorization.json ]; then\n  echo \"no authorization record committed — nothing to validate.\"\n  echo \"(absence is not a failure here: an un-armed production needs no record;\"\n  echo \" the enforce job is what refuses an ARMED production without one.)\"\n  exit 0\nfi\nnode scripts/edge-arming-gate.mjs validate \\\n  --record=docs/runbooks/edge-arming-authorization.json\n",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": "github.event_name == 'pull_request'",
+      "timeout_minutes": 10,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/gitleaks.yml#gitleaks",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/gitleaks.yml#gitleaks",
+      "workflow": ".github/workflows/gitleaks.yml",
+      "job_id": "gitleaks",
+      "status_context": "Secret Scan (gitleaks)",
+      "required": true,
+      "graduating": false,
+      "runnability": "LOCAL+TOOL",
+      "required_tools": [
+        "gitleaks"
+      ],
+      "ci_only_reasons": [],
+      "step_count": 2,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout full history",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": {
+            "fetch-depth": 0
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Run gitleaks — fail on any finding",
+          "id": null,
+          "uses": "gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e",
+          "run": null,
+          "with": null,
+          "env": {
+            "GITHUB_TOKEN": "${{ secrets.GITHUB_TOKEN }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": true
+    },
+    {
+      "gate_id": ".github/workflows/os-ledger-append.yml#append",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/os-ledger-append.yml#append",
+      "workflow": ".github/workflows/os-ledger-append.yml",
+      "job_id": "append",
+      "status_context": "os-ledger-append",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 4,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout main (full history — the appender reads merge parents)",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": {
+            "fetch-depth": 0
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Setup Node.js 22",
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[VERIFY] os-ledger must not be main — a deploy here would be a defect",
+          "id": null,
+          "uses": null,
+          "run": "if [ \"${GITHUB_REF_NAME}\" != \"main\" ]; then\n  echo \"::error::expected to run on main, got ${GITHUB_REF_NAME}\"; exit 1\nfi\n",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Append the cycle artifact to the os-ledger orphan branch",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nSHA=\"${GITHUB_SHA}\"\ngit config user.name \"github-actions[bot]\"\ngit config user.email \"41898282+github-actions[bot]@users.noreply.github.com\"\n\n# Materialise os-ledger in a worktree; create it orphan on first run.\nif git ls-remote --exit-code --heads origin os-ledger >/dev/null 2>&1; then\n  git fetch origin os-ledger --depth=1\n  git worktree add /tmp/osl origin/os-ledger --detach\n  git -C /tmp/osl checkout -B os-ledger\nelse\n  git worktree add --detach /tmp/osl\n  git -C /tmp/osl checkout --orphan os-ledger\n  git -C /tmp/osl rm -rf . >/dev/null 2>&1 || true\n  printf '# os-ledger\\n\\nMachine-generated loop artifacts. Never deployed: Railway pins main.\\n' > /tmp/osl/README.md\nfi\n\n# Resolve the proof-contract run for this merge.\n#\n# DEFECT FIXED 2026-08-05: the first version matched on GITHUB_SHA, the\n# MERGE commit. 01-pr-proof-contract runs on `pull_request`, so its\n# headSha is the PR HEAD, never the merge commit -- the lookup matched\n# nothing and every artifact recorded proofContractRunId: null. Caught\n# by inspecting the very first artifact the loop produced.\n#\n# Correct chain: merge commit -> PR number -> PR head sha -> run.\nPRNUM=$(git log -1 --format=%s \"$SHA\" | sed -n 's/^Merge pull request #\\([0-9]*\\).*/\\1/p')\nRID=\"\"\nif [ -n \"$PRNUM\" ]; then\n  PRHEAD=$(gh pr view \"$PRNUM\" --json headRefOid --jq '.headRefOid' 2>/dev/null || true)\n  if [ -n \"$PRHEAD\" ]; then\n    RID=$(gh run list --workflow=01-pr-proof-contract.yml --limit 60 \\\n            --json databaseId,headSha,conclusion --jq \\\n            \"[.[]|select(.headSha==\\\"$PRHEAD\\\" and .conclusion==\\\"success\\\")][0].databaseId // empty\" \\\n            2>/dev/null || true)\n  fi\nfi\necho \"[os-ledger] pr=${PRNUM:-none} head=${PRHEAD:-none} proofContractRun=${RID:-none}\"\n\ncd /tmp/osl\nPROOF_CONTRACT_RUN_ID=\"${RID}\" node \"${GITHUB_WORKSPACE}/scripts/os/ledger-append.mjs\" \\\n  --sha \"$SHA\" --repo \"${GITHUB_WORKSPACE}\"\n\nif [ -n \"$(git status --porcelain)\" ]; then\n  git add -A\n  git commit -q -m \"os-ledger: cycle for ${SHA:0:12}\"\n  git push -q origin os-ledger\n  echo \"[os-ledger] pushed\"\nelse\n  echo \"[os-ledger] no change (idempotent replay)\"\nfi\n",
+          "with": null,
+          "env": {
+            "GH_TOKEN": "${{ github.token }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/os-observe-crons.yml#observe",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/os-observe-crons.yml#observe",
+      "workflow": ".github/workflows/os-observe-crons.yml",
+      "job_id": "observe",
+      "status_context": "os-observe-crons",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 5,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout main",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": {
+            "fetch-depth": 0
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Setup Node.js 22",
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Install pnpm",
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Install dependencies",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[VERIFY] Declared cron cadence vs. observed runs",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nif [ -n \"${OBSERVE_DATE:-}\" ]; then\n  npx tsx scripts/os/observe-crons.mts --date \"$OBSERVE_DATE\"\nelse\n  npx tsx scripts/os/observe-crons.mts\nfi\n",
+          "with": null,
+          "env": {
+            "GH_TOKEN": "${{ github.token }}",
+            "OBSERVE_DATE": "${{ inputs.date }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 10,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/p0-db-verify.yml#query",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/p0-db-verify.yml#query",
+      "workflow": ".github/workflows/p0-db-verify.yml",
+      "job_id": "query",
+      "status_context": "Cross-reference prod DB",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): DATABASE_URL"
+      ],
+      "step_count": 4,
+      "steps": [
+        {
+          "index": 0,
+          "name": "Install MySQL client",
+          "id": null,
+          "uses": null,
+          "run": "sudo apt-get update -qq && sudo apt-get install -y -qq mysql-client",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "Build client config from DATABASE_URL (secret never printed)",
+          "id": null,
+          "uses": null,
+          "run": "if [ -z \"${DATABASE_URL:-}\" ]; then echo \"::error::DATABASE_URL secret is not set\"; exit 1; fi\npython3 - <<'PY'\nimport os, urllib.parse, stat\nu = urllib.parse.urlparse(os.environ[\"DATABASE_URL\"])\nif not u.hostname: raise SystemExit(\"DATABASE_URL is not a valid mysql:// URL\")\ndb = (u.path or \"/\").lstrip(\"/\")\ncnf = (\"[client]\\n\"\n       f\"host={u.hostname}\\n\"\n       f\"port={u.port or 4000}\\n\"\n       f\"user={urllib.parse.unquote(u.username or '')}\\n\"\n       f\"password={urllib.parse.unquote(u.password or '')}\\n\"\n       \"ssl-mode=REQUIRED\\n\")\nopen(\"client.cnf\",\"w\").write(cnf)\nos.chmod(\"client.cnf\", stat.S_IRUSR|stat.S_IWUSR)\nopen(\"dbname.txt\",\"w\").write(db)\nprint(f\"client.cnf written (password omitted): host={u.hostname} port={u.port or 4000} db={db}\")\nPY\n",
+          "with": null,
+          "env": {
+            "DATABASE_URL": "${{ secrets.DATABASE_URL }}"
+          },
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "P0 cross-reference queries",
+          "id": null,
+          "uses": null,
+          "run": "set -uo pipefail\nDB=\"$(cat dbname.txt)\"\nIN_LIST=$(printf \"'%s',\" $(echo \"$DATES\" | tr ',' ' ') | sed \"s/,$//\")\nM() { mysql --defaults-extra-file=client.cnf -D \"$DB\" -t -e \"$1\" 2>&1 || echo \"<query blocked/failed>\"; }\n\necho \"===== [MLB] games coverage by sport × date =====\"\nM \"SELECT sport, gameDate,\n          COUNT(*) AS games,\n          SUM(modelRunAt IS NOT NULL) AS with_model,\n          FROM_UNIXTIME(MAX(modelRunAt)/1000) AS last_model_run_utc,\n          SUM(mlAwayMoneyPct IS NOT NULL) AS with_splits\n   FROM games\n   WHERE gameDate IN ($IN_LIST)\n   GROUP BY sport, gameDate ORDER BY gameDate, sport;\"\n\necho \"===== [MLB] sample: first 5 games for the dates (model vs book) =====\"\nM \"SELECT id, gameDate, sport, awayTeam, homeTeam,\n          modelRunAt IS NOT NULL AS modeled,\n          awayModelSpread, awayBookSpread, modelTotal, bookTotal\n   FROM games WHERE gameDate IN ($IN_LIST) AND sport='MLB'\n   ORDER BY gameDate, id LIMIT 5;\"\n\necho \"===== [WC] wc2026_matches by date (team resolution) =====\"\nM \"SELECT match_date,\n          COUNT(*) AS matches,\n          SUM(home_team_id<>'tbd' AND away_team_id<>'tbd') AS resolved_teams\n   FROM wc2026_matches\n   WHERE match_date IN ($IN_LIST)\n   GROUP BY match_date ORDER BY match_date;\"\n\necho \"===== [WC] match rows for the dates =====\"\nM \"SELECT match_id, match_date, stage, home_team_id, away_team_id, kickoff_utc\n   FROM wc2026_matches WHERE match_date IN ($IN_LIST) ORDER BY kickoff_utc;\"\n\necho \"===== [WC] odds snapshot + model-projection presence for those matches =====\"\nM \"SELECT\n     (SELECT COUNT(*) FROM wc2026_odds_snapshots o\n        JOIN wc2026_matches m ON m.match_id=o.match_id\n        WHERE m.match_date IN ($IN_LIST)) AS odds_snapshots,\n     (SELECT COUNT(*) FROM wc2026_model_projections p\n        JOIN wc2026_matches m ON m.match_id=p.match_id\n        WHERE m.match_date IN ($IN_LIST)) AS model_projections;\"\n",
+          "with": null,
+          "env": {
+            "DATES": "${{ inputs.dates }}"
+          },
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "Cleanup",
+          "id": null,
+          "uses": null,
+          "run": "rm -f client.cnf dbname.txt",
+          "with": null,
+          "env": null,
+          "if": "always()"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/p0-feed-verify.yml#verify",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/p0-feed-verify.yml#verify",
+      "workflow": ".github/workflows/p0-feed-verify.yml",
+      "job_id": "verify",
+      "status_context": "Verify live feed data",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 1,
+      "steps": [
+        {
+          "index": 0,
+          "name": "Probe public feed endpoints",
+          "id": null,
+          "uses": null,
+          "run": "set -uo pipefail\nbase=\"${ORIGIN%/}\"\nstamp() { date -u +%FT%TZ; }\n\n# tRPC httpBatchLink GET: /api/trpc/<proc>?batch=1&input=<urlenc {\"0\":{\"json\":<input>}}>\nenc() { jq -rn --arg s \"$1\" '$s|@uri'; }\nbatch_input() { printf '{\"0\":{\"json\":%s}}' \"$1\"; }\n\nprobe() {\n  local label=\"$1\" proc=\"$2\" json=\"$3\"\n  local input; input=\"$(batch_input \"$json\")\"\n  local url; url=\"$base/api/trpc/$proc?batch=1&input=$(enc \"$input\")\"\n  echo \"---- $label : $proc  @ $(stamp) ----\"\n  local hdr body code\n  hdr=\"$(mktemp)\"; body=\"$(mktemp)\"\n  code=\"$(curl -sS -D \"$hdr\" -o \"$body\" -w '%{http_code}' --max-time 45 \"$url\" 2>&1)\" || code=\"ERR\"\n  echo \"HTTP $code\"\n  grep -i '^x-games-count:' \"$hdr\" || true\n  grep -i '^x-cache-status:' \"$hdr\" || true\n  local n; n=$(wc -c < \"$body\")\n  echo \"body_bytes=$n\"\n  # Field-presence signals (counts, never values):\n  # modelRunAt is a numeric bigint (epoch ms) or null — count both correctly.\n  echo \"modelRunAt_number=$(grep -o '\\\"modelRunAt\\\":[0-9]' \"$body\" | wc -l)\"\n  echo \"modelRunAt_null=$(grep -o '\\\"modelRunAt\\\":null' \"$body\" | wc -l)\"\n  echo \"edge_tags=$(grep -o '\\[EDGE\\]' \"$body\" | wc -l)\"\n  echo \"modelTotal_fields=$(grep -o '\\\"modelTotal\\\"' \"$body\" | wc -l)\"\n  echo \"splits_fields=$(grep -o 'BetsPct\\|MoneyPct\\|ticketsPct\\|moneyPct' \"$body\" | wc -l)\"\n  # WC-specific signals: Double Chance appears once per side (dkOdds=book,\n  # modelOdds=model), so N matches with both book AND model DC → 2N counts.\n  echo \"wc_homeDrawOdds=$(grep -o '\\\"homeDrawOdds\\\":-\\?[0-9]' \"$body\" | wc -l)\"\n  echo \"wc_awayDrawOdds=$(grep -o '\\\"awayDrawOdds\\\":-\\?[0-9]' \"$body\" | wc -l)\"\n  echo \"wc_noDraw=$(grep -o '\\\"noDraw\\\":-\\?[0-9]' \"$body\" | wc -l)\"\n  echo \"wc_dkOdds_objs=$(grep -o '\\\"dkOdds\\\":{' \"$body\" | wc -l)\"\n  echo \"wc_modelOdds_objs=$(grep -o '\\\"modelOdds\\\":{' \"$body\" | wc -l)\"\n  # WC winner-scope verification (owner directive 2026-07-18): the\n  # model winner odds (model_*_to_advance → modelOdds.toAdvance*) are\n  # public display data already served to every visitor — extract\n  # matchId → home/away team ids → book+model toAdvance and 3-way ML\n  # per match so the winner-market binding can be verified end-to-end\n  # from CI (the sandboxed agent container has no egress to prod).\n  echo \"wc_winner_scope=$(jq -c '(.[0].result.data.json // []) | if type==\"array\" then map({id:.matchId, home:.homeTeamId, away:.awayTeamId, bookAdvH:(.dkOdds.toAdvanceHome // null), bookAdvA:(.dkOdds.toAdvanceAway // null), modelAdvH:(.modelOdds.toAdvanceHome // null), modelAdvA:(.modelOdds.toAdvanceAway // null), modelH:(.modelOdds.home // null), modelD:(.modelOdds.draw // null), modelA:(.modelOdds.away // null)}) else \"not-a-match-array\" end' \"$body\" 2>/dev/null || echo 'jq-parse-failed')\"\n  echo \"wc_venueIds=$(grep -o '\\\"venueId\\\":\\\"[a-z0-9-]*\\\"' \"$body\" | sort | uniq -c | tr '\\n' ' ')\"\n  # First 500 bytes for shape sanity (public data only):\n  echo \"head: $(head -c 500 \"$body\" | tr '\\n' ' ')\"\n  echo\n}\n\necho \"=================== P0 FEED VERIFY @ $(stamp) ===================\"\necho \"ORIGIN: $base\"\nif [ -n \"${PROC:-}\" ]; then\n  probe \"ad-hoc\" \"$PROC\" \"${INPUT_JSON:-null}\"\nelse\n  probe \"current date\"       \"games.getCurrentDate\" \"null\"\n  probe \"last refresh\"       \"games.lastRefresh\"    \"null\"\n  probe \"MLB 07-10\"          \"games.list\"           '{\"sport\":\"MLB\",\"gameDate\":\"2026-07-10\"}'\n  probe \"MLB 07-11\"          \"games.list\"           '{\"sport\":\"MLB\",\"gameDate\":\"2026-07-11\"}'\n  probe \"MLB splits\"         \"games.liveSplits\"     \"null\"\n  probe \"WC today+odds\"      \"wc2026.todayWithOdds\" \"null\"\n  probe \"WC by date 07-11\"   \"wc2026.matchesByDate\" '{\"date\":\"2026-07-11\"}'\nfi\necho \"=================== END ===================\"\n",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": {
+        "ORIGIN": "${{ inputs.origin }}",
+        "PROC": "${{ inputs.proc }}",
+        "INPUT_JSON": "${{ inputs.input_json }}"
+      },
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/perf-harness.yml#measure",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/perf-harness.yml#measure",
+      "workflow": ".github/workflows/perf-harness.yml",
+      "job_id": "measure",
+      "status_context": "Measure live routes",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [
+        "playwright-browsers"
+      ],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): EDGE_AGENT_BYPASS_KEY"
+      ],
+      "step_count": 10,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout repository",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Preflight — RAILWAY_APP_URL present",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nif [ -z \"${RAILWAY_APP_URL:-}\" ]; then\n  echo \"::error::RAILWAY_APP_URL secret is not set\"; exit 1\nfi\necho \"[PREFLIGHT] target secret present\"\n",
+          "with": null,
+          "env": {
+            "RAILWAY_APP_URL": "${{ vars.RAILWAY_APP_URL }}"
+          },
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Setup pnpm",
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Setup Node.js 22",
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Install dependencies (frozen lockfile)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[STEP] Install Chromium for Playwright",
+          "id": null,
+          "uses": null,
+          "run": "pnpm exec playwright install --with-deps chromium",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "[VERIFY] Run focused real-browser harness tests",
+          "id": null,
+          "uses": null,
+          "run": "pnpm exec vitest run perf/harness.smoke.test.ts --reporter=verbose",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 7,
+          "name": "[STEP] Run perf harness",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\nif [ \"$UPDATE_BASELINE\" = \"true\" ]; then\n  pnpm exec tsx perf/harness.ts --update-baseline\nelse\n  pnpm exec tsx perf/harness.ts\nfi\n",
+          "with": null,
+          "env": {
+            "PERF_TARGET_URL": "${{ vars.RAILWAY_APP_URL }}",
+            "EDGE_AGENT_BYPASS_KEY": "${{ secrets.EDGE_AGENT_BYPASS_KEY }}",
+            "UPDATE_BASELINE": "${{ github.event.inputs.update_baseline }}"
+          },
+          "if": null
+        },
+        {
+          "index": 8,
+          "name": "[OUTPUT] Upload raw metrics artifact",
+          "id": null,
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "run": null,
+          "with": {
+            "name": "perf-results",
+            "path": "perf-results.json",
+            "if-no-files-found": "ignore"
+          },
+          "env": null,
+          "if": "always()"
+        },
+        {
+          "index": 9,
+          "name": "[OUTPUT] Upload reviewable baseline candidate",
+          "id": null,
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "run": null,
+          "with": {
+            "name": "perf-baseline-candidate-${{ github.run_id }}-${{ github.run_attempt }}",
+            "path": "perf-baseline-candidate.json\nperf-results.json\n",
+            "if-no-files-found": "error",
+            "retention-days": 30
+          },
+          "env": null,
+          "if": "${{ success() && github.event_name == 'workflow_dispatch' && github.event.inputs.update_baseline == 'true' }}"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/pi-review.yml#pi-review",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/pi-review.yml#pi-review",
+      "workflow": ".github/workflows/pi-review.yml",
+      "job_id": "pi-review",
+      "status_context": "pi Review",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): ANTHROPIC_API_KEY"
+      ],
+      "step_count": 7,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[INPUT] Checkout repository",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[STEP] Setup pnpm",
+          "id": null,
+          "uses": "pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Setup Node.js 22",
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Install dependencies (frozen lockfile)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile --ignore-scripts",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Install pi coding agent",
+          "id": null,
+          "uses": null,
+          "run": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 5,
+          "name": "[STEP] Run pi review on this ref",
+          "id": null,
+          "uses": null,
+          "run": "echo \"[INPUT] pi $(pi --version) reviewing ${GITHUB_REF_NAME}\"\npi -p -a \"/review branch ${REVIEW_INSTRUCTIONS}\" | tee pi-review-report.md\necho \"[OUTPUT] review complete\"\n",
+          "with": null,
+          "env": {
+            "ANTHROPIC_API_KEY": "${{ secrets.ANTHROPIC_API_KEY }}",
+            "PI_SKIP_VERSION_CHECK": "1",
+            "PI_TELEMETRY": "0",
+            "REVIEW_INSTRUCTIONS": "${{ inputs.instructions }}"
+          },
+          "if": null
+        },
+        {
+          "index": 6,
+          "name": "[OUTPUT] Upload review report as artifact",
+          "id": null,
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "run": null,
+          "with": {
+            "name": "pi-review-report",
+            "path": "pi-review-report.md",
+            "retention-days": 30
+          },
+          "env": null,
+          "if": "always()"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 25,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/railway-p0-control.yml#health",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/railway-p0-control.yml#health",
+      "workflow": ".github/workflows/railway-p0-control.yml",
+      "job_id": "health",
+      "status_context": "Pinned production health",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 1,
+      "steps": [
+        {
+          "index": 0,
+          "name": "Probe pinned HTTPS endpoints",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\n\nprobe() {\n  label=\"$1\"\n  url=\"$2\"\n  code=\"$(\n    curl \\\n      --silent \\\n      --show-error \\\n      --output /dev/null \\\n      --write-out \"%{http_code}\" \\\n      --max-time 20 \\\n      --proto '=https' \\\n      --tlsv1.2 \\\n      \"$url\"\n  )\"\n  echo \"$label: HTTP $code\"\n  test \"$code\" -ge 200 -a \"$code\" -lt 400\n}\n\ncase \"$TARGET\" in\n  all)\n    probe application \"https://aisportsbettingmodels.com/health\"\n    probe backend \"https://ai-sports-betting-backend-production.up.railway.app/health\"\n    ;;\n  application)\n    probe application \"https://aisportsbettingmodels.com/health\"\n    ;;\n  backend)\n    probe backend \"https://ai-sports-betting-backend-production.up.railway.app/health\"\n    ;;\n  *)\n    echo \"::error::unrecognized pinned target\"\n    exit 2\n    ;;\nesac\n",
+          "with": null,
+          "env": {
+            "TARGET": "${{ inputs.target }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 3,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/refresh-cf-cidrs.yml#check",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/refresh-cf-cidrs.yml#check",
+      "workflow": ".github/workflows/refresh-cf-cidrs.yml",
+      "job_id": "check",
+      "status_context": "check",
+      "required": false,
+      "graduating": false,
+      "runnability": "LOCAL",
+      "required_tools": [],
+      "ci_only_reasons": [],
+      "step_count": 3,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": "Check the CF CIDR snapshot against upstream (exit 3 on drift)",
+          "id": null,
+          "uses": null,
+          "run": "node scripts/refresh-cf-cidrs.mjs --check",
+          "with": null,
+          "env": null,
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/seed-cfb.yml#seed-cfb",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/seed-cfb.yml#seed-cfb",
+      "workflow": ".github/workflows/seed-cfb.yml",
+      "job_id": "seed-cfb",
+      "status_context": "seed-cfb",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): DATABASE_URL"
+      ],
+      "step_count": 5,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "Install dependencies",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "Seed CFB 2026 data",
+          "id": null,
+          "uses": null,
+          "run": "pnpm exec tsx scripts/seedCfb2026.mts ${{ inputs.dry_run && '--dry-run' || '' }}",
+          "with": null,
+          "env": {
+            "DATABASE_URL": "${{ secrets.DATABASE_URL }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/seed-nfl.yml#seed-nfl",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/seed-nfl.yml#seed-nfl",
+      "workflow": ".github/workflows/seed-nfl.yml",
+      "job_id": "seed-nfl",
+      "status_context": "seed-nfl",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): DATABASE_URL"
+      ],
+      "step_count": 5,
+      "steps": [
+        {
+          "index": 0,
+          "name": null,
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": null,
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 2,
+          "name": null,
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 3,
+          "name": "Install dependencies",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install",
+          "with": null,
+          "env": null,
+          "if": null
+        },
+        {
+          "index": 4,
+          "name": "Seed NFL 2026 data",
+          "id": null,
+          "uses": null,
+          "run": "pnpm exec tsx scripts/seedNfl2026.mts ${{ inputs.dry_run && '--dry-run' || '' }}",
+          "with": null,
+          "env": {
+            "DATABASE_URL": "${{ secrets.DATABASE_URL }}"
+          },
+          "if": null
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": null,
+      "mandatory": false
+    },
+    {
+      "gate_id": ".github/workflows/stripe-e2e.yml#stripe-e2e",
+      "class": "PARITY",
+      "contract_check_id": ".github/workflows/stripe-e2e.yml#stripe-e2e",
+      "workflow": ".github/workflows/stripe-e2e.yml",
+      "job_id": "stripe-e2e",
+      "status_context": "Stripe money path (test mode)",
+      "required": false,
+      "graduating": false,
+      "runnability": "CI-ONLY",
+      "required_tools": [],
+      "ci_only_reasons": [
+        "binds protected environment 'Production'",
+        "references repository secret(s): STRIPE_TEST_SECRET_KEY"
+      ],
+      "step_count": 9,
+      "steps": [
+        {
+          "index": 0,
+          "name": "[GUARD] Skip cleanly when the test Stripe key is not configured",
+          "id": "guard",
+          "uses": null,
+          "run": "set -euo pipefail\nif [ -z \"${STRIPE_TEST_SECRET_KEY:-}\" ]; then\n  echo \"enabled=false\" >> \"$GITHUB_OUTPUT\"\n  echo \"::notice::STRIPE_TEST_SECRET_KEY is not configured for this repository.\"\n  echo \"::notice::The Stripe end-to-end harness needs a Stripe TEST secret key\"\n  echo \"::notice::(sk_test_… or rk_test_…). Skipping — this is not a failure.\"\n  exit 0\nfi\ncase \"$STRIPE_TEST_SECRET_KEY\" in\n  sk_test_*|rk_test_*)\n    echo \"enabled=true\" >> \"$GITHUB_OUTPUT\"\n    echo \"[PREFLIGHT] Stripe TEST key present (prefix ${STRIPE_TEST_SECRET_KEY:0:8})\"\n    ;;\n  *)\n    echo \"::error::STRIPE_TEST_SECRET_KEY is not a Stripe TEST key. Refusing to run.\"\n    exit 1\n    ;;\nesac\n",
+          "with": null,
+          "env": {
+            "STRIPE_TEST_SECRET_KEY": "${{ secrets.STRIPE_TEST_SECRET_KEY }}"
+          },
+          "if": null
+        },
+        {
+          "index": 1,
+          "name": "[INPUT] Checkout repository",
+          "id": null,
+          "uses": "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": "steps.guard.outputs.enabled == 'true'"
+        },
+        {
+          "index": 2,
+          "name": "[STEP] Setup pnpm",
+          "id": null,
+          "uses": "pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271",
+          "run": null,
+          "with": null,
+          "env": null,
+          "if": "steps.guard.outputs.enabled == 'true'"
+        },
+        {
+          "index": 3,
+          "name": "[STEP] Setup Node.js 22",
+          "id": null,
+          "uses": "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "run": null,
+          "with": {
+            "node-version": 22,
+            "cache": "pnpm"
+          },
+          "env": null,
+          "if": "steps.guard.outputs.enabled == 'true'"
+        },
+        {
+          "index": 4,
+          "name": "[STEP] Install dependencies (frozen lockfile)",
+          "id": null,
+          "uses": null,
+          "run": "pnpm install --frozen-lockfile",
+          "with": null,
+          "env": null,
+          "if": "steps.guard.outputs.enabled == 'true'"
+        },
+        {
+          "index": 5,
+          "name": "[STEP] Install the Stripe CLI",
+          "id": null,
+          "uses": null,
+          "run": "set -euo pipefail\ncurl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \\\n  https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public \\\n  | gpg --dearmor \\\n  | sudo tee /usr/share/keyrings/stripe.gpg > /dev/null\necho \"deb [signed-by=/usr/share/keyrings/stripe.gpg] https://packages.stripe.dev/stripe-cli-debian-local stable main\" \\\n  | sudo tee /etc/apt/sources.list.d/stripe.list > /dev/null\nsudo apt-get update\nsudo apt-get install -y stripe\nstripe version\n",
+          "with": null,
+          "env": null,
+          "if": "steps.guard.outputs.enabled == 'true'"
+        },
+        {
+          "index": 6,
+          "name": "[VERIFY] Docker daemon is available to the harness",
+          "id": null,
+          "uses": null,
+          "run": "docker version --format '{{.Server.Version}}'",
+          "with": null,
+          "env": null,
+          "if": "steps.guard.outputs.enabled == 'true'"
+        },
+        {
+          "index": 7,
+          "name": "[VERIFY] Run the Stripe end-to-end money-path harness",
+          "id": null,
+          "uses": null,
+          "run": "pnpm run test:stripe-e2e 2>&1 | tee stripe-e2e-report.txt\nexit ${PIPESTATUS[0]}\n",
+          "with": null,
+          "env": {
+            "STRIPE_TEST_SECRET_KEY": "${{ secrets.STRIPE_TEST_SECRET_KEY }}"
+          },
+          "if": "steps.guard.outputs.enabled == 'true'"
+        },
+        {
+          "index": 8,
+          "name": "[OUTPUT] Upload harness report",
+          "id": null,
+          "uses": "actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "run": null,
+          "with": {
+            "name": "stripe-e2e-report",
+            "path": "stripe-e2e-report.txt",
+            "retention-days": 30
+          },
+          "env": null,
+          "if": "always() && steps.guard.outputs.enabled == 'true'"
+        }
+      ],
+      "needs": null,
+      "env": null,
+      "defaults": null,
+      "services": null,
+      "permissions": null,
+      "strategy": null,
+      "if": null,
+      "timeout_minutes": 45,
+      "mandatory": false
+    }
+  ],
+  "out_of_scope": [
+    {
+      "contract_check_id": ".github/workflows/cron-mlb-learning-loop.yml#fire",
+      "reason": "dynamic status context: Trigger /api/cron/${{ inputs.job }}"
+    },
+    {
+      "contract_check_id": ".github/workflows/db-query.yml#query",
+      "reason": "dynamic status context: Query database (${{ github.event.inputs.mode }})"
+    },
+    {
+      "contract_check_id": ".github/workflows/feed-responsive-cross-browser.yml#browser-engine",
+      "reason": "dynamic status context: Feed responsive — ${{ matrix.browser }}"
+    },
+    {
+      "contract_check_id": ".github/workflows/security-audit-weekly.yml#weekly-security-audit",
+      "reason": "dynamic status context: Weekly Audit — pnpm audit --audit-level=${{ inputs.audit_level || 'moderate' }}"
+    }
+  ]
+}

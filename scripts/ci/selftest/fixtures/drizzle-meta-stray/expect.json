@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "drizzle-meta-stray",
+  "expected_gate": ".github/workflows/08-contract-and-data-integrity.yml#contracts",
+  "target_contract_id": ".github/workflows/08-contract-and-data-integrity.yml#contracts",
+  "target_class": "PARITY",
+  "applicability": "seed",
+  "expected_status": "FAIL",
+  "expected_reason": [
+    {
+      "source": "stdout",
+      "regex": "contains only drizzle-owned artifacts"
+    }
+  ],
+  "control_expectation": {
+    "status": "PASS"
+  },
+  "required_execution_mode": "host",
+  "command_step_indexes": [5],
+  "expected_changed_paths": ["drizzle/meta/p05-poison-stray.json"],
+  "allowed_execution_artifacts": [],
+  "timeout_ms": 600000,
+  "fixture_sha256": "3393bf981d65e2bee0e8ab2b061e85adedf90fd25ff15ec232ff0c949b01e182"
+}

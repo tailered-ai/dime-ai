@@ -1,0 +1,48 @@
+P00.CP02 RE-VALIDATION SWEEP
+pwd=/Users/danielwalker/src/ai-sports-betting-dime-ai  branch=feat/ci-verify-control-plane  HEAD=4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6
+origin/main=4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6
+All exit codes captured DIRECTLY (no pipes) per DEF-007.
+Every negative asserts its DECLARED reason, not merely a red exit (DEF-008).
+
+ledger verify                 -> exit 0
+[ledger] VERIFY OK — no tampering, drift, or stale evidence
+PB suite (scripts/ci)         -> exit 0
+ Test Files  1 passed (1)
+      Tests  35 passed (35)
+scripts/ subset               -> exit 0
+ Test Files  31 passed (31)
+      Tests  428 passed (428)
+tsc --noEmit                  -> exit 0
+prettier (changed sources)    -> exit 0
+All matched files use Prettier code style!
+actions-security contract     -> exit 0
+{"status":"PASS","workflowsChecked":40,"compositesChecked":0,"actionReferences":120,"productionSecretReferences":25,"failures":[]}
+federation docs gate          -> exit 0
+federation docs: OK — no dangling paths, ordinals, schema drift, or dead routing
+DEF-002 doc-vs-live validator -> exit 0
+OVERALL: DOCUMENTATION AND LIVE EVIDENCE AGREE EXACTLY
+frozen install (--ignore-scripts) -> exit 0
+
+### negative proofs — each must fail for its OWN declared reason
+tampered JSON                 -> exit 1  reason: LEDGER_TAMPERED
+tampered markdown             -> exit 1  reason: RENDER_DRIFT
+mutated evidence artifact     -> exit 1  reason: STALE_EVIDENCE
+self-referential evidence     -> exit 1  reason: EVIDENCE_SELF_REFERENCE
+  (asserted against collectEvidence directly: the CLI path would hit
+   ILLEGAL_TRANSITION first and prove nothing about self-reference — DEF-008)
+
+### restored
+ledger verify (restored)      -> exit 0
+[ledger] VERIFY OK — no tampering, drift, or stale evidence
+
+### controlled diff contains ONLY this initiative
+ M .prettierignore
+ M docs/verification/RULESETS.md
+ M package.json
+ M pnpm-lock.yaml
+?? docs/verification/CI-VERIFY-EXECUTION-LEDGER.md
+?? docs/verification/ci-verify-ledger.json
+?? docs/verification/ci-verify-ledger.sha256
+?? docs/verification/evidence/
+?? scripts/ci/
+unrelated pre-existing working-tree entries (untouched): 27

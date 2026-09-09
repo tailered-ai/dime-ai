@@ -1,0 +1,314 @@
+{
+  "provisioning": {
+    "node-deps": true,
+    "playwright-install": true,
+    "uv-sync": true,
+    "pip-install": true
+  },
+  "tools": {
+    "semgrep": true,
+    "zizmor": true,
+    "gitleaks": true,
+    "osv-scanner": true,
+    "docker": false,
+    "trivy": false,
+    "playwright-browsers": true
+  },
+  "counts": {
+    "LOCAL": 7,
+    "LOCAL+TOOL": 5,
+    "NOT_LOCALLY_EXECUTABLE(RUNTIME_UNAVAILABLE)": 2,
+    "NOT_LOCALLY_EXECUTABLE(ACTION_SEMANTICS_UNREPRODUCED)": 1,
+    "NOT_LOCALLY_EXECUTABLE(SECRET_BOUND)": 1
+  },
+  "rows": [
+    {
+      "gate_id": ".github/workflows/01-pr-proof-contract.yml#format-check",
+      "required": false,
+      "graduating": false,
+      "execution_class": "LOCAL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        4
+      ],
+      "provisioning_steps": [
+        3
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "required": true,
+      "graduating": false,
+      "execution_class": "LOCAL+TOOL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        4,
+        6,
+        7,
+        8
+      ],
+      "provisioning_steps": [
+        3,
+        5
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/03-semgrep.yml#advisory",
+      "required": false,
+      "graduating": false,
+      "execution_class": "LOCAL+TOOL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        2
+      ],
+      "provisioning_steps": [
+        1
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/03-semgrep.yml#blocking",
+      "required": false,
+      "graduating": true,
+      "execution_class": "LOCAL+TOOL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        2
+      ],
+      "provisioning_steps": [
+        1
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/05-workflow-security.yml#zizmor",
+      "required": true,
+      "graduating": false,
+      "execution_class": "LOCAL+TOOL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        2,
+        4
+      ],
+      "provisioning_steps": [
+        1
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/08-contract-and-data-integrity.yml#contracts",
+      "required": true,
+      "graduating": false,
+      "execution_class": "LOCAL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "provisioning_steps": [
+        3
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/09-artifact-build-and-smoke.yml#artifact",
+      "required": false,
+      "graduating": true,
+      "execution_class": "NOT_LOCALLY_EXECUTABLE",
+      "reason_code": "RUNTIME_UNAVAILABLE",
+      "reason": "required tool(s) unavailable: docker, trivy",
+      "contract_cwd": null,
+      "detector_steps": [
+        1,
+        7,
+        8,
+        9,
+        10
+      ],
+      "provisioning_steps": [],
+      "secret_sites": 0,
+      "ci_authoritative": true
+    },
+    {
+      "gate_id": ".github/workflows/10-ai-eval-critical.yml#deterministic",
+      "required": true,
+      "graduating": false,
+      "execution_class": "LOCAL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "provisioning_steps": [
+        3
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/12-nightly-verification.yml#full-container-scan",
+      "required": false,
+      "graduating": false,
+      "execution_class": "NOT_LOCALLY_EXECUTABLE",
+      "reason_code": "RUNTIME_UNAVAILABLE",
+      "reason": "required tool(s) unavailable: docker, trivy",
+      "contract_cwd": null,
+      "detector_steps": [
+        1
+      ],
+      "provisioning_steps": [],
+      "secret_sites": 0,
+      "ci_authoritative": true
+    },
+    {
+      "gate_id": ".github/workflows/12-nightly-verification.yml#full-osv",
+      "required": false,
+      "graduating": false,
+      "execution_class": "NOT_LOCALLY_EXECUTABLE",
+      "reason_code": "ACTION_SEMANTICS_UNREPRODUCED",
+      "reason": "the job has no `run:` detector step; its verdict comes from a marketplace action, and no faithful local adapter is registered",
+      "contract_cwd": null,
+      "detector_steps": [],
+      "provisioning_steps": [
+        1
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": true
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#build",
+      "required": false,
+      "graduating": false,
+      "execution_class": "LOCAL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        4,
+        5,
+        6
+      ],
+      "provisioning_steps": [
+        3
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#security-audit",
+      "required": true,
+      "graduating": false,
+      "execution_class": "LOCAL+TOOL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        2,
+        4
+      ],
+      "provisioning_steps": [
+        3
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#typecheck",
+      "required": true,
+      "graduating": false,
+      "execution_class": "LOCAL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        4,
+        5
+      ],
+      "provisioning_steps": [
+        3
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/dime-llm-validation.yml#validate",
+      "required": false,
+      "graduating": false,
+      "execution_class": "LOCAL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": "ml/dime-1.0",
+      "detector_steps": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "provisioning_steps": [
+        3
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/edge-arming-gate.yml#validate",
+      "required": false,
+      "graduating": false,
+      "execution_class": "LOCAL",
+      "reason_code": null,
+      "reason": null,
+      "contract_cwd": null,
+      "detector_steps": [
+        4,
+        5
+      ],
+      "provisioning_steps": [
+        3
+      ],
+      "secret_sites": 0,
+      "ci_authoritative": false
+    },
+    {
+      "gate_id": ".github/workflows/gitleaks.yml#gitleaks",
+      "required": true,
+      "graduating": false,
+      "execution_class": "NOT_LOCALLY_EXECUTABLE",
+      "reason_code": "SECRET_BOUND",
+      "reason": "job references repository secrets at 1 site(s): ${{ secrets.GITHUB_TOKEN }}",
+      "contract_cwd": null,
+      "detector_steps": [],
+      "provisioning_steps": [],
+      "secret_sites": 1,
+      "ci_authoritative": true
+    }
+  ]
+}

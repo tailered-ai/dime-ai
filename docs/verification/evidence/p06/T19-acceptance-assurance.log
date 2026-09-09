@@ -1,0 +1,12 @@
+[assurance] candidate provisioned: true
+[assurance] p06-ai-eval-knowledge-corrupt          PROVEN
+[assurance] p06-contracts-migration-mutation       PROVEN
+[assurance] p06-gitleaks-canary                    PROVEN
+[assurance] p06-proof-failing-test                 PROVEN
+[assurance] p06-security-audit-unpinned-action     PROVEN
+[assurance] p06-semgrep-blocking-session-secret    PROVEN
+[assurance] p06-typecheck-ts2322                   PROVEN
+[assurance] p06-zizmor-template-injection          PROVEN
+
+[assurance] proofs: 8/8 PROVEN
+[assurance] mandatory local coverage: 6/6

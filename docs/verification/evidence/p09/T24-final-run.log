@@ -1,0 +1,11 @@
+[p09] candidate 6aabf13c8fb7 on base 249bf314c131
+[p09] provisioned in 9847ms
+[p09] T02 deploy-order: PASS
+[p09] T03 schema-type-drift: PASS 
+[p09] T04 knip: PASS
+[p09] building client for a11y…
+[p09] T05 a11y: PASS (0 serious/critical)
+[p09] NEG01 synthetic migration reddens: true
+[p09] NEG02 type mismatch reddens: true
+[p09] NEG03 dead export reddens: true
+[p09] NEG04 a11y poison reddens: true

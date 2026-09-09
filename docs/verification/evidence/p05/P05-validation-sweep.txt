@@ -1,0 +1,51 @@
+P05 validation sweep — every command with its DIRECT exit code
+(2026-08-10, branch feat/ci-verify-control-plane, HEAD 8946b13b)
+
+P05 suite                       npx vitest run scripts/ci/selftest/p05.test.ts   -> exit 0  (43/43)
+P05 suite repeat runs           3 independent executions                          -> exit 0,0,0 (43/43 each; zero flakes)
+Full scripts surface            npx vitest run scripts/                           -> exit 0  (36 files, 630/630:
+                                                                                     PB 35, P01 20, P02 31, P03 56, P04 52, P05 43 + tooling)
+TypeScript                      NODE_OPTIONS=--max-old-space-size=6144 tsc --noEmit -> exit 0
+Prettier                        npx prettier --check scripts/ci/                  -> exit 0
+Ledger verify                   node scripts/ci/ledger.mjs verify                 -> exit 0
+Contract conformance            contract-conformance.mjs verify                   -> exit 0  (40 workflows, 51 checks, 9 required)
+CONTRACT.md doc conformance     contract-conformance.mjs doc                      -> exit 0
+P02 YAML isolation audit        contract-conformance.mjs audit                    -> exit 0
+Registry build + fidelity       node scripts/ci/registry.mjs                      -> exit 0  (47 PARITY entries)
+P03 audits (AUD01+AUD02)        node scripts/ci/p03-audit.mjs                     -> exit 0
+P01 provenance audit            node scripts/ci/provenance-audit.mjs              -> exit 0
+P04 audits (AUD01-03)           node scripts/ci/p04-audit.mjs <scratch>           -> exit 0
+P05 audits (AUD01+AUD02)        node scripts/ci/selftest/p05-audit.mjs            -> exit 0
+Assurance run (artifact)        node scripts/ci/selftest/assurance.mjs <evidence> -> exit 0
+Actions security contract       node scripts/check-github-actions-security.mjs    -> exit 0
+Federation docs                 node scripts/check-federation-docs.mjs            -> exit 0
+Frozen install (established)    pnpm install --frozen-lockfile --ignore-scripts   -> exit 0
+  (bare --frozen-lockfile still fails on the PRE-EXISTING macOS PEP 668
+   postinstall issue; P05 adds zero dependencies — package.json and
+   pnpm-lock.yaml untouched — so this is not a P05 regression.)
+
+ASSURANCE outcome
+  3 real gates PROVEN     typecheck-ts2322 / format-check-violation / drizzle-meta-stray
+  1 FINDING_CONFIRMED     workflow-template-injection (DEF-023: gate cannot reject)
+  coverage over 47 PARITY entries:
+    PROVEN 3 | UNPROVEN 1 (cannot_reject) | NOT_YET_MANDATORY 19 | CI_ONLY 20 | NOT_LOCALLY_EXECUTABLE 4
+  blocking gates: 0 (graduated set is empty by design)
+  assurance.json sha256 recorded in assurance.json.sha256; logical section carries its own hash
+
+Determinism
+  Poison/control cycles repeated across the suite's own TEST04 and three
+  independent suite executions: identical verdict, expected gate, expected
+  status, patch hash, poison status/exit code, control status, and changed-path
+  set every time. Zero flaky fixtures; no gate proven from a flaky cycle.
+
+Residue (bounded, delta-based per DEF-013)
+  marked processes         0
+  lane locks               0
+  orphaned candidates      0 after the startup sweep (DEF-026)
+  .ci-verify/runs          2 dirs, both PRE-EXISTING registered worktrees from
+                           earlier sessions — offered to the sweep and REFUSED
+                           with "registered git worktree - live" (ownership law)
+  poison in developer tree 0 (server/, .github/workflows/, drizzle/meta/ all clean)
+
+Unrelated working tree: 25 entries at start, 25 at end, fingerprints
+byte-IDENTICAL (unrelated-fingerprint-{start,end}.txt).

@@ -1,0 +1,112 @@
+[
+  {
+    "iteration": 1,
+    "run_id": "2026-08-10T11-03-50-887Z-93513-14e0a5a38f0f",
+    "exit_code": 130,
+    "nonzero_exit": true,
+    "children_dead": true,
+    "marked_processes": 0,
+    "lane_locks": 0,
+    "tmp_dir_exists": false,
+    "manifest_exists": false
+  },
+  {
+    "iteration": 2,
+    "run_id": "2026-08-10T11-03-51-106Z-93567-851817825d4c",
+    "exit_code": 130,
+    "nonzero_exit": true,
+    "children_dead": true,
+    "marked_processes": 0,
+    "lane_locks": 0,
+    "tmp_dir_exists": false,
+    "manifest_exists": false
+  },
+  {
+    "iteration": 3,
+    "run_id": "2026-08-10T11-03-51-336Z-93621-d6e50eebb496",
+    "exit_code": 130,
+    "nonzero_exit": true,
+    "children_dead": true,
+    "marked_processes": 0,
+    "lane_locks": 0,
+    "tmp_dir_exists": false,
+    "manifest_exists": false
+  },
+  {
+    "iteration": 4,
+    "run_id": "2026-08-10T11-03-51-552Z-93675-01a775318319",
+    "exit_code": 130,
+    "nonzero_exit": true,
+    "children_dead": true,
+    "marked_processes": 0,
+    "lane_locks": 0,
+    "tmp_dir_exists": false,
+    "manifest_exists": false
+  },
+  {
+    "iteration": 5,
+    "run_id": "2026-08-10T11-03-51-770Z-93736-ccbe42a61246",
+    "exit_code": 130,
+    "nonzero_exit": true,
+    "children_dead": true,
+    "marked_processes": 0,
+    "lane_locks": 0,
+    "tmp_dir_exists": false,
+    "manifest_exists": false
+  },
+  {
+    "iteration": 6,
+    "run_id": "2026-08-10T11-03-51-978Z-93790-6bb7943b18a1",
+    "exit_code": 130,
+    "nonzero_exit": true,
+    "children_dead": true,
+    "marked_processes": 0,
+    "lane_locks": 0,
+    "tmp_dir_exists": false,
+    "manifest_exists": false
+  },
+  {
+    "iteration": 7,
+    "run_id": "2026-08-10T11-03-52-197Z-93844-208c4624abc2",
+    "exit_code": 130,
+    "nonzero_exit": true,
+    "children_dead": true,
+    "marked_processes": 0,
+    "lane_locks": 0,
+    "tmp_dir_exists": false,
+    "manifest_exists": false
+  },
+  {
+    "iteration": 8,
+    "run_id": "2026-08-10T11-03-52-409Z-93898-d6c454a5cad6",
+    "exit_code": 130,
+    "nonzero_exit": true,
+    "children_dead": true,
+    "marked_processes": 0,
+    "lane_locks": 0,
+    "tmp_dir_exists": false,
+    "manifest_exists": false
+  },
+  {
+    "iteration": 9,
+    "run_id": "2026-08-10T11-03-52-675Z-93952-43b9db6857fc",
+    "exit_code": 130,
+    "nonzero_exit": true,
+    "children_dead": true,
+    "marked_processes": 0,
+    "lane_locks": 0,
+    "tmp_dir_exists": false,
+    "manifest_exists": false
+  },
+  {
+    "iteration": 10,
+    "run_id": "2026-08-10T11-03-52-905Z-94006-c387ca54aa33",
+    "exit_code": 130,
+    "nonzero_exit": true,
+    "children_dead": true,
+    "marked_processes": 0,
+    "lane_locks": 0,
+    "tmp_dir_exists": false,
+    "manifest_exists": false
+  }
+]

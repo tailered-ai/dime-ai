@@ -1,0 +1,2 @@
+[ledger] VERIFY OK — no tampering, drift, or stale evidence
+verify_exit=0

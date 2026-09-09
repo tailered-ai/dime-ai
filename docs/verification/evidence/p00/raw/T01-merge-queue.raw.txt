@@ -1,0 +1,17 @@
+### A. rulesets list
+[{"id":18701573,"name":"main-protection","target":"branch","source_type":"Repository","source":"tailered-ai/dime-ai","enforcement":"active","node_id":"RRS_lACqUmVwb3NpdG9yec5NJK4XzgEdXQU","_links":{"self":{"href":"https://api.github.com/repos/tailered-ai/dime-ai/rulesets/18701573"},"html":{"href":"https://github.com/tailered-ai/dime-ai/rules/18701573"}},"created_at":"2026-07-08T22:45:21.546-07:00","updated_at":"2026-08-05T15:09:27.083-07:00"}]exitA=0
+### B. ruleset 18701573 rule types
+deletion
+non_fast_forward
+pull_request
+required_status_checks
+exitB=0
+### C. GraphQL mergeQueue on main
+{"errors":[{"path":["query","repository","mergeQueue","configuration","minimumGroupSize"],"extensions":{"code":"undefinedField","typeName":"MergeQueueConfiguration","fieldName":"minimumGroupSize"},"locations":[{"line":1,"column":134}],"message":"Field 'minimumGroupSize' doesn't exist on type 'MergeQueueConfiguration'"},{"path":["query","repository","mergeQueue","configuration","maximumGroupSize"],"extensions":{"code":"undefinedField","typeName":"MergeQueueConfiguration","fieldName":"maximumGroupSize"},"locations":[{"line":1,"column":151}],"message":"Field 'maximumGroupSize' doesn't exist on type 'MergeQueueConfiguration'"}]}gh: Field 'minimumGroupSize' doesn't exist on type 'MergeQueueConfiguration'
+Field 'maximumGroupSize' doesn't exist on type 'MergeQueueConfiguration'
+exitC=1
+### C2. GraphQL mergeQueue (minimal fields) — null means NOT enabled
+{"data":{"repository":{"mergeQueue":null}}}exitC2=0
+
+### D. full ruleset 18701573 (rules + parameters)
+{"id":18701573,"name":"main-protection","target":"branch","source_type":"Repository","source":"tailered-ai/dime-ai","enforcement":"active","conditions":{"ref_name":{"exclude":[],"include":["~DEFAULT_BRANCH","refs/heads/main"]}},"rules":[{"type":"deletion"},{"type":"non_fast_forward"},{"type":"pull_request","parameters":{"required_approving_review_count":0,"dismiss_stale_reviews_on_push":false,"required_reviewers":[],"require_code_owner_review":false,"require_last_push_approval":false,"required_review_thread_resolution":false,"allowed_merge_methods":["merge","squash","rebase"]}},{"type":"required_status_checks","parameters":{"strict_required_status_checks_policy":true,"do_not_enforce_on_create":false,"required_status_checks":[{"context":"Security Audit","integration_id":15368},{"context":"TypeScript Check","integration_id":15368},{"context":"Vitest","integration_id":15368},{"context":"Secret Scan (gitleaks)","integration_id":15368},{"context":"01-pr-proof-contract","integration_id":15368},{"context":"05-workflow-security","integration_id":15368},{"context":"06-dependency-review","integration_id":15368},{"context":"08-contract-and-data-integrity","integration_id":15368},{"context":"10-ai-eval-critical","integration_id":15368}]}}],"node_id":"RRS_lACqUmVwb3NpdG9yec5NJK4XzgEdXQU","created_at":"2026-07-08T22:45:21.546-07:00","updated_at":"2026-08-05T15:09:27.083-07:00","bypass_actors":[],"current_user_can_bypass":"never","_links":{"self":{"href":"https://api.github.com/repos/tailered-ai/dime-ai/rulesets/18701573"},"html":{"href":"https://github.com/tailered-ai/dime-ai/rules/18701573"}}}exitD=0

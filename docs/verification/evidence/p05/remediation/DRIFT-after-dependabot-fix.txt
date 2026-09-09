@@ -1,0 +1,2 @@
+[conformance] FAIL
+  - CONTRACT_DRIFT: .github/workflows/auto-merge-dependabot.yml changed without contract regeneration (contract ec503bf7147b, actual cc1fdaa050d8)

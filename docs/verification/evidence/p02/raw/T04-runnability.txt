@@ -1,0 +1,20 @@
+P02.T04 — runnability classification after DEF-017
+
+required   Security Audit                  LOCAL+TOOL  tools=osv-scanner  nonGating=1
+required   TypeScript Check                LOCAL         nonGating=1
+required   Vitest                          LOCAL+TOOL  tools=playwright-browsers  nonGating=1
+required   Secret Scan (gitleaks)          LOCAL+TOOL  tools=gitleaks  nonGating=0
+required   01-pr-proof-contract            LOCAL+TOOL  tools=playwright-browsers  nonGating=1
+required   05-workflow-security            CI-ONLY     reason=github/codeql-action/upload-sarif: SARIF upload targets the   nonGating=0
+required   06-dependency-review            CI-ONLY     reason=actions/dependency-review-action: compares PR dependency gra  nonGating=0
+required   08-contract-and-data-integrity  LOCAL         nonGating=0
+required   10-ai-eval-critical             LOCAL         nonGating=0
+graduating 02-codeql                       CI-ONLY     reason=github/codeql-action/init: CodeQL database creation is a Git  nonGating=0
+graduating 03-semgrep-blocking             LOCAL         nonGating=0
+graduating 07-coverage-patch               LOCAL         nonGating=0
+graduating 09-artifact-build-and-smoke     CI-ONLY     tools=docker,trivyreason=github/codeql-action/upload-sarif: SARIF upload targets the   nonGating=1
+graduating 11-artifact-attestation         CI-ONLY     tools=dockerreason=actions/attest-build-provenance: requires GitHub OIDC proven  nonGating=0
+
+summary: {"LOCAL":20,"LOCAL+TOOL":7,"CI-ONLY":24}
+total checks: 51 | dynamic contexts: 4
+steps represented: 257 (census step_count: 257)

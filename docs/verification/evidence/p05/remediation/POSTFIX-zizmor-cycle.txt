@@ -1,0 +1,6 @@
+
+=== workflow-template-injection [5.0s] verdict=BROKEN_GATE CONTROL_RED
+detail: control leg FAIL; fixture declares PASS
+poison: {"status":"FAIL","reason":"EXIT_14","exit_code":14,"run_dir":"/Users/danielwalker/src/ai-sports-betting-dime-ai/.ci-verify/assurance-scratch/exec/workflow-template-injection/poison/2026-08-10T12-44-52-505Z-88141-8a51c0608731","stdout_sha256":"10e05f25ec9841d0260bd6464eead08914309ef2553cd68cd99cc42c0f00c840","stderr_sha256":"486f9a204255b52cd6b6b1c7bd7d92046fbc7f5dc70f5380a61d5b7770e19bbf"}
+control: {"status":"FAIL","reason":"EXIT_14","exit_code":14,"run_dir":"/Users/danielwalker/src/ai-sports-betting-dime-ai/.ci-verify/assurance-scratch/exec/workflow-template-injection/control/2026-08-10T12-44-53-082Z-88141-cc1c3f4b93ca"}
+reason_match: [{"source":"stdout","artifact_path":null,"regex":"error\\[template-injection\\]","matched":true},{"source":"stdout","artifact_path":null,"regex":"p05-poison-template-injection\\.yml","matched":true}]

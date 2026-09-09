@@ -1,0 +1,30 @@
+
+ RUN  v4.1.10 /Users/danielwalker/src/ai-sports-betting-dime-ai
+
+ ✓ scripts/ci/ledger.test.ts > PB.TEST01 — blueprint IDs are seeded exactly once > seeds one ledger unit per declared blueprint ID 5ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST01 — blueprint IDs are seeded exactly once > declares no duplicate ID anywhere in the blueprint 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST01 — blueprint IDs are seeded exactly once > seeds every unit at NOT_STARTED with zero attempts and no evidence 8ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST01 — blueprint IDs are seeded exactly once > derives a known kind for every declared ID 11ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST01 — blueprint IDs are seeded exactly once > covers every phase from P-BOOT through P10 3ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST02 — rendered markdown conforms exactly to the JSON > regenerates the on-disk markdown byte-for-byte from the on-disk JSON 10ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST02 — rendered markdown conforms exactly to the JSON > pins the on-disk JSON with a matching sha256 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST02 — rendered markdown conforms exactly to the JSON > renders as a pure function of state — no clock, no environment 24ms
+ ✓ scripts/ci/ledger.test.ts > PB.TEST02 — rendered markdown conforms exactly to the JSON > serializes canonically and stably 6ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG01 — a duplicate blueprint ID FAILS initialization > throws DUPLICATE_UNIT_ID and names the offending id 0ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG01 — a duplicate blueprint ID FAILS initialization > refuses to build a ledger at all when a duplicate exists 0ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG01 — a duplicate blueprint ID FAILS initialization > detects a duplicated PHASE id, not only duplicated units 0ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG02 — a declared ID missing from the seed FAILS initialization > throws SEED_INCOMPLETE naming the missing id 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG02 — a declared ID missing from the seed FAILS initialization > throws SEED_INCOMPLETE when the ledger carries an undeclared extra id 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.NEG02 — a declared ID missing from the seed FAILS initialization > accepts a complete seed 5ms
+ ✓ scripts/ci/ledger.test.ts > PB.T01 exit requirement — PASS is refused without verifiable evidence > refuses PASS when no evidence is declared 7ms
+ ✓ scripts/ci/ledger.test.ts > PB.T01 exit requirement — PASS is refused without verifiable evidence > refuses PASS when a declared evidence path does not exist 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.T01 exit requirement — PASS is refused without verifiable evidence > refuses a jump from NOT_STARTED straight to PASS 0ms
+ ✓ scripts/ci/ledger.test.ts > PB.T01 exit requirement — PASS is refused without verifiable evidence > refuses evidence pointing at a live control-plane artifact (DEF-001) 1ms
+ ✓ scripts/ci/ledger.test.ts > PB.T01 exit requirement — PASS is refused without verifiable evidence > accepts PASS with real, non-empty, hashable evidence 7ms
+
+ Test Files  1 passed (1)
+      Tests  20 passed (20)
+   Start at  01:18:19
+   Duration  358ms (transform 82ms, setup 0ms, import 97ms, tests 94ms, environment 0ms)
+
+exit=0

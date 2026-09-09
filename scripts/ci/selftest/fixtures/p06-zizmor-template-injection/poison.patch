@@ -1,0 +1,17 @@
+diff --git a/.github/workflows/zz-p06-zizmor-poison.yml b/.github/workflows/zz-p06-zizmor-poison.yml
+new file mode 100644
+index 0000000000000000000000000000000000000000..dddddddddddddddddddddddddddddddddddddddd
+--- /dev/null
++++ b/.github/workflows/zz-p06-zizmor-poison.yml
+@@ -0,0 +1,11 @@
++name: p06 zizmor assurance poison
++on:
++  issues:
++    types: [opened]
++permissions:
++  contents: read
++jobs:
++  poison:
++    runs-on: ubuntu-latest
++    steps:
++      - run: echo "issue title is ${{ github.event.issue.title }}"

@@ -22,9 +22,13 @@ jobs:
     name: Auto-merge Dependabot patch PRs
     runs-on: ubuntu-latest
 
-    # Only run for Dependabot PRs — skip all human-authored PRs
-    # actor alone is spoofable via re-runs; the PR author check is not
-    if: github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'
+    # Only run for Dependabot PRs — skip all human-authored PRs.
+    # The PR author is the authoritative identity here. `github.actor` was
+    # also checked, but it is spoofable via re-runs (it becomes whoever
+    # re-ran the workflow) and was redundant against this clause, so it is
+    # not a security control — zizmor's bot-conditions audit flagged it as
+    # HIGH. Removed; the authoritative check below is unchanged.
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
 
     steps:
       # ── Step 1: Fetch Dependabot metadata ─────────────────────────────────

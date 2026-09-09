@@ -1,0 +1,18 @@
+DEF-076 direct retest — wrapper de-nested to direct node entrypoints
+date: 2026-08-13T14:36:12Z
+context: background task shell — the exact context that reproduced the corepack refusal twice at ecffb186b (inner pnpm re-resolved to 11.19.0, exit 1 with zero tools executed)
+
+== retest (negative space): wrapper on a dirty tree must REACH plan.mjs and refuse honestly ==
+true wrapper exit: 2 (plan.mjs refusal exit 2 propagated — pre-fix failure was exit 1 BEFORE any tool ran)
+
+
+> ai-sports-betting@1.0.0 ci:verify:deploy /Users/danielwalker/src/ai-sports-betting-dime-ai
+> node scripts/ci/deploy/plan.mjs && node scripts/ci/deploy/rehearse.mjs && node scripts/ci/deploy/readiness.mjs issue && node scripts/ci/deploy/readiness.mjs verify
+
+[deploy:plan] REFUSED: DIRTY_TRACKED_TREE
+[deploy:plan] REFUSED head=ecffb186beb1 base=249bf314c131 -> /Users/danielwalker/src/ai-sports-betting-dime-ai/.ci-verify/deploy/plan.json
+ ELIFECYCLE  Command failed with exit code 2.
+
+== verdict ==
+wrapper executes the direct node chain (banner above shows no nested pnpm); the corepack class is eliminated by construction — no inner pnpm resolution remains.
+positive full-chain retest (clean tree, corrective head) recorded by the post-commit P9 chain run.

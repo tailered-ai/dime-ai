@@ -1,0 +1,44 @@
+{
+  "schema": "ci-verify/freeze-baseline/1.0.0",
+  "captured_at": "2026-08-10T23:02:43.824746+00:00",
+  "repository": "tailered-ai/dime-ai",
+  "branch": "feat/ci-verify-control-plane",
+  "feature_head": "ff5d3a48fdd0271f7b18d51bb048e89ed465f601",
+  "origin_main_at_capture": "5a9b657579c62df004b47980dd14ead7108d7577",
+  "ruleset": {
+    "id": 18701573,
+    "name": "main-protection",
+    "target": "branch",
+    "enforcement": "active",
+    "bypass_actors": [],
+    "rule_types": [
+      "deletion",
+      "non_fast_forward",
+      "pull_request",
+      "required_status_checks"
+    ],
+    "required_contexts": [
+      "01-pr-proof-contract",
+      "05-workflow-security",
+      "06-dependency-review",
+      "08-contract-and-data-integrity",
+      "10-ai-eval-critical",
+      "Secret Scan (gitleaks)",
+      "Security Audit",
+      "TypeScript Check",
+      "Vitest"
+    ]
+  },
+  "classic_branch_protection": "absent (404 \u2014 governance is the ruleset)",
+  "repo_merge_settings": {
+    "allow_auto_merge": false,
+    "allow_merge_commit": true,
+    "allow_rebase_merge": true,
+    "allow_squash_merge": true,
+    "delete_branch_on_merge": false
+  },
+  "freeze_mechanism_selected": "coordinated human/agent merge hold (section 1 option 4)",
+  "freeze_mechanism_rationale": "allow_auto_merge is false and the ruleset has zero bypass actors, so main advances only by deliberate human/agent merge of a PR that already passed 9 required contexts. There is no automated merger to pause. Options 1-3 would require creating or altering a repository ruleset, which both the standing operator constraints and section 1 forbid; section 1 directs a coordinated merge hold instead of inventing a settings change.",
+  "settings_modified_by_this_work": [],
+  "restoration_required": "none \u2014 no governance object is altered; the hold is operational and ends when the operator resumes merging"
+}

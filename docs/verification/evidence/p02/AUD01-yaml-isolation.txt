@@ -1,0 +1,13 @@
+[yaml-audit] scanned 11 file(s); allowlisted 2
+[yaml-audit] allowlisted scripts/ci/contract-extract.mjs — P02 extraction is the designated and only YAML-reading boundary; it produces the frozen contract that every runtime stage consumes.
+[yaml-audit] allowlisted scripts/ci/contract-conformance.mjs — Names the workflow directory to re-derive source hashes. It reads workflow BYTES for hashing and never parses YAML.
+[yaml-audit] note (test) scripts/ci/contract.test.ts:37 yaml-import
+[yaml-audit] note (test) scripts/ci/contract.test.ts:565 yaml-import
+[yaml-audit] note (test) scripts/ci/contract.test.ts:53 workflow-glob
+[yaml-audit] note (test) scripts/ci/contract.test.ts:54 workflow-glob
+[yaml-audit] note (test) scripts/ci/contract.test.ts:183 workflow-glob
+[yaml-audit] note (test) scripts/ci/contract.test.ts:221 workflow-glob
+[yaml-audit] note (test) scripts/ci/contract.test.ts:250 workflow-glob
+[yaml-audit] note (test) scripts/ci/contract.test.ts:286 workflow-glob
+[yaml-audit] PASS — extraction is the only YAML-reading boundary
+AUDIT_EXIT=0

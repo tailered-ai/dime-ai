@@ -1,0 +1,110 @@
+{
+  "schema": "ci-verify/deploy-rehearsal.v1",
+  "started_at": "2026-08-13T09:13:44.646Z",
+  "target": "local-docker",
+  "head_sha": "f1ec886a978856dedd92dfbbe8e553ea2b7e3152",
+  "base_sha": "249bf314c131e0f34aa0f1aae393411e4e8c8d55",
+  "idempotency_key": "5bf57c237e3884ffe3df8d04d61f9cfbdd8bcd20a473eb72d9effeea6f85399d",
+  "marker": "68df34610ff2",
+  "mode": "FULL",
+  "steps": {
+    "images": {
+      "prior": {
+        "tag": "cvdep-prior:249bf314c131",
+        "image_id": "sha256:2c85fb8610d6f3bf7de436d0d6f243be7d1c34a381c118534219a17243c146cd",
+        "cached": true
+      },
+      "candidate": {
+        "tag": "cvdep-cand:f1ec886a9788",
+        "image_id": "sha256:fdb9b9b836eb82dbe6b176a56922c958242085271e25a896e3c6b83c2c331d8a",
+        "cached": false
+      }
+    },
+    "migrations": {
+      "ok": true,
+      "tail": [
+        "[reconciled-migrate] applying 0133_account_lockout",
+        "[reconciled-migrate] applying 0134_widen_unit_probability_precision",
+        "[reconciled-migrate] PASS: journal and canonical table reached 0134_widen_unit_probability_precision"
+      ],
+      "stderr_tail": [
+        "[WARN] The \"pnpm\" field in package.json is no longer read by pnpm. The following keys were ignored: \"pnpm.onlyBuiltDependencies\", \"pnpm.patchedDependencies\", \"pnpm.overrides\", \"pnpm.auditConfig\". See https://pnpm.io/settings for the new home of each setting."
+      ]
+    },
+    "prior_deploy": {
+      "ok": true,
+      "health": true,
+      "serving_commit": "249bf314c131e0f34aa0f1aae393411e4e8c8d55"
+    },
+    "prior_shutdown": {
+      "stopped": true,
+      "exit_code": 137,
+      "contract_met": false,
+      "note": "prior artifact (protected-main head) lacks DEF-063 graceful shutdown — recorded production behavior, repaired by the candidate"
+    },
+    "candidate_health": {
+      "ok": true
+    },
+    "smoke": {
+      "ok": true,
+      "true_exit": 0
+    },
+    "stability": {
+      "running": true,
+      "restarts": 0,
+      "secret_leak": false
+    },
+    "candidate_shutdown": {
+      "stopped": true,
+      "exit_code": 0
+    },
+    "candidate_restart": {
+      "ok": true
+    },
+    "controlled_failure": {
+      "killed": true,
+      "exit_code": 137
+    },
+    "rollback": {
+      "ok": true,
+      "health": true,
+      "serving_commit": "249bf314c131e0f34aa0f1aae393411e4e8c8d55",
+      "artifact_restored": true
+    },
+    "rollback_shutdown": {
+      "stopped": true,
+      "exit_code": 137,
+      "contract_met": false
+    },
+    "teardown": {
+      "removed_containers": 4,
+      "residue": {
+        "new_containers": [],
+        "new_volumes": []
+      },
+      "zero_residue": true
+    }
+  },
+  "deployments": [
+    {
+      "deployment_id": "6fc9098a201f91d4b3e1adaa20a40e2d92ea5c01f47d8cd4ca7f44552a8752ce",
+      "role": "prior",
+      "image_id": "sha256:2c85fb8610d6f3bf7de436d0d6f243be7d1c34a381c118534219a17243c146cd",
+      "commit": "249bf314c131e0f34aa0f1aae393411e4e8c8d55"
+    },
+    {
+      "deployment_id": "713c5abe5bce31e96623fb56adf0c12355327ddf3a08b37d4f97566fff71db7b",
+      "role": "candidate",
+      "image_id": "sha256:fdb9b9b836eb82dbe6b176a56922c958242085271e25a896e3c6b83c2c331d8a",
+      "commit": "f1ec886a978856dedd92dfbbe8e553ea2b7e3152"
+    },
+    {
+      "deployment_id": "388c68351549dc0e1013ce22ad477cfcb7ff42b3fa8fe4f5a341eeeb5b23544a",
+      "role": "rollback",
+      "image_id": "sha256:2c85fb8610d6f3bf7de436d0d6f243be7d1c34a381c118534219a17243c146cd",
+      "commit": "249bf314c131e0f34aa0f1aae393411e4e8c8d55"
+    }
+  ],
+  "finished_at": "2026-08-13T09:23:59.045Z",
+  "verdict": "REHEARSED"
+}

@@ -1,0 +1,36 @@
+P01.NEG02 — LIVE dirty-tree exercise against the real repository
+pwd=/Users/danielwalker/src/ai-sports-betting-dime-ai branch=feat/ci-verify-control-plane HEAD=f9a35aa281c5ca9d209c7c152cb94da38d80274b
+Exit codes captured directly (DEF-007); assertions state results (DEF-008);
+resource checks are MEASURED DELTAS, not invented absolutes (DEF-013).
+
+### baseline (measured, not assumed)
+worktree registrations = 39  (pre-existing, from earlier sessions on other branches)
+ci-verify run dirs     = 0
+stash entries          = 1  (stash@{0} dated 2026-08-06, predates P01)
+working-tree entries   = 32
+
+### A. bare/default authoritative run against the dirty tree
+exit=2  (expected 2 = BLOCKED)
+[snapshot] BLOCKED(DIRTY_TREE)
+detail: mode=default entry_count=32 tracked_modified=6 untracked=26
+stdout bytes=0 -> certificate emitted = NO
+delta worktrees=0  runs=0  stash=0
+
+### B. explicit --committed mode certifies committed HEAD only
+exit=0  (expected 0)
+head_sha           = f9a35aa281c5ca9d209c7c152cb94da38d80274b
+base_sha           = 4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6
+merge_tree_sha     = 39a6aa38a26fee7b77bec776b4852a0fd36c2fa7
+merge_commit_sha   = 2101ad875cf26549d6035dd4726416c757351d52
+parent_order       = ["4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6","f9a35aa281c5ca9d209c7c152cb94da38d80274b"]
+parents_effective  = ["4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6","f9a35aa281c5ca9d209c7c152cb94da38d80274b"]
+mode/authoritative = committed / true
+dirty_working_tree = true (tracked_modified=6, untracked=26)
+identity_digest    = 6d32d9466051ff8d040d7f00ad1b873f7a7b6246e1afae106a9a17386be73b62
+head_sha == committed HEAD : true
+
+### C. deltas after the authoritative run — nothing leaked, nothing mutated
+worktree registrations delta = 0   (0 = run worktree disposed)
+ci-verify run dirs delta     = 0
+stash entries delta          = 0   (0 = nothing stashed)
+working-tree entries delta   = 0

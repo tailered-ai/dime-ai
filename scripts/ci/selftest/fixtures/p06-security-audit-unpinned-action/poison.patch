@@ -1,0 +1,15 @@
+diff --git a/.github/workflows/zz-p06-assurance-poison.yml b/.github/workflows/zz-p06-assurance-poison.yml
+new file mode 100644
+index 0000000000000000000000000000000000000000..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+--- /dev/null
++++ b/.github/workflows/zz-p06-assurance-poison.yml
+@@ -0,0 +1,9 @@
++name: p06 assurance poison
++on: workflow_dispatch
++permissions:
++  contents: read
++jobs:
++  poison:
++    runs-on: ubuntu-latest
++    steps:
++      - uses: actions/checkout@v4

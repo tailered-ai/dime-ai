@@ -1,0 +1,10 @@
+diff --git a/server/p05-poison-format.ts b/server/p05-poison-format.ts
+new file mode 100644
+index 000000000..80562381b
+--- /dev/null
++++ b/server/p05-poison-format.ts
+@@ -0,0 +1,4 @@
++// P05 ASSURANCE poison - deliberate formatting violation used to prove
++// the format-check gate can reject. Inert patch bytes only.
++export const p05PoisonFormat   =    {a:1,b:2,
++      c:3};

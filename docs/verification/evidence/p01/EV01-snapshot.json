@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "mode": "committed",
+  "authoritative": true,
+  "identity": {
+    "head_sha": "f9a35aa281c5ca9d209c7c152cb94da38d80274b",
+    "base_sha": "4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6",
+    "merge_tree_sha": "39a6aa38a26fee7b77bec776b4852a0fd36c2fa7",
+    "merge_commit_sha": "2101ad875cf26549d6035dd4726416c757351d52",
+    "parent_order": [
+      "4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6",
+      "f9a35aa281c5ca9d209c7c152cb94da38d80274b"
+    ],
+    "parents_effective": [
+      "4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6",
+      "f9a35aa281c5ca9d209c7c152cb94da38d80274b"
+    ],
+    "degenerate_merge": false,
+    "synthetic_identity": {
+      "author_name": "ci-verify",
+      "author_email": "ci-verify@localhost",
+      "committer_name": "ci-verify",
+      "committer_email": "ci-verify@localhost",
+      "timezone": "+0000",
+      "timestamp_rule": "max(committer_time(base), committer_time(head)) + 1",
+      "message_template": "ci-verify synthetic merge <base_sha> <head_sha>",
+      "parent_order": [
+        "base_sha",
+        "head_sha"
+      ]
+    },
+    "synthetic_timestamp": 1786352243,
+    "synthetic_message": "ci-verify synthetic merge 4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6 f9a35aa281c5ca9d209c7c152cb94da38d80274b"
+  },
+  "identity_digest": "6d32d9466051ff8d040d7f00ad1b873f7a7b6246e1afae106a9a17386be73b62",
+  "observational": {
+    "run_id": "2026-08-10T09-21-55-433Z-2776-0",
+    "resolved_at": "2026-08-10T09:21:57.091Z",
+    "worktree_path": ".ci-verify/runs/2026-08-10T09-21-55-433Z-2776-0/worktree",
+    "git_version": "git version 2.55.0",
+    "base_source": "origin/main",
+    "base_fetched": true,
+    "dirty_working_tree": true,
+    "tracked_modified_count": 6,
+    "untracked_count": 26
+  },
+  "provenance": {
+    "owner": "scripts/ci/snapshot.mjs",
+    "note": "merge_commit_sha is LOCAL provenance only and is NOT expected to equal GitHub's refs/pull/N/merge SHA. Reconciliation compares {head_sha, base_sha, merge_tree_sha, contract_hash}."
+  }
+}

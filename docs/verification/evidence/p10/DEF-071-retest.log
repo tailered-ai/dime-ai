@@ -1,0 +1,25 @@
+DEF-071 direct retest — ledger lease + atomic settlement (Section 9)
+date: 2026-08-13T08:19:52Z
+
+== manual sandbox battery ==
+20 concurrent distinct opens: survivors 20/20, pin_match True, residue none (pre-fix baseline: 1/20)
+duplicate id 2x concurrent: exactly one DEFECT_ID_REUSED refusal (exit 1) pre-mutation, 1 entry
+kill points: before-temp/after-temp/before-replace rolled BACK; after-ledger-replace/after-pin rolled FORWARD; pin consistent at every point; next writer always proceeds; 5 recovery records
+
+== formal matrix (scripts/ci/ledger-lease.test.ts) ==
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  01:19:26
+   Duration  5.67s (transform 14ms, setup 0ms, import 22ms, tests 5.55s, environment 0ms)
+
+
+== dependent suites ==
+ Test Files  2 passed (2)
+      Tests  95 passed (95)
+   Start at  01:19:14
+   Duration  1.36s (transform 236ms, setup 0ms, import 335ms, tests 1.06s, environment 0ms)
+
+
+== governance ==
+AMD-012 authorizes ledger.mjs=d772fc4540ec (mechanism in scripts/ci/ledger-lock.mjs)

@@ -1,0 +1,433 @@
+{
+  "candidate": {
+    "head_sha": "ff5d3a48fdd0271f7b18d51bb048e89ed465f601",
+    "base_sha": "a85fd95f9f828fa51db8bf507624b5b1e52051a7",
+    "merge_commit_sha": "a2226f3766c65d960ac3cea630eee883336e3537",
+    "run_marker": "assure-msnqvwfy"
+  },
+  "generated_at": "2026-08-10T21:37:10.143Z",
+  "proofs": [
+    {
+      "fixture_id": "p06-ai-eval-knowledge-corrupt",
+      "fixture_sha256": "3639f446397a7225a5387f19ecde25e30c8e46eecc900135a068651ef115a1af",
+      "gate_id": ".github/workflows/10-ai-eval-critical.yml#deterministic",
+      "mandatory": true,
+      "legs": {
+        "control_before": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 5.4
+        },
+        "poison": {
+          "status": "FAIL",
+          "reason": "DETECTOR_FAILED: step 4 exit 1: env -u DATABASE_URL npx vitest run \\",
+          "failed_step": 4,
+          "duration_s": 1.1,
+          "reason_matches": [
+            {
+              "source": "step_stdout",
+              "regex": "dimeChatProviderFreeze\\.test\\.ts",
+              "matched": true
+            },
+            {
+              "source": "result_reason",
+              "regex": "DETECTOR_FAILED: step 4",
+              "matched": true
+            }
+          ],
+          "journal_sha256": "a713c095b29c2b7d57a119f76df8210ea0425185276ee64abc682098ea86d736"
+        },
+        "restore": {
+          "clean": true,
+          "baseline_dirty": "",
+          "declared_artifacts": [],
+          "residue": ""
+        },
+        "control_after": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 4.8
+        }
+      },
+      "verdict": "PROVEN",
+      "subcode": null,
+      "detail": null
+    },
+    {
+      "fixture_id": "p06-contracts-migration-mutation",
+      "fixture_sha256": "e9506855ed46266145126f249927463bb4ebfd99c6091c0fe2cd61b1def41993",
+      "gate_id": ".github/workflows/08-contract-and-data-integrity.yml#contracts",
+      "mandatory": true,
+      "legs": {
+        "control_before": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 1.8
+        },
+        "poison": {
+          "status": "FAIL",
+          "reason": "DETECTOR_FAILED: step 6 exit 1: BASE=\"origin/${BASE_BRANCH}\"",
+          "failed_step": 6,
+          "duration_s": 0.7,
+          "reason_matches": [
+            {
+              "source": "step_stdout",
+              "regex": "applied migration files modified or deleted: drizzle/0134_widen_unit_probability_precision\\.sql",
+              "matched": true
+            },
+            {
+              "source": "result_reason",
+              "regex": "DETECTOR_FAILED: step 6",
+              "matched": true
+            }
+          ],
+          "journal_sha256": "b49e52c20657ecdc337b6cb14fc40d8e1359ff816b08084fd5deb84a7ec3dd8c"
+        },
+        "restore": {
+          "clean": true,
+          "baseline_dirty": "",
+          "declared_artifacts": [],
+          "residue": ""
+        },
+        "control_after": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 2.2
+        }
+      },
+      "verdict": "PROVEN",
+      "subcode": null,
+      "detail": null
+    },
+    {
+      "fixture_id": "p06-gitleaks-canary",
+      "fixture_sha256": "a859524f98fc374e4b71b31c3649023e4a1a9f8a0b979f42f2f9a6b2d1c06aa7",
+      "gate_id": ".github/workflows/gitleaks.yml#gitleaks",
+      "mandatory": true,
+      "legs": {
+        "control_before": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 0.5
+        },
+        "poison": {
+          "status": "FAIL",
+          "reason": "DETECTOR_FAILED: step 1.1 exit 2: gitleaks detect --redact -v --exit-code=2 --report-format=sarif --report-path=results.sari",
+          "failed_step": 1.1,
+          "duration_s": 0.4,
+          "reason_matches": [
+            {
+              "source": "step_stderr",
+              "regex": "aws-access-token|leaks found",
+              "matched": true
+            },
+            {
+              "source": "result_reason",
+              "regex": "DETECTOR_FAILED: step 1\\.1",
+              "matched": true
+            }
+          ],
+          "journal_sha256": "decdc9d4050cceef0ce0f7cf4380190f180af484134b0ffcbf64e3bd3a022977"
+        },
+        "restore": {
+          "clean": true,
+          "baseline_dirty": "",
+          "declared_artifacts": [
+            "results.sarif"
+          ],
+          "residue": ""
+        },
+        "control_after": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 0.4
+        }
+      },
+      "verdict": "PROVEN",
+      "subcode": null,
+      "detail": null
+    },
+    {
+      "fixture_id": "p06-proof-failing-test",
+      "fixture_sha256": "f832b25c6221f3588cd98a5e69137b4f6d02b49277c9303b765ed7963af08ea6",
+      "gate_id": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "mandatory": true,
+      "legs": {
+        "control_before": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 125.1
+        },
+        "poison": {
+          "status": "FAIL",
+          "reason": "DETECTOR_FAILED: step 6 exit 1: (npx vitest run --reporter=default --reporter=json --outputFile=vitest-results.json || tru",
+          "failed_step": 6,
+          "duration_s": 119.9,
+          "reason_matches": [
+            {
+              "source": "step_stderr",
+              "regex": "ci-failure: server/p06ProofAssurancePoison\\.test\\.ts",
+              "matched": true
+            },
+            {
+              "source": "step_stdout",
+              "regex": "\\[env-gate\\] FAIL",
+              "matched": true
+            },
+            {
+              "source": "result_reason",
+              "regex": "DETECTOR_FAILED: step 6",
+              "matched": true
+            }
+          ],
+          "journal_sha256": "8f02b9597119900bd4c705e4f0ceaa9cf52e37a87c7bf7a3ae4f643220b53e38"
+        },
+        "restore": {
+          "clean": true,
+          "baseline_dirty": "?? results.sarif",
+          "declared_artifacts": [
+            "vitest-results.json",
+            "proof-contract.json",
+            "env-gate-report.json",
+            "typecheck-report.txt",
+            "test-report.txt",
+            "dist"
+          ],
+          "residue": ""
+        },
+        "control_after": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 118.5
+        }
+      },
+      "verdict": "PROVEN",
+      "subcode": null,
+      "detail": null
+    },
+    {
+      "fixture_id": "p06-security-audit-unpinned-action",
+      "fixture_sha256": "aaa57030f06baa2fe672d0f1452303d1156dbc079004a1edc89f1f38d1b9198e",
+      "gate_id": ".github/workflows/ci.yml#security-audit",
+      "mandatory": true,
+      "legs": {
+        "control_before": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 1.8
+        },
+        "poison": {
+          "status": "FAIL",
+          "reason": "DETECTOR_FAILED: step 2 exit 1: node scripts/check-github-actions-security.mjs",
+          "failed_step": 2,
+          "duration_s": 0.1,
+          "reason_matches": [
+            {
+              "source": "step_stdout",
+              "regex": "zz-p06-assurance-poison\\.yml:\\d+: action is not pinned to a commit",
+              "matched": true
+            },
+            {
+              "source": "result_reason",
+              "regex": "DETECTOR_FAILED: step 2",
+              "matched": true
+            }
+          ],
+          "journal_sha256": "01d806afb3717d11bb6caa68021cc26f44090c2de67013d1e09e82366d9ec123"
+        },
+        "restore": {
+          "clean": true,
+          "baseline_dirty": "?? proof-contract.json\n?? results.sarif",
+          "declared_artifacts": [
+            "osv-report.json",
+            "osv-scanner"
+          ],
+          "residue": ""
+        },
+        "control_after": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 1.6
+        }
+      },
+      "verdict": "PROVEN",
+      "subcode": null,
+      "detail": null
+    },
+    {
+      "fixture_id": "p06-semgrep-blocking-session-secret",
+      "fixture_sha256": "e29af21f6151ae9e95d55049093df409a653718c387187aee6bbe631d280083b",
+      "gate_id": ".github/workflows/03-semgrep.yml#blocking",
+      "mandatory": false,
+      "legs": {
+        "control_before": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 9.2
+        },
+        "poison": {
+          "status": "FAIL",
+          "reason": "DETECTOR_FAILED: step 2 exit 1: semgrep scan --config .semgrep/ server client/src shared scripts --severity ERROR --error",
+          "failed_step": 2,
+          "duration_s": 7.4,
+          "reason_matches": [
+            {
+              "source": "step_stdout",
+              "regex": "dime-session-secret-fallback",
+              "matched": true
+            },
+            {
+              "source": "result_reason",
+              "regex": "DETECTOR_FAILED: step 2",
+              "matched": true
+            }
+          ],
+          "journal_sha256": "a67868a9f948683020fc4d236a888ba5e5b18cfd0338f572d0ba9ce34666b5aa"
+        },
+        "restore": {
+          "clean": true,
+          "baseline_dirty": "?? proof-contract.json\n?? results.sarif",
+          "declared_artifacts": [],
+          "residue": ""
+        },
+        "control_after": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 6
+        }
+      },
+      "verdict": "PROVEN",
+      "subcode": null,
+      "detail": null
+    },
+    {
+      "fixture_id": "p06-typecheck-ts2322",
+      "fixture_sha256": "348fbed44daa027ec3e1217994b79891dd811ffce9796c7f6e7b86ad8d7ffe0f",
+      "gate_id": ".github/workflows/ci.yml#typecheck",
+      "mandatory": true,
+      "legs": {
+        "control_before": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 9.8
+        },
+        "poison": {
+          "status": "FAIL",
+          "reason": "DETECTOR_FAILED: step 4 exit 2: echo \"[INPUT] Running tsc --noEmit on full project...\"",
+          "failed_step": 4,
+          "duration_s": 3.5,
+          "reason_matches": [
+            {
+              "source": "step_stdout",
+              "regex": "p06PoisonTypecheck\\.ts\\(\\d+,\\d+\\): error TS2322",
+              "matched": true
+            },
+            {
+              "source": "step_stdout",
+              "regex": "\\[OUTPUT\\] FAIL — TypeScript errors detected",
+              "matched": true
+            },
+            {
+              "source": "result_reason",
+              "regex": "DETECTOR_FAILED: step 4",
+              "matched": true
+            }
+          ],
+          "journal_sha256": "0e679cc41e2241396829860ee40037128b17573e26d0d98d59c364fe60530755"
+        },
+        "restore": {
+          "clean": true,
+          "baseline_dirty": "?? proof-contract.json\n?? results.sarif",
+          "declared_artifacts": [
+            "typecheck-report.txt"
+          ],
+          "residue": ""
+        },
+        "control_after": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 5.3
+        }
+      },
+      "verdict": "PROVEN",
+      "subcode": null,
+      "detail": null
+    },
+    {
+      "fixture_id": "p06-zizmor-template-injection",
+      "fixture_sha256": "e7587e8020495daec00cd367001002418ca2a055c1ec14f603b39b7e470f5d4d",
+      "gate_id": ".github/workflows/05-workflow-security.yml#zizmor",
+      "mandatory": true,
+      "legs": {
+        "control_before": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 0.2
+        },
+        "poison": {
+          "status": "FAIL",
+          "reason": "DETECTOR_FAILED: step 4 exit 14: # THE VERDICT. Plain mode exits 14 when findings >= --min-severity",
+          "failed_step": 4,
+          "duration_s": 0.2,
+          "reason_matches": [
+            {
+              "source": "step_stdout",
+              "regex": "template-injection",
+              "matched": true
+            },
+            {
+              "source": "result_reason",
+              "regex": "DETECTOR_FAILED: step 4",
+              "matched": true
+            }
+          ],
+          "journal_sha256": "d3bac29eef82ea3a6620cb3cc95f60708f8231f33c3e0f7fe8b598737769c5b0"
+        },
+        "restore": {
+          "clean": true,
+          "baseline_dirty": "?? proof-contract.json\n?? results.sarif\n?? typecheck-report.txt",
+          "declared_artifacts": [
+            "zizmor.sarif"
+          ],
+          "residue": ""
+        },
+        "control_after": {
+          "status": "PASS",
+          "reason": null,
+          "duration_s": 0.2
+        }
+      },
+      "verdict": "PROVEN",
+      "subcode": null,
+      "detail": null
+    }
+  ],
+  "coverage": [
+    {
+      "gate_id": ".github/workflows/01-pr-proof-contract.yml#proof",
+      "state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/05-workflow-security.yml#zizmor",
+      "state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/08-contract-and-data-integrity.yml#contracts",
+      "state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/10-ai-eval-critical.yml#deterministic",
+      "state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#security-audit",
+      "state": "PROVEN"
+    },
+    {
+      "gate_id": ".github/workflows/ci.yml#typecheck",
+      "state": "PROVEN"
+    }
+  ],
+  "unproven": [],
+  "all_proven": true
+}

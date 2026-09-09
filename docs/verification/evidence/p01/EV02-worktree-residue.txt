@@ -1,0 +1,18 @@
+P01.EV02 — worktree / resource residue log
+pwd=/Users/danielwalker/src/ai-sports-betting-dime-ai HEAD=f9a35aa281c5ca9d209c7c152cb94da38d80274b
+
+Pre-existing baseline (NOT created by P01): 39 worktree registrations.
+They belong to earlier sessions under /private/tmp/claude-501/.../scratchpad/wt-*
+on unrelated branches. git worktree prune --dry-run reports nothing prunable.
+
+| exercise | worktree delta | run-dir delta | stash delta | residue |
+| --- | --- | --- | --- | --- |
+| NEG02 blocked run   | 0 | 0 | 0 | none |
+| NEG02 committed run | 0 | 0 | 0 | none |
+| REG01 x20           | 0 | 0 | 0 | none (every iteration tracked individually) |
+| CLN01 SIGINT        | 0 | 0 | 0 | none (worktree + registration + run dir removed) |
+
+current worktree registrations : 39
+stale registration backlog     : 0
+ci-verify run dirs remaining   : 0
+stash entries                  : 1 (pre-existing, dated 2026-08-06)

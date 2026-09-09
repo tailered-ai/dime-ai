@@ -1,0 +1,6 @@
+[assurance] drizzle-meta-stray: PROVEN poison=FAIL control=PASS
+[assurance] format-check-violation: PROVEN poison=FAIL control=PASS
+[assurance] typecheck-ts2322: PROVEN poison=FAIL control=PASS
+[assurance] workflow-template-injection: PROVEN poison=FAIL control=PASS
+[assurance] wrote docs/verification/evidence/p05/assurance.json sha256=0986a75a9cd25547bbe20106d3c55de2414cc626533d868d94b2ad4f7d1ac2a6
+[assurance] proven=4 discovered=4 status=ASSURANCE_GREEN

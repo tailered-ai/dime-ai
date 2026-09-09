@@ -182,6 +182,11 @@ jobs:
     steps:
       - name: "[INPUT] Checkout repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          # The CI VERIFY selftests resolve origin/main via P01 (snapshot.mjs)
+          # and run merge-tree against it; a shallow PR checkout has neither
+          # the ref nor the history (DEF-074).
+          fetch-depth: 0
 
       - name: "[STEP] Setup pnpm"
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86
@@ -195,6 +200,11 @@ jobs:
 
       - name: "[STEP] Install dependencies (frozen lockfile)"
         run: pnpm install --frozen-lockfile
+
+      - name: "[STEP] Pinned zizmor — the P05 fixture cycles execute the real workflow-security detector"
+        env:
+          ZIZMOR_VERSION: "1.29.0" # keep equal to 05-workflow-security.yml
+        run: pipx install "zizmor==${ZIZMOR_VERSION}"
 
       - name: "[STEP] Install Chromium for perf smoke tests"
         run: pnpm exec playwright install --with-deps chromium

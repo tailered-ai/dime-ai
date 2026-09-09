@@ -84,17 +84,89 @@ describe("formatMutationError — complete error mapping", () => {
 });
 
 // ── [TEST GROUP 2] bcrypt cost factor ────────────────────────────────────────
-describe("bcrypt cost factor timing", () => {
-  it("[VERIFY] bcrypt cost=10 completes in < 500ms (OWASP-compliant)", async () => {
+//
+// This group used to be a single wall-clock assertion: hash once at cost 10
+// and require it to finish in under 500ms. That assertion could not detect the
+// thing it was named for. It passed the cost itself, so a production
+// misconfiguration was invisible to it, and what it actually measured was how
+// much CPU the machine happened to have. Measured here: ~60ms median on an
+// idle host, but 531ms inside the full 5,090-test suite on the same healthy
+// 8-core machine — a 6% overshoot of the bound driven purely by scheduling.
+//
+// The invariant worth protecting is that PRODUCTION hashes at an OWASP-grade
+// cost. That is now asserted deterministically, from the cost embedded in the
+// hash and from the production call sites themselves. The timing check is kept
+// as a gross-regression signal, but sampled rather than measured once, so a
+// single scheduling stall cannot fail the build while a real cost regression
+// (each +1 doubles the work) still will.
+describe("bcrypt cost factor", () => {
+  const OWASP_MIN_COST = 10;
+
+  it("[VERIFY] a hash generated at the production cost embeds that cost", async () => {
     const bcrypt = await import("bcryptjs");
-    const start = Date.now();
-    const hash = await bcrypt.hash("TestPassword123!", 10);
-    const elapsed = Date.now() - start;
-    console.log(`[INPUT] cost=10`);
-    console.log(`[OUTPUT] elapsed=${elapsed}ms`);
-    expect(elapsed).toBeLessThan(500);
+    const hash = await bcrypt.hash("TestPassword123!", OWASP_MIN_COST);
+    // bcrypt encodes the cost in the modular-crypt prefix: $2b$10$...
+    const cost = Number(hash.split("$")[2]);
+    console.log(`[OUTPUT] embedded cost=${cost}`);
     expect(hash).toMatch(/^\$2[aby]\$/);
-    console.log(`[VERIFY] PASS — bcrypt cost=10 completed in ${elapsed}ms`);
+    expect(cost).toBeGreaterThanOrEqual(OWASP_MIN_COST);
+    console.log("[VERIFY] PASS — embedded cost is OWASP-compliant");
+  });
+
+  it("[VERIFY] every production hashing site uses cost >= 10", async () => {
+    // The security invariant the old timing test claimed but never checked.
+    // Reads the production call sites directly, so a lowered cost anywhere
+    // fails deterministically rather than depending on machine speed.
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const { execFileSync } = await import("node:child_process");
+    const repoRoot = join(__dirname, "..");
+    // Pathspec is the directory, not a `**` glob: `server/**/*.ts` silently
+    // excludes files sitting directly in server/ (228 files instead of 441),
+    // which hid server/stripeWebhook.ts and made this check vacuous when it
+    // was first written. Proven by its own negative test below.
+    const files = execFileSync("git", ["ls-files", "server"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+    })
+      .split("\n")
+      .filter(f => f && f.endsWith(".ts") && !/\.test\.ts$/.test(f));
+
+    const sites: { file: string; cost: number }[] = [];
+    for (const file of files) {
+      const source = readFileSync(join(repoRoot, file), "utf8");
+      for (const m of source.matchAll(/bcrypt\.hash\([^,]+,\s*(\d+)\s*\)/g)) {
+        sites.push({ file, cost: Number(m[1]) });
+      }
+    }
+    console.log(`[INPUT] production bcrypt.hash sites=${sites.length}`);
+    expect(sites.length).toBeGreaterThan(0);
+    const weak = sites.filter(s => s.cost < OWASP_MIN_COST);
+    expect(
+      weak,
+      `these production sites hash below cost ${OWASP_MIN_COST}: ${weak
+        .map(s => `${s.file}(cost=${s.cost})`)
+        .join(", ")}`
+    ).toEqual([]);
+    console.log("[VERIFY] PASS — all production sites >= cost 10");
+  });
+
+  it("[VERIFY] bcrypt cost=10 median stays within the gross-regression bound", async () => {
+    const bcrypt = await import("bcryptjs");
+    // Median of samples, not a single measurement. One stalled sample under
+    // parallel test load must not fail the build; a genuine cost regression
+    // shifts the whole distribution and still does.
+    const samples: number[] = [];
+    for (let i = 0; i < 5; i += 1) {
+      const start = Date.now();
+      await bcrypt.hash("TestPassword123!", OWASP_MIN_COST);
+      samples.push(Date.now() - start);
+    }
+    samples.sort((a, b) => a - b);
+    const median = samples[Math.floor(samples.length / 2)];
+    console.log(`[OUTPUT] samples=${samples.join(",")}ms median=${median}ms`);
+    expect(median).toBeLessThan(500);
+    console.log(`[VERIFY] PASS — median ${median}ms within bound`);
   });
 
   it("[VERIFY] bcrypt cost=10 hash is correctly verifiable", async () => {

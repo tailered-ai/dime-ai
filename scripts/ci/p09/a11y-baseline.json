@@ -1,0 +1,9 @@
+[
+  {
+    "route": "/",
+    "id": "color-contrast",
+    "targets": [".state-pill--pass"],
+    "defect": "DEF-064",
+    "note": "landing-page state pill below AA contrast — pre-existing, found by the P09 a11y gate's first run 2026-08-12; fix rides UI brand law (design-system/dime-ai/MASTER.md), tracked in GRADUATION-RISK-QUEUE.md. Baselined = recorded, never hidden; any NEW violation reds."
+  }
+]

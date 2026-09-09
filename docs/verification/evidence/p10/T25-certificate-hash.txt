@@ -1,0 +1,3 @@
+Certificate issued at HEAD 3b493236e: sha256 baf628a2e256aebcd2203bb568f70f817218250dc54580528695aceb143002eb
+Independent verify (fresh process): VALID
+Lifecycle law: this certificate voids at the acceptance commit that follows; the operative certificate is issued from the final HEAD by ci:verify:pr.

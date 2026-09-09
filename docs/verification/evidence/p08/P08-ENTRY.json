@@ -1,0 +1,132 @@
+{
+  "schema": "ci-verify/p08-entry.v1",
+  "produced_at": "2026-08-12T07:48:17.333Z",
+  "accepted_identity": {
+    "head_sha": "c4668206a1f911708778c7857e2eb1809650605b",
+    "accepted_base_sha": "249bf314c131e0f34aa0f1aae393411e4e8c8d55",
+    "branch": "feat/ci-verify-control-plane",
+    "acceptance_baseline_commit": "51ff59f74",
+    "evidence_logs_commit": "c4668206a",
+    "contract_sha256": "b594ebd952be871e1e283cf43964303694e59f19d25ab0f6ed9b14609a242638"
+  },
+  "acceptance_checkpoints": [
+    {
+      "phase": "P06",
+      "recorded_at": "2026-08-12T07:30:04.789Z",
+      "evidence": [
+        {
+          "path": "docs/verification/evidence/p06/T22-acceptance-249bf314.md",
+          "sha256": "569c4c0f76a6258f36d52a955df5ecef02b06c53014b456c85939444e8301321"
+        },
+        {
+          "path": "docs/verification/evidence/p06/T19-acceptance.md",
+          "sha256": "d09ed6edf0b2ce22c933f4594887c3c40e52bda22094386120547884ed4f748b"
+        },
+        {
+          "path": "docs/verification/evidence/freeze/FREEZE-249bf314.md",
+          "sha256": "239f7adf27112426845c4c0d0783d78f5b36bd38564828673826057ecc6b4b83"
+        }
+      ]
+    },
+    {
+      "phase": "P07",
+      "recorded_at": "2026-08-12T07:30:04.832Z",
+      "evidence": [
+        {
+          "path": "docs/verification/evidence/p07/T22-acceptance-p07.log",
+          "sha256": "0b40d19bc23c67d9a22cc8e62f5bca884e8de1d4ce41b218a37c6e874ff0c590"
+        },
+        {
+          "path": "docs/verification/evidence/p07/T19-acceptance.md",
+          "sha256": "d884ee630a6a0970c04ff39d1512e77e64ac36b64031aa17889f1d91a0160458"
+        }
+      ]
+    }
+  ],
+  "assurance": {
+    "artifact": ".ci-verify/p06-assurance/assurance.json",
+    "sha256": "6c2e07c8d579aad0a7eefd124a80f8adcba539a62ceceabb39df6668707e04e1",
+    "proofs": "8/8 PROVEN",
+    "coverage": "6/6",
+    "durable_log": {
+      "path": "docs/verification/evidence/p06/T22-acceptance-assurance.log",
+      "sha256": "807e447692982d42fb3d03062dce24fe85e82de5855a42517ea00ff06daecfd4"
+    }
+  },
+  "db_evidence": {
+    "mysql_image": "mysql:8",
+    "resolved_digest_tail": "4bb78d37fe8a23eb857fd3fb",
+    "server_version": "8.4.11",
+    "durable_log": {
+      "path": "docs/verification/evidence/p07/T22-acceptance-p07.log",
+      "sha256": "0b40d19bc23c67d9a22cc8e62f5bca884e8de1d4ce41b218a37c6e874ff0c590"
+    }
+  },
+  "ledger": {
+    "path": "docs/verification/ci-verify-ledger.json",
+    "sha256": "bbd3bdbb8c7ab71eeec3702ab9a81673dd3e9f31bc13dbdf5aaf580ce07a7564",
+    "pin_file": "bbd3bdbb8c7ab71eeec3702ab9a81673dd3e9f31bc13dbdf5aaf580ce07a7564  ci-verify-ledger.json"
+  },
+  "worker_profile": {
+    "VITEST_MAX_FORKS": "4",
+    "VITEST_MAX_THREADS": "4",
+    "rationale": "CI ubuntu-latest 4 vCPU parity (DEF-062)",
+    "host_cores": 8
+  },
+  "tool_identities": [
+    {
+      "id": "semgrep",
+      "version": "1.172.0",
+      "derived_from": "03-semgrep.yml env SEMGREP_VERSION"
+    },
+    {
+      "id": "semgrep",
+      "version": "1.172.0",
+      "derived_from": "03-semgrep.yml env SEMGREP_VERSION"
+    },
+    {
+      "id": "zizmor",
+      "version": "1.29.0",
+      "derived_from": "05-workflow-security.yml env ZIZMOR_VERSION"
+    },
+    {
+      "id": "trivy",
+      "version": "0.70.0",
+      "derived_from": "09/12 workflows → trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 input default v0.70.0"
+    },
+    {
+      "id": "syft",
+      "version": "1.42.3",
+      "derived_from": "09-artifact → sbom-action@e22c389904149dbc22b58101806040fa8d37a610 dist VERSION7 v1.42.3"
+    },
+    {
+      "id": "trivy",
+      "version": "0.70.0",
+      "derived_from": "09/12 workflows → trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 input default v0.70.0"
+    },
+    {
+      "id": "osv-scanner@full-osv",
+      "version": "2.2.4",
+      "derived_from": "12-nightly-verification.yml#full-osv provisioning-step release URL"
+    },
+    {
+      "id": "osv-scanner@security-audit",
+      "version": "2.4.0",
+      "derived_from": "ci.yml#security-audit provisioning-step release URL"
+    },
+    {
+      "id": "gitleaks",
+      "version": "8.24.3",
+      "derived_from": "gitleaks.yml → gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e dist (GITLEAKS_VERSION || \"8.24.3\")"
+    }
+  ],
+  "docker_identity": {
+    "server_version": "29.6.1",
+    "platform": "Docker Desktop aarch64"
+  },
+  "zero_residue": {
+    "owned_containers": 0,
+    "worktrees_note": "run worktrees are disposable under .ci-verify/runs; repo working tree carries zero program modifications post-baseline"
+  },
+  "invalidation_rule": "This artifact voids if origin/main moves past accepted_base_sha, if HEAD gains commits touching scripts/ci or .github/workflows, or if the contract regenerates to a different sha256. P06/P07 are NOT rerun for P08 work incapable of invalidating them."
+}

@@ -1,0 +1,29 @@
+[p06] PASS      .github/workflows/01-pr-proof-contract.yml#format-check  (18.6s, exit 0)
+[p06] FAIL      .github/workflows/01-pr-proof-contract.yml#proof  (173.4s, exit 1)
+[p06] PASS      .github/workflows/03-semgrep.yml#advisory  (192.0s, exit 0)
+[p06] PASS      .github/workflows/03-semgrep.yml#blocking  (13.7s, exit 0)
+[p06] PASS      .github/workflows/05-workflow-security.yml#zizmor  (0.2s, exit 0)
+[p06] PASS      .github/workflows/08-contract-and-data-integrity.yml#contracts  (0.1s, exit 0)
+[p06] BLOCKED   .github/workflows/09-artifact-build-and-smoke.yml#artifact
+[p06] PASS      .github/workflows/10-ai-eval-critical.yml#deterministic  (7.0s, exit 0)
+[p06] BLOCKED   .github/workflows/12-nightly-verification.yml#full-container-scan
+[p06] FAIL      .github/workflows/12-nightly-verification.yml#full-osv  (0.5s, exit 56)
+[p06] PASS      .github/workflows/ci.yml#build  (11.1s, exit 0)
+[p06] FAIL      .github/workflows/ci.yml#security-audit  (2.0s, exit 1)
+[p06] PASS      .github/workflows/ci.yml#typecheck  (11.6s, exit 0)
+[p06] FAIL      .github/workflows/dime-llm-validation.yml#validate  (0.5s, exit 2)
+[p06] PASS      .github/workflows/edge-arming-gate.yml#validate  (1.2s, exit 0)
+[p06] BLOCKED   .github/workflows/gitleaks.yml#gitleaks
+
+CLASS       TOTAL  PASS  FAIL FLAKY   T/O  BLKD  SKIP CIONL   N/A INFRA DRIFT BROKN INCON  BLOCKING
+PARITY        16    9    4    0    0    3    0    0    0    0    0    0    0  YES
+HARDENING      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+CLEANROOM      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+ASSURANCE      0    0    0    0    0    0    0    0    0    0    0    0    0  no
+REMOTE         0    0    0    0    0    0    0    0    0    0    0    0    0  no
+AUDIT          0    0    0    0    0    0    0    0    0    0    0    0    0  no
+
+totals: 16 result(s); reconciles=true; blocking classes: PARITY
+  PARITY: .github/workflows/01-pr-proof-contract.yml#proof: FAIL | .github/workflows/ci.yml#security-audit: FAIL | .github/workflows/gitleaks.yml#gitleaks: BLOCKED
+
+[p06] mandatory gates: 7; blocking: 3 -> .github/workflows/01-pr-proof-contract.yml#proof=FAIL, .github/workflows/ci.yml#security-audit=FAIL, .github/workflows/gitleaks.yml#gitleaks=BLOCKED

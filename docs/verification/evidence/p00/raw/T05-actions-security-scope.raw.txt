@@ -1,0 +1,106 @@
+### A. scan roots (scanActionsSecurity)
+export async function scanActionsSecurity(
+  repositoryRoot,
+  { enforceRepositoryContracts = true } = {}
+) {
+  const workflowsDirectory = resolve(repositoryRoot, ".github/workflows");
+  const workflowPaths = await filesBelow(
+    workflowsDirectory,
+    name => name.endsWith(".yml") || name.endsWith(".yaml")
+  );
+  const compositePaths = await filesBelow(
+    resolve(repositoryRoot, ".github/actions"),
+    name => name === "action.yml" || name === "action.yaml"
+  );
+  const failures = [];
+  let actionReferences = 0;
+  let productionSecretReferences = 0;
+
+  for (const path of workflowPaths) {
+    const name = relative(workflowsDirectory, path);
+    const source = await readFile(path, "utf8");
+    inspectDuplicateKeys(name, source, failures);
+    inspectPermissions(name, source, failures);
+
+### B. filesBelow — recursive?
+50:async function filesBelow(directory, predicate) {
+51-  const found = [];
+52-  async function visit(current) {
+53-    let entries;
+54-    try {
+55-      entries = await readdir(current, { withFileTypes: true });
+56-    } catch (error) {
+57-      if (error?.code === "ENOENT") return;
+58-      throw error;
+59-    }
+60-    for (const entry of entries) {
+61-      const path = resolve(current, entry.name);
+62-      if (entry.isDirectory()) await visit(path);
+63-      else if (entry.isFile() && predicate(entry.name)) found.push(path);
+64-    }
+
+### C. third root: CODEOWNERS
+          `railway-p0-control.yml: forbidden capability present: ${forbidden}`
+        );
+      }
+    }
+    const codeowners = await readFile(
+      resolve(repositoryRoot, ".github/CODEOWNERS"),
+      "utf8"
+    );
+    if (
+      !/^\/\.github\/\s+@prez-ai-sports-betting\s+@aisportsbettingcontact\s*$/m.test(
+        codeowners
+      )
+    ) {
+      failures.push("CODEOWNERS: .github security owners are missing");
+    }
+  }
+
+  return {
+
+### D. RAW-TEXT secret scan (why a secrets.NAME literal in a COMMENT counts)
+    const jobBlocks = source.split(/(?=^  [A-Za-z0-9_-]+:\s*$)/gm);
+    for (const block of jobBlocks) {
+      const secretNames = [...block.matchAll(/secrets\.([A-Z0-9_]+)/g)]
+        .map(match => match[1])
+        .filter(secretName => secretName !== "GITHUB_TOKEN");
+      if (secretNames.length === 0) continue;
+      productionSecretReferences += secretNames.length;
+      if (!/^    environment:\s*Production\s*$/m.test(block)) {
+        failures.push(
+          `${name}: production secret is outside the protected Production environment`
+        );
+      }
+      for (const line of block.split(/\r?\n/)) {
+
+### E. invocation surfaces
+.github/workflows/deploy-smoke.yml:45:    # scripts/check-github-actions-security.mjs). Production's only rule is a
+.github/workflows/cron-mlb-learning-loop.yml:39:# NB: those are written BARE above, deliberately. scripts/check-github-actions-security.mjs
+.github/workflows/os-ledger-append.yml:17:# branch. Justified in scripts/check-github-actions-security.mjs WRITE_APPROVALS.
+.github/workflows/stripe-e2e.yml:28:# (scripts/check-github-actions-security.mjs) routes EVERY non-GITHUB_TOKEN
+.github/workflows/05-workflow-security.yml:4:# repo's own scripts/check-github-actions-security.mjs gate (pinning +
+.github/workflows/ci.yml:61:        run: node scripts/check-github-actions-security.mjs
+.github/workflows/cron-bet-grade.yml:60:    # Required by the Actions security contract (scripts/check-github-actions-security.mjs):
+package.json:32:    "security:actions": "node scripts/check-github-actions-security.mjs",
+.github/workflows/feed-responsive-cross-browser.yml:48:        run: node scripts/check-github-actions-security.mjs
+
+### C-FIX. third root: CODEOWNERS (re-captured, correct line range)
+      }
+    }
+    const codeowners = await readFile(
+      resolve(repositoryRoot, ".github/CODEOWNERS"),
+      "utf8"
+    );
+    if (
+      !/^\/\.github\/\s+@prez-ai-sports-betting\s+@aisportsbettingcontact\s*$/m.test(
+        codeowners
+      )
+    ) {
+      failures.push("CODEOWNERS: .github security owners are missing");
+    }
+  }
+
+
+### F. workflow file count on this branch
+      40

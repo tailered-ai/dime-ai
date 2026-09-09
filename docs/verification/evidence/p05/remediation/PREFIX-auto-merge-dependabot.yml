@@ -1,0 +1,87 @@
+name: Dependabot Auto-Merge (Patch Only)
+
+# ─── Trigger ──────────────────────────────────────────────────────────────────
+# Fires on every Dependabot PR. The job gates on:
+#   1. PR is opened by dependabot[bot]
+#   2. Version bump is patch-level only (semver: x.y.Z)
+#   3. An independent reviewer approves
+#   4. All CI checks pass (enforced by branch protection and auto-merge)
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# ─── Permissions ──────────────────────────────────────────────────────────────
+# contents:write  — needed to merge the PR
+# pull-requests:write — needed to enable auto-merge
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Auto-merge Dependabot patch PRs
+    runs-on: ubuntu-latest
+
+    # Only run for Dependabot PRs — skip all human-authored PRs
+    # actor alone is spoofable via re-runs; the PR author check is not
+    if: github.actor == 'dependabot[bot]' && github.event.pull_request.user.login == 'dependabot[bot]'
+
+    steps:
+      # ── Step 1: Fetch Dependabot metadata ─────────────────────────────────
+      - name: Fetch Dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── Step 2: Log decision context ──────────────────────────────────────
+      - name: Log PR metadata
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          DEP_NAMES: ${{ steps.meta.outputs.dependency-names }}
+          UPDATE_TYPE: ${{ steps.meta.outputs.update-type }}
+          NEW_VERSION: ${{ steps.meta.outputs.new-version }}
+          PREV_VERSION: ${{ steps.meta.outputs.previous-version }}
+          ECOSYSTEM: ${{ steps.meta.outputs.package-ecosystem }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          echo "[INPUT] PR number:        $PR_NUMBER"
+          echo "[INPUT] PR title:         $PR_TITLE"
+          echo "[INPUT] Dependency name:  $DEP_NAMES"
+          echo "[INPUT] Update type:      $UPDATE_TYPE"
+          echo "[INPUT] Semver change:    $NEW_VERSION (was $PREV_VERSION)"
+          echo "[STATE] Ecosystem:        $ECOSYSTEM"
+          echo "[STATE] Actor:            $ACTOR"
+
+      # ── Step 3: Enable auto-merge (squash) ────────────────────────────────
+      # `--auto` waits for all required status checks to pass before merging.
+      # Branch protection still requires an independent human approval.
+      # Uses squash to keep the commit history clean.
+      # Only runs for patch updates — minor/major are skipped entirely.
+      - name: Enable auto-merge for patch update
+        if: steps.meta.outputs.update-type == 'version-update:semver-patch'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "[STEP] Enabling auto-merge (squash) for PR #${PR_NUMBER}..."
+          gh pr merge "$PR_NUMBER" \
+            --auto \
+            --squash \
+            --subject "chore(deps): ${PR_TITLE}" \
+            --body "Auto-merged by Dependabot auto-merge workflow. Patch-level update. All CI checks passed."
+          echo "[OUTPUT] Auto-merge enabled — will merge once CI passes"
+          echo "[VERIFY] PASS — PR #${PR_NUMBER} queued for auto-merge"
+
+      # ── Step 4: Log skip reason for non-patch updates ─────────────────────
+      - name: Skip non-patch update
+        if: steps.meta.outputs.update-type != 'version-update:semver-patch'
+        run: |
+          echo "[STEP] Skipping auto-merge — update type is not patch-level"
+          echo "[STATE] update-type: ${{ steps.meta.outputs.update-type }}"
+          echo "[STATE] Dependency: ${{ steps.meta.outputs.dependency-names }}"
+          echo "[STATE] ${{ steps.meta.outputs.previous-version }} → ${{ steps.meta.outputs.new-version }}"
+          echo "[OUTPUT] Manual review required for minor/major updates"
+          echo "[VERIFY] SKIP — no action taken"

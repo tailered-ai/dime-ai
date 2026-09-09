@@ -8,6 +8,11 @@
 import { describe, it, expect } from "vitest";
 import * as path from "path";
 import * as fs from "fs";
+// Static so the full app-router graph loads at collection, outside testTimeout:
+// as a dynamic import inside the 15s-bounded test it timed out under
+// v8-coverage instrumentation on a loaded host (DEF-060) — the bound was
+// measuring CPU availability, not whether the router exists.
+import { appRouter } from "./routers";
 
 // ─── Schema exports ────────────────────────────────────────────────────────────
 
@@ -74,8 +79,7 @@ describe("strikeoutModelRunner.ts", () => {
 // ─── tRPC router ──────────────────────────────────────────────────────────────
 
 describe("appRouter strikeoutProps procedures", () => {
-  it("appRouter has strikeoutProps router", async () => {
-    const { appRouter } = await import("./routers");
+  it("appRouter has strikeoutProps router", () => {
     // The router is an object with procedure definitions
     expect(appRouter).toBeDefined();
     // Check the router has the strikeoutProps namespace

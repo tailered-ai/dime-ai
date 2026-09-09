@@ -1,0 +1,33 @@
+### A. classic branch protection on main
+{"message":"Branch not protected","documentation_url":"https://docs.github.com/rest/branches/branch-protection#get-branch-protection","status":"404"}gh: Branch not protected (HTTP 404)
+exitA=1
+
+### B. classic required_status_checks contexts
+{"message":"Branch not protected","documentation_url":"https://docs.github.com/rest/branches/branch-protection#get-status-checks-protection","status":"404"}gh: Branch not protected (HTTP 404)
+exitB=1
+
+### C. ruleset required contexts (from ruleset 18701573)
+Security Audit (integration_id=15368)
+TypeScript Check (integration_id=15368)
+Vitest (integration_id=15368)
+Secret Scan (gitleaks) (integration_id=15368)
+01-pr-proof-contract (integration_id=15368)
+05-workflow-security (integration_id=15368)
+06-dependency-review (integration_id=15368)
+08-contract-and-data-integrity (integration_id=15368)
+10-ai-eval-critical (integration_id=15368)
+exitC=0
+### D. token permissions on the repo (is 404 a permissions artifact?)
+{"admin":true,"maintain":true,"push":true}
+exitD=0
+
+### E. branch object .protected (authoritative, no admin required)
+{"name":"main","protected":true,"protection_url":"https://api.github.com/repos/tailered-ai/dime-ai/branches/main/protection"}
+exitE=0
+
+### F. ALL rules applying to main, including org-level (rules/branches/main)
+[{"type":"deletion","ruleset_source_type":"Repository","ruleset_source":"tailered-ai/dime-ai","ruleset_id":18701573},{"type":"non_fast_forward","ruleset_source_type":"Repository","ruleset_source":"tailered-ai/dime-ai","ruleset_id":18701573},{"type":"pull_request","parameters":{"required_approving_review_count":0,"dismiss_stale_reviews_on_push":false,"required_reviewers":[],"require_code_owner_review":false,"require_last_push_approval":false,"required_review_thread_resolution":false,"allowed_merge_methods":["merge","squash","rebase"]},"ruleset_source_type":"Repository","ruleset_source":"tailered-ai/dime-ai","ruleset_id":18701573},{"type":"required_status_checks","parameters":{"strict_required_status_checks_policy":true,"do_not_enforce_on_create":false,"required_status_checks":[{"context":"Security Audit","integration_id":15368},{"context":"TypeScript Check","integration_id":15368},{"context":"Vitest","integration_id":15368},{"context":"Secret Scan (gitleaks)","integration_id":15368},{"context":"01-pr-proof-contract","integration_id":15368},{"context":"05-workflow-security","integration_id":15368},{"context":"06-dependency-review","integration_id":15368},{"context":"08-contract-and-data-integrity","integration_id":15368},{"context":"10-ai-eval-critical","integration_id":15368}]},"ruleset_source_type":"Repository","ruleset_source":"tailered-ai/dime-ai","ruleset_id":18701573}]exitF=0
+
+### G. rulesets including parents
+{"enforcement":"active","id":18701573,"name":"main-protection","source":"tailered-ai/dime-ai","source_type":"Repository","target":"branch"}
+exitG=0

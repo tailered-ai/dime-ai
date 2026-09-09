@@ -1,0 +1,99 @@
+{
+  "schema": "p05-preservation-bundle/1.0.0",
+  "repo_head": "d07a1c3877adb8846330ab06c57652befb5b55ad",
+  "base_sha": "7fa4b3fe49f67f98e5aaa1fe466862ee3cfa20d9",
+  "preserved_at": "2026-08-10T13:52:33.459Z",
+  "bundle_root": "/private/tmp/claude-501/-Users-danielwalker-src-ai-sports-betting-dime-ai/5d9ce9d5-1e18-4c39-9094-32afb1636471/scratchpad/preservation-bundle",
+  "entries": [
+    {
+      "path": ".claude/settings.json",
+      "sha256": "3ac663cdee5d2f756a699212aa387376da2033396da46ddc7e3a56dcd7f52a5c",
+      "size": 5579,
+      "mode": "0644",
+      "git_status": " M",
+      "tracked": true,
+      "preserved_as": "bytes/.claude__settings.json",
+      "head_blob": "c82531971b549e56dccee32f622fdcd75a28669b",
+      "head_sha256": "bb6cbd8751eb27643180d6093901574727d9935594f85f5712a6680d91ca14bc",
+      "equals_head": false,
+      "base_blob": "89b3c4cf0a82e5baacb1782fe65fe8eabd6d0d09",
+      "base_sha256": "3ac663cdee5d2f756a699212aa387376da2033396da46ddc7e3a56dcd7f52a5c",
+      "exists_in_base": true,
+      "equals_base": true
+    },
+    {
+      "path": ".claude/scripts/bootstrap-gstack.sh",
+      "sha256": "709c1a75c4325892d5a770a9a1a6dcdd3ed5e0e6c4f545aa386c952df478b521",
+      "size": 15090,
+      "mode": "0755",
+      "git_status": "??",
+      "tracked": false,
+      "preserved_as": "bytes/.claude__scripts__bootstrap-gstack.sh",
+      "head_blob": null,
+      "head_sha256": null,
+      "equals_head": false,
+      "base_blob": "6175fe6b408320f7517b307da05d05b812795c94",
+      "base_sha256": "709c1a75c4325892d5a770a9a1a6dcdd3ed5e0e6c4f545aa386c952df478b521",
+      "exists_in_base": true,
+      "equals_base": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "f1daf101d091aa23e565528576a327fed3c2128405d8d45d60cb3a19cf049ee3",
+      "size": 40217,
+      "mode": "0644",
+      "git_status": " M",
+      "tracked": true,
+      "preserved_as": "bytes/CLAUDE.md",
+      "head_blob": "4b6788a7df77cd0c03ee3b400c720579641bb1a7",
+      "head_sha256": "a4b52d01648765e9d8f781c8417a034f34c4e19d034d73f4f0c3dcd5547f69fa",
+      "equals_head": false,
+      "base_blob": "043ae1044c6ccd22a27aad5b4953d55858af3ada",
+      "base_sha256": "f1daf101d091aa23e565528576a327fed3c2128405d8d45d60cb3a19cf049ee3",
+      "exists_in_base": true,
+      "equals_base": true
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "a4ad5414340633001b35ea3ccd5c320bb4b2b688a7bfb1e4b3198da8c230fd43",
+      "size": 7089,
+      "mode": "0644",
+      "git_status": " M",
+      "tracked": true,
+      "preserved_as": "bytes/.gitignore",
+      "head_blob": "634871cc5df23b5eb790cecd7adf27b0953ae3be",
+      "head_sha256": "6074cf49127dc78cbacee1a5b55f61a565413bf98c0b7e78d40944e015b1abd3",
+      "equals_head": false,
+      "base_blob": "774663d10ca4d87dc8d8f5c9e62db72432097072",
+      "base_sha256": "92444f3c48869b0f1b4139bdd5a797a49fb6ab3af94fb62518fe9c9f8e3bd036",
+      "exists_in_base": true,
+      "equals_base": false
+    }
+  ],
+  "gitignore": {
+    "feature_head_sha256": "6074cf49127dc78cbacee1a5b55f61a565413bf98c0b7e78d40944e015b1abd3",
+    "working_tree_sha256": "a4ad5414340633001b35ea3ccd5c320bb4b2b688a7bfb1e4b3198da8c230fd43",
+    "base_sha256": "92444f3c48869b0f1b4139bdd5a797a49fb6ab3af94fb62518fe9c9f8e3bd036",
+    "validated_union_sha256": "a4ad5414340633001b35ea3ccd5c320bb4b2b688a7bfb1e4b3198da8c230fd43",
+    "expected_ci_verify_rules": [
+      "/.ci-verify/",
+      "/local-proof-contract.json",
+      "/vitest-results.phase-a.json",
+      "/vitest-results.phase-b.json"
+    ],
+    "ci_verify_rules_present_in_working_tree": true,
+    "gstack_cardinality": {
+      "working_tree": 1,
+      "base": 1,
+      "feature_head": 0,
+      "validated_union": 1
+    },
+    "local_only_rules_vs_base": [
+      "/.ci-verify/",
+      "/local-proof-contract.json",
+      "/vitest-results.phase-a.json",
+      "/vitest-results.phase-b.json"
+    ],
+    "base_only_rules_vs_local": []
+  }
+}

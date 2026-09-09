@@ -1,0 +1,25 @@
+
+> ai-sports-betting@1.0.0 ci:verify:pr /Users/danielwalker/src/ai-sports-betting-dime-ai
+> node scripts/ci/verify-pr.mjs
+
+[WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies", "pnpm.patchedDependencies", "pnpm.overrides", "pnpm.auditConfig". See https://pnpm.io/settings for the new home of each setting.
+[ci:verify:pr] ▶ p06-roster
+[ci:verify:pr] ✓ p06-roster 595.7s peakRSS=1024MB
+[ci:verify:pr] ▶ p06-assurance
+[ci:verify:pr] ✓ p06-assurance 686.5s peakRSS=984MB
+[ci:verify:pr] ▶ p07
+[ci:verify:pr] ✓ p07 450.6s peakRSS=783MB
+[ci:verify:pr] ▶ p08
+[ci:verify:pr] ✓ p08 694s peakRSS=852MB
+[ci:verify:pr] ▶ p09
+[ci:verify:pr] ✓ p09 88.9s peakRSS=678MB
+[ci:verify:pr] ▶ negatives
+[ci:verify:pr] ✓ negatives 5.6s peakRSS=113MB
+[ci:verify:pr] ▶ certificate
+[ci:verify:pr] ✗ certificate 0.9s peakRSS=174MB
+  "refusals": [
+    "OPEN_DEFECTS: DEF-066(MEDIUM)"
+  ]
+}
+[ci:verify:pr] FAILED_AT: certificate — total 2524s; slowest: p08:694s, p06-assurance:686.5s, p06-roster:595.7s
+ ELIFECYCLE  Command failed with exit code 1.

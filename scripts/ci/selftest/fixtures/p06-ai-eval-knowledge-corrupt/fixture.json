@@ -1,0 +1,28 @@
+{
+  "schema_version": "p06-1.0.0",
+  "fixture_id": "p06-ai-eval-knowledge-corrupt",
+  "expected_gate": ".github/workflows/10-ai-eval-critical.yml#deterministic",
+  "poison_mode": "overwrite",
+  "poison_overwrite": {
+    "path": "shared/dime/platform_knowledge_v1.json",
+    "content": "{ corrupted-by-p06-assurance-poison: the deterministic AI-eval gate must reject an unparseable platform-knowledge artifact"
+  },
+  "expected_status": "FAIL",
+  "expected_failed_step": 4,
+  "expected_reason": [
+    {
+      "source": "step_stdout",
+      "regex": "dimeChatProviderFreeze\\.test\\.ts"
+    },
+    {
+      "source": "result_reason",
+      "regex": "DETECTOR_FAILED: step 4"
+    }
+  ],
+  "control_expectation": {
+    "status": "PASS"
+  },
+  "expected_changed_paths": ["shared/dime/platform_knowledge_v1.json"],
+  "timeout_ms": 900000,
+  "allowed_execution_artifacts": []
+}

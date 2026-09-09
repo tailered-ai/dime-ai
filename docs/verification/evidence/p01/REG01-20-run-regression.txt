@@ -1,0 +1,33 @@
+P01.REG01 — 20 consecutive complete snapshot/worktree lifecycles
+stable-input profile: mode=committed, fetch=true (full lifecycle, no shortcuts)
+baseline: worktree_registrations=39 run_dirs=0
+
+iter | exit | merge_commit_sha                         | identity_digest(12) | wt_delta | run_delta | worktree_created | disposed
+-----|------|------------------------------------------|---------------------|----------|-----------|------------------|---------
+   1 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+   2 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+   3 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+   4 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+   5 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+   6 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+   7 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+   8 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+   9 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  10 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  11 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  12 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  13 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  14 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  15 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  16 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  17 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  18 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  19 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+  20 |    0 | 2101ad875cf26549d6035dd4726416c757351d52 | 6d32d9466051        |        0 |         0 |             true | true
+
+distinct merge_commit_sha across 20 runs : 1 (expect 1 — determinism)
+distinct identity_digest across 20 runs  : 1 (expect 1)
+final worktree delta : 0
+final run-dir delta  : 0
+EVERY iteration clean (no averaging) : true
+REG01_EXIT=0

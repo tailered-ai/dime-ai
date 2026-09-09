@@ -1,0 +1,19 @@
+{
+  "schema_version": "p06-1.0.0",
+  "fixture_id": "p06-semgrep-blocking-session-secret",
+  "expected_gate": ".github/workflows/03-semgrep.yml#blocking",
+  "poison_mode": "patch",
+  "expected_status": "FAIL",
+  "expected_failed_step": 2,
+  "expected_reason": [
+    { "source": "step_stdout", "regex": "dime-session-secret-fallback" },
+    { "source": "result_reason", "regex": "DETECTOR_FAILED: step 2" }
+  ],
+  "control_expectation": { "status": "PASS" },
+  "allowed_execution_artifacts": [],
+  "timeout_ms": 900000,
+  "notes": [
+    "Originally targeted dime-money-float-arithmetic-on-cents. That rule was measured to be structurally incapable of firing: its `patterns` block AND-combines a pattern-either with metavariable-regex constraints on $F and $C, and $C binds only in the parseFloat alternative, so the multiplication/division alternatives can never satisfy it. Isolated proof: the identical rule minus the $C constraint reports 1 finding on the same input; with it, 0. Recorded as a candidate finding — fixing the repository rule is outside P06's authorized scope.",
+    "dime-session-secret-fallback carries no metavariable constraints and is semantically sharp: a hardcoded APP_SESSION_SECRET fallback turns a missing secret into a forgeable session key."
+  ]
+}

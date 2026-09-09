@@ -1,0 +1,30 @@
+{
+  "schema_version": "p06-1.0.0",
+  "fixture_id": "p06-gitleaks-canary",
+  "expected_gate": ".github/workflows/gitleaks.yml#gitleaks",
+  "poison_mode": "temp-commit",
+  "poison_temp_commit": {
+    "path": "scripts/ci/selftest/fixtures/p06-gitleaks-canary/materialized-canary.txt",
+    "content_parts_note": "the canary secret pattern is stored SPLIT so committed fixture bytes can never trip a live branch scan; the cycle joins the parts only inside an unreferenced temp commit in the disposable candidate",
+    "content_parts": ["AKIA", "ZQP06CANARYX9ABC"],
+    "content_template": "p06 assurance canary \u2014 synthetic, inert, unreferenced-commit-only\naws_access_key_id = {JOINED}\n"
+  },
+  "expected_status": "FAIL",
+  "expected_failed_step": 1.1,
+  "expected_reason": [
+    {
+      "source": "step_stderr",
+      "regex": "aws-access-token|leaks found"
+    },
+    {
+      "source": "result_reason",
+      "regex": "DETECTOR_FAILED: step 1\\.1"
+    }
+  ],
+  "control_expectation": {
+    "status": "PASS"
+  },
+  "expected_changed_paths": [],
+  "timeout_ms": 300000,
+  "allowed_execution_artifacts": ["results.sarif"]
+}

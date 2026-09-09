@@ -1,0 +1,10 @@
+total 0
+drwxr-xr-x@  9 danielwalker  staff  288 Aug 12 04:44 .
+drwxr-xr-x@ 28 danielwalker  staff  896 Aug 12 02:41 ..
+drwxr-xr-x@  5 danielwalker  staff  160 Aug 11 23:07 2026-08-12T06-07-11-118Z-76505-0
+drwxr-xr-x@  5 danielwalker  staff  160 Aug 11 23:21 2026-08-12T06-21-16-368Z-11882-0
+drwxr-xr-x@  5 danielwalker  staff  160 Aug 11 23:28 2026-08-12T06-28-42-159Z-39569-0
+drwxr-xr-x@  5 danielwalker  staff  160 Aug 11 23:56 2026-08-12T06-56-18-378Z-97750-0
+drwxr-xr-x@  5 danielwalker  staff  160 Aug 12 02:42 2026-08-12T09-42-20-842Z-23442-0
+drwxr-xr-x@  5 danielwalker  staff  160 Aug 12 02:46 2026-08-12T09-46-32-089Z-44293-0
+drwxr-xr-x@  3 danielwalker  staff   96 Aug 12 03:27 2026-08-12T10-26-37-147Z-44889-0

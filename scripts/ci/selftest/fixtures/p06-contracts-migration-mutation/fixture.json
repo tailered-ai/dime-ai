@@ -1,0 +1,25 @@
+{
+  "schema_version": "p06-1.0.0",
+  "fixture_id": "p06-contracts-migration-mutation",
+  "expected_gate": ".github/workflows/08-contract-and-data-integrity.yml#contracts",
+  "poison_mode": "temp-commit-modify",
+  "poison_temp_commit_modify": {
+    "path": "drizzle/0134_widen_unit_probability_precision.sql",
+    "append": "\n-- P06 ASSURANCE poison: an applied migration must be immutable.\n"
+  },
+  "expected_status": "FAIL",
+  "expected_failed_step": 6,
+  "expected_reason": [
+    {
+      "source": "step_stdout",
+      "regex": "applied migration files modified or deleted: drizzle/0134_widen_unit_probability_precision\\.sql"
+    },
+    { "source": "result_reason", "regex": "DETECTOR_FAILED: step 6" }
+  ],
+  "control_expectation": { "status": "PASS" },
+  "allowed_execution_artifacts": [],
+  "timeout_ms": 600000,
+  "notes": [
+    "Diff-aware detector: the mutation must be COMMITTED because the contract compares origin/main...HEAD with --diff-filter=MD. An unstaged edit is invisible to that detector."
+  ]
+}

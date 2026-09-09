@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "typecheck-ts2322",
+  "expected_gate": ".github/workflows/ci.yml#typecheck",
+  "target_contract_id": ".github/workflows/ci.yml#typecheck",
+  "target_class": "PARITY",
+  "applicability": "seed",
+  "expected_status": "FAIL",
+  "expected_reason": [
+    {
+      "source": "stdout",
+      "regex": "p05-poison-typecheck\\.ts\\(\\d+,\\d+\\): error TS2322"
+    }
+  ],
+  "control_expectation": {
+    "status": "PASS"
+  },
+  "required_execution_mode": "host",
+  "command_step_indexes": [4],
+  "expected_changed_paths": ["server/p05-poison-typecheck.ts"],
+  "allowed_execution_artifacts": ["typecheck-report.txt"],
+  "timeout_ms": 600000,
+  "fixture_sha256": "4129e1815e8edcb152996d6837eff185a54852c28591b726966cb5193d2f00bd"
+}

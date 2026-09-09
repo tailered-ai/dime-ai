@@ -1,0 +1,20 @@
+DEF-067 / DEF-068 direct retest — closure audit CI-VERIFY-AUDIT-20260812T131456Z
+date: 2026-08-12T13:44:19Z
+
+== anchor suite (scripts/ci/selftest/certificate-binding.test.ts) ==
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  06:44:20
+   Duration  193ms (transform 28ms, setup 0ms, import 40ms, tests 39ms, environment 0ms)
+
+
+== real verify path executes the new comparator: edited verifier voids the pre-repair certificate ==
+{
+  "status": "VOID",
+  "field": "head_sha",
+  "reason": "DIRTY_TRACKED_FILES"
+}
+exit=2
+
+== DEF-068 reproduction commands (scenario E2, pre-repair): tampered required_contexts + re-pin verified VALID; post-repair comparator anchors BIND03 proves VOID(required_contexts) ==

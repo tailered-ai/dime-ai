@@ -1,0 +1,5 @@
+P02.T01 — DEEP PARSER COMPARISON (per file, per JSON path)
+files compared      : 40
+total differences   : 0
+
+RESULT: ZERO semantic differences — both parsers produce identical document trees for all 40 workflows.

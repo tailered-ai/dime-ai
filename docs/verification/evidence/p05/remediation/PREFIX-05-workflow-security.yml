@@ -1,0 +1,43 @@
+# 05-workflow-security — zizmor over every workflow, SARIF uploaded, blocking
+# on high-severity findings (untrusted-input interpolation, unpinned actions,
+# excessive GITHUB_TOKEN permissions, vulnerable constructs). Complements the
+# repo's own scripts/check-github-actions-security.mjs gate (pinning +
+# permissions + secret-ref audit), which stays required in ci.yml.
+name: 05-workflow-security
+
+on:
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ZIZMOR_VERSION: "1.29.0" # pinned; bump deliberately
+
+jobs:
+  zizmor:
+    name: 05-workflow-security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
+
+      - name: Install pinned zizmor
+        run: pipx install "zizmor==${ZIZMOR_VERSION}"
+
+      - name: "[GATE] zizmor — blocking at high severity, SARIF for the security tab"
+        run: |
+          zizmor --min-severity high --format sarif .github/workflows/ > zizmor.sarif
+          # zizmor exits non-zero when findings >= min-severity exist; a scan
+          # crash also exits non-zero. Either way this step fails — fail-closed.
+
+      - uses: github/codeql-action/upload-sarif@c4dd10e44af883a891fe31ced449bcb4a6728b9b # v3
+        if: always()
+        with:
+          sarif_file: zizmor.sarif
+          category: zizmor

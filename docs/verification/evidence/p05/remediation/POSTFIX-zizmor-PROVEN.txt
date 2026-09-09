@@ -1,0 +1,5 @@
+
+=== workflow-template-injection [5.3s] verdict=PROVEN 
+poison: {"status":"FAIL","reason":"EXIT_14","exit_code":14,"run_dir":"/Users/danielwalker/src/ai-sports-betting-dime-ai/.ci-verify/assurance-scratch/exec/workflow-template-injection/poison/2026-08-10T13-04-23-665Z-21061-12df8f1f9a91","stdout_sha256":"4be540b0b45f08d3ee4854ee47f6aba181a719be978b78c29e1415d1d925b7b6","stderr_sha256":"486f9a204255b52cd6b6b1c7bd7d92046fbc7f5dc70f5380a61d5b7770e19bbf"}
+control: {"status":"PASS","reason":null,"exit_code":0,"run_dir":"/Users/danielwalker/src/ai-sports-betting-dime-ai/.ci-verify/assurance-scratch/exec/workflow-template-injection/control/2026-08-10T13-04-24-259Z-21061-ff10dde2526e"}
+disposed: true

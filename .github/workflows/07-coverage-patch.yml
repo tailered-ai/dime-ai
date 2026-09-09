@@ -30,6 +30,11 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      - name: "[STEP] Pinned zizmor — the P05 fixture cycles execute the real workflow-security detector"
+        env:
+          ZIZMOR_VERSION: "1.29.0" # keep equal to 05-workflow-security.yml
+        run: pipx install "zizmor==${ZIZMOR_VERSION}"
+
       - run: pnpm install --frozen-lockfile
 
       - name: "[STEP] Vitest with v8 coverage (server+shared, DB-free profile)"

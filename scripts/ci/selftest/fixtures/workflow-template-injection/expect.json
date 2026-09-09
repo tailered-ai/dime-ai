@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "workflow-template-injection",
+  "expected_gate": ".github/workflows/05-workflow-security.yml#zizmor",
+  "target_contract_id": ".github/workflows/05-workflow-security.yml#zizmor",
+  "target_class": "PARITY",
+  "applicability": "seed",
+  "expected_status": "FAIL",
+  "expected_reason": [
+    {
+      "source": "stdout",
+      "regex": "error\\[template-injection\\]"
+    },
+    {
+      "source": "stdout",
+      "regex": "p05-poison-template-injection\\.yml"
+    }
+  ],
+  "control_expectation": {
+    "status": "PASS"
+  },
+  "required_execution_mode": "host",
+  "command_step_indexes": [2, 4],
+  "expected_changed_paths": [
+    ".github/workflows/p05-poison-template-injection.yml"
+  ],
+  "allowed_execution_artifacts": ["zizmor.sarif"],
+  "timeout_ms": 300000,
+  "fixture_sha256": "e97a8c13be9c0e985a6367d8b728bb5ac28e541984727f1578be7cbfe5c8c3c1"
+}

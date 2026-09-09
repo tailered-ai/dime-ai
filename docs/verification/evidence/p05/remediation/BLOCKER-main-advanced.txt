@@ -1,0 +1,41 @@
+origin/main advanced during this session
+  was:  4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6
+  now:  1c17c5554a75be752307a686b7662fb6b10fb375
+  branch HEAD: d07a1c3877adb8846330ab06c57652befb5b55ad
+  base is ancestor of HEAD: NO
+
+new commits on main:
+1c17c5554 Merge pull request #495 from tailered-ai/chore/gstack-global-bootstrap
+ee8f931ca Merge branch 'main' into chore/gstack-global-bootstrap
+320d5b99f Merge pull request #480 from tailered-ai/dependabot/github_actions/main/pnpm/action-setup-6.0.10
+91b13daa1 chore: add deterministic global gstack bootstrap
+23c00508e chore(actions): bump pnpm/action-setup from 4.3.0 to 6.0.10
+
+workflow files changed on main (18):
+.github/workflows/01-pr-proof-contract.yml
+.github/workflows/07-coverage-patch.yml
+.github/workflows/08-contract-and-data-integrity.yml
+.github/workflows/10-ai-eval-critical.yml
+.github/workflows/12-nightly-verification.yml
+.github/workflows/ci.yml
+.github/workflows/cron-mlb-canonical-refresh.yml
+.github/workflows/db-push.yml
+.github/workflows/db-reconcile-migrations.yml
+.github/workflows/edge-arming-gate.yml
+.github/workflows/feed-responsive-cross-browser.yml
+.github/workflows/os-observe-crons.yml
+.github/workflows/perf-harness.yml
+.github/workflows/pi-review.yml
+.github/workflows/security-audit-weekly.yml
+.github/workflows/seed-cfb.yml
+.github/workflows/seed-nfl.yml
+.github/workflows/stripe-e2e.yml
+
+prospective-merge conflict (git merge-tree):
+CONFLICT (content): Merge conflict in .gitignore
+
+P01 snapshot verdict:
+[snapshot] BLOCKED(MERGE_CONFLICT)
+{
+  "base_sha": "1c17c5554a75be752307a686b7662fb6b10fb375",
+  "head_sha": "d07a1c3877adb8846330ab06c57652befb5b55ad",

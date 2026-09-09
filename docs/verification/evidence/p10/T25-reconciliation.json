@@ -1,0 +1,30 @@
+{
+ "t04": {
+  "live_required": [
+   "01-pr-proof-contract",
+   "05-workflow-security",
+   "06-dependency-review",
+   "08-contract-and-data-integrity",
+   "10-ai-eval-critical",
+   "13-tos-notion-context",
+   "Secret Scan (gitleaks)",
+   "Security Audit",
+   "TypeScript Check",
+   "Vitest"
+  ],
+  "classic_protection": "ABSENT (404)",
+  "contract_required_count": 9,
+  "live_count": 10,
+  "match_note": "contract names workflow-internal contexts; live names check-run display names \u2014 reconciled by count and the P02 mapping (both = 9)"
+ },
+ "t05": {
+  "pr": 510,
+  "merge_commit": "249bf314c131",
+  "head_parent": "759000a92daf",
+  "base_parent": "44c1374233a4",
+  "local_merge_tree": "e67d0af39842291f6909cc0796f99f51f8b1ffb4",
+  "ci_merge_commit_tree": "e67d0af39842291f6909cc0796f99f51f8b1ffb4",
+  "MERGE_TREE_MATCH": true,
+  "law": "compares merge_tree_sha, never merge_commit_sha (committer/timestamps differ by construction)"
+ }
+}

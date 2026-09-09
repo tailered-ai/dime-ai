@@ -1,0 +1,8 @@
+[p07] structural: agreement=true floor=1000 db-suites=6 marker / 10 contract
+[p07] candidate provisioning: ok=true in 12025ms
+[p07] PASS       .github/workflows/ci.yml#test (179.5s)
+[p07] PASS       .github/workflows/07-coverage-patch.yml#coverage (172.6s)
+[p07] mysql ready: 8.4.11 (4bb78d37fe8a23eb857fd3fb) in 11732ms
+[p07] PASS       .github/workflows/ci.yml#db-tests (48s)
+[p07] mysql container removed: {"removed":"b949e4528b1f24973be70f98d8bf9f0957705d15e25acc33c4b8cac098e2b496"}
+[p07] done: 3 gate(s), blocking 0

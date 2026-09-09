@@ -1,0 +1,31 @@
+DEF-002 VALIDATION — RULESETS.md vs LIVE GitHub vs preserved P00 evidence
+pwd=/Users/danielwalker/src/ai-sports-betting-dime-ai HEAD=4d644cf47d2ee8a1528e1efd8a79da5ce658d8c6 branch=feat/ci-verify-control-plane
+script: docs/verification/evidence/remediation/def-002-validate.mjs
+
+documented enforced   (9): Security Audit, TypeScript Check, Vitest, Secret Scan (gitleaks), 01-pr-proof-contract, 05-workflow-security, 06-dependency-review, 08-contract-and-data-integrity, 10-ai-eval-critical
+live enforced         (9): Security Audit, TypeScript Check, Vitest, Secret Scan (gitleaks), 01-pr-proof-contract, 05-workflow-security, 06-dependency-review, 08-contract-and-data-integrity, 10-ai-eval-critical
+MATCH enforced        : true
+
+documented graduating (5): 02-codeql, 03-semgrep-blocking, 07-coverage-patch, 09-artifact-build-and-smoke, 11-artifact-attestation
+derived   graduating  (5): 02-codeql, 03-semgrep-blocking, 07-coverage-patch, 09-artifact-build-and-smoke, 11-artifact-attestation
+MATCH graduating      : true
+
+end-state count       : 14 (expect 14)
+9 + 5 == 14           : true
+gh: Branch not protected (HTTP 404)
+classic protection    : ABSENT(404)   (doc asserts ABSENT: true)
+live mergeQueue       : null   (doc asserts NOT enabled: true)
+
+OVERALL: DOCUMENTATION AND LIVE EVIDENCE AGREE EXACTLY
+VALIDATION_EXIT=0
+
+### preserved P00 evidence unchanged since P00 (targeted retest)
+P00.T01 docs/verification/evidence/p00/T01-merge-queue.md UNCHANGED=true
+P00.T01 docs/verification/evidence/p00/raw/T01-merge-queue.raw.txt UNCHANGED=true
+P00.T02 docs/verification/evidence/p00/T02-required-contexts.md UNCHANGED=true
+P00.T02 docs/verification/evidence/p00/raw/T02-required-contexts.raw.txt UNCHANGED=true
+
+### relevant regression: docs/security/format gates
+All matched files use Prettier code style!
+federation docs: OK — no dangling paths, ordinals, schema drift, or dead routing
+{"status":"PASS","workflowsChecked":40,"compositesChecked":0,"actionReferences":120,"productionSecretReferences":25,"failures":[]}
