@@ -1,0 +1,66 @@
+name: M-203 Historical Dry Run (read-only)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Materializes the M-203 candidate ledger for ONE historical date against the
+# live production database, without writing anything.
+#
+# It runs the reviewed server/mlbOutcomeIngestor.ts path with dryRun AND
+# historical both hard-coded true in scripts/m203-dry-run.mts. Neither is a
+# workflow input, so this workflow has no reachable mutating configuration:
+#   - dryRun    skips the UPDATE
+#   - historical suppresses the drift detector, the recalibration it can
+#     trigger, and the owner notification
+#   - the ingestor throws on historical without dryRun
+# The script also fails the job if the returned summary reports any write.
+#
+# Runs from a CI runner because that is where real egress to TiDB exists and
+# where the production credential already lives; the credential is never
+# printed and never leaves the job.
+#
+# The ledger contains model probabilities and Brier values. This repository is
+# private, so run logs are visible only to collaborators. Do NOT make the
+# repository public while these logs are retained.
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_dispatch:
+    inputs:
+      dateStr:
+        description: "Historical game date to inspect (YYYY-MM-DD)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m203-dry-run
+  cancel-in-progress: false
+
+jobs:
+  dry-run:
+    name: M-203 dry run
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      # Version comes from package.json's "packageManager" field — specifying
+      # it here too makes pnpm/action-setup fail with a version conflict.
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      # The date reaches the script through the environment, never through
+      # shell interpolation of a workflow input.
+      - name: Run historical dry run (no writes)
+        run: pnpm tsx scripts/m203-dry-run.mts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          M203_DATE: ${{ inputs.dateStr }}
