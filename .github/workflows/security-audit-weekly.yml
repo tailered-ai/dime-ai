@@ -137,7 +137,7 @@ jobs:
         # Always upload — even on failure — so the report is available for review
         # regardless of whether the job passed or failed.
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: "weekly-audit-report-${{ github.run_number }}-${{ github.run_attempt }}"
           path: audit-full.txt
